@@ -5,6 +5,7 @@
 glTFast is a Unity Plug-In for loading glTF 3D files at runtime with focus on small build footprint and speed.
 
 If you like this project, go ahead and:
+
 [![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
 
 ## Why?
