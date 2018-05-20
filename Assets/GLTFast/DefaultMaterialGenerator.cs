@@ -40,6 +40,9 @@ namespace GLTFast {
 					// todo: Avoid this conversion by switching to a shader that accepts the given layout.
 					Debug.LogWarning("Convert MetallicRoughnessTexture structure to fit Unity Standard Shader (slow operation).");
 					var newmrt = new UnityEngine.Texture2D(metallicRoughnessTxt.width, metallicRoughnessTxt.height);
+#if DEBUG
+					newmrt.name = string.Format("{0}_metal_smooth", metallicRoughnessTxt.name);
+#endif
 					var buf = metallicRoughnessTxt.GetPixels32();               
 					for (int i = 0; i < buf.Length;i++ ) {
 						// TODO: Reassure given space (linear) is correct (no gamma conversion needed).
@@ -65,7 +68,27 @@ namespace GLTFast {
 			
             var occlusionTxt = GetTexture(gltfMaterial.occlusionTexture,textures,images);
             if(occlusionTxt !=null) {
-                material.SetTexture( StandardShaderHelper.occlusionMapPropId, occlusionTxt );
+
+				Profiler.BeginSample("ConvertOcclusionTexture");
+                // todo: Avoid this conversion by switching to a shader that accepts the given layout.
+				Debug.LogWarning("Convert OcclusionTexture structure to fit Unity Standard Shader (slow operation).");
+				var newOcclusionTxt = new UnityEngine.Texture2D(occlusionTxt.width, occlusionTxt.height);
+#if DEBUG
+				newOcclusionTxt.name = string.Format("{0}_occlusion", occlusionTxt.name);
+#endif
+				var buf = occlusionTxt.GetPixels32();
+                for (int i = 0; i < buf.Length; i++)
+                {
+                    var color = buf[i];
+					color.g = color.b = color.r;
+					color.a = 1;
+                    buf[i] = color;
+                }
+                newOcclusionTxt.SetPixels32(buf);
+                newOcclusionTxt.Apply();
+                Profiler.EndSample();
+
+				material.SetTexture( StandardShaderHelper.occlusionMapPropId, newOcclusionTxt );
             }
 			
             var emmissiveTxt = GetTexture(gltfMaterial.emissiveTexture,textures,images);
