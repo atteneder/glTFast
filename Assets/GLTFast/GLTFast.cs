@@ -18,6 +18,8 @@ namespace GLTFast {
     public class GLTFast {
 
         const uint GLB_MAGIC = 0x46546c67;
+  
+		const float UINT16_MAX = 65535f;
 
         enum ChunkFormat : uint
         {
@@ -425,26 +427,51 @@ namespace GLTFast {
         }
 
         void GetColors( int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors ) {
+
+			const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
+
             colors = null;
             colors32 = null;
             if(accessorIndex>=0) {
                 var colorAccessor = gltf.accessors[accessorIndex];
-                // TODO: Support Vec3 colors
-                Assert.AreEqual( colorAccessor.typeEnum, GLTFAccessorAttributeType.VEC4 );
-                switch( colorAccessor.componentType ) {
-                case GLTFComponentType.Float:
-                    colors = GetAccessorData<Color>( accessorIndex, ref bytes, GetColorsVec4Float );
-                    break;
-                case GLTFComponentType.UnsignedByte:
-                    colors32 = GetAccessorData<Color32>( accessorIndex, ref bytes, GetColorsVec4UInt8 );
-                    break;
-                // TODO:
-                //case GLTFComponentType.UnsignedShort:
-                    //return GetAccessorData<Vector2>( accessorIndex, ref bytes, GetUVsUInt16 );
-                default:
-                    Debug.LogErrorFormat("Unsupported Color format {0}", colorAccessor.componentType);
-                    break;
-                }
+				if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
+				{
+					switch (colorAccessor.componentType)
+					{
+						case GLTFComponentType.Float:
+							colors = GetAccessorData<Color>(accessorIndex, ref bytes, GetColorsVec3Float);
+							break;
+						case GLTFComponentType.UnsignedByte:
+							colors32 = GetAccessorData<Color32>(accessorIndex, ref bytes, GetColorsVec3UInt8);
+							break;
+						case GLTFComponentType.UnsignedShort:
+							colors = GetAccessorData<Color>( accessorIndex, ref bytes, GetColorsVec3UInt16 );
+							break;
+						default:
+							Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
+							break;
+					}
+				}
+				else if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC4)
+				{
+					switch (colorAccessor.componentType)
+                    {
+                        case GLTFComponentType.Float:
+                            colors = GetAccessorData<Color>(accessorIndex, ref bytes, GetColorsVec4Float);
+                            break;
+                        case GLTFComponentType.UnsignedByte:
+                            colors32 = GetAccessorData<Color32>(accessorIndex, ref bytes, GetColorsVec4UInt8);
+                            break;
+                        case GLTFComponentType.UnsignedShort:
+                            colors = GetAccessorData<Color>(accessorIndex, ref bytes, GetColorsVec4UInt16);
+                            break;
+                        default:
+							Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
+                            break;
+                    }
+				} else {
+					Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
+				}
             }
         }
 
@@ -634,6 +661,27 @@ namespace GLTFast {
             return res;
         }
 
+		static Color[] GetColorsVec3Float(
+            ref byte[] bytes,
+            int start,
+            int count
+        )
+        {
+			Profiler.BeginSample("GetColorsVec3Float");
+            var res = new Color[count];
+
+            for (var i = 0; i < count; i++)
+            {
+				res[i].r = BitConverter.ToSingle(bytes, start + i * 12);
+				res[i].g = BitConverter.ToSingle(bytes, start + i * 12 + 4);
+				res[i].b = BitConverter.ToSingle(bytes, start + i * 12 + 8);
+                res[i].a = 1.0f;
+            }
+
+            Profiler.EndSample();
+            return res;
+        }
+
         unsafe static Color[] GetColorsVec4Float(
             ref byte[] bytes,
             int start,
@@ -661,6 +709,27 @@ namespace GLTFast {
             return res;
         }
 
+		static Color32[] GetColorsVec3UInt8(
+            ref byte[] bytes,
+            int start,
+            int count
+        )
+        {
+			Profiler.BeginSample("GetColorsVec3UInt8");
+            var res = new Color32[count];
+
+            for (var i = 0; i < count; i++)
+            {
+				res[i].r = bytes[start + i * 3];
+				res[i].g = bytes[start + i * 3 + 1];
+				res[i].b = bytes[start + i * 3 + 2];
+                res[i].a = 255;
+            }
+
+            Profiler.EndSample();
+            return res;
+        }
+
         unsafe static Color32[] GetColorsVec4UInt8(
             ref byte[] bytes,
             int start,
@@ -683,6 +752,46 @@ namespace GLTFast {
             Marshal.Copy(bytes, start, gcRes.AddrOfPinnedObject(), count*4);
             gcRes.Free();
 #endif
+            Profiler.EndSample();
+            return res;
+        }
+
+		static Color[] GetColorsVec3UInt16(
+            ref byte[] bytes,
+            int start,
+            int count
+        ) {
+			Profiler.BeginSample("GetColorsVec3UInt16");
+            var res = new Color[count];
+
+            for (var i = 0; i < count; i++)
+            {
+                res[i].r = BitConverter.ToUInt16(bytes, start + i * 6) / UINT16_MAX;
+                res[i].g = BitConverter.ToUInt16(bytes, start + i * 6 + 2) / UINT16_MAX;
+                res[i].b = BitConverter.ToUInt16(bytes, start + i * 6 + 4) / UINT16_MAX;
+                res[i].a = 1;
+            }
+
+            Profiler.EndSample();
+            return res;
+        }
+        
+		static Color[] GetColorsVec4UInt16(
+            ref byte[] bytes,
+            int start,
+            int count
+        ) {
+			Profiler.BeginSample("GetColorsVec4UInt16");
+            var res = new Color[count];
+            
+			for (var i = 0; i < count; i++)
+            {
+				res[i].r = BitConverter.ToUInt16(bytes, start + i * 8) / UINT16_MAX;
+				res[i].g = BitConverter.ToUInt16(bytes, start + i * 8 + 2) / UINT16_MAX;
+				res[i].b = BitConverter.ToUInt16(bytes, start + i * 8 + 4) / UINT16_MAX;
+				res[i].a = BitConverter.ToUInt16(bytes, start + i * 8 + 6) / UINT16_MAX;
+            }
+
             Profiler.EndSample();
             return res;
         }
@@ -743,8 +852,8 @@ namespace GLTFast {
             var res = new Vector2[count];
 
             for (var i = 0;i<count;i++) {
-                res[i].x = BitConverter.ToUInt16( bytes, start + i*4 ) / 65535f;
-                res[i].y = 1 - BitConverter.ToUInt16( bytes, start + i*4 + 2 ) / 65535f;
+				res[i].x = BitConverter.ToUInt16( bytes, start + i*4 ) / UINT16_MAX;
+				res[i].y = 1 - BitConverter.ToUInt16( bytes, start + i*4 + 2 ) / UINT16_MAX;
             }
 
             Profiler.EndSample();
