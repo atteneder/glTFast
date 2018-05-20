@@ -478,8 +478,7 @@ namespace GLTFast {
                 case GLTFComponentType.Float:
                     return typeof(float);
                 case GLTFComponentType.Short:
-                    Debug.LogError("GLTFComponentType.Short unsupported");
-                    return null;
+                    return typeof(System.Int16);
                 case GLTFComponentType.UnsignedByte:
                     return typeof(byte);
                 case GLTFComponentType.UnsignedInt:
