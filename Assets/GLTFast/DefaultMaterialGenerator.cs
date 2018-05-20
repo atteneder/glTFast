@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace GLTFast {
 
@@ -34,8 +35,24 @@ namespace GLTFast {
 
                 var metallicRoughnessTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,textures,images);
                 if(metallicRoughnessTxt!=null) {
-                    // todo: invert roughness to be glossines
-                    material.SetTexture( StandardShaderHelper.metallicGlossMapPropId, metallicRoughnessTxt );
+					               
+					Profiler.BeginSample("ConvertMetallicRoughnessTexture");
+					// todo: Avoid this conversion by switching to a shader that accepts the given layout.
+					Debug.LogWarning("Convert MetallicRoughnessTexture structure to fit Unity Standard Shader (slow operation).");
+					var newmrt = new UnityEngine.Texture2D(metallicRoughnessTxt.width, metallicRoughnessTxt.height);
+					var buf = metallicRoughnessTxt.GetPixels32();               
+					for (int i = 0; i < buf.Length;i++ ) {
+						// TODO: Reassure given space (linear) is correct (no gamma conversion needed).
+						var color = buf[i];                  
+						color.a = (byte) (255 - color.g);
+						color.r = color.g = color.b;                  
+						buf[i] = color;
+					}
+					newmrt.SetPixels32(buf);
+					newmrt.Apply();
+					Profiler.EndSample();
+
+					material.SetTexture( StandardShaderHelper.metallicGlossMapPropId, newmrt );
                     material.EnableKeyword("_METALLICGLOSSMAP");
                 }
             }
