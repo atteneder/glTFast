@@ -18,7 +18,7 @@ namespace GLTFast {
             return defaultMaterial;
         }
 
-        public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture[] images ) {
+        public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture2D[] images ) {
             var material = Material.Instantiate<Material>( GetDefaultMaterial() );
             material.name = gltfMaterial.name;
 
@@ -76,7 +76,7 @@ namespace GLTFast {
             return material;
         }
 
-        static Texture GetTexture(Schema.TextureInfo textureInfo, Schema.Texture[] textures, Texture[] images )
+        static Texture2D GetTexture(Schema.TextureInfo textureInfo, Schema.Texture[] textures, Texture2D[] images )
         {
             if (textureInfo != null && textureInfo.index >= 0)
             {

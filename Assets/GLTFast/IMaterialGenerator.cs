@@ -6,6 +6,6 @@ namespace GLTFast {
     using Schema;
     public interface IMaterialGenerator {
 		UnityEngine.Material GetDefaultMaterial();
-        UnityEngine.Material GenerateMaterial( Material gltfMaterial, Schema.Texture[] textures, UnityEngine.Texture[] images );
+        UnityEngine.Material GenerateMaterial( Material gltfMaterial, Schema.Texture[] textures, UnityEngine.Texture2D[] images );
     }
 }

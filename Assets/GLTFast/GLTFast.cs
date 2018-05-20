@@ -128,10 +128,10 @@ namespace GLTFast {
             var primitives = new List<Primitive>(gltf.meshes.Length);
             var meshPrimitiveIndex = new int[gltf.meshes.Length+1];
 
-            UnityEngine.Texture[] images = null;
+            UnityEngine.Texture2D[] images = null;
 
             if (gltf.images != null) {
-                images = new UnityEngine.Texture[gltf.images.Length];
+                images = new UnityEngine.Texture2D[gltf.images.Length];
                 for (int i = 0; i < images.Length; i++) {
                     var img = gltf.images[i];
                     if (img.mimeType == "image/jpeg" || img.mimeType == "image/png")
