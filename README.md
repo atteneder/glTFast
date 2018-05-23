@@ -1,10 +1,35 @@
 # glTFast
 
-*Note: This project is in an early development state!*
+glTFast is a Unity Plug-In for loading glTF 3D files at runtime with focus speed.
 
-glTFast is a Unity Plug-In for loading glTF 3D files at runtime with focus on small build footprint and speed.
+This means fast startup (due to small build footprint) and fast parsing/decoding.
 
-If you like this project, go ahead and:
+## Missing features
+
+This project is in an early development state and some things are (deliberately) missing:
+
+* no binary glb files with external buffers
+* no regular (JSON based) glTFs
+* no animation
+* no glTF 1.0 backwards compatibility
+
+See details on missing features in the [issues](./issues) section.
+
+## Roadmap / Priorities
+
+Besides speed, the focus at the moment is on users that:
+
+* control the content (are able to generate compatible glb files)
+* use it for static content (no animation, skinning or morphing)
+
+I try to keep an up-to-date, detailed roadmap in the [milestones](./milestones)
+ section.
+
+## Get involved
+
+Contributions like ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving glTFast.
+
+Also, you can show your appreciation and...
 
 [![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
 
@@ -12,26 +37,19 @@ If you like this project, go ahead and:
 The Khronos group (creators of glTF) already provides an excellent Unity Plug-In here:
 https://github.com/KhronosGroup/UnityGLTF
 
-It is very well written, quite feature complete and stable. However, building a WebGL project with it will lead to huge binary files. Given that glTF aims to become an efficient 3D format for the web, this is a step back.
-
-That's why this project was started as a low-profile alternative.
+It is very well written, quite feature complete and stable. However, building a project with it (especially WebGL) will lead to huge binary files.
+This project aims to be a low-profile alternative.
 
 You can test and compare both libs here:
 https://atteneder.github.io/glTFCompare
 
 ## Why is it smaller?
-It uses Unity's JsonUtility for parsing, which has little overhead, is fast and memory-efficient. It also uses fast low-level memory copy methods whenever possible.
+It uses [Unity's JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) for parsing, which has little overhead, is fast and memory-efficient (See https://docs.unity3d.com/Manual/JSONSerialization.html).
 
-## What is missing
+It also uses fast low-level memory copy methods whenever possible.
 
-* no glb files with external buffers
-* no regular (JSON based) glTFs
-* no animation
-* no glTF 1.0
-
-See details on missing features in the Issues section.
-
-## What it is NOT supposed to be
+## What it is NOT
+...and probably never will be:
 * It's not an asset manager with instantiation and reference counting support. 
 * Also not a download manager for asset caching/re-usage.
 
