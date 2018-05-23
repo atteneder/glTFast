@@ -13,7 +13,7 @@ This project is in an early development state and some things are (deliberately)
 * no animation
 * no glTF 1.0 backwards compatibility
 
-See details on missing features in the [issues](/atteneder/glTFast/issues) section.
+See details on missing features in the [issues](https://github.com/atteneder/glTFast/issues) section.
 
 ## Roadmap / Priorities
 
@@ -22,7 +22,7 @@ Besides speed, the focus at the moment is on users that:
 * control the content (are able to generate compatible glb files)
 * use it for static content (no animation, skinning or morphing)
 
-I try to keep an up-to-date, detailed roadmap in the [milestones](/atteneder/glTFast/milestones)
+I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
  section.
 
 ## Get involved
