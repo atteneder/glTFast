@@ -10,6 +10,9 @@ namespace GLTFast
     {
         public string url;
 
+		GLTFast gLTFastInstance;
+		Coroutine loadRoutine;
+
         public UnityAction onLoadComplete;
 
         // Use this for initialization
@@ -20,8 +23,13 @@ namespace GLTFast
             }
         }
 
-        public void Load() {
-            StartCoroutine(LoadRoutine());
+        public void Load( string url = null ) {
+			if(url!=null) {
+				this.url = url;
+			}
+			if(gLTFastInstance==null && loadRoutine==null) {
+				loadRoutine = StartCoroutine(LoadRoutine());
+            }
         }
 
 		IEnumerator LoadRoutine()
@@ -35,11 +43,18 @@ namespace GLTFast
             else {
                 // Or retrieve results as binary data
                 byte[] results = www.downloadHandler.data;
-                new GLTFast(results,transform);
+				gLTFastInstance = new GLTFast(results,transform);
                 if(onLoadComplete!=null) {
                     onLoadComplete();
                 }
             }
+			loadRoutine = null;
         }
+
+		public IEnumerator WaitForLoaded() {
+			while(loadRoutine!=null) {
+				yield return loadRoutine;         
+            }
+		}
     }
 }
