@@ -110,7 +110,7 @@ namespace GLTFast {
             }
 
             if(gltfMaterial.doubleSided) {
-                Debug.LogError("Double sided shading is not supported!");
+				Debug.LogWarning("Double sided shading is not supported!");
             }
 
             return material;
