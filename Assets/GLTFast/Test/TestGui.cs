@@ -29,7 +29,8 @@ public class TestGui : MonoBehaviour {
 	private void Awake()
 	{
 
-#if PLATFORM_WEBGL
+#if PLATFORM_WEBGL && !UNITY_EDITOR
+        // Hide UI in glTF compare web
         HideUI();
 #endif
 
