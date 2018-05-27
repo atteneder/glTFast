@@ -4,17 +4,19 @@ using UnityEngine;
 [RequireComponent(typeof(TestLoader))]
 public class TestGui : MonoBehaviour {
 
-    const float barHeightWidth = 25;
-    const float buttonWidth = 50;
-    const float listWidth = 150;
-    const float listItemHeight = 25;
-    const float timeHeight = 20;
+	static float barHeightWidth = 25;
+    static float buttonWidth = 50;
+    static float listWidth = 150;
+    static float listItemHeight = 25;
+    static float timeHeight = 20;
 
     public bool showMenu = true;
 
     Dictionary<string,string> testItems = new Dictionary<string, string>();
 
     string urlField;
+
+	float screenFactor;   
 
     float startTime = -1;
 #if !NO_GLTFAST
@@ -29,6 +31,14 @@ public class TestGui : MonoBehaviour {
 	private void Awake()
 	{
 
+		screenFactor = Mathf.Max( 1, Mathf.Floor( Screen.dpi / 100f ));
+
+		barHeightWidth *= screenFactor;
+        buttonWidth *= screenFactor;
+        listWidth *= screenFactor;
+        listItemHeight *= screenFactor;
+        timeHeight *= screenFactor;
+        
 #if PLATFORM_WEBGL && !UNITY_EDITOR
         // Hide UI in glTF compare web
         HideUI();
@@ -99,6 +109,13 @@ public class TestGui : MonoBehaviour {
 
 	private void OnGUI()
 	{
+		if(!float.IsNaN(screenFactor)) {
+			// Init time gui style adjustments
+			var guiStyle = GUI.skin.button;
+            guiStyle.fontSize = Mathf.RoundToInt(14 * screenFactor);
+			screenFactor = float.NaN;
+		}
+
 		float width = Screen.width;
 		float height = Screen.height;
 
