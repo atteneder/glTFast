@@ -33,7 +33,7 @@ namespace GLTFast.Schema {
         /// <minimum>0</minimum>
         /// <maximum>255</maximum>
         /// </summary>
-        public int byteStride;
+        public int byteStride = -1;
 
         /// <summary>
         /// The target that the WebGL buffer should be bound to.

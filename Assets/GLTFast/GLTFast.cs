@@ -1,15 +1,8 @@
-﻿#define BUFFER
-
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using UnityEngine;
-using UnityEngine.Profiling;
 using UnityEngine.Assertions;
-using System.Runtime.InteropServices;
-//using Unity.Collections.LowLevel.Unsafe;
 
 namespace GLTFast {
 
@@ -18,23 +11,11 @@ namespace GLTFast {
     public class GLTFast {
 
         const uint GLB_MAGIC = 0x46546c67;
-  
-		const float UINT16_MAX = 65535f;
 
         enum ChunkFormat : uint
         {
             JSON = 0x4e4f534a,
             BIN = 0x004e4942
-        }
-
-        struct BinChunk {
-            public int start;
-            public uint length;
-
-            public BinChunk( int start, uint length ) {
-                this.start = start;
-                this.length = length;
-            }
         }
 
         struct Primitive {
@@ -46,12 +27,12 @@ namespace GLTFast {
                 this.materialIndex = materialIndex;
             }
         }
+              
+		public delegate CompType[] ExtractAccessor<CompType>(ref byte[] bytes, int start, int count);
+        public delegate CompType[] ExtractInterleavedAccessor<CompType>(ref byte[] bytes, int start, int count, int byteStride);
         
-
-        public delegate CompType[] ExtractAccessor<CompType>(ref byte[] bytes, int start, int count);
-
         Root gltf;
-        BinChunk[] binChunks;
+        GlbBinChunk[] binChunks;
         UnityEngine.Material[] materials;
 
         IMaterialGenerator materialGenerator;
@@ -91,7 +72,7 @@ namespace GLTFast {
 
             gltf = null;
 
-            var binChunksList = new List<BinChunk>();
+            var binChunksList = new List<GlbBinChunk>();
 
             while( index < bytes.Length ) {
                 uint chLength = BitConverter.ToUInt32( bytes, index );
@@ -103,7 +84,7 @@ namespace GLTFast {
 
                 if (chType == (uint)ChunkFormat.BIN) {
 					//Debug.Log( string.Format("chunk: BIN; length: {0}", chLength) );
-                    binChunksList.Add(new BinChunk( index, chLength));
+                    binChunksList.Add(new GlbBinChunk( index, chLength));
                 }
                 else if (chType == (uint)ChunkFormat.JSON) {
                     Assert.IsNull(gltf);
@@ -142,7 +123,7 @@ namespace GLTFast {
                         {
                             var bufferView = gltf.bufferViews[img.bufferView];
                             var chunk = binChunks[bufferView.buffer];
-                            var imgBytes = CreateBufferViewCopy(bufferView,chunk,bytes);
+                            var imgBytes = Extractor.CreateBufferViewCopy(bufferView,chunk,bytes);
                             var txt = new UnityEngine.Texture2D(4, 4);
                             txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
                             txt.LoadImage(imgBytes);
@@ -176,19 +157,19 @@ namespace GLTFast {
                     var bufferView = gltf.bufferViews[accessor.bufferView];
                     var buffer = bufferView.buffer;
 
-                    BinChunk chunk = binChunks[buffer];
+                    GlbBinChunk chunk = binChunks[buffer];
                     Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
                     //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
                     int[] indices = null;
                     switch( accessor.componentType ) {
                     case GLTFComponentType.UnsignedByte:
-                        indices = GetIndicesUInt8(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+                        indices = Extractor.GetIndicesUInt8(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
                         break;
                     case GLTFComponentType.UnsignedShort:
-                        indices = GetIndicesUInt16(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+						indices = Extractor.GetIndicesUInt16(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
                         break;
                     case GLTFComponentType.UnsignedInt:
-                        indices = GetIndicesUInt32(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+						indices = Extractor.GetIndicesUInt32(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
                         break;
                     default:
                         Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
@@ -200,15 +181,19 @@ namespace GLTFast {
                     Assert.IsTrue(pos>=0);
                     #if DEBUG
                     Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
-                    #endif
-                    var positions = GetAccessorData<Vector3>( pos, ref bytes, GetVector3s );
+#endif
+					var positions = gltf.IsAccessorInterleaved(pos)
+		                ? GetAccessorDataInterleaved<Vector3>( pos, ref bytes, Extractor.GetVector3sInterleaved )
+		                : GetAccessorData<Vector3>( pos, ref bytes, Extractor.GetVector3s );
 
                     Vector3[] normals = null;
                     if(primitive.attributes.NORMAL>=0) {
                         #if DEBUG
                         Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.NORMAL].typeEnum), typeof(Vector3) );
                         #endif
-                        normals = GetAccessorData<Vector3>( primitive.attributes.NORMAL, ref bytes, GetVector3s );
+						normals = gltf.IsAccessorInterleaved(pos)
+						    ? GetAccessorDataInterleaved<Vector3>( primitive.attributes.NORMAL, ref bytes, Extractor.GetVector3sInterleaved )
+						    : GetAccessorData<Vector3>( primitive.attributes.NORMAL, ref bytes, Extractor.GetVector3s );
                     }
 
                     Vector2[] uvs0 = GetUvs(primitive.attributes.TEXCOORD_0, ref bytes);
@@ -219,7 +204,9 @@ namespace GLTFast {
                         #if DEBUG
                         Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.TANGENT].typeEnum), typeof(Vector4) );
                         #endif
-                        tangents = GetAccessorData<Vector4>( primitive.attributes.TANGENT, ref bytes, GetVector4s );
+						tangents = gltf.IsAccessorInterleaved(pos)
+    					    ? GetAccessorDataInterleaved<Vector4>(primitive.attributes.TANGENT, ref bytes, Extractor.GetVector4sInterleaved)
+    						: GetAccessorData<Vector4>( primitive.attributes.TANGENT, ref bytes, Extractor.GetVector4s );
                     }
 
                     Color32[] colors32;
@@ -404,6 +391,33 @@ namespace GLTFast {
                 );
         }
 
+		CompType[] GetAccessorDataInterleaved<CompType>(int accessorIndex, ref byte[] bytes, ExtractInterleavedAccessor<CompType> extractor)
+        {
+            Assert.IsTrue(accessorIndex >= 0);
+            var accessor = gltf.accessors[accessorIndex];
+            var bufferView = gltf.bufferViews[accessor.bufferView];
+            var chunk = binChunks[bufferView.buffer];
+
+            int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+
+#if DEBUG
+			int dataLength = (accessor.count * bufferView.byteStride);
+            // inside bufferView boundary?
+            Assert.IsTrue(dataLength <= bufferView.byteLength);
+            // inside chunk boundary?
+            Assert.IsTrue(bufferView.byteOffset + dataLength <= (int)chunk.length);
+            // inside bytes boundary?
+            Assert.IsTrue(start + dataLength <= bytes.Length);
+#endif
+
+            return extractor(
+                ref bytes
+                , start
+                , accessor.count
+				, bufferView.byteStride
+                );
+        }
+
         Vector2[] GetUvs( int accessorIndex, ref byte[] bytes ) {
             if(accessorIndex>=0) {
                 var uvAccessor = gltf.accessors[accessorIndex];
@@ -411,13 +425,20 @@ namespace GLTFast {
                 #if DEBUG
                 Assert.AreEqual( GetAccessorTye(uvAccessor.typeEnum), typeof(Vector2) );
                 #endif
+				bool interleaved = gltf.IsAccessorInterleaved(accessorIndex);
                 switch( uvAccessor.componentType ) {
                 case GLTFComponentType.Float:
-                    return GetAccessorData<Vector2>( accessorIndex, ref bytes, GetUVsFloat );
+					return interleaved
+                        ? GetAccessorDataInterleaved<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsFloatInterleaved)
+						: GetAccessorData<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsFloat );
                 case GLTFComponentType.UnsignedByte:
-                    return GetAccessorData<Vector2>( accessorIndex, ref bytes, GetUVsUInt8 );
+					return interleaved
+						? GetAccessorDataInterleaved<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsUInt8Interleaved )
+						: GetAccessorData<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsUInt8 );
                 case GLTFComponentType.UnsignedShort:
-                    return GetAccessorData<Vector2>( accessorIndex, ref bytes, GetUVsUInt16 );
+					return interleaved
+                        ? GetAccessorDataInterleaved<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsUInt16Interleaved )
+                        : GetAccessorData<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsUInt16 );
                 default:
                     Debug.LogErrorFormat("Unsupported UV format {0}", uvAccessor.componentType);
                     break;
@@ -434,18 +455,25 @@ namespace GLTFast {
             colors32 = null;
             if(accessorIndex>=0) {
                 var colorAccessor = gltf.accessors[accessorIndex];
+                var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
 				if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
 				{
 					switch (colorAccessor.componentType)
 					{
 						case GLTFComponentType.Float:
-							colors = GetAccessorData<Color>(accessorIndex, ref bytes, GetColorsVec3Float);
+							colors = interleaved
+                                ? GetAccessorDataInterleaved<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec3FloatInterleaved)
+                                : GetAccessorData<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec3Float);;
 							break;
 						case GLTFComponentType.UnsignedByte:
-							colors32 = GetAccessorData<Color32>(accessorIndex, ref bytes, GetColorsVec3UInt8);
+							colors32 = interleaved
+                                ? GetAccessorDataInterleaved<Color32>(accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8Interleaved)
+                                : GetAccessorData<Color32>(accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8);
 							break;
 						case GLTFComponentType.UnsignedShort:
-							colors = GetAccessorData<Color>( accessorIndex, ref bytes, GetColorsVec3UInt16 );
+							colors = interleaved
+                                ? GetAccessorDataInterleaved<Color>( accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16Interleaved )
+                                : GetAccessorData<Color>( accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16 );
 							break;
 						default:
 							Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
@@ -457,13 +485,19 @@ namespace GLTFast {
 					switch (colorAccessor.componentType)
                     {
                         case GLTFComponentType.Float:
-                            colors = GetAccessorData<Color>(accessorIndex, ref bytes, GetColorsVec4Float);
+							colors = interleaved
+                                ? GetAccessorDataInterleaved<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec4FloatInterleaved)
+                                : GetAccessorData<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec4Float);
                             break;
                         case GLTFComponentType.UnsignedByte:
-                            colors32 = GetAccessorData<Color32>(accessorIndex, ref bytes, GetColorsVec4UInt8);
+							colors32 = interleaved
+                                ? GetAccessorDataInterleaved<Color32>(accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8Interleaved)
+                                : GetAccessorData<Color32>(accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8);
                             break;
                         case GLTFComponentType.UnsignedShort:
-                            colors = GetAccessorData<Color>(accessorIndex, ref bytes, GetColorsVec4UInt16);
+							colors = interleaved
+                                ? GetAccessorDataInterleaved<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16Interleaved)
+                                : GetAccessorData<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16);
                             break;
                         default:
 							Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
@@ -518,7 +552,7 @@ namespace GLTFast {
             }
         }
 
-        static int GetAccessorComponentTypeLength( GLTFComponentType componentType ) {
+        public static int GetAccessorComponentTypeLength( GLTFComponentType componentType ) {
             switch (componentType)
             {
                 case GLTFComponentType.Byte:
@@ -536,7 +570,7 @@ namespace GLTFast {
             }
         }
 
-        static int GetAccessorAttriuteTypeLength( GLTFAccessorAttributeType type ) {
+        public static int GetAccessorAttriuteTypeLength( GLTFAccessorAttributeType type ) {
             switch (type)
             {
                 case GLTFAccessorAttributeType.SCALAR:
@@ -558,306 +592,5 @@ namespace GLTFast {
             }
         }
 #endif // DEBUG
-
-        unsafe static byte[] CreateBufferViewCopy( BufferView bufferView, BinChunk chunk, byte[] bytes ) {
-            var result = new byte[bufferView.byteLength];
-            fixed( void* p = &(result[0]), src = &(bytes[bufferView.byteOffset+chunk.start]) ) {
-                System.Buffer.MemoryCopy(
-                    src,
-                    p,
-                    bufferView.byteLength,
-                    bufferView.byteLength
-                );
-            }
-            return result;
-        }
-
-        unsafe static int[] GetIndicesUInt8(byte[] bytes, int start, int count) {
-            var res = new int[count];
-            for (var i = 0;i<count;i++) {
-                res[i] = bytes[ start + i ];
-            }
-            return res;
-        }
-
-        unsafe static int[] GetIndicesUInt16(byte[] bytes, int start, int count) {
-            var res = new int[count];
-            for (var i = 0;i<count;i++) {
-                res[i] = BitConverter.ToUInt16( bytes, start + i*2 );
-            }
-            return res;
-        }
-        
-        unsafe static int[] GetIndicesUInt32(byte[] bytes, int start, int count) {
-            var res = new int[count];
-            System.Buffer.BlockCopy( bytes, start, res, 0, count*4);
-
-            // TODO: fix, test and profile alternative:
-            //fixed( void* p = &(res[0]) ) {
-            //fixed( void* src = &(bytes[start]) ) {
-            //    System.Buffer.MemoryCopy(
-            //        //IntPtr.Add( gcBytes.AddrOfPinnedObject(),start).ToPointer(),
-            //        //gcRes.AddrOfPinnedObject().ToPointer(),
-            //        src,
-            //        p,
-            //        count*2,
-            //        count*2
-            //    );
-            //}}
-            return res;
-        }
-
-        unsafe static Vector3[] GetVector3s(
-			ref byte[] bytes,
-            int start,
-            int count
-        ) {
-            Profiler.BeginSample("GetVector3s");
-            var res = new Vector3[count];
-
-#if BUFFER
-            fixed( void* p = &(res[0]), src = &(bytes[start]) ) {
-				System.Buffer.MemoryCopy(
-                    src,
-					p,
-					count*12,
-					count*12
-				);
-            }
-#else
-            var gcRes = GCHandle.Alloc(res, GCHandleType.Pinned);
-            Marshal.Copy(bytes, start, gcRes.AddrOfPinnedObject(), count*12);
-            gcRes.Free();
-#endif
-
-            Profiler.EndSample();
-            return res;
-        }
-
-        unsafe static Vector4[] GetVector4s(
-            ref byte[] bytes,
-            int start,
-            int count
-        ) {
-            Profiler.BeginSample("GetVector4s");
-            var res = new Vector4[count];
-
-#if BUFFER
-            fixed( void* p = &(res[0]), src = &(bytes[start]) ) {
-                System.Buffer.MemoryCopy(
-                    src,
-                    p,
-                    count*16,
-                    count*16
-                );
-            }
-#else
-            var gcRes = GCHandle.Alloc(res, GCHandleType.Pinned);
-            Marshal.Copy(bytes, start, gcRes.AddrOfPinnedObject(), count*16);
-            gcRes.Free();
-#endif
-
-            Profiler.EndSample();
-            return res;
-        }
-
-		static Color[] GetColorsVec3Float(
-            ref byte[] bytes,
-            int start,
-            int count
-        )
-        {
-			Profiler.BeginSample("GetColorsVec3Float");
-            var res = new Color[count];
-
-            for (var i = 0; i < count; i++)
-            {
-				res[i].r = BitConverter.ToSingle(bytes, start + i * 12);
-				res[i].g = BitConverter.ToSingle(bytes, start + i * 12 + 4);
-				res[i].b = BitConverter.ToSingle(bytes, start + i * 12 + 8);
-                res[i].a = 1.0f;
-            }
-
-            Profiler.EndSample();
-            return res;
-        }
-
-        unsafe static Color[] GetColorsVec4Float(
-            ref byte[] bytes,
-            int start,
-            int count
-        ) {
-            Profiler.BeginSample("GetColorsVec4Float");
-            var res = new Color[count];
-
-#if BUFFER
-            fixed( void* p = &(res[0]), src = &(bytes[start]) ) {
-                System.Buffer.MemoryCopy(
-                    src,
-                    p,
-                    count*16,
-                    count*16
-                );
-            }
-#else
-            var gcRes = GCHandle.Alloc(res, GCHandleType.Pinned);
-            Marshal.Copy(bytes, start, gcRes.AddrOfPinnedObject(), count*16);
-            gcRes.Free();
-#endif
-
-            Profiler.EndSample();
-            return res;
-        }
-
-		static Color32[] GetColorsVec3UInt8(
-            ref byte[] bytes,
-            int start,
-            int count
-        )
-        {
-			Profiler.BeginSample("GetColorsVec3UInt8");
-            var res = new Color32[count];
-
-            for (var i = 0; i < count; i++)
-            {
-				res[i].r = bytes[start + i * 3];
-				res[i].g = bytes[start + i * 3 + 1];
-				res[i].b = bytes[start + i * 3 + 2];
-                res[i].a = 255;
-            }
-
-            Profiler.EndSample();
-            return res;
-        }
-
-        unsafe static Color32[] GetColorsVec4UInt8(
-            ref byte[] bytes,
-            int start,
-            int count
-        ) {
-            Profiler.BeginSample("GetColorsVec4UInt8");
-            var res = new Color32[count];
-
-#if BUFFER
-            fixed( void* p = &(res[0]), src = &(bytes[start]) ) {
-                System.Buffer.MemoryCopy(
-                    src,
-                    p,
-                    count*4,
-                    count*4
-                );
-            }
-#else
-            var gcRes = GCHandle.Alloc(res, GCHandleType.Pinned);
-            Marshal.Copy(bytes, start, gcRes.AddrOfPinnedObject(), count*4);
-            gcRes.Free();
-#endif
-            Profiler.EndSample();
-            return res;
-        }
-
-		static Color[] GetColorsVec3UInt16(
-            ref byte[] bytes,
-            int start,
-            int count
-        ) {
-			Profiler.BeginSample("GetColorsVec3UInt16");
-            var res = new Color[count];
-
-            for (var i = 0; i < count; i++)
-            {
-                res[i].r = BitConverter.ToUInt16(bytes, start + i * 6) / UINT16_MAX;
-                res[i].g = BitConverter.ToUInt16(bytes, start + i * 6 + 2) / UINT16_MAX;
-                res[i].b = BitConverter.ToUInt16(bytes, start + i * 6 + 4) / UINT16_MAX;
-                res[i].a = 1;
-            }
-
-            Profiler.EndSample();
-            return res;
-        }
-        
-		static Color[] GetColorsVec4UInt16(
-            ref byte[] bytes,
-            int start,
-            int count
-        ) {
-			Profiler.BeginSample("GetColorsVec4UInt16");
-            var res = new Color[count];
-            
-			for (var i = 0; i < count; i++)
-            {
-				res[i].r = BitConverter.ToUInt16(bytes, start + i * 8) / UINT16_MAX;
-				res[i].g = BitConverter.ToUInt16(bytes, start + i * 8 + 2) / UINT16_MAX;
-				res[i].b = BitConverter.ToUInt16(bytes, start + i * 8 + 4) / UINT16_MAX;
-				res[i].a = BitConverter.ToUInt16(bytes, start + i * 8 + 6) / UINT16_MAX;
-            }
-
-            Profiler.EndSample();
-            return res;
-        }
-
-        unsafe static Vector2[] GetUVsFloat(
-            ref byte[] bytes,
-            int start,
-            int count
-        ) {
-            Profiler.BeginSample("GetUVsFloat");
-            var res = new Vector2[count];
-
-#if BUFFER
-            fixed( void* p = &(res[0]), src = &(bytes[start]) ) {
-                System.Buffer.MemoryCopy(
-                    src,
-                    p,
-                    count*8,
-                    count*8
-                );
-            }
-#else
-            var gcRes = GCHandle.Alloc(res, GCHandleType.Pinned);
-            Marshal.Copy(bytes, start, gcRes.AddrOfPinnedObject(), count*8);
-            gcRes.Free();
-#endif
-            for (var i = 0;i<count;i++) {
-                res[i].y = 1 - res[i].y;
-            }
-
-            Profiler.EndSample();
-            return res;
-        }
-
-        unsafe static Vector2[] GetUVsUInt8(
-            ref byte[] bytes,
-            int start,
-            int count
-        ) {
-            Profiler.BeginSample("GetUVsUInt8");
-            var res = new Vector2[count];
-
-            for (var i = 0;i<count;i++) {
-                res[i].x = bytes[ start + (i*2) ] / 255f;
-                res[i].y = 1 - bytes[ start + (i*2) + 1 ] / 255f;
-            }
-
-            Profiler.EndSample();
-            return res;
-        }
-
-        unsafe static Vector2[] GetUVsUInt16(
-            ref byte[] bytes,
-            int start,
-            int count
-        ) {
-            Profiler.BeginSample("GetUVsUInt16");
-            var res = new Vector2[count];
-
-            for (var i = 0;i<count;i++) {
-				res[i].x = BitConverter.ToUInt16( bytes, start + i*4 ) / UINT16_MAX;
-				res[i].y = 1 - BitConverter.ToUInt16( bytes, start + i*4 + 2 ) / UINT16_MAX;
-            }
-
-            Profiler.EndSample();
-            return res;
-        }
     }
 }

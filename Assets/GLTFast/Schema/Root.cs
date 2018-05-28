@@ -91,5 +91,13 @@ namespace GLTFast.Schema {
         /// An array of textures.
         /// </summary>
         public Texture[] textures;
+
+		public bool IsAccessorInterleaved( int accessorIndex ) {
+			var accessor = accessors[accessorIndex];
+			var bufferView = bufferViews[accessor.bufferView];
+			if (bufferView.byteStride < 0) return false;
+			int elementSize = GLTFast.GetAccessorAttriuteTypeLength(accessor.typeEnum) * GLTFast.GetAccessorComponentTypeLength(accessor.componentType);
+			return bufferView.byteStride > elementSize;
+		}
     }
 }
