@@ -551,6 +551,7 @@ namespace GLTFast {
                     return null;
             }
         }
+#endif // DEBUG
 
         public static int GetAccessorComponentTypeLength( GLTFComponentType componentType ) {
             switch (componentType)
@@ -591,6 +592,5 @@ namespace GLTFast {
                     return 0;
             }
         }
-#endif // DEBUG
     }
 }
