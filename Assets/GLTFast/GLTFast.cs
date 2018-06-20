@@ -34,6 +34,8 @@ namespace GLTFast {
         Root gltf;
         GlbBinChunk[] binChunks;
         UnityEngine.Material[] materials;
+        Texture2D[] images;
+        List<Primitive> primitives;
 
         IMaterialGenerator materialGenerator;
 
@@ -108,13 +110,11 @@ namespace GLTFast {
 
         void CreateGameObjects( Transform parent, byte[] bytes ) {
 
-            var primitives = new List<Primitive>(gltf.meshes.Length);
+            primitives = new List<Primitive>(gltf.meshes.Length);
             var meshPrimitiveIndex = new int[gltf.meshes.Length+1];
 
-            UnityEngine.Texture2D[] images = null;
-
             if (gltf.images != null) {
-                images = new UnityEngine.Texture2D[gltf.images.Length];
+                images = new Texture2D[gltf.images.Length];
                 for (int i = 0; i < images.Length; i++) {
                     var img = gltf.images[i];
                     if (img.mimeType == "image/jpeg" || img.mimeType == "image/png")
@@ -362,6 +362,24 @@ namespace GLTFast {
                     
                 }
             }
+        }
+
+        public void Destroy() {
+            foreach( var material in materials ) {
+                UnityEngine.Object.Destroy(material);
+            }
+            materials = null;
+
+            foreach( var texture in images ) {
+                UnityEngine.Object.Destroy(texture);
+            }
+            images = null;
+
+            foreach( var primitive in primitives ) {
+                UnityEngine.Object.Destroy(primitive.mesh);
+                //primitive.mesh = null;
+            }
+            primitives = null;
         }
 
         CompType[] GetAccessorData<CompType>( int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {

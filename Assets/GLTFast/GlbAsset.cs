@@ -56,5 +56,10 @@ namespace GLTFast
 				yield return loadRoutine;         
             }
 		}
-    }
+
+		private void OnDestroy()
+		{
+			gLTFastInstance.Destroy();
+		}
+	}
 }
