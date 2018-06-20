@@ -19,7 +19,7 @@ namespace GLTFast {
             return defaultMaterial;
         }
 
-        public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture2D[] images ) {
+        public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture2D[] images, List<UnityEngine.Object> additionalResources ) {
             var material = Material.Instantiate<Material>( GetDefaultMaterial() );
             material.name = gltfMaterial.name;
 
@@ -57,6 +57,8 @@ namespace GLTFast {
 
 					material.SetTexture( StandardShaderHelper.metallicGlossMapPropId, newmrt );
                     material.EnableKeyword("_METALLICGLOSSMAP");
+
+                    additionalResources.Add(newmrt);
                 }
             }
 
@@ -89,6 +91,8 @@ namespace GLTFast {
                 Profiler.EndSample();
 
 				material.SetTexture( StandardShaderHelper.occlusionMapPropId, newOcclusionTxt );
+
+                additionalResources.Add(newOcclusionTxt);
             }
 			
             var emmissiveTxt = GetTexture(gltfMaterial.emissiveTexture,textures,images);

@@ -34,8 +34,7 @@ namespace GLTFast {
         Root gltf;
         GlbBinChunk[] binChunks;
         UnityEngine.Material[] materials;
-        Texture2D[] images;
-        List<Primitive> primitives;
+        List<UnityEngine.Object> resources;
 
         IMaterialGenerator materialGenerator;
 
@@ -110,8 +109,12 @@ namespace GLTFast {
 
         void CreateGameObjects( Transform parent, byte[] bytes ) {
 
-            primitives = new List<Primitive>(gltf.meshes.Length);
+            var primitives = new List<Primitive>(gltf.meshes.Length);
             var meshPrimitiveIndex = new int[gltf.meshes.Length+1];
+
+            Texture2D[] images = null;
+
+            resources = new List<UnityEngine.Object>();
 
             if (gltf.images != null) {
                 images = new Texture2D[gltf.images.Length];
@@ -128,6 +131,7 @@ namespace GLTFast {
                             txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
                             txt.LoadImage(imgBytes);
                             images[i] = txt;
+                            resources.Add(txt);
                         } else
                         if(!string.IsNullOrEmpty(img.uri)) {
                             Debug.LogError("Loading from URI not supported");
@@ -141,7 +145,7 @@ namespace GLTFast {
             if(gltf.materials!=null) {
                 materials = new UnityEngine.Material[gltf.materials.Length];
                 for(int i=0;i<materials.Length;i++) {
-					materials[i] = materialGenerator.GenerateMaterial( gltf.materials[i], gltf.textures, images );
+					materials[i] = materialGenerator.GenerateMaterial( gltf.materials[i], gltf.textures, images, resources );
 				}
             }
 
@@ -239,6 +243,7 @@ namespace GLTFast {
                         msh.RecalculateTangents();
                     }
                     primitives.Add( new Primitive(msh,primitive.material) );
+                    resources.Add(msh);
                 }
             }
 
@@ -370,16 +375,10 @@ namespace GLTFast {
             }
             materials = null;
 
-            foreach( var texture in images ) {
-                UnityEngine.Object.Destroy(texture);
+            foreach( var resource in resources ) {
+                UnityEngine.Object.Destroy(resource);
             }
-            images = null;
-
-            foreach( var primitive in primitives ) {
-                UnityEngine.Object.Destroy(primitive.mesh);
-                //primitive.mesh = null;
-            }
-            primitives = null;
+            resources = null;
         }
 
         CompType[] GetAccessorData<CompType>( int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {
