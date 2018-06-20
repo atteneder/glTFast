@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if !NO_TEST
+using UnityEngine;
 using UnityEngine.TestTools;
 using NUnit.Framework;
 using System.Collections;
@@ -96,3 +97,4 @@ public class SampleModelsTest
         }
 	}
 }
+#endif
