@@ -91,7 +91,9 @@ public class SampleModelsTest
 			Assert.Greater(bytes.Length, 0);
 
 			var go = new GameObject();         
-			new GLTFast.GLTFast(bytes, go.transform);
+			var glTFast = new GLTFast.GLTFast();
+            var success = glTFast.LoadGlb(bytes, go.transform);
+            Assert.True(success);
 			yield return null;
 			Object.Destroy(go);
         }
