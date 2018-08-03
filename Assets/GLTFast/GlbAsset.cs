@@ -13,7 +13,7 @@ namespace GLTFast
 		GLTFast gLTFastInstance;
 		Coroutine loadRoutine;
 
-        public UnityAction onLoadComplete;
+        public UnityAction<bool> onLoadComplete;
 
         // Use this for initialization
         void Start()
@@ -43,10 +43,11 @@ namespace GLTFast
             else {
                 // Or retrieve results as binary data
                 byte[] results = www.downloadHandler.data;
-				gLTFastInstance = new GLTFast(results,transform);
-                if(onLoadComplete!=null) {
-                    onLoadComplete();
-                }
+				gLTFastInstance = new GLTFast();
+                var success = gLTFastInstance.LoadGlb(results,transform);
+				if(onLoadComplete!=null) {
+					onLoadComplete(success);
+				}
             }
 			loadRoutine = null;
         }

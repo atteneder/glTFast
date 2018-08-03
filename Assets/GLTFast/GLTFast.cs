@@ -38,23 +38,24 @@ namespace GLTFast {
 
         IMaterialGenerator materialGenerator;
 
-        public GLTFast( byte[] bytes, Transform parent = null ) {
+        public GLTFast() {
             materialGenerator = new DefaultMaterialGenerator();
-            LoadGlb(bytes,parent);
         }
 
-        public static GLTFast LoadGlbFile( string path, Transform parent = null )
+        public static bool LoadGlbFile( string path, Transform parent = null )
         {
             var bytes = File.ReadAllBytes(path);
 
             if (bytes == null || bytes.Length < 12)
             {
-                return null;
+                Debug.LogError("Couldn't load GLB file.");
+                return false;
             }
-            return new GLTFast( bytes, parent );
+            var glTFast = new GLTFast();
+            return glTFast.LoadGlb(bytes,parent);
         }
 
-        bool LoadGlb( byte[] bytes, Transform parent = null ) {
+        public bool LoadGlb( byte[] bytes, Transform parent = null ) {
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
             if (magic != GLB_MAGIC)
@@ -102,12 +103,12 @@ namespace GLTFast {
             if(gltf!=null) {
                 //Debug.Log(gltf);
                 binChunks = binChunksList.ToArray();
-                CreateGameObjects( parent, bytes );
+                return CreateGameObjects( parent, bytes );
             }
-            return true;
+            return false;
         }
 
-        void CreateGameObjects( Transform parent, byte[] bytes ) {
+        bool CreateGameObjects( Transform parent, byte[] bytes ) {
 
             var primitives = new List<Primitive>(gltf.meshes.Length);
             var meshPrimitiveIndex = new int[gltf.meshes.Length+1];
@@ -135,9 +136,11 @@ namespace GLTFast {
                         } else
                         if(!string.IsNullOrEmpty(img.uri)) {
                             Debug.LogError("Loading from URI not supported");
+                            return false;
                         }
                     } else {
                         Debug.LogErrorFormat("Unknown image mime type {0}",img.mimeType);
+                        return false;
                     }
                 }
             }
@@ -177,7 +180,7 @@ namespace GLTFast {
                         break;
                     default:
                         Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
-                        break;
+                        return false;
                     }
 
                     // position
@@ -293,6 +296,7 @@ namespace GLTFast {
 						go.transform.localScale = m.lossyScale;
                     } else {
                         Debug.LogErrorFormat("Invalid matrix on node {0}",nodeIndex);
+                        return false;
                     }
                 } else {
                     if(node.translation!=null) {
@@ -367,6 +371,7 @@ namespace GLTFast {
                     
                 }
             }
+            return true;
         }
 
         public void Destroy() {

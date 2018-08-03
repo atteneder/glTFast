@@ -106,24 +106,29 @@ public class TestLoader : MonoBehaviour {
 #endif
 
 #if !NO_GLTFAST
-    void GLTFast_onLoadComplete()
+    void GLTFast_onLoadComplete(bool success)
     {
         time1Update((Time.realtimeSinceStartup-startTime)*1000);
-        var bounds = CalculateLocalBounds(gltf1.transform);
-        
-        float targetSize = 2.0f;
-        
-        float scale = Mathf.Min(
-            targetSize / bounds.extents.x,
-            targetSize / bounds.extents.y,
-            targetSize / bounds.extents.z
-            );
 
-        gltf1.transform.localScale = Vector3.one * scale;
-        Vector3 pos = bounds.center;
-        pos.x += bounds.extents.x * variantDistance;;
-        pos *= -scale;
-        gltf1.transform.position = pos;
+        if(success) {
+            var bounds = CalculateLocalBounds(gltf1.transform);
+            
+            float targetSize = 2.0f;
+            
+            float scale = Mathf.Min(
+                targetSize / bounds.extents.x,
+                targetSize / bounds.extents.y,
+                targetSize / bounds.extents.z
+                );
+    
+            gltf1.transform.localScale = Vector3.one * scale;
+            Vector3 pos = bounds.center;
+            pos.x += bounds.extents.x * variantDistance;;
+            pos *= -scale;
+            gltf1.transform.position = pos;
+        } else {
+            Debug.LogError("TestLoader: loading failed!");
+        }
     }
 #endif
 
