@@ -35,3 +35,4 @@ sysinfo.txt
 *.unitypackage
 
 /Assets/UnityGLTF
+/Assets/StreamingAssets/glTF-Sample-Models
