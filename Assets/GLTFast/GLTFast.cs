@@ -221,6 +221,13 @@ namespace GLTFast {
                     GetColors(primitive.attributes.COLOR_0, ref bytes, out colors32, out colors);
 
                     var msh = new UnityEngine.Mesh();
+                    if( positions.Length > 65536 ) {
+#if UNITY_2017_3_OR_NEWER
+                        msh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+#else
+                        throw new System.Exception("Meshes with more than 65536 vertices are only supported from Unity 2017.3 onwards.");
+#endif
+                    }
                     msh.name = mesh.name;
                     msh.vertices = positions;
                     msh.SetIndices(indices, MeshTopology.Triangles, 0);
