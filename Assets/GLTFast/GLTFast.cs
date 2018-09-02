@@ -183,15 +183,67 @@ namespace GLTFast {
                         return false;
                     }
 
+                    #if DEBUG
+                    if( accessor.min!=null && accessor.min.Length>0 && accessor.max!=null && accessor.max.Length>0 ) {
+                        int minInt = (int) accessor.min[0];
+                        int maxInt = (int) accessor.max[0];
+                        int minIndex = int.MaxValue;
+                        int maxIndex = int.MinValue;
+                        foreach (var index in indices) {
+                        Assert.IsTrue( index >= minInt );
+                        Assert.IsTrue( index <= maxInt );
+                        minIndex = Math.Min(minIndex,index);
+                        maxIndex = Math.Max(maxIndex,index);
+                        }
+                        if( minIndex!=minInt
+                        || maxIndex!=maxInt
+                        ) {
+                        Debug.LogErrorFormat("Faulty index bounds: is {0}:{1} expected:{2}:{3}",minIndex,maxIndex,minInt,maxInt);
+                        }
+                    }
+                    #endif
+
                     // position
                     int pos = primitive.attributes.POSITION;
                     Assert.IsTrue(pos>=0);
                     #if DEBUG
                     Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
-#endif
+                    #endif
 					var positions = gltf.IsAccessorInterleaved(pos)
 		                ? GetAccessorDataInterleaved<Vector3>( pos, ref bytes, Extractor.GetVector3sInterleaved )
 		                : GetAccessorData<Vector3>( pos, ref bytes, Extractor.GetVector3s );
+
+                    #if DEBUG
+                    var posAcc = gltf.accessors[pos];
+                    Vector3 minPos = new Vector3( (float) posAcc.min[0], (float) posAcc.min[1], (float) posAcc.min[2] );
+                    Vector3 maxPos = new Vector3( (float) posAcc.max[0], (float) posAcc.max[1], (float) posAcc.max[2] );
+                    foreach (var p in positions) {
+                        if( ! (p.x >= minPos.x
+                            && p.y >= minPos.y
+                            && p.z >= minPos.z
+                            && p.x <= maxPos.x
+                            && p.y <= maxPos.y
+                            && p.z <= maxPos.z
+                            ))
+                        {
+                            Debug.LogError("Vertex outside of limits");
+                            break;
+                        }
+                    }
+
+                    var pUsage = new int[positions.Length];
+                    foreach (var index in indices) {
+                        pUsage[index] += 1;
+                    }
+                    int pMin = int.MaxValue;
+                    foreach (var u in pUsage) {
+                        pMin = Math.Min(pMin,u);
+                    }
+                    if(pMin<1) {
+                        Debug.LogError("Unused vertices");
+                    }
+                    #endif
+
 
                     Vector3[] normals = null;
                     if(primitive.attributes.NORMAL>=0) {
