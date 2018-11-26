@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Networking;
 
 namespace GLTFast {
 
@@ -31,7 +33,8 @@ namespace GLTFast {
 		public delegate CompType[] ExtractAccessor<CompType>(ref byte[] bytes, int start, int count);
         public delegate CompType[] ExtractInterleavedAccessor<CompType>(ref byte[] bytes, int start, int count, int byteStride);
         
-        Root gltf;
+        Dictionary<int,byte[]> buffers;
+
         GlbBinChunk[] binChunks;
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
@@ -55,6 +58,115 @@ namespace GLTFast {
             return glTFast.LoadGlb(bytes,parent);
         }
 
+        // TODO: remove maybe?
+        Root gltfRoot;
+        Texture2D[] images = null;
+
+        static string GetUriBase( string url ) {
+            var uri = new Uri(url);
+            return new Uri( uri, ".").AbsoluteUri;
+        }
+
+        public void LoadGltf( string json, string url ){
+            var gltf = JsonUtility.FromJson<Root>(json);
+
+            var baseUri = GetUriBase(url);
+
+            for( int i=0; i<gltf.buffers.Length;i++) {
+                var buffer = gltf.buffers[i];
+                if( !string.IsNullOrEmpty(buffer.uri) ) {
+                    LoadBuffer( i, baseUri+buffer.uri );
+                }
+            }
+            buffers = new Dictionary<int, byte[]>(gltf.buffers.Length);
+
+            if (gltf.images != null) {
+                images = new Texture2D[gltf.images.Length];
+                for (int i = 0; i < images.Length; i++) {
+                    var img = gltf.images[i];
+                    bool knownImageType = false;
+                    if(string.IsNullOrEmpty(img.mimeType)) {
+                        Debug.LogWarning("Image is missing mime type");
+                        knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
+                            || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
+                            || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
+                    } else {
+                        knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
+                    }
+
+                    if (knownImageType)
+                    {
+                        if (img.bufferView >= 0)
+                        {
+                            // Inside buffer
+                        } else
+                        if(!string.IsNullOrEmpty(img.uri)) {
+                            LoadTexture(i,baseUri+img.uri);
+                        }
+                    }
+                }
+            }
+
+            gltfRoot = gltf;
+        }
+
+        public IEnumerator WaitForAllDependencies() {
+            foreach( var dl in downloads ) {
+                yield return dl.Value;
+                var www = dl.Value.webRequest;
+                if(www.isNetworkError || www.isHttpError) {
+                    Debug.LogError(www.error);
+                }
+                else {
+                    buffers[dl.Key] = www.downloadHandler.data;
+                }
+            }
+
+            foreach( var dl in textureDownloads ) {
+                yield return dl.Value;
+                var www = dl.Value.webRequest;
+                if(www.isNetworkError || www.isHttpError) {
+                    Debug.LogError(www.error);
+                }
+                else {
+                    images[dl.Key] = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
+                }
+            }
+
+            binChunks = new GlbBinChunk[buffers.Count];
+            for( int i=0; i<buffers.Count; i++ ) {
+                var b = buffers[i];
+                binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
+            }
+        }
+
+        public void InstanciateGltf( Transform parent ) {
+            CreateGameObjects( gltfRoot, parent );
+        }
+
+        Dictionary<int,UnityWebRequestAsyncOperation> downloads;
+        Dictionary<int,UnityWebRequestAsyncOperation> textureDownloads;
+
+        void LoadBuffer( int index, string url ) {
+            UnityWebRequest www = UnityWebRequest.Get(url);
+
+            if(downloads==null) {
+                downloads = new Dictionary<int, UnityWebRequestAsyncOperation>();
+            }
+
+            downloads[index] = www.SendWebRequest();
+        }
+
+        void LoadTexture( int index, string url ) {
+            var www = UnityWebRequestTexture.GetTexture(url);
+
+            if(textureDownloads==null) {
+                textureDownloads = new Dictionary<int, UnityWebRequestAsyncOperation>();
+            }
+
+            textureDownloads[index] = www.SendWebRequest();
+        }
+
         public bool LoadGlb( byte[] bytes, Transform parent = null ) {
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
@@ -72,9 +184,12 @@ namespace GLTFast {
 
             int index = 12; // first chung header
 
-            gltf = null;
+            buffers = new Dictionary<int, byte[]>(1);
+            buffers[0] = bytes;
 
             var binChunksList = new List<GlbBinChunk>();
+
+            Root gltf = null;
 
             while( index < bytes.Length ) {
                 uint chLength = BitConverter.ToUInt32( bytes, index );
@@ -103,44 +218,57 @@ namespace GLTFast {
             if(gltf!=null) {
                 //Debug.Log(gltf);
                 binChunks = binChunksList.ToArray();
-                return CreateGameObjects( parent, bytes );
+                return CreateGameObjects( gltf, parent );
             }
             return false;
         }
 
-        bool CreateGameObjects( Transform parent, byte[] bytes ) {
+        byte[] GetBuffer(int index) {
+            return buffers[index];
+        }
+
+        bool CreateGameObjects( Root gltf, Transform parent ) {
 
             var primitives = new List<Primitive>(gltf.meshes.Length);
             var meshPrimitiveIndex = new int[gltf.meshes.Length+1];
 
-            Texture2D[] images = null;
-
             resources = new List<UnityEngine.Object>();
 
             if (gltf.images != null) {
-                images = new Texture2D[gltf.images.Length];
+                if(images==null) {
+                    images = new Texture2D[gltf.images.Length];
+                } else {
+                    Assert.AreEqual(images.Length,gltf.images.Length);
+                }
                 for (int i = 0; i < images.Length; i++) {
+                    if(images[i]!=null) {
+                        resources.Add(images[i]);
+                    }
                     var img = gltf.images[i];
-                    if (img.mimeType == "image/jpeg" || img.mimeType == "image/png")
+                    bool knownImageType = false;
+                    if(string.IsNullOrEmpty(img.mimeType)) {
+                        Debug.LogWarning("Image is missing mime type");
+                        knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
+                            || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
+                            || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
+                    } else {
+                        knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
+                    }
+
+                    if (knownImageType)
                     {
                         if (img.bufferView >= 0)
                         {
                             var bufferView = gltf.bufferViews[img.bufferView];
+                            var buffer = GetBuffer(bufferView.buffer);
                             var chunk = binChunks[bufferView.buffer];
-                            var imgBytes = Extractor.CreateBufferViewCopy(bufferView,chunk,bytes);
+                            var imgBytes = Extractor.CreateBufferViewCopy(bufferView,chunk,buffer);
                             var txt = new UnityEngine.Texture2D(4, 4);
                             txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
                             txt.LoadImage(imgBytes);
                             images[i] = txt;
                             resources.Add(txt);
-                        } else
-                        if(!string.IsNullOrEmpty(img.uri)) {
-                            Debug.LogError("Loading from URI not supported");
-                            return false;
                         }
-                    } else {
-                        Debug.LogErrorFormat("Unknown image mime type {0}",img.mimeType);
-                        return false;
                     }
                 }
             }
@@ -162,21 +290,22 @@ namespace GLTFast {
                     // index
                     var accessor = gltf.accessors[primitive.indices];
                     var bufferView = gltf.bufferViews[accessor.bufferView];
-                    var buffer = bufferView.buffer;
+                    var bufferIndex = bufferView.buffer;
+                    var buffer = GetBuffer(bufferIndex);
 
-                    GlbBinChunk chunk = binChunks[buffer];
+                    GlbBinChunk chunk = binChunks[bufferIndex];
                     Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
                     //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
                     int[] indices = null;
                     switch( accessor.componentType ) {
                     case GLTFComponentType.UnsignedByte:
-                        indices = Extractor.GetIndicesUInt8(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+                        indices = Extractor.GetIndicesUInt8(buffer, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
                         break;
                     case GLTFComponentType.UnsignedShort:
-						indices = Extractor.GetIndicesUInt16(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+						indices = Extractor.GetIndicesUInt16(buffer, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
                         break;
                     case GLTFComponentType.UnsignedInt:
-						indices = Extractor.GetIndicesUInt32(bytes, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+						indices = Extractor.GetIndicesUInt32(buffer, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
                         break;
                     default:
                         Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
@@ -210,8 +339,8 @@ namespace GLTFast {
                     Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
                     #endif
 					var positions = gltf.IsAccessorInterleaved(pos)
-		                ? GetAccessorDataInterleaved<Vector3>( pos, ref bytes, Extractor.GetVector3sInterleaved )
-		                : GetAccessorData<Vector3>( pos, ref bytes, Extractor.GetVector3s );
+		                ? GetAccessorDataInterleaved<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3sInterleaved )
+		                : GetAccessorData<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3s );
 
                     #if DEBUG
                     var posAcc = gltf.accessors[pos];
@@ -251,12 +380,12 @@ namespace GLTFast {
                         Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.NORMAL].typeEnum), typeof(Vector3) );
                         #endif
 						normals = gltf.IsAccessorInterleaved(pos)
-						    ? GetAccessorDataInterleaved<Vector3>( primitive.attributes.NORMAL, ref bytes, Extractor.GetVector3sInterleaved )
-						    : GetAccessorData<Vector3>( primitive.attributes.NORMAL, ref bytes, Extractor.GetVector3s );
+						    ? GetAccessorDataInterleaved<Vector3>( gltf, primitive.attributes.NORMAL, ref buffer, Extractor.GetVector3sInterleaved )
+						    : GetAccessorData<Vector3>( gltf, primitive.attributes.NORMAL, ref buffer, Extractor.GetVector3s );
                     }
 
-                    Vector2[] uvs0 = GetUvs(primitive.attributes.TEXCOORD_0, ref bytes);
-                    Vector2[] uvs1 = GetUvs(primitive.attributes.TEXCOORD_1, ref bytes);
+                    Vector2[] uvs0 = GetUvs(gltf,primitive.attributes.TEXCOORD_0, ref buffer);
+                    Vector2[] uvs1 = GetUvs(gltf,primitive.attributes.TEXCOORD_1, ref buffer);
                     
                     Vector4[] tangents = null;
                     if(primitive.attributes.TANGENT>=0) {
@@ -264,13 +393,13 @@ namespace GLTFast {
                         Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.TANGENT].typeEnum), typeof(Vector4) );
                         #endif
 						tangents = gltf.IsAccessorInterleaved(pos)
-    					    ? GetAccessorDataInterleaved<Vector4>(primitive.attributes.TANGENT, ref bytes, Extractor.GetVector4sInterleaved)
-    						: GetAccessorData<Vector4>( primitive.attributes.TANGENT, ref bytes, Extractor.GetVector4s );
+    					    ? GetAccessorDataInterleaved<Vector4>( gltf, primitive.attributes.TANGENT, ref buffer, Extractor.GetVector4sInterleaved)
+    						: GetAccessorData<Vector4>( gltf, primitive.attributes.TANGENT, ref buffer, Extractor.GetVector4s );
                     }
 
                     Color32[] colors32;
                     Color[] colors;
-                    GetColors(primitive.attributes.COLOR_0, ref bytes, out colors32, out colors);
+                    GetColors(gltf,primitive.attributes.COLOR_0, ref buffer, out colors32, out colors);
 
                     var msh = new UnityEngine.Mesh();
                     if( positions.Length > 65536 ) {
@@ -445,7 +574,7 @@ namespace GLTFast {
             resources = null;
         }
 
-        CompType[] GetAccessorData<CompType>( int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {
+        CompType[] GetAccessorData<CompType>( Root gltf, int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {
             Assert.IsTrue(accessorIndex>=0);
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
@@ -472,7 +601,7 @@ namespace GLTFast {
                 );
         }
 
-		CompType[] GetAccessorDataInterleaved<CompType>(int accessorIndex, ref byte[] bytes, ExtractInterleavedAccessor<CompType> extractor)
+		CompType[] GetAccessorDataInterleaved<CompType>( Root gltf, int accessorIndex, ref byte[] bytes, ExtractInterleavedAccessor<CompType> extractor)
         {
             Assert.IsTrue(accessorIndex >= 0);
             var accessor = gltf.accessors[accessorIndex];
@@ -499,7 +628,7 @@ namespace GLTFast {
                 );
         }
 
-        Vector2[] GetUvs( int accessorIndex, ref byte[] bytes ) {
+        Vector2[] GetUvs( Root gltf, int accessorIndex, ref byte[] bytes ) {
             if(accessorIndex>=0) {
                 var uvAccessor = gltf.accessors[accessorIndex];
                 Assert.AreEqual( uvAccessor.typeEnum, GLTFAccessorAttributeType.VEC2 );
@@ -510,16 +639,16 @@ namespace GLTFast {
                 switch( uvAccessor.componentType ) {
                 case GLTFComponentType.Float:
 					return interleaved
-                        ? GetAccessorDataInterleaved<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsFloatInterleaved)
-						: GetAccessorData<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsFloat );
+                        ? GetAccessorDataInterleaved<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsFloatInterleaved)
+						: GetAccessorData<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsFloat );
                 case GLTFComponentType.UnsignedByte:
 					return interleaved
-						? GetAccessorDataInterleaved<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsUInt8Interleaved )
-						: GetAccessorData<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsUInt8 );
+						? GetAccessorDataInterleaved<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsUInt8Interleaved )
+						: GetAccessorData<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsUInt8 );
                 case GLTFComponentType.UnsignedShort:
 					return interleaved
-                        ? GetAccessorDataInterleaved<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsUInt16Interleaved )
-                        : GetAccessorData<Vector2>( accessorIndex, ref bytes, Extractor.GetUVsUInt16 );
+                        ? GetAccessorDataInterleaved<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsUInt16Interleaved )
+                        : GetAccessorData<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsUInt16 );
                 default:
                     Debug.LogErrorFormat("Unsupported UV format {0}", uvAccessor.componentType);
                     break;
@@ -528,7 +657,7 @@ namespace GLTFast {
             return null;
         }
 
-        void GetColors( int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors ) {
+        void GetColors( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors ) {
 
 			const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
 
@@ -543,18 +672,18 @@ namespace GLTFast {
 					{
 						case GLTFComponentType.Float:
 							colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec3FloatInterleaved)
-                                : GetAccessorData<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec3Float);;
+                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3FloatInterleaved)
+                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3Float);;
 							break;
 						case GLTFComponentType.UnsignedByte:
 							colors32 = interleaved
-                                ? GetAccessorDataInterleaved<Color32>(accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8Interleaved)
-                                : GetAccessorData<Color32>(accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8);
+                                ? GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8Interleaved)
+                                : GetAccessorData<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8);
 							break;
 						case GLTFComponentType.UnsignedShort:
 							colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16Interleaved )
-                                : GetAccessorData<Color>( accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16 );
+                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16Interleaved )
+                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16 );
 							break;
 						default:
 							Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
@@ -567,18 +696,18 @@ namespace GLTFast {
                     {
                         case GLTFComponentType.Float:
 							colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec4FloatInterleaved)
-                                : GetAccessorData<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec4Float);
+                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4FloatInterleaved)
+                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4Float);
                             break;
                         case GLTFComponentType.UnsignedByte:
 							colors32 = interleaved
-                                ? GetAccessorDataInterleaved<Color32>(accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8Interleaved)
-                                : GetAccessorData<Color32>(accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8);
+                                ? GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8Interleaved)
+                                : GetAccessorData<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8);
                             break;
                         case GLTFComponentType.UnsignedShort:
 							colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16Interleaved)
-                                : GetAccessorData<Color>(accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16);
+                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16Interleaved)
+                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16);
                             break;
                         default:
 							Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);

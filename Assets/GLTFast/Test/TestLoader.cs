@@ -20,7 +20,7 @@ public class TestLoader : MonoBehaviour {
     GameObject go2;
 
 #if !NO_GLTFAST
-    GlbAsset gltf1;
+    GltfAsset gltf1;
 #endif
 #if UNITY_GLTF
     UnityGLTFLoader gltf2;
@@ -69,7 +69,9 @@ public class TestLoader : MonoBehaviour {
         go2 = new GameObject();
 
 #if !NO_GLTFAST
-        gltf1 = go1.AddComponent<GLTFast.GlbAsset>();
+        gltf1 = url.EndsWith(".gltf",System.StringComparison.OrdinalIgnoreCase)
+            ? go1.AddComponent<GLTFast.GltfAsset>()
+            : go1.AddComponent<GLTFast.GlbAsset>();
         gltf1.url = url;
         gltf1.onLoadComplete += GLTFast_onLoadComplete;
 #endif
