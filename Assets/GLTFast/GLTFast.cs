@@ -122,14 +122,16 @@ namespace GLTFast {
                 }
             }
 
-            foreach( var dl in textureDownloads ) {
-                yield return dl.Value;
-                var www = dl.Value.webRequest;
-                if(www.isNetworkError || www.isHttpError) {
-                    Debug.LogError(www.error);
-                }
-                else {
-                    images[dl.Key] = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
+            if(textureDownloads!=null) {
+                foreach( var dl in textureDownloads ) {
+                    yield return dl.Value;
+                    var www = dl.Value.webRequest;
+                    if(www.isNetworkError || www.isHttpError) {
+                        Debug.LogError(www.error);
+                    }
+                    else {
+                        images[dl.Key] = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
+                    }
                 }
             }
 
