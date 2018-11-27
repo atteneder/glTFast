@@ -38,7 +38,7 @@ namespace GLTFast
             yield return www.SendWebRequest();
      
             if(www.isNetworkError || www.isHttpError) {
-                Debug.LogError(www.error);
+                Debug.LogErrorFormat("{0} {1}",www.error,url);
             }
             else {
                 yield return StartCoroutine( LoadContent(www.downloadHandler) );
