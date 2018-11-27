@@ -50,36 +50,76 @@ public class TestGui : MonoBehaviour {
         string prefix = "http://localhost:8080/glTF-Sample-Models/2.0/";
 #endif
 
-		testItems.Add("Duck", prefix+"Duck/glTF-Binary/Duck.glb");
-        testItems.Add("AnimatedMorphCube", prefix+"AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb");
-        testItems.Add("DamagedHelmet", prefix+"DamagedHelmet/glTF-Binary/DamagedHelmet.glb");
-        testItems.Add("Avocado", prefix+"Avocado/glTF-Binary/Avocado.glb");
-        testItems.Add("BoxVertexColors", prefix+"BoxVertexColors/glTF-Binary/BoxVertexColors.glb");
-        testItems.Add("Box", prefix+"Box/glTF-Binary/Box.glb");
-        testItems.Add("BoxTextured", prefix+"BoxTexturedNonPowerOfTwo/glTF-Binary/BoxTextured.glb");
-        testItems.Add("BoxInterleaved", prefix+"BoxInterleaved/glTF-Binary/BoxInterleaved.glb");
-        testItems.Add("BoomBox", prefix+"BoomBox/glTF-Binary/BoomBox.glb");
-        testItems.Add("Buggy", prefix+"Buggy/glTF-Binary/Buggy.glb");
-        testItems.Add("CesiumMan", prefix+"CesiumMan/glTF-Binary/CesiumMan.glb");
-        testItems.Add("2CylinderEngine", prefix+"2CylinderEngine/glTF-Binary/2CylinderEngine.glb");
-        testItems.Add("Lantern", prefix+"Lantern/glTF-Binary/Lantern.glb");
-        testItems.Add("WaterBottle", prefix+"WaterBottle/glTF-Binary/WaterBottle.glb");
-        testItems.Add("BrainStem", prefix+"BrainStem/glTF-Binary/BrainStem.glb");
-        testItems.Add("BarramundiFish", prefix+"BarramundiFish/glTF-Binary/BarramundiFish.glb");
-        testItems.Add("ReciprocatingSaw", prefix+"ReciprocatingSaw/glTF-Binary/ReciprocatingSaw.glb");
-        testItems.Add("MetalRoughSpheres", prefix+"MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb");
-        testItems.Add("TextureSettingsTest", prefix+"TextureSettingsTest/glTF-Binary/TextureSettingsTest.glb");
-        testItems.Add("BoxAnimated", prefix+"BoxAnimated/glTF-Binary/BoxAnimated.glb");
-        testItems.Add("VC", prefix+"VC/glTF-Binary/VC.glb");
-        testItems.Add("CesiumMilkTruck", prefix+"CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb");
-        testItems.Add("AnimatedMorphSphere", prefix+"AnimatedMorphSphere/glTF-Binary/AnimatedMorphSphere.glb");
-        testItems.Add("RiggedSimple", prefix+"RiggedSimple/glTF-Binary/RiggedSimple.glb");
-        testItems.Add("Corset", prefix+"Corset/glTF-Binary/Corset.glb");
-        testItems.Add("RiggedFigure", prefix+"RiggedFigure/glTF-Binary/RiggedFigure.glb");
-        testItems.Add("GearboxAssy", prefix+"GearboxAssy/glTF-Binary/GearboxAssy.glb");
-        testItems.Add("NormalTangentTest", prefix+"NormalTangentTest/glTF-Binary/NormalTangentTest.glb");
-        testItems.Add("Monster", prefix+"Monster/glTF-Binary/Monster.glb");
-        testItems.Add("BoxTextured2", prefix+"BoxTextured/glTF-Binary/BoxTextured.glb");
+        string[] names = {
+            "2CylinderEngine",
+            "AlphaBlendModeTest",
+            "AnimatedCube",
+            "AnimatedMorphCube",
+            "AnimatedMorphSphere",
+            "AnimatedTriangle",
+            "Avocado",
+            "BarramundiFish",
+            "BoomBox",
+            "BoomBoxWithAxes",
+            "Box",
+            "BoxAnimated",
+            "BoxInterleaved",
+            "BoxTextured",
+            "BoxTexturedNonPowerOfTwo",
+            "BoxVertexColors",
+            "BrainStem",
+            "Buggy",
+            "Cameras",
+            "CesiumMan",
+            "CesiumMilkTruck",
+            "Corset",
+            "Cube",
+            "DamagedHelmet",
+            "Duck",
+            "FlightHelmet",
+            "GearboxAssy",
+            "Lantern",
+            "MetalRoughSpheres",
+            "Monster",
+            "MorphPrimitivesTest",
+            "MultiUVTest",
+            "NormalTangentMirrorTest",
+            "NormalTangentTest",
+            "OrientationTest",
+            "ReciprocatingSaw",
+            "RiggedFigure",
+            "RiggedSimple",
+            "SciFiHelmet",
+            "SimpleMeshes",
+            "SimpleMorph",
+            "SimpleSparseAccessor",
+            "SpecGlossVsMetalRough",
+            "Sponza",
+            "Suzanne",
+            "TextureCoordinateTest",
+            "TextureSettingsTest",
+            "TextureTransformTest",
+            "Triangle",
+            "TriangleWithoutIndices",
+            "TwoSidedPlane",
+            "VC",
+            "VertexColorTest",
+            "WaterBottle",
+        };
+
+        bool binary = false;
+        foreach( var n in names ) {
+            testItems.Add(
+                n,
+                string.Format(
+                    "{0}{1}/glTF{2}/{1}.gl{3}"
+                    ,prefix
+                    ,n
+                    ,binary ? "-binary" : ""
+                    ,binary ? "b" : "tf"
+                    )
+                );
+        }
 
         var tl = GetComponent<TestLoader>();
         tl.urlChanged += UrlChanged;
