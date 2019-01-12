@@ -67,7 +67,7 @@ namespace GLTFast {
             return new Uri( uri, ".").AbsoluteUri;
         }
 
-        public void LoadGltf( string json, string url ){
+        public bool LoadGltf( string json, string url ){
             var gltf = JsonUtility.FromJson<Root>(json);
 
             var baseUri = GetUriBase(url);
@@ -75,7 +75,12 @@ namespace GLTFast {
             for( int i=0; i<gltf.buffers.Length;i++) {
                 var buffer = gltf.buffers[i];
                 if( !string.IsNullOrEmpty(buffer.uri) ) {
-                    LoadBuffer( i, baseUri+buffer.uri );
+                    if(buffer.uri.StartsWith("data:")) {
+                        Debug.LogError("Embed buffer not supported");
+                        return false;
+                    } else {
+                        LoadBuffer( i, baseUri+buffer.uri );
+                    }
                 }
             }
             buffers = new Dictionary<int, byte[]>(gltf.buffers.Length);
@@ -108,6 +113,8 @@ namespace GLTFast {
             }
 
             gltfRoot = gltf;
+
+            return true;
         }
 
         public IEnumerator WaitForAllDependencies() {

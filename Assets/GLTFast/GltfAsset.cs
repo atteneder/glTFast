@@ -50,15 +50,16 @@ namespace GLTFast
             string json = dlh.text;
             gLTFastInstance = new GLTFast();
 
-            gLTFastInstance.LoadGltf(json,url);
+            if(gLTFastInstance.LoadGltf(json,url)) {
 
-            yield return StartCoroutine( gLTFastInstance.WaitForAllDependencies() );
+                yield return StartCoroutine( gLTFastInstance.WaitForAllDependencies() );
 
-            gLTFastInstance.InstanciateGltf(transform);
+                gLTFastInstance.InstanciateGltf(transform);
 
-            //if(onLoadComplete!=null) {
-            //    onLoadComplete(success);
-            //}
+                //if(onLoadComplete!=null) {
+                //    onLoadComplete(success);
+                //}
+            }
         }
 
         public IEnumerator WaitForLoaded() {
