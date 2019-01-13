@@ -86,10 +86,10 @@ public class SampleModelsTest
                              
             Debug.LogFormat("Testing {0}", path);
 
-            var www = new WWW(path);
-            yield return www;
-            Assert.Null(www.error,www.error);
-            var json = www.text;
+            var webRequest = new UnityWebRequest(path);
+            yield return webRequest.SendWebRequest();
+            Assert.Null(webRequest.error,webRequest.error);
+            var json = webRequest.downloadHandler.text;
 
             Assert.NotNull(json);
             Assert.Greater(json.Length, 0);
