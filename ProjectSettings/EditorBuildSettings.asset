@@ -6,5 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/GLTFast/Test/TestLoadScene.unity
+    path: Assets/GLTFast/Examples/Scenes/TestLoadScene.unity
     guid: 09fde5e67a60f4730a203df01316fa69
+  m_configObjects: {}
