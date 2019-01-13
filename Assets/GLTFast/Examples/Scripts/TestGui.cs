@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -47,16 +48,27 @@ public class TestGui : MonoBehaviour {
         // Hide UI in glTF compare web
         HideUI();
 #endif
+        
+        StartCoroutine(InitGui());
 
-#if !UNITY_EDITOR
+        var tl = GetComponent<TestLoader>();
+        tl.urlChanged += UrlChanged;
+        tl.time1Update += Time1Update;
+        tl.time2Update += Time2Update;
+	}
+
+    IEnumerator InitGui() {
+
+        #if !UNITY_EDITOR
         string prefix = GltfSampleModels.baseUrl;
 #else
         string prefix = GltfSampleModels.baseUrlLocal;
 #endif
 
         var prefixLocal = GltfSampleModels.localPath;
-        
-        var names = GltfSampleModels.GetTestGltfFileUrls();
+
+        yield return GltfSampleModels.LoadGltfFileUrls();
+        var names = GltfSampleModels.gltfFileUrls;
 
         foreach( var n in names ) {
             var i = n.LastIndexOf('/');
@@ -80,11 +92,6 @@ public class TestGui : MonoBehaviour {
                 )
             );
         }
-
-        var tl = GetComponent<TestLoader>();
-        tl.urlChanged += UrlChanged;
-        tl.time1Update += Time1Update;
-        tl.time2Update += Time2Update;
 	}
 
 	void UrlChanged(string newUrl)

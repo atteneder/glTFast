@@ -9,13 +9,14 @@ public class MassLoader : MonoBehaviour {
 	// Use this for initialization
 	IEnumerator Start () {
 
-        var names = GltfSampleModels.GetTestGltfFileUrls();
+        yield return GltfSampleModels.LoadGltfFileUrls();
+
         var baseUrl = local ? GltfSampleModels.baseUrlLocal : GltfSampleModels.baseUrl;
 
         // Wait a bit to make sure profiling works
         yield return new WaitForSeconds(1);
 
-		foreach( var n in names ) {
+		foreach( var n in GltfSampleModels.gltfFileUrls ) {
             var url = string.Format(
                 "{0}{1}"
                 ,baseUrl

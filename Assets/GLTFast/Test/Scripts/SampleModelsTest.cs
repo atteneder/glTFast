@@ -12,18 +12,24 @@ public class SampleModelsTest
 {
     const string prefix = "glTF-Sample-Models/2.0/";
 
-	[Test]
-	public void SampleModelsTestCheckFiles()
+	[UnityTest]
+	public IEnumerator SampleModelsTestCheckFiles()
 	{
-        var glbFiles = GltfSampleModels.GetTestGlbFileUrls();
+		yield return GltfSampleModels.LoadGlbFileUrls();
+		CheckFileExist(GltfSampleModels.glbFileUrls);
 
+		yield return GltfSampleModels.LoadGltfFileUrls();
+		CheckFileExist(GltfSampleModels.gltfFileUrls);
+	}
+
+	void CheckFileExist( string[] files ) {
 #if !(UNITY_ANDROID && !UNITY_EDITOR)
-		foreach (var file in glbFiles)
+		foreach (var file in files)
 		{
 			var path = Path.Combine(Application.streamingAssetsPath, prefix, file);
 			Assert.IsTrue(
 				File.Exists(path)
-				, "glb file {0} not found"
+				, "file {0} not found"
 				, path
 			);
 		}
@@ -36,9 +42,9 @@ public class SampleModelsTest
 	[UnityTest]
 	public IEnumerator SampleModelsTestLoadAllGlb()
 	{      
-        var glbFiles = GltfSampleModels.GetTestGlbFileUrls();
+		yield return GltfSampleModels.LoadGlbFileUrls();
 
-		foreach (var file in glbFiles)
+		foreach (var file in GltfSampleModels.glbFileUrls)
 		{
 			var path = string.Format(
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -71,9 +77,9 @@ public class SampleModelsTest
     [UnityTest]
     public IEnumerator SampleModelsTestLoadAllGltf()
     {
-        var gltfFiles = GltfSampleModels.GetTestGltfFileUrls();
+		yield return GltfSampleModels.LoadGltfFileUrls();
 
-        foreach (var file in gltfFiles)
+        foreach (var file in GltfSampleModels.gltfFileUrls)
         {
             var path = string.Format(
 #if UNITY_ANDROID && !UNITY_EDITOR

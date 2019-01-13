@@ -1,7 +1,12 @@
-﻿using System.Collections;
+﻿#if !(UNITY_ANDROID || UNITY_WEBGL) || UNITY_EDITOR
+#define LOCAL_LOADING
+#endif
+
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Networking;
 
 public class GltfSampleModels {
@@ -12,39 +17,38 @@ public class GltfSampleModels {
 
     public static string localPath {
 		get {
-			return string.Format(
-#if UNITY_ANDROID && !UNITY_EDITOR
-            "{0}"
-#else
-            "file://{0}"
+			var path = Path.Combine(Application.streamingAssetsPath, "glTF-Sample-Models/2.0");
+#if LOCAL_LOADING
+			path = string.Format( "file://{0}", path );
 #endif
-            ,Path.Combine(Application.streamingAssetsPath, "glTF-Sample-Models/2.0")
-        );
+			return path;
 		}
 	}
 	
-	public static string[] GetTestGltfFileUrls() {
+	public static string[] gltfFileUrls;
+	public static string[] glbFileUrls;
+
+	public static IEnumerator LoadGltfFileUrls() {
         var path = Path.Combine(Application.streamingAssetsPath, "test-gltf-file-list.txt");
-        return  LoadStreamingAssetFileBlocking(path);
+        yield return LoadStreamingAssetFileBlocking(path, (arr) => gltfFileUrls = arr );
     }
 
-    public static string[] GetTestGlbFileUrls() {
+    public static IEnumerator LoadGlbFileUrls() {
+		if(glbFileUrls!=null) yield break;
         var path = Path.Combine(Application.streamingAssetsPath, "test-glb-file-list.txt");
-        return LoadStreamingAssetFileBlocking(path);
+        yield return LoadStreamingAssetFileBlocking(path, (arr) => glbFileUrls = arr );
     }
 
-    static string[] LoadStreamingAssetFileBlocking(string path) {
-        var uri = string.Format(
-#if UNITY_ANDROID && !UNITY_EDITOR
-                "{0}"
-#else
-                "file://{0}"
+    static IEnumerator LoadStreamingAssetFileBlocking( string path, UnityAction<string[]> callback ) {
+        var uri = path;
+		
+#if LOCAL_LOADING
+		uri = string.Format( "file://{0}", uri);
 #endif
-                ,path
-            );
+
+		Debug.LogFormat("Trying to load file list from {0}",uri);
         var webRequest = UnityWebRequest.Get(uri);
-        webRequest.SendWebRequest();
-        while( !webRequest.isDone ) {} // blocking wait until done
-        return webRequest.downloadHandler.text.Split('\n');
+        yield return webRequest.SendWebRequest();
+        callback( webRequest.downloadHandler.text.Split('\n') );
     }
 }
