@@ -54,11 +54,11 @@ namespace GLTFast
 
                 yield return StartCoroutine( gLTFastInstance.WaitForAllDependencies() );
 
-                gLTFastInstance.InstanciateGltf(transform);
+                var success = gLTFastInstance.InstanciateGltf(transform);
 
-                //if(onLoadComplete!=null) {
-                //    onLoadComplete(success);
-                //}
+                if(onLoadComplete!=null) {
+                   onLoadComplete(success);
+                }
             }
         }
 

@@ -149,8 +149,8 @@ namespace GLTFast {
             }
         }
 
-        public void InstanciateGltf( Transform parent ) {
-            CreateGameObjects( gltfRoot, parent );
+        public bool InstanciateGltf( Transform parent ) {
+            return CreateGameObjects( gltfRoot, parent );
         }
 
         Dictionary<int,UnityWebRequestAsyncOperation> downloads;
