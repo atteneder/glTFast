@@ -49,21 +49,14 @@ public class TestGui : MonoBehaviour {
 #endif
 
 #if !UNITY_EDITOR
-        string prefix = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/";
+        string prefix = GltfSampleModels.baseUrl;
 #else
-        string prefix = "http://localhost:8080/glTF-Sample-Models/2.0/";
+        string prefix = GltfSampleModels.baseUrlLocal;
 #endif
 
-        var prefixLocal = string.Format(
-#if UNITY_ANDROID && !UNITY_EDITOR
-            "{0}"
-#else
-            "file://{0}"
-#endif
-            ,Path.Combine(Application.streamingAssetsPath, "glTF-Sample-Models/2.0")
-        );
+        var prefixLocal = GltfSampleModels.localPath;
         
-        var names = TestLoader.GetTestGltfFileUrls();
+        var names = GltfSampleModels.GetTestGltfFileUrls();
 
         foreach( var n in names ) {
             var i = n.LastIndexOf('/');

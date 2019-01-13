@@ -15,7 +15,7 @@ public class SampleModelsTest
 	[Test]
 	public void SampleModelsTestCheckFiles()
 	{
-        var glbFiles = TestLoader.GetTestGlbFileUrls();
+        var glbFiles = GltfSampleModels.GetTestGlbFileUrls();
 
 #if !(UNITY_ANDROID && !UNITY_EDITOR)
 		foreach (var file in glbFiles)
@@ -36,7 +36,7 @@ public class SampleModelsTest
 	[UnityTest]
 	public IEnumerator SampleModelsTestLoadAllGlb()
 	{      
-        var glbFiles = TestLoader.GetTestGlbFileUrls();
+        var glbFiles = GltfSampleModels.GetTestGlbFileUrls();
 
 		foreach (var file in glbFiles)
 		{
@@ -71,7 +71,7 @@ public class SampleModelsTest
     [UnityTest]
     public IEnumerator SampleModelsTestLoadAllGltf()
     {
-        var gltfFiles = TestLoader.GetTestGltfFileUrls();
+        var gltfFiles = GltfSampleModels.GetTestGltfFileUrls();
 
         foreach (var file in gltfFiles)
         {
@@ -86,9 +86,11 @@ public class SampleModelsTest
                              
             Debug.LogFormat("Testing {0}", path);
 
-            var webRequest = new UnityWebRequest(path);
+            var webRequest = UnityWebRequest.Get(path);
             yield return webRequest.SendWebRequest();
             Assert.Null(webRequest.error,webRequest.error);
+			Assert.IsFalse(webRequest.isNetworkError);
+			Assert.IsFalse(webRequest.isHttpError);
             var json = webRequest.downloadHandler.text;
 
             Assert.NotNull(json);
