@@ -1,6 +1,7 @@
 ﻿#if !NO_TEST
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.Networking;
 using NUnit.Framework;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,10 +51,10 @@ public class SampleModelsTest
                              
 			Debug.LogFormat("Testing {0}", path);
 
-			var www = new WWW(path);
-			yield return www;
-			Assert.Null(www.error,www.error);
-			var bytes = www.bytes;
+			var webRequest = UnityWebRequest.Get(path);
+			yield return webRequest.SendWebRequest();
+			Assert.Null(webRequest.error);
+			var bytes = webRequest.downloadHandler.data;
 
 			Assert.NotNull(bytes);
 			Assert.Greater(bytes.Length, 0);
