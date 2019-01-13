@@ -1,0 +1,23 @@
+### Optimization
+Optimize by comparing copy methods like:
+http://code4k.blogspot.co.at/2010/10/high-performance-memcpy-gotchas-in-c.html
+or maybe implement native (SIMD-based) copy methods.
+copy values directly into unity buffer:
+https://docs.unity3d.com/ScriptReference/Mesh.GetNativeVertexBufferPtr.html
+https://bitbucket.org/Unity-Technologies/graphicsdemos/src/6fd22b55d6a0c21f2a4d18629ba1b6c61d44ca23/NativeRenderingPlugin/UnityProject/Assets/UseRenderingPlugin.cs?at=default&fileviewer=file-view-default
+Avoid negative scene scale (coordinate system translation), in case it causes trouble like shading errors.
+
+
+Events:
+meshes ready
+materials/textures ready
+animation ready
+everything ready
+Some loading progress maybe?
+
+Load Strategy:
+NoAnimation
+Unsupported extension expected
+Unsupported extension nice to have
+Only parts loaded
+Load texture failed
