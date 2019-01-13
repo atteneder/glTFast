@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 [RequireComponent(typeof(TestLoader))]
@@ -11,8 +12,11 @@ public class TestGui : MonoBehaviour {
     static float timeHeight = 20;
 
     public bool showMenu = true;
+    // Load files locally (from streaming assets) or via HTTP
+    public bool local = false;
 
-    Dictionary<string,string> testItems = new Dictionary<string, string>();
+    List<System.Tuple<string,string>> testItems = new List<System.Tuple<string, string>>();
+    List<System.Tuple<string,string>> testItemsLocal = new List<System.Tuple<string, string>>();
 
     string urlField;
 
@@ -50,75 +54,38 @@ public class TestGui : MonoBehaviour {
         string prefix = "http://localhost:8080/glTF-Sample-Models/2.0/";
 #endif
 
-        string[] names = {
-            "2CylinderEngine",
-            "AlphaBlendModeTest",
-            "AnimatedCube",
-            "AnimatedMorphCube",
-            "AnimatedMorphSphere",
-            "AnimatedTriangle",
-            "Avocado",
-            "BarramundiFish",
-            "BoomBox",
-            "BoomBoxWithAxes",
-            "Box",
-            "BoxAnimated",
-            "BoxInterleaved",
-            "BoxTextured",
-            "BoxTexturedNonPowerOfTwo",
-            "BoxVertexColors",
-            "BrainStem",
-            "Buggy",
-            "Cameras",
-            "CesiumMan",
-            "CesiumMilkTruck",
-            "Corset",
-            "Cube",
-            "DamagedHelmet",
-            "Duck",
-            "FlightHelmet",
-            "GearboxAssy",
-            "Lantern",
-            "MetalRoughSpheres",
-            "Monster",
-            "MorphPrimitivesTest",
-            "MultiUVTest",
-            "NormalTangentMirrorTest",
-            "NormalTangentTest",
-            "OrientationTest",
-            "ReciprocatingSaw",
-            "RiggedFigure",
-            "RiggedSimple",
-            "SciFiHelmet",
-            "SimpleMeshes",
-            "SimpleMorph",
-            "SimpleSparseAccessor",
-            "SpecGlossVsMetalRough",
-            "Sponza",
-            "Suzanne",
-            "TextureCoordinateTest",
-            "TextureSettingsTest",
-            "TextureTransformTest",
-            "Triangle",
-            "TriangleWithoutIndices",
-            "TwoSidedPlane",
-            "VC",
-            "VertexColorTest",
-            "WaterBottle",
-        };
+        var prefixLocal = string.Format(
+#if UNITY_ANDROID && !UNITY_EDITOR
+            "{0}"
+#else
+            "file://{0}"
+#endif
+            ,Path.Combine(Application.streamingAssetsPath, "glTF-Sample-Models/2.0")
+        );
+        
+        var names = TestLoader.GetTestGltfFileUrls();
 
-        bool binary = false;
         foreach( var n in names ) {
-            testItems.Add(
-                n,
+            var i = n.LastIndexOf('/');
+            var t = i>=0 ? n.Substring(i+1) : n;
+            testItems.Add( new System.Tuple<string, string>(
+                t,
                 string.Format(
-                    "{0}{1}/glTF{2}/{1}.gl{3}"
+                    "{0}/{1}"
                     ,prefix
                     ,n
-                    ,binary ? "-binary" : ""
-                    ,binary ? "b" : "tf"
                     )
-                );
+                )
+            );
+            testItemsLocal.Add( new System.Tuple<string, string>(
+                t,
+                string.Format(
+                    "{0}/{1}"
+                    ,prefixLocal
+                    ,n
+                    )
+                )
+            );
         }
 
         var tl = GetComponent<TestLoader>();
@@ -153,6 +120,9 @@ public class TestGui : MonoBehaviour {
 			// Init time gui style adjustments
 			var guiStyle = GUI.skin.button;
             guiStyle.fontSize = Mathf.RoundToInt(14 * screenFactor);
+
+            guiStyle = GUI.skin.toggle;
+            guiStyle.fontSize = Mathf.RoundToInt(14 * screenFactor);
 			screenFactor = float.NaN;
 		}
 
@@ -168,19 +138,14 @@ public class TestGui : MonoBehaviour {
             GUI.EndGroup();
     
             float listItemWidth = listWidth-16;
+            local = GUI.Toggle(new Rect(listWidth,barHeightWidth,listWidth*2,barHeightWidth),local,local?"local":"http");
             scrollPos = GUI.BeginScrollView(
                 new Rect(0,barHeightWidth,listWidth,height-barHeightWidth),
                 scrollPos,
                 new Rect(0,0,listItemWidth, listItemHeight*testItems.Count)
             );
-    
-            float y=0;
-            foreach( var item in testItems ) {
-                if(GUI.Button(new Rect(0,y,listItemWidth,listItemHeight),item.Key)) {
-                    GetComponent<TestLoader>().LoadUrl(item.Value);
-                }
-                y+=listItemHeight;
-            }
+
+            GUIDrawItems( local ? testItemsLocal : testItems, listItemWidth );
     
             GUI.EndScrollView();
         }
@@ -207,6 +172,15 @@ public class TestGui : MonoBehaviour {
         #endif
 	}
 
+    void GUIDrawItems( List<System.Tuple<string,string>> items, float listItemWidth) {
+        float y = 0;
+        foreach( var item in items ) {
+            if(GUI.Button(new Rect(0,y,listItemWidth,listItemHeight),item.Item1)) {
+                GetComponent<TestLoader>().LoadUrl(item.Item2);
+            }
+            y+=listItemHeight;
+        }
+    }
     public void HideUI() {
         showMenu = false;
     }
