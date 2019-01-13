@@ -572,15 +572,19 @@ namespace GLTFast {
         }
 
         public void Destroy() {
-            foreach( var material in materials ) {
-                UnityEngine.Object.Destroy(material);
+            if(materials!=null) {
+                foreach( var material in materials ) {
+                    UnityEngine.Object.Destroy(material);
+                }
+                materials = null;
             }
-            materials = null;
 
-            foreach( var resource in resources ) {
-                UnityEngine.Object.Destroy(resource);
+            if(resources!=null) {
+                foreach( var resource in resources ) {
+                    UnityEngine.Object.Destroy(resource);
+                }
+                resources = null;
             }
-            resources = null;
         }
 
         CompType[] GetAccessorData<CompType>( Root gltf, int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {
