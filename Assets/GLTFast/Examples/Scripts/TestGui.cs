@@ -71,8 +71,7 @@ public class TestGui : MonoBehaviour {
         var names = GltfSampleModels.gltfFileUrls;
 
         foreach( var n in names ) {
-            var i = n.LastIndexOf('/');
-            var t = i>=0 ? n.Substring(i+1) : n;
+            var t = GltfSampleModels.GetNameFromPath(n);
             testItems.Add( new System.Tuple<string, string>(
                 t,
                 string.Format(

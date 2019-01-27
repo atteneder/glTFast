@@ -28,6 +28,11 @@ public class GltfSampleModels {
 	public static string[] gltfFileUrls;
 	public static string[] glbFileUrls;
 
+	public static string GetNameFromPath( string path ) {
+		var i = path.LastIndexOf('/');
+		return i>=0 ? path.Substring(i+1) : path;
+	}
+
 	public static IEnumerator LoadGltfFileUrls() {
         var path = Path.Combine(Application.streamingAssetsPath, "test-gltf-file-list.txt");
         yield return LoadStreamingAssetFileBlocking(path, (arr) => gltfFileUrls = arr );

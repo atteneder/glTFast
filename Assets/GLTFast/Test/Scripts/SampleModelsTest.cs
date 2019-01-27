@@ -70,6 +70,7 @@ public class SampleModelsTest
             var success = glTFast.LoadGlb(bytes, go.transform);
             Assert.True(success);
 			yield return null;
+			glTFast.Destroy();
 			Object.Destroy(go);
         }
 	}
@@ -102,11 +103,17 @@ public class SampleModelsTest
             Assert.NotNull(json);
             Assert.Greater(json.Length, 0);
 
-            var go = new GameObject();    
+            var go = new GameObject( GltfSampleModels.GetNameFromPath(file) );    
             var glTFast = new GLTFast.GLTFast();
             Assert.IsTrue(glTFast.LoadGltf(json, path));
-            Debug.LogError("Test not finished. Need to load all things (not just parse)");
+
+			yield return glTFast.WaitForAllDependencies();
+
+			var success = glTFast.InstanciateGltf(go.transform);
+			Assert.IsTrue(success);
+
             yield return null;
+			glTFast.Destroy();
             Object.Destroy(go);
         }
     }
