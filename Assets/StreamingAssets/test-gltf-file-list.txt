@@ -68,7 +68,6 @@ TextureCoordinateTest/glTF/TextureCoordinateTest.gltf
 TextureSettingsTest/glTF/TextureSettingsTest.gltf
 TextureTransformTest/glTF/TextureTransformTest.gltf
 Triangle/glTF/Triangle.gltf
-TriangleWithoutIndices/glTF/TriangleWithoutIndices.gltf
 TwoSidedPlane/glTF/TwoSidedPlane.gltf
 VC/glTF-pbrSpecularGlossiness/VC.gltf
 VC/glTF/VC.gltf
