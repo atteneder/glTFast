@@ -1,6 +1,8 @@
+# 0.2
+Support for regular JSON glTFs (non-binary)
+
 # 0.1
-
-
+First pre-release
 
 # Pre release changes
 ## 2018-09-02

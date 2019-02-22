@@ -6,12 +6,14 @@ This means fast startup (due to small build footprint) and fast parsing/decoding
 
 ## Missing features
 
-This project is in an early development state and some things are (deliberately) missing:
+This project is in an early development state and some things are missing:
 
-* no binary glb files with external buffers
-* no regular (JSON based) glTFs
+* embed buffers or textures
+* meshes without indices
+* mesh compression
 * no animation
 * no glTF 1.0 backwards compatibility
+* further extensions
 
 See details on missing features in the [issues](https://github.com/atteneder/glTFast/issues) section.
 
@@ -19,7 +21,7 @@ See details on missing features in the [issues](https://github.com/atteneder/glT
 
 Besides speed, the focus at the moment is on users that:
 
-* control the content (are able to generate compatible glb files)
+* control the content (are able to create compatible glTFs)
 * use it for static content (no animation, skinning or morphing)
 
 I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
@@ -58,7 +60,14 @@ Such stuff should be able to place on top of this library.
 # Usage
 Copy the Assets/GLTFast folder into you Unity project's Assets folder.
 
-Minimum code to load a glb file:
+Minimum code to load a glTF file:
+
+```C#
+var gltf = new GameObject().AddComponent<GLTFast.GltfAsset>();
+gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
+```
+
+Minimum code to load a glTF binary (.glb) file:
 
 ```C#
 var gltf = new GameObject().AddComponent<GLTFast.GlbAsset>();
