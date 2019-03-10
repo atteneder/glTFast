@@ -53,7 +53,8 @@ namespace GLTFast
             if(gLTFastInstance.LoadGltf(json,url)) {
 
                 yield return StartCoroutine( gLTFastInstance.WaitForAllDependencies() );
-
+                yield return StartCoroutine( gLTFastInstance.Prepare() );
+                
                 var success = gLTFastInstance.InstanciateGltf(transform);
 
                 if(onLoadComplete!=null) {

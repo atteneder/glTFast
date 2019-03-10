@@ -38,6 +38,8 @@ namespace GLTFast {
         GlbBinChunk[] binChunks;
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
+        List<Primitive> primitives;
+        int[] meshPrimitiveIndex;
 
         IMaterialGenerator materialGenerator;
 
@@ -236,60 +238,207 @@ namespace GLTFast {
             return buffers[index];
         }
 
-        bool CreateGameObjects( Root gltf, Transform parent ) {
-
-            var primitives = new List<Primitive>(gltf.meshes.Length);
-            var meshPrimitiveIndex = new int[gltf.meshes.Length+1];
+        public IEnumerator Prepare() {
+            primitives = new List<Primitive>(gltfRoot.meshes.Length);
+            meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
 
             resources = new List<UnityEngine.Object>();
 
-            if (gltf.images != null) {
+            if(gltfRoot.images!=null) {
                 if(images==null) {
-                    images = new Texture2D[gltf.images.Length];
+                    images = new Texture2D[gltfRoot.images.Length];
                 } else {
-                    Assert.AreEqual(images.Length,gltf.images.Length);
+                    Assert.AreEqual(images.Length,gltfRoot.images.Length);
                 }
-                for (int i = 0; i < images.Length; i++) {
-                    if(images[i]!=null) {
-                        resources.Add(images[i]);
-                    }
-                    var img = gltf.images[i];
-                    bool knownImageType = false;
-                    if(string.IsNullOrEmpty(img.mimeType)) {
-                        Debug.LogWarning("Image is missing mime type");
-                        knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
-                            || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                            || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
-                    } else {
-                        knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
-                    }
+                CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews);
+            }
 
-                    if (knownImageType)
-                    {
-                        if (img.bufferView >= 0)
-                        {
-                            var bufferView = gltf.bufferViews[img.bufferView];
-                            var buffer = GetBuffer(bufferView.buffer);
-                            var chunk = binChunks[bufferView.buffer];
-                            var imgBytes = Extractor.CreateBufferViewCopy(bufferView,chunk,buffer);
-                            var txt = new UnityEngine.Texture2D(4, 4);
-                            txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
-                            txt.LoadImage(imgBytes);
-                            images[i] = txt;
-                            resources.Add(txt);
+            if(gltfRoot.materials!=null) {
+                materials = new UnityEngine.Material[gltfRoot.materials.Length];
+                for(int i=0;i<materials.Length;i++) {
+                    materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], gltfRoot.textures, images, resources );
+                }
+            }
+
+            if(!CreatePrimitives(gltfRoot)) {
+                yield return false;
+            }
+        }
+
+        bool CreateGameObjects( Root gltf, Transform parent ) {
+
+            var nodes = new Transform[gltf.nodes.Length];
+            var relations = new Dictionary<uint,uint>();
+
+            for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
+                var node = gltf.nodes[nodeIndex];
+
+                if( node.children==null && node.mesh<0 ) {
+                    continue;
+                }
+
+                var go = new GameObject(node.name ?? "Node");
+                nodes[nodeIndex] = go.transform;
+
+                if(node.children!=null) {
+                    foreach( var child in node.children ) {
+                        relations[child] = nodeIndex;
+                    }
+                }
+
+                if(node.matrix!=null) {
+                    Matrix4x4 m = new Matrix4x4();
+                    m.m00 = node.matrix[0];
+                    m.m10 = node.matrix[1];
+                    m.m20 = node.matrix[2];
+                    m.m30 = node.matrix[3];
+                    m.m01 = node.matrix[4];
+                    m.m11 = node.matrix[5];
+                    m.m21 = node.matrix[6];
+                    m.m31 = node.matrix[7];
+                    m.m02 = node.matrix[8];
+                    m.m12 = node.matrix[9];
+                    m.m22 = node.matrix[10];
+                    m.m32 = node.matrix[11];
+                    m.m03 = node.matrix[12];
+                    m.m13 = node.matrix[13];
+                    m.m23 = node.matrix[14];
+                    m.m33 = node.matrix[15];
+
+                    if(m.ValidTRS()) {
+                        go.transform.localPosition = new Vector3( m.m03, m.m13, m.m23 );
+                        go.transform.localRotation = m.rotation;
+                        go.transform.localScale = m.lossyScale;
+                    } else {
+                        Debug.LogErrorFormat("Invalid matrix on node {0}",nodeIndex);
+                        return false;
+                    }
+                } else {
+                    if(node.translation!=null) {
+                        Assert.AreEqual( node.translation.Length, 3 );
+                        go.transform.localPosition = new Vector3(
+                            node.translation[0],
+                            node.translation[1],
+                            node.translation[2]
+                        );
+                    }
+                    if(node.rotation!=null) {
+                        Assert.AreEqual( node.rotation.Length, 4 );
+                        go.transform.localRotation = new Quaternion(
+                            node.rotation[0],
+                            node.rotation[1],
+                            node.rotation[2],
+                            node.rotation[3]
+                        );
+                    }
+                    if(node.scale!=null) {
+                        Assert.AreEqual( node.scale.Length, 3 );
+                        go.transform.localScale = new Vector3(
+                            node.scale[0],
+                            node.scale[1],
+                            node.scale[2]
+                        );
+                    }
+                }
+
+                if(node.mesh>=0) {
+                    int end = meshPrimitiveIndex[node.mesh+1];
+                    GameObject meshGo = null;
+                    for( int i=meshPrimitiveIndex[node.mesh]; i<end; i++ ) {
+                        if(meshGo==null) {
+                            meshGo = go;
+                        } else {
+                            meshGo = new GameObject( "Primitive" );
+                            meshGo.transform.SetParent(go.transform,false);
+                        }
+                        var mf = meshGo.AddComponent<MeshFilter>();
+                        mf.mesh = primitives[i].mesh;
+                        var mr = meshGo.AddComponent<MeshRenderer>();
+                        
+                        int materialIndex = primitives[i].materialIndex;
+                        if(materials!=null && materialIndex>=0 && materialIndex<materials.Length ) {
+                            mr.material = materials[primitives[i].materialIndex];
+                        } else {
+                            mr.material = materialGenerator.GetDefaultMaterial();
                         }
                     }
                 }
             }
 
-            if(gltf.materials!=null) {
-                materials = new UnityEngine.Material[gltf.materials.Length];
-                for(int i=0;i<materials.Length;i++) {
-                    materials[i] = materialGenerator.GenerateMaterial( gltf.materials[i], gltf.textures, images, resources );
+            foreach( var rel in relations ) {
+                nodes[rel.Key]?.SetParent( nodes[rel.Value], false );
+            }
+
+            foreach(var scene in gltf.scenes) {
+                var go = new GameObject(scene.name ?? "Scene");
+                go.transform.SetParent( parent, false);
+
+                // glTF to unity space ( -z forward to z forward )
+                go.transform.localScale = new Vector3(1,1,-1);
+
+                foreach(var nodeIndex in scene.nodes) {
+                    nodes[nodeIndex]?.SetParent( go.transform, false );
                 }
             }
 
-            //foreach( var mesh in gltf.meshes ) {
+            foreach( var bv in gltf.bufferViews ) {
+                if(gltf.buffers[bv.buffer].uri == null) {
+                    
+                }
+            }
+            return true;
+        }
+
+        void CreateTexturesFromBuffers( Schema.Image[] src_images, Schema.BufferView[] bufferViews ) {
+            for (int i = 0; i < images.Length; i++) {
+                if(images[i]!=null) {
+                    resources.Add(images[i]);
+                }
+                var img = src_images[i];
+                bool knownImageType = false;
+                if(string.IsNullOrEmpty(img.mimeType)) {
+                    Debug.LogWarning("Image is missing mime type");
+                    knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
+                        || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
+                        || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
+                } else {
+                    knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
+                }
+
+                if (knownImageType)
+                {
+                    if (img.bufferView >= 0)
+                    {
+                        var bufferView = bufferViews[img.bufferView];
+                        var buffer = GetBuffer(bufferView.buffer);
+                        var chunk = binChunks[bufferView.buffer];
+                        var imgBytes = Extractor.CreateBufferViewCopy(bufferView,chunk,buffer);
+                        var txt = new UnityEngine.Texture2D(4, 4);
+                        txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
+                        txt.LoadImage(imgBytes);
+                        images[i] = txt;
+                        resources.Add(txt);
+                    }
+                }
+            }
+        }
+        public void Destroy() {
+            if(materials!=null) {
+                foreach( var material in materials ) {
+                    UnityEngine.Object.Destroy(material);
+                }
+                materials = null;
+            }
+
+            if(resources!=null) {
+                foreach( var resource in resources ) {
+                    UnityEngine.Object.Destroy(resource);
+                }
+                resources = null;
+            }
+        }
+
+        bool CreatePrimitives( Root gltf ) {
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
                 meshPrimitiveIndex[meshIndex] = primitives.Count;
@@ -306,15 +455,16 @@ namespace GLTFast {
                     Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
                     //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
                     int[] indices = null;
+                    int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
                     switch( accessor.componentType ) {
                     case GLTFComponentType.UnsignedByte:
-                        indices = Extractor.GetIndicesUInt8(buffer, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+                        indices = Extractor.GetIndicesUInt8(buffer, start, accessor.count);
                         break;
                     case GLTFComponentType.UnsignedShort:
-                        indices = Extractor.GetIndicesUInt16(buffer, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+                        indices = Extractor.GetIndicesUInt16(buffer, start, accessor.count);
                         break;
                     case GLTFComponentType.UnsignedInt:
-                        indices = Extractor.GetIndicesUInt32(buffer, accessor.byteOffset + bufferView.byteOffset + chunk.start, accessor.count);
+                        indices = Extractor.GetIndicesUInt32(buffer, start, accessor.count);
                         break;
                     default:
                         Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
@@ -448,143 +598,7 @@ namespace GLTFast {
             }
 
             meshPrimitiveIndex[gltf.meshes.Length] = primitives.Count;
-
-            var nodes = new Transform[gltf.nodes.Length];
-            var relations = new Dictionary<uint,uint>();
-
-            for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
-                var node = gltf.nodes[nodeIndex];
-
-                if( node.children==null && node.mesh<0 ) {
-                    continue;
-                }
-
-                var go = new GameObject(node.name ?? "Node");
-                nodes[nodeIndex] = go.transform;
-
-                if(node.children!=null) {
-                    foreach( var child in node.children ) {
-                        relations[child] = nodeIndex;
-                    }
-                }
-
-                if(node.matrix!=null) {
-                    Matrix4x4 m = new Matrix4x4();
-                    m.m00 = node.matrix[0];
-                    m.m10 = node.matrix[1];
-                    m.m20 = node.matrix[2];
-                    m.m30 = node.matrix[3];
-                    m.m01 = node.matrix[4];
-                    m.m11 = node.matrix[5];
-                    m.m21 = node.matrix[6];
-                    m.m31 = node.matrix[7];
-                    m.m02 = node.matrix[8];
-                    m.m12 = node.matrix[9];
-                    m.m22 = node.matrix[10];
-                    m.m32 = node.matrix[11];
-                    m.m03 = node.matrix[12];
-                    m.m13 = node.matrix[13];
-                    m.m23 = node.matrix[14];
-                    m.m33 = node.matrix[15];
-
-                    if(m.ValidTRS()) {
-                        go.transform.localPosition = new Vector3( m.m03, m.m13, m.m23 );
-                        go.transform.localRotation = m.rotation;
-                        go.transform.localScale = m.lossyScale;
-                    } else {
-                        Debug.LogErrorFormat("Invalid matrix on node {0}",nodeIndex);
-                        return false;
-                    }
-                } else {
-                    if(node.translation!=null) {
-                        Assert.AreEqual( node.translation.Length, 3 );
-                        go.transform.localPosition = new Vector3(
-                            node.translation[0],
-                            node.translation[1],
-                            node.translation[2]
-                        );
-                    }
-                    if(node.rotation!=null) {
-                        Assert.AreEqual( node.rotation.Length, 4 );
-                        go.transform.localRotation = new Quaternion(
-                            node.rotation[0],
-                            node.rotation[1],
-                            node.rotation[2],
-                            node.rotation[3]
-                        );
-                    }
-                    if(node.scale!=null) {
-                        Assert.AreEqual( node.scale.Length, 3 );
-                        go.transform.localScale = new Vector3(
-                            node.scale[0],
-                            node.scale[1],
-                            node.scale[2]
-                        );
-                    }
-                }
-
-                if(node.mesh>=0) {
-                    int end = meshPrimitiveIndex[node.mesh+1];
-                    GameObject meshGo = null;
-                    for( int i=meshPrimitiveIndex[node.mesh]; i<end; i++ ) {
-                        if(meshGo==null) {
-                            meshGo = go;
-                        } else {
-                            meshGo = new GameObject( "Primitive" );
-                            meshGo.transform.SetParent(go.transform,false);
-                        }
-                        var mf = meshGo.AddComponent<MeshFilter>();
-                        mf.mesh = primitives[i].mesh;
-                        var mr = meshGo.AddComponent<MeshRenderer>();
-                        
-                        int materialIndex = primitives[i].materialIndex;
-                        if(materials!=null && materialIndex>=0 && materialIndex<materials.Length ) {
-                            mr.material = materials[primitives[i].materialIndex];
-                        } else {
-                            mr.material = materialGenerator.GetDefaultMaterial();
-                        }
-                    }
-                }
-            }
-
-            foreach( var rel in relations ) {
-                nodes[rel.Key]?.SetParent( nodes[rel.Value], false );
-            }
-
-            foreach(var scene in gltf.scenes) {
-                var go = new GameObject(scene.name ?? "Scene");
-                go.transform.SetParent( parent, false);
-
-                // glTF to unity space ( -z forward to z forward )
-                go.transform.localScale = new Vector3(1,1,-1);
-
-                foreach(var nodeIndex in scene.nodes) {
-                    nodes[nodeIndex]?.SetParent( go.transform, false );
-                }
-            }
-
-            foreach( var bv in gltf.bufferViews ) {
-                if(gltf.buffers[bv.buffer].uri == null) {
-                    
-                }
-            }
             return true;
-        }
-
-        public void Destroy() {
-            if(materials!=null) {
-                foreach( var material in materials ) {
-                    UnityEngine.Object.Destroy(material);
-                }
-                materials = null;
-            }
-
-            if(resources!=null) {
-                foreach( var resource in resources ) {
-                    UnityEngine.Object.Destroy(resource);
-                }
-                resources = null;
-            }
         }
 
         CompType[] GetAccessorData<CompType>( Root gltf, int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {
