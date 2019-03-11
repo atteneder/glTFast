@@ -5,6 +5,10 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
+using UnityEngine.Profiling;
+using Unity.Jobs;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace GLTFast {
 
@@ -30,6 +34,52 @@ namespace GLTFast {
             }
         }
               
+        struct PrimitiveCreateContext {
+
+            public int primtiveIndex;
+
+            public Mesh mesh;
+            public MeshPrimitive primitive;
+
+#if GLTFAST_NO_JOB
+            public int[] indices;
+            public Vector3[] positions;
+            public Vector3[] normals;
+            public Vector2[] uvs0;
+            public Vector2[] uvs1;
+            public Vector4[] tangents;
+            public Color32[] colors32;
+            public Color[] colors;
+#else
+            /// TODO remove begin
+            public Vector3[] positions;
+            public Vector3[] normals;
+            public Vector2[] uvs0;
+            public Vector2[] uvs1;
+            public Vector4[] tangents;
+            public Color32[] colors32;
+            public Color[] colors;
+            /// TODO remove end
+
+            public JobHandle indexJob;
+            public NativeArray<int> indicesResult;
+
+            public bool IsCompleted {
+                get {
+                    return indexJob.IsCompleted;
+                }  
+            }
+
+            public void Complete() {
+                indexJob.Complete();
+            }
+
+            public void Dispose() {
+                indicesResult.Dispose();
+            }
+#endif
+        }
+
         public delegate CompType[] ExtractAccessor<CompType>(ref byte[] bytes, int start, int count);
         public delegate CompType[] ExtractInterleavedAccessor<CompType>(ref byte[] bytes, int start, int count, int byteStride);
         
@@ -38,7 +88,10 @@ namespace GLTFast {
         GlbBinChunk[] binChunks;
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
-        List<Primitive> primitives;
+
+        PrimitiveCreateContext[] primitiveContexts;
+
+        Primitive[] primitives;
         int[] meshPrimitiveIndex;
 
         IMaterialGenerator materialGenerator;
@@ -239,7 +292,6 @@ namespace GLTFast {
         }
 
         public IEnumerator Prepare() {
-            primitives = new List<Primitive>(gltfRoot.meshes.Length);
             meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
 
             resources = new List<UnityEngine.Object>();
@@ -260,9 +312,23 @@ namespace GLTFast {
                 }
             }
 
-            if(!CreatePrimitives(gltfRoot)) {
-                yield return false;
+            PreparePrimitives(gltfRoot);
+
+            for(int i=0;i<primitiveContexts.Length;i++) {
+#if !GLTFAST_NO_JOB
+                while(!primitiveContexts[i].IsCompleted) {
+                    yield return null;
+                }
+#endif
+                CreatePrimitive(ref primitiveContexts[i]);
             }
+
+            // Free temp resources
+            primitiveContexts = null;
+
+#if GLTFAST_NO_JOB
+            yield return null;
+#endif
         }
 
         bool CreateGameObjects( Root gltf, Transform parent ) {
@@ -438,167 +504,236 @@ namespace GLTFast {
             }
         }
 
-        bool CreatePrimitives( Root gltf ) {
+        void PreparePrimitives( Root gltf ) {
+            int totalPrimitives = 0;
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
-                meshPrimitiveIndex[meshIndex] = primitives.Count;
+                meshPrimitiveIndex[meshIndex] = totalPrimitives;
+                totalPrimitives += mesh.primitives.Length;
+            }
+            meshPrimitiveIndex[gltf.meshes.Length] = totalPrimitives;
 
+            primitives = new Primitive[totalPrimitives];
+            primitiveContexts = new PrimitiveCreateContext[totalPrimitives];
+
+            int i=0;
+            for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
+                var mesh = gltf.meshes[meshIndex];
                 foreach( var primitive in mesh.primitives ) {
-                    
-                    // index
-                    var accessor = gltf.accessors[primitive.indices];
-                    var bufferView = gltf.bufferViews[accessor.bufferView];
-                    var bufferIndex = bufferView.buffer;
-                    var buffer = GetBuffer(bufferIndex);
+                    primitiveContexts[i].primtiveIndex = i;
+                    PreparePrimitive(gltf,mesh,primitive,ref primitiveContexts[i]);
+                    i++;
+                }
+            }
+        }
 
-                    GlbBinChunk chunk = binChunks[bufferIndex];
-                    Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
-                    //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
-                    int[] indices = null;
-                    int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-                    switch( accessor.componentType ) {
-                    case GLTFComponentType.UnsignedByte:
-                        indices = Extractor.GetIndicesUInt8(buffer, start, accessor.count);
-                        break;
-                    case GLTFComponentType.UnsignedShort:
-                        indices = Extractor.GetIndicesUInt16(buffer, start, accessor.count);
-                        break;
-                    case GLTFComponentType.UnsignedInt:
-                        indices = Extractor.GetIndicesUInt32(buffer, start, accessor.count);
-                        break;
-                    default:
-                        Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
-                        return false;
-                    }
+        unsafe bool PreparePrimitive( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
 
-                    #if DEBUG
-                    if( accessor.min!=null && accessor.min.Length>0 && accessor.max!=null && accessor.max.Length>0 ) {
-                        int minInt = (int) accessor.min[0];
-                        int maxInt = (int) accessor.max[0];
-                        int minIndex = int.MaxValue;
-                        int maxIndex = int.MinValue;
-                        foreach (var index in indices) {
-                        Assert.IsTrue( index >= minInt );
-                        Assert.IsTrue( index <= maxInt );
-                        minIndex = Math.Min(minIndex,index);
-                        maxIndex = Math.Max(maxIndex,index);
-                        }
-                        if( minIndex!=minInt
-                        || maxIndex!=maxInt
-                        ) {
-                        Debug.LogErrorFormat("Faulty index bounds: is {0}:{1} expected:{2}:{3}",minIndex,maxIndex,minInt,maxInt);
-                        }
-                    }
-                    #endif
+            c.mesh = mesh;
+            c.primitive = primitive;
 
-                    // position
-                    int pos = primitive.attributes.POSITION;
-                    Assert.IsTrue(pos>=0);
-                    #if DEBUG
-                    Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
-                    #endif
-                    var positions = gltf.IsAccessorInterleaved(pos)
-                        ? GetAccessorDataInterleaved<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3sInterleaved )
-                        : GetAccessorData<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3s );
+            // index
+            var accessor = gltf.accessors[primitive.indices];
+            var bufferView = gltf.bufferViews[accessor.bufferView];
+            var bufferIndex = bufferView.buffer;
+            var buffer = GetBuffer(bufferIndex);
 
-                    #if DEBUG
-                    var posAcc = gltf.accessors[pos];
-                    Vector3 minPos = new Vector3( (float) posAcc.min[0], (float) posAcc.min[1], (float) posAcc.min[2] );
-                    Vector3 maxPos = new Vector3( (float) posAcc.max[0], (float) posAcc.max[1], (float) posAcc.max[2] );
-                    foreach (var p in positions) {
-                        if( ! (p.x >= minPos.x
-                            && p.y >= minPos.y
-                            && p.z >= minPos.z
-                            && p.x <= maxPos.x
-                            && p.y <= maxPos.y
-                            && p.z <= maxPos.z
-                            ))
-                        {
-                            Debug.LogError("Vertex outside of limits");
-                            break;
-                        }
-                    }
-
-                    var pUsage = new int[positions.Length];
-                    foreach (var index in indices) {
-                        pUsage[index] += 1;
-                    }
-                    int pMin = int.MaxValue;
-                    foreach (var u in pUsage) {
-                        pMin = Math.Min(pMin,u);
-                    }
-                    if(pMin<1) {
-                        Debug.LogError("Unused vertices");
-                    }
-                    #endif
-
-
-                    Vector3[] normals = null;
-                    if(primitive.attributes.NORMAL>=0) {
-                        #if DEBUG
-                        Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.NORMAL].typeEnum), typeof(Vector3) );
-                        #endif
-                        normals = gltf.IsAccessorInterleaved(pos)
-                            ? GetAccessorDataInterleaved<Vector3>( gltf, primitive.attributes.NORMAL, ref buffer, Extractor.GetVector3sInterleaved )
-                            : GetAccessorData<Vector3>( gltf, primitive.attributes.NORMAL, ref buffer, Extractor.GetVector3s );
-                    }
-
-                    Vector2[] uvs0 = GetUvs(gltf,primitive.attributes.TEXCOORD_0, ref buffer);
-                    Vector2[] uvs1 = GetUvs(gltf,primitive.attributes.TEXCOORD_1, ref buffer);
-                    
-                    Vector4[] tangents = null;
-                    if(primitive.attributes.TANGENT>=0) {
-                        #if DEBUG
-                        Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.TANGENT].typeEnum), typeof(Vector4) );
-                        #endif
-                        tangents = gltf.IsAccessorInterleaved(pos)
-                            ? GetAccessorDataInterleaved<Vector4>( gltf, primitive.attributes.TANGENT, ref buffer, Extractor.GetVector4sInterleaved)
-                            : GetAccessorData<Vector4>( gltf, primitive.attributes.TANGENT, ref buffer, Extractor.GetVector4s );
-                    }
-
-                    Color32[] colors32;
-                    Color[] colors;
-                    GetColors(gltf,primitive.attributes.COLOR_0, ref buffer, out colors32, out colors);
-
-                    var msh = new UnityEngine.Mesh();
-                    if( positions.Length > 65536 ) {
-#if UNITY_2017_3_OR_NEWER
-                        msh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-#else
-                        throw new System.Exception("Meshes with more than 65536 vertices are only supported from Unity 2017.3 onwards.");
+            GlbBinChunk chunk = binChunks[bufferIndex];
+            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
+            //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
+            int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+#if !GLTFAST_NO_JOB
+            c.indicesResult = new NativeArray<int>(accessor.count,Allocator.TempJob);
 #endif
-                    }
-                    msh.name = mesh.name;
-                    msh.vertices = positions;
-                    msh.SetIndices(indices, MeshTopology.Triangles, 0);
-                    if(uvs0!=null) {
-                        msh.uv = uvs0;
-                    }
-                    if(uvs1!=null) {
-                        msh.uv2 = uvs1;
-                    }
-                    if(normals!=null) {
-                        msh.normals = normals;
-                    } else {
-                        msh.RecalculateNormals();
-                    }
-                    if (colors!=null) {
-                        msh.colors = colors;
-                    } else if(colors32!=null) {
-                        msh.colors32 = colors32;
-                    }
-                    if(tangents!=null) {
-                        msh.tangents = tangents;
-                    } else {
-                        msh.RecalculateTangents();
-                    }
-                    primitives.Add( new Primitive(msh,primitive.material) );
-                    resources.Add(msh);
+            switch( accessor.componentType ) {
+            case GLTFComponentType.UnsignedByte:
+#if GLTFAST_NO_JOB
+                c.indices = Extractor.GetIndicesUInt8(buffer, start, accessor.count);
+#else
+                fixed( byte* src = &(buffer[start]) ) {
+                    var job = new Extractor.GetIndicesUInt8Job();
+                    job.input = src;
+                    job.result = c.indicesResult;
+                    c.indexJob = job.Schedule();
+                }
+#endif
+                break;
+            case GLTFComponentType.UnsignedShort:
+                Profiler.BeginSample("IndicesUInt16");
+#if GLTFAST_NO_JOB
+                c.indices = Extractor.GetIndicesUInt16(buffer, start, accessor.count);
+#else
+                fixed( void* src = &(buffer[start]) ) {
+                    var job = new Extractor.GetIndicesUInt16Job();
+                    job.input = (System.UInt16*) src;
+                    job.result = c.indicesResult;
+                    c.indexJob = job.Schedule();
+                }
+#endif
+                Profiler.EndSample();
+                break;
+            case GLTFComponentType.UnsignedInt:
+#if GLTFAST_NO_JOB
+                c.indices = Extractor.GetIndicesUInt32(buffer, start, accessor.count);
+#else
+                fixed( void* src = &(buffer[start]) ) {
+                    var job = new Extractor.GetIndicesUInt32Job();
+                    job.input = (System.UInt32*) src;
+                    job.result = c.indicesResult;
+                    c.indexJob = job.Schedule();
+                }
+#endif
+                break;
+            default:
+                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                break;
+            }
+
+            #if DEBUG && GLTFAST_NO_JOB
+            if( accessor.min!=null && accessor.min.Length>0 && accessor.max!=null && accessor.max.Length>0 ) {
+                int minInt = (int) accessor.min[0];
+                int maxInt = (int) accessor.max[0];
+                int minIndex = int.MaxValue;
+                int maxIndex = int.MinValue;
+                foreach (var index in c.indices) {
+                    Assert.IsTrue( index >= minInt );
+                    Assert.IsTrue( index <= maxInt );
+                    minIndex = Math.Min(minIndex,index);
+                    maxIndex = Math.Max(maxIndex,index);
+                }
+                if( minIndex!=minInt
+                    || maxIndex!=maxInt
+                ) {
+                    Debug.LogErrorFormat("Faulty index bounds: is {0}:{1} expected:{2}:{3}",minIndex,maxIndex,minInt,maxInt);
+                }
+            }
+            #endif
+
+            // position
+            int pos = primitive.attributes.POSITION;
+            Assert.IsTrue(pos>=0);
+            #if DEBUG
+            Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
+            #endif
+            var positions = gltf.IsAccessorInterleaved(pos)
+                ? GetAccessorDataInterleaved<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3sInterleaved )
+                : GetAccessorData<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3s );
+
+            #if DEBUG && GLTFAST_NO_JOB
+            var posAcc = gltf.accessors[pos];
+            Vector3 minPos = new Vector3( (float) posAcc.min[0], (float) posAcc.min[1], (float) posAcc.min[2] );
+            Vector3 maxPos = new Vector3( (float) posAcc.max[0], (float) posAcc.max[1], (float) posAcc.max[2] );
+            foreach (var p in positions) {
+                if( ! (p.x >= minPos.x
+                    && p.y >= minPos.y
+                    && p.z >= minPos.z
+                    && p.x <= maxPos.x
+                    && p.y <= maxPos.y
+                    && p.z <= maxPos.z
+                    ))
+                {
+                    Debug.LogError("Vertex outside of limits");
+                    break;
                 }
             }
 
-            meshPrimitiveIndex[gltf.meshes.Length] = primitives.Count;
+            var pUsage = new int[positions.Length];
+            foreach (var index in c.indices) {
+                pUsage[index] += 1;
+            }
+            int pMin = int.MaxValue;
+            foreach (var u in pUsage) {
+                pMin = Math.Min(pMin,u);
+            }
+            if(pMin<1) {
+                Debug.LogError("Unused vertices");
+            }
+            #endif
+            c.positions = positions;
+
+            Vector3[] normals = null;
+            if(primitive.attributes.NORMAL>=0) {
+                #if DEBUG
+                Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.NORMAL].typeEnum), typeof(Vector3) );
+                #endif
+                normals = gltf.IsAccessorInterleaved(pos)
+                    ? GetAccessorDataInterleaved<Vector3>( gltf, primitive.attributes.NORMAL, ref buffer, Extractor.GetVector3sInterleaved )
+                    : GetAccessorData<Vector3>( gltf, primitive.attributes.NORMAL, ref buffer, Extractor.GetVector3s );
+            }
+            c.normals= normals;
+
+            Vector2[] uvs0 = GetUvs(gltf,primitive.attributes.TEXCOORD_0, ref buffer);
+            Vector2[] uvs1 = GetUvs(gltf,primitive.attributes.TEXCOORD_1, ref buffer);
+            c.uvs0=uvs0;
+            c.uvs1=uvs1;
+            
+            Vector4[] tangents = null;
+            if(primitive.attributes.TANGENT>=0) {
+                #if DEBUG
+                Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.TANGENT].typeEnum), typeof(Vector4) );
+                #endif
+                tangents = gltf.IsAccessorInterleaved(pos)
+                    ? GetAccessorDataInterleaved<Vector4>( gltf, primitive.attributes.TANGENT, ref buffer, Extractor.GetVector4sInterleaved)
+                    : GetAccessorData<Vector4>( gltf, primitive.attributes.TANGENT, ref buffer, Extractor.GetVector4s );
+            }
+            c.tangents = tangents;
+
+            GetColors(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors);
             return true;
+        }
+
+        void CreatePrimitive( ref PrimitiveCreateContext c ) {
+#if !GLTFAST_NO_JOB
+            c.Complete();
+#endif
+            var msh = new UnityEngine.Mesh();
+            if( c.positions.Length > 65536 ) {
+#if UNITY_2017_3_OR_NEWER
+                msh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+#else
+                throw new System.Exception("Meshes with more than 65536 vertices are only supported from Unity 2017.3 onwards.");
+#endif
+            }
+            msh.name = c.mesh.name;
+            msh.vertices = c.positions;
+
+            msh.SetIndices(
+#if GLTFAST_NO_JOB
+                c.indices
+#else
+                c.indicesResult.ToArray()
+#endif
+                ,MeshTopology.Triangles
+                ,0
+                );
+
+            if(c.uvs0!=null) {
+                msh.uv = c.uvs0;
+            }
+            if(c.uvs1!=null) {
+                msh.uv2 = c.uvs1;
+            }
+            if(c.normals!=null) {
+                msh.normals = c.normals;
+            } else {
+                msh.RecalculateNormals();
+            }
+            if (c.colors!=null) {
+                msh.colors = c.colors;
+            } else if(c.colors32!=null) {
+                msh.colors32 = c.colors32;
+            }
+            if(c.tangents!=null) {
+                msh.tangents = c.tangents;
+            } else {
+                msh.RecalculateTangents();
+            }
+            primitives[c.primtiveIndex] = new Primitive(msh,c.primitive.material);
+            resources.Add(msh);
+
+#if !GLTFAST_NO_JOB
+            c.Dispose();
+#endif
         }
 
         CompType[] GetAccessorData<CompType>( Root gltf, int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {

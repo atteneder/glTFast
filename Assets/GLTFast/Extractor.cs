@@ -13,6 +13,12 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Profiling;
 
+#if !GLTFAST_NO_JOB
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
+#endif
+
 namespace GLTFast {
 
 	using Schema;
@@ -36,6 +42,61 @@ namespace GLTFast {
             return result;
         }
 
+#if !GLTFAST_NO_JOB
+        public unsafe struct GetIndicesUInt8Job : IJob  {
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            public NativeArray<int> result;
+
+            public void Execute()
+            {
+                for (var i = 0; i < result.Length; i++)
+                {
+                    result[i] = input[i];
+                }
+            }
+        }
+
+        public unsafe struct GetIndicesUInt16Job : IJob  {
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public System.UInt16* input;
+
+            [WriteOnly]
+            public NativeArray<int> result;
+
+            public void Execute()
+            {
+                for (var i = 0; i < result.Length; i++)
+                {
+                    result[i] = input[i];
+                }
+            }
+        }
+
+        public unsafe struct GetIndicesUInt32Job : IJob  {
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public System.UInt32* input;
+
+            [WriteOnly]
+            public NativeArray<int> result;
+
+            public void Execute()
+            {
+                for (var i = 0; i < result.Length; i++)
+                {
+                    result[i] = (int) input[i];
+                }
+            }
+        }
+#else
 		public unsafe static int[] GetIndicesUInt8(byte[] bytes, int start, int count)
         {
             var res = new int[count];
@@ -62,6 +123,7 @@ namespace GLTFast {
             System.Buffer.BlockCopy(bytes, start, res, 0, count * 4);
             return res;
         }
+#endif
 
 		public unsafe static Vector3[] GetVector3s(
             ref byte[] bytes,
