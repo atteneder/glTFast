@@ -21,13 +21,13 @@ using Unity.Jobs;
 
 namespace GLTFast {
 
-	using Schema;
+    using Schema;
 
-	public static class Extractor {
+    public static class Extractor {
         
-		const float UINT16_MAX = 65535f;
+        const float UINT16_MAX = 65535f;
 
-		public unsafe static byte[] CreateBufferViewCopy(BufferView bufferView, GlbBinChunk chunk, byte[] bytes)
+        public unsafe static byte[] CreateBufferViewCopy(BufferView bufferView, GlbBinChunk chunk, byte[] bytes)
         {
             var result = new byte[bufferView.byteLength];
             fixed (void* p = &(result[0]), src = &(bytes[bufferView.byteOffset + chunk.start]))
@@ -97,7 +97,7 @@ namespace GLTFast {
             }
         }
 #else
-		public unsafe static int[] GetIndicesUInt8(byte[] bytes, int start, int count)
+        public unsafe static int[] GetIndicesUInt8(byte[] bytes, int start, int count)
         {
             var res = new int[count];
             for (var i = 0; i < count; i++)
@@ -107,7 +107,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static int[] GetIndicesUInt16(byte[] bytes, int start, int count)
+        public unsafe static int[] GetIndicesUInt16(byte[] bytes, int start, int count)
         {
             var res = new int[count];
             for (var i = 0; i < count; i++)
@@ -117,7 +117,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static int[] GetIndicesUInt32(byte[] bytes, int start, int count)
+        public unsafe static int[] GetIndicesUInt32(byte[] bytes, int start, int count)
         {
             var res = new int[count];
             System.Buffer.BlockCopy(bytes, start, res, 0, count * 4);
@@ -125,7 +125,7 @@ namespace GLTFast {
         }
 #endif
 
-		public unsafe static Vector3[] GetVector3s(
+        public unsafe static Vector3[] GetVector3s(
             ref byte[] bytes,
             int start,
             int count
@@ -156,7 +156,7 @@ namespace GLTFast {
         // The generic version turned out to be a bit slower than concrete implementations
         // TODO: maybe re-evaluate
         /*
-		public static VectorFormat[] GetVectors<VectorFormat>(
+        public static VectorFormat[] GetVectors<VectorFormat>(
             ref byte[] bytes,
             int start,
             int count
@@ -174,7 +174,7 @@ namespace GLTFast {
             return res;
         }
 
-		public static VectorFormat[] GetVectorsInterleaved<VectorFormat>(
+        public static VectorFormat[] GetVectorsInterleaved<VectorFormat>(
             ref byte[] bytes,
             int start,
             int count,
@@ -204,7 +204,7 @@ namespace GLTFast {
         }
         */
 
-		public unsafe static Vector3[] GetVector3sInterleaved(
+        public unsafe static Vector3[] GetVector3sInterleaved(
             ref byte[] bytes,
             int start,
             int count,
@@ -257,7 +257,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static Vector4[] GetVector4s(
+        public unsafe static Vector4[] GetVector4s(
             ref byte[] bytes,
             int start,
             int count
@@ -285,7 +285,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static Vector4[] GetVector4sInterleaved(
+        public unsafe static Vector4[] GetVector4sInterleaved(
             ref byte[] bytes,
             int start,
             int count,
@@ -338,7 +338,7 @@ namespace GLTFast {
             return res;
         }
 
-		public static Color[] GetColorsVec3Float(
+        public static Color[] GetColorsVec3Float(
             ref byte[] bytes,
             int start,
             int count
@@ -383,7 +383,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static Color[] GetColorsVec4Float(
+        public unsafe static Color[] GetColorsVec4Float(
             ref byte[] bytes,
             int start,
             int count
@@ -420,7 +420,7 @@ namespace GLTFast {
             int byteStride
         )
         {
-			// TODO: maybe do generic with GetVector4sInterleaved ?
+            // TODO: maybe do generic with GetVector4sInterleaved ?
 
             Profiler.BeginSample("GetColorsVec4FloatInterleaved");
             var res = new Color[count];
@@ -468,7 +468,7 @@ namespace GLTFast {
             return res;
         }
 
-		public static Color32[] GetColorsVec3UInt8(
+        public static Color32[] GetColorsVec3UInt8(
             ref byte[] bytes,
             int start,
             int count
@@ -512,7 +512,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static Color32[] GetColorsVec4UInt8(
+        public unsafe static Color32[] GetColorsVec4UInt8(
             ref byte[] bytes,
             int start,
             int count
@@ -589,7 +589,7 @@ namespace GLTFast {
             return res;
         }
 
-		public static Color[] GetColorsVec3UInt16(
+        public static Color[] GetColorsVec3UInt16(
             ref byte[] bytes,
             int start,
             int count
@@ -632,7 +632,7 @@ namespace GLTFast {
             return res;
         }
 
-		public static Color[] GetColorsVec4UInt16(
+        public static Color[] GetColorsVec4UInt16(
             ref byte[] bytes,
             int start,
             int count
@@ -676,7 +676,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static Vector2[] GetUVsFloat(
+        public unsafe static Vector2[] GetUVsFloat(
             ref byte[] bytes,
             int start,
             int count
@@ -721,24 +721,24 @@ namespace GLTFast {
             int elementSize = Marshal.SizeOf(typeof(Vector2));
 #if BUFFER_MEMORY_COPY
             fixed (Vector2* dest = &(res[0]))
-			{
-				Vector2* destV = dest;
-				fixed (byte* src = &(bytes[start]))
-				{
-					byte* off = src;
-					for (int i = 0; i < count; i++)
-					{
-						System.Buffer.MemoryCopy(
-							off,
-							destV,
-							elementSize,
-							elementSize
-						);
-						off += byteStride;
-						destV += 1;
-					}
-				}
-			}
+            {
+                Vector2* destV = dest;
+                fixed (byte* src = &(bytes[start]))
+                {
+                    byte* off = src;
+                    for (int i = 0; i < count; i++)
+                    {
+                        System.Buffer.MemoryCopy(
+                            off,
+                            destV,
+                            elementSize,
+                            elementSize
+                        );
+                        off += byteStride;
+                        destV += 1;
+                    }
+                }
+            }
 #else
             var gcRes = GCHandle.Alloc(res, GCHandleType.Pinned);
 
@@ -763,7 +763,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static Vector2[] GetUVsUInt8(
+        public unsafe static Vector2[] GetUVsUInt8(
             ref byte[] bytes,
             int start,
             int count
@@ -804,7 +804,7 @@ namespace GLTFast {
             return res;
         }
 
-		public unsafe static Vector2[] GetUVsUInt16(
+        public unsafe static Vector2[] GetUVsUInt16(
             ref byte[] bytes,
             int start,
             int count
@@ -844,5 +844,5 @@ namespace GLTFast {
             Profiler.EndSample();
             return res;
         }
-	}
+    }
 }
