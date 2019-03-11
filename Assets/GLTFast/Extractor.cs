@@ -46,15 +46,19 @@ namespace GLTFast {
         public unsafe struct GetIndicesUInt8Job : IJob  {
             
             [ReadOnly]
+            public int count;
+
+            [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
             public byte* input;
 
-            [WriteOnly]
-            public NativeArray<int> result;
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public int* result;
 
             public void Execute()
             {
-                for (var i = 0; i < result.Length; i++)
+                for (var i = 0; i < count; i++)
                 {
                     result[i] = input[i];
                 }
@@ -62,17 +66,21 @@ namespace GLTFast {
         }
 
         public unsafe struct GetIndicesUInt16Job : IJob  {
+            
+            [ReadOnly]
+            public int count;
 
             [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
             public System.UInt16* input;
 
-            [WriteOnly]
-            public NativeArray<int> result;
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public int* result;
 
             public void Execute()
             {
-                for (var i = 0; i < result.Length; i++)
+                for (var i = 0; i < count; i++)
                 {
                     result[i] = input[i];
                 }
@@ -82,15 +90,19 @@ namespace GLTFast {
         public unsafe struct GetIndicesUInt32Job : IJob  {
 
             [ReadOnly]
+            public int count;
+
+            [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
             public System.UInt32* input;
 
-            [WriteOnly]
-            public NativeArray<int> result;
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public int* result;
 
             public void Execute()
             {
-                for (var i = 0; i < result.Length; i++)
+                for (var i = 0; i < count; i++)
                 {
                     result[i] = (int) input[i];
                 }

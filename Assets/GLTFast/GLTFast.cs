@@ -9,6 +9,7 @@ using UnityEngine.Profiling;
 using Unity.Jobs;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using System.Runtime.InteropServices;
 
 namespace GLTFast {
 
@@ -62,7 +63,8 @@ namespace GLTFast {
             /// TODO remove end
 
             public JobHandle indexJob;
-            public NativeArray<int> indicesResult;
+            public int[] indices;
+            public GCHandle indicesHandle;
 
             public bool IsCompleted {
                 get {
@@ -75,7 +77,8 @@ namespace GLTFast {
             }
 
             public void Dispose() {
-                indicesResult.Dispose();
+                indicesHandle.Free();
+                indices = null;
             }
 #endif
         }
@@ -543,17 +546,19 @@ namespace GLTFast {
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 #if !GLTFAST_NO_JOB
-            c.indicesResult = new NativeArray<int>(accessor.count,Allocator.TempJob);
+            c.indices = new int[accessor.count];
+            c.indicesHandle = GCHandle.Alloc(c.indices, GCHandleType.Pinned);
 #endif
             switch( accessor.componentType ) {
             case GLTFComponentType.UnsignedByte:
 #if GLTFAST_NO_JOB
                 c.indices = Extractor.GetIndicesUInt8(buffer, start, accessor.count);
 #else
-                fixed( byte* src = &(buffer[start]) ) {
+                fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
                     var job = new Extractor.GetIndicesUInt8Job();
-                    job.input = src;
-                    job.result = c.indicesResult;
+                    job.count = accessor.count;
+                    job.input = (byte*)src;
+                    job.result = (int*)dst;
                     c.indexJob = job.Schedule();
                 }
 #endif
@@ -563,10 +568,11 @@ namespace GLTFast {
 #if GLTFAST_NO_JOB
                 c.indices = Extractor.GetIndicesUInt16(buffer, start, accessor.count);
 #else
-                fixed( void* src = &(buffer[start]) ) {
+                fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
                     var job = new Extractor.GetIndicesUInt16Job();
+                    job.count = accessor.count;
                     job.input = (System.UInt16*) src;
-                    job.result = c.indicesResult;
+                    job.result = (int*) dst;
                     c.indexJob = job.Schedule();
                 }
 #endif
@@ -576,10 +582,10 @@ namespace GLTFast {
 #if GLTFAST_NO_JOB
                 c.indices = Extractor.GetIndicesUInt32(buffer, start, accessor.count);
 #else
-                fixed( void* src = &(buffer[start]) ) {
+                fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
                     var job = new Extractor.GetIndicesUInt32Job();
                     job.input = (System.UInt32*) src;
-                    job.result = c.indicesResult;
+                    job.result = (int*) dst;
                     c.indexJob = job.Schedule();
                 }
 #endif
@@ -698,11 +704,7 @@ namespace GLTFast {
             msh.vertices = c.positions;
 
             msh.SetIndices(
-#if GLTFAST_NO_JOB
                 c.indices
-#else
-                c.indicesResult.ToArray()
-#endif
                 ,MeshTopology.Triangles
                 ,0
                 );
