@@ -66,11 +66,8 @@ namespace GLTFast {
 
             public JobHandle jobHandle;
             public int[] indices;
-            public GCHandle indicesHandle;
 
-            public GCHandle positionsHandle;
-            public GCHandle normalsHandle;
-            public GCHandle tangentsHandle;
+            public GCHandle[] gcHandles;
 
             public bool IsCompleted {
                 get {
@@ -83,11 +80,9 @@ namespace GLTFast {
             }
 
             public void Dispose() {
-                indicesHandle.Free();
-                positionsHandle.Free();
-                if(normalsHandle.IsAllocated) normalsHandle.Free();
-                if(tangentsHandle.IsAllocated) tangentsHandle.Free();
-                indices = null;
+                for(int i=0;i<gcHandles.Length;i++) {
+                    gcHandles[i].Free();
+                }
             }
 #endif
         }
@@ -308,6 +303,7 @@ namespace GLTFast {
 
             resources = new List<UnityEngine.Object>();
 
+            Profiler.BeginSample("CreateTexturesFromBuffers");
             if(gltfRoot.images!=null) {
                 if(images==null) {
                     images = new Texture2D[gltfRoot.images.Length];
@@ -316,16 +312,20 @@ namespace GLTFast {
                 }
                 CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews);
             }
+            Profiler.EndSample();
 
+            Profiler.BeginSample("GenerateMaterial");
             if(gltfRoot.materials!=null) {
                 materials = new UnityEngine.Material[gltfRoot.materials.Length];
                 for(int i=0;i<materials.Length;i++) {
                     materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], gltfRoot.textures, images, resources );
                 }
             }
+            Profiler.EndSample();
 
             PreparePrimitives(gltfRoot);
 
+            Profiler.BeginSample("CreatePrimitives");
             for(int i=0;i<primitiveContexts.Length;i++) {
 #if !GLTFAST_NO_JOB
                 while(!primitiveContexts[i].IsCompleted) {
@@ -337,6 +337,7 @@ namespace GLTFast {
 
             // Free temp resources
             primitiveContexts = null;
+            Profiler.EndSample();
 
 #if GLTFAST_NO_JOB
             yield return null;
@@ -517,6 +518,7 @@ namespace GLTFast {
         }
 
         void PreparePrimitives( Root gltf ) {
+            Profiler.BeginSample("PreparePrimitives");
             int totalPrimitives = 0;
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
@@ -537,10 +539,11 @@ namespace GLTFast {
                     i++;
                 }
             }
+            Profiler.EndSample();
         }
 
         unsafe bool PreparePrimitive( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
-
+            Profiler.BeginSample("PreparePrimitivePrepare");
             c.mesh = mesh;
             c.primitive = primitive;
 
@@ -555,9 +558,6 @@ namespace GLTFast {
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 #if !GLTFAST_NO_JOB
-            c.indices = new int[accessor.count];
-            c.indicesHandle = GCHandle.Alloc(c.indices, GCHandleType.Pinned);
-
             int jobHandlesCount = 2;
             if(primitive.attributes.NORMAL>=0) {
                 jobHandlesCount++;
@@ -575,8 +575,16 @@ namespace GLTFast {
                 jobHandlesCount++;
             }
             NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(jobHandlesCount, Allocator.TempJob);
+            c.gcHandles = new GCHandle[jobHandlesCount];
             // from now on use it as a counter
             jobHandlesCount = 0;
+#endif
+            Profiler.EndSample();
+
+            Profiler.BeginSample("PrepareIndicesJob");
+#if !GLTFAST_NO_JOB
+            c.indices = new int[accessor.count];
+            c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.indices, GCHandleType.Pinned);
 #endif
             switch( accessor.componentType ) {
             case GLTFComponentType.UnsignedByte:
@@ -590,11 +598,9 @@ namespace GLTFast {
                     job8.result = (int*)dst;
                 }
                 jobHandles[jobHandlesCount] = job8.Schedule();
-                jobHandlesCount++;
 #endif
                 break;
             case GLTFComponentType.UnsignedShort:
-                Profiler.BeginSample("IndicesUInt16");
 #if GLTFAST_NO_JOB
                 c.indices = Extractor.GetIndicesUInt16(buffer, start, accessor.count);
 #else
@@ -605,9 +611,7 @@ namespace GLTFast {
                     job16.result = (int*) dst;
                 }
                 jobHandles[jobHandlesCount] = job16.Schedule();
-                jobHandlesCount++;
 #endif
-                Profiler.EndSample();
                 break;
             case GLTFComponentType.UnsignedInt:
 #if GLTFAST_NO_JOB
@@ -620,16 +624,18 @@ namespace GLTFast {
                     job32.result = (int*) dst;
                 }
                 jobHandles[jobHandlesCount] = job32.Schedule();
-                jobHandlesCount++;
 #endif
                 break;
             default:
                 Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
                 break;
             }
+            jobHandlesCount++;
+            Profiler.EndSample();
 
             // TODO: re-enable test for jobs as well
             #if DEBUG && GLTFAST_NO_JOB
+            Profiler.BeginSample("PrepareIndicesSanityTest");
             if( accessor.min!=null && accessor.min.Length>0 && accessor.max!=null && accessor.max.Length>0 ) {
                 int minInt = (int) accessor.min[0];
                 int maxInt = (int) accessor.max[0];
@@ -647,8 +653,10 @@ namespace GLTFast {
                     Debug.LogErrorFormat("Faulty index bounds: is {0}:{1} expected:{2}:{3}",minIndex,maxIndex,minInt,maxInt);
                 }
             }
+            Profiler.EndSample();
             #endif
 
+            Profiler.BeginSample("PreparePositionsJob");
             // position
             int pos = primitive.attributes.POSITION;
             Assert.IsTrue(pos>=0);
@@ -666,7 +674,7 @@ namespace GLTFast {
             bufferView = gltf.bufferViews[accessor.bufferView];
             chunk = binChunks[bufferView.buffer];
             c.positions = new Vector3[accessor.count];
-            c.positionsHandle = GCHandle.Alloc(c.positions, GCHandleType.Pinned);
+            c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.positions, GCHandleType.Pinned);
             start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             if (gltf.IsAccessorInterleaved(pos)) {
                 throw new System.NotImplementedException();
@@ -678,10 +686,13 @@ namespace GLTFast {
                     job.result = dst;
                 }
                 jobHandles[jobHandlesCount] = job.Schedule();
-                jobHandlesCount++;
             }
+            jobHandlesCount++;
 #endif
+            Profiler.EndSample();
+
             #if DEBUG && GLTFAST_NO_JOB
+            Profiler.BeginSample("PreparePosSanityCheck");
             var posAcc = gltf.accessors[pos];
             Vector3 minPos = new Vector3( (float) posAcc.min[0], (float) posAcc.min[1], (float) posAcc.min[2] );
             Vector3 maxPos = new Vector3( (float) posAcc.max[0], (float) posAcc.max[1], (float) posAcc.max[2] );
@@ -710,8 +721,10 @@ namespace GLTFast {
             if(pMin<1) {
                 Debug.LogError("Unused vertices");
             }
+            Profiler.EndSample();
             #endif
 
+            Profiler.BeginSample("PrepareNormals");
             if(primitive.attributes.NORMAL>=0) {
                 pos = primitive.attributes.NORMAL;
                 #if DEBUG
@@ -726,7 +739,7 @@ namespace GLTFast {
                 bufferView = gltf.bufferViews[accessor.bufferView];
                 chunk = binChunks[bufferView.buffer];
                 c.normals = new Vector3[accessor.count];
-                c.normalsHandle = GCHandle.Alloc(c.normals, GCHandleType.Pinned);
+                c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.normals, GCHandleType.Pinned);
                 start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
                 if (gltf.IsAccessorInterleaved(pos)) {
                     throw new System.NotImplementedException();
@@ -738,29 +751,33 @@ namespace GLTFast {
                         job.result = dst;
                     }
                     jobHandles[jobHandlesCount] = job.Schedule();
-                    jobHandlesCount++;
                 }
+                jobHandlesCount++;
 #endif
             }
+            Profiler.EndSample();
 
+            Profiler.BeginSample("PrepareUVs");
 #if GLTFAST_NO_JOB
             c.uvs0 = GetUvs(gltf,primitive.attributes.TEXCOORD_0, ref buffer);
             c.uvs1 = GetUvs(gltf,primitive.attributes.TEXCOORD_1, ref buffer);
 #else
             if(primitive.attributes.TEXCOORD_0>=0) {
                 JobHandle? jh;
-                c.uvs0 = GetUvsJob(gltf,primitive.attributes.TEXCOORD_0, ref buffer, out jh );
+                c.uvs0 = GetUvsJob(gltf,primitive.attributes.TEXCOORD_0, ref buffer, out jh, out c.gcHandles[jobHandlesCount] );
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             }
             if(primitive.attributes.TEXCOORD_1>=0) {
                 JobHandle? jh;
-                c.uvs1 = GetUvsJob(gltf,primitive.attributes.TEXCOORD_0, ref buffer, out jh );
+                c.uvs1 = GetUvsJob(gltf,primitive.attributes.TEXCOORD_0, ref buffer, out jh, out c.gcHandles[jobHandlesCount] );
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             }
 #endif
-            
+            Profiler.EndSample();
+
+            Profiler.BeginSample("PrepareTangents");
             if(primitive.attributes.TANGENT>=0) {
                 pos = primitive.attributes.TANGENT;
                 #if DEBUG
@@ -775,7 +792,7 @@ namespace GLTFast {
                 bufferView = gltf.bufferViews[accessor.bufferView];
                 chunk = binChunks[bufferView.buffer];
                 c.tangents = new Vector4[accessor.count];
-                c.tangentsHandle = GCHandle.Alloc(c.tangents, GCHandleType.Pinned);
+                c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.tangents, GCHandleType.Pinned);
                 start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
                 if (gltf.IsAccessorInterleaved(pos)) {
                     throw new System.NotImplementedException();
@@ -787,11 +804,13 @@ namespace GLTFast {
                         job.result = dst;
                     }
                     jobHandles[jobHandlesCount] = job.Schedule();
-                    jobHandlesCount++;
                 }
+                jobHandlesCount++;
 #endif
             }
+            Profiler.EndSample();
 
+            Profiler.BeginSample("PrepareColors");
 #if GLTFAST_NO_JOB
             GetColors(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors);
 #else
@@ -801,8 +820,8 @@ namespace GLTFast {
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             }
-            
 #endif
+            Profiler.EndSample();
 
 #if !GLTFAST_NO_JOB
             c.jobHandle = JobHandle.CombineDependencies(jobHandles);
@@ -944,7 +963,7 @@ namespace GLTFast {
             return null;
         }
 
-        unsafe Vector2[] GetUvsJob( Root gltf, int accessorIndex, ref byte[] bytes, out JobHandle? jobHandle ) {
+        unsafe Vector2[] GetUvsJob( Root gltf, int accessorIndex, ref byte[] bytes, out JobHandle? jobHandle, out GCHandle resultHandle ) {
             if(accessorIndex>=0) {
                 var uvAccessor = gltf.accessors[accessorIndex];
                 Assert.AreEqual( uvAccessor.typeEnum, GLTFAccessorAttributeType.VEC2 );
@@ -956,7 +975,7 @@ namespace GLTFast {
                 var bufferView = gltf.bufferViews[uvAccessor.bufferView];
                 var chunk = binChunks[bufferView.buffer];
                 var result = new Vector2[uvAccessor.count];
-                var resultHandle = GCHandle.Alloc(result, GCHandleType.Pinned);
+                resultHandle = GCHandle.Alloc(result, GCHandleType.Pinned);
                 int start = uvAccessor.byteOffset + bufferView.byteOffset + chunk.start;
 
                 switch( uvAccessor.componentType ) {
