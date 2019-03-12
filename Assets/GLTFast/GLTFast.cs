@@ -68,6 +68,7 @@ namespace GLTFast {
 
             public GCHandle positionsHandle;
             public GCHandle normalsHandle;
+            public GCHandle tangentsHandle;
 
             public bool IsCompleted {
                 get {
@@ -82,7 +83,8 @@ namespace GLTFast {
             public void Dispose() {
                 indicesHandle.Free();
                 positionsHandle.Free();
-                normalsHandle.Free();
+                if(normalsHandle.IsAllocated) normalsHandle.Free();
+                if(tangentsHandle.IsAllocated) tangentsHandle.Free();
                 indices = null;
             }
 #endif
@@ -558,6 +560,9 @@ namespace GLTFast {
             if(primitive.attributes.NORMAL>=0) {
                 jobHandlesCount++;
             }
+            if(primitive.attributes.TANGENT>=0) {
+                jobHandlesCount++;
+            }
             NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(jobHandlesCount, Allocator.TempJob);
             // from now on use it as a counter
             jobHandlesCount = 0;
@@ -732,16 +737,36 @@ namespace GLTFast {
             c.uvs0=uvs0;
             c.uvs1=uvs1;
             
-            Vector4[] tangents = null;
             if(primitive.attributes.TANGENT>=0) {
+                pos = primitive.attributes.TANGENT;
                 #if DEBUG
-                Assert.AreEqual( GetAccessorTye(gltf.accessors[primitive.attributes.TANGENT].typeEnum), typeof(Vector4) );
+                Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector4) );
                 #endif
-                tangents = gltf.IsAccessorInterleaved(pos)
-                    ? GetAccessorDataInterleaved<Vector4>( gltf, primitive.attributes.TANGENT, ref buffer, Extractor.GetVector4sInterleaved)
-                    : GetAccessorData<Vector4>( gltf, primitive.attributes.TANGENT, ref buffer, Extractor.GetVector4s );
+#if GLTFAST_NO_JOB
+                c.tangents = gltf.IsAccessorInterleaved(pos)
+                    ? GetAccessorDataInterleaved<Vector4>( gltf, pos, ref buffer, Extractor.GetVector4sInterleaved)
+                    : GetAccessorData<Vector4>( gltf, pos, ref buffer, Extractor.GetVector4s );
+#else
+                accessor = gltf.accessors[pos];
+                bufferView = gltf.bufferViews[accessor.bufferView];
+                chunk = binChunks[bufferView.buffer];
+                c.tangents = new Vector4[accessor.count];
+                c.tangentsHandle = GCHandle.Alloc(c.tangents, GCHandleType.Pinned);
+                start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+                if (gltf.IsAccessorInterleaved(pos)) {
+                    throw new System.NotImplementedException();
+                } else {
+                    var job = new Jobs.MemCopyJob();
+                    job.bufferSize = accessor.count * 16;
+                    fixed( void* src = &(buffer[start]), dst = &(c.tangents[0]) ) {
+                        job.input = src;
+                        job.result = dst;
+                    }
+                    jobHandles[jobHandlesCount] = job.Schedule();
+                    jobHandlesCount++;
+                }
+#endif
             }
-            c.tangents = tangents;
 
             GetColors(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors);
 
