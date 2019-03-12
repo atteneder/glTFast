@@ -19,6 +19,8 @@ namespace GLTFast {
 
         const uint GLB_MAGIC = 0x46546c67;
 
+        const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
+
         enum ChunkFormat : uint
         {
             JSON = 0x4e4f534a,
@@ -569,6 +571,9 @@ namespace GLTFast {
             if(primitive.attributes.TEXCOORD_1>=0) {
                 jobHandlesCount++;
             }
+            if(primitive.attributes.COLOR_0>=0) {
+                jobHandlesCount++;
+            }
             NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(jobHandlesCount, Allocator.TempJob);
             // from now on use it as a counter
             jobHandlesCount = 0;
@@ -787,7 +792,17 @@ namespace GLTFast {
 #endif
             }
 
+#if GLTFAST_NO_JOB
             GetColors(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors);
+#else
+            if(primitive.attributes.COLOR_0>=0) {
+                JobHandle? jh;
+                GetColorsJob(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors, out jh);
+                jobHandles[jobHandlesCount] = jh.Value;
+                jobHandlesCount++;
+            }
+            
+#endif
 
 #if !GLTFAST_NO_JOB
             c.jobHandle = JobHandle.CombineDependencies(jobHandles);
@@ -997,8 +1012,6 @@ namespace GLTFast {
 
         void GetColors( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors ) {
 
-            const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
-
             colors = null;
             colors32 = null;
             if(accessorIndex>=0) {
@@ -1054,6 +1067,129 @@ namespace GLTFast {
                 } else {
                     Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
                 }
+            }
+        }
+
+        unsafe void GetColorsJob( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors, out JobHandle? jobHandle ) {
+            
+            var colorAccessor = gltf.accessors[accessorIndex];
+            var bufferView = gltf.bufferViews[colorAccessor.bufferView];
+            var chunk = binChunks[bufferView.buffer];
+            var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
+            int start = colorAccessor.byteOffset + bufferView.byteOffset + chunk.start;
+
+            if(colorAccessor.componentType == GLTFComponentType.UnsignedByte ) {
+                colors32 = new Color32[colorAccessor.count];
+                colors = null;
+            } else {
+                colors = new Color[colorAccessor.count];
+                colors32 = null;
+            }
+            jobHandle = null;
+
+            if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
+            {
+                switch (colorAccessor.componentType)
+                {
+                    case GLTFComponentType.Float:
+                        if(interleaved) {
+                            Debug.LogError("Not jobified yet!");
+                            colors = GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3FloatInterleaved);
+                        } else {
+                            var job = new Jobs.GetColorsVec3FloatJob();
+                            job.count = colorAccessor.count;
+                            fixed( void* src = &(bytes[start]), dst = &(colors[0]) ) {
+                                job.input = (float*) src;
+                                job.result = (Color*)dst;
+                            }
+                            jobHandle = job.Schedule();
+                        }
+                        break;
+                    case GLTFComponentType.UnsignedByte:
+                        if(interleaved) {
+                            Debug.LogError("Not jobified yet!");
+                            colors32 = GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8Interleaved);
+                        } else {
+                            var job = new Jobs.GetColorsVec3UInt8Job();
+                            job.count = colorAccessor.count;
+                            fixed( void* src = &(bytes[start]), dst = &(colors32[0]) ) {
+                                job.input = (byte*) src;
+                                job.result = (Color32*)dst;
+                            }
+                            jobHandle = job.Schedule();
+                        }
+                        break;
+                    case GLTFComponentType.UnsignedShort:
+                        if(interleaved) {
+                            Debug.LogError("Not jobified yet!");
+                            colors = GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16Interleaved );
+                        } else {
+                            var job = new Jobs.GetColorsVec3UInt16Job();
+                            job.count = colorAccessor.count;
+                            fixed( void* src = &(bytes[start]), dst = &(colors[0]) ) {
+                                job.input = (System.UInt16*) src;
+                                job.result = (Color*)dst;
+                            }
+                            jobHandle = job.Schedule();
+                        }
+                        break;
+                    default:
+                        Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
+                        break;
+                }
+            }
+            else if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC4)
+            {
+                switch (colorAccessor.componentType)
+                {
+                    case GLTFComponentType.Float:
+                        if(interleaved) {
+                            Debug.LogError("Not jobified yet!");
+                            colors = GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4FloatInterleaved);
+                        } else {
+                            var job = new Jobs.MemCopyJob();
+                            job.bufferSize = colorAccessor.count*16;
+                            fixed( void* src = &(bytes[start]), dst = &(colors[0]) ) {
+                                job.input = src;
+                                job.result = dst;
+                            }
+                            jobHandle = job.Schedule();
+                        }
+                        break;
+                    case GLTFComponentType.UnsignedByte:
+                        if(interleaved) {
+                            Debug.LogError("Not jobified yet!");
+                            colors32 = GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8Interleaved);
+                        } else {
+                            var job = new Jobs.MemCopyJob();
+                            job.bufferSize = colorAccessor.count*4;
+                            fixed( void* src = &(bytes[start]), dst = &(colors32[0]) ) {
+                                job.input = src;
+                                job.result = dst;
+                            }
+                            jobHandle = job.Schedule();
+                        }
+                        break;
+                    case GLTFComponentType.UnsignedShort:
+                        if(interleaved) {
+                            Debug.LogError("Not jobified yet!");
+                            colors = GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16Interleaved);
+                        } else {
+                            var job = new Jobs.GetColorsVec4UInt16Job();
+                            job.count = colorAccessor.count;
+                            fixed( void* src = &(bytes[start]), dst = &(colors[0]) ) {
+                                job.input = (System.UInt16*) src;
+                                job.result = (Color*)dst;
+                            }
+                            jobHandle = job.Schedule();
+                        }
+                        break;
+                    default:
+                        Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
+                        break;
+                }
+            } else {
+                Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
             }
         }
 

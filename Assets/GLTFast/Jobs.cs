@@ -150,6 +150,106 @@ namespace GLTFast.Jobs {
         }
     }
 
+    public unsafe struct GetColorsVec3FloatJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Color* result;
+
+        public void Execute() {
+            for (var i = 0; i < count; i++)
+            {
+                // TODO: try partial memcopy and compare performance.
+                result[i].r = input[i * 3];
+                result[i].g = input[i * 3 + 1];
+                result[i].b = input[i * 3 + 2];
+                
+                result[i].a = 1.0f;
+            }
+        }
+    }
+
+    public unsafe struct GetColorsVec3UInt8Job : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Color32* result;
+
+        public void Execute() {
+            for (var i = 0; i < count; i++)
+            {
+                // TODO: try partial memcopy and compare performance.
+                result[i].r = input[i * 3];
+                result[i].g = input[i * 3 + 1];
+                result[i].b = input[i * 3 + 2];
+                
+                result[i].a = 255;
+            }
+        }
+    }
+
+    public unsafe struct GetColorsVec3UInt16Job : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public System.UInt16* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Color* result;
+
+        public void Execute() {
+            for (var i = 0; i < count; i++)
+            {
+                result[i].r = input[i * 3] / Constants.UINT16_MAX;
+                result[i].g = input[i * 3 + 1] / Constants.UINT16_MAX;
+                result[i].b = input[i * 3 + 2] / Constants.UINT16_MAX;
+                result[i].a = 1.0f;
+            }
+        }
+    }
+
+    public unsafe struct GetColorsVec4UInt16Job : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public System.UInt16* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Color* result;
+
+        public void Execute() {
+            for (var i = 0; i < count; i++)
+            {
+                result[i].r = input[i * 4] / Constants.UINT16_MAX;
+                result[i].g = input[i * 4 + 1] / Constants.UINT16_MAX;
+                result[i].b = input[i * 4 + 2] / Constants.UINT16_MAX;
+                result[i].a = input[i * 4 + 3] / Constants.UINT16_MAX;
+            }
+        }
+    }
+
     public unsafe struct MemCopyJob : IJob {
 
         [ReadOnly]
