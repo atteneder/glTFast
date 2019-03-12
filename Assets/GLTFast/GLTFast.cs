@@ -674,7 +674,7 @@ namespace GLTFast {
             var posAcc = gltf.accessors[pos];
             Vector3 minPos = new Vector3( (float) posAcc.min[0], (float) posAcc.min[1], (float) posAcc.min[2] );
             Vector3 maxPos = new Vector3( (float) posAcc.max[0], (float) posAcc.max[1], (float) posAcc.max[2] );
-            foreach (var p in positions) {
+            foreach (var p in c.positions) {
                 if( ! (p.x >= minPos.x
                     && p.y >= minPos.y
                     && p.z >= minPos.z
@@ -688,7 +688,7 @@ namespace GLTFast {
                 }
             }
 
-            var pUsage = new int[positions.Length];
+            var pUsage = new int[c.positions.Length];
             foreach (var index in c.indices) {
                 pUsage[index] += 1;
             }
