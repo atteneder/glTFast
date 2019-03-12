@@ -71,7 +71,10 @@ namespace GLTFast
 
         private void OnDestroy()
         {
-            gLTFastInstance.Destroy();
+            if(gLTFastInstance!=null) {
+                gLTFastInstance.Destroy();
+                gLTFastInstance=null;
+            }
         }
     }
 }
