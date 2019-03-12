@@ -8,6 +8,9 @@ using Unity.Jobs;
 
 namespace GLTFast.Jobs {
 
+    static class Constants {
+        public const float UINT16_MAX = 65535f;
+    }
     public unsafe struct GetIndicesUInt8Job : IJob  {
             
         [ReadOnly]
@@ -70,6 +73,79 @@ namespace GLTFast.Jobs {
             for (var i = 0; i < count; i++)
             {
                 result[i] = (int) input[i];
+            }
+        }
+    }
+
+    public unsafe struct GetUVsUInt8Job : IJob  {
+
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector2* result;
+
+        public void Execute()
+        {
+            for (var i = 0; i < count; i++)
+            {
+                result[i].x = input[i*2] / 255f;
+                result[i].y = 1 - input[i*2+1] / 255f;
+            }
+        }
+    }
+
+    public unsafe struct GetUVsUInt16Job : IJob  {
+
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public System.UInt16* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector2* result;
+
+        public void Execute()
+        {
+            for (var i = 0; i < count; i++)
+            {
+                result[i].x = input[i*2] / Constants.UINT16_MAX;
+                result[i].y = 1 - input[i*2+1] / Constants.UINT16_MAX;
+            }
+        }
+    }
+
+    public unsafe struct GetUVsFloatJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public void* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector2* result;
+
+        public void Execute() {
+            System.Buffer.MemoryCopy(
+                input,
+                result,
+                count*8,
+                count*8
+            );
+            for (var i = 0; i < count; i++)
+            {
+                result[i].y = 1 - result[i].y;
             }
         }
     }
