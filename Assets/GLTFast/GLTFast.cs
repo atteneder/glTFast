@@ -889,6 +889,8 @@ namespace GLTFast {
 #endif
         }
 
+#if GLTFAST_NO_JOB
+
         CompType[] GetAccessorData<CompType>( Root gltf, int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {
             Assert.IsTrue(accessorIndex>=0);
             var accessor = gltf.accessors[accessorIndex];
@@ -972,6 +974,68 @@ namespace GLTFast {
             return null;
         }
 
+        void GetColors( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors ) {
+
+            colors = null;
+            colors32 = null;
+            if(accessorIndex>=0) {
+                var colorAccessor = gltf.accessors[accessorIndex];
+                var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
+                if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
+                {
+                    switch (colorAccessor.componentType)
+                    {
+                        case GLTFComponentType.Float:
+                            colors = interleaved
+                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3FloatInterleaved)
+                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3Float);;
+                            break;
+                        case GLTFComponentType.UnsignedByte:
+                            colors32 = interleaved
+                                ? GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8Interleaved)
+                                : GetAccessorData<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8);
+                            break;
+                        case GLTFComponentType.UnsignedShort:
+                            colors = interleaved
+                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16Interleaved )
+                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16 );
+                            break;
+                        default:
+                            Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
+                            break;
+                    }
+                }
+                else if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC4)
+                {
+                    switch (colorAccessor.componentType)
+                    {
+                        case GLTFComponentType.Float:
+                            colors = interleaved
+                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4FloatInterleaved)
+                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4Float);
+                            break;
+                        case GLTFComponentType.UnsignedByte:
+                            colors32 = interleaved
+                                ? GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8Interleaved)
+                                : GetAccessorData<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8);
+                            break;
+                        case GLTFComponentType.UnsignedShort:
+                            colors = interleaved
+                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16Interleaved)
+                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16);
+                            break;
+                        default:
+                            Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
+                            break;
+                    }
+                } else {
+                    Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
+                }
+            }
+        }
+
+#else
+
         unsafe Vector2[] GetUvsJob( Root gltf, int accessorIndex, ref byte[] bytes, out JobHandle? jobHandle, out GCHandle resultHandle ) {
             if(accessorIndex>=0) {
                 var uvAccessor = gltf.accessors[accessorIndex];
@@ -1036,66 +1100,6 @@ namespace GLTFast {
             }
             jobHandle = null;
             return null;
-        }
-
-        void GetColors( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors ) {
-
-            colors = null;
-            colors32 = null;
-            if(accessorIndex>=0) {
-                var colorAccessor = gltf.accessors[accessorIndex];
-                var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
-                if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
-                {
-                    switch (colorAccessor.componentType)
-                    {
-                        case GLTFComponentType.Float:
-                            colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3FloatInterleaved)
-                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3Float);;
-                            break;
-                        case GLTFComponentType.UnsignedByte:
-                            colors32 = interleaved
-                                ? GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8Interleaved)
-                                : GetAccessorData<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8);
-                            break;
-                        case GLTFComponentType.UnsignedShort:
-                            colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16Interleaved )
-                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16 );
-                            break;
-                        default:
-                            Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
-                            break;
-                    }
-                }
-                else if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC4)
-                {
-                    switch (colorAccessor.componentType)
-                    {
-                        case GLTFComponentType.Float:
-                            colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4FloatInterleaved)
-                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4Float);
-                            break;
-                        case GLTFComponentType.UnsignedByte:
-                            colors32 = interleaved
-                                ? GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8Interleaved)
-                                : GetAccessorData<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8);
-                            break;
-                        case GLTFComponentType.UnsignedShort:
-                            colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16Interleaved)
-                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16);
-                            break;
-                        default:
-                            Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
-                            break;
-                    }
-                } else {
-                    Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
-                }
-            }
         }
 
         unsafe void GetColorsJob( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors, out JobHandle? jobHandle, out GCHandle resultHandle ) {
@@ -1222,6 +1226,7 @@ namespace GLTFast {
                 Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
             }
         }
+#endif
 
 #if DEBUG
         static Type GetAccessorTye( GLTFAccessorAttributeType accessorAttributeType ) {
