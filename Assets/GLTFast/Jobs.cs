@@ -166,11 +166,18 @@ namespace GLTFast.Jobs {
         public void Execute() {
             for (var i = 0; i < count; i++)
             {
-                // TODO: try partial memcopy and compare performance.
                 result[i].r = input[i * 3];
                 result[i].g = input[i * 3 + 1];
                 result[i].b = input[i * 3 + 2];
                 
+                // TODO: try this partial memcopy and compare performance.
+                // System.Buffer.MemoryCopy(
+                //     input+(i*3),
+                //     result+i,
+                //     12,
+                //     12
+                // );
+
                 result[i].a = 1.0f;
             }
         }
@@ -192,10 +199,17 @@ namespace GLTFast.Jobs {
         public void Execute() {
             for (var i = 0; i < count; i++)
             {
-                // TODO: try partial memcopy and compare performance.
                 result[i].r = input[i * 3];
                 result[i].g = input[i * 3 + 1];
                 result[i].b = input[i * 3 + 2];
+
+                // TODO: try this partial memcopy and compare performance.
+                // System.Buffer.MemoryCopy(
+                //     input+(i*3),
+                //     result+i,
+                //     3,
+                //     3
+                // );
                 
                 result[i].a = 255;
             }
