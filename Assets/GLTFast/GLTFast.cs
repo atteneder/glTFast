@@ -330,7 +330,6 @@ namespace GLTFast {
             PreparePrimitives(gltfRoot);
             yield return null;
 
-            Profiler.BeginSample("CreatePrimitives");
             for(int i=0;i<primitiveContexts.Length;i++) {
 #if !GLTFAST_NO_JOB
                 while(!primitiveContexts[i].IsCompleted) {
@@ -343,7 +342,6 @@ namespace GLTFast {
 
             // Free temp resources
             primitiveContexts = null;
-            Profiler.EndSample();
 
 #if GLTFAST_NO_JOB
             yield return null;
@@ -840,6 +838,7 @@ namespace GLTFast {
         }
 
         void CreatePrimitive( ref PrimitiveCreateContext c ) {
+            Profiler.BeginSample("CreatePrimitive");
 #if !GLTFAST_NO_JOB
             c.Complete();
 #endif
@@ -887,6 +886,7 @@ namespace GLTFast {
 #if !GLTFAST_NO_JOB
             c.Dispose();
 #endif
+            Profiler.EndSample();
         }
 
 #if GLTFAST_NO_JOB
