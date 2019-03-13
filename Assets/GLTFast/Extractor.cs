@@ -64,7 +64,6 @@ namespace GLTFast {
             System.Buffer.BlockCopy(bytes, start, res, 0, count * 4);
             return res;
         }
-#endif
 
         public unsafe static Vector3[] GetVector3s(
             ref byte[] bytes,
@@ -785,5 +784,6 @@ namespace GLTFast {
             Profiler.EndSample();
             return res;
         }
+#endif
     }
 }

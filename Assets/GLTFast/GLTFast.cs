@@ -1128,7 +1128,6 @@ namespace GLTFast {
                     case GLTFComponentType.Float:
                         if(interleaved) {
                             Debug.LogError("Not jobified yet!");
-                            colors = GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3FloatInterleaved);
                         } else {
                             var job = new Jobs.GetColorsVec3FloatJob();
                             job.count = colorAccessor.count;
@@ -1142,7 +1141,6 @@ namespace GLTFast {
                     case GLTFComponentType.UnsignedByte:
                         if(interleaved) {
                             Debug.LogError("Not jobified yet!");
-                            colors32 = GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8Interleaved);
                         } else {
                             var job = new Jobs.GetColorsVec3UInt8Job();
                             job.count = colorAccessor.count;
@@ -1156,7 +1154,6 @@ namespace GLTFast {
                     case GLTFComponentType.UnsignedShort:
                         if(interleaved) {
                             Debug.LogError("Not jobified yet!");
-                            colors = GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16Interleaved );
                         } else {
                             var job = new Jobs.GetColorsVec3UInt16Job();
                             job.count = colorAccessor.count;
@@ -1179,7 +1176,6 @@ namespace GLTFast {
                     case GLTFComponentType.Float:
                         if(interleaved) {
                             Debug.LogError("Not jobified yet!");
-                            colors = GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4FloatInterleaved);
                         } else {
                             var job = new Jobs.MemCopyJob();
                             job.bufferSize = colorAccessor.count*16;
@@ -1193,7 +1189,6 @@ namespace GLTFast {
                     case GLTFComponentType.UnsignedByte:
                         if(interleaved) {
                             Debug.LogError("Not jobified yet!");
-                            colors32 = GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8Interleaved);
                         } else {
                             var job = new Jobs.MemCopyJob();
                             job.bufferSize = colorAccessor.count*4;
@@ -1207,7 +1202,6 @@ namespace GLTFast {
                     case GLTFComponentType.UnsignedShort:
                         if(interleaved) {
                             Debug.LogError("Not jobified yet!");
-                            colors = GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16Interleaved);
                         } else {
                             var job = new Jobs.GetColorsVec4UInt16Job();
                             job.count = colorAccessor.count;
