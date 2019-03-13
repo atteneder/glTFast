@@ -346,6 +346,7 @@ namespace GLTFast {
 
         bool CreateGameObjects( Root gltf, Transform parent ) {
 
+            Profiler.BeginSample("CreateGameObjects");
             var nodes = new Transform[gltf.nodes.Length];
             var relations = new Dictionary<uint,uint>();
 
@@ -390,6 +391,7 @@ namespace GLTFast {
                         go.transform.localScale = m.lossyScale;
                     } else {
                         Debug.LogErrorFormat("Invalid matrix on node {0}",nodeIndex);
+                        Profiler.EndSample();
                         return false;
                     }
                 } else {
@@ -465,6 +467,7 @@ namespace GLTFast {
                     
                 }
             }
+            Profiler.EndSample();
             return true;
         }
 
