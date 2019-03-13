@@ -12,6 +12,7 @@ namespace GLTFast
 
         protected GLTFast gLTFastInstance;
         Coroutine loadRoutine;
+        IDeferAgent deferAgent;
 
         public UnityAction<bool> onLoadComplete;
 
@@ -23,11 +24,12 @@ namespace GLTFast
             }
         }
 
-        public void Load( string url = null ) {
+        public void Load( string url = null, IDeferAgent deferAgent=null ) {
             if(url!=null) {
                 this.url = url;
             }
             if(gLTFastInstance==null && loadRoutine==null) {
+                this.deferAgent = deferAgent ?? new DeferTimer();
                 loadRoutine = StartCoroutine(LoadRoutine());
             }
         }
@@ -47,14 +49,27 @@ namespace GLTFast
         }
 
         protected virtual IEnumerator LoadContent( DownloadHandler dlh ) {
+            deferAgent.Reset();
             string json = dlh.text;
             gLTFastInstance = new GLTFast();
 
             if(gLTFastInstance.LoadGltf(json,url)) {
 
-                yield return StartCoroutine( gLTFastInstance.WaitForAllDependencies() );
-                yield return StartCoroutine( gLTFastInstance.Prepare() );
-                
+                if( deferAgent.ShouldDefer() ) yield return null;
+
+                var routineBuffers = StartCoroutine( gLTFastInstance.WaitForBufferDownloads() );
+                var routineTextures = StartCoroutine( gLTFastInstance.WaitForTextureDownloads() );
+
+                yield return routineBuffers;
+                yield return routineTextures;
+                deferAgent.Reset();
+
+                var prepareRoutine = gLTFastInstance.Prepare();
+                while(prepareRoutine.MoveNext()) {
+                    if( deferAgent.ShouldDefer() ) yield return null;
+                }
+                if( deferAgent.ShouldDefer() ) yield return null;
+
                 var success = gLTFastInstance.InstanciateGltf(transform);
 
                 if(onLoadComplete!=null) {

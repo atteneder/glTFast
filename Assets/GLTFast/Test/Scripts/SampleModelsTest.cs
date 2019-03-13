@@ -107,7 +107,7 @@ public class SampleModelsTest
             var glTFast = new GLTFast.GLTFast();
             Assert.IsTrue(glTFast.LoadGltf(json, path));
 
-			yield return glTFast.WaitForAllDependencies();
+			yield return glTFast.WaitForBufferDownloads();
 
 			var success = glTFast.InstanciateGltf(go.transform);
 			Assert.IsTrue(success);

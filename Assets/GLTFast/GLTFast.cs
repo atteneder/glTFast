@@ -179,7 +179,7 @@ namespace GLTFast {
             return true;
         }
 
-        public IEnumerator WaitForAllDependencies() {
+        public IEnumerator WaitForBufferDownloads() {
             foreach( var dl in downloads ) {
                 yield return dl.Value;
                 var www = dl.Value.webRequest;
@@ -191,6 +191,14 @@ namespace GLTFast {
                 }
             }
 
+            binChunks = new GlbBinChunk[buffers.Count];
+            for( int i=0; i<buffers.Count; i++ ) {
+                var b = buffers[i];
+                binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
+            }
+        }
+
+        public IEnumerator WaitForTextureDownloads() {
             if(textureDownloads!=null) {
                 foreach( var dl in textureDownloads ) {
                     yield return dl.Value;
@@ -202,12 +210,6 @@ namespace GLTFast {
                         images[dl.Key] = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
                     }
                 }
-            }
-
-            binChunks = new GlbBinChunk[buffers.Count];
-            for( int i=0; i<buffers.Count; i++ ) {
-                var b = buffers[i];
-                binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
             }
         }
 
@@ -313,6 +315,7 @@ namespace GLTFast {
                 CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews);
             }
             Profiler.EndSample();
+            yield return null;
 
             Profiler.BeginSample("GenerateMaterial");
             if(gltfRoot.materials!=null) {
@@ -322,8 +325,10 @@ namespace GLTFast {
                 }
             }
             Profiler.EndSample();
+            yield return null;
 
             PreparePrimitives(gltfRoot);
+            yield return null;
 
             Profiler.BeginSample("CreatePrimitives");
             for(int i=0;i<primitiveContexts.Length;i++) {
@@ -333,6 +338,7 @@ namespace GLTFast {
                 }
 #endif
                 CreatePrimitive(ref primitiveContexts[i]);
+                yield return null;
             }
 
             // Free temp resources
