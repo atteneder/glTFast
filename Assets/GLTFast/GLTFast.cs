@@ -819,7 +819,7 @@ namespace GLTFast {
 #else
             if(primitive.attributes.COLOR_0>=0) {
                 JobHandle? jh;
-                GetColorsJob(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors, out jh);
+                GetColorsJob(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors, out jh, out c.gcHandles[jobHandlesCount] );
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             }
@@ -1092,7 +1092,7 @@ namespace GLTFast {
             }
         }
 
-        unsafe void GetColorsJob( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors, out JobHandle? jobHandle ) {
+        unsafe void GetColorsJob( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors, out JobHandle? jobHandle, out GCHandle resultHandle ) {
             
             var colorAccessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[colorAccessor.bufferView];
@@ -1102,9 +1102,11 @@ namespace GLTFast {
 
             if(colorAccessor.componentType == GLTFComponentType.UnsignedByte ) {
                 colors32 = new Color32[colorAccessor.count];
+                resultHandle = GCHandle.Alloc(colors32,GCHandleType.Pinned);
                 colors = null;
             } else {
                 colors = new Color[colorAccessor.count];
+                resultHandle = GCHandle.Alloc(colors,GCHandleType.Pinned);
                 colors32 = null;
             }
             jobHandle = null;
