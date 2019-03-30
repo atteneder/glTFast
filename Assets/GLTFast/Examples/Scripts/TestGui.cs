@@ -67,8 +67,13 @@ public class TestGui : MonoBehaviour {
 
         var prefixLocal = GltfSampleModels.localPath;
 
+        var names = new List<string>();
+
         yield return GltfSampleModels.LoadGltfFileUrls();
-        var names = GltfSampleModels.gltfFileUrls;
+        names.AddRange(GltfSampleModels.gltfFileUrls);
+
+        yield return GltfSampleModels.LoadGlbFileUrls();
+        names.AddRange(GltfSampleModels.glbFileUrls);
 
         foreach( var n in names ) {
             var t = GltfSampleModels.GetNameFromPath(n);
