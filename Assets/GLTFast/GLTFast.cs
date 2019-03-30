@@ -96,7 +96,8 @@ namespace GLTFast {
         public delegate CompType[] ExtractAccessor<CompType>(ref byte[] bytes, int start, int count);
         public delegate CompType[] ExtractInterleavedAccessor<CompType>(ref byte[] bytes, int start, int count, int byteStride);
         
-        Dictionary<int,byte[]> buffers;
+        // TODO:make array
+        byte[][] buffers;
 
         GlbBinChunk[] binChunks;
         UnityEngine.Material[] materials;
@@ -148,7 +149,7 @@ namespace GLTFast {
 
             var bufferCount = gltfRoot.buffers.Length;
             if(bufferCount>0) {
-                buffers = new Dictionary<int, byte[]>(bufferCount);
+                buffers = new byte[bufferCount][];
                 binChunks = new GlbBinChunk[bufferCount];
             }
 
@@ -207,7 +208,7 @@ namespace GLTFast {
                 }
             }
 
-            for( int i=0; i<buffers.Count; i++ ) {
+            for( int i=0; i<buffers.Length; i++ ) {
                 if(i==0 && glbBinChunk.HasValue) {
                     // Already assigned in LoadGlb
                     continue;
