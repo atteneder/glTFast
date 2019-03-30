@@ -37,6 +37,12 @@ namespace GLTFast {
             }
         }
               
+        struct ImageCreateContext {
+            public int imageIndex;
+            public byte[] buffer;
+            public GCHandle gcHandle;
+            public JobHandle jobHandle;
+        }
         struct PrimitiveCreateContext {
 
             public int primtiveIndex;
@@ -123,6 +129,7 @@ namespace GLTFast {
         // TODO: remove maybe?
         Root gltfRoot;
         Texture2D[] images = null;
+        List<ImageCreateContext> imageCreateContexts;
 
         static string GetUriBase( string url ) {
             var uri = new Uri(url);
@@ -312,7 +319,8 @@ namespace GLTFast {
                 } else {
                     Assert.AreEqual(images.Length,gltfRoot.images.Length);
                 }
-                CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews);
+                imageCreateContexts = new List<ImageCreateContext>();
+                CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews,imageCreateContexts);
             }
             Profiler.EndSample();
             yield return null;
@@ -329,6 +337,20 @@ namespace GLTFast {
 
             PreparePrimitives(gltfRoot);
             yield return null;
+
+#if !GLTFAST_NO_JOB
+            if(imageCreateContexts!=null) {
+                foreach(var jh in imageCreateContexts) {
+                    while(!jh.jobHandle.IsCompleted) {
+                        yield return null;
+                    }
+                    jh.jobHandle.Complete();
+                    images[jh.imageIndex].LoadImage(jh.buffer);
+                    jh.gcHandle.Free();
+                }
+                imageCreateContexts = null;
+            }
+#endif
 
             for(int i=0;i<primitiveContexts.Length;i++) {
 #if !GLTFAST_NO_JOB
@@ -475,7 +497,7 @@ namespace GLTFast {
             return true;
         }
 
-        void CreateTexturesFromBuffers( Schema.Image[] src_images, Schema.BufferView[] bufferViews ) {
+        unsafe void CreateTexturesFromBuffers( Schema.Image[] src_images, Schema.BufferView[] bufferViews, List<ImageCreateContext> contexts ) {
             for (int i = 0; i < images.Length; i++) {
                 if(images[i]!=null) {
                     resources.Add(images[i]);
@@ -498,10 +520,26 @@ namespace GLTFast {
                         var bufferView = bufferViews[img.bufferView];
                         var buffer = GetBuffer(bufferView.buffer);
                         var chunk = binChunks[bufferView.buffer];
-                        var imgBytes = Extractor.CreateBufferViewCopy(bufferView,chunk,buffer);
                         var txt = new UnityEngine.Texture2D(4, 4);
                         txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
+#if GLTFAST_NO_JOB
+                        var imgBytes = Extractor.CreateBufferViewCopy(bufferView,chunk,buffer);
                         txt.LoadImage(imgBytes);
+#else
+                        var icc = new ImageCreateContext();
+                        icc.imageIndex = i;
+                        icc.buffer = new byte[bufferView.byteLength];
+                        icc.gcHandle = GCHandle.Alloc(icc.buffer,GCHandleType.Pinned);
+                        var job = new Jobs.MemCopyJob();
+                        job.bufferSize = bufferView.byteLength;
+                        fixed( void* src = &(buffer[bufferView.byteOffset + chunk.start]), dst = &(icc.buffer[0]) ) {
+                            job.input = src;
+                            job.result = dst;
+                        }
+                        icc.jobHandle = job.Schedule();
+                        contexts.Add(icc);
+#endif
+                        
                         images[i] = txt;
                         resources.Add(txt);
                     }
