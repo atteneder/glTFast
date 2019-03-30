@@ -113,21 +113,16 @@ namespace GLTFast {
             materialGenerator = new DefaultMaterialGenerator();
         }
 
-        public static bool LoadGlbFile( string path, Transform parent = null )
-        {
-            var bytes = File.ReadAllBytes(path);
+        /// TODO: Some of these class members maybe could be passed
+        /// between loading routines. Turn them into parameters or at
+        /// least dispose them once all ingredients are ready.
 
-            if (bytes == null || bytes.Length < 12)
-            {
-                Debug.LogError("Couldn't load GLB file.");
-                return false;
-            }
-            var glTFast = new GLTFast();
-            return glTFast.LoadGlb(bytes,parent);
-        }
-
-        // TODO: remove maybe?
+        /// Main glTF data structure
         Root gltfRoot;
+
+        /// optional glTF-binary buffer
+        /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
+        GlbBinChunk? glbBinChunk;
         Texture2D[] images = null;
         List<ImageCreateContext> imageCreateContexts;
 
@@ -136,13 +131,11 @@ namespace GLTFast {
             return new Uri( uri, ".").AbsoluteUri;
         }
 
-        public bool LoadGltf( string json, string url ){
-            var gltf = JsonUtility.FromJson<Root>(json);
+        bool ParseJsonAndLoadBuffers( string json, string baseUri ) {
+            gltfRoot = JsonUtility.FromJson<Root>(json);
 
-            var baseUri = GetUriBase(url);
-
-            for( int i=0; i<gltf.buffers.Length;i++) {
-                var buffer = gltf.buffers[i];
+            for( int i=0; i<gltfRoot.buffers.Length;i++) {
+                var buffer = gltfRoot.buffers[i];
                 if( !string.IsNullOrEmpty(buffer.uri) ) {
                     if(buffer.uri.StartsWith("data:")) {
                         Debug.LogError("Embed buffer not supported");
@@ -152,12 +145,29 @@ namespace GLTFast {
                     }
                 }
             }
-            buffers = new Dictionary<int, byte[]>(gltf.buffers.Length);
 
-            if (gltf.images != null) {
-                images = new Texture2D[gltf.images.Length];
+            var bufferCount = gltfRoot.buffers.Length;
+            if(bufferCount>0) {
+                buffers = new Dictionary<int, byte[]>(bufferCount);
+                binChunks = new GlbBinChunk[bufferCount];
+            }
+
+            return true;
+        }
+        public bool LoadGltf( string json, string url ) {
+            var baseUri = GetUriBase(url);
+            if(!ParseJsonAndLoadBuffers(json,baseUri)) {
+                return false;
+            }
+            return LoadImages(baseUri);
+        }
+
+        bool LoadImages( string baseUri ) {
+
+            if (gltfRoot.images != null) {
+                images = new Texture2D[gltfRoot.images.Length];
                 for (int i = 0; i < images.Length; i++) {
-                    var img = gltf.images[i];
+                    var img = gltfRoot.images[i];
                     bool knownImageType = false;
                     if(string.IsNullOrEmpty(img.mimeType)) {
                         Debug.LogWarning("Image is missing mime type");
@@ -180,26 +190,28 @@ namespace GLTFast {
                     }
                 }
             }
-
-            gltfRoot = gltf;
-
             return true;
         }
 
         public IEnumerator WaitForBufferDownloads() {
-            foreach( var dl in downloads ) {
-                yield return dl.Value;
-                var www = dl.Value.webRequest;
-                if(www.isNetworkError || www.isHttpError) {
-                    Debug.LogError(www.error);
-                }
-                else {
-                    buffers[dl.Key] = www.downloadHandler.data;
+            if(downloads!=null) {
+                foreach( var dl in downloads ) {
+                    yield return dl.Value;
+                    var www = dl.Value.webRequest;
+                    if(www.isNetworkError || www.isHttpError) {
+                        Debug.LogError(www.error);
+                    }
+                    else {
+                        buffers[dl.Key] = www.downloadHandler.data;
+                    }
                 }
             }
 
-            binChunks = new GlbBinChunk[buffers.Count];
             for( int i=0; i<buffers.Count; i++ ) {
+                if(i==0 && glbBinChunk.HasValue) {
+                    // Already assigned in LoadGlb
+                    continue;
+                }
                 var b = buffers[i];
                 binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
             }
@@ -247,7 +259,7 @@ namespace GLTFast {
             textureDownloads[index] = www.SendWebRequest();
         }
 
-        public bool LoadGlb( byte[] bytes, Transform parent = null ) {
+        public bool LoadGlb( byte[] bytes, string url ) {
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
             if (magic != GLB_MAGIC)
@@ -264,12 +276,7 @@ namespace GLTFast {
 
             int index = 12; // first chung header
 
-            buffers = new Dictionary<int, byte[]>(1);
-            buffers[0] = bytes;
-
-            var binChunksList = new List<GlbBinChunk>();
-
-            Root gltf = null;
+            var baseUri = GetUriBase(url);
 
             while( index < bytes.Length ) {
                 uint chLength = BitConverter.ToUInt32( bytes, index );
@@ -281,24 +288,29 @@ namespace GLTFast {
 
                 if (chType == (uint)ChunkFormat.BIN) {
                     //Debug.Log( string.Format("chunk: BIN; length: {0}", chLength) );
-                    binChunksList.Add(new GlbBinChunk( index, chLength));
+                    Assert.IsFalse(glbBinChunk.HasValue); // There can only be one binary chunk
+                    glbBinChunk = new GlbBinChunk( index, chLength);
                 }
                 else if (chType == (uint)ChunkFormat.JSON) {
-                    Assert.IsNull(gltf);
+                    Assert.IsNull(gltfRoot);
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength );
                     //Debug.Log( string.Format("chunk: JSON; length: {0}", json ) );
-                    gltf = JsonUtility.FromJson<Root>(json);
+                    if(!ParseJsonAndLoadBuffers(json,baseUri)) {
+                        return false;
+                    }
                 }
  
                 index += (int) chLength;
             }
 
             //Debug.Log(index);
-
-            if(gltf!=null) {
+            if(gltfRoot!=null) {
                 //Debug.Log(gltf);
-                binChunks = binChunksList.ToArray();
-                return CreateGameObjects( gltf, parent );
+                if(glbBinChunk.HasValue) {
+                    binChunks[0] = glbBinChunk.Value;
+                    buffers[0] = bytes;
+                }
+                return LoadImages(baseUri);
             }
             return false;
         }

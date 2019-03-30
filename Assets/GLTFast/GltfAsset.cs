@@ -12,7 +12,7 @@ namespace GLTFast
 
         protected GLTFast gLTFastInstance;
         Coroutine loadRoutine;
-        IDeferAgent deferAgent;
+        protected IDeferAgent deferAgent;
 
         public UnityAction<bool> onLoadComplete;
 
@@ -50,32 +50,37 @@ namespace GLTFast
 
         protected virtual IEnumerator LoadContent( DownloadHandler dlh ) {
             deferAgent.Reset();
-            string json = dlh.text;
             gLTFastInstance = new GLTFast();
 
-            if(gLTFastInstance.LoadGltf(json,url)) {
-
-                if( deferAgent.ShouldDefer() ) yield return null;
-
-                var routineBuffers = StartCoroutine( gLTFastInstance.WaitForBufferDownloads() );
-                var routineTextures = StartCoroutine( gLTFastInstance.WaitForTextureDownloads() );
-
-                yield return routineBuffers;
-                yield return routineTextures;
-                deferAgent.Reset();
-
-                var prepareRoutine = gLTFastInstance.Prepare();
-                while(prepareRoutine.MoveNext()) {
-                    if( deferAgent.ShouldDefer() ) yield return null;
-                }
-                if( deferAgent.ShouldDefer() ) yield return null;
-
-                var success = gLTFastInstance.InstanciateGltf(transform);
-
-                if(onLoadComplete!=null) {
-                   onLoadComplete(success);
-                }
+            if(!LoadContentPrimary(dlh)) {
+                yield break;
             }
+
+            if( deferAgent.ShouldDefer() ) yield return null;
+
+            var routineBuffers = StartCoroutine( gLTFastInstance.WaitForBufferDownloads() );
+            var routineTextures = StartCoroutine( gLTFastInstance.WaitForTextureDownloads() );
+
+            yield return routineBuffers;
+            yield return routineTextures;
+            deferAgent.Reset();
+
+            var prepareRoutine = gLTFastInstance.Prepare();
+            while(prepareRoutine.MoveNext()) {
+                if( deferAgent.ShouldDefer() ) yield return null;
+            }
+            if( deferAgent.ShouldDefer() ) yield return null;
+
+            var success = gLTFastInstance.InstanciateGltf(transform);
+
+            if(onLoadComplete!=null) {
+                onLoadComplete(success);
+            }
+        }
+
+        protected virtual bool LoadContentPrimary(DownloadHandler dlh) {
+            string json = dlh.text;
+            return gLTFastInstance.LoadGltf(json,url);
         }
 
         public IEnumerator WaitForLoaded() {

@@ -8,14 +8,9 @@ namespace GLTFast
 {
     public class GlbAsset : GltfAsset
     {
-        protected override IEnumerator LoadContent( DownloadHandler dlh ) {
+        protected override bool LoadContentPrimary(DownloadHandler dlh) {
             byte[] results = dlh.data;
-            gLTFastInstance = new GLTFast();
-            var success = gLTFastInstance.LoadGlb(results,transform);
-            if(onLoadComplete!=null) {
-                onLoadComplete(success);
-            }
-            yield break;
+            return gLTFastInstance.LoadGlb(results,url);
         }
 	}
 }
