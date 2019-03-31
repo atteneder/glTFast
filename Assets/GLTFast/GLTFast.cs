@@ -93,10 +93,11 @@ namespace GLTFast {
 #endif
         }
 
+#if GLTFAST_NO_JOB
         public delegate CompType[] ExtractAccessor<CompType>(ref byte[] bytes, int start, int count);
         public delegate CompType[] ExtractInterleavedAccessor<CompType>(ref byte[] bytes, int start, int count, int byteStride);
-        
-        // TODO:make array
+#endif
+
         byte[][] buffers;
 
         GlbBinChunk[] binChunks;
@@ -109,10 +110,6 @@ namespace GLTFast {
         int[] meshPrimitiveIndex;
 
         IMaterialGenerator materialGenerator;
-
-        public GLTFast() {
-            materialGenerator = new DefaultMaterialGenerator();
-        }
 
         /// TODO: Some of these class members maybe could be passed
         /// between loading routines. Turn them into parameters or at
@@ -130,6 +127,10 @@ namespace GLTFast {
         static string GetUriBase( string url ) {
             var uri = new Uri(url);
             return new Uri( uri, ".").AbsoluteUri;
+        }
+
+        public GLTFast() {
+            materialGenerator = new DefaultMaterialGenerator();
         }
 
         bool ParseJsonAndLoadBuffers( string json, string baseUri ) {
