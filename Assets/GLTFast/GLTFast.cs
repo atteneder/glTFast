@@ -124,6 +124,9 @@ namespace GLTFast {
         Texture2D[] images = null;
         List<ImageCreateContext> imageCreateContexts;
 
+        bool loadingError = false;
+        public bool LoadingError { get => loadingError; private set => loadingError = value; }
+
         static string GetUriBase( string url ) {
             var uri = new Uri(url);
             return new Uri( uri, ".").AbsoluteUri;
@@ -133,7 +136,7 @@ namespace GLTFast {
             materialGenerator = new DefaultMaterialGenerator();
         }
 
-        bool ParseJsonAndLoadBuffers( string json, string baseUri ) {
+        void ParseJsonAndLoadBuffers( string json, string baseUri ) {
             gltfRoot = JsonUtility.FromJson<Root>(json);
 
             for( int i=0; i<gltfRoot.buffers.Length;i++) {
@@ -141,7 +144,7 @@ namespace GLTFast {
                 if( !string.IsNullOrEmpty(buffer.uri) ) {
                     if(buffer.uri.StartsWith("data:")) {
                         Debug.LogError("Embed buffer not supported");
-                        return false;
+                        loadingError = true;
                     } else {
                         LoadBuffer( i, baseUri+buffer.uri );
                     }
@@ -153,18 +156,17 @@ namespace GLTFast {
                 buffers = new byte[bufferCount][];
                 binChunks = new GlbBinChunk[bufferCount];
             }
-
-            return true;
         }
-        public bool LoadGltf( string json, string url ) {
+
+        public void LoadGltf( string json, string url ) {
             var baseUri = GetUriBase(url);
-            if(!ParseJsonAndLoadBuffers(json,baseUri)) {
-                return false;
+            ParseJsonAndLoadBuffers(json,baseUri);
+            if(!loadingError) {
+                LoadImages(baseUri);
             }
-            return LoadImages(baseUri);
         }
 
-        bool LoadImages( string baseUri ) {
+        void LoadImages( string baseUri ) {
 
             if (gltfRoot.images != null) {
                 images = new Texture2D[gltfRoot.images.Length];
@@ -192,7 +194,6 @@ namespace GLTFast {
                     }
                 }
             }
-            return true;
         }
 
         public IEnumerator WaitForBufferDownloads() {
@@ -235,7 +236,8 @@ namespace GLTFast {
         }
 
         public bool InstanciateGltf( Transform parent ) {
-            return CreateGameObjects( gltfRoot, parent );
+            CreateGameObjects( gltfRoot, parent );
+            return !loadingError;
         }
 
         Dictionary<int,UnityWebRequestAsyncOperation> downloads;
@@ -264,8 +266,10 @@ namespace GLTFast {
         public bool LoadGlb( byte[] bytes, string url ) {
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
-            if (magic != GLB_MAGIC)
+            if (magic != GLB_MAGIC) {
+                loadingError = true;
                 return false;
+            }
     
 
             uint version = BitConverter.ToUInt32( bytes, 4 );
@@ -273,8 +277,10 @@ namespace GLTFast {
 
             //Debug.Log( string.Format("version: {0:X}; length: {1}", version, length ) );
 
-            if (version != 2)
+            if (version != 2) {
+                loadingError = true;
                 return false;
+            }
 
             int index = 12; // first chung header
 
@@ -297,7 +303,8 @@ namespace GLTFast {
                     Assert.IsNull(gltfRoot);
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength );
                     //Debug.Log( string.Format("chunk: JSON; length: {0}", json ) );
-                    if(!ParseJsonAndLoadBuffers(json,baseUri)) {
+                    ParseJsonAndLoadBuffers(json,baseUri);
+                    if(loadingError) {
                         return false;
                     }
                 }
@@ -312,7 +319,11 @@ namespace GLTFast {
                     binChunks[0] = glbBinChunk.Value;
                     buffers[0] = bytes;
                 }
-                return LoadImages(baseUri);
+                LoadImages(baseUri);
+                return !loadingError;
+            } else {
+                Debug.LogError("Invalid JSON chunk");
+                loadingError = true;
             }
             return false;
         }
@@ -384,7 +395,7 @@ namespace GLTFast {
 #endif
         }
 
-        bool CreateGameObjects( Root gltf, Transform parent ) {
+        void CreateGameObjects( Root gltf, Transform parent ) {
 
             Profiler.BeginSample("CreateGameObjects");
             var nodes = new Transform[gltf.nodes.Length];
@@ -432,7 +443,8 @@ namespace GLTFast {
                     } else {
                         Debug.LogErrorFormat("Invalid matrix on node {0}",nodeIndex);
                         Profiler.EndSample();
-                        return false;
+                        loadingError = true;
+                        return;
                     }
                 } else {
                     if(node.translation!=null) {
@@ -508,7 +520,6 @@ namespace GLTFast {
                 }
             }
             Profiler.EndSample();
-            return true;
         }
 
         unsafe void CreateTexturesFromBuffers( Schema.Image[] src_images, Schema.BufferView[] bufferViews, List<ImageCreateContext> contexts ) {
@@ -601,7 +612,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        unsafe bool PreparePrimitive( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
+        unsafe void PreparePrimitive( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
             Profiler.BeginSample("PreparePrimitivePrepare");
             c.mesh = mesh;
             c.primitive = primitive;
@@ -886,7 +897,6 @@ namespace GLTFast {
             c.jobHandle = JobHandle.CombineDependencies(jobHandles);
             jobHandles.Dispose();
 #endif
-            return true;
         }
 
         void CreatePrimitive( ref PrimitiveCreateContext c ) {

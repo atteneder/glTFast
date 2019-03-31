@@ -68,13 +68,15 @@ public class SampleModelsTest
 
 			var go = new GameObject();         
 			var glTFast = new GLTFast.GLTFast();
-            var success = glTFast.LoadGlb(bytes, path);
-			Assert.True(success);
+            glTFast.LoadGlb(bytes, path);
+			Assert.False(glTFast.LoadingError);
 			yield return glTFast.WaitForBufferDownloads();
+			Assert.False(glTFast.LoadingError);
 			yield return glTFast.WaitForTextureDownloads();
+			Assert.False(glTFast.LoadingError);
 			yield return glTFast.Prepare();
-			success = glTFast.InstanciateGltf(go.transform);
-
+			Assert.False(glTFast.LoadingError);
+			var success = glTFast.InstanciateGltf(go.transform);
             Assert.True(success);
 			yield return null;
 			glTFast.Destroy();
@@ -113,12 +115,15 @@ public class SampleModelsTest
 
             var go = new GameObject( GltfSampleModels.GetNameFromPath(file) );    
             var glTFast = new GLTFast.GLTFast();
-            Assert.IsTrue(glTFast.LoadGltf(json, path));
+            glTFast.LoadGltf(json, path);
+			Assert.IsFalse(glTFast.LoadingError);
 
 			yield return glTFast.WaitForBufferDownloads();
+			Assert.False(glTFast.LoadingError);
 			yield return glTFast.WaitForTextureDownloads();
+			Assert.False(glTFast.LoadingError);
 			yield return glTFast.Prepare();
-
+			Assert.False(glTFast.LoadingError);
 			var success = glTFast.InstanciateGltf(go.transform);
 			Assert.IsTrue(success);
 

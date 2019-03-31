@@ -52,35 +52,55 @@ namespace GLTFast
             deferAgent.Reset();
             gLTFastInstance = new GLTFast();
 
-            if(!LoadContentPrimary(dlh)) {
-                yield break;
+            bool allFine = true;
+
+            LoadContentPrimary(dlh);
+            
+            allFine = !gLTFastInstance.LoadingError;
+
+            if(allFine) {
+                if( deferAgent.ShouldDefer() ) {
+                    yield return null;
+                }
+                var routineBuffers = StartCoroutine( gLTFastInstance.WaitForBufferDownloads() );
+                var routineTextures = StartCoroutine( gLTFastInstance.WaitForTextureDownloads() );
+
+                yield return routineBuffers;
+                yield return routineTextures;
             }
 
-            if( deferAgent.ShouldDefer() ) yield return null;
+            allFine = !gLTFastInstance.LoadingError;
 
-            var routineBuffers = StartCoroutine( gLTFastInstance.WaitForBufferDownloads() );
-            var routineTextures = StartCoroutine( gLTFastInstance.WaitForTextureDownloads() );
-
-            yield return routineBuffers;
-            yield return routineTextures;
-            deferAgent.Reset();
-
-            var prepareRoutine = gLTFastInstance.Prepare();
-            while(prepareRoutine.MoveNext()) {
-                if( deferAgent.ShouldDefer() ) yield return null;
+            if(allFine) {
+                deferAgent.Reset();
+                var prepareRoutine = gLTFastInstance.Prepare();
+                while(prepareRoutine.MoveNext()) {
+                    allFine = !gLTFastInstance.LoadingError;
+                    if(!allFine) {
+                        break;
+                    }
+                    if( deferAgent.ShouldDefer() ) {
+                        yield return null;
+                    }
+                }
             }
-            if( deferAgent.ShouldDefer() ) yield return null;
-
-            var success = gLTFastInstance.InstanciateGltf(transform);
+            
+            allFine = !gLTFastInstance.LoadingError;
+            if(allFine) {
+                if( deferAgent.ShouldDefer() ) {
+                    yield return null;
+                }
+                allFine = gLTFastInstance.InstanciateGltf(transform);
+            }
 
             if(onLoadComplete!=null) {
-                onLoadComplete(success);
+                onLoadComplete(allFine);
             }
         }
 
-        protected virtual bool LoadContentPrimary(DownloadHandler dlh) {
+        protected virtual void LoadContentPrimary(DownloadHandler dlh) {
             string json = dlh.text;
-            return gLTFastInstance.LoadGltf(json,url);
+            gLTFastInstance.LoadGltf(json,url);
         }
 
         public IEnumerator WaitForLoaded() {
