@@ -747,7 +747,14 @@ namespace GLTFast {
             c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.positions, GCHandleType.Pinned);
             start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             if (gltf.IsAccessorInterleaved(pos)) {
-                throw new System.NotImplementedException();
+                var job = new Jobs.GetVector3sInterleavedJob();
+                job.count = accessor.count;
+                job.byteStride = bufferView.byteStride;
+                fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
+                    job.input = (byte*)src;
+                    job.result = (Vector3*)dst;
+                }
+                jobHandles[jobHandlesCount] = job.Schedule();
             } else {
                 var job = new Jobs.MemCopyJob();
                 job.bufferSize = accessor.count * 12;
@@ -812,7 +819,14 @@ namespace GLTFast {
                 c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.normals, GCHandleType.Pinned);
                 start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
                 if (gltf.IsAccessorInterleaved(pos)) {
-                    throw new System.NotImplementedException();
+                    var job = new Jobs.GetVector3sInterleavedJob();
+                    job.count = accessor.count;
+                    job.byteStride = bufferView.byteStride;
+                    fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
+                        job.input = (byte*)src;
+                        job.result = (Vector3*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job.Schedule();
                 } else {
                     var job = new Jobs.MemCopyJob();
                     job.bufferSize = accessor.count * 12;
@@ -865,7 +879,14 @@ namespace GLTFast {
                 c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.tangents, GCHandleType.Pinned);
                 start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
                 if (gltf.IsAccessorInterleaved(pos)) {
-                    throw new System.NotImplementedException();
+                    var job = new Jobs.GetVector4sInterleavedJob();
+                    job.count = accessor.count;
+                    job.byteStride = bufferView.byteStride;
+                    fixed( void* src = &(buffer[start]), dst = &(c.tangents[0]) ) {
+                        job.input = (byte*)src;
+                        job.result = (Vector4*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job.Schedule();
                 } else {
                     var job = new Jobs.MemCopyJob();
                     job.bufferSize = accessor.count * 16;
@@ -1116,7 +1137,14 @@ namespace GLTFast {
                 switch( uvAccessor.componentType ) {
                 case GLTFComponentType.Float:
                     if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                        throw new System.NotImplementedException();
+                        var job = new Jobs.GetVector2sInterleavedJob();
+                        job.count = uvAccessor.count;
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(bytes[start]), dst = &(result[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector2*)dst;
+                        }
+                        jobHandle = job.Schedule();
                     } else {
                         var job = new Jobs.GetUVsFloatJob();
                         job.count = uvAccessor.count;
@@ -1129,7 +1157,14 @@ namespace GLTFast {
                     break;
                 case GLTFComponentType.UnsignedByte:
                     if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                        throw new System.NotImplementedException();
+                        var job = new Jobs.GetUVsUInt8InterleavedJob();
+                        job.count = uvAccessor.count;
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(bytes[start]), dst = &(result[0]) ) {
+                            job.input = (byte*) src;
+                            job.result = (Vector2*)dst;
+                        }
+                        jobHandle = job.Schedule();
                     } else {
                         var job = new Jobs.GetUVsUInt8Job();
                         job.count = uvAccessor.count;
@@ -1142,7 +1177,14 @@ namespace GLTFast {
                     break;
                 case GLTFComponentType.UnsignedShort:
                     if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                        throw new System.NotImplementedException();
+                        var job = new Jobs.GetUVsUInt16InterleavedJob();
+                        job.count = uvAccessor.count;
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(bytes[start]), dst = &(result[0]) ) {
+                            job.input = (byte*) src;
+                            job.result = (Vector2*)dst;
+                        }
+                        jobHandle = job.Schedule();
                     } else {
                         var job = new Jobs.GetUVsUInt16Job();
                         job.count = uvAccessor.count;

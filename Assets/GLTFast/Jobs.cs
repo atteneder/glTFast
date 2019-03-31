@@ -150,6 +150,65 @@ namespace GLTFast.Jobs {
         }
     }
 
+    /// Untested!
+    public unsafe struct GetUVsUInt8InterleavedJob : IJob  {
+
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        public int byteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector2* result;
+
+        public void Execute()
+        {
+            byte* off = input;
+            for (var i = 0; i < count; i++)
+            {
+                result[i].x = *off / 255f;
+                result[i].y = 1 - *(off+1) / 255f;
+                off += byteStride;
+            }
+        }
+    }
+
+    /// Untested!
+    public unsafe struct GetUVsUInt16InterleavedJob : IJob  {
+
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        public int byteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector2* result;
+
+        public void Execute()
+        {
+            byte* off = input;
+            for (var i = 0; i < count; i++)
+            {
+                System.UInt16* uv = (System.UInt16*) off;
+                result[i].x = *uv / Constants.UINT16_MAX;
+                result[i].y = 1 - *(uv+1) / Constants.UINT16_MAX;
+                off += byteStride;
+            }
+        }
+    }
+
     public unsafe struct GetColorsVec3FloatJob : IJob {
 
         [ReadOnly]
@@ -284,6 +343,107 @@ namespace GLTFast.Jobs {
                 bufferSize,
                 bufferSize
             );
+        }
+    }
+
+    /// Untested!
+    public unsafe struct GetVector2sInterleavedJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        public int byteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector2* result;
+
+        public void Execute() {
+            Vector2* resultV = result;
+            byte* off = input;
+            for (int i = 0; i < count; i++)
+            {
+                System.Buffer.MemoryCopy(
+                    off,
+                    resultV,
+                    8,
+                    8
+                );
+                off += byteStride;
+                resultV += 1;
+            }
+        }
+    }
+
+    public unsafe struct GetVector3sInterleavedJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        public int byteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector3* result;
+
+        public void Execute() {
+            Vector3* resultV = result;
+            byte* off = input;
+            for (int i = 0; i < count; i++)
+            {
+                System.Buffer.MemoryCopy(
+                    off,
+                    resultV,
+                    12,
+                    12
+                );
+                off += byteStride;
+                resultV += 1;
+            }
+        }
+    }
+
+    /// Untested!
+    public unsafe struct GetVector4sInterleavedJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        public int byteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector4* result;
+
+        public void Execute() {
+            Vector4* resultV = result;
+            byte* off = input;
+            for (int i = 0; i < count; i++)
+            {
+                System.Buffer.MemoryCopy(
+                    off,
+                    resultV,
+                    16,
+                    16
+                );
+                off += byteStride;
+                resultV += 1;
+            }
         }
     }
 }
