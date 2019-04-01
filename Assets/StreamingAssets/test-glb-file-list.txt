@@ -2,6 +2,7 @@
 AlphaBlendModeTest/glTF-Binary/AlphaBlendModeTest.glb
 AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb
 AnimatedMorphSphere/glTF-Binary/AnimatedMorphSphere.glb
+AntiqueCamera/glTF-Binary/AntiqueCamera.glb
 Avocado/glTF-Binary/Avocado.glb
 BarramundiFish/glTF-Binary/BarramundiFish.glb
 BoomBox/glTF-Binary/BoomBox.glb
@@ -19,6 +20,7 @@ Corset/glTF-Binary/Corset.glb
 DamagedHelmet/glTF-Binary/DamagedHelmet.glb
 Duck/glTF-Binary/Duck.glb
 GearboxAssy/glTF-Binary/GearboxAssy.glb
+InterpolationTest/glTF-Binary/InterpolationTest.glb
 Lantern/glTF-Binary/Lantern.glb
 MetalRoughSpheres/glTF-Binary/MetalRoughSpheres.glb
 Monster/glTF-Binary/Monster.glb
@@ -33,6 +35,7 @@ RiggedSimple/glTF-Binary/RiggedSimple.glb
 SpecGlossVsMetalRough/glTF-Binary/SpecGlossVsMetalRough.glb
 TextureCoordinateTest/glTF-Binary/TextureCoordinateTest.glb
 TextureSettingsTest/glTF-Binary/TextureSettingsTest.glb
+UnlitTest/glTF-Binary/UnlitTest.glb
 VC/glTF-Binary/VC.glb
 VertexColorTest/glTF-Binary/VertexColorTest.glb
 WaterBottle/glTF-Binary/WaterBottle.glb
