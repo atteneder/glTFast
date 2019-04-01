@@ -24,6 +24,8 @@ public class TestGui : MonoBehaviour {
 	float screenFactor;   
 
     float startTime = -1;
+    float minFrame = float.MaxValue;
+    float maxFrame = float.MinValue;
 #if !NO_GLTFAST
 	float time1 = -1;
 #endif
@@ -102,6 +104,8 @@ public class TestGui : MonoBehaviour {
     {
         startTime = Time.realtimeSinceStartup;
         urlField = newUrl;
+        minFrame = float.MaxValue;
+        maxFrame = float.MinValue;
     }
 
     void Time1Update(float time)
@@ -158,24 +162,34 @@ public class TestGui : MonoBehaviour {
         float now = (Time.realtimeSinceStartup-startTime)*1000;
         #if !NO_GLTFAST
         if(startTime>=0 || time1>=0) {
+            if(startTime>=0 && time1<0) UpdateFrameTimes();
 			label = string.Format(
-                "glTFast time: {0:0.00} ms"
+                "glTFast time: {0:0.00} ms (min: {1:0.0} ms max: {2:0.0} ms)"
                 ,time1>=0 ? time1 : now
+                ,minFrame < float.MaxValue ? minFrame : '-'
+                ,maxFrame > float.MinValue ? maxFrame : '-'
                 );
 			GUI.Label(new Rect(listWidth+10,height-timeHeight,width-listWidth-10,timeHeight),label);
         }
         #endif
         #if UNITY_GLTF
         if(startTime>=0 || time2>=0) {
+            if(startTime>=0 && time2<0) UpdateFrameTimes();
             label = string.Format(
-                "UnityGLTF time: {0:0.00} ms"
+                "UnityGLTF time: {0:0.00} ms (min: {1:0.0} ms max: {2:0.0} ms)"
                 , time2>=0 ? time2 : now
+                ,minFrame < float.MaxValue ? minFrame : '-'
+                ,maxFrame > float.MinValue ? maxFrame : '-'
                 );
             GUI.Label(new Rect(listWidth+10,height-timeHeight,width-listWidth-10,timeHeight),label);
         }
         #endif
 	}
 
+    void UpdateFrameTimes() {
+        minFrame = Mathf.Min(minFrame, Time.deltaTime * 1000 );
+        maxFrame = Mathf.Max(maxFrame, Time.deltaTime * 1000 );
+    }
     void GUIDrawItems( List<System.Tuple<string,string>> items, float listItemWidth) {
         float y = 0;
         foreach( var item in items ) {
