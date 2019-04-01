@@ -11,14 +11,14 @@ public class MassLoader : MonoBehaviour {
 
         yield return GltfSampleModels.LoadGltfFileUrls();
 
-        var baseUrl = local ? GltfSampleModels.baseUrlLocal : GltfSampleModels.baseUrl;
+        var baseUrl = local ? GltfSampleModels.localPath : GltfSampleModels.baseUrl;
 
         // Wait a bit to make sure profiling works
         yield return new WaitForSeconds(1);
 
 		foreach( var n in GltfSampleModels.gltfFileUrls ) {
             var url = string.Format(
-                "{0}{1}"
+                "{0}/{1}"
                 ,baseUrl
                 ,n
                 );
