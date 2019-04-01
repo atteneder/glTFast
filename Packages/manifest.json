@@ -1,10 +1,9 @@
 {
   "dependencies": {
-    "com.unity.package-manager-ui": "2.0.3",
+    "com.unity.package-manager-ui": "2.1.1",
     "com.unity.modules.imageconversion": "1.0.0",
     "com.unity.modules.imgui": "1.0.0",
     "com.unity.modules.jsonserialize": "1.0.0",
-    "com.unity.modules.screencapture": "1.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.modules.unitywebrequesttexture": "1.0.0"
   }
