@@ -1,24 +1,47 @@
-# 0.2
-Support for regular JSON glTFs (non-binary)
+# Changelog
+All notable changes to this project will be documented in this file.
 
-# 0.1
-First pre-release
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-# Pre release changes
-## 2018-09-02
-* Support for meshes with more than 65k vertices.
+## [Unreleased]
+### Added
+- Threaded glTF loading via Unity Job System
+### Changed
+- Update to Unity 2019.1.0b9
+- Formatted ChangeLog markdown file
+
+## [0.2.0] - 2019-02-22
+### Added
+- Support for regular JSON glTFs (non-binary)
+
+## [0.1.0] - 2018-11-27
+### Added
+- First pre-release
+
+## [0.0.5] - 2018-09-02
+### Fixed
+- Support for meshes with more than 65k vertices.
 	
-## 2018-06-20
-* free up memory when destroying content
+## [0.0.4] - 2018-06-20
+### Fixed
+- free up memory when destroying content
 
-## 2018-05-29
-added support for interleaved vertex data
+## [0.0.3] - 2018-05-29
+### Added
+- Added support for interleaved vertex data
 
-## 2018-05-20
-* fixed metallic roughness texture usage (workaround)
-* fixed occlusion texture usage (workaround)
-* added support for 3 component vertex colors (rgb without alpha)
-* added support for uint16 vertex colors
+## [0.0.2] - 2018-05-20
+### Added
+- added support for 3 component vertex colors (rgb without alpha)
+- added support for uint16 vertex colors
+### Fixed
+- fixed metallic roughness texture usage (workaround)
+- fixed occlusion texture usage (workaround)
 
-## 2018-05-12
-* initial version
+## [0.0.1] - 2018-05-12
+### Added
+- initial version
+
+[0.3.0]: https://github.com/atteneder/glTFast/compare/v0.3.0...v0.2.0
+[0.2.0]: https://github.com/atteneder/glTFast/compare/v0.2.0...v0.1.0
