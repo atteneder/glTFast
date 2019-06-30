@@ -4,20 +4,7 @@ glTFast is a Unity Plug-In for loading glTF 3D files at runtime with focus speed
 
 This means fast startup (due to small build footprint) and fast parsing/decoding.
 
-Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo)[^1].
-
-## Missing features
-
-This project is in an early development state and some things are missing:
-
-* embed buffers or textures
-* meshes without indices
-* mesh compression
-* animation
-* glTF 1.0 backwards compatibility
-* further extensions
-
-See details on missing features in the [issues](https://github.com/atteneder/glTFast/issues) section.
+Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo).
 
 ## Roadmap / Priorities
 
@@ -29,18 +16,9 @@ Besides speed, the focus at the moment is on users that:
 I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
  section.
 
-## Get involved
-
-Contributions like ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving glTFast.
-
-Also, you can show your appreciation and...
-
-[![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
-
 ## Motivation
 
-The Khronos group (creators of glTF) already provides an excellent Unity Plug-In here:
-<https://github.com/KhronosGroup/UnityGLTF>
+The Khronos group (creators of glTF) already provides an excellent Unity Plug-In called [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF).
 
 It is very well written, has many features and is stable. However, building a project with it (especially WebGL) will lead to huge binary files.
 This project aims to be a low-profile alternative.
@@ -49,7 +27,7 @@ This project aims to be a low-profile alternative.
 
 It uses [Unity's JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) for parsing, which has little overhead, is fast and memory-efficient (See <https://docs.unity3d.com/Manual/JSONSerialization.html>).
 
-It also uses fast low-level memory copy methods whenever possible.
+It also uses fast low-level memory copy methods and [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html).
 
 ## What it is NOT
 
@@ -84,7 +62,7 @@ In case you need to know when loading finished, add an event callback:
 gltf.onLoadComplete += YourCallbackMethod;
 ```
 
-## Materials and Shader Variants
+### Materials and Shader Variants
 
 glTF files can contain lots of materials making use of various shader features. You have to make sure all shader variants you project will probably use are included in the build. If not, the materials will be fine in the editor, but not in the builds.
 glTFast uses the Unity Standard Shader. Including all its variants would be quite big. There's an easy way to find the right subset, if you already know what files you'll expect:
@@ -97,10 +75,29 @@ glTFast uses the Unity Standard Shader. Including all its variants would be quit
 
 An alternative way is to create placeholder materials for all feature combinations you expect and put them in a "Resource" folder in your project.
 
-## Known issues
+## Missing features and known issues
 
-When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
+This project is in an early development state and some things are missing:
 
-The imported scene is scaled negative in one axis. I did not encounter any trouble doing this, but in case shading errors show up, this has to be fixed.
+* embed buffers or textures
+* meshes without indices
+* mesh compression
+* animation
+* glTF 1.0 backwards compatibility
+* further extensions
 
-[^1]: Unfortunately the WebGL build has issues you don't have in native builds. In general Unity WebGL builds are huge and load slow and there are material issues with shader variants.
+Known issues:
+
+* When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
+
+* The imported scene is scaled negative in one axis. I did not encounter any trouble doing this, but in case shading errors show up, this has to be fixed.
+
+See details in the [issues](https://github.com/atteneder/glTFast/issues) section.
+
+## Get involved
+
+Contributions like ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving glTFast.
+
+Also, you can show your appreciation and...
+
+[![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
