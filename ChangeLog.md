@@ -5,10 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.3.0] - 2019-06-30
 ### Added
 - Threaded glTF loading via Unity Job System
 ### Changed
-- Update to Unity 2019.1.0b9
+- Update to Unity 2019.1.7f1
 - Formatted ChangeLog markdown file
 
 ## [0.2.0] - 2019-02-22
