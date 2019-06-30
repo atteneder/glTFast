@@ -25,6 +25,7 @@ namespace GLTFast.Materials {
         public static int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
         public static int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
         public static int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
+        public static int glossMapScaleId = Shader.PropertyToID("_GlossMapScale");
 
         public static void SetAlphaModeMask( UnityEngine.Material material ) {
 			material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
