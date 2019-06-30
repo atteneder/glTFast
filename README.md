@@ -6,38 +6,6 @@ This means fast startup (due to small build footprint) and fast parsing/decoding
 
 Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo).
 
-## Roadmap / Priorities
-
-Besides speed, the focus at the moment is on users that:
-
-* control the content (are able to create compatible glTFs)
-* use it for static content (no animation, skinning or morphing)
-
-I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
- section.
-
-## Motivation
-
-The Khronos group (creators of glTF) already provides an excellent Unity Plug-In called [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF).
-
-It is very well written, has many features and is stable. However, building a project with it (especially WebGL) will lead to huge binary files.
-This project aims to be a low-profile alternative.
-
-## Why is it smaller
-
-It uses [Unity's JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) for parsing, which has little overhead, is fast and memory-efficient (See <https://docs.unity3d.com/Manual/JSONSerialization.html>).
-
-It also uses fast low-level memory copy methods and [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html).
-
-## What it is NOT
-
-...and probably never will be:
-
-* It's not an asset manager with instantiation and reference counting support.
-* Also not a download manager for asset caching/re-usage.
-
-Such stuff should be able to place on top of this library.
-
 ## Usage
 
 Copy the Assets/GLTFast folder into you Unity project's Assets folder.
@@ -74,6 +42,38 @@ glTFast uses the Unity Standard Shader. Including all its variants would be quit
 * Take this ShaderVariantCollection asset and add it to the "Preloaded Shaders" list
 
 An alternative way is to create placeholder materials for all feature combinations you expect and put them in a "Resource" folder in your project.
+
+## Roadmap / Priorities
+
+Besides speed, the focus at the moment is on users that:
+
+* control the content (are able to create compatible glTFs)
+* use it for static content (no animation, skinning or morphing)
+
+I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
+ section.
+
+## Motivation
+
+The Khronos group (creators of glTF) already provides an excellent Unity Plug-In called [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF).
+
+It is very well written, has many features and is stable. However, building a project with it (especially WebGL) will lead to huge binary files.
+This project aims to be a low-profile alternative.
+
+## Why is it smaller
+
+It uses [Unity's JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) for parsing, which has little overhead, is fast and memory-efficient (See <https://docs.unity3d.com/Manual/JSONSerialization.html>).
+
+It also uses fast low-level memory copy methods and [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html).
+
+## What it is NOT
+
+...and probably never will be:
+
+* It's not an asset manager with instantiation and reference counting support.
+* Also not a download manager for asset caching/re-usage.
+
+Such stuff should be able to place on top of this library.
 
 ## Missing features and known issues
 
