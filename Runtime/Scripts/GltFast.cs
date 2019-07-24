@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
 using Unity.Jobs;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using System.Runtime.InteropServices;
 
 namespace GLTFast {
