@@ -19,6 +19,10 @@ namespace GLTFast {
 
         const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
 
+        public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
+            // "KHR_draco_mesh_compression"
+        };
+
         enum ChunkFormat : uint
         {
             JSON = 0x4e4f534a,
@@ -137,6 +141,11 @@ namespace GLTFast {
         void ParseJsonAndLoadBuffers( string json, string baseUri ) {
             gltfRoot = JsonUtility.FromJson<Root>(json);
 
+            if(!CheckExtensionSupport(gltfRoot)) {
+                loadingError = true;
+                return;
+            }
+
             for( int i=0; i<gltfRoot.buffers.Length;i++) {
                 var buffer = gltfRoot.buffers[i];
                 if( !string.IsNullOrEmpty(buffer.uri) ) {
@@ -154,6 +163,32 @@ namespace GLTFast {
                 buffers = new byte[bufferCount][];
                 binChunks = new GlbBinChunk[bufferCount];
             }
+        }
+
+        /// <summary>
+        /// Validates required and used glTF extensions and reports unsupported ones.
+        /// </summary>
+        /// <param name="gltfRoot"></param>
+        /// <returns>False if a required extension is not supported. True otherwise.</returns>
+        bool CheckExtensionSupport (Root gltfRoot) {
+            if(gltfRoot.extensionsRequired!=null) {
+                foreach(var ext in gltfRoot.extensionsRequired) {
+                    var supported = supportedExtensions.Contains(ext);
+                    if(!supported) {
+                        Debug.LogErrorFormat("Required glTF extension {0} is not supported!",ext);
+                        return false;
+                    }
+                }
+            }
+            if(gltfRoot.extensionsUsed!=null) {
+                foreach(var ext in gltfRoot.extensionsUsed) {
+                    var supported = supportedExtensions.Contains(ext);
+                    if(!supported) {
+                        Debug.LogWarningFormat("glTF extension {0} is not supported!",ext);
+                    }
+                }
+            }
+            return true;
         }
 
         public void LoadGltf( string json, string url ) {

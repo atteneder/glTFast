@@ -9,12 +9,12 @@ namespace GLTFast.Schema {
         /// <summary>
         /// Names of glTF extensions used somewhere in this asset.
         /// </summary>
-        //public List<string> ExtensionsUsed;
+        public string[] extensionsUsed;
 
         /// <summary>
         /// Names of glTF extensions required to properly load this asset.
         /// </summary>
-        //public List<string> ExtensionsRequired;
+        public string[] extensionsRequired;
 
         /// <summary>
         /// An array of accessors. An accessor is a typed view into a bufferView.
