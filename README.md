@@ -4,7 +4,7 @@ glTFast is a Unity Package for loading glTF 3D files at runtime.
 
 It's focus is on speed, specifically fast startup (due to small build footprint) and fast parsing/decoding.
 
-Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo).
+Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out the [demo project](https://github.com/atteneder/glTFastDemo).
 
 ## Installing
 
