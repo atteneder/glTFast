@@ -1,14 +1,40 @@
 # glTFast
 
-glTFast is a Unity Plug-In for loading glTF 3D files at runtime with focus speed.
+glTFast is a Unity Package for loading glTF 3D files at runtime.
 
-This means fast startup (due to small build footprint) and fast parsing/decoding.
+It's focus is on speed, specifically fast startup (due to small build footprint) and fast parsing/decoding.
 
-Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo).
+Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out the [demo project](https://github.com/atteneder/glTFastDemo).
+
+## Installing
+
+You have to manually add the package's URL into your [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html)
+
+Inside your Unity project there's the folder `Packages` containing a file called `manifest.json`. You have to open it and add the following line inside the `dependencies` category:
+
+```json
+"com.atteneder.gltfast": "https://github.com/atteneder/glTFast",
+```
+
+It should look something like this:
+
+```json
+{
+  "dependencies": {
+    "com.atteneder.gltfast": "https://github.com/atteneder/glTFast",
+    "com.unity.package-manager-ui": "2.1.2",
+    "com.unity.modules.imageconversion": "1.0.0",
+    "com.unity.modules.imgui": "1.0.0",
+    "com.unity.modules.jsonserialize": "1.0.0",
+    "com.unity.modules.unitywebrequest": "1.0.0",
+    "com.unity.modules.unitywebrequesttexture": "1.0.0"
+  }
+}
+```
+
+Next time you open your project in Unity, it will download the package automatically. There's more detail about how to add packages via GIT URLs in the [Unity documentation](https://docs.unity3d.com/Manual/upm-git.html).
 
 ## Usage
-
-Copy the Assets/GLTFast folder into you Unity project's Assets folder.
 
 Minimum code to load a glTF file:
 
@@ -101,3 +127,20 @@ Contributions like ideas, comments, critique, bug reports, pull requests are hig
 Also, you can show your appreciation and...
 
 [![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
+
+
+## License
+
+Copyright (c) 2019 Andreas Atteneder, All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use files in this repository except in compliance with the License.
+You may obtain a copy of the License at
+
+   <http://www.apache.org/licenses/LICENSE-2.0>
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

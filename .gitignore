@@ -34,6 +34,3 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
-
-/Assets/UnityGLTF
-/Assets/StreamingAssets/glTF-Sample-Models*
