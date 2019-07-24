@@ -1,0 +1,15 @@
+{
+    "name": "glTFast",
+    "references": [
+        "GUID:339cc51f8f5f946a99be775bcfa83f2e"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
