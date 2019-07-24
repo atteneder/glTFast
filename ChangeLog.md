@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2019-07-24
+### Changed
+- Tranformed Project into a Unity Package, which can easily be installed via Package Manager
+
 ## [0.3.0] - 2019-06-30
 ### Added
 - Threaded glTF loading via Unity Job System
