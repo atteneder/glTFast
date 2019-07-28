@@ -20,7 +20,7 @@ namespace GLTFast {
         const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
-            // "KHR_draco_mesh_compression"
+            "KHR_draco_mesh_compression"
         };
 
         enum ChunkFormat : uint
@@ -45,12 +45,17 @@ namespace GLTFast {
             public GCHandle gcHandle;
             public JobHandle jobHandle;
         }
-        struct PrimitiveCreateContext {
 
+        abstract class PrimitiveCreateContextBase {
             public int primtiveIndex;
+            public MeshPrimitive primitive;
+            public abstract bool IsCompleted {get;}
+            public abstract Primitive? CreatePrimitive();
+        }
+
+        class PrimitiveCreateContext : PrimitiveCreateContextBase {
 
             public Mesh mesh;
-            public MeshPrimitive primitive;
 
 #if GLTFAST_NO_JOB
             public int[] indices;
@@ -77,22 +82,101 @@ namespace GLTFast {
 
             public GCHandle[] gcHandles;
 
-            public bool IsCompleted {
+            public override bool IsCompleted {
                 get {
                     return jobHandle.IsCompleted;
                 }  
             }
 
-            public void Complete() {
+            public override Primitive? CreatePrimitive() {
+                Profiler.BeginSample("CreatePrimitive");
+#if !GLTFAST_NO_JOB
                 jobHandle.Complete();
+#endif
+                var msh = new UnityEngine.Mesh();
+                if( positions.Length > 65536 ) {
+#if UNITY_2017_3_OR_NEWER
+                    msh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+#else
+                    throw new System.Exception("Meshes with more than 65536 vertices are only supported from Unity 2017.3 onwards.");
+#endif
+                }
+                msh.name = mesh.name;
+                msh.vertices = positions;
+
+                msh.SetIndices(
+                    indices
+                    ,MeshTopology.Triangles
+                    ,0
+                    );
+
+                if(uvs0!=null) {
+                    msh.uv = uvs0;
+                }
+                if(uvs1!=null) {
+                    msh.uv2 = uvs1;
+                }
+                if(normals!=null) {
+                    msh.normals = normals;
+                } else {
+                    msh.RecalculateNormals();
+                }
+                if (colors!=null) {
+                    msh.colors = colors;
+                } else if(colors32!=null) {
+                    msh.colors32 = colors32;
+                }
+                if(tangents!=null) {
+                    msh.tangents = tangents;
+                } else {
+                    msh.RecalculateTangents();
+                }
+                // primitives[c.primtiveIndex] = new Primitive(msh,c.primitive.material);
+                // resources.Add(msh);
+
+#if !GLTFAST_NO_JOB
+                Dispose();
+#endif
+                Profiler.EndSample();
+                return new Primitive(msh,primitive.material);
             }
 
-            public void Dispose() {
+            void Dispose() {
                 for(int i=0;i<gcHandles.Length;i++) {
                     gcHandles[i].Free();
                 }
             }
 #endif
+        }
+
+        class PrimitiveDracoCreateContext : PrimitiveCreateContextBase {
+            public JobHandle jobHandle;
+            public NativeArray<int> dracoResult;
+            public NativeArray<IntPtr> dracoPtr;
+
+            public override bool IsCompleted {
+                get {
+                    return jobHandle.IsCompleted;
+                }  
+            }
+
+            public override Primitive? CreatePrimitive() {
+                jobHandle.Complete();
+                int result = dracoResult[0];
+                IntPtr dracoMesh = dracoPtr[0];
+
+                dracoResult.Dispose();
+                dracoPtr.Dispose();
+
+                if (result <= 0) {
+                    Debug.LogError ("Failed: Decoding error.");
+                    return null;
+                }
+
+                var msh = DracoMeshLoader.CreateMesh(dracoMesh);
+
+                return new Primitive(msh,primitive.material);
+            }
         }
 
 #if GLTFAST_NO_JOB
@@ -101,12 +185,13 @@ namespace GLTFast {
 #endif
 
         byte[][] buffers;
+        NativeArray<byte>[] nativeBuffers;
 
         GlbBinChunk[] binChunks;
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
 
-        PrimitiveCreateContext[] primitiveContexts;
+        PrimitiveCreateContextBase[] primitiveContexts;
 
         Primitive[] primitives;
         int[] meshPrimitiveIndex;
@@ -161,6 +246,7 @@ namespace GLTFast {
             var bufferCount = gltfRoot.buffers.Length;
             if(bufferCount>0) {
                 buffers = new byte[bufferCount][];
+                nativeBuffers = new NativeArray<byte>[bufferCount];
                 binChunks = new GlbBinChunk[bufferCount];
             }
         }
@@ -365,6 +451,13 @@ namespace GLTFast {
             return buffers[index];
         }
 
+        NativeArray<byte> GetNativeBuffer(int index) {
+            if(!nativeBuffers[index].IsCreated) {
+                nativeBuffers[index] = new NativeArray<byte>(GetBuffer(index),Allocator.Persistent);
+            }
+            return nativeBuffers[index];
+        }
+
         public IEnumerator Prepare() {
             meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
 
@@ -412,20 +505,41 @@ namespace GLTFast {
 
             for(int i=0;i<primitiveContexts.Length;i++) {
 #if !GLTFAST_NO_JOB
-                while(!primitiveContexts[i].IsCompleted) {
+                var primitiveContext = primitiveContexts[i];
+                
+                while(!primitiveContext.IsCompleted) {
                     yield return null;
                 }
 #endif
-                CreatePrimitive(ref primitiveContexts[i]);
+                var primitive = primitiveContext.CreatePrimitive();
+                if(primitive.HasValue) {
+                    primitives[primitiveContext.primtiveIndex] = primitive.Value;
+                    resources.Add(primitive.Value.mesh);
+                } else {
+                    loadingError = true;
+                }
+
                 yield return null;
             }
 
             // Free temp resources
             primitiveContexts = null;
+            DisposeBuffers();
 
 #if GLTFAST_NO_JOB
             yield return null;
 #endif
+        }
+
+        void DisposeBuffers() {
+            foreach (var nativeBuffer in nativeBuffers)
+            {
+                if(nativeBuffer.IsCreated) {
+                    nativeBuffer.Dispose();
+                }
+            }
+            nativeBuffers = null;
+            buffers = null;
         }
 
         void CreateGameObjects( Root gltf, Transform parent ) {
@@ -631,14 +745,29 @@ namespace GLTFast {
             meshPrimitiveIndex[gltf.meshes.Length] = totalPrimitives;
 
             primitives = new Primitive[totalPrimitives];
-            primitiveContexts = new PrimitiveCreateContext[totalPrimitives];
+            primitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
 
             int i=0;
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
                 foreach( var primitive in mesh.primitives ) {
-                    primitiveContexts[i].primtiveIndex = i;
-                    PreparePrimitive(gltf,mesh,primitive,ref primitiveContexts[i]);
+                    
+                    PrimitiveCreateContextBase context = null;
+
+                    if( primitive.extensions!=null &&
+                        primitive.extensions.KHR_draco_mesh_compression != null )
+                    {
+                        var c = new PrimitiveDracoCreateContext();
+                        PreparePrimitiveDraco(gltf,mesh,primitive,ref c);
+                        context = c;
+                    } else {
+                        var c = new PrimitiveCreateContext();
+                        PreparePrimitive(gltf,mesh,primitive,ref c);
+                        context = c;
+                    }
+                    context.primtiveIndex = i;
+                    context.primitive = primitive;
+                    primitiveContexts[i] = context;
                     i++;
                 }
             }
@@ -646,6 +775,7 @@ namespace GLTFast {
         }
 
         unsafe void PreparePrimitive( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
+
             Profiler.BeginSample("PreparePrimitivePrepare");
             c.mesh = mesh;
             c.primitive = primitive;
@@ -953,56 +1083,26 @@ namespace GLTFast {
 #endif
         }
 
-        void CreatePrimitive( ref PrimitiveCreateContext c ) {
-            Profiler.BeginSample("CreatePrimitive");
-#if !GLTFAST_NO_JOB
-            c.Complete();
-#endif
-            var msh = new UnityEngine.Mesh();
-            if( c.positions.Length > 65536 ) {
-#if UNITY_2017_3_OR_NEWER
-                msh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-#else
-                throw new System.Exception("Meshes with more than 65536 vertices are only supported from Unity 2017.3 onwards.");
-#endif
-            }
-            msh.name = c.mesh.name;
-            msh.vertices = c.positions;
+        void PreparePrimitiveDraco( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveDracoCreateContext c ) {
+            var draco_ext = primitive.extensions.KHR_draco_mesh_compression;
+            
+            var bufferView = gltf.bufferViews[draco_ext.bufferView];
+            var buffer = GetNativeBuffer(bufferView.buffer);
 
-            msh.SetIndices(
-                c.indices
-                ,MeshTopology.Triangles
-                ,0
-                );
+            var job = new DracoMeshLoader.DracoJob();
 
-            if(c.uvs0!=null) {
-                msh.uv = c.uvs0;
-            }
-            if(c.uvs1!=null) {
-                msh.uv2 = c.uvs1;
-            }
-            if(c.normals!=null) {
-                msh.normals = c.normals;
-            } else {
-                msh.RecalculateNormals();
-            }
-            if (c.colors!=null) {
-                msh.colors = c.colors;
-            } else if(c.colors32!=null) {
-                msh.colors32 = c.colors32;
-            }
-            if(c.tangents!=null) {
-                msh.tangents = c.tangents;
-            } else {
-                msh.RecalculateTangents();
-            }
-            primitives[c.primtiveIndex] = new Primitive(msh,c.primitive.material);
-            resources.Add(msh);
+            c.dracoResult = new NativeArray<int>(1,DracoMeshLoader.defaultAllocator);
+            c.dracoPtr = new NativeArray<IntPtr>(1,DracoMeshLoader.defaultAllocator);
 
-#if !GLTFAST_NO_JOB
-            c.Dispose();
-#endif
-            Profiler.EndSample();
+            job.data = buffer.Slice(bufferView.byteOffset,bufferView.byteLength);
+            job.result = c.dracoResult;
+            job.outMesh = c.dracoPtr;
+
+            c.jobHandle = job.Schedule();
+        }
+
+        void OnMeshesLoaded( Mesh mesh ) {
+            Debug.Log("draco is ready");
         }
 
 #if GLTFAST_NO_JOB

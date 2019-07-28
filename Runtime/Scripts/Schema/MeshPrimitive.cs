@@ -52,6 +52,8 @@ namespace GLTFast.Schema {
         /// </summary>
         /// TODO: Make dictionary key enums?
         //public List<Dictionary<string, AccessorId>> Targets;
+
+        public MeshPrimitiveExtensions extensions;
     }
 
     [System.Serializable]
@@ -62,5 +64,16 @@ namespace GLTFast.Schema {
         public int TEXCOORD_0 = -1;
         public int TEXCOORD_1 = -1;
         public int COLOR_0 = -1;
+    }
+
+    [System.Serializable]
+    public class MeshPrimitiveExtensions {
+        public MeshPrimitiveDracoExtension KHR_draco_mesh_compression;
+    }
+
+    [System.Serializable]
+    public class MeshPrimitiveDracoExtension {
+        public int bufferView;
+        public Attributes attributes;
     }
 }
