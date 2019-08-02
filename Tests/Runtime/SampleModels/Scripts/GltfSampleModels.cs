@@ -52,8 +52,16 @@ public class GltfSampleModels {
 #endif
 
 		Debug.LogFormat("Trying to load file list from {0}",uri);
-        var webRequest = UnityWebRequest.Get(uri);
-        yield return webRequest.SendWebRequest();
-        callback( webRequest.downloadHandler.text.Split('\n') );
-    }
+		var webRequest = UnityWebRequest.Get(uri);
+		yield return webRequest.SendWebRequest();
+		var lines = webRequest.downloadHandler.text.Split('\n');
+		var filteredLines = new List<string>();
+		foreach (var line in lines)
+		{
+			if(!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
+				filteredLines.Add(line);
+			}
+		}
+		callback( filteredLines.ToArray() );
+	}
 }
