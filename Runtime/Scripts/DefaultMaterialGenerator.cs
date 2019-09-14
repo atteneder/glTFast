@@ -10,6 +10,9 @@ namespace GLTFast {
 
     public class DefaultMaterialGenerator : IMaterialGenerator {
 
+        static readonly Vector2 TEXTURE_SCALE = new Vector2(1,-1);
+        static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
+
         Material defaultMaterial;
 
         public UnityEngine.Material GetDefaultMaterial() {
@@ -23,6 +26,9 @@ namespace GLTFast {
             var material = Material.Instantiate<Material>( GetDefaultMaterial() );
             material.name = gltfMaterial.name;
 
+            material.mainTextureScale = TEXTURE_SCALE;
+            material.mainTextureOffset = TEXTURE_OFFSET;
+
             if(gltfMaterial.pbrMetallicRoughness!=null) {
                 material.color = gltfMaterial.pbrMetallicRoughness.baseColor;
                 material.SetFloat(StandardShaderHelper.metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
@@ -30,6 +36,7 @@ namespace GLTFast {
 
                 var mainTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.baseColorTexture,textures,images);
                 if(mainTxt!=null) {
+                    mainTxt.wrapMode = TextureWrapMode.Clamp;
                     material.mainTexture = mainTxt;
                 }
 

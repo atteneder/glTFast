@@ -95,7 +95,7 @@ namespace GLTFast.Jobs {
             for (var i = 0; i < count; i++)
             {
                 result[i].x = input[i*2] / 255f;
-                result[i].y = 1 - input[i*2+1] / 255f;
+                result[i].y = input[i*2+1] / 255f;
             }
         }
     }
@@ -118,7 +118,7 @@ namespace GLTFast.Jobs {
             for (var i = 0; i < count; i++)
             {
                 result[i].x = input[i*2] / Constants.UINT16_MAX;
-                result[i].y = 1 - input[i*2+1] / Constants.UINT16_MAX;
+                result[i].y = input[i*2+1] / Constants.UINT16_MAX;
             }
         }
     }
@@ -143,10 +143,6 @@ namespace GLTFast.Jobs {
                 count*8,
                 count*8
             );
-            for (var i = 0; i < count; i++)
-            {
-                result[i].y = 1 - result[i].y;
-            }
         }
     }
 
@@ -173,7 +169,7 @@ namespace GLTFast.Jobs {
             for (var i = 0; i < count; i++)
             {
                 result[i].x = *off / 255f;
-                result[i].y = 1 - *(off+1) / 255f;
+                result[i].y = *(off+1) / 255f;
                 off += byteStride;
             }
         }
@@ -203,7 +199,7 @@ namespace GLTFast.Jobs {
             {
                 System.UInt16* uv = (System.UInt16*) off;
                 result[i].x = *uv / Constants.UINT16_MAX;
-                result[i].y = 1 - *(uv+1) / Constants.UINT16_MAX;
+                result[i].y = *(uv+1) / Constants.UINT16_MAX;
                 off += byteStride;
             }
         }
