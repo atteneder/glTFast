@@ -101,16 +101,18 @@ It also uses fast low-level memory copy methods and [Unity's Job system](https:/
 
 Such stuff should be able to place on top of this library.
 
+## Supported glTF extensions
+
+* KHR_draco_mesh_compression
+
 ## Missing features and known issues
 
 This project is in an early development state and some things are missing:
 
 * embed buffers or textures
 * meshes without indices
-* mesh compression
 * animation
 * glTF 1.0 backwards compatibility
-* further extensions
 
 Known issues:
 
@@ -127,7 +129,6 @@ Contributions like ideas, comments, critique, bug reports, pull requests are hig
 Also, you can show your appreciation and...
 
 [![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
-
 
 ## License
 
