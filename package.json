@@ -5,7 +5,7 @@
   "description": "Load glTF assets at runtime.",
   "unity": "2019.1",
   "dependencies": {
-    "com.atteneder.draco": "https://gitlab.com/atteneder/DracoUnity.git"
+    "com.atteneder.draco": "1.0.1"
   },
   "keywords": [
     "mesh",
