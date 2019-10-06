@@ -13,7 +13,7 @@ You have to manually add the package's URL into your [project manifest](https://
 Inside your Unity project there's the folder `Packages` containing a file called `manifest.json`. You have to open it and add the following line inside the `dependencies` category:
 
 ```json
-"com.atteneder.gltfast": "https://github.com/atteneder/glTFast",
+"com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git",
 ```
 
 It should look something like this:
@@ -21,7 +21,7 @@ It should look something like this:
 ```json
 {
   "dependencies": {
-    "com.atteneder.gltfast": "https://github.com/atteneder/glTFast",
+    "com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git",
     "com.unity.package-manager-ui": "2.1.2",
     "com.unity.modules.imageconversion": "1.0.0",
     "com.unity.modules.imgui": "1.0.0",
