@@ -10,9 +10,12 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 You have to manually add the package's URL into your [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html)
 
-Inside your Unity project there's the folder `Packages` containing a file called `manifest.json`. You have to open it and add the following line inside the `dependencies` category:
+glTFast has a dependency to [DracoUnity](https://gitlab.com/atteneder/DracoUnity) (which provides support for compressed meshes), which also needs to be added.
+
+Inside your Unity project there's the folder `Packages` containing a file called `manifest.json`. You have to open it and add the following lines inside the `dependencies` category:
 
 ```json
+"com.atteneder.draco": "https://gitlab.com/atteneder/DracoUnity.git",
 "com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git",
 ```
 
@@ -21,6 +24,7 @@ It should look something like this:
 ```json
 {
   "dependencies": {
+    "com.atteneder.draco": "https://gitlab.com/atteneder/DracoUnity.git",
     "com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git",
     "com.unity.package-manager-ui": "2.1.2",
     "com.unity.modules.imageconversion": "1.0.0",
@@ -32,7 +36,7 @@ It should look something like this:
 }
 ```
 
-Next time you open your project in Unity, it will download the package automatically. There's more detail about how to add packages via GIT URLs in the [Unity documentation](https://docs.unity3d.com/Manual/upm-git.html).
+Next time you open your project in Unity, it will download the packages automatically. There's more detail about how to add packages via GIT URLs in the [Unity documentation](https://docs.unity3d.com/Manual/upm-git.html).
 
 ## Usage
 
