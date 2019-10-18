@@ -1,8 +1,8 @@
 {
     "name": "glTFast",
     "references": [
-        "GUID:339cc51f8f5f946a99be775bcfa83f2e",
-        "GUID:1f1db07d22489445ab0fc8ed6ef2ed4f"
+        "glTFastSchema",
+        "Draco"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
