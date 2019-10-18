@@ -20,7 +20,8 @@ namespace GLTFast {
         const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
-            "KHR_draco_mesh_compression"
+            "KHR_draco_mesh_compression",
+            "KHR_materials_pbrSpecularGlossiness"
         };
 
         enum ChunkFormat : uint
@@ -211,8 +212,13 @@ namespace GLTFast {
         Texture2D[] images = null;
         List<ImageCreateContext> imageCreateContexts;
 
+
         bool loadingError = false;
-        public bool LoadingError { get => loadingError; private set => loadingError = value; }
+        //this line had a compile error "only assigment, call, increment, decrement and new object expressions can be used
+        //as a statement"
+       // public bool LoadingError {get => loadingError; private set => loadingError = value; }
+        public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
+
 
         static string GetUriBase( string url ) {
             var uri = new Uri(url);

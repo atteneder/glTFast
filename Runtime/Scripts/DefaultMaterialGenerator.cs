@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 
+
 namespace GLTFast {
 
     using Materials;
+   
     using AlphaMode = Schema.Material.AlphaMode;
 
     public class DefaultMaterialGenerator : IMaterialGenerator {
@@ -29,7 +31,31 @@ namespace GLTFast {
             material.mainTextureScale = TEXTURE_SCALE;
             material.mainTextureOffset = TEXTURE_OFFSET;
 
-            if(gltfMaterial.pbrMetallicRoughness!=null) {
+            //added support for KHR_materials_pbrSpecularGlossiness
+            if (gltfMaterial.extensions != null) {
+                Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
+                if (specGloss != null) {
+                    material.shader = Shader.Find("Standard (Specular setup)");
+                    var diffuseTexture = GetTexture(specGloss.diffuseTexture, textures, images);
+                    if (diffuseTexture != null) {
+                        material.SetTexture("_MainTex", diffuseTexture);
+                    }
+                    else {
+                        material.SetColor("_Color", specGloss.diffuseColor);
+                    }
+                    var specGlossTexture = GetTexture(specGloss.specularGlossinessTexture, textures, images);
+                    if (specGlossTexture != null) {
+                        material.SetTexture("_SpecGlossMap", specGlossTexture);
+                        material.EnableKeyword("_SPECGLOSSMAP");
+                    }
+                    else {
+                        material.SetVector("_SpecColor", specGloss.specularColor);
+                        material.SetFloat("_Glossiness", (float)specGloss.glossinessFactor);
+                    }
+                }
+            }
+
+            if (gltfMaterial.pbrMetallicRoughness!=null) {
                 material.color = gltfMaterial.pbrMetallicRoughness.baseColor;
                 material.SetFloat(StandardShaderHelper.metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                 material.SetFloat(StandardShaderHelper.glossinessPropId, 1-gltfMaterial.pbrMetallicRoughness.roughnessFactor );
@@ -124,6 +150,41 @@ namespace GLTFast {
                 Debug.LogWarning("Double sided shading is not supported!");
             }
 
+            //Stephen Gower - added code for Enabling and Disabling Keywords for various alpha types.
+            //I don't remember which models were problematic, but it seemed to be the case that
+            //transparency wasn't always working the way it should. Added the code below fixed some of these issues.
+            if (gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
+                material.name = gltfMaterial.alphaModeEnum.ToString();
+                material.SetOverrideTag("RenderType", "TransparentCutout");
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                material.SetInt("_ZWrite", 1);
+                material.EnableKeyword("_ALPHATEST_ON");
+                material.DisableKeyword("_ALPHABLEND_ON");
+                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
+                material.SetFloat("_Cutoff", gltfMaterial.alphaCutoff);
+            }
+            else if (gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
+                material.SetOverrideTag("RenderType", "Transparent");
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                material.SetInt("_ZWrite", 0);
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.EnableKeyword("_ALPHABLEND_ON");
+                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            }
+            else {
+                material.SetOverrideTag("RenderType", "Opaque");
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
+                material.SetInt("_ZWrite", 1);
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.DisableKeyword("_ALPHABLEND_ON");
+                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                material.renderQueue = -1;
+            }
             return material;
         }
 
