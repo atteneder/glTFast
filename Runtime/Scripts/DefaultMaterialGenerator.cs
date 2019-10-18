@@ -11,9 +11,12 @@ namespace GLTFast {
     using AlphaMode = Schema.Material.AlphaMode;
 
     public class DefaultMaterialGenerator : IMaterialGenerator {
-
+        int test = 0;
         static readonly Vector2 TEXTURE_SCALE = new Vector2(1,-1);
         static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
+
+        private Shader specularSetupShader;
+        private Shader unlitShader;
 
         Material defaultMaterial;
 
@@ -35,22 +38,35 @@ namespace GLTFast {
             if (gltfMaterial.extensions != null) {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
-                    material.shader = Shader.Find("Standard (Specular setup)");
+                    if (!specularSetupShader) {
+                        specularSetupShader=Shader.Find("Standard (Specular setup)");
+                    }
+                    material.shader = specularSetupShader;
                     var diffuseTexture = GetTexture(specGloss.diffuseTexture, textures, images);
-                    if (diffuseTexture != null) {
-                        material.SetTexture("_MainTex", diffuseTexture);
+                    if (diffuseTexture != null) {   
+                        material.mainTexture = diffuseTexture;
                     }
                     else {
-                        material.SetColor("_Color", specGloss.diffuseColor);
+                        material.color = specGloss.diffuseColor;
                     }
                     var specGlossTexture = GetTexture(specGloss.specularGlossinessTexture, textures, images);
                     if (specGlossTexture != null) {
-                        material.SetTexture("_SpecGlossMap", specGlossTexture);
+                        material.SetTexture(StandardShaderHelper.specGlossMapPropId, specGlossTexture);
                         material.EnableKeyword("_SPECGLOSSMAP");
                     }
                     else {
-                        material.SetVector("_SpecColor", specGloss.specularColor);
-                        material.SetFloat("_Glossiness", (float)specGloss.glossinessFactor);
+                        material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
+                        material.SetFloat(StandardShaderHelper.glossinessPropId, (float)specGloss.glossinessFactor);
+                    }
+                }
+
+                Schema.MaterialUnlit unlitMaterial = gltfMaterial.extensions.KHR_materials_unlit;
+                if (unlitMaterial != null) {
+                    if (gltfMaterial.pbrMetallicRoughness != null) {
+                        if (!unlitShader) {
+                            unlitShader = Shader.Find("Unlit/Color");
+                        }
+                        material.shader = unlitShader;  
                     }
                 }
             }
@@ -136,9 +152,11 @@ namespace GLTFast {
             
             if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
                 material.SetFloat(StandardShaderHelper.cutoffPropId, gltfMaterial.alphaCutoff);
-                StandardShaderHelper.SetAlphaModeMask( material );
+                StandardShaderHelper.SetAlphaModeMask( material, gltfMaterial);
             } else if(gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
                 StandardShaderHelper.SetAlphaModeBlend( material );
+            } else {
+                StandardShaderHelper.SetOpaqueMode(material);
             }
 
             if(gltfMaterial.emissive != Color.black) {
@@ -148,42 +166,6 @@ namespace GLTFast {
 
             if(gltfMaterial.doubleSided) {
                 Debug.LogWarning("Double sided shading is not supported!");
-            }
-
-            //Stephen Gower - added code for Enabling and Disabling Keywords for various alpha types.
-            //I don't remember which models were problematic, but it seemed to be the case that
-            //transparency wasn't always working the way it should. Added the code below fixed some of these issues.
-            if (gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
-                material.name = gltfMaterial.alphaModeEnum.ToString();
-                material.SetOverrideTag("RenderType", "TransparentCutout");
-                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                material.SetInt("_ZWrite", 1);
-                material.EnableKeyword("_ALPHATEST_ON");
-                material.DisableKeyword("_ALPHABLEND_ON");
-                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;
-                material.SetFloat("_Cutoff", gltfMaterial.alphaCutoff);
-            }
-            else if (gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
-                material.SetOverrideTag("RenderType", "Transparent");
-                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                material.SetInt("_ZWrite", 0);
-                material.DisableKeyword("_ALPHATEST_ON");
-                material.EnableKeyword("_ALPHABLEND_ON");
-                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-            }
-            else {
-                material.SetOverrideTag("RenderType", "Opaque");
-                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
-                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.Zero);
-                material.SetInt("_ZWrite", 1);
-                material.DisableKeyword("_ALPHATEST_ON");
-                material.DisableKeyword("_ALPHABLEND_ON");
-                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                material.renderQueue = -1;
             }
             return material;
         }
