@@ -59,7 +59,7 @@ public class GltfSampleModels {
 		foreach (var line in lines)
 		{
 			if(!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
-				filteredLines.Add(line);
+				filteredLines.Add(line.TrimEnd('\r'));
 			}
 		}
 		callback( filteredLines.ToArray() );
