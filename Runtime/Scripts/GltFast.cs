@@ -226,7 +226,7 @@ namespace GLTFast {
         }
 
         void ParseJsonAndLoadBuffers( string json, string baseUri ) {
-            gltfRoot = JsonUtility.FromJson<Root>(json);
+            gltfRoot = ParseJson(json);
 
             if(!CheckExtensionSupport(gltfRoot)) {
                 loadingError = true;
@@ -251,6 +251,60 @@ namespace GLTFast {
                 nativeBuffers = new NativeArray<byte>[bufferCount];
                 binChunks = new GlbBinChunk[bufferCount];
             }
+        }
+
+        Root ParseJson(string json) {
+            // JsonUtility sometimes creates non-null default instances of objects-type members
+            // even though there are none in the original JSON.
+            // This work-around makes sure not existent JSON nodes will be null in the result.
+
+            // Step one: main JSON parsing
+            Profiler.BeginSample("JSON main");
+            var root = JsonUtility.FromJson<Root>(json);
+            Profiler.EndSample();
+
+            /// Step two:
+            /// detect, if a secondary null-check is necessary.
+            Profiler.BeginSample("JSON extension check");
+            bool check = false;
+            if(root.materials!=null) {
+                for (int i = 0; i < root.materials.Length; i++) {
+                    var mat = root.materials[i];
+                    check = mat.extensions!=null &&
+                    (
+                        mat.extensions.KHR_materials_pbrSpecularGlossiness!=null
+                        || mat.extensions.KHR_materials_unlit!=null
+                    );
+                    if(check) break;
+                }
+            }
+            Profiler.EndSample();
+
+            /// Step three:
+            /// If we have to make an explicit check, parse the JSON again with a
+            /// different, minimal Root class, where class members are serialized to
+            /// the type string. In case the string is null, there's no JSON node.
+            /// Otherwise the string would be empty ("").
+            if(check) {
+                Profiler.BeginSample("JSON secondary");
+                var fakeRoot = JsonUtility.FromJson<FakeSchema.Root>(json);
+
+                for (int i = 0; i < root.materials.Length; i++)
+                {
+                    var mat = root.materials[i];
+                    if(mat.extensions == null) continue;
+                    Assert.AreEqual(mat.name,fakeRoot.materials[i].name);
+                    var fake = fakeRoot.materials[i].extensions;
+                    if(fake.KHR_materials_unlit==null) {
+                        mat.extensions.KHR_materials_unlit = null;
+                    }
+                    if(fake.KHR_materials_pbrSpecularGlossiness==null) {
+                        mat.extensions.KHR_materials_pbrSpecularGlossiness = null;
+                    }
+                }
+                Profiler.EndSample();
+            }
+            return root;
         }
 
         /// <summary>

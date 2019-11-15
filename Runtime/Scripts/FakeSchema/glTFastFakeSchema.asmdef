@@ -1,13 +1,9 @@
 {
-    "name": "glTFast",
-    "references": [
-        "Draco",
-        "glTFastSchema",
-        "glTFastFakeSchema"
-    ],
+    "name": "glTFastFakeSchema",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": true,
+    "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
