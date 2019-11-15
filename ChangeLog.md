@@ -5,8 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support for unlit materials (KHR_materials_unlit extension)
+- Support for specular-glossiness type materials (KHR_materials_pbrSpecularGlossiness extension)
 ### Fixed
-- Fixed broken assemby references by switching to non-GUID refs (thanks Stephen Gower for pointing it out)
+- Fixed broken assembly references by switching to non-GUID refs (thanks Stephen Gower for pointing it out)
 
 ## [0.5.0] - 2019-09-14
 ### Added

@@ -3,15 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
 
+
 namespace GLTFast {
 
     using Materials;
+   
     using AlphaMode = Schema.Material.AlphaMode;
 
     public class DefaultMaterialGenerator : IMaterialGenerator {
-
+        int test = 0;
         static readonly Vector2 TEXTURE_SCALE = new Vector2(1,-1);
         static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
+
+        private Shader specularSetupShader;
+        private Shader unlitShader;
 
         Material defaultMaterial;
 
@@ -29,7 +34,44 @@ namespace GLTFast {
             material.mainTextureScale = TEXTURE_SCALE;
             material.mainTextureOffset = TEXTURE_OFFSET;
 
-            if(gltfMaterial.pbrMetallicRoughness!=null) {
+            //added support for KHR_materials_pbrSpecularGlossiness
+            if (gltfMaterial.extensions != null) {
+                Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
+                if (specGloss != null) {
+                    if (!specularSetupShader) {
+                        specularSetupShader=Shader.Find("Standard (Specular setup)");
+                    }
+                    material.shader = specularSetupShader;
+                    var diffuseTexture = GetTexture(specGloss.diffuseTexture, textures, images);
+                    if (diffuseTexture != null) {   
+                        material.mainTexture = diffuseTexture;
+                    }
+                    else {
+                        material.color = specGloss.diffuseColor;
+                    }
+                    var specGlossTexture = GetTexture(specGloss.specularGlossinessTexture, textures, images);
+                    if (specGlossTexture != null) {
+                        material.SetTexture(StandardShaderHelper.specGlossMapPropId, specGlossTexture);
+                        material.EnableKeyword("_SPECGLOSSMAP");
+                    }
+                    else {
+                        material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
+                        material.SetFloat(StandardShaderHelper.glossinessPropId, (float)specGloss.glossinessFactor);
+                    }
+                }
+
+                Schema.MaterialUnlit unlitMaterial = gltfMaterial.extensions.KHR_materials_unlit;
+                if (unlitMaterial != null) {
+                    if (gltfMaterial.pbrMetallicRoughness != null) {
+                        if (!unlitShader) {
+                            unlitShader = Shader.Find("Unlit/Color");
+                        }
+                        material.shader = unlitShader;  
+                    }
+                }
+            }
+
+            if (gltfMaterial.pbrMetallicRoughness!=null) {
                 material.color = gltfMaterial.pbrMetallicRoughness.baseColor;
                 material.SetFloat(StandardShaderHelper.metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                 material.SetFloat(StandardShaderHelper.glossinessPropId, 1-gltfMaterial.pbrMetallicRoughness.roughnessFactor );
@@ -110,9 +152,11 @@ namespace GLTFast {
             
             if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
                 material.SetFloat(StandardShaderHelper.cutoffPropId, gltfMaterial.alphaCutoff);
-                StandardShaderHelper.SetAlphaModeMask( material );
+                StandardShaderHelper.SetAlphaModeMask( material, gltfMaterial);
             } else if(gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
                 StandardShaderHelper.SetAlphaModeBlend( material );
+            } else {
+                StandardShaderHelper.SetOpaqueMode(material);
             }
 
             if(gltfMaterial.emissive != Color.black) {
@@ -123,7 +167,6 @@ namespace GLTFast {
             if(gltfMaterial.doubleSided) {
                 Debug.LogWarning("Double sided shading is not supported!");
             }
-
             return material;
         }
 
