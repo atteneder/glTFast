@@ -532,16 +532,6 @@ namespace GLTFast {
             Profiler.EndSample();
             yield return null;
 
-            Profiler.BeginSample("GenerateMaterial");
-            if(gltfRoot.materials!=null) {
-                materials = new UnityEngine.Material[gltfRoot.materials.Length];
-                for(int i=0;i<materials.Length;i++) {
-                    materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], gltfRoot.textures, images, resources );
-                }
-            }
-            Profiler.EndSample();
-            yield return null;
-
             PreparePrimitives(gltfRoot);
             yield return null;
 
@@ -558,6 +548,16 @@ namespace GLTFast {
                 imageCreateContexts = null;
             }
 #endif
+
+            Profiler.BeginSample("GenerateMaterial");
+            if(gltfRoot.materials!=null) {
+                materials = new UnityEngine.Material[gltfRoot.materials.Length];
+                for(int i=0;i<materials.Length;i++) {
+                    materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], gltfRoot.textures, images, resources );
+                }
+            }
+            Profiler.EndSample();
+            yield return null;
 
             for(int i=0;i<primitiveContexts.Length;i++) {
 #if !GLTFAST_NO_JOB

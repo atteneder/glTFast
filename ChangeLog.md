@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for specular-glossiness type materials (KHR_materials_pbrSpecularGlossiness extension)
 ### Fixed
 - Fixed broken assembly references by switching to non-GUID refs (thanks Stephen Gower for pointing it out)
+- Metallic-Roughness texture not working. Now they are created only after their source was properly loaded.
 
 ## [0.5.0] - 2019-09-14
 ### Added
