@@ -702,7 +702,9 @@ namespace GLTFast {
             }
 
             foreach( var rel in relations ) {
-                nodes[rel.Key]?.SetParent( nodes[rel.Value], false );
+                if (nodes[rel.Key] != null) {
+                    nodes[rel.Key].SetParent( nodes[rel.Value], false );
+                }
             }
 
             foreach(var scene in gltf.scenes) {
@@ -713,7 +715,9 @@ namespace GLTFast {
                 go.transform.localScale = new Vector3(1,1,-1);
 
                 foreach(var nodeIndex in scene.nodes) {
-                    nodes[nodeIndex]?.SetParent( go.transform, false );
+                    if (nodes[nodeIndex] != null) {
+                        nodes[nodeIndex].SetParent( go.transform, false );
+                    }
                 }
             }
 
@@ -1390,9 +1394,11 @@ namespace GLTFast {
                     break;
                 }
                 return result;
+            } else {
+                resultHandle = GCHandle.Alloc(null);
+                jobHandle = null;
+                return null;
             }
-            jobHandle = null;
-            return null;
         }
 
         unsafe void GetColorsJob( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors, out JobHandle? jobHandle, out GCHandle resultHandle ) {

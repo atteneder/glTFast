@@ -25,7 +25,7 @@ public class SampleModelsTest
 #if !(UNITY_ANDROID && !UNITY_EDITOR)
 		foreach (var file in files)
 		{
-			var path = Path.Combine(Application.streamingAssetsPath, prefix, file);
+			var path = Path.Combine(Application.streamingAssetsPath, Path.Combine(prefix, file));
 			Assert.IsTrue(
 				File.Exists(path)
 				, "file {0} not found"
@@ -52,7 +52,7 @@ public class SampleModelsTest
 #else
 				"file://{0}"
 #endif
-			    ,Path.Combine(Application.streamingAssetsPath, prefix, file)
+			    ,Path.Combine(Application.streamingAssetsPath, Path.Combine(prefix, file))
 			);
                              
 			Debug.LogFormat("Testing {0}", path);
@@ -97,7 +97,7 @@ public class SampleModelsTest
 #else
                 "file://{0}"
 #endif
-                ,Path.Combine(Application.streamingAssetsPath, prefix, file)
+                ,Path.Combine(Application.streamingAssetsPath, Path.Combine(prefix, file))
             );
                              
             Debug.LogFormat("Testing {0}", path);

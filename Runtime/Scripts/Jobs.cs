@@ -1,4 +1,10 @@
 ﻿#if !GLTFAST_NO_JOB
+﻿#if NET_LEGACY || NET_2_0 || NET_2_0_SUBSET
+#warning Consider using .NET 4.x equivalent scripting runtime version or upgrading Unity 2019.1 or newer for better performance
+#define COPY_LEGACY
+#else
+#endif
+
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -135,12 +141,19 @@ namespace GLTFast.Jobs {
         public Vector2* result;
 
         public void Execute() {
+#if COPY_LEGACY
+            for (int i = 0; i < count; i++)
+            {
+                result[i] = ((Vector2*)input)[i];
+            }
+#else
             System.Buffer.MemoryCopy(
                 input,
                 result,
                 count*8,
                 count*8
             );
+#endif
         }
     }
 
@@ -222,15 +235,6 @@ namespace GLTFast.Jobs {
                 result[i].r = input[i * 3];
                 result[i].g = input[i * 3 + 1];
                 result[i].b = input[i * 3 + 2];
-                
-                // TODO: try this partial memcopy and compare performance.
-                // System.Buffer.MemoryCopy(
-                //     input+(i*3),
-                //     result+i,
-                //     12,
-                //     12
-                // );
-
                 result[i].a = 1.0f;
             }
         }
@@ -255,15 +259,6 @@ namespace GLTFast.Jobs {
                 result[i].r = input[i * 3];
                 result[i].g = input[i * 3 + 1];
                 result[i].b = input[i * 3 + 2];
-
-                // TODO: try this partial memcopy and compare performance.
-                // System.Buffer.MemoryCopy(
-                //     input+(i*3),
-                //     result+i,
-                //     3,
-                //     3
-                // );
-                
                 result[i].a = 255;
             }
         }
@@ -331,12 +326,19 @@ namespace GLTFast.Jobs {
         public void* result;
 
         public void Execute() {
+#if COPY_LEGACY
+            for (int i = 0; i < bufferSize; i++)
+            {
+                ((byte*)result)[i] = ((byte*)input)[i];
+            }
+#else
             System.Buffer.MemoryCopy(
                 input,
                 result,
                 bufferSize,
                 bufferSize
             );
+#endif
         }
     }
 
@@ -362,12 +364,7 @@ namespace GLTFast.Jobs {
             byte* off = input;
             for (int i = 0; i < count; i++)
             {
-                System.Buffer.MemoryCopy(
-                    off,
-                    resultV,
-                    8,
-                    8
-                );
+                *resultV = *(Vector2*)off;
                 off += byteStride;
                 resultV += 1;
             }
@@ -395,12 +392,7 @@ namespace GLTFast.Jobs {
             byte* off = input;
             for (int i = 0; i < count; i++)
             {
-                System.Buffer.MemoryCopy(
-                    off,
-                    resultV,
-                    12,
-                    12
-                );
+                *resultV = *(Vector3*)off;
                 off += byteStride;
                 resultV += 1;
             }
@@ -429,12 +421,7 @@ namespace GLTFast.Jobs {
             byte* off = input;
             for (int i = 0; i < count; i++)
             {
-                System.Buffer.MemoryCopy(
-                    off,
-                    resultV,
-                    16,
-                    16
-                );
+                *resultV = *(Vector4*)off;
                 off += byteStride;
                 resultV += 1;
             }
