@@ -78,7 +78,6 @@ namespace GLTFast {
 
                 var mainTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.baseColorTexture,textures,images);
                 if(mainTxt!=null) {
-                    mainTxt.wrapMode = TextureWrapMode.Clamp;
                     material.mainTexture = mainTxt;
                 }
 

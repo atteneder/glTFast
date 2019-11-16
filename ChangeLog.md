@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unity backwards compatibility (tested with 2018.2 with .NET 3.5)
 ### Changed
 - Removed job-less support
+### Fixed
+- Texture default wrap mode is repeat (not set to clamp anymore)
 
 ## [0.6.0] - 2019-11-15
 ### Added
