@@ -59,16 +59,6 @@ namespace GLTFast {
 
             public Mesh mesh;
 
-#if GLTFAST_NO_JOB
-            public int[] indices;
-            public Vector3[] positions;
-            public Vector3[] normals;
-            public Vector2[] uvs0;
-            public Vector2[] uvs1;
-            public Vector4[] tangents;
-            public Color32[] colors32;
-            public Color[] colors;
-#else
             /// TODO remove begin
             public Vector3[] positions;
             public Vector3[] normals;
@@ -92,9 +82,7 @@ namespace GLTFast {
 
             public override Primitive? CreatePrimitive() {
                 Profiler.BeginSample("CreatePrimitive");
-#if !GLTFAST_NO_JOB
                 jobHandle.Complete();
-#endif
                 var msh = new UnityEngine.Mesh();
                 if( positions.Length > 65536 ) {
 #if UNITY_2017_3_OR_NEWER
@@ -136,9 +124,7 @@ namespace GLTFast {
                 // primitives[c.primtiveIndex] = new Primitive(msh,c.primitive.material);
                 // resources.Add(msh);
 
-#if !GLTFAST_NO_JOB
                 Dispose();
-#endif
                 Profiler.EndSample();
                 return new Primitive(msh,primitive.material);
             }
@@ -148,7 +134,6 @@ namespace GLTFast {
                     gcHandles[i].Free();
                 }
             }
-#endif
         }
 
         class PrimitiveDracoCreateContext : PrimitiveCreateContextBase {
@@ -180,11 +165,6 @@ namespace GLTFast {
                 return new Primitive(msh,primitive.material);
             }
         }
-
-#if GLTFAST_NO_JOB
-        public delegate CompType[] ExtractAccessor<CompType>(ref byte[] bytes, int start, int count);
-        public delegate CompType[] ExtractInterleavedAccessor<CompType>(ref byte[] bytes, int start, int count, int byteStride);
-#endif
 
         byte[][] buffers;
         NativeArray<byte>[] nativeBuffers;
@@ -535,7 +515,6 @@ namespace GLTFast {
             PreparePrimitives(gltfRoot);
             yield return null;
 
-#if !GLTFAST_NO_JOB
             if(imageCreateContexts!=null) {
                 foreach(var jh in imageCreateContexts) {
                     while(!jh.jobHandle.IsCompleted) {
@@ -547,7 +526,6 @@ namespace GLTFast {
                 }
                 imageCreateContexts = null;
             }
-#endif
 
             Profiler.BeginSample("GenerateMaterial");
             if(gltfRoot.materials!=null) {
@@ -560,13 +538,10 @@ namespace GLTFast {
             yield return null;
 
             for(int i=0;i<primitiveContexts.Length;i++) {
-#if !GLTFAST_NO_JOB
                 var primitiveContext = primitiveContexts[i];
-                
                 while(!primitiveContext.IsCompleted) {
                     yield return null;
                 }
-#endif
                 var primitive = primitiveContext.CreatePrimitive();
                 if(primitive.HasValue) {
                     primitives[primitiveContext.primtiveIndex] = primitive.Value;
@@ -581,10 +556,6 @@ namespace GLTFast {
             // Free temp resources
             primitiveContexts = null;
             DisposeBuffers();
-
-#if GLTFAST_NO_JOB
-            yield return null;
-#endif
         }
 
         void DisposeBuffers() {
@@ -754,10 +725,6 @@ namespace GLTFast {
                         var chunk = binChunks[bufferView.buffer];
                         var txt = new UnityEngine.Texture2D(4, 4);
                         txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
-#if GLTFAST_NO_JOB
-                        var imgBytes = Extractor.CreateBufferViewCopy(bufferView,chunk,buffer);
-                        txt.LoadImage(imgBytes);
-#else
                         var icc = new ImageCreateContext();
                         icc.imageIndex = i;
                         icc.buffer = new byte[bufferView.byteLength];
@@ -770,7 +737,6 @@ namespace GLTFast {
                         }
                         icc.jobHandle = job.Schedule();
                         contexts.Add(icc);
-#endif
                         
                         images[i] = txt;
                         resources.Add(txt);
@@ -850,7 +816,6 @@ namespace GLTFast {
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-#if !GLTFAST_NO_JOB
             int jobHandlesCount = 2;
             if(primitive.attributes.NORMAL>=0) {
                 jobHandlesCount++;
@@ -871,19 +836,13 @@ namespace GLTFast {
             c.gcHandles = new GCHandle[jobHandlesCount];
             // from now on use it as a counter
             jobHandlesCount = 0;
-#endif
             Profiler.EndSample();
 
             Profiler.BeginSample("PrepareIndicesJob");
-#if !GLTFAST_NO_JOB
             c.indices = new int[accessor.count];
             c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.indices, GCHandleType.Pinned);
-#endif
             switch( accessor.componentType ) {
             case GLTFComponentType.UnsignedByte:
-#if GLTFAST_NO_JOB
-                c.indices = Extractor.GetIndicesUInt8(buffer, start, accessor.count);
-#else
                 var job8 = new Jobs.GetIndicesUInt8Job();
                 job8.count = accessor.count;
                 fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
@@ -891,12 +850,8 @@ namespace GLTFast {
                     job8.result = (int*)dst;
                 }
                 jobHandles[jobHandlesCount] = job8.Schedule();
-#endif
                 break;
             case GLTFComponentType.UnsignedShort:
-#if GLTFAST_NO_JOB
-                c.indices = Extractor.GetIndicesUInt16(buffer, start, accessor.count);
-#else
                 var job16 = new Jobs.GetIndicesUInt16Job();
                 job16.count = accessor.count;
                 fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
@@ -904,12 +859,8 @@ namespace GLTFast {
                     job16.result = (int*) dst;
                 }
                 jobHandles[jobHandlesCount] = job16.Schedule();
-#endif
                 break;
             case GLTFComponentType.UnsignedInt:
-#if GLTFAST_NO_JOB
-                c.indices = Extractor.GetIndicesUInt32(buffer, start, accessor.count);
-#else
                 var job32 = new Jobs.GetIndicesUInt32Job();
                 job32.count = accessor.count;
                 fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
@@ -917,7 +868,6 @@ namespace GLTFast {
                     job32.result = (int*) dst;
                 }
                 jobHandles[jobHandlesCount] = job32.Schedule();
-#endif
                 break;
             default:
                 Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
@@ -926,28 +876,28 @@ namespace GLTFast {
             jobHandlesCount++;
             Profiler.EndSample();
 
-            // TODO: re-enable test for jobs as well
-            #if DEBUG && GLTFAST_NO_JOB
-            Profiler.BeginSample("PrepareIndicesSanityTest");
-            if( accessor.min!=null && accessor.min.Length>0 && accessor.max!=null && accessor.max.Length>0 ) {
-                int minInt = (int) accessor.min[0];
-                int maxInt = (int) accessor.max[0];
-                int minIndex = int.MaxValue;
-                int maxIndex = int.MinValue;
-                foreach (var index in c.indices) {
-                    Assert.IsTrue( index >= minInt );
-                    Assert.IsTrue( index <= maxInt );
-                    minIndex = Math.Min(minIndex,index);
-                    maxIndex = Math.Max(maxIndex,index);
-                }
-                if( minIndex!=minInt
-                    || maxIndex!=maxInt
-                ) {
-                    Debug.LogErrorFormat("Faulty index bounds: is {0}:{1} expected:{2}:{3}",minIndex,maxIndex,minInt,maxInt);
-                }
-            }
-            Profiler.EndSample();
-            #endif
+            // TODO: re-enable test for jobs
+            // #if DEBUG
+            // Profiler.BeginSample("PrepareIndicesSanityTest");
+            // if( accessor.min!=null && accessor.min.Length>0 && accessor.max!=null && accessor.max.Length>0 ) {
+            //     int minInt = (int) accessor.min[0];
+            //     int maxInt = (int) accessor.max[0];
+            //     int minIndex = int.MaxValue;
+            //     int maxIndex = int.MinValue;
+            //     foreach (var index in c.indices) {
+            //         Assert.IsTrue( index >= minInt );
+            //         Assert.IsTrue( index <= maxInt );
+            //         minIndex = Math.Min(minIndex,index);
+            //         maxIndex = Math.Max(maxIndex,index);
+            //     }
+            //     if( minIndex!=minInt
+            //         || maxIndex!=maxInt
+            //     ) {
+            //         Debug.LogErrorFormat("Faulty index bounds: is {0}:{1} expected:{2}:{3}",minIndex,maxIndex,minInt,maxInt);
+            //     }
+            // }
+            // Profiler.EndSample();
+            // #endif
 
             Profiler.BeginSample("PreparePositionsJob");
             // position
@@ -957,11 +907,6 @@ namespace GLTFast {
             Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
             #endif
 
-#if GLTFAST_NO_JOB
-            c.positions = gltf.IsAccessorInterleaved(pos)
-                ? GetAccessorDataInterleaved<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3sInterleaved )
-                : GetAccessorData<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3s );
-#else
             // TODO: unify with normals/tangent getter
             accessor = gltf.accessors[pos];
             bufferView = gltf.bufferViews[accessor.bufferView];
@@ -988,41 +933,40 @@ namespace GLTFast {
                 jobHandles[jobHandlesCount] = job.Schedule();
             }
             jobHandlesCount++;
-#endif
             Profiler.EndSample();
 
-            #if DEBUG && GLTFAST_NO_JOB
-            Profiler.BeginSample("PreparePosSanityCheck");
-            var posAcc = gltf.accessors[pos];
-            Vector3 minPos = new Vector3( (float) posAcc.min[0], (float) posAcc.min[1], (float) posAcc.min[2] );
-            Vector3 maxPos = new Vector3( (float) posAcc.max[0], (float) posAcc.max[1], (float) posAcc.max[2] );
-            foreach (var p in c.positions) {
-                if( ! (p.x >= minPos.x
-                    && p.y >= minPos.y
-                    && p.z >= minPos.z
-                    && p.x <= maxPos.x
-                    && p.y <= maxPos.y
-                    && p.z <= maxPos.z
-                    ))
-                {
-                    Debug.LogError("Vertex outside of limits");
-                    break;
-                }
-            }
+            // #if DEBUG
+            // Profiler.BeginSample("PreparePosSanityCheck");
+            // var posAcc = gltf.accessors[pos];
+            // Vector3 minPos = new Vector3( (float) posAcc.min[0], (float) posAcc.min[1], (float) posAcc.min[2] );
+            // Vector3 maxPos = new Vector3( (float) posAcc.max[0], (float) posAcc.max[1], (float) posAcc.max[2] );
+            // foreach (var p in c.positions) {
+            //     if( ! (p.x >= minPos.x
+            //         && p.y >= minPos.y
+            //         && p.z >= minPos.z
+            //         && p.x <= maxPos.x
+            //         && p.y <= maxPos.y
+            //         && p.z <= maxPos.z
+            //         ))
+            //     {
+            //         Debug.LogError("Vertex outside of limits");
+            //         break;
+            //     }
+            // }
 
-            var pUsage = new int[c.positions.Length];
-            foreach (var index in c.indices) {
-                pUsage[index] += 1;
-            }
-            int pMin = int.MaxValue;
-            foreach (var u in pUsage) {
-                pMin = Math.Min(pMin,u);
-            }
-            if(pMin<1) {
-                Debug.LogError("Unused vertices");
-            }
-            Profiler.EndSample();
-            #endif
+            // var pUsage = new int[c.positions.Length];
+            // foreach (var index in c.indices) {
+            //     pUsage[index] += 1;
+            // }
+            // int pMin = int.MaxValue;
+            // foreach (var u in pUsage) {
+            //     pMin = Math.Min(pMin,u);
+            // }
+            // if(pMin<1) {
+            //     Debug.LogError("Unused vertices");
+            // }
+            // Profiler.EndSample();
+            // #endif
 
             Profiler.BeginSample("PrepareNormals");
             if(primitive.attributes.NORMAL>=0) {
@@ -1030,11 +974,6 @@ namespace GLTFast {
                 #if DEBUG
                 Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
                 #endif
-#if GLTFAST_NO_JOB
-                c.normals = gltf.IsAccessorInterleaved(pos)
-                    ? GetAccessorDataInterleaved<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3sInterleaved )
-                    : GetAccessorData<Vector3>( gltf, pos, ref buffer, Extractor.GetVector3s );
-#else
                 accessor = gltf.accessors[pos];
                 bufferView = gltf.bufferViews[accessor.bufferView];
                 chunk = binChunks[bufferView.buffer];
@@ -1060,15 +999,10 @@ namespace GLTFast {
                     jobHandles[jobHandlesCount] = job.Schedule();
                 }
                 jobHandlesCount++;
-#endif
             }
             Profiler.EndSample();
 
             Profiler.BeginSample("PrepareUVs");
-#if GLTFAST_NO_JOB
-            c.uvs0 = GetUvs(gltf,primitive.attributes.TEXCOORD_0, ref buffer);
-            c.uvs1 = GetUvs(gltf,primitive.attributes.TEXCOORD_1, ref buffer);
-#else
             if(primitive.attributes.TEXCOORD_0>=0) {
                 JobHandle? jh;
                 c.uvs0 = GetUvsJob(gltf,primitive.attributes.TEXCOORD_0, ref buffer, out jh, out c.gcHandles[jobHandlesCount] );
@@ -1081,7 +1015,6 @@ namespace GLTFast {
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             }
-#endif
             Profiler.EndSample();
 
             Profiler.BeginSample("PrepareTangents");
@@ -1090,11 +1023,6 @@ namespace GLTFast {
                 #if DEBUG
                 Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector4) );
                 #endif
-#if GLTFAST_NO_JOB
-                c.tangents = gltf.IsAccessorInterleaved(pos)
-                    ? GetAccessorDataInterleaved<Vector4>( gltf, pos, ref buffer, Extractor.GetVector4sInterleaved)
-                    : GetAccessorData<Vector4>( gltf, pos, ref buffer, Extractor.GetVector4s );
-#else
                 accessor = gltf.accessors[pos];
                 bufferView = gltf.bufferViews[accessor.bufferView];
                 chunk = binChunks[bufferView.buffer];
@@ -1120,27 +1048,20 @@ namespace GLTFast {
                     jobHandles[jobHandlesCount] = job.Schedule();
                 }
                 jobHandlesCount++;
-#endif
             }
             Profiler.EndSample();
 
             Profiler.BeginSample("PrepareColors");
-#if GLTFAST_NO_JOB
-            GetColors(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors);
-#else
             if(primitive.attributes.COLOR_0>=0) {
                 JobHandle? jh;
                 GetColorsJob(gltf,primitive.attributes.COLOR_0, ref buffer, out c.colors32, out c.colors, out jh, out c.gcHandles[jobHandlesCount] );
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             }
-#endif
             Profiler.EndSample();
 
-#if !GLTFAST_NO_JOB
             c.jobHandle = JobHandle.CombineDependencies(jobHandles);
             jobHandles.Dispose();
-#endif
         }
 
         void PreparePrimitiveDraco( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveDracoCreateContext c ) {
@@ -1164,153 +1085,6 @@ namespace GLTFast {
         void OnMeshesLoaded( Mesh mesh ) {
             Debug.Log("draco is ready");
         }
-
-#if GLTFAST_NO_JOB
-
-        CompType[] GetAccessorData<CompType>( Root gltf, int accessorIndex, ref byte[] bytes, ExtractAccessor<CompType> extractor ) {
-            Assert.IsTrue(accessorIndex>=0);
-            var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var chunk = binChunks[bufferView.buffer];
-
-            int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-
-            #if DEBUG
-            int dataLength = ( accessor.count
-                * GetAccessorAttriuteTypeLength( accessor.typeEnum )
-                * GetAccessorComponentTypeLength( accessor.componentType ) );
-            // inside bufferView boundary?
-            Assert.IsTrue( accessor.byteOffset + dataLength <= bufferView.byteLength );
-            // inside chunk boundary?
-            Assert.IsTrue( accessor.byteOffset + bufferView.byteOffset + dataLength <= (int) chunk.length );
-            // inside bytes boundary?
-            Assert.IsTrue( start + dataLength <= bytes.Length );
-            #endif
-
-            return extractor(
-                ref bytes
-                ,start
-                ,accessor.count
-                );
-        }
-
-        CompType[] GetAccessorDataInterleaved<CompType>( Root gltf, int accessorIndex, ref byte[] bytes, ExtractInterleavedAccessor<CompType> extractor)
-        {
-            Assert.IsTrue(accessorIndex >= 0);
-            var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var chunk = binChunks[bufferView.buffer];
-
-            int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-
-#if DEBUG
-            int dataLength = (accessor.count * bufferView.byteStride);
-            // inside bufferView boundary?
-            Assert.IsTrue(dataLength <= bufferView.byteLength);
-            // inside chunk boundary?
-            Assert.IsTrue(bufferView.byteOffset + dataLength <= (int)chunk.length);
-            // inside bytes boundary?
-            Assert.IsTrue(start + dataLength <= bytes.Length);
-#endif
-
-            return extractor(
-                ref bytes
-                , start
-                , accessor.count
-                , bufferView.byteStride
-                );
-        }
-
-        Vector2[] GetUvs( Root gltf, int accessorIndex, ref byte[] bytes ) {
-            if(accessorIndex>=0) {
-                var uvAccessor = gltf.accessors[accessorIndex];
-                Assert.AreEqual( uvAccessor.typeEnum, GLTFAccessorAttributeType.VEC2 );
-                #if DEBUG
-                Assert.AreEqual( GetAccessorTye(uvAccessor.typeEnum), typeof(Vector2) );
-                #endif
-                bool interleaved = gltf.IsAccessorInterleaved(accessorIndex);
-                switch( uvAccessor.componentType ) {
-                case GLTFComponentType.Float:
-                    return interleaved
-                        ? GetAccessorDataInterleaved<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsFloatInterleaved)
-                        : GetAccessorData<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsFloat );
-                case GLTFComponentType.UnsignedByte:
-                    return interleaved
-                        ? GetAccessorDataInterleaved<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsUInt8Interleaved )
-                        : GetAccessorData<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsUInt8 );
-                case GLTFComponentType.UnsignedShort:
-                    return interleaved
-                        ? GetAccessorDataInterleaved<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsUInt16Interleaved )
-                        : GetAccessorData<Vector2>( gltf, accessorIndex, ref bytes, Extractor.GetUVsUInt16 );
-                default:
-                    Debug.LogErrorFormat("Unsupported UV format {0}", uvAccessor.componentType);
-                    break;
-                }
-            }
-            return null;
-        }
-
-        void GetColors( Root gltf, int accessorIndex, ref byte[] bytes, out Color32[] colors32, out Color[] colors ) {
-
-            colors = null;
-            colors32 = null;
-            if(accessorIndex>=0) {
-                var colorAccessor = gltf.accessors[accessorIndex];
-                var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
-                if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
-                {
-                    switch (colorAccessor.componentType)
-                    {
-                        case GLTFComponentType.Float:
-                            colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3FloatInterleaved)
-                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3Float);;
-                            break;
-                        case GLTFComponentType.UnsignedByte:
-                            colors32 = interleaved
-                                ? GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8Interleaved)
-                                : GetAccessorData<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt8);
-                            break;
-                        case GLTFComponentType.UnsignedShort:
-                            colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16Interleaved )
-                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec3UInt16 );
-                            break;
-                        default:
-                            Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
-                            break;
-                    }
-                }
-                else if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC4)
-                {
-                    switch (colorAccessor.componentType)
-                    {
-                        case GLTFComponentType.Float:
-                            colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4FloatInterleaved)
-                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4Float);
-                            break;
-                        case GLTFComponentType.UnsignedByte:
-                            colors32 = interleaved
-                                ? GetAccessorDataInterleaved<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8Interleaved)
-                                : GetAccessorData<Color32>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt8);
-                            break;
-                        case GLTFComponentType.UnsignedShort:
-                            colors = interleaved
-                                ? GetAccessorDataInterleaved<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16Interleaved)
-                                : GetAccessorData<Color>( gltf, accessorIndex, ref bytes, Extractor.GetColorsVec4UInt16);
-                            break;
-                        default:
-                            Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
-                            break;
-                    }
-                } else {
-                    Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
-                }
-            }
-        }
-
-#else
 
         unsafe Vector2[] GetUvsJob( Root gltf, int accessorIndex, ref byte[] bytes, out JobHandle? jobHandle, out GCHandle resultHandle ) {
             if(accessorIndex>=0) {
@@ -1518,7 +1292,6 @@ namespace GLTFast {
                 Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
             }
         }
-#endif
 
 #if DEBUG
         static Type GetAccessorTye( GLTFAccessorAttributeType accessorAttributeType ) {
