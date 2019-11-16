@@ -8,6 +8,7 @@ using UnityEngine.Profiling;
 using Unity.Jobs;
 using Unity.Collections;
 using System.Runtime.InteropServices;
+using KtxUnity;
 
 namespace GLTFast {
 
@@ -21,6 +22,8 @@ namespace GLTFast {
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
             "KHR_draco_mesh_compression",
+            "KHR_image_ktx2",
+            "KHR_texture_basisu",
             "KHR_materials_pbrSpecularGlossiness",
             "KHR_materials_unlit",
             "KHR_texture_transform"
@@ -47,6 +50,36 @@ namespace GLTFast {
             public byte[] buffer;
             public GCHandle gcHandle;
             public JobHandle jobHandle;
+        }
+
+        class KtxLoadContext {
+            public int imageIndex;
+            public Texture2D texture;
+            KtxTexture ktxTexture;
+            NativeArray<byte> data;
+
+            public KtxLoadContext(int index,byte[] data) {
+                this.imageIndex = index;
+                this.data = new NativeArray<byte>(data,KtxNativeInstance.defaultAllocator);
+                ktxTexture = new KtxTexture();
+                texture = null;
+            }
+
+            public IEnumerator LoadKtx() {
+                ktxTexture.onTextureLoaded += OnKtxLoaded;
+                yield return ktxTexture.LoadBytesRoutine(data);
+                data.Dispose();
+            }
+
+            void OnKtxLoaded(Texture2D newTexture) {
+                ktxTexture.onTextureLoaded -= OnKtxLoaded;
+                texture = newTexture;
+            }
+
+            public void Dispose() {
+                texture = null;
+                ktxTexture = null;
+            }
         }
 
         abstract class PrimitiveCreateContextBase {
@@ -193,6 +226,7 @@ namespace GLTFast {
         GlbBinChunk? glbBinChunk;
         Texture2D[] images = null;
         List<ImageCreateContext> imageCreateContexts;
+        List<KtxLoadContext> ktxLoadContexts;
 
         bool loadingError = false;
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
@@ -333,7 +367,8 @@ namespace GLTFast {
                         Debug.LogWarning("Image is missing mime type");
                         knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
                             || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                            || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
+                            || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase)
+                            || img.uri.EndsWith(".ktx",StringComparison.OrdinalIgnoreCase);
                     } else {
                         knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
                     }
@@ -345,7 +380,17 @@ namespace GLTFast {
                             // Inside buffer
                         } else
                         if(!string.IsNullOrEmpty(img.uri)) {
-                            LoadTexture(i,baseUri+img.uri);
+                            if(textureDownloads==null) {
+                                textureDownloads = new Dictionary<int, UnityWebRequestAsyncOperation>();
+                            }
+                            var url = baseUri+img.uri;
+                            UnityWebRequest www;
+                            if(img.isKtx) {
+                                www = UnityWebRequest.Get(url);
+                            } else {
+                                www = UnityWebRequestTexture.GetTexture(url);
+                            }
+                            textureDownloads[i] = www.SendWebRequest();
                         }
                     }
                 }
@@ -385,10 +430,30 @@ namespace GLTFast {
                         Debug.LogError(www.error);
                     }
                     else {
-                        images[dl.Key] = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
+                        var img = gltfRoot.images[dl.Key];
+                        if(img.isKtx) {
+                            if(ktxLoadContexts==null) {
+                                ktxLoadContexts = new List<KtxLoadContext>();
+                            }
+                            var ktxContext = new KtxLoadContext(dl.Key,www.downloadHandler.data);
+                            ktxLoadContexts.Add(ktxContext);
+                        } else {
+                            images[dl.Key] = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
+                        }
                     }
                 }
             }
+        }
+
+        public IEnumerator WaitForKtxTextures() {
+            if(ktxLoadContexts==null) yield break;
+            foreach (var ktx in ktxLoadContexts)
+            {
+                yield return ktx.LoadKtx();
+                images[ktx.imageIndex] = ktx.texture;
+                ktx.Dispose();
+            }
+            ktxLoadContexts.Clear();
         }
 
         public bool InstanciateGltf( Transform parent ) {
@@ -407,16 +472,6 @@ namespace GLTFast {
             }
 
             downloads[index] = www.SendWebRequest();
-        }
-
-        void LoadTexture( int index, string url ) {
-            var www = UnityWebRequestTexture.GetTexture(url);
-
-            if(textureDownloads==null) {
-                textureDownloads = new Dictionary<int, UnityWebRequestAsyncOperation>();
-            }
-
-            textureDownloads[index] = www.SendWebRequest();
         }
 
         public bool LoadGlb( byte[] bytes, string url ) {
@@ -534,7 +589,7 @@ namespace GLTFast {
             if(gltfRoot.materials!=null) {
                 materials = new UnityEngine.Material[gltfRoot.materials.Length];
                 for(int i=0;i<materials.Length;i++) {
-                    materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], gltfRoot.textures, images );
+                    materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], ref gltfRoot.textures, ref gltfRoot.images, ref images );
                 }
             }
             Profiler.EndSample();

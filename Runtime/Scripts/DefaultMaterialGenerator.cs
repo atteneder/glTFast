@@ -40,7 +40,12 @@ namespace GLTFast {
             return new Material(unlitShader);
         }
 
-        public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture2D[] images ) {
+        public UnityEngine.Material GenerateMaterial(
+            Schema.Material gltfMaterial,
+            ref Schema.Texture[] textures,
+            ref Schema.Image[] schemaImages,
+            ref UnityEngine.Texture2D[] images
+        ) {
             UnityEngine.Material material;
             
             if (gltfMaterial.extensions!=null && gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness!=null) {
@@ -68,9 +73,9 @@ namespace GLTFast {
                     material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
                     material.SetFloat(StandardShaderHelper.glossinessPropId,specGloss.glossinessFactor);
 
-                    TrySetTexture(specGloss.diffuseTexture,material,StandardShaderHelper.mainTexPropId,textures,images);
+                    TrySetTexture(specGloss.diffuseTexture,material,StandardShaderHelper.mainTexPropId,ref textures,ref schemaImages,ref images);
 
-                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,StandardShaderHelper.specGlossMapPropId,textures,images)) {
+                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,StandardShaderHelper.specGlossMapPropId,ref textures,ref schemaImages,ref images)) {
                         material.EnableKeyword(StandardShaderHelper.KW_SPEC_GLOSS_MAP);
                     }
                 }
@@ -85,24 +90,25 @@ namespace GLTFast {
                     gltfMaterial.pbrMetallicRoughness.baseColorTexture,
                     material,
                     StandardShaderHelper.mainTexPropId,
-                    textures,
-                    images
+                    ref textures,
+                    ref schemaImages,
+                    ref images
                     );
                 
-                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,StandardShaderHelper.metallicGlossMapPropId,textures,images)) {
+                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,StandardShaderHelper.metallicGlossMapPropId,ref textures,ref schemaImages,ref images)) {
                     material.EnableKeyword(StandardShaderHelper.KW_METALLIC_ROUGNESS_MAP);
                 }
             }
 
-            if(TrySetTexture(gltfMaterial.normalTexture,material,StandardShaderHelper.bumpMapPropId,textures,images)) {
+            if(TrySetTexture(gltfMaterial.normalTexture,material,StandardShaderHelper.bumpMapPropId,ref textures,ref schemaImages,ref images)) {
                 material.EnableKeyword("_NORMALMAP");
             }
 
-            if(TrySetTexture(gltfMaterial.occlusionTexture,material,StandardShaderHelper.occlusionMapPropId,textures,images)) {
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,StandardShaderHelper.occlusionMapPropId,ref textures,ref schemaImages,ref images)) {
                 material.EnableKeyword(StandardShaderHelper.KW_OCCLUSION);
             }
 
-            if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,textures,images)) {
+            if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,ref textures,ref schemaImages,ref images)) {
                 material.EnableKeyword("_EMISSION");
             }
             
@@ -130,8 +136,9 @@ namespace GLTFast {
             Schema.TextureInfo textureInfo,
             UnityEngine.Material material,
             int propertyId,
-            Schema.Texture[] textures,
-            Texture2D[] images
+            ref Schema.Texture[] textures,
+            ref Schema.Image[] schemaImages,
+            ref Texture2D[] images
             )
         {
             if (textureInfo != null && textureInfo.index >= 0)
@@ -140,15 +147,24 @@ namespace GLTFast {
                 if (textures != null && textures.Length > bcTextureIndex)
                 {
                     var txt = textures[bcTextureIndex];
-                    if (images != null && images.Length > txt.source)
+                    var imageIndex = txt.source;
+
+                    if(txt.extensions!=null) {
+                        if (txt.extensions.KHR_texture_basisu!=null) {
+                            imageIndex = txt.extensions.KHR_texture_basisu.source;
+                        }
+                    }
+
+                    if (images != null && imageIndex >= 0 && images.Length > imageIndex)
                     {
-                        material.SetTexture(propertyId,images[txt.source]);
-                        TrySetTextureTransform(textureInfo,material,propertyId);
+                        material.SetTexture(propertyId,images[imageIndex]);
+                        var isKtx = schemaImages[imageIndex].isKtx;
+                        TrySetTextureTransform(textureInfo,material,propertyId,!isKtx);
                         return true;
                     }
                     else
                     {
-                        Debug.LogErrorFormat("Image #{0} not found", txt.source);
+                        Debug.LogErrorFormat("Image #{0} not found", imageIndex);
                     }
                 }
                 else
@@ -162,16 +178,20 @@ namespace GLTFast {
         static void TrySetTextureTransform(
             Schema.TextureInfo textureInfo,
             UnityEngine.Material material,
-            int propertyId
+            int propertyId,
+            bool flipY = false
             )
         {
+            Vector2 offset = Vector2.zero;
+            Vector2 scale = Vector2.one;
+
             if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
                 var tt = textureInfo.extensions.KHR_texture_transform;
                 if(tt.texCoord!=0) {
                     Debug.LogError("Multiple UV sets are not supported!");
                 }
                 if(tt.offset!=null) {
-                    material.SetTextureOffset(propertyId,new Vector2(tt.offset[0],1-tt.offset[1]));
+                    offset = new Vector2(tt.offset[0],tt.offset[1]);
                 }
                 if(tt.rotation!=0) {
                     float cos = Mathf.Cos(tt.rotation);
@@ -180,9 +200,17 @@ namespace GLTFast {
                     material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
                 }
                 if(tt.scale!=null) {
-                    material.SetTextureScale(propertyId,new Vector2(tt.scale[0],-tt.scale[1]));
+                    scale = new Vector2(tt.scale[0],tt.scale[1]);
                 }
             }
+
+            if(flipY) {
+                offset.y = 1-offset.y;
+                scale.y = -scale.y;
+            }
+
+            material.SetTextureOffset(propertyId,offset);
+            material.SetTextureScale(propertyId,scale);
         }
     }
 }

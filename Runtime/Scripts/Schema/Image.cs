@@ -21,5 +21,13 @@
         /// Use this instead of the image's uri property.
         /// </summary>
         public int bufferView = -1;
+
+        public ImageExtension extensions;
+
+        public bool isKtx {
+            get {
+                return extensions!=null && extensions.KHR_image_ktx2!=null;
+            }
+        }
     }
 }

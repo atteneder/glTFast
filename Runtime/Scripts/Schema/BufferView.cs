@@ -8,12 +8,7 @@
     }
 
     [System.Serializable]
-    public class BufferView {
-        /// <summary>
-        /// The index of the buffer.
-        /// </summary>
-        public int buffer;
-
+    public class BufferSlice {
         /// <summary>
         /// The offset into the buffer in bytes.
         /// <minimum>0</minimum>
@@ -25,6 +20,14 @@
         /// <minimum>0</minimum>
         /// </summary>
         public int byteLength;
+    }
+
+    [System.Serializable]
+    public class BufferView : BufferSlice {
+        /// <summary>
+        /// The index of the buffer.
+        /// </summary>
+        public int buffer;
 
         /// <summary>
         /// The stride, in bytes, between vertex attributes or other interleavable data.

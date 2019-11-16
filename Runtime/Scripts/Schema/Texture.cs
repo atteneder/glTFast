@@ -11,5 +11,7 @@
         /// The index of the image used by this texture.
         /// </summary>
         public int source = -1;
+
+        public TextureExtension extensions;
     }
 }

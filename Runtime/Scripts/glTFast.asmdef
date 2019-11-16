@@ -3,7 +3,8 @@
     "references": [
         "Draco",
         "glTFastSchema",
-        "glTFastFakeSchema"
+        "glTFastFakeSchema",
+        "Ktx"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

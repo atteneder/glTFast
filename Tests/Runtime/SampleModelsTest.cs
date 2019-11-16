@@ -3,8 +3,8 @@ using UnityEngine.TestTools;
 using UnityEngine.Networking;
 using NUnit.Framework;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using GLTFast;
 
 public class SampleModelsTest
@@ -73,6 +73,8 @@ public class SampleModelsTest
 			Assert.False(glTFast.LoadingError);
 			yield return glTFast.WaitForTextureDownloads();
 			Assert.False(glTFast.LoadingError);
+			yield return glTFast.WaitForKtxTextures();
+			Assert.False(glTFast.LoadingError);
 			yield return glTFast.Prepare();
 			Assert.False(glTFast.LoadingError);
 			var success = glTFast.InstanciateGltf(go.transform);
@@ -120,6 +122,8 @@ public class SampleModelsTest
 			yield return glTFast.WaitForBufferDownloads();
 			Assert.False(glTFast.LoadingError);
 			yield return glTFast.WaitForTextureDownloads();
+			Assert.False(glTFast.LoadingError);
+			yield return glTFast.WaitForKtxTextures();
 			Assert.False(glTFast.LoadingError);
 			yield return glTFast.Prepare();
 			Assert.False(glTFast.LoadingError);

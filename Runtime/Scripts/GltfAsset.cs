@@ -67,6 +67,8 @@ namespace GLTFast
 
                 yield return routineBuffers;
                 yield return routineTextures;
+
+                yield return StartCoroutine( gLTFastInstance.WaitForKtxTextures() );
             }
 
             allFine = !gLTFastInstance.LoadingError;
