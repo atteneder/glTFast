@@ -1319,7 +1319,6 @@ namespace GLTFast {
                 #if DEBUG
                 Assert.AreEqual( GetAccessorTye(uvAccessor.typeEnum), typeof(Vector2) );
                 #endif
-                bool interleaved = gltf.IsAccessorInterleaved(accessorIndex);
 
                 var bufferView = gltf.bufferViews[uvAccessor.bufferView];
                 var chunk = binChunks[bufferView.buffer];
