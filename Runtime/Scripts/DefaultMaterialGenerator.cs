@@ -11,7 +11,7 @@ namespace GLTFast {
     using AlphaMode = Schema.Material.AlphaMode;
 
     public class DefaultMaterialGenerator : IMaterialGenerator {
-        int test = 0;
+
         static readonly Vector2 TEXTURE_SCALE = new Vector2(1,-1);
         static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
 

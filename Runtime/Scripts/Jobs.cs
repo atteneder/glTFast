@@ -1,6 +1,4 @@
 ﻿#if !GLTFAST_NO_JOB
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
