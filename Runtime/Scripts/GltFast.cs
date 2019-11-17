@@ -582,7 +582,8 @@ namespace GLTFast {
                     continue;
                 }
 
-                var go = new GameObject(node.name ?? "Node");
+                var goName = node.name;
+                var go = new GameObject();
                 nodes[nodeIndex] = go.transform;
 
                 if(node.children!=null) {
@@ -652,14 +653,17 @@ namespace GLTFast {
                     int end = meshPrimitiveIndex[node.mesh+1];
                     GameObject meshGo = null;
                     for( int i=meshPrimitiveIndex[node.mesh]; i<end; i++ ) {
+                        var mesh = primitives[i].mesh;
+                        var meshName = string.IsNullOrEmpty(mesh.name) ? null : mesh.name;
                         if(meshGo==null) {
                             meshGo = go;
+                            goName = goName ?? meshName;
                         } else {
-                            meshGo = new GameObject( "Primitive" );
+                            meshGo = new GameObject( meshName ?? "Primitive" );
                             meshGo.transform.SetParent(go.transform,false);
                         }
                         var mf = meshGo.AddComponent<MeshFilter>();
-                        mf.mesh = primitives[i].mesh;
+                        mf.mesh = mesh;
                         var mr = meshGo.AddComponent<MeshRenderer>();
                         
                         int materialIndex = primitives[i].materialIndex;
@@ -670,6 +674,8 @@ namespace GLTFast {
                         }
                     }
                 }
+
+                go.name = goName ?? "Node";
             }
 
             foreach( var rel in relations ) {

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unity backwards compatibility (tested with 2018.2 with .NET 3.5)
 ### Changed
 - Removed job-less support
+- The node or primitive GameObjects now have their mesh's name, if there is no node name provided
 ### Fixed
 - Texture default wrap mode is repeat (not set to clamp anymore)
 
