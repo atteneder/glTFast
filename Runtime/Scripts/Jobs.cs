@@ -29,9 +29,11 @@ namespace GLTFast.Jobs {
 
         public void Execute()
         {
-            for (var i = 0; i < count; i++)
-            {
-                result[i] = input[i];
+            int triCount = count/3;
+            for (var i = 0; i < triCount; i++) {
+                result[i*3] = input[i*3];
+                result[i*3+2] = input[i*3+1];
+                result[i*3+1] = input[i*3+2];
             }
         }
     }
@@ -51,9 +53,11 @@ namespace GLTFast.Jobs {
 
         public void Execute()
         {
-            for (var i = 0; i < count; i++)
-            {
-                result[i] = input[i];
+            int triCount = count/3;
+            for (var i = 0; i < triCount; i++) {
+                result[i*3] = input[i*3];
+                result[i*3+2] = input[i*3+1];
+                result[i*3+1] = input[i*3+2];
             }
         }
     }
@@ -73,9 +77,11 @@ namespace GLTFast.Jobs {
 
         public void Execute()
         {
-            for (var i = 0; i < count; i++)
-            {
-                result[i] = (int) input[i];
+            int triCount = count/3;
+            for (var i = 0; i < triCount; i++) {
+                result[i*3] = (int)input[i*3];
+                result[i*3+2] = (int)input[i*3+1];
+                result[i*3+1] = (int)input[i*3+2];
             }
         }
     }
@@ -341,6 +347,62 @@ namespace GLTFast.Jobs {
         }
     }
 
+    public unsafe struct GetVector3sJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float* result;
+
+        public void Execute() {
+            System.Buffer.MemoryCopy(
+                input,
+                result,
+                count*12,
+                count*12
+            );
+
+            for (int i = 0; i < count; i++)
+            {
+                result[i*3+2] = -input[i*3+2];
+            }
+        }
+    }
+
+    public unsafe struct GetVector4sJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float* result;
+
+        public void Execute() {
+            System.Buffer.MemoryCopy(
+                input,
+                result,
+                count*16,
+                count*16
+            );
+
+            for (int i = 0; i < count; i++)
+            {
+                result[i*4+2] = -input[i*4+2];
+            }
+        }
+    }
+
     /// Untested!
     public unsafe struct GetVector2sInterleavedJob : IJob {
 
@@ -391,7 +453,8 @@ namespace GLTFast.Jobs {
             byte* off = input;
             for (int i = 0; i < count; i++)
             {
-                *resultV = *(Vector3*)off;
+                *(Vector2*)resultV = *(Vector2*)off;
+                *(((float*)resultV)+2) = -*(((float*)off)+2);
                 off += byteStride;
                 resultV += 1;
             }

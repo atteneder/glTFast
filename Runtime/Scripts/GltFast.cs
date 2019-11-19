@@ -596,19 +596,19 @@ namespace GLTFast {
                     Matrix4x4 m = new Matrix4x4();
                     m.m00 = node.matrix[0];
                     m.m10 = node.matrix[1];
-                    m.m20 = node.matrix[2];
+                    m.m20 = -node.matrix[2];
                     m.m30 = node.matrix[3];
                     m.m01 = node.matrix[4];
                     m.m11 = node.matrix[5];
-                    m.m21 = node.matrix[6];
+                    m.m21 = -node.matrix[6];
                     m.m31 = node.matrix[7];
-                    m.m02 = node.matrix[8];
-                    m.m12 = node.matrix[9];
+                    m.m02 = -node.matrix[8];
+                    m.m12 = -node.matrix[9];
                     m.m22 = node.matrix[10];
                     m.m32 = node.matrix[11];
                     m.m03 = node.matrix[12];
                     m.m13 = node.matrix[13];
-                    m.m23 = node.matrix[14];
+                    m.m23 = -node.matrix[14];
                     m.m33 = node.matrix[15];
 
                     if(m.ValidTRS()) {
@@ -627,14 +627,14 @@ namespace GLTFast {
                         go.transform.localPosition = new Vector3(
                             node.translation[0],
                             node.translation[1],
-                            node.translation[2]
+                            -node.translation[2]
                         );
                     }
                     if(node.rotation!=null) {
                         Assert.AreEqual( node.rotation.Length, 4 );
                         go.transform.localRotation = new Quaternion(
-                            node.rotation[0],
-                            node.rotation[1],
+                            -node.rotation[0],
+                            -node.rotation[1],
                             node.rotation[2],
                             node.rotation[3]
                         );
@@ -687,9 +687,6 @@ namespace GLTFast {
             foreach(var scene in gltf.scenes) {
                 var go = new GameObject(scene.name ?? "Scene");
                 go.transform.SetParent( parent, false);
-
-                // glTF to unity space ( -z forward to z forward )
-                go.transform.localScale = new Vector3(1,1,-1);
 
                 foreach(var nodeIndex in scene.nodes) {
                     if (nodes[nodeIndex] != null) {
@@ -930,11 +927,11 @@ namespace GLTFast {
                 }
                 jobHandles[jobHandlesCount] = job.Schedule();
             } else {
-                var job = new Jobs.MemCopyJob();
-                job.bufferSize = accessor.count * 12;
+                var job = new Jobs.GetVector3sJob();
+                job.count = accessor.count;
                 fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
-                    job.input = src;
-                    job.result = dst;
+                    job.input = (float*)src;
+                    job.result = (float*)dst;
                 }
                 jobHandles[jobHandlesCount] = job.Schedule();
             }
@@ -996,11 +993,11 @@ namespace GLTFast {
                     }
                     jobHandles[jobHandlesCount] = job.Schedule();
                 } else {
-                    var job = new Jobs.MemCopyJob();
-                    job.bufferSize = accessor.count * 12;
+                    var job = new Jobs.GetVector3sJob();
+                    job.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
-                        job.input = src;
-                        job.result = dst;
+                        job.input = (float*)src;
+                        job.result = (float*)dst;
                     }
                     jobHandles[jobHandlesCount] = job.Schedule();
                 }
@@ -1045,11 +1042,11 @@ namespace GLTFast {
                     }
                     jobHandles[jobHandlesCount] = job.Schedule();
                 } else {
-                    var job = new Jobs.MemCopyJob();
-                    job.bufferSize = accessor.count * 16;
+                    var job = new Jobs.GetVector4sJob();
+                    job.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(c.tangents[0]) ) {
-                        job.input = src;
-                        job.result = dst;
+                        job.input = (float*)src;
+                        job.result = (float*)dst;
                     }
                     jobHandles[jobHandlesCount] = job.Schedule();
                 }
