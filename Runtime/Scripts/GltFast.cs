@@ -331,11 +331,9 @@ namespace GLTFast {
                     bool knownImageType = false;
                     if(string.IsNullOrEmpty(img.mimeType)) {
                         Debug.LogWarning("Image is missing mime type");
-                        knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
-                            || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                            || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
+                        knownImageType = IsKnownImageFileExtension(img.uri);
                     } else {
-                        knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
+                        knownImageType = IsKnownImageMimeType(img.mimeType);
                     }
 
                     if (knownImageType)
@@ -715,11 +713,9 @@ namespace GLTFast {
                 bool knownImageType = false;
                 if(string.IsNullOrEmpty(img.mimeType)) {
                     Debug.LogWarning("Image is missing mime type");
-                    knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
-                        || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                        || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
+                    knownImageType = IsKnownImageFileExtension(img.uri);
                 } else {
-                    knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
+                    knownImageType = IsKnownImageMimeType(img.mimeType);
                 }
 
                 if (knownImageType)
@@ -1297,6 +1293,22 @@ namespace GLTFast {
             } else {
                 Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
             }
+        }
+
+        bool IsKnownImageMimeType(string mimeType) {
+            return mimeType == "image/jpeg"
+            || mimeType == "image/png"
+            // || mimeType == "image/ktx"
+            ;
+        }
+        
+        bool IsKnownImageFileExtension(string path) {
+            return path.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
+                || path.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
+                || path.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase)
+                // || path.EndsWith(".ktx",StringComparison.OrdinalIgnoreCase)
+                // || path.EndsWith(".ktx2",StringComparison.OrdinalIgnoreCase)
+                ;
         }
 
 #if DEBUG
