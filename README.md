@@ -62,7 +62,7 @@ gltf.onLoadComplete += YourCallbackMethod;
 
 ### Materials and Shader Variants
 
-glTF files can contain lots of materials making use of various shader features. You have to make sure all shader variants you project will probably use are included in the build. If not, the materials will be fine in the editor, but not in the builds.
+glTF files can contain lots of materials making use of various shader features. You have to make sure all shader variants your project will probably use are included in the build. If not, the materials will be fine in the editor, but not in the builds.
 glTFast uses the Unity Standard Shader. Including all its variants would be quite big. There's an easy way to find the right subset, if you already know what files you'll expect:
 
 * Run your scene that loads all glTFs you expect in the editor.
