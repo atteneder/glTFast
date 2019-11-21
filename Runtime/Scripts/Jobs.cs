@@ -361,12 +361,20 @@ namespace GLTFast.Jobs {
         public float* result;
 
         public void Execute() {
+#if COPY_LEGACY
+            for (int i = 0; i < count; i++)
+            {
+                ((Vector3*)result)[i] = ((Vector3*)input)[i];
+                result[i*3+2] *= -1;
+            }
+#else
             System.Buffer.MemoryCopy(
                 input,
                 result,
                 count*12,
                 count*12
             );
+#endif
 
             for (int i = 0; i < count; i++)
             {
@@ -389,12 +397,20 @@ namespace GLTFast.Jobs {
         public float* result;
 
         public void Execute() {
+#if COPY_LEGACY
+            for (int i = 0; i < count; i++)
+            {
+                ((Vector4*)result)[i] = ((Vector4*)input)[i];
+                result[i*4+2] *= -1;
+            }
+#else
             System.Buffer.MemoryCopy(
                 input,
                 result,
                 count*16,
                 count*16
             );
+#endif
 
             for (int i = 0; i < count; i++)
             {
