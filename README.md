@@ -108,6 +108,8 @@ Such stuff should be able to place on top of this library.
 ## Supported glTF extensions
 
 * KHR_draco_mesh_compression
+* KHR_materials_pbrSpecularGlossiness
+* KHR_materials_unlit
 
 ## Missing features and known issues
 
@@ -121,8 +123,6 @@ This project is in an early development state and some things are missing:
 Known issues:
 
 * When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
-
-* The imported scene is scaled negative in one axis. I did not encounter any trouble doing this, but in case shading errors show up, this has to be fixed.
 
 See details in the [issues](https://github.com/atteneder/glTFast/issues) section.
 
