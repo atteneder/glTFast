@@ -57,18 +57,29 @@ namespace GLTFast {
             public Texture2D texture;
             KtxTexture ktxTexture;
             NativeArray<byte> data;
+            NativeSlice<byte> slice;
 
             public KtxLoadContext(int index,byte[] data) {
                 this.imageIndex = index;
                 this.data = new NativeArray<byte>(data,KtxNativeInstance.defaultAllocator);
+                this.slice = this.data;
+                ktxTexture = new KtxTexture();
+                texture = null;
+            }
+
+            public KtxLoadContext(int index,NativeSlice<byte> slice) {
+                this.imageIndex = index;
+                this.slice = slice;
                 ktxTexture = new KtxTexture();
                 texture = null;
             }
 
             public IEnumerator LoadKtx() {
                 ktxTexture.onTextureLoaded += OnKtxLoaded;
-                yield return ktxTexture.LoadBytesRoutine(data);
-                data.Dispose();
+                yield return ktxTexture.LoadBytesRoutine(slice);
+                if(data.IsCreated) {
+                    data.Dispose();
+                }
             }
 
             void OnKtxLoaded(Texture2D newTexture) {
@@ -779,23 +790,37 @@ namespace GLTFast {
                         var bufferView = bufferViews[img.bufferView];
                         var buffer = GetBuffer(bufferView.buffer);
                         var chunk = binChunks[bufferView.buffer];
-                        var txt = new UnityEngine.Texture2D(4, 4);
-                        txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
-                        var icc = new ImageCreateContext();
-                        icc.imageIndex = i;
-                        icc.buffer = new byte[bufferView.byteLength];
-                        icc.gcHandle = GCHandle.Alloc(icc.buffer,GCHandleType.Pinned);
-                        var job = new Jobs.MemCopyJob();
-                        job.bufferSize = bufferView.byteLength;
-                        fixed( void* src = &(buffer[bufferView.byteOffset + chunk.start]), dst = &(icc.buffer[0]) ) {
-                            job.input = src;
-                            job.result = dst;
+
+                        if(img.isKtx) {
+                            var slice = new NativeSlice<byte>(
+                                GetNativeBuffer(bufferView.buffer),
+                                bufferView.byteOffset + chunk.start,
+                                bufferView.byteLength
+                                );
+                            if(ktxLoadContexts==null) {
+                                ktxLoadContexts = new List<KtxLoadContext>();
+                            }
+                            var ktxContext = new KtxLoadContext(i,slice);
+                            ktxLoadContexts.Add(ktxContext);
+                        } else {
+                            var txt = new UnityEngine.Texture2D(4, 4);
+                            txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
+                            var icc = new ImageCreateContext();
+                            icc.imageIndex = i;
+                            icc.buffer = new byte[bufferView.byteLength];
+                            icc.gcHandle = GCHandle.Alloc(icc.buffer,GCHandleType.Pinned);
+                            var job = new Jobs.MemCopyJob();
+                            job.bufferSize = bufferView.byteLength;
+                            fixed( void* src = &(buffer[bufferView.byteOffset + chunk.start]), dst = &(icc.buffer[0]) ) {
+                                job.input = src;
+                                job.result = dst;
+                            }
+                            icc.jobHandle = job.Schedule();
+                            contexts.Add(icc);
+                            
+                            images[i] = txt;
+                            resources.Add(txt);
                         }
-                        icc.jobHandle = job.Schedule();
-                        contexts.Add(icc);
-                        
-                        images[i] = txt;
-                        resources.Add(txt);
                     }
                 }
             }
