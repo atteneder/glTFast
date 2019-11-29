@@ -487,11 +487,13 @@ namespace GLTFast {
             return buffers[index];
         }
 
-        NativeArray<byte> GetNativeBuffer(int index) {
-            if(!nativeBuffers[index].IsCreated) {
-                nativeBuffers[index] = new NativeArray<byte>(GetBuffer(index),Allocator.Persistent);
+        NativeSlice<byte> GetBufferView(BufferView bufferView) {
+            int bufferIndex = bufferView.buffer;
+            if(!nativeBuffers[bufferIndex].IsCreated) {
+                nativeBuffers[bufferIndex] = new NativeArray<byte>(GetBuffer(bufferIndex),Allocator.Persistent);
             }
-            return nativeBuffers[index];
+            var chunk = binChunks[bufferIndex];
+            return new NativeSlice<byte>(nativeBuffers[bufferIndex],chunk.start+bufferView.byteOffset,bufferView.byteLength);
         }
 
         public IEnumerator Prepare() {
@@ -1071,14 +1073,14 @@ namespace GLTFast {
             var draco_ext = primitive.extensions.KHR_draco_mesh_compression;
             
             var bufferView = gltf.bufferViews[draco_ext.bufferView];
-            var buffer = GetNativeBuffer(bufferView.buffer);
+            var buffer = GetBufferView(bufferView);
 
             var job = new DracoMeshLoader.DracoJob();
 
             c.dracoResult = new NativeArray<int>(1,DracoMeshLoader.defaultAllocator);
             c.dracoPtr = new NativeArray<IntPtr>(1,DracoMeshLoader.defaultAllocator);
 
-            job.data = buffer.Slice(bufferView.byteOffset,bufferView.byteLength);
+            job.data = buffer;
             job.result = c.dracoResult;
             job.outMesh = c.dracoPtr;
 
