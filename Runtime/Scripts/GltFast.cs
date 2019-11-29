@@ -52,44 +52,51 @@ namespace GLTFast {
             public JobHandle jobHandle;
         }
 
-        class KtxLoadContext {
+        abstract class KtxLoadContextBase {
             public int imageIndex;
             public Texture2D texture;
-            KtxTexture ktxTexture;
-            NativeArray<byte> data;
-            NativeSlice<byte> slice;
+            protected KtxTexture ktxTexture;
+            
+            public abstract IEnumerator LoadKtx();
+
+            protected void OnKtxLoaded(Texture2D newTexture) {
+                ktxTexture.onTextureLoaded -= OnKtxLoaded;
+                texture = newTexture;
+            }
+        }
+
+        class KtxLoadContext : KtxLoadContextBase {
+            byte[] data;
 
             public KtxLoadContext(int index,byte[] data) {
                 this.imageIndex = index;
-                this.data = new NativeArray<byte>(data,KtxNativeInstance.defaultAllocator);
-                this.slice = this.data;
+                this.data = data;
                 ktxTexture = new KtxTexture();
                 texture = null;
             }
 
-            public KtxLoadContext(int index,NativeSlice<byte> slice) {
+            public override IEnumerator LoadKtx() {
+                ktxTexture.onTextureLoaded += OnKtxLoaded;
+                var slice = new NativeArray<byte>(data,KtxNativeInstance.defaultAllocator);
+                yield return ktxTexture.LoadBytesRoutine(slice);
+                slice.Dispose();
+                data = null;
+            }
+        }
+
+        class KtxLoadNativeContext : KtxLoadContextBase {
+            NativeSlice<byte> slice;
+
+            public KtxLoadNativeContext(int index,NativeSlice<byte> slice) {
                 this.imageIndex = index;
                 this.slice = slice;
                 ktxTexture = new KtxTexture();
                 texture = null;
             }
 
-            public IEnumerator LoadKtx() {
+            public override IEnumerator LoadKtx() {
                 ktxTexture.onTextureLoaded += OnKtxLoaded;
-                yield return ktxTexture.LoadBytesRoutine(slice);
-                if(data.IsCreated) {
-                    data.Dispose();
-                }
-            }
-
-            void OnKtxLoaded(Texture2D newTexture) {
-                ktxTexture.onTextureLoaded -= OnKtxLoaded;
-                texture = newTexture;
-            }
-
-            public void Dispose() {
-                texture = null;
-                ktxTexture = null;
+                return ktxTexture.LoadBytesRoutine(slice);
             }
         }
 
@@ -237,7 +244,8 @@ namespace GLTFast {
         GlbBinChunk? glbBinChunk;
         Texture2D[] images = null;
         List<ImageCreateContext> imageCreateContexts;
-        List<KtxLoadContext> ktxLoadContexts;
+        List<KtxLoadContextBase> ktxLoadContexts;
+        List<KtxLoadContextBase> ktxLoadContextsBuffer;
 
         bool loadingError = false;
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
@@ -441,7 +449,7 @@ namespace GLTFast {
                         var img = gltfRoot.images[dl.Key];
                         if(img.isKtx) {
                             if(ktxLoadContexts==null) {
-                                ktxLoadContexts = new List<KtxLoadContext>();
+                                ktxLoadContexts = new List<KtxLoadContextBase>();
                             }
                             var ktxContext = new KtxLoadContext(dl.Key,www.downloadHandler.data);
                             ktxLoadContexts.Add(ktxContext);
@@ -459,7 +467,6 @@ namespace GLTFast {
             {
                 yield return ktx.LoadKtx();
                 images[ktx.imageIndex] = ktx.texture;
-                ktx.Dispose();
             }
             ktxLoadContexts.Clear();
         }
@@ -580,6 +587,20 @@ namespace GLTFast {
 
             PreparePrimitives(gltfRoot);
             yield return null;
+
+            if(ktxLoadContextsBuffer!=null) {
+
+                for (int i = 0; i < ktxLoadContextsBuffer.Count; i++)
+                {
+                    var ktx = ktxLoadContextsBuffer[i];
+                    var ktxRoutine = ktx.LoadKtx();
+                    while(ktxRoutine.MoveNext()) {
+                        yield return null;
+                    }
+                    images[ktx.imageIndex] = ktx.texture;
+                }
+                ktxLoadContextsBuffer.Clear();
+            }
 
             if(imageCreateContexts!=null) {
                 foreach(var jh in imageCreateContexts) {
@@ -788,21 +809,17 @@ namespace GLTFast {
                     if (img.bufferView >= 0)
                     {
                         var bufferView = bufferViews[img.bufferView];
-                        var buffer = GetBuffer(bufferView.buffer);
-                        var chunk = binChunks[bufferView.buffer];
-
+                        
                         if(img.isKtx) {
-                            var slice = new NativeSlice<byte>(
-                                GetNativeBuffer(bufferView.buffer),
-                                bufferView.byteOffset + chunk.start,
-                                bufferView.byteLength
-                                );
-                            if(ktxLoadContexts==null) {
-                                ktxLoadContexts = new List<KtxLoadContext>();
+                            if(ktxLoadContextsBuffer==null) {
+                                ktxLoadContextsBuffer = new List<KtxLoadContextBase>();
                             }
-                            var ktxContext = new KtxLoadContext(i,slice);
-                            ktxLoadContexts.Add(ktxContext);
+                            var ktxContext = new KtxLoadNativeContext(i,GetBufferView(bufferView));
+                            ktxLoadContextsBuffer.Add(ktxContext);
                         } else {
+                            var buffer = GetBuffer(bufferView.buffer);
+                            var chunk = binChunks[bufferView.buffer];
+                            
                             var txt = new UnityEngine.Texture2D(4, 4);
                             txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
                             var icc = new ImageCreateContext();
@@ -1377,7 +1394,8 @@ namespace GLTFast {
         bool IsKnownImageMimeType(string mimeType) {
             return mimeType == "image/jpeg"
             || mimeType == "image/png"
-            || mimeType == "image/ktx";
+            || mimeType == "image/ktx"
+            || mimeType == "image/ktx2";
         }
         
         bool IsKnownImageFileExtension(string path) {

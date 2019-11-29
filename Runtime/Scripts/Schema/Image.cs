@@ -26,7 +26,7 @@
 
         public bool isKtx {
             get {
-                return extensions!=null && extensions.KHR_image_ktx2!=null;
+                return mimeType=="image/ktx2" || (extensions!=null && extensions.KHR_image_ktx2!=null);
             }
         }
     }
