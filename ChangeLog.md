@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.7.1] - 2019-11-29
 ### Fixed
 - glTF binary with Draco compression (decoding error due to invalid buffer view access)
+- Legacy .NET speed regression
 
 ## [0.7.0] - 2019-11-22
 ### Added

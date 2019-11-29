@@ -374,12 +374,11 @@ namespace GLTFast.Jobs {
                 count*12,
                 count*12
             );
-#endif
-
             for (int i = 0; i < count; i++)
             {
                 result[i*3+2] = -input[i*3+2];
             }
+#endif
         }
     }
 
@@ -410,12 +409,11 @@ namespace GLTFast.Jobs {
                 count*16,
                 count*16
             );
-#endif
-
             for (int i = 0; i < count; i++)
             {
                 result[i*4+2] = -input[i*4+2];
             }
+#endif
         }
     }
 
