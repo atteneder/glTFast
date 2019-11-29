@@ -1,10 +1,73 @@
 # glTFast
 
-glTFast is a Unity Package for loading glTF 3D files at runtime.
+glTFast is a Unity Package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
 
 It's focus is on speed, specifically fast startup (due to small build footprint) and fast parsing/decoding.
 
 Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out the [demo project](https://github.com/atteneder/glTFastDemo).
+
+## Features
+
+- [x] Runtime import
+- [x] Multithreading via C# job system
+- [ ] Editor import
+- [ ] Export
+
+### Core glTF features
+
+- [x] glTF (gltf + buffers + textures)
+- [x] glTF binary (glb)
+
+- [x] Scene
+  - [x] Node hierarchy
+  - [ ] Camera
+- [x] Buffers
+  - [x] External URIs
+  - [x] glTF binary main buffer
+  - [ ] Embed buffers or textures (base-64 encoded within JSON)
+- [x] Images
+  - [x] PNG
+  - [x] Jpeg
+- [x] Materials
+  - [x] Unity built-in pipeline
+    - [x] PBR metallic-roughness
+    - [x] Normal texture
+    - [x] Occlusion texture [^1]
+    - [x] Emission texture [^1]
+    - [x] Metallic texture [^1]
+    - [x] Roughness texture [^1]
+    - [x] Alpha mode
+    - [ ] Double sided
+    - [ ] Emission
+  - [ ] Universal Render Pipeline
+  - [ ] High Definition Render Pipeline
+- [x] Meshes
+  - [x] Positions
+  - [x] Normals
+  - [x] Tangents
+  - [x] Texture coordinates
+  - [x] Vertex colors
+  - [ ] Multiple texture coordinates sets
+  - [ ] Joints
+  - [ ] Weights
+  - [ ] Implicit (no) indices
+- [ ] Texture sampler
+  - [ ] Filtering
+  - [ ] Wrap mode
+- [ ] Morph targets
+  - [ ] Sparse accessors
+- [ ] Skinning
+- [ ] Animation
+
+[^1]: Slow operation at the moment, since the image channels have to be converted to fit the shader.
+
+### Extensions
+
+- [x] KHR_draco_mesh_compression
+- [x] KHR_materials_pbrSpecularGlossiness
+- [x] KHR_materials_unlit
+- [ ] KHR_lights_punctual
+- [ ] KHR_texture_transform
 
 ## Installing
 
@@ -67,11 +130,11 @@ gltf.onLoadComplete += YourCallbackMethod;
 glTF files can contain lots of materials making use of various shader features. You have to make sure all shader variants your project will probably use are included in the build. If not, the materials will be fine in the editor, but not in the builds.
 glTFast uses the Unity Standard Shader. Including all its variants would be quite big. There's an easy way to find the right subset, if you already know what files you'll expect:
 
-* Run your scene that loads all glTFs you expect in the editor.
-* Go to Edit->Project Settings->Graphics
-* At the bottom end you'll see the "Shader Preloading" section
-* Save the currently tracked shaders/variants to an asset
-* Take this ShaderVariantCollection asset and add it to the "Preloaded Shaders" list
+- Run your scene that loads all glTFs you expect in the editor.
+- Go to Edit->Project Settings->Graphics
+- At the bottom end you'll see the "Shader Preloading" section
+- Save the currently tracked shaders/variants to an asset
+- Take this ShaderVariantCollection asset and add it to the "Preloaded Shaders" list
 
 An alternative way is to create placeholder materials for all feature combinations you expect and put them in a "Resource" folder in your project.
 
@@ -79,8 +142,8 @@ An alternative way is to create placeholder materials for all feature combinatio
 
 Besides speed, the focus at the moment is on users that:
 
-* control the content (are able to create compatible glTFs)
-* use it for static content (no animation, skinning or morphing)
+- control the content (are able to create compatible glTFs)
+- use it for static content (no animation, skinning or morphing)
 
 I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
  section.
@@ -102,29 +165,14 @@ It also uses fast low-level memory copy methods and [Unity's Job system](https:/
 
 ...and probably never will be:
 
-* It's not an asset manager with instantiation and reference counting support.
-* Also not a download manager for asset caching/re-usage.
-
+- It won't be backwards compatible to glTF 1.0
+- It's not an asset manager with instantiation and reference counting support.
+- Also not a download manager for asset caching/re-usage.
 Such stuff should be able to place on top of this library.
 
-## Supported glTF extensions
+## Known issues
 
-* KHR_draco_mesh_compression
-* KHR_materials_pbrSpecularGlossiness
-* KHR_materials_unlit
-
-## Missing features and known issues
-
-This project is in an early development state and some things are missing:
-
-* embed buffers or textures
-* meshes without indices
-* animation
-* glTF 1.0 backwards compatibility
-
-Known issues:
-
-* When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
+- When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
 
 See details in the [issues](https://github.com/atteneder/glTFast/issues) section.
 
