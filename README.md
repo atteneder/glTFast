@@ -9,6 +9,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 ## Features
 
 - [x] Runtime import
+- [x] Fast and small footprint JSON parsing
 - [x] Multithreading via C# job system
 - [ ] Editor import
 - [ ] Export
@@ -32,10 +33,10 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [x] Unity built-in pipeline
     - [x] PBR metallic-roughness
     - [x] Normal texture
-    - [x] Occlusion texture [^1]
-    - [x] Emission texture [^1]
-    - [x] Metallic texture [^1]
-    - [x] Roughness texture [^1]
+    - [x] <sup>1</sup>Occlusion texture
+    - [x] <sup>1</sup>Emission texture
+    - [x] <sup>1</sup>Metallic texture
+    - [x] <sup>1</sup>Roughness texture
     - [x] Alpha mode
     - [ ] Double sided
     - [ ] Emission
@@ -59,7 +60,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [ ] Skinning
 - [ ] Animation
 
-[^1]: Slow operation at the moment, since the image channels have to be converted to fit the shader.
+<sup>1</sup>: Slow operation at the moment, since the image channels have to be converted to fit the shader.
 
 ### Extensions
 
