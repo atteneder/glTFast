@@ -672,7 +672,7 @@ namespace GLTFast {
                         if(materials!=null && materialIndex>=0 && materialIndex<materials.Length ) {
                             mr.material = materials[primitives[i].materialIndex];
                         } else {
-                            mr.material = materialGenerator.GetDefaultMaterial();
+                            mr.material = materialGenerator.GetPbrMetallicRoughnessMaterial();
                         }
                     }
                 }

@@ -15,20 +15,43 @@ namespace GLTFast {
         static readonly Vector2 TEXTURE_SCALE = new Vector2(1,-1);
         static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
 
-        private Shader specularSetupShader;
-        private Shader unlitShader;
+        Shader pbrMetallicRoughnessShader;
+        Shader pbrSpecularGlossinessShader;
+        Shader unlitShader;
 
-        Material defaultMaterial;
-
-        public UnityEngine.Material GetDefaultMaterial() {
-            if(defaultMaterial==null) {
-                defaultMaterial = Resources.Load<UnityEngine.Material>("Material");
+        public UnityEngine.Material GetPbrMetallicRoughnessMaterial() {
+            if(pbrMetallicRoughnessShader==null) {
+                pbrMetallicRoughnessShader = Shader.Find("glTF/PbrMetallicRoughness");
             }
-            return defaultMaterial;
+            return new Material(pbrMetallicRoughnessShader);
+        }
+
+        public UnityEngine.Material GetPbrSpecularGlossinessMaterial() {
+            if(pbrSpecularGlossinessShader==null) {
+                pbrSpecularGlossinessShader = Shader.Find("GLTF/PbrSpecularGlossiness");
+            }
+            return new Material(pbrSpecularGlossinessShader);
+        }
+
+        public UnityEngine.Material GetUnlitMaterial() {
+            if(unlitShader==null) {
+                unlitShader = Shader.Find("Unlit/Color");
+            }
+            return new Material(unlitShader);
         }
 
         public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture2D[] images, List<UnityEngine.Object> additionalResources ) {
-            var material = Material.Instantiate<Material>( GetDefaultMaterial() );
+            UnityEngine.Material material;
+            
+            if (gltfMaterial.extensions!=null && gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness!=null) {
+                material = GetPbrSpecularGlossinessMaterial();
+            } else
+            if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
+                material = GetUnlitMaterial();
+            } else {
+                material = GetPbrMetallicRoughnessMaterial();
+            }
+
             material.name = gltfMaterial.name;
 
             material.mainTextureScale = TEXTURE_SCALE;
@@ -38,10 +61,6 @@ namespace GLTFast {
             if (gltfMaterial.extensions != null) {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
-                    if (!specularSetupShader) {
-                        specularSetupShader=Shader.Find("Standard (Specular setup)");
-                    }
-                    material.shader = specularSetupShader;
                     var diffuseTexture = GetTexture(specGloss.diffuseTexture, textures, images);
                     if (diffuseTexture != null) {   
                         material.mainTexture = diffuseTexture;
@@ -57,16 +76,6 @@ namespace GLTFast {
                     else {
                         material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
                         material.SetFloat(StandardShaderHelper.glossinessPropId, (float)specGloss.glossinessFactor);
-                    }
-                }
-
-                Schema.MaterialUnlit unlitMaterial = gltfMaterial.extensions.KHR_materials_unlit;
-                if (unlitMaterial != null) {
-                    if (gltfMaterial.pbrMetallicRoughness != null) {
-                        if (!unlitShader) {
-                            unlitShader = Shader.Find("Unlit/Color");
-                        }
-                        material.shader = unlitShader;  
                     }
                 }
             }
