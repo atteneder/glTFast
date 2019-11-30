@@ -121,9 +121,9 @@ half Occlusion(float2 uv)
 #if (SHADER_TARGET < 30)
     // SM20: instruction count limitation
     // SM20: simpler occlusion
-    return tex2D(_OcclusionMap, uv).g;
+    return tex2D(_OcclusionMap, uv).r;
 #else
-    half occ = tex2D(_OcclusionMap, uv).g;
+    half occ = tex2D(_OcclusionMap, uv).r;
     return LerpOneTo (occ, _OcclusionStrength);
 #endif
 }
@@ -155,20 +155,12 @@ half2 MetallicGloss(float2 uv)
     half2 mg;
 
 #ifdef _METALLICGLOSSMAP
-    #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-        mg.r = tex2D(_MetallicGlossMap, uv).r;
-        mg.g = tex2D(_MainTex, uv).a;
-    #else
-        mg = tex2D(_MetallicGlossMap, uv).ra;
-    #endif
+    mg.r = tex2D(_MetallicGlossMap, uv).b;
+    mg.g = 1-tex2D(_MetallicGlossMap, uv).g;
     mg.g *= _GlossMapScale;
 #else
     mg.r = _Metallic;
-    #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-        mg.g = tex2D(_MainTex, uv).a * _GlossMapScale;
-    #else
-        mg.g = _Glossiness;
-    #endif
+    mg.g = _Glossiness;
 #endif
     return mg;
 }
