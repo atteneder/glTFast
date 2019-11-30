@@ -9,9 +9,9 @@ Shader "glTF/PbrSpecularGlossiness"
 
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
-        _Glossiness("Smoothness", Range(0.0, 1.0)) = 1
-        _GlossMapScale("Smoothness Factor", Range(0.0, 1.0)) = 1.0
-        [Enum(Specular Alpha,0)] _SmoothnessTextureChannel ("Smoothness texture channel", Float) = 0
+        _Glossiness("Glossiness", Range(0.0, 1.0)) = 1
+        // _GlossMapScale("Smoothness Factor", Range(0.0, 1.0)) = 1.0
+        // [Enum(Specular Alpha,0,Albedo Alpha,1)] _SmoothnessTextureChannel ("Smoothness texture channel", Float) = 0
 
         _SpecColor("Specular", Color) = (1,1,1)
         _SpecGlossMap("Specular", 2D) = "white" {}

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Using custom glTF shaders. This speeds up occlusion and roughness/metallic texture loading since they don't have to be converted at runtime anymore. It's also the foundation for future material features.
+### Fixed
+- Factor and texture (for metallic-roughness and specular-glossiness) are now multiplied as defined in spec.
 
 ## [0.7.1] - 2019-11-29
 ### Fixed

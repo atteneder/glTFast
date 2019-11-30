@@ -61,21 +61,19 @@ namespace GLTFast {
             if (gltfMaterial.extensions != null) {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
+                    material.color = specGloss.diffuseColor;
+                    material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
+                    material.SetFloat(StandardShaderHelper.glossinessPropId,specGloss.glossinessFactor);
+
                     var diffuseTexture = GetTexture(specGloss.diffuseTexture, textures, images);
                     if (diffuseTexture != null) {   
                         material.mainTexture = diffuseTexture;
                     }
-                    else {
-                        material.color = specGloss.diffuseColor;
-                    }
+                    
                     var specGlossTexture = GetTexture(specGloss.specularGlossinessTexture, textures, images);
                     if (specGlossTexture != null) {
                         material.SetTexture(StandardShaderHelper.specGlossMapPropId, specGlossTexture);
-                        material.EnableKeyword("_SPECGLOSSMAP");
-                    }
-                    else {
-                        material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
-                        material.SetFloat(StandardShaderHelper.glossinessPropId, (float)specGloss.glossinessFactor);
+                        material.EnableKeyword(StandardShaderHelper.KW_SPEC_GLOSS_MAP);
                     }
                 }
             }
@@ -83,7 +81,7 @@ namespace GLTFast {
             if (gltfMaterial.pbrMetallicRoughness!=null) {
                 material.color = gltfMaterial.pbrMetallicRoughness.baseColor;
                 material.SetFloat(StandardShaderHelper.metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
-                material.SetFloat(StandardShaderHelper.glossinessPropId, 1-gltfMaterial.pbrMetallicRoughness.roughnessFactor );
+                material.SetFloat(StandardShaderHelper.roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
                 var mainTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.baseColorTexture,textures,images);
                 if(mainTxt!=null) {

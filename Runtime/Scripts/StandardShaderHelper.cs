@@ -16,6 +16,7 @@ namespace GLTFast.Materials {
         }
 
         public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
+        public const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
         public const string KW_OCCLUSION = "_OCCLUSION";
 
         public static int modePropId = Shader.PropertyToID("_Mode");
@@ -23,6 +24,7 @@ namespace GLTFast.Materials {
         public static int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
         public static int zWritePropId = Shader.PropertyToID("_ZWrite");
         public static int glossinessPropId = Shader.PropertyToID("_Glossiness");
+        public static int roughnessPropId = Shader.PropertyToID("_Roughness");
         public static int metallicPropId = Shader.PropertyToID("_Metallic");
         public static int cutoffPropId = Shader.PropertyToID("_Cutoff");
         public static int bumpMapPropId = Shader.PropertyToID("_BumpMap");
@@ -31,7 +33,7 @@ namespace GLTFast.Materials {
         public static int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
         public static int specColorPropId = Shader.PropertyToID("_SpecColor");
         public static int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
-        public static int glossMapScaleId = Shader.PropertyToID("_GlossMapScale");
+        // public static int glossMapScaleId = Shader.PropertyToID("_GlossMapScale");
 
         public static void SetAlphaModeMask( UnityEngine.Material material,Schema.Material gltfMaterial) {
 			material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
