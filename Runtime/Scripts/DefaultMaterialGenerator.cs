@@ -54,7 +54,8 @@ namespace GLTFast {
 
             material.name = gltfMaterial.name;
 
-            if(material.HasProperty("_MainTex")) {
+            if(material.HasProperty(StandardShaderHelper.KW_MAIN_MAP)) {
+                // Initialize texture transform
                 material.mainTextureScale = TEXTURE_SCALE;
                 material.mainTextureOffset = TEXTURE_OFFSET;
             }
@@ -67,14 +68,7 @@ namespace GLTFast {
                     material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
                     material.SetFloat(StandardShaderHelper.glossinessPropId,specGloss.glossinessFactor);
 
-                    var diffuseTexture = GetTexture(specGloss.diffuseTexture, textures, images);
-                    if (diffuseTexture != null) {   
-                        material.mainTexture = diffuseTexture;
-                    }
-                    
-                    var specGlossTexture = GetTexture(specGloss.specularGlossinessTexture, textures, images);
-                    if (specGlossTexture != null) {
-                        material.SetTexture(StandardShaderHelper.specGlossMapPropId, specGlossTexture);
+                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,StandardShaderHelper.specGlossMapPropId,textures,images)) {
                         material.EnableKeyword(StandardShaderHelper.KW_SPEC_GLOSS_MAP);
                     }
                 }
@@ -85,35 +79,28 @@ namespace GLTFast {
                 material.SetFloat(StandardShaderHelper.metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                 material.SetFloat(StandardShaderHelper.roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
-                var mainTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.baseColorTexture,textures,images);
-                if(mainTxt!=null) {
-                    material.mainTexture = mainTxt;
-                }
-
-                var metallicRoughnessTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,textures,images);
-                if(metallicRoughnessTxt!=null) {
-                    material.SetTexture( StandardShaderHelper.metallicGlossMapPropId, metallicRoughnessTxt );
+                TrySetTexture(
+                    gltfMaterial.pbrMetallicRoughness.baseColorTexture,
+                    material,
+                    StandardShaderHelper.mainTexPropId,
+                    textures,
+                    images
+                    );
+                
+                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,StandardShaderHelper.metallicGlossMapPropId,textures,images)) {
                     material.EnableKeyword(StandardShaderHelper.KW_METALLIC_ROUGNESS_MAP);
-                    additionalResources.Add(metallicRoughnessTxt);
                 }
             }
 
-            var normalTxt = GetTexture(gltfMaterial.normalTexture,textures,images);
-            if(normalTxt!=null) {
-                material.SetTexture( StandardShaderHelper.bumpMapPropId, normalTxt);
+            if(TrySetTexture(gltfMaterial.normalTexture,material,StandardShaderHelper.bumpMapPropId,textures,images)) {
                 material.EnableKeyword("_NORMALMAP");
             }
-            
-            var occlusionTxt = GetTexture(gltfMaterial.occlusionTexture,textures,images);
-            if(occlusionTxt !=null) {
-                material.SetTexture(StandardShaderHelper.occlusionMapPropId, occlusionTxt);
+
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,StandardShaderHelper.occlusionMapPropId,textures,images)) {
                 material.EnableKeyword(StandardShaderHelper.KW_OCCLUSION);
-                additionalResources.Add(occlusionTxt);
             }
-            
-            var emmissiveTxt = GetTexture(gltfMaterial.emissiveTexture,textures,images);
-            if(emmissiveTxt!=null) {
-                material.SetTexture( StandardShaderHelper.emissionMapPropId, emmissiveTxt);
+
+            if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,textures,images)) {
                 material.EnableKeyword("_EMISSION");
             }
             
@@ -137,7 +124,13 @@ namespace GLTFast {
             return material;
         }
 
-        static Texture2D GetTexture(Schema.TextureInfo textureInfo, Schema.Texture[] textures, Texture2D[] images )
+        static bool TrySetTexture(
+            Schema.TextureInfo textureInfo,
+            UnityEngine.Material material,
+            int propertyId,
+            Schema.Texture[] textures,
+            Texture2D[] images
+            )
         {
             if (textureInfo != null && textureInfo.index >= 0)
             {
@@ -147,7 +140,9 @@ namespace GLTFast {
                     var txt = textures[bcTextureIndex];
                     if (images != null && images.Length > txt.source)
                     {
-                        return images[txt.source];
+                        material.SetTexture(propertyId,images[txt.source]);
+                        TrySetTextureTransform(textureInfo,material,propertyId);
+                        return true;
                     }
                     else
                     {
@@ -159,7 +154,27 @@ namespace GLTFast {
                     Debug.LogErrorFormat("Texture #{0} not found", bcTextureIndex);
                 }
             }
-            return null;
+            return false;
+        }
+
+        static void TrySetTextureTransform(
+            Schema.TextureInfo textureInfo,
+            UnityEngine.Material material,
+            int propertyId
+            )
+        {
+            if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
+                var tt = textureInfo.extensions.KHR_texture_transform;
+                if(tt.offset!=null) {
+                    material.SetTextureOffset(propertyId,new Vector2(tt.offset[0],1-tt.offset[1]));
+                }
+                if(tt.rotation!=0) {
+                    Debug.LogWarning("texture transform rotation is not supported");
+                }
+                if(tt.scale!=null) {
+                    material.SetTextureScale(propertyId,new Vector2(tt.scale[0],-tt.scale[1]));
+                }
+            }
         }
     }
 }

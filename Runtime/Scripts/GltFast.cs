@@ -22,7 +22,8 @@ namespace GLTFast {
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
             "KHR_draco_mesh_compression",
             "KHR_materials_pbrSpecularGlossiness",
-            "KHR_materials_unlit"
+            "KHR_materials_unlit",
+            "KHR_texture_transform"
         };
 
         enum ChunkFormat : uint

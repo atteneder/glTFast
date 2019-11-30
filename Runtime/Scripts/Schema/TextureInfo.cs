@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace GLTFast.Schema {
+﻿namespace GLTFast.Schema {
 
     [System.Serializable]
     public class TextureInfo {
@@ -18,5 +14,7 @@ namespace GLTFast.Schema {
         /// mesh.primitives.attributes (e.g. A value of 0 corresponds to TEXCOORD_0).
         /// </summary>
         public int texCoord = 0;
+
+        public TextureInfoExtension extensions;
     }
 }

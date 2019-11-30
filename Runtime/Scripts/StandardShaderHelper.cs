@@ -15,6 +15,7 @@ namespace GLTFast.Materials {
             Transparent = 3
         }
 
+        public const string KW_MAIN_MAP = "_MainTex";
         public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
         public const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
         public const string KW_OCCLUSION = "_OCCLUSION";
@@ -27,6 +28,7 @@ namespace GLTFast.Materials {
         public static int roughnessPropId = Shader.PropertyToID("_Roughness");
         public static int metallicPropId = Shader.PropertyToID("_Metallic");
         public static int cutoffPropId = Shader.PropertyToID("_Cutoff");
+        public static int mainTexPropId = Shader.PropertyToID(KW_MAIN_MAP);
         public static int bumpMapPropId = Shader.PropertyToID("_BumpMap");
         public static int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
         public static int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
