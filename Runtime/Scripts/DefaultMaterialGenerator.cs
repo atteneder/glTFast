@@ -28,7 +28,7 @@ namespace GLTFast {
 
         public UnityEngine.Material GetPbrSpecularGlossinessMaterial() {
             if(pbrSpecularGlossinessShader==null) {
-                pbrSpecularGlossinessShader = Shader.Find("GLTF/PbrSpecularGlossiness");
+                pbrSpecularGlossinessShader = Shader.Find("glTF/PbrSpecularGlossiness");
             }
             return new Material(pbrSpecularGlossinessShader);
         }
