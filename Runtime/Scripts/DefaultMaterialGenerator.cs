@@ -54,8 +54,10 @@ namespace GLTFast {
 
             material.name = gltfMaterial.name;
 
-            material.mainTextureScale = TEXTURE_SCALE;
-            material.mainTextureOffset = TEXTURE_OFFSET;
+            if(material.HasProperty("_MainTex")) {
+                material.mainTextureScale = TEXTURE_SCALE;
+                material.mainTextureOffset = TEXTURE_OFFSET;
+            }
 
             //added support for KHR_materials_pbrSpecularGlossiness
             if (gltfMaterial.extensions != null) {
