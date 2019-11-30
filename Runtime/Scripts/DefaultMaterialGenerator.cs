@@ -92,30 +92,9 @@ namespace GLTFast {
 
                 var metallicRoughnessTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,textures,images);
                 if(metallicRoughnessTxt!=null) {
-                                   
-                    Profiler.BeginSample("ConvertMetallicRoughnessTexture");
-                    // todo: Avoid this conversion by switching to a shader that accepts the given layout.
-                    Debug.LogWarning("Convert MetallicRoughnessTexture structure to fit Unity Standard Shader (slow operation).");
-                    var newmrt = new UnityEngine.Texture2D(metallicRoughnessTxt.width, metallicRoughnessTxt.height);
-#if DEBUG
-                    newmrt.name = string.Format("{0}_metal_smooth", metallicRoughnessTxt.name);
-#endif
-                    var buf = metallicRoughnessTxt.GetPixels32();               
-                    for (int i = 0; i < buf.Length;i++ ) {
-                        // TODO: Reassure given space (linear) is correct (no gamma conversion needed).
-                        var color = buf[i];                  
-                        color.a = (byte) (255 - color.g);
-                        color.r = color.g = color.b;                  
-                        buf[i] = color;
-                    }
-                    newmrt.SetPixels32(buf);
-                    newmrt.Apply();
-                    Profiler.EndSample();
-
-                    material.SetTexture( StandardShaderHelper.metallicGlossMapPropId, newmrt );
-                    material.EnableKeyword("_METALLICGLOSSMAP");
-
-                    additionalResources.Add(newmrt);
+                    material.SetTexture( StandardShaderHelper.metallicGlossMapPropId, metallicRoughnessTxt );
+                    material.EnableKeyword(StandardShaderHelper.KW_METALLIC_ROUGNESS_MAP);
+                    additionalResources.Add(metallicRoughnessTxt);
                 }
             }
 
@@ -127,29 +106,9 @@ namespace GLTFast {
             
             var occlusionTxt = GetTexture(gltfMaterial.occlusionTexture,textures,images);
             if(occlusionTxt !=null) {
-
-                Profiler.BeginSample("ConvertOcclusionTexture");
-                // todo: Avoid this conversion by switching to a shader that accepts the given layout.
-                Debug.LogWarning("Convert OcclusionTexture structure to fit Unity Standard Shader (slow operation).");
-                var newOcclusionTxt = new UnityEngine.Texture2D(occlusionTxt.width, occlusionTxt.height);
-#if DEBUG
-                newOcclusionTxt.name = string.Format("{0}_occlusion", occlusionTxt.name);
-#endif
-                var buf = occlusionTxt.GetPixels32();
-                for (int i = 0; i < buf.Length; i++)
-                {
-                    var color = buf[i];
-                    color.g = color.b = color.r;
-                    color.a = 1;
-                    buf[i] = color;
-                }
-                newOcclusionTxt.SetPixels32(buf);
-                newOcclusionTxt.Apply();
-                Profiler.EndSample();
-
-                material.SetTexture( StandardShaderHelper.occlusionMapPropId, newOcclusionTxt );
-
-                additionalResources.Add(newOcclusionTxt);
+                material.SetTexture(StandardShaderHelper.occlusionMapPropId, occlusionTxt);
+                material.EnableKeyword(StandardShaderHelper.KW_OCCLUSION);
+                additionalResources.Add(occlusionTxt);
             }
             
             var emmissiveTxt = GetTexture(gltfMaterial.emissiveTexture,textures,images);

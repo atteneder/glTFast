@@ -15,6 +15,9 @@ namespace GLTFast.Materials {
             Transparent = 3
         }
 
+        public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
+        public const string KW_OCCLUSION = "_OCCLUSION";
+
         public static int modePropId = Shader.PropertyToID("_Mode");
         public static int dstBlendPropId = Shader.PropertyToID("_DstBlend");
         public static int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
