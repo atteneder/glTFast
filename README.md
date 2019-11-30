@@ -1,8 +1,8 @@
 # glTFast
 
-glTFast is a Unity Package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
+glTFast is a Unity package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
 
-It's focus is on speed, specifically fast startup (due to small build footprint) and fast parsing/decoding.
+It focuses on speed, memory efficiency and a small build footprint.
 
 Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out the [demo project](https://github.com/atteneder/glTFastDemo).
 
@@ -10,7 +10,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 - [x] Runtime import
 - [x] Fast and small footprint JSON parsing
-- [x] Multithreading via C# job system
+- [x] Multi-threading via C# job system
 - [ ] Editor import
 - [ ] Export
 
@@ -32,6 +32,8 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] Materials
   - [x] Unity built-in pipeline
     - [x] PBR metallic-roughness
+    - [x] PBR specular-glossiness (via extension)
+    - [x] Unlit (via extension)
     - [x] Normal texture
     - [x] <sup>1</sup>Occlusion texture
     - [x] <sup>1</sup>Emission texture
@@ -48,6 +50,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [x] Tangents
   - [x] Texture coordinates
   - [x] Vertex colors
+  - [x] Draco mesh compression (via extension)
   - [ ] Multiple texture coordinates sets
   - [ ] Joints
   - [ ] Weights
@@ -67,6 +70,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] KHR_draco_mesh_compression
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
+- [ ] KHR_mesh_quantization
 - [ ] KHR_lights_punctual
 - [ ] KHR_texture_transform
 
