@@ -12,6 +12,7 @@ namespace GLTFast.Jobs {
 
     static class Constants {
         public const float UINT16_MAX = 65535f;
+        public const float INT16_MAX = 32767f;
     }
 
     public unsafe struct CreateIndicesJob : IJob  {
@@ -150,7 +151,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct GetUVsUInt16Job : IJob  {
+    public unsafe struct GetUVsUInt16NormalizedJob : IJob  {
 
         [ReadOnly]
         public int count;
@@ -169,6 +170,29 @@ namespace GLTFast.Jobs {
             {
                 result[i].x = input[i*2] / Constants.UINT16_MAX;
                 result[i].y = input[i*2+1] / Constants.UINT16_MAX;
+            }
+        }
+    }
+
+    public unsafe struct GetUVsUInt16Job : IJob  {
+
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public System.UInt16* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector2* result;
+
+        public void Execute()
+        {
+            for (var i = 0; i < count; i++)
+            {
+                result[i].x = input[i*2];
+                result[i].y = input[i*2+1];
             }
         }
     }
@@ -539,6 +563,124 @@ namespace GLTFast.Jobs {
             for (int i = 0; i < count; i++)
             {
                 *resultV = *(Vector4*)off;
+                off += byteStride;
+                resultV += 1;
+            }
+        }
+    }
+
+    public unsafe struct GetUInt16PositionsJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public System.UInt16* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float* result;
+
+        public void Execute() {
+            // TODO: evaluate if the new mesh API supports uint16 positions and remove this Job
+            for (int i = 0; i < count; i++)
+            {
+                result[i*3] = input[i*3];
+                result[i*3+1] = input[i*3+1];
+                result[i*3+2] = -input[i*3+2];
+            }
+        }
+    }
+
+    public unsafe struct GetUInt16PositionsInterleavedJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        public int byteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector3* result;
+
+        public void Execute() {
+            Vector3* resultV = result;
+            byte* off = input;
+            for (int i = 0; i < count; i++)
+            {
+                *(((float*)resultV)) = *(((System.Int16*)off));
+                *(((float*)resultV)+1) = *(((System.Int16*)off)+1);
+                *(((float*)resultV)+2) = -*(((System.Int16*)off)+2);
+                off += byteStride;
+                resultV += 1;
+            }
+        }
+    }
+
+    public unsafe struct GetInt16NormalsInterleavedJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        public int byteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector3* result;
+
+        public void Execute() {
+            Vector3* resultV = result;
+            byte* off = input;
+            for (int i = 0; i < count; i++)
+            {
+                *(((float*)resultV)) = Mathf.Max(-1,*(((System.Int16*)off))/Constants.INT16_MAX);
+                *(((float*)resultV)+1) = Mathf.Max(-1,*(((System.Int16*)off)+1)/Constants.INT16_MAX);
+                *(((float*)resultV)+2) = -Mathf.Max(-1,*(((System.Int16*)off)+2)/Constants.INT16_MAX);
+                off += byteStride;
+                resultV += 1;
+            }
+        }
+    }
+
+    public unsafe struct GetSByteNormalsInterleavedJob : IJob {
+
+        [ReadOnly]
+        public long count;
+
+        [ReadOnly]
+        public int byteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public sbyte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector3* result;
+
+        public void Execute() {
+            Vector3* resultV = result;
+            sbyte* off = input;
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 tmp;
+                tmp.x = Mathf.Max(-1,*off/127f);
+                tmp.y = Mathf.Max(-1,*(off+1)/127f);
+                tmp.z = -Mathf.Max(-1,*(off+2)/127f);
+                tmp.Normalize();
+                *resultV = tmp;
                 off += byteStride;
                 resultV += 1;
             }

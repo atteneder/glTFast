@@ -24,7 +24,8 @@ namespace GLTFast {
             "KHR_draco_mesh_compression",
             "KHR_materials_pbrSpecularGlossiness",
             "KHR_materials_unlit",
-            "KHR_texture_transform"
+            "KHR_texture_transform",
+            "KHR_mesh_quantization"
         };
 
         enum ChunkFormat : uint
@@ -891,22 +892,45 @@ namespace GLTFast {
             c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.positions, GCHandleType.Pinned);
             start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             if (gltf.IsAccessorInterleaved(pos)) {
-                var job = new Jobs.GetVector3sInterleavedJob();
-                job.count = vertexCount;
-                job.byteStride = bufferView.byteStride;
-                fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
-                    job.input = (byte*)src;
-                    job.result = (Vector3*)dst;
+                if(accessor.componentType == GLTFComponentType.Float) {
+                    var job = new Jobs.GetVector3sInterleavedJob();
+                    job.count = vertexCount;
+                    job.byteStride = bufferView.byteStride;
+                    fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
+                        job.input = (byte*)src;
+                        job.result = (Vector3*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job.Schedule();
+                } else
+                if(accessor.componentType == GLTFComponentType.UnsignedShort) {
+                    var job = new Jobs.GetUInt16PositionsInterleavedJob();
+                    job.count = vertexCount;
+                    job.byteStride = bufferView.byteStride;
+                    fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
+                        job.input = (byte*)src;
+                        job.result = (Vector3*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job.Schedule();
                 }
-                jobHandles[jobHandlesCount] = job.Schedule();
             } else {
-                var job = new Jobs.GetVector3sJob();
-                job.count = accessor.count;
-                fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
-                    job.input = (float*)src;
-                    job.result = (float*)dst;
+                if(accessor.componentType == GLTFComponentType.Float) {
+                    var job = new Jobs.GetVector3sJob();
+                    job.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
+                        job.input = (float*)src;
+                        job.result = (float*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job.Schedule();
+                } else
+                if(accessor.componentType == GLTFComponentType.UnsignedShort) {
+                    var job = new Jobs.GetUInt16PositionsJob();
+                    job.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
+                        job.input = (System.UInt16*)src;
+                        job.result = (float*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job.Schedule();
                 }
-                jobHandles[jobHandlesCount] = job.Schedule();
             }
             jobHandlesCount++;
             Profiler.EndSample();
@@ -1081,22 +1105,74 @@ namespace GLTFast {
                 c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.normals, GCHandleType.Pinned);
                 start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
                 if (gltf.IsAccessorInterleaved(pos)) {
-                    var job = new Jobs.GetVector3sInterleavedJob();
-                    job.count = accessor.count;
-                    job.byteStride = bufferView.byteStride;
-                    fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
-                        job.input = (byte*)src;
-                        job.result = (Vector3*)dst;
+                    if(accessor.componentType == GLTFComponentType.Float) {
+                        var job = new Jobs.GetVector3sInterleavedJob();
+                        job.count = accessor.count;
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandles[jobHandlesCount] = job.Schedule();
+                    } else
+                    if(accessor.componentType == GLTFComponentType.Short) {
+                        var job = new Jobs.GetInt16NormalsInterleavedJob();
+                        job.count = accessor.count;
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandles[jobHandlesCount] = job.Schedule();
+                    } else
+                    if(accessor.componentType == GLTFComponentType.Byte) {
+                        var job = new Jobs.GetSByteNormalsInterleavedJob();
+                        job.count = accessor.count;
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
+                            job.input = (sbyte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandles[jobHandlesCount] = job.Schedule();
+                    } else {
+                        Debug.LogErrorFormat("Unsupported normal type {0}", accessor.componentType);
                     }
-                    jobHandles[jobHandlesCount] = job.Schedule();
                 } else {
-                    var job = new Jobs.GetVector3sJob();
-                    job.count = accessor.count;
-                    fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
-                        job.input = (float*)src;
-                        job.result = (float*)dst;
+                    if(accessor.componentType == GLTFComponentType.Float) {
+                        var job = new Jobs.GetVector3sJob();
+                        job.count = accessor.count;
+                        fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
+                            job.input = (float*)src;
+                            job.result = (float*)dst;
+                        }
+                        jobHandles[jobHandlesCount] = job.Schedule();
+                    } else
+                    if(accessor.componentType == GLTFComponentType.Short) {
+                        // TODO: test. did not have test files
+                        // TODO: is a non-interleaved variant faster?
+                        var job = new Jobs.GetInt16NormalsInterleavedJob();
+                        job.count = accessor.count;
+                        job.byteStride = 6;
+                        fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandles[jobHandlesCount] = job.Schedule();
+                    } else
+                    if(accessor.componentType == GLTFComponentType.Byte) {
+                        // TODO: test. did not have test files
+                        // TODO: is a non-interleaved variant faster?
+                        var job = new Jobs.GetSByteNormalsInterleavedJob();
+                        job.count = accessor.count;
+                        job.byteStride = 4; // 3 byte normal + pad byte
+                        fixed( void* src = &(buffer[start]), dst = &(c.normals[0]) ) {
+                            job.input = (sbyte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandles[jobHandlesCount] = job.Schedule();
+                    } else {
+                        Debug.LogErrorFormat("Unsupported normal type {0}", accessor.componentType);
                     }
-                    jobHandles[jobHandlesCount] = job.Schedule();
                 }
                 jobHandlesCount++;
             }
@@ -1252,13 +1328,23 @@ namespace GLTFast {
                         }
                         jobHandle = job.Schedule();
                     } else {
-                        var job = new Jobs.GetUVsUInt16Job();
-                        job.count = uvAccessor.count;
-                        fixed( void* src = &(bytes[start]), dst = &(result[0]) ) {
-                            job.input = (System.UInt16*) src;
-                            job.result = (Vector2*)dst;
+                        if(uvAccessor.normalized) {
+                            var job = new Jobs.GetUVsUInt16NormalizedJob();
+                            job.count = uvAccessor.count;
+                            fixed( void* src = &(bytes[start]), dst = &(result[0]) ) {
+                                job.input = (System.UInt16*) src;
+                                job.result = (Vector2*)dst;
+                            }
+                            jobHandle = job.Schedule();
+                        } else {
+                            var job = new Jobs.GetUVsUInt16Job();
+                            job.count = uvAccessor.count;
+                            fixed( void* src = &(bytes[start]), dst = &(result[0]) ) {
+                                job.input = (System.UInt16*) src;
+                                job.result = (Vector2*)dst;
+                            }
+                            jobHandle = job.Schedule();
                         }
-                        jobHandle = job.Schedule();
                     }
                     break;
                 default:
