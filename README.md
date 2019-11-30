@@ -21,11 +21,11 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 - [x] Scene
   - [x] Node hierarchy
-  - [ ] Camera
+  - [ ] Camera ([issue](issues/12))
 - [x] Buffers
   - [x] External URIs
   - [x] glTF binary main buffer
-  - [ ] Embed buffers or textures (base-64 encoded within JSON)
+  - [ ] Embed buffers or textures (base-64 encoded within JSON; [issue](issues/35))
 - [x] Images
   - [x] PNG
   - [x] Jpeg
@@ -40,10 +40,10 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
     - [x] <sup>1</sup>Metallic texture
     - [x] <sup>1</sup>Roughness texture
     - [x] Alpha mode
-    - [ ] Double sided
+    - [ ] Double sided ([issue](issues/9))
     - [ ] Emission
-  - [ ] Universal Render Pipeline
-  - [ ] High Definition Render Pipeline
+  - [ ] Universal Render Pipeline ([issue](issues/41))
+  - [ ] High Definition Render Pipeline ([issue](issues/42))
 - [x] Meshes
   - [x] Positions
   - [x] Normals
@@ -51,16 +51,17 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [x] Texture coordinates
   - [x] Vertex colors
   - [x] Draco mesh compression (via extension)
-  - [ ] Multiple texture coordinates sets
+  - [ ] Per primitive material ([issue](issues/32))
+  - [ ] Multiple texture coordinates sets ([issue](issues/34))
   - [ ] Joints
   - [ ] Weights
   - [ ] Implicit (no) indices
-- [ ] Texture sampler
+- [ ] Texture sampler ([issue](issues/45))
   - [ ] Filtering
   - [ ] Wrap mode
-- [ ] Morph targets
+- [ ] Morph targets ([issue](issues/8))
   - [ ] Sparse accessors
-- [ ] Skinning
+- [ ] Skinning ([issue](issues/13))
 - [ ] Animation
 
 <sup>1</sup>: Slow operation at the moment, since the image channels have to be converted to fit the shader.
@@ -71,8 +72,8 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
 - [ ] KHR_mesh_quantization
-- [ ] KHR_lights_punctual
-- [ ] KHR_texture_transform
+- [ ] KHR_lights_punctual ([issue](issues/17))
+- [ ] KHR_texture_transform ([issue](issues/18))
 
 ## Installing
 
