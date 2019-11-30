@@ -7,9 +7,9 @@
 // (extracts albedo/emission for lightmapper etc.)
 
 #include "UnityCG.cginc"
-#include "UnityStandardInput.cginc"
+#include "glTFUnityStandardInput.cginc"
 #include "UnityMetaPass.cginc"
-#include "UnityStandardCore.cginc"
+#include "glTFUnityStandardCore.cginc"
 
 struct v2f_meta
 {

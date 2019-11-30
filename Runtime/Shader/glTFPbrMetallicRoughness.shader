@@ -90,7 +90,7 @@ Shader "glTF/PbrMetallicRoughness"
 
             #pragma vertex vertBase
             #pragma fragment fragBase
-            #include "UnityStandardCoreForward.cginc"
+            #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
         }
@@ -126,7 +126,7 @@ Shader "glTF/PbrMetallicRoughness"
 
             #pragma vertex vertAdd
             #pragma fragment fragAdd
-            #include "UnityStandardCoreForward.cginc"
+            #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
         }
@@ -191,7 +191,7 @@ Shader "glTF/PbrMetallicRoughness"
             #pragma vertex vertDeferred
             #pragma fragment fragDeferred
 
-            #include "UnityStandardCore.cginc"
+            #include "glTFIncludes/glTFUnityStandardCore.cginc"
 
             ENDCG
         }
@@ -216,7 +216,7 @@ Shader "glTF/PbrMetallicRoughness"
             #pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION
 
-            #include "UnityStandardMeta.cginc"
+            #include "glTFIncludes/glTFUnityStandardMeta.cginc"
             ENDCG
         }
     }
@@ -256,7 +256,7 @@ Shader "glTF/PbrMetallicRoughness"
 
             #pragma vertex vertBase
             #pragma fragment fragBase
-            #include "UnityStandardCoreForward.cginc"
+            #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
         }
@@ -288,7 +288,7 @@ Shader "glTF/PbrMetallicRoughness"
 
             #pragma vertex vertAdd
             #pragma fragment fragAdd
-            #include "UnityStandardCoreForward.cginc"
+            #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
         }
@@ -337,7 +337,7 @@ Shader "glTF/PbrMetallicRoughness"
             #pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION
 
-            #include "UnityStandardMeta.cginc"
+            #include "glTFIncludes/glTFUnityStandardMeta.cginc"
             ENDCG
         }
     }
