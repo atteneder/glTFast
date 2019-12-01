@@ -171,7 +171,10 @@ namespace GLTFast {
                     material.SetTextureOffset(propertyId,new Vector2(tt.offset[0],1-tt.offset[1]));
                 }
                 if(tt.rotation!=0) {
-                    Debug.LogWarning("texture transform rotation is not supported");
+                    float cos = Mathf.Cos(tt.rotation);
+                    float sin = Mathf.Sin(tt.rotation);
+                    material.SetVector(StandardShaderHelper.mainTexRotatePropId,new Vector4(cos,-sin,sin,cos));
+                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
                 }
                 if(tt.scale!=null) {
                     material.SetTextureScale(propertyId,new Vector2(tt.scale[0],-tt.scale[1]));

@@ -24,6 +24,7 @@ half        _Cutoff;
 
 sampler2D   _MainTex;
 float4      _MainTex_ST;
+float4      _MainTexRotation;
 
 sampler2D   _DetailAlbedoMap;
 float4      _DetailAlbedoMap_ST;
@@ -72,8 +73,17 @@ struct VertexInput
 float4 TexCoords(VertexInput v)
 {
     float4 texcoord;
+#ifdef _UV_ROTATION
+    // 2x2 matrix multiplication to apply rotation
+    texcoord.x = v.uv0.x * _MainTexRotation.x + v.uv0.y * _MainTexRotation.z;
+    texcoord.y = v.uv0.x * _MainTexRotation.y + v.uv0.y * _MainTexRotation.w;
+
+    texcoord.xy = TRANSFORM_TEX(texcoord.xy, _MainTex);
+    texcoord.zw = TRANSFORM_TEX(((_UVSec == 0) ? v.uv0 : v.uv1), _DetailAlbedoMap);
+#else
     texcoord.xy = TRANSFORM_TEX(v.uv0, _MainTex); // Always source from uv0
     texcoord.zw = TRANSFORM_TEX(((_UVSec == 0) ? v.uv0 : v.uv1), _DetailAlbedoMap);
+#endif
     return texcoord;
 }
 
