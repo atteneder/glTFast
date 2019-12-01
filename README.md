@@ -40,6 +40,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
     - [x] <sup>1</sup>Metallic texture
     - [x] <sup>1</sup>Roughness texture
     - [x] Alpha mode
+    - [ ] Vertex colors
     - [ ] Double sided ([issue](issues/9))
     - [ ] Emission
   - [ ] Universal Render Pipeline ([issue](issues/41))
