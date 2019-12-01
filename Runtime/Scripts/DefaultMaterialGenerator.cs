@@ -68,6 +68,8 @@ namespace GLTFast {
                     material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
                     material.SetFloat(StandardShaderHelper.glossinessPropId,specGloss.glossinessFactor);
 
+                    TrySetTexture(specGloss.diffuseTexture,material,StandardShaderHelper.mainTexPropId,textures,images);
+
                     if (TrySetTexture(specGloss.specularGlossinessTexture,material,StandardShaderHelper.specGlossMapPropId,textures,images)) {
                         material.EnableKeyword(StandardShaderHelper.KW_SPEC_GLOSS_MAP);
                     }
