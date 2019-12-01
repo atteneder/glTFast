@@ -167,6 +167,9 @@ namespace GLTFast {
         {
             if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
                 var tt = textureInfo.extensions.KHR_texture_transform;
+                if(tt.texCoord!=0) {
+                    Debug.LogError("Multiple UV sets are not supported!");
+                }
                 if(tt.offset!=null) {
                     material.SetTextureOffset(propertyId,new Vector2(tt.offset[0],1-tt.offset[1]));
                 }
