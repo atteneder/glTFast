@@ -35,7 +35,7 @@ namespace GLTFast {
 
         public UnityEngine.Material GetUnlitMaterial() {
             if(unlitShader==null) {
-                unlitShader = Shader.Find("Unlit/Color");
+                unlitShader = Shader.Find("glTF/Unlit");
             }
             return new Material(unlitShader);
         }
