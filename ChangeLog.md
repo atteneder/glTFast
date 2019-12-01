@@ -5,8 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Support for texture transform (extension KHR_texture_transform)
 ### Changed
-- Using custom glTF shaders. This speeds up occlusion and roughness/metallic texture loading since they don't have to be converted at runtime anymore. It's also the foundation for future material features.
+- Using custom glTF shaders instead of Unity Standard shaders. This speeds up occlusion and roughness/metallic texture loading since they don't have to be converted at runtime anymore.
 ### Fixed
 - Factor and texture (for metallic-roughness and specular-glossiness) are now multiplied as defined in spec.
 - Unlit materials now support baseColorTexture and texture transforms
