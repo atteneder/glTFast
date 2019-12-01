@@ -1,5 +1,4 @@
-﻿
-namespace GLTFast.Schema {
+﻿namespace GLTFast.Schema {
 
     public enum DrawMode
     {
