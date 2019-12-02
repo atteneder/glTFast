@@ -214,23 +214,26 @@ namespace GLTFast {
                 return;
             }
 
-            for( int i=0; i<gltfRoot.buffers.Length;i++) {
-                var buffer = gltfRoot.buffers[i];
-                if( !string.IsNullOrEmpty(buffer.uri) ) {
-                    if(buffer.uri.StartsWith("data:")) {
-                        Debug.LogError("Embed buffer not supported");
-                        loadingError = true;
-                    } else {
-                        LoadBuffer( i, baseUri+buffer.uri );
-                    }
-                }
-            }
-
             var bufferCount = gltfRoot.buffers.Length;
             if(bufferCount>0) {
                 buffers = new byte[bufferCount][];
                 nativeBuffers = new NativeArray<byte>[bufferCount];
                 binChunks = new GlbBinChunk[bufferCount];
+            }
+
+            for( int i=0; i<bufferCount;i++) {
+                var buffer = gltfRoot.buffers[i];
+                if( !string.IsNullOrEmpty(buffer.uri) ) {
+                    if(buffer.uri.StartsWith("data:")) {
+                        buffers[i] = DecodeEmbedBuffer(buffer.uri);
+                        if(buffers[i]==null) {
+                            Debug.LogError("Error loading embed buffer!");
+                            loadingError = true;
+                        }
+                    } else {
+                        LoadBuffer( i, baseUri+buffer.uri );
+                    }
+                }
             }
         }
 
@@ -328,22 +331,33 @@ namespace GLTFast {
                 images = new Texture2D[gltfRoot.images.Length];
                 for (int i = 0; i < images.Length; i++) {
                     var img = gltfRoot.images[i];
-                    bool knownImageType = false;
-                    if(string.IsNullOrEmpty(img.mimeType)) {
-                        Debug.LogWarning("Image is missing mime type");
-                        knownImageType = IsKnownImageFileExtension(img.uri);
-                    } else {
-                        knownImageType = IsKnownImageMimeType(img.mimeType);
-                    }
 
-                    if (knownImageType)
-                    {
-                        if (img.bufferView >= 0)
-                        {
-                            // Inside buffer
-                        } else
-                        if(!string.IsNullOrEmpty(img.uri)) {
-                            LoadTexture(i,baseUri+img.uri);
+                    if(!string.IsNullOrEmpty(img.uri) && img.uri.StartsWith("data:")) {
+                        string mimeType;
+                        var data = DecodeEmbedBuffer(img.uri,out mimeType);
+                        if(data==null || !IsKnownImageMimeType(mimeType)) {
+                            Debug.LogError("Loading embedded image failed");
+                            continue;
+                        }
+                        var txt = CreateEmptyTexture(img,i);
+                        txt.LoadImage(data);
+                        images[i] = txt;
+                    } else {
+                        bool knownImageType = false;
+                        if(string.IsNullOrEmpty(img.mimeType)) {
+                            knownImageType = IsKnownImageFileExtension(img.uri);
+                        } else {
+                            knownImageType = IsKnownImageMimeType(img.mimeType);
+                        }
+
+                        if (knownImageType) {
+                            if (img.bufferView < 0 && !string.IsNullOrEmpty(img.uri))
+                            {
+                                // Not Inside buffer
+                                LoadTexture(i,baseUri+img.uri);
+                            }
+                        } else {
+                            Debug.LogErrorFormat("Unknown image format (image {0};uri:{1})",i,img.uri);
                         }
                     }
                 }
@@ -405,6 +419,22 @@ namespace GLTFast {
             }
 
             downloads[index] = www.SendWebRequest();
+        }
+
+        byte[] DecodeEmbedBuffer(string encodedBytes) {
+            string tmp;
+            return DecodeEmbedBuffer(encodedBytes,out tmp);
+        }
+
+        byte[] DecodeEmbedBuffer(string encodedBytes, out string mimeType) {
+            mimeType = null;
+            Debug.LogWarning("JSON embed buffers are slow! consider using glTF binary");
+            var mediaTypeEnd = encodedBytes.IndexOf(';',5,Math.Min(encodedBytes.Length-5,1000) );
+            if(mediaTypeEnd<0) return null;
+            mimeType = encodedBytes.Substring(5,mediaTypeEnd-5);
+            var tmp = encodedBytes.Substring(mediaTypeEnd+1,7);
+            if(tmp!="base64,") return null;
+            return System.Convert.FromBase64String(encodedBytes.Substring(mediaTypeEnd+8));
         }
 
         void LoadTexture( int index, string url ) {
@@ -725,8 +755,7 @@ namespace GLTFast {
                         var bufferView = bufferViews[img.bufferView];
                         var buffer = GetBuffer(bufferView.buffer);
                         var chunk = binChunks[bufferView.buffer];
-                        var txt = new UnityEngine.Texture2D(4, 4);
-                        txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
+                        var txt = CreateEmptyTexture(img,i);
                         var icc = new ImageCreateContext();
                         icc.imageIndex = i;
                         icc.buffer = new byte[bufferView.byteLength];
@@ -746,6 +775,13 @@ namespace GLTFast {
                 }
             }
         }
+
+        Texture2D CreateEmptyTexture(Schema.Image img, int index) {
+            var txt = new UnityEngine.Texture2D(4, 4);
+            txt.name = string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
+            return txt;
+        }
+
         public void Destroy() {
             if(materials!=null) {
                 foreach( var material in materials ) {

@@ -25,7 +25,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] Buffers
   - [x] External URIs
   - [x] glTF binary main buffer
-  - [ ] Embed buffers or textures (base-64 encoded within JSON; [issue](issues/35))
+  - [x] Embed buffers or textures (base-64 encoded within JSON)
 - [x] Images
   - [x] PNG
   - [x] Jpeg
