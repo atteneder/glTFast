@@ -161,10 +161,10 @@ float3 PerPixelWorldNormal(float4 i_tex, float4 tangentToWorld[3])
 #define IN_LIGHTDIR_FWDADD(i) half3(i.tangentToWorldAndLightDir[0].w, i.tangentToWorldAndLightDir[1].w, i.tangentToWorldAndLightDir[2].w)
 
 #define FRAGMENT_SETUP(x) FragmentCommonData x = \
-    FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i));
+    FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i),i.color);
 
 #define FRAGMENT_SETUP_FWDADD(x) FragmentCommonData x = \
-    FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX_FWDADD(i), i.tangentToWorldAndLightDir, IN_WORLDPOS_FWDADD(i));
+    FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX_FWDADD(i), i.tangentToWorldAndLightDir, IN_WORLDPOS_FWDADD(i), i.color);
 
 struct FragmentCommonData
 {
@@ -190,14 +190,14 @@ struct FragmentCommonData
     #define UNITY_SETUP_BRDF_INPUT SpecularSetup
 #endif
 
-inline FragmentCommonData SpecularSetup (float4 i_tex)
+inline FragmentCommonData SpecularSetup (float4 i_tex, half3 v_color)
 {
     half4 specGloss = SpecularGloss(i_tex.xy);
     half3 specColor = specGloss.rgb;
     half smoothness = specGloss.a;
 
     half oneMinusReflectivity;
-    half3 diffColor = EnergyConservationBetweenDiffuseAndSpecular (Albedo(i_tex), specColor, /*out*/ oneMinusReflectivity);
+    half3 diffColor = EnergyConservationBetweenDiffuseAndSpecular (Albedo(i_tex)*v_color, specColor, /*out*/ oneMinusReflectivity);
 
     FragmentCommonData o = (FragmentCommonData)0;
     o.diffColor = diffColor;
@@ -207,7 +207,7 @@ inline FragmentCommonData SpecularSetup (float4 i_tex)
     return o;
 }
 
-inline FragmentCommonData RoughnessSetup(float4 i_tex)
+inline FragmentCommonData RoughnessSetup(float4 i_tex, half3 v_color)
 {
     half2 metallicGloss = MetallicRough(i_tex.xy);
     half metallic = metallicGloss.x;
@@ -215,7 +215,7 @@ inline FragmentCommonData RoughnessSetup(float4 i_tex)
 
     half oneMinusReflectivity;
     half3 specColor;
-    half3 diffColor = DiffuseAndSpecularFromMetallic(Albedo(i_tex), metallic, /*out*/ specColor, /*out*/ oneMinusReflectivity);
+    half3 diffColor = DiffuseAndSpecularFromMetallic(Albedo(i_tex)*v_color, metallic, /*out*/ specColor, /*out*/ oneMinusReflectivity);
 
     FragmentCommonData o = (FragmentCommonData)0;
     o.diffColor = diffColor;
@@ -225,7 +225,7 @@ inline FragmentCommonData RoughnessSetup(float4 i_tex)
     return o;
 }
 
-inline FragmentCommonData MetallicSetup (float4 i_tex)
+inline FragmentCommonData MetallicSetup (float4 i_tex, half3 v_color)
 {
     half2 metallicGloss = MetallicGloss(i_tex.xy);
     half metallic = metallicGloss.x;
@@ -233,7 +233,7 @@ inline FragmentCommonData MetallicSetup (float4 i_tex)
 
     half oneMinusReflectivity;
     half3 specColor;
-    half3 diffColor = DiffuseAndSpecularFromMetallic (Albedo(i_tex), metallic, /*out*/ specColor, /*out*/ oneMinusReflectivity);
+    half3 diffColor = DiffuseAndSpecularFromMetallic (Albedo(i_tex)*v_color, metallic, /*out*/ specColor, /*out*/ oneMinusReflectivity);
 
     FragmentCommonData o = (FragmentCommonData)0;
     o.diffColor = diffColor;
@@ -244,7 +244,7 @@ inline FragmentCommonData MetallicSetup (float4 i_tex)
 }
 
 // parallax transformed texcoord is used to sample occlusion
-inline FragmentCommonData FragmentSetup (inout float4 i_tex, float3 i_eyeVec, half3 i_viewDirForParallax, float4 tangentToWorld[3], float3 i_posWorld)
+inline FragmentCommonData FragmentSetup (inout float4 i_tex, float3 i_eyeVec, half3 i_viewDirForParallax, float4 tangentToWorld[3], float3 i_posWorld, half3 v_color)
 {
     i_tex = Parallax(i_tex, i_viewDirForParallax);
 
@@ -253,7 +253,7 @@ inline FragmentCommonData FragmentSetup (inout float4 i_tex, float3 i_eyeVec, ha
         clip (alpha - _Cutoff);
     #endif
 
-    FragmentCommonData o = UNITY_SETUP_BRDF_INPUT (i_tex);
+    FragmentCommonData o = UNITY_SETUP_BRDF_INPUT (i_tex,v_color);
     o.normalWorld = PerPixelWorldNormal(i_tex, tangentToWorld);
     o.eyeVec = NormalizePerPixelNormal(i_eyeVec);
     o.posWorld = i_posWorld;
@@ -367,7 +367,7 @@ struct VertexOutputForwardBase
 #if UNITY_REQUIRE_FRAG_WORLDPOS && !UNITY_PACK_WORLDPOS_WITH_TANGENT
     float3 posWorld                     : TEXCOORD8;
 #endif
-
+    half4 color                         : COLOR;
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
 };
@@ -422,6 +422,7 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     #endif
 
     UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o,o.pos);
+    o.color = v.color;
     return o;
 }
 
@@ -469,6 +470,7 @@ struct VertexOutputForwardAdd
 #if defined(_PARALLAXMAP)
     half3 viewDirForParallax            : TEXCOORD8;
 #endif
+    half4 color                         : COLOR;
 
     UNITY_VERTEX_OUTPUT_STEREO
 };
@@ -516,6 +518,7 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     #endif
 
     UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o, o.pos);
+    o.color = v.color;
     return o;
 }
 
@@ -557,6 +560,7 @@ struct VertexOutputDeferred
     #if UNITY_REQUIRE_FRAG_WORLDPOS && !UNITY_PACK_WORLDPOS_WITH_TANGENT
         float3 posWorld                     : TEXCOORD6;
     #endif
+    half4 color                             : COLOR;
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
@@ -616,6 +620,8 @@ VertexOutputDeferred vertDeferred (VertexInput v)
         o.tangentToWorldAndPackedData[1].w = viewDirForParallax.y;
         o.tangentToWorldAndPackedData[2].w = viewDirForParallax.z;
     #endif
+
+    o.color = v.color;
 
     return o;
 }
