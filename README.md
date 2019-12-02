@@ -41,7 +41,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
     - [x] <sup>1</sup>Roughness texture
     - [x] Alpha mode
     - [x] Double sided
-    - [ ] Vertex colors
+    - [x] Vertex colors
     - [ ] Emission
   - [ ] Universal Render Pipeline ([issue](issues/41))
   - [ ] High Definition Render Pipeline ([issue](issues/42))
