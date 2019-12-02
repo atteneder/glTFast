@@ -1,6 +1,6 @@
 // Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
 
-Shader "glTF/PbrSpecularGlossiness"
+Shader "glTF/PbrSpecularGlossinessDouble"
 {
     Properties
     {
@@ -46,7 +46,7 @@ Shader "glTF/PbrSpecularGlossiness"
         [HideInInspector] _DstBlend ("__dst", Float) = 0.0
         [HideInInspector] _ZWrite ("__zw", Float) = 1.0
 
-        _DoubleSided ("_DoubleSided", Float) = 2
+        _DoubleSided ("_DoubleSided", Float) = 0
     }
 
     CGINCLUDE
@@ -58,16 +58,19 @@ Shader "glTF/PbrSpecularGlossiness"
         Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
         LOD 300
 
+        UsePass "glTF/PbrSpecularGlossiness/FORWARD"
+        UsePass "glTF/PbrSpecularGlossiness/FORWARD_DELTA"
 
         // ------------------------------------------------------------------
         //  Base forward pass (directional light, emission, lightmaps, ...)
         Pass
         {
-            Name "FORWARD"
+            Name "FORWARD_BACK"
             Tags { "LightMode" = "ForwardBase" }
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
+            Cull Front
 
             CGPROGRAM
             #pragma target 3.0
@@ -91,22 +94,35 @@ Shader "glTF/PbrSpecularGlossiness"
             // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
-            #pragma vertex vertBase
+            #pragma vertex vertBaseBack
             #pragma fragment fragBase
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
+            #if UNITY_STANDARD_SIMPLE
+            VertexOutputBaseSimple vertBaseBack (VertexInput v) {
+                v.normal = v.normal * -1;
+                return vertBase(v);
+            }
+            #else
+            VertexOutputForwardBase vertBaseBack (VertexInput v) {
+                v.normal = v.normal * -1;
+                return vertBase(v);
+            }
+            #endif
             ENDCG
         }
+
         // ------------------------------------------------------------------
         //  Additive forward pass (one light per pass)
         Pass
         {
-            Name "FORWARD_DELTA"
+            Name "FORWARD_DELTA_BACK"
             Tags { "LightMode" = "ForwardAdd" }
             Blend [_SrcBlend] One
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
             ZWrite Off
             ZTest LEqual
+            Cull Front
 
             CGPROGRAM
             #pragma target 3.0
@@ -127,49 +143,31 @@ Shader "glTF/PbrSpecularGlossiness"
             // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
-            #pragma vertex vertAdd
+            #pragma vertex vertAddBack
             #pragma fragment fragAdd
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
+            #if UNITY_STANDARD_SIMPLE
+                VertexOutputForwardAddSimple vertAddBack (VertexInput v) {
+                    v.normal = v.normal * -1;
+                    return vertAdd(v);
+                }
+            #else
+                VertexOutputForwardAdd vertAddBack (VertexInput v) {
+                    v.normal = v.normal * -1;
+                    return vertAdd(v);
+                }
+            #endif
             ENDCG
         }
-        // ------------------------------------------------------------------
-        //  Shadow rendering pass
-        Pass {
-            Name "ShadowCaster"
-            Tags { "LightMode" = "ShadowCaster" }
 
-            ZWrite On ZTest LEqual
-            Cull [_DoubleSided]
-
-            CGPROGRAM
-            #pragma target 3.0
-
-            // -------------------------------------
-
-
-            #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature_local _SPECGLOSSMAP
-            #pragma shader_feature_local _UV_ROTATION
-            // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            // #pragma shader_feature_local _PARALLAXMAP
-            #pragma multi_compile_shadowcaster
-            #pragma multi_compile_instancing
-            // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
-            //#pragma multi_compile _ LOD_FADE_CROSSFADE
-
-            #pragma vertex vertShadowCaster
-            #pragma fragment fragShadowCaster
-
-            #include "UnityStandardShadow.cginc"
-
-            ENDCG
-        }
+        UsePass "glTF/PbrSpecularGlossiness/ShadowCaster"
+        
         // ------------------------------------------------------------------
         //  Deferred pass
         Pass
         {
-            Name "DEFERRED"
+            Name "DEFERRED_BACK"
             Tags { "LightMode" = "Deferred" }
 
             CGPROGRAM
@@ -194,38 +192,18 @@ Shader "glTF/PbrSpecularGlossiness"
             // Uncomment the following line to enable dithering LOD crossfade. Note: there are more in the file to uncomment for other passes.
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
-            #pragma vertex vertDeferred
+            #pragma vertex vertDeferredBack
             #pragma fragment fragDeferred
-
             #include "glTFIncludes/glTFUnityStandardCore.cginc"
 
+            VertexOutputDeferred vertDeferredBack (VertexInput v) {
+                v.normal = v.normal * -1;
+                return vertDeferred(v);
+            }
             ENDCG
         }
 
-        // ------------------------------------------------------------------
-        // Extracts information for lightmapping, GI (emission, albedo, ...)
-        // This pass it not used during regular rendering.
-        Pass
-        {
-            Name "META"
-            Tags { "LightMode"="Meta" }
-
-            Cull Off
-
-            CGPROGRAM
-            #pragma vertex vert_meta
-            #pragma fragment frag_meta
-
-            #pragma shader_feature _EMISSION
-            #pragma shader_feature_local _SPECGLOSSMAP
-            #pragma shader_feature_local _UV_ROTATION
-            // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            // #pragma shader_feature_local _DETAIL_MULX2
-            #pragma shader_feature EDITOR_VISUALIZATION
-
-            #include "glTFIncludes/glTFUnityStandardMeta.cginc"
-            ENDCG
-        }
+        UsePass "glTF/PbrSpecularGlossiness/META"
     }
 
     SubShader
@@ -233,11 +211,14 @@ Shader "glTF/PbrSpecularGlossiness"
         Tags { "RenderType"="Opaque" "PerformanceChecks"="False" }
         LOD 150
 
+        UsePass "glTF/PbrSpecularGlossiness/FORWARD"
+        UsePass "glTF/PbrSpecularGlossiness/FORWARD_DELTA"
+
         // ------------------------------------------------------------------
         //  Base forward pass (directional light, emission, lightmaps, ...)
         Pass
         {
-            Name "FORWARD"
+            Name "FORWARD_BACK"
             Tags { "LightMode" = "ForwardBase" }
 
             Blend [_SrcBlend] [_DstBlend]
@@ -262,17 +243,28 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma multi_compile_fwdbase
             #pragma multi_compile_fog
 
-            #pragma vertex vertBase
+            #pragma vertex vertBaseBack
             #pragma fragment fragBase
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
+            #if UNITY_STANDARD_SIMPLE
+            VertexOutputBaseSimple vertBaseBack (VertexInput v) {
+                v.normal = v.normal * -1;
+                return vertBase(v);
+            }
+            #else
+            VertexOutputForwardBase vertBaseBack (VertexInput v) {
+                v.normal = v.normal * -1;
+                return vertBase(v);
+            }
+            #endif
             ENDCG
         }
         // ------------------------------------------------------------------
         //  Additive forward pass (one light per pass)
         Pass
         {
-            Name "FORWARD_DELTA"
+            Name "FORWARD_DELTA_BACK"
             Tags { "LightMode" = "ForwardAdd" }
             Blend [_SrcBlend] One
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
@@ -295,64 +287,27 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma multi_compile_fwdadd_fullshadows
             #pragma multi_compile_fog
 
-            #pragma vertex vertAdd
+            #pragma vertex vertAddBack
             #pragma fragment fragAdd
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
+            #if UNITY_STANDARD_SIMPLE
+                VertexOutputForwardAddSimple vertAddBack (VertexInput v) {
+                    v.normal = v.normal * -1;
+                    return vertAdd(v);
+                }
+            #else
+                VertexOutputForwardAdd vertAddBack (VertexInput v) {
+                    v.normal = v.normal * -1;
+                    return vertAdd(v);
+                }
+            #endif
             ENDCG
         }
-        // ------------------------------------------------------------------
-        //  Shadow rendering pass
-        Pass {
-            Name "ShadowCaster"
-            Tags { "LightMode" = "ShadowCaster" }
 
-            ZWrite On ZTest LEqual
-            Cull [_DoubleSided]
-
-            CGPROGRAM
-            #pragma target 2.0
-
-            #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature_local _SPECGLOSSMAP
-            #pragma shader_feature_local _UV_ROTATION
-            // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            #pragma skip_variants SHADOWS_SOFT
-            #pragma multi_compile_shadowcaster
-
-            #pragma vertex vertShadowCaster
-            #pragma fragment fragShadowCaster
-
-            #include "UnityStandardShadow.cginc"
-
-            ENDCG
-        }
-        // ------------------------------------------------------------------
-        // Extracts information for lightmapping, GI (emission, albedo, ...)
-        // This pass it not used during regular rendering.
-        Pass
-        {
-            Name "META"
-            Tags { "LightMode"="Meta" }
-
-            Cull Off
-
-            CGPROGRAM
-            #pragma vertex vert_meta
-            #pragma fragment frag_meta
-
-            #pragma shader_feature _EMISSION
-            #pragma shader_feature_local _SPECGLOSSMAP
-            #pragma shader_feature_local _UV_ROTATION
-            // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-            // #pragma shader_feature_local _DETAIL_MULX2
-            #pragma shader_feature EDITOR_VISUALIZATION
-
-            #include "glTFIncludes/glTFUnityStandardMeta.cginc"
-            ENDCG
-        }
+        UsePass "glTF/PbrSpecularGlossiness/ShadowCaster"
+        UsePass "glTF/PbrSpecularGlossiness/META"
     }
 
-    FallBack "VertexLit"
-    // CustomEditor "StandardShaderGUI"
+    FallBack "glTF/PbrSpecularGlossiness"
 }

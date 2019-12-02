@@ -10,6 +10,7 @@ Properties {
     _Color ("Main Color", Color) = (1,1,1,1)
     _MainTex ("Base (RGB)", 2D) = "white" {}
     _MainTexRotation ("Texture rotation", Vector) = (1,0,0,1)
+    _DoubleSided ("_DoubleSided", Float) = 2
 }
 
 SubShader {
@@ -17,6 +18,9 @@ SubShader {
     LOD 100
 
     Pass {
+        
+        Cull [_DoubleSided]
+
         CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag

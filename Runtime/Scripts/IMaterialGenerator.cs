@@ -5,7 +5,7 @@ using UnityEngine;
 namespace GLTFast {
     using Schema;
     public interface IMaterialGenerator {
-		UnityEngine.Material GetPbrMetallicRoughnessMaterial();
+		UnityEngine.Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false);
         UnityEngine.Material GenerateMaterial( Material gltfMaterial, Schema.Texture[] textures, UnityEngine.Texture2D[] images );
     }
 }

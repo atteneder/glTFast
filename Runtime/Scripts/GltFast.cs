@@ -742,7 +742,8 @@ namespace GLTFast {
                 var img = src_images[i];
                 bool knownImageType = false;
                 if(string.IsNullOrEmpty(img.mimeType)) {
-                    Debug.LogWarning("Image is missing mime type");
+                    // Image is missing mime type
+                    // try to determine type by file extension
                     knownImageType = IsKnownImageFileExtension(img.uri);
                 } else {
                     knownImageType = IsKnownImageMimeType(img.mimeType);

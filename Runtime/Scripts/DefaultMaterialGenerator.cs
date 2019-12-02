@@ -16,40 +16,61 @@ namespace GLTFast {
         static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
 
         Shader pbrMetallicRoughnessShader;
+        Shader pbrMetallicRoughnessDoubleSideShader;
         Shader pbrSpecularGlossinessShader;
+        Shader pbrSpecularGlossinessDoubleSideShader;
         Shader unlitShader;
 
-        public UnityEngine.Material GetPbrMetallicRoughnessMaterial() {
-            if(pbrMetallicRoughnessShader==null) {
-                pbrMetallicRoughnessShader = Shader.Find("glTF/PbrMetallicRoughness");
+        public UnityEngine.Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {
+            if(doubleSided) {
+                if(pbrMetallicRoughnessDoubleSideShader==null) {
+                    pbrMetallicRoughnessDoubleSideShader = Shader.Find("glTF/PbrMetallicRoughnessDouble");
+                }
+                return new Material(pbrMetallicRoughnessDoubleSideShader);
+            } else {
+                if(pbrMetallicRoughnessShader==null) {
+                    pbrMetallicRoughnessShader = Shader.Find("glTF/PbrMetallicRoughness");
+                }
+                return new Material(pbrMetallicRoughnessShader);
             }
-            return new Material(pbrMetallicRoughnessShader);
         }
 
-        public UnityEngine.Material GetPbrSpecularGlossinessMaterial() {
-            if(pbrSpecularGlossinessShader==null) {
-                pbrSpecularGlossinessShader = Shader.Find("glTF/PbrSpecularGlossiness");
+        public UnityEngine.Material GetPbrSpecularGlossinessMaterial(bool doubleSided=false) {
+            if(doubleSided) {
+                if(pbrSpecularGlossinessDoubleSideShader==null) {
+                    pbrSpecularGlossinessDoubleSideShader = Shader.Find("glTF/PbrSpecularGlossinessDouble");
+                }
+                return new Material(pbrSpecularGlossinessDoubleSideShader);
+            } else {
+                if(pbrSpecularGlossinessShader==null) {
+                    pbrSpecularGlossinessShader = Shader.Find("glTF/PbrSpecularGlossiness");
+                }
+                return new Material(pbrSpecularGlossinessShader);
             }
-            return new Material(pbrSpecularGlossinessShader);
         }
 
-        public UnityEngine.Material GetUnlitMaterial() {
+        public UnityEngine.Material GetUnlitMaterial(bool doubleSided=false) {
             if(unlitShader==null) {
                 unlitShader = Shader.Find("glTF/Unlit");
             }
-            return new Material(unlitShader);
+            var mat = new Material(unlitShader);
+            if(doubleSided) {
+                // Turn of back-face culling
+                mat.SetFloat(StandardShaderHelper.doubleSidedPropId,0);
+            }
+            return mat;
         }
 
         public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture2D[] images ) {
             UnityEngine.Material material;
             
             if (gltfMaterial.extensions!=null && gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness!=null) {
-                material = GetPbrSpecularGlossinessMaterial();
+                material = GetPbrSpecularGlossinessMaterial(gltfMaterial.doubleSided);
             } else
             if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
-                material = GetUnlitMaterial();
+                material = GetUnlitMaterial(gltfMaterial.doubleSided);
             } else {
-                material = GetPbrMetallicRoughnessMaterial();
+                material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);
             }
 
             material.name = gltfMaterial.name;
@@ -120,9 +141,6 @@ namespace GLTFast {
                 material.EnableKeyword("_EMISSION");
             }
 
-            if(gltfMaterial.doubleSided) {
-                Debug.LogWarning("Double sided shading is not supported!");
-            }
             return material;
         }
 

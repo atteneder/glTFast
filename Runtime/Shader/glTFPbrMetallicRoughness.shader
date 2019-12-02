@@ -46,6 +46,8 @@ Shader "glTF/PbrMetallicRoughness"
         [HideInInspector] _SrcBlend ("__src", Float) = 1.0
         [HideInInspector] _DstBlend ("__dst", Float) = 0.0
         [HideInInspector] _ZWrite ("__zw", Float) = 1.0
+
+        _DoubleSided ("_DoubleSided", Float) = 2
     }
 
     CGINCLUDE
@@ -142,6 +144,7 @@ Shader "glTF/PbrMetallicRoughness"
             Tags { "LightMode" = "ShadowCaster" }
 
             ZWrite On ZTest LEqual
+            Cull [_DoubleSided]
 
             CGPROGRAM
             #pragma target 3.0
@@ -314,6 +317,7 @@ Shader "glTF/PbrMetallicRoughness"
             Tags { "LightMode" = "ShadowCaster" }
 
             ZWrite On ZTest LEqual
+            Cull [_DoubleSided]
 
             CGPROGRAM
             #pragma target 2.0
