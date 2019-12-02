@@ -80,9 +80,9 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] KHR_draco_mesh_compression
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
-- [ ] KHR_mesh_quantization
+- [x] KHR_texture_transform
+- [ ] KHR_mesh_quantization ([issue](issues/51))
 - [ ] KHR_lights_punctual ([issue](issues/17))
-- [ ] KHR_texture_transform ([issue](issues/18))
 
 ## Installing
 
