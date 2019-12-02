@@ -20,6 +20,7 @@ namespace GLTFast.Materials {
         public const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
         public const string KW_OCCLUSION = "_OCCLUSION";
         public const string KW_UV_ROTATION = "_UV_ROTATION";
+        public const string KW_EMISSION = "_EMISSION";
 
         public static int modePropId = Shader.PropertyToID("_Mode");
         public static int dstBlendPropId = Shader.PropertyToID("_DstBlend");

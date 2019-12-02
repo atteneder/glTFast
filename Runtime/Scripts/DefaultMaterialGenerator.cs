@@ -124,7 +124,7 @@ namespace GLTFast {
             }
 
             if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,textures,images)) {
-                material.EnableKeyword("_EMISSION");
+                material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
             }
             
             if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
@@ -138,7 +138,7 @@ namespace GLTFast {
 
             if(gltfMaterial.emissive != Color.black) {
                 material.SetColor("_EmissionColor", gltfMaterial.emissive);
-                material.EnableKeyword("_EMISSION");
+                material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
             }
 
             return material;

@@ -42,7 +42,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
     - [x] Alpha mode
     - [x] Double sided
     - [x] Vertex colors
-    - [ ] Emission
+    - [x] Emission(factor)
   - [ ] Universal Render Pipeline ([issue](issues/41))
   - [ ] High Definition Render Pipeline ([issue](issues/42))
 - Primitive Types
