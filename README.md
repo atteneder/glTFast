@@ -45,6 +45,14 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
     - [ ] Emission
   - [ ] Universal Render Pipeline ([issue](issues/41))
   - [ ] High Definition Render Pipeline ([issue](issues/42))
+- Primitive Types
+  - [ ] POINTS
+  - [ ] LINES
+  - [ ] LINE_LOOP
+  - [ ] LINE_STRIP
+  - [x] TRIANGLES
+  - [ ] TRIANGLE_STRIP
+  - [ ] TRIANGLE_FAN
 - [x] Meshes
   - [x] Positions
   - [x] Normals
