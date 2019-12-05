@@ -74,6 +74,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [ ] Animation
 
 <sup>1</sup>: Slow operation at the moment, since the image channels have to be converted to fit the shader.
+
 <sup>2</sup>: Untested due to lack of demo files.
 
 ### Extensions
