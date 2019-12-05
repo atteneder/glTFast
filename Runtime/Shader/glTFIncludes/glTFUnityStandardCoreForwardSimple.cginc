@@ -256,6 +256,7 @@ struct VertexOutputForwardAddSimple
 #else
     half3 normalWorld                   : TEXCOORD4;
 #endif
+    half4 color                         : COLOR;
 
     UNITY_LIGHTING_COORDS(5, 6)
 
