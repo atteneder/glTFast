@@ -47,10 +47,10 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [ ] High Definition Render Pipeline ([issue](issues/42))
 - Primitive Types
   - [x] TRIANGLES
-  - [x] POINTS (untested)
-  - [x] LINES (untested)
-  - [x] LINE_STRIP (untested)
-  - [x] LINE_LOOP (untested)
+  - [x] <sup>2</sup>POINTS
+  - [x] <sup>2</sup>LINES
+  - [x] <sup>2</sup>LINE_STRIP
+  - [x] <sup>2</sup>LINE_LOOP
   - [ ] TRIANGLE_STRIP
   - [ ] TRIANGLE_FAN
 - [x] Meshes
@@ -74,6 +74,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [ ] Animation
 
 <sup>1</sup>: Slow operation at the moment, since the image channels have to be converted to fit the shader.
+<sup>2</sup>: Untested due to lack of demo files.
 
 ### Extensions
 
