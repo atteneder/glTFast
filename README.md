@@ -46,11 +46,11 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [ ] Universal Render Pipeline ([issue](issues/41))
   - [ ] High Definition Render Pipeline ([issue](issues/42))
 - Primitive Types
-  - [ ] POINTS
-  - [ ] LINES
-  - [ ] LINE_LOOP
-  - [ ] LINE_STRIP
   - [x] TRIANGLES
+  - [x] POINTS (untested)
+  - [x] LINES (untested)
+  - [x] LINE_STRIP (untested)
+  - [x] LINE_LOOP (untested)
   - [ ] TRIANGLE_STRIP
   - [ ] TRIANGLE_FAN
 - [x] Meshes
@@ -60,11 +60,11 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [x] Texture coordinates
   - [x] Vertex colors
   - [x] Draco mesh compression (via extension)
+  - [x] Implicit (no) indices
   - [ ] Per primitive material ([issue](issues/32))
   - [ ] Multiple texture coordinates sets ([issue](issues/34))
   - [ ] Joints
   - [ ] Weights
-  - [ ] Implicit (no) indices
 - [ ] Texture sampler ([issue](issues/45))
   - [ ] Filtering
   - [ ] Wrap mode

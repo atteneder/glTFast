@@ -13,6 +13,48 @@ namespace GLTFast.Jobs {
     static class Constants {
         public const float UINT16_MAX = 65535f;
     }
+
+    public unsafe struct CreateIndicesJob : IJob  {
+            
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        [ReadOnly]
+        public bool lineLoop;
+
+        public void Execute()
+        {
+            for (var i = 0; i < count; i++) {
+                result[i] = i;
+            }
+            if(lineLoop) {
+                result[count-1] = 0;
+            }
+        }
+    }
+
+    public unsafe struct CreateIndicesFlippedJob : IJob  {
+            
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        public void Execute()
+        {
+            for (var i = 0; i < count; i++) {
+                result[i] = i - 2*(i%3-1);
+            }
+        }
+    }
+
+
     public unsafe struct GetIndicesUInt8Job : IJob  {
             
         [ReadOnly]

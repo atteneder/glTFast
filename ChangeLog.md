@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for double sided materials
 - Support for data URI / embedded buffers and images
 - Support for vertex colors in materials
+- Support for implicit/undefined primitive indices
+- Experimental support for primitive modes points, lines, line strip and line loop
 ### Changed
 - Using custom glTF shaders instead of Unity Standard shaders. This speeds up occlusion and roughness/metallic texture loading since they don't have to be converted at runtime anymore.
 ### Fixed
