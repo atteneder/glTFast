@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-
-namespace GLTFast.Schema {
+﻿namespace GLTFast.Schema {
     
     [System.Serializable]
     public class Root

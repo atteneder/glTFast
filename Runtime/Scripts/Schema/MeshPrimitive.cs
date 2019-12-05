@@ -1,5 +1,4 @@
-﻿
-namespace GLTFast.Schema {
+﻿namespace GLTFast.Schema {
 
     public enum DrawMode
     {
@@ -32,7 +31,7 @@ namespace GLTFast.Schema {
         /// or 5125 (UNSIGNED_INT), the latter is only allowed
         /// when `OES_element_index_uint` extension is used; `type` must be `\"SCALAR\"`.
         /// </summary>
-        public int indices;
+        public int indices = -1;
 
         /// <summary>
         /// The index of the material to apply to this primitive when rendering.
@@ -42,7 +41,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The type of primitives to render. All valid values correspond to WebGL enums.
         /// </summary>
-        public DrawMode mode;
+        public DrawMode mode = DrawMode.Triangles;
 
         /// <summary>
         /// An array of Morph Targets, each  Morph Target is a dictionary mapping

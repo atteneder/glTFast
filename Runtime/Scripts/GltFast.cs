@@ -18,11 +18,13 @@ namespace GLTFast {
         const uint GLB_MAGIC = 0x46546c67;
 
         const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
+        const string ErrorUnsupportedPrimitiveMode = "Primitive mode {0} is untested!";
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
             "KHR_draco_mesh_compression",
             "KHR_materials_pbrSpecularGlossiness",
-            "KHR_materials_unlit"
+            "KHR_materials_unlit",
+            "KHR_texture_transform"
         };
 
         enum ChunkFormat : uint
@@ -74,6 +76,8 @@ namespace GLTFast {
 
             public GCHandle[] gcHandles;
 
+            public MeshTopology topology;
+
             public override bool IsCompleted {
                 get {
                     return jobHandle.IsCompleted;
@@ -94,11 +98,7 @@ namespace GLTFast {
                 msh.name = mesh.name;
                 msh.vertices = positions;
 
-                msh.SetIndices(
-                    indices
-                    ,MeshTopology.Triangles
-                    ,0
-                    );
+                msh.SetIndices(indices,topology,0);
 
                 if(uvs0!=null) {
                     msh.uv = uvs0;
@@ -213,23 +213,26 @@ namespace GLTFast {
                 return;
             }
 
-            for( int i=0; i<gltfRoot.buffers.Length;i++) {
-                var buffer = gltfRoot.buffers[i];
-                if( !string.IsNullOrEmpty(buffer.uri) ) {
-                    if(buffer.uri.StartsWith("data:")) {
-                        Debug.LogError("Embed buffer not supported");
-                        loadingError = true;
-                    } else {
-                        LoadBuffer( i, baseUri+buffer.uri );
-                    }
-                }
-            }
-
             var bufferCount = gltfRoot.buffers.Length;
             if(bufferCount>0) {
                 buffers = new byte[bufferCount][];
                 nativeBuffers = new NativeArray<byte>[bufferCount];
                 binChunks = new GlbBinChunk[bufferCount];
+            }
+
+            for( int i=0; i<bufferCount;i++) {
+                var buffer = gltfRoot.buffers[i];
+                if( !string.IsNullOrEmpty(buffer.uri) ) {
+                    if(buffer.uri.StartsWith("data:")) {
+                        buffers[i] = DecodeEmbedBuffer(buffer.uri);
+                        if(buffers[i]==null) {
+                            Debug.LogError("Error loading embed buffer!");
+                            loadingError = true;
+                        }
+                    } else {
+                        LoadBuffer( i, baseUri+buffer.uri );
+                    }
+                }
             }
         }
 
@@ -327,24 +330,33 @@ namespace GLTFast {
                 images = new Texture2D[gltfRoot.images.Length];
                 for (int i = 0; i < images.Length; i++) {
                     var img = gltfRoot.images[i];
-                    bool knownImageType = false;
-                    if(string.IsNullOrEmpty(img.mimeType)) {
-                        Debug.LogWarning("Image is missing mime type");
-                        knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
-                            || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                            || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
-                    } else {
-                        knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
-                    }
 
-                    if (knownImageType)
-                    {
-                        if (img.bufferView >= 0)
-                        {
-                            // Inside buffer
-                        } else
-                        if(!string.IsNullOrEmpty(img.uri)) {
-                            LoadTexture(i,baseUri+img.uri);
+                    if(!string.IsNullOrEmpty(img.uri) && img.uri.StartsWith("data:")) {
+                        string mimeType;
+                        var data = DecodeEmbedBuffer(img.uri,out mimeType);
+                        if(data==null || !IsKnownImageMimeType(mimeType)) {
+                            Debug.LogError("Loading embedded image failed");
+                            continue;
+                        }
+                        var txt = CreateEmptyTexture(img,i);
+                        txt.LoadImage(data);
+                        images[i] = txt;
+                    } else {
+                        bool knownImageType = false;
+                        if(string.IsNullOrEmpty(img.mimeType)) {
+                            knownImageType = IsKnownImageFileExtension(img.uri);
+                        } else {
+                            knownImageType = IsKnownImageMimeType(img.mimeType);
+                        }
+
+                        if (knownImageType) {
+                            if (img.bufferView < 0 && !string.IsNullOrEmpty(img.uri))
+                            {
+                                // Not Inside buffer
+                                LoadTexture(i,baseUri+img.uri);
+                            }
+                        } else {
+                            Debug.LogErrorFormat("Unknown image format (image {0};uri:{1})",i,img.uri);
                         }
                     }
                 }
@@ -406,6 +418,22 @@ namespace GLTFast {
             }
 
             downloads[index] = www.SendWebRequest();
+        }
+
+        byte[] DecodeEmbedBuffer(string encodedBytes) {
+            string tmp;
+            return DecodeEmbedBuffer(encodedBytes,out tmp);
+        }
+
+        byte[] DecodeEmbedBuffer(string encodedBytes, out string mimeType) {
+            mimeType = null;
+            Debug.LogWarning("JSON embed buffers are slow! consider using glTF binary");
+            var mediaTypeEnd = encodedBytes.IndexOf(';',5,Math.Min(encodedBytes.Length-5,1000) );
+            if(mediaTypeEnd<0) return null;
+            mimeType = encodedBytes.Substring(5,mediaTypeEnd-5);
+            var tmp = encodedBytes.Substring(mediaTypeEnd+1,7);
+            if(tmp!="base64,") return null;
+            return System.Convert.FromBase64String(encodedBytes.Substring(mediaTypeEnd+8));
         }
 
         void LoadTexture( int index, string url ) {
@@ -533,7 +561,7 @@ namespace GLTFast {
             if(gltfRoot.materials!=null) {
                 materials = new UnityEngine.Material[gltfRoot.materials.Length];
                 for(int i=0;i<materials.Length;i++) {
-                    materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], gltfRoot.textures, images, resources );
+                    materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], gltfRoot.textures, images );
                 }
             }
             Profiler.EndSample();
@@ -672,7 +700,7 @@ namespace GLTFast {
                         if(materials!=null && materialIndex>=0 && materialIndex<materials.Length ) {
                             mr.material = materials[primitives[i].materialIndex];
                         } else {
-                            mr.material = materialGenerator.GetDefaultMaterial();
+                            mr.material = materialGenerator.GetPbrMetallicRoughnessMaterial();
                         }
                     }
                 }
@@ -713,12 +741,11 @@ namespace GLTFast {
                 var img = src_images[i];
                 bool knownImageType = false;
                 if(string.IsNullOrEmpty(img.mimeType)) {
-                    Debug.LogWarning("Image is missing mime type");
-                    knownImageType = img.uri.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
-                        || img.uri.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                        || img.uri.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase);
+                    // Image is missing mime type
+                    // try to determine type by file extension
+                    knownImageType = IsKnownImageFileExtension(img.uri);
                 } else {
-                    knownImageType = img.mimeType == "image/jpeg" || img.mimeType == "image/png";
+                    knownImageType = IsKnownImageMimeType(img.mimeType);
                 }
 
                 if (knownImageType)
@@ -728,8 +755,7 @@ namespace GLTFast {
                         var bufferView = bufferViews[img.bufferView];
                         var buffer = GetBuffer(bufferView.buffer);
                         var chunk = binChunks[bufferView.buffer];
-                        var txt = new UnityEngine.Texture2D(4, 4);
-                        txt.name = string.IsNullOrEmpty(img.name) ? string.Format("glb embed texture {0}",i) : img.name;
+                        var txt = CreateEmptyTexture(img,i);
                         var icc = new ImageCreateContext();
                         icc.imageIndex = i;
                         icc.buffer = new byte[bufferView.byteLength];
@@ -749,6 +775,13 @@ namespace GLTFast {
                 }
             }
         }
+
+        Texture2D CreateEmptyTexture(Schema.Image img, int index) {
+            var txt = new UnityEngine.Texture2D(4, 4);
+            txt.name = string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
+            return txt;
+        }
+
         public void Destroy() {
             if(materials!=null) {
                 foreach( var material in materials ) {
@@ -811,16 +844,6 @@ namespace GLTFast {
             c.mesh = mesh;
             c.primitive = primitive;
 
-            // index
-            var accessor = gltf.accessors[primitive.indices];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
-
-            GlbBinChunk chunk = binChunks[bufferIndex];
-            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
-            //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
-            int start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             int jobHandlesCount = 2;
             if(primitive.attributes.NORMAL>=0) {
                 jobHandlesCount++;
@@ -843,42 +866,150 @@ namespace GLTFast {
             jobHandlesCount = 0;
             Profiler.EndSample();
 
-            Profiler.BeginSample("PrepareIndicesJob");
-            c.indices = new int[accessor.count];
-            c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.indices, GCHandleType.Pinned);
-            switch( accessor.componentType ) {
-            case GLTFComponentType.UnsignedByte:
-                var job8 = new Jobs.GetIndicesUInt8Job();
-                job8.count = accessor.count;
-                fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
-                    job8.input = (byte*)src;
-                    job8.result = (int*)dst;
+            Accessor accessor;
+            BufferView bufferView;
+            // int bufferIndex;
+            byte[] buffer;
+            GlbBinChunk chunk;
+            int start;
+
+            Profiler.BeginSample("PreparePositionsJob");
+            // position
+            int pos = primitive.attributes.POSITION;
+            Assert.IsTrue(pos>=0);
+            #if DEBUG
+            Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
+            #endif
+
+            // TODO: unify with normals/tangent getter
+            accessor = gltf.accessors[pos];
+            bufferView = gltf.bufferViews[accessor.bufferView];
+            buffer = GetBuffer(bufferView.buffer);
+            chunk = binChunks[bufferView.buffer];
+            int vertexCount = accessor.count;
+            c.positions = new Vector3[vertexCount];
+            c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.positions, GCHandleType.Pinned);
+            start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+            if (gltf.IsAccessorInterleaved(pos)) {
+                var job = new Jobs.GetVector3sInterleavedJob();
+                job.count = vertexCount;
+                job.byteStride = bufferView.byteStride;
+                fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
+                    job.input = (byte*)src;
+                    job.result = (Vector3*)dst;
                 }
-                jobHandles[jobHandlesCount] = job8.Schedule();
-                break;
-            case GLTFComponentType.UnsignedShort:
-                var job16 = new Jobs.GetIndicesUInt16Job();
-                job16.count = accessor.count;
-                fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
-                    job16.input = (System.UInt16*) src;
-                    job16.result = (int*) dst;
+                jobHandles[jobHandlesCount] = job.Schedule();
+            } else {
+                var job = new Jobs.GetVector3sJob();
+                job.count = accessor.count;
+                fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
+                    job.input = (float*)src;
+                    job.result = (float*)dst;
                 }
-                jobHandles[jobHandlesCount] = job16.Schedule();
-                break;
-            case GLTFComponentType.UnsignedInt:
-                var job32 = new Jobs.GetIndicesUInt32Job();
-                job32.count = accessor.count;
-                fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
-                    job32.input = (System.UInt32*) src;
-                    job32.result = (int*) dst;
-                }
-                jobHandles[jobHandlesCount] = job32.Schedule();
-                break;
-            default:
-                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
-                break;
+                jobHandles[jobHandlesCount] = job.Schedule();
             }
             jobHandlesCount++;
+            Profiler.EndSample();
+
+
+            switch(primitive.mode) {
+            case DrawMode.Triangles:
+                c.topology = MeshTopology.Triangles;
+                break;
+            case DrawMode.Points:
+                Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                c.topology = MeshTopology.Points;
+                break;
+            case DrawMode.Lines:
+                Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                c.topology = MeshTopology.Lines;
+                break;
+            case DrawMode.LineStrip:
+            case DrawMode.LineLoop:
+                Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                c.topology = MeshTopology.LineStrip;
+                break;
+            case DrawMode.TriangleStrip:
+            case DrawMode.TriangleFan:
+            default:
+                Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                c.topology = MeshTopology.Triangles;
+                break;
+            }
+
+            Profiler.BeginSample("PrepareIndicesJob");
+            if(primitive.indices < 0) {
+                // No indices: calculate them
+                bool lineLoop = primitive.mode == DrawMode.LineLoop;
+                // extra index (first vertex again) for closing line loop
+                c.indices = new int[vertexCount+(lineLoop?1:0)];
+                c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.indices, GCHandleType.Pinned);
+                if(c.topology == MeshTopology.Triangles) {
+                    var job8 = new Jobs.CreateIndicesFlippedJob();
+                    job8.count = c.indices.Length;
+                    fixed( void* dst = &(c.indices[0]) ) {
+                        job8.result = (int*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job8.Schedule();
+                } else {
+                    var job8 = new Jobs.CreateIndicesJob();
+                    job8.count = c.indices.Length;
+                    job8.lineLoop = lineLoop;
+                    fixed( void* dst = &(c.indices[0]) ) {
+                        job8.result = (int*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job8.Schedule();
+                }
+                jobHandlesCount++;
+            } else {
+                // index
+                accessor = gltf.accessors[primitive.indices];
+                bufferView = gltf.bufferViews[accessor.bufferView];
+                int bufferIndex = bufferView.buffer;
+                buffer = GetBuffer(bufferIndex);
+
+                c.indices = new int[accessor.count];
+                c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.indices, GCHandleType.Pinned);
+
+                chunk = binChunks[bufferIndex];
+                Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
+                //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
+                start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+
+                switch( accessor.componentType ) {
+                case GLTFComponentType.UnsignedByte:
+                    var job8 = new Jobs.GetIndicesUInt8Job();
+                    job8.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
+                        job8.input = (byte*)src;
+                        job8.result = (int*)dst;
+                    }
+                    jobHandles[jobHandlesCount] = job8.Schedule();
+                    break;
+                case GLTFComponentType.UnsignedShort:
+                    var job16 = new Jobs.GetIndicesUInt16Job();
+                    job16.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
+                        job16.input = (System.UInt16*) src;
+                        job16.result = (int*) dst;
+                    }
+                    jobHandles[jobHandlesCount] = job16.Schedule();
+                    break;
+                case GLTFComponentType.UnsignedInt:
+                    var job32 = new Jobs.GetIndicesUInt32Job();
+                    job32.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(c.indices[0]) ) {
+                        job32.input = (System.UInt32*) src;
+                        job32.result = (int*) dst;
+                    }
+                    jobHandles[jobHandlesCount] = job32.Schedule();
+                    break;
+                default:
+                    Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                    break;
+                }
+                jobHandlesCount++;
+            }
             Profiler.EndSample();
 
             // TODO: re-enable test for jobs
@@ -903,42 +1034,6 @@ namespace GLTFast {
             // }
             // Profiler.EndSample();
             // #endif
-
-            Profiler.BeginSample("PreparePositionsJob");
-            // position
-            int pos = primitive.attributes.POSITION;
-            Assert.IsTrue(pos>=0);
-            #if DEBUG
-            Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
-            #endif
-
-            // TODO: unify with normals/tangent getter
-            accessor = gltf.accessors[pos];
-            bufferView = gltf.bufferViews[accessor.bufferView];
-            chunk = binChunks[bufferView.buffer];
-            c.positions = new Vector3[accessor.count];
-            c.gcHandles[jobHandlesCount] = GCHandle.Alloc(c.positions, GCHandleType.Pinned);
-            start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-            if (gltf.IsAccessorInterleaved(pos)) {
-                var job = new Jobs.GetVector3sInterleavedJob();
-                job.count = accessor.count;
-                job.byteStride = bufferView.byteStride;
-                fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
-                    job.input = (byte*)src;
-                    job.result = (Vector3*)dst;
-                }
-                jobHandles[jobHandlesCount] = job.Schedule();
-            } else {
-                var job = new Jobs.GetVector3sJob();
-                job.count = accessor.count;
-                fixed( void* src = &(buffer[start]), dst = &(c.positions[0]) ) {
-                    job.input = (float*)src;
-                    job.result = (float*)dst;
-                }
-                jobHandles[jobHandlesCount] = job.Schedule();
-            }
-            jobHandlesCount++;
-            Profiler.EndSample();
 
             // #if DEBUG
             // Profiler.BeginSample("PreparePosSanityCheck");
@@ -1296,6 +1391,22 @@ namespace GLTFast {
             } else {
                 Debug.LogErrorFormat("Unsupported color accessor type {0}", colorAccessor.typeEnum );
             }
+        }
+
+        bool IsKnownImageMimeType(string mimeType) {
+            return mimeType == "image/jpeg"
+            || mimeType == "image/png"
+            // || mimeType == "image/ktx"
+            ;
+        }
+        
+        bool IsKnownImageFileExtension(string path) {
+            return path.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
+                || path.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
+                || path.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase)
+                // || path.EndsWith(".ktx",StringComparison.OrdinalIgnoreCase)
+                // || path.EndsWith(".ktx2",StringComparison.OrdinalIgnoreCase)
+                ;
         }
 
 #if DEBUG

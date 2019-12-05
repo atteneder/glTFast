@@ -15,58 +15,84 @@ namespace GLTFast {
         static readonly Vector2 TEXTURE_SCALE = new Vector2(1,-1);
         static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
 
-        private Shader specularSetupShader;
-        private Shader unlitShader;
+        Shader pbrMetallicRoughnessShader;
+        Shader pbrMetallicRoughnessDoubleSideShader;
+        Shader pbrSpecularGlossinessShader;
+        Shader pbrSpecularGlossinessDoubleSideShader;
+        Shader unlitShader;
 
-        Material defaultMaterial;
-
-        public UnityEngine.Material GetDefaultMaterial() {
-            if(defaultMaterial==null) {
-                defaultMaterial = Resources.Load<UnityEngine.Material>("Material");
+        public UnityEngine.Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {
+            if(doubleSided) {
+                if(pbrMetallicRoughnessDoubleSideShader==null) {
+                    pbrMetallicRoughnessDoubleSideShader = Shader.Find("glTF/PbrMetallicRoughnessDouble");
+                }
+                return new Material(pbrMetallicRoughnessDoubleSideShader);
+            } else {
+                if(pbrMetallicRoughnessShader==null) {
+                    pbrMetallicRoughnessShader = Shader.Find("glTF/PbrMetallicRoughness");
+                }
+                return new Material(pbrMetallicRoughnessShader);
             }
-            return defaultMaterial;
         }
 
-        public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture2D[] images, List<UnityEngine.Object> additionalResources ) {
-            var material = Material.Instantiate<Material>( GetDefaultMaterial() );
+        public UnityEngine.Material GetPbrSpecularGlossinessMaterial(bool doubleSided=false) {
+            if(doubleSided) {
+                if(pbrSpecularGlossinessDoubleSideShader==null) {
+                    pbrSpecularGlossinessDoubleSideShader = Shader.Find("glTF/PbrSpecularGlossinessDouble");
+                }
+                return new Material(pbrSpecularGlossinessDoubleSideShader);
+            } else {
+                if(pbrSpecularGlossinessShader==null) {
+                    pbrSpecularGlossinessShader = Shader.Find("glTF/PbrSpecularGlossiness");
+                }
+                return new Material(pbrSpecularGlossinessShader);
+            }
+        }
+
+        public UnityEngine.Material GetUnlitMaterial(bool doubleSided=false) {
+            if(unlitShader==null) {
+                unlitShader = Shader.Find("glTF/Unlit");
+            }
+            var mat = new Material(unlitShader);
+            if(doubleSided) {
+                // Turn of back-face culling
+                mat.SetFloat(StandardShaderHelper.doubleSidedPropId,0);
+            }
+            return mat;
+        }
+
+        public UnityEngine.Material GenerateMaterial( Schema.Material gltfMaterial, Schema.Texture[] textures, Texture2D[] images ) {
+            UnityEngine.Material material;
+            
+            if (gltfMaterial.extensions!=null && gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness!=null) {
+                material = GetPbrSpecularGlossinessMaterial(gltfMaterial.doubleSided);
+            } else
+            if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
+                material = GetUnlitMaterial(gltfMaterial.doubleSided);
+            } else {
+                material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);
+            }
+
             material.name = gltfMaterial.name;
 
-            material.mainTextureScale = TEXTURE_SCALE;
-            material.mainTextureOffset = TEXTURE_OFFSET;
+            if(material.HasProperty(StandardShaderHelper.KW_MAIN_MAP)) {
+                // Initialize texture transform
+                material.mainTextureScale = TEXTURE_SCALE;
+                material.mainTextureOffset = TEXTURE_OFFSET;
+            }
 
             //added support for KHR_materials_pbrSpecularGlossiness
             if (gltfMaterial.extensions != null) {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
-                    if (!specularSetupShader) {
-                        specularSetupShader=Shader.Find("Standard (Specular setup)");
-                    }
-                    material.shader = specularSetupShader;
-                    var diffuseTexture = GetTexture(specGloss.diffuseTexture, textures, images);
-                    if (diffuseTexture != null) {   
-                        material.mainTexture = diffuseTexture;
-                    }
-                    else {
-                        material.color = specGloss.diffuseColor;
-                    }
-                    var specGlossTexture = GetTexture(specGloss.specularGlossinessTexture, textures, images);
-                    if (specGlossTexture != null) {
-                        material.SetTexture(StandardShaderHelper.specGlossMapPropId, specGlossTexture);
-                        material.EnableKeyword("_SPECGLOSSMAP");
-                    }
-                    else {
-                        material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
-                        material.SetFloat(StandardShaderHelper.glossinessPropId, (float)specGloss.glossinessFactor);
-                    }
-                }
+                    material.color = specGloss.diffuseColor;
+                    material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
+                    material.SetFloat(StandardShaderHelper.glossinessPropId,specGloss.glossinessFactor);
 
-                Schema.MaterialUnlit unlitMaterial = gltfMaterial.extensions.KHR_materials_unlit;
-                if (unlitMaterial != null) {
-                    if (gltfMaterial.pbrMetallicRoughness != null) {
-                        if (!unlitShader) {
-                            unlitShader = Shader.Find("Unlit/Color");
-                        }
-                        material.shader = unlitShader;  
+                    TrySetTexture(specGloss.diffuseTexture,material,StandardShaderHelper.mainTexPropId,textures,images);
+
+                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,StandardShaderHelper.specGlossMapPropId,textures,images)) {
+                        material.EnableKeyword(StandardShaderHelper.KW_SPEC_GLOSS_MAP);
                     }
                 }
             }
@@ -74,79 +100,31 @@ namespace GLTFast {
             if (gltfMaterial.pbrMetallicRoughness!=null) {
                 material.color = gltfMaterial.pbrMetallicRoughness.baseColor;
                 material.SetFloat(StandardShaderHelper.metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
-                material.SetFloat(StandardShaderHelper.glossinessPropId, 1-gltfMaterial.pbrMetallicRoughness.roughnessFactor );
+                material.SetFloat(StandardShaderHelper.roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
-                var mainTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.baseColorTexture,textures,images);
-                if(mainTxt!=null) {
-                    material.mainTexture = mainTxt;
-                }
-
-                var metallicRoughnessTxt = GetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,textures,images);
-                if(metallicRoughnessTxt!=null) {
-                                   
-                    Profiler.BeginSample("ConvertMetallicRoughnessTexture");
-                    // todo: Avoid this conversion by switching to a shader that accepts the given layout.
-                    Debug.LogWarning("Convert MetallicRoughnessTexture structure to fit Unity Standard Shader (slow operation).");
-                    var newmrt = new UnityEngine.Texture2D(metallicRoughnessTxt.width, metallicRoughnessTxt.height);
-#if DEBUG
-                    newmrt.name = string.Format("{0}_metal_smooth", metallicRoughnessTxt.name);
-#endif
-                    var buf = metallicRoughnessTxt.GetPixels32();               
-                    for (int i = 0; i < buf.Length;i++ ) {
-                        // TODO: Reassure given space (linear) is correct (no gamma conversion needed).
-                        var color = buf[i];                  
-                        color.a = (byte) (255 - color.g);
-                        color.r = color.g = color.b;                  
-                        buf[i] = color;
-                    }
-                    newmrt.SetPixels32(buf);
-                    newmrt.Apply();
-                    Profiler.EndSample();
-
-                    material.SetTexture( StandardShaderHelper.metallicGlossMapPropId, newmrt );
-                    material.EnableKeyword("_METALLICGLOSSMAP");
-
-                    additionalResources.Add(newmrt);
+                TrySetTexture(
+                    gltfMaterial.pbrMetallicRoughness.baseColorTexture,
+                    material,
+                    StandardShaderHelper.mainTexPropId,
+                    textures,
+                    images
+                    );
+                
+                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,StandardShaderHelper.metallicGlossMapPropId,textures,images)) {
+                    material.EnableKeyword(StandardShaderHelper.KW_METALLIC_ROUGNESS_MAP);
                 }
             }
 
-            var normalTxt = GetTexture(gltfMaterial.normalTexture,textures,images);
-            if(normalTxt!=null) {
-                material.SetTexture( StandardShaderHelper.bumpMapPropId, normalTxt);
+            if(TrySetTexture(gltfMaterial.normalTexture,material,StandardShaderHelper.bumpMapPropId,textures,images)) {
                 material.EnableKeyword("_NORMALMAP");
             }
-            
-            var occlusionTxt = GetTexture(gltfMaterial.occlusionTexture,textures,images);
-            if(occlusionTxt !=null) {
 
-                Profiler.BeginSample("ConvertOcclusionTexture");
-                // todo: Avoid this conversion by switching to a shader that accepts the given layout.
-                Debug.LogWarning("Convert OcclusionTexture structure to fit Unity Standard Shader (slow operation).");
-                var newOcclusionTxt = new UnityEngine.Texture2D(occlusionTxt.width, occlusionTxt.height);
-#if DEBUG
-                newOcclusionTxt.name = string.Format("{0}_occlusion", occlusionTxt.name);
-#endif
-                var buf = occlusionTxt.GetPixels32();
-                for (int i = 0; i < buf.Length; i++)
-                {
-                    var color = buf[i];
-                    color.g = color.b = color.r;
-                    color.a = 1;
-                    buf[i] = color;
-                }
-                newOcclusionTxt.SetPixels32(buf);
-                newOcclusionTxt.Apply();
-                Profiler.EndSample();
-
-                material.SetTexture( StandardShaderHelper.occlusionMapPropId, newOcclusionTxt );
-
-                additionalResources.Add(newOcclusionTxt);
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,StandardShaderHelper.occlusionMapPropId,textures,images)) {
+                material.EnableKeyword(StandardShaderHelper.KW_OCCLUSION);
             }
-            
-            var emmissiveTxt = GetTexture(gltfMaterial.emissiveTexture,textures,images);
-            if(emmissiveTxt!=null) {
-                material.SetTexture( StandardShaderHelper.emissionMapPropId, emmissiveTxt);
-                material.EnableKeyword("_EMISSION");
+
+            if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,textures,images)) {
+                material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
             }
             
             if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
@@ -160,16 +138,19 @@ namespace GLTFast {
 
             if(gltfMaterial.emissive != Color.black) {
                 material.SetColor("_EmissionColor", gltfMaterial.emissive);
-                material.EnableKeyword("_EMISSION");
+                material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
             }
 
-            if(gltfMaterial.doubleSided) {
-                Debug.LogWarning("Double sided shading is not supported!");
-            }
             return material;
         }
 
-        static Texture2D GetTexture(Schema.TextureInfo textureInfo, Schema.Texture[] textures, Texture2D[] images )
+        static bool TrySetTexture(
+            Schema.TextureInfo textureInfo,
+            UnityEngine.Material material,
+            int propertyId,
+            Schema.Texture[] textures,
+            Texture2D[] images
+            )
         {
             if (textureInfo != null && textureInfo.index >= 0)
             {
@@ -179,7 +160,9 @@ namespace GLTFast {
                     var txt = textures[bcTextureIndex];
                     if (images != null && images.Length > txt.source)
                     {
-                        return images[txt.source];
+                        material.SetTexture(propertyId,images[txt.source]);
+                        TrySetTextureTransform(textureInfo,material,propertyId);
+                        return true;
                     }
                     else
                     {
@@ -191,7 +174,33 @@ namespace GLTFast {
                     Debug.LogErrorFormat("Texture #{0} not found", bcTextureIndex);
                 }
             }
-            return null;
+            return false;
+        }
+
+        static void TrySetTextureTransform(
+            Schema.TextureInfo textureInfo,
+            UnityEngine.Material material,
+            int propertyId
+            )
+        {
+            if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
+                var tt = textureInfo.extensions.KHR_texture_transform;
+                if(tt.texCoord!=0) {
+                    Debug.LogError("Multiple UV sets are not supported!");
+                }
+                if(tt.offset!=null) {
+                    material.SetTextureOffset(propertyId,new Vector2(tt.offset[0],1-tt.offset[1]));
+                }
+                if(tt.rotation!=0) {
+                    float cos = Mathf.Cos(tt.rotation);
+                    float sin = Mathf.Sin(tt.rotation);
+                    material.SetVector(StandardShaderHelper.mainTexRotatePropId,new Vector4(cos,-sin,sin,cos));
+                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+                }
+                if(tt.scale!=null) {
+                    material.SetTextureScale(propertyId,new Vector2(tt.scale[0],-tt.scale[1]));
+                }
+            }
         }
     }
 }

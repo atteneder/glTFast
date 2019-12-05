@@ -25,7 +25,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] Buffers
   - [x] External URIs
   - [x] glTF binary main buffer
-  - [ ] Embed buffers or textures (base-64 encoded within JSON; [issue](issues/35))
+  - [x] Embed buffers or textures (base-64 encoded within JSON)
 - [x] Images
   - [x] PNG
   - [x] Jpeg
@@ -40,10 +40,19 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
     - [x] <sup>1</sup>Metallic texture
     - [x] <sup>1</sup>Roughness texture
     - [x] Alpha mode
-    - [ ] Double sided ([issue](issues/9))
-    - [ ] Emission
+    - [x] Double sided
+    - [x] Vertex colors
+    - [x] Emission(factor)
   - [ ] Universal Render Pipeline ([issue](issues/41))
   - [ ] High Definition Render Pipeline ([issue](issues/42))
+- Primitive Types
+  - [x] TRIANGLES
+  - [x] <sup>2</sup>POINTS
+  - [x] <sup>2</sup>LINES
+  - [x] <sup>2</sup>LINE_STRIP
+  - [x] <sup>2</sup>LINE_LOOP
+  - [ ] TRIANGLE_STRIP
+  - [ ] TRIANGLE_FAN
 - [x] Meshes
   - [x] Positions
   - [x] Normals
@@ -51,11 +60,11 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [x] Texture coordinates
   - [x] Vertex colors
   - [x] Draco mesh compression (via extension)
+  - [x] Implicit (no) indices
   - [ ] Per primitive material ([issue](issues/32))
   - [ ] Multiple texture coordinates sets ([issue](issues/34))
   - [ ] Joints
   - [ ] Weights
-  - [ ] Implicit (no) indices
 - [ ] Texture sampler ([issue](issues/45))
   - [ ] Filtering
   - [ ] Wrap mode
@@ -66,14 +75,16 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 <sup>1</sup>: Slow operation at the moment, since the image channels have to be converted to fit the shader.
 
+<sup>2</sup>: Untested due to lack of demo files.
+
 ### Extensions
 
 - [x] KHR_draco_mesh_compression
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
-- [ ] KHR_mesh_quantization
+- [x] KHR_texture_transform
+- [ ] KHR_mesh_quantization ([issue](issues/51))
 - [ ] KHR_lights_punctual ([issue](issues/17))
-- [ ] KHR_texture_transform ([issue](issues/18))
 
 ## Installing
 
@@ -178,6 +189,7 @@ Such stuff should be able to place on top of this library.
 
 ## Known issues
 
+- Some shader variants (observed with double sided, textured metallic-roughness materials) don't work on older Unity versions (pre 2019.1). Probably cause is the shader feature keyword limit.
 - When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
 
 See details in the [issues](https://github.com/atteneder/glTFast/issues) section.

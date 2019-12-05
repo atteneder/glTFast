@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2019-12-05
+### Added
+- Support for texture transform (extension KHR_texture_transform)
+- Support for double sided materials
+- Support for data URI / embedded buffers and images
+- Support for vertex colors in materials
+- Support for implicit/undefined primitive indices
+- Experimental support for primitive modes points, lines, line strip and line loop
+### Changed
+- Using custom glTF shaders instead of Unity Standard shaders. This speeds up occlusion and roughness/metallic texture loading since they don't have to be converted at runtime anymore.
+### Fixed
+- Factor and texture (for metallic-roughness and specular-glossiness) are now multiplied as defined in spec.
+- Unlit materials now support baseColorTexture and texture transforms
+
 ## [0.7.1] - 2019-11-29
 ### Fixed
 - glTF binary with Draco compression (decoding error due to invalid buffer view access)
