@@ -614,9 +614,9 @@ namespace GLTFast.Jobs {
             byte* off = input;
             for (int i = 0; i < count; i++)
             {
-                *(((float*)resultV)) = *(((System.Int16*)off));
-                *(((float*)resultV)+1) = *(((System.Int16*)off)+1);
-                *(((float*)resultV)+2) = -*(((System.Int16*)off)+2);
+                *(((float*)resultV)) = *(((System.UInt16*)off));
+                *(((float*)resultV)+1) = *(((System.UInt16*)off)+1);
+                *(((float*)resultV)+2) = -*(((System.UInt16*)off)+2);
                 off += byteStride;
                 resultV += 1;
             }
