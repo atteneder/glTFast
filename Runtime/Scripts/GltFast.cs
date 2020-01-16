@@ -1503,6 +1503,7 @@ namespace GLTFast {
                 {
                     case GLTFComponentType.Float:
                         if(interleaved) {
+                            // TODO
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec3FloatJob();
@@ -1516,6 +1517,7 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.UnsignedByte:
                         if(interleaved) {
+                            // TODO
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec3UInt8Job();
@@ -1529,6 +1531,7 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.UnsignedShort:
                         if(interleaved) {
+                            // TODO
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec3UInt16Job();
@@ -1551,6 +1554,7 @@ namespace GLTFast {
                 {
                     case GLTFComponentType.Float:
                         if(interleaved) {
+                            // TODO
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.MemCopyJob();
@@ -1564,6 +1568,7 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.UnsignedByte:
                         if(interleaved) {
+                            // TODO
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.MemCopyJob();
@@ -1577,6 +1582,7 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.UnsignedShort:
                         if(interleaved) {
+                            // TODO
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec4UInt16Job();
