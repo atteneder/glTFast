@@ -12,9 +12,6 @@ namespace GLTFast {
 
     public class DefaultMaterialGenerator : IMaterialGenerator {
 
-        static readonly Vector2 TEXTURE_SCALE = new Vector2(1,-1);
-        static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
-
         Shader pbrMetallicRoughnessShader;
         Shader pbrMetallicRoughnessDoubleSideShader;
         Shader pbrSpecularGlossinessShader;
@@ -74,12 +71,6 @@ namespace GLTFast {
             }
 
             material.name = gltfMaterial.name;
-
-            if(material.HasProperty(StandardShaderHelper.KW_MAIN_MAP)) {
-                // Initialize texture transform
-                material.mainTextureScale = TEXTURE_SCALE;
-                material.mainTextureOffset = TEXTURE_OFFSET;
-            }
 
             //added support for KHR_materials_pbrSpecularGlossiness
             if (gltfMaterial.extensions != null) {
@@ -188,18 +179,30 @@ namespace GLTFast {
                 if(tt.texCoord!=0) {
                     Debug.LogError("Multiple UV sets are not supported!");
                 }
+
+                Vector2 offset = Vector2.zero;
+                Vector2 scale = Vector2.one;
+                float cos = 1;
+                float sin = 0;
+
                 if(tt.offset!=null) {
-                    material.SetTextureOffset(propertyId,new Vector2(tt.offset[0],1-tt.offset[1]));
-                }
-                if(tt.rotation!=0) {
-                    float cos = Mathf.Cos(tt.rotation);
-                    float sin = Mathf.Sin(tt.rotation);
-                    material.SetVector(StandardShaderHelper.mainTexRotatePropId,new Vector4(cos,-sin,sin,cos));
-                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+                    offset.x = tt.offset[0];
+                    offset.y = 1-tt.offset[1];
                 }
                 if(tt.scale!=null) {
-                    material.SetTextureScale(propertyId,new Vector2(tt.scale[0],-tt.scale[1]));
+                    scale.x = tt.scale[0];
+                    scale.y = tt.scale[1];
+                    material.SetTextureScale(propertyId,scale);
                 }
+                if(tt.rotation!=0) {
+                    cos = Mathf.Cos(tt.rotation);
+                    sin = Mathf.Sin(tt.rotation);
+                    material.SetVector(StandardShaderHelper.mainTexRotatePropId,new Vector4(cos,sin,-sin,cos));
+                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+                    offset.x += scale.y * sin;
+                }
+                offset.y -= scale.y * cos;
+                material.SetTextureOffset(propertyId,offset);
             }
         }
     }

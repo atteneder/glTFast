@@ -1384,7 +1384,7 @@ namespace GLTFast {
                         var jobUv = new Jobs.GetUVsFloatJob();
                         jobUv.count = uvAccessor.count;
                         fixed( void* src = &(bytes[start]), dst = &(result[0]) ) {
-                            jobUv.input = src;
+                            jobUv.input = (float*)src;
                             jobUv.result = (Vector2*)dst;
                         }
                         jobHandle = jobUv.Schedule();

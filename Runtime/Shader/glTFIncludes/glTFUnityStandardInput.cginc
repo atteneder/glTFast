@@ -75,11 +75,17 @@ float4 TexCoords(VertexInput v)
 {
     float4 texcoord;
 #ifdef _UV_ROTATION
-    // 2x2 matrix multiplication to apply rotation
-    texcoord.x = v.uv0.x * _MainTexRotation.x + v.uv0.y * _MainTexRotation.z;
-    texcoord.y = v.uv0.x * _MainTexRotation.y + v.uv0.y * _MainTexRotation.w;
 
-    texcoord.xy = TRANSFORM_TEX(texcoord.xy, _MainTex);
+    // Scale/Tiling
+    texcoord.xy = v.uv0.xy * _MainTex_ST.xy;
+
+    // Rotation: 2x2 matrix multiplication
+    texcoord.z = texcoord.x * _MainTexRotation.x + texcoord.y * _MainTexRotation.z;
+    texcoord.w = texcoord.x * _MainTexRotation.y + texcoord.y * _MainTexRotation.w;
+
+    // Transform/Offset
+    texcoord.xy = texcoord.zw + _MainTex_ST.zw;
+
     texcoord.zw = TRANSFORM_TEX(((_UVSec == 0) ? v.uv0 : v.uv1), _DetailAlbedoMap);
 #else
     texcoord.xy = TRANSFORM_TEX(v.uv0, _MainTex); // Always source from uv0

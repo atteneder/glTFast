@@ -107,11 +107,17 @@ Shader "glTF/PbrSpecularGlossinessDouble"
             #if UNITY_STANDARD_SIMPLE
             VertexOutputBaseSimple vertBaseBack (VertexInput v) {
                 v.normal = v.normal * -1;
+                #ifdef _TANGENT_TO_WORLD
+                v.tangent = v.tangent * -1;
+                #endif
                 return vertBase(v);
             }
             #else
             VertexOutputForwardBase vertBaseBack (VertexInput v) {
                 v.normal = v.normal * -1;
+                #ifdef _TANGENT_TO_WORLD
+                v.tangent = v.tangent * -1;
+                #endif
                 return vertBase(v);
             }
             #endif
@@ -162,11 +168,17 @@ Shader "glTF/PbrSpecularGlossinessDouble"
             #if UNITY_STANDARD_SIMPLE
                 VertexOutputForwardAddSimple vertAddBack (VertexInput v) {
                     v.normal = v.normal * -1;
+                    #ifdef _TANGENT_TO_WORLD
+                    v.tangent = v.tangent * -1;
+                    #endif
                     return vertAdd(v);
                 }
             #else
                 VertexOutputForwardAdd vertAddBack (VertexInput v) {
                     v.normal = v.normal * -1;
+                    #ifdef _TANGENT_TO_WORLD
+                    v.tangent = v.tangent * -1;
+                    #endif
                     return vertAdd(v);
                 }
             #endif
@@ -216,6 +228,9 @@ Shader "glTF/PbrSpecularGlossinessDouble"
 
             VertexOutputDeferred vertDeferredBack (VertexInput v) {
                 v.normal = v.normal * -1;
+                #ifdef _TANGENT_TO_WORLD
+                v.tangent = v.tangent * -1;
+                #endif
                 return vertDeferred(v);
             }
             ENDCG
@@ -274,11 +289,17 @@ Shader "glTF/PbrSpecularGlossinessDouble"
             #if UNITY_STANDARD_SIMPLE
             VertexOutputBaseSimple vertBaseBack (VertexInput v) {
                 v.normal = v.normal * -1;
+                #ifdef _TANGENT_TO_WORLD
+                v.tangent = v.tangent * -1;
+                #endif
                 return vertBase(v);
             }
             #else
             VertexOutputForwardBase vertBaseBack (VertexInput v) {
                 v.normal = v.normal * -1;
+                #ifdef _TANGENT_TO_WORLD
+                v.tangent = v.tangent * -1;
+                #endif
                 return vertBase(v);
             }
             #endif
@@ -324,11 +345,17 @@ Shader "glTF/PbrSpecularGlossinessDouble"
             #if UNITY_STANDARD_SIMPLE
                 VertexOutputForwardAddSimple vertAddBack (VertexInput v) {
                     v.normal = v.normal * -1;
+                    #ifdef _TANGENT_TO_WORLD
+                    v.tangent = v.tangent * -1;
+                    #endif
                     return vertAdd(v);
                 }
             #else
                 VertexOutputForwardAdd vertAddBack (VertexInput v) {
                     v.normal = v.normal * -1;
+                    #ifdef _TANGENT_TO_WORLD
+                    v.tangent = v.tangent * -1;
+                    #endif
                     return vertAdd(v);
                 }
             #endif

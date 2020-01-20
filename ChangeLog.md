@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Support for quantized mesh data via `KHR_mesh_quantization` extension
+### Changed
+- UV space conversion now happens per UV coordinate (not negatively scaled via texture tiling anymore). This helped to fix tangent calculation.
+### Fixed
+- Certified correct normal mapping by making normals, UVs and tangents consistent
 
 ## [0.8.1] - 2019-12-05
 ### Fixed

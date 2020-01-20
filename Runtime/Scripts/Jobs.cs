@@ -215,26 +215,17 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public void* input;
+        public float* input;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public Vector2* result;
 
         public void Execute() {
-#if COPY_LEGACY
-            for (int i = 0; i < count; i++)
-            {
-                result[i] = ((Vector2*)input)[i];
+            for (int i = 0; i < count; i++) {
+                result[i].x = ((float*)input)[i*2];
+                result[i].y = 1-((float*)input)[i*2+1];
             }
-#else
-            System.Buffer.MemoryCopy(
-                input,
-                result,
-                count*8,
-                count*8
-            );
-#endif
         }
     }
 
@@ -265,14 +256,14 @@ namespace GLTFast.Jobs {
                 for (var i = 0; i < count; i++)
                 {
                     result[i].x = *off / 255f;
-                    result[i].y = *(off+1) / 255f;
+                    result[i].y = 1 - *(off+1) / 255f;
                     off += byteStride;
                 }
             } else {
                 for (var i = 0; i < count; i++)
                 {
                     result[i].x = *off;
-                    result[i].y = *(off+1);
+                    result[i].y = 1 - *(off+1);
                     off += byteStride;
                 }
             }
@@ -307,7 +298,7 @@ namespace GLTFast.Jobs {
                 {
                     System.UInt16* uv = (System.UInt16*) off;
                     result[i].x = *uv / Constants.UINT16_MAX;
-                    result[i].y = *(uv+1) / Constants.UINT16_MAX;
+                    result[i].y = 1 - *(uv+1) / Constants.UINT16_MAX;
                     off += byteStride;
                 }
             } else {
@@ -315,7 +306,7 @@ namespace GLTFast.Jobs {
                 {
                     System.UInt16* uv = (System.UInt16*) off;
                     result[i].x = *uv;
-                    result[i].y = *(uv+1);
+                    result[i].y = 1 - *(uv+1);
                     off += byteStride;
                 }
             }
@@ -350,7 +341,7 @@ namespace GLTFast.Jobs {
                 {
                     System.Int16* uv = (System.Int16*) off;
                     result[i].x = Mathf.Max( *uv / Constants.INT16_MAX, -1.0f);
-                    result[i].y = Mathf.Max( *(uv+1) / Constants.INT16_MAX, -1.0f);
+                    result[i].y = 1 - Mathf.Max( *(uv+1) / Constants.INT16_MAX, -1.0f);
                     off += byteStride;
                 }
             } else {
@@ -358,7 +349,7 @@ namespace GLTFast.Jobs {
                 {
                     System.Int16* uv = (System.Int16*) off;
                     result[i].x = *uv;
-                    result[i].y = *(uv+1);
+                    result[i].y = 1 - *(uv+1);
                     off += byteStride;
                 }
             }
@@ -392,14 +383,14 @@ namespace GLTFast.Jobs {
                 for (var i = 0; i < count; i++)
                 {
                     result[i].x = Mathf.Max( *off / 127f, -1.0f);
-                    result[i].y = Mathf.Max( *(off+1) / 127f, -1.0f);
+                    result[i].y = 1 - Mathf.Max( *(off+1) / 127f, -1.0f);
                     off += byteStride;
                 }
             } else {
                 for (var i = 0; i < count; i++)
                 {
                     result[i].x = *off;
-                    result[i].y = *(off+1);
+                    result[i].y = 1 - *(off+1);
                     off += byteStride;
                 }
             }
@@ -581,24 +572,13 @@ namespace GLTFast.Jobs {
         public float* result;
 
         public void Execute() {
-#if COPY_LEGACY
             for (int i = 0; i < count; i++)
             {
-                ((Vector4*)result)[i] = ((Vector4*)input)[i];
-                result[i*4+2] *= -1;
-            }
-#else
-            System.Buffer.MemoryCopy(
-                input,
-                result,
-                count*16,
-                count*16
-            );
-            for (int i = 0; i < count; i++)
-            {
+                result[i*4] = -input[i*4];
+                result[i*4+1] = input[i*4+1];
                 result[i*4+2] = -input[i*4+2];
+                result[i*4+3] = input[i*4+3];
             }
-#endif
         }
     }
 
@@ -683,6 +663,7 @@ namespace GLTFast.Jobs {
             for (int i = 0; i < count; i++)
             {
                 *resultV = *(Vector4*)off;
+                (*resultV).x *= -1;
                 (*resultV).z *= -1;
                 off += byteStride;
                 resultV += 1;
@@ -713,7 +694,7 @@ namespace GLTFast.Jobs {
             for (int i = 0; i < count; i++)
             {
                 Vector4 tmp;
-                tmp.x = Mathf.Max( *(System.Int16*)off / Constants.INT16_MAX, -1f );
+                tmp.x = -Mathf.Max( *(System.Int16*)off / Constants.INT16_MAX, -1f );
                 tmp.y = Mathf.Max( *( ((System.Int16*)off) +1 ) / Constants.INT16_MAX, -1f );
                 tmp.z = -Mathf.Max( *( ((System.Int16*)off) +2 ) / Constants.INT16_MAX, -1f );
                 tmp.w = Mathf.Max( *( ((System.Int16*)off) +3 ) / Constants.INT16_MAX, -1f );
@@ -748,7 +729,7 @@ namespace GLTFast.Jobs {
             for (int i = 0; i < count; i++)
             {
                 Vector4 tmp;
-                tmp.x = Mathf.Max( *(sbyte*)off / 127f, -1f );
+                tmp.x = -Mathf.Max( *(sbyte*)off / 127f, -1f );
                 tmp.y = Mathf.Max( *( ((sbyte*)off) +1 ) / 127f, -1f );
                 tmp.z = -Mathf.Max( *( ((sbyte*)off) +2 ) / 127f, -1f );
                 tmp.w = Mathf.Max( *( ((sbyte*)off) +3 ) / 127f, -1f );
