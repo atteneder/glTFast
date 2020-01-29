@@ -47,7 +47,7 @@ Shader "glTF/PbrMetallicRoughness"
         [HideInInspector] _DstBlend ("__dst", Float) = 0.0
         [HideInInspector] _ZWrite ("__zw", Float) = 1.0
 
-        _DoubleSided ("_DoubleSided", Float) = 2
+        [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2.0
     }
 
     CGINCLUDE
@@ -69,6 +69,7 @@ Shader "glTF/PbrMetallicRoughness"
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 3.0
@@ -101,7 +102,7 @@ Shader "glTF/PbrMetallicRoughness"
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
             #pragma vertex vertBase
-            #pragma fragment fragBase
+            #pragma fragment fragBaseFacing
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
@@ -116,6 +117,7 @@ Shader "glTF/PbrMetallicRoughness"
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
             ZWrite Off
             ZTest LEqual
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 3.0
@@ -146,7 +148,7 @@ Shader "glTF/PbrMetallicRoughness"
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
             #pragma vertex vertAdd
-            #pragma fragment fragAdd
+            #pragma fragment fragAddFacing
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
@@ -158,7 +160,7 @@ Shader "glTF/PbrMetallicRoughness"
             Tags { "LightMode" = "ShadowCaster" }
 
             ZWrite On ZTest LEqual
-            Cull [_DoubleSided]
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 3.0
@@ -196,6 +198,7 @@ Shader "glTF/PbrMetallicRoughness"
         {
             Name "DEFERRED"
             Tags { "LightMode" = "Deferred" }
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 3.0
@@ -228,8 +231,9 @@ Shader "glTF/PbrMetallicRoughness"
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
             #pragma vertex vertDeferred
-            #pragma fragment fragDeferred
+            #pragma fragment fragDeferredFacing
 
+            #include "glTFIncludes/glTF.cginc"
             #include "glTFIncludes/glTFUnityStandardCore.cginc"
 
             ENDCG
@@ -283,6 +287,7 @@ Shader "glTF/PbrMetallicRoughness"
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 2.0
@@ -312,7 +317,8 @@ Shader "glTF/PbrMetallicRoughness"
             #pragma multi_compile_fog
 
             #pragma vertex vertBase
-            #pragma fragment fragBase
+            #pragma fragment fragBaseFacing
+
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
@@ -327,6 +333,7 @@ Shader "glTF/PbrMetallicRoughness"
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
             ZWrite Off
             ZTest LEqual
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 2.0
@@ -353,7 +360,7 @@ Shader "glTF/PbrMetallicRoughness"
             #pragma multi_compile_fog
 
             #pragma vertex vertAdd
-            #pragma fragment fragAdd
+            #pragma fragment fragAddFacing
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
@@ -365,7 +372,7 @@ Shader "glTF/PbrMetallicRoughness"
             Tags { "LightMode" = "ShadowCaster" }
 
             ZWrite On ZTest LEqual
-            Cull [_DoubleSided]
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 2.0

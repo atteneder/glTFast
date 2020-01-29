@@ -19,31 +19,27 @@ namespace GLTFast {
         Shader unlitShader;
 
         public UnityEngine.Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {
-            if(doubleSided) {
-                if(pbrMetallicRoughnessDoubleSideShader==null) {
-                    pbrMetallicRoughnessDoubleSideShader = Shader.Find("glTF/PbrMetallicRoughnessDouble");
-                }
-                return new Material(pbrMetallicRoughnessDoubleSideShader);
-            } else {
-                if(pbrMetallicRoughnessShader==null) {
-                    pbrMetallicRoughnessShader = Shader.Find("glTF/PbrMetallicRoughness");
-                }
-                return new Material(pbrMetallicRoughnessShader);
+            if(pbrMetallicRoughnessShader==null) {
+                pbrMetallicRoughnessShader = Shader.Find("glTF/PbrMetallicRoughness");
             }
+            var mat = new Material(pbrMetallicRoughnessShader);
+            if(doubleSided) {
+                // Turn of back-face culling
+                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
+            }
+            return mat;
         }
 
         public UnityEngine.Material GetPbrSpecularGlossinessMaterial(bool doubleSided=false) {
-            if(doubleSided) {
-                if(pbrSpecularGlossinessDoubleSideShader==null) {
-                    pbrSpecularGlossinessDoubleSideShader = Shader.Find("glTF/PbrSpecularGlossinessDouble");
-                }
-                return new Material(pbrSpecularGlossinessDoubleSideShader);
-            } else {
-                if(pbrSpecularGlossinessShader==null) {
-                    pbrSpecularGlossinessShader = Shader.Find("glTF/PbrSpecularGlossiness");
-                }
-                return new Material(pbrSpecularGlossinessShader);
+            if(pbrSpecularGlossinessShader==null) {
+                pbrSpecularGlossinessShader = Shader.Find("glTF/PbrSpecularGlossiness");
             }
+            var mat = new Material(pbrSpecularGlossinessShader);
+            if(doubleSided) {
+                // Turn of back-face culling
+                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
+            }
+            return mat;
         }
 
         public UnityEngine.Material GetUnlitMaterial(bool doubleSided=false) {
@@ -53,7 +49,7 @@ namespace GLTFast {
             var mat = new Material(unlitShader);
             if(doubleSided) {
                 // Turn of back-face culling
-                mat.SetFloat(StandardShaderHelper.doubleSidedPropId,0);
+                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
             }
             return mat;
         }

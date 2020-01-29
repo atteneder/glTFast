@@ -10,7 +10,7 @@ Properties {
     _Color ("Main Color", Color) = (1,1,1,1)
     _MainTex ("Base (RGB)", 2D) = "white" {}
     _MainTexRotation ("Texture rotation", Vector) = (1,0,0,1)
-    _DoubleSided ("_DoubleSided", Float) = 2
+    [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2.0
 }
 
 SubShader {
@@ -19,7 +19,7 @@ SubShader {
 
     Pass {
         
-        Cull [_DoubleSided]
+        Cull [_CullMode]
 
         CGPROGRAM
             #pragma vertex vert
