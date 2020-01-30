@@ -150,13 +150,13 @@ namespace GLTFast.Jobs {
                 for (var i = 0; i < count; i++)
                 {
                     result[i].x = input[i*2] / 255f;
-                    result[i].y = input[i*2+1] / 255f;
+                    result[i].y = 1 - input[i*2+1] / 255f;
                 }
             } else {
                 for (var i = 0; i < count; i++)
                 {
                     result[i].x = input[i*2];
-                    result[i].y = input[i*2+1];
+                    result[i].y = 1 - input[i*2+1];
                 }
             }
         }
@@ -180,7 +180,7 @@ namespace GLTFast.Jobs {
             for (var i = 0; i < count; i++)
             {
                 result[i].x = input[i*2] / Constants.UINT16_MAX;
-                result[i].y = input[i*2+1] / Constants.UINT16_MAX;
+                result[i].y = 1 - input[i*2+1] / Constants.UINT16_MAX;
             }
         }
     }
@@ -203,7 +203,7 @@ namespace GLTFast.Jobs {
             for (var i = 0; i < count; i++)
             {
                 result[i].x = input[i*2];
-                result[i].y = input[i*2+1];
+                result[i].y = 1 - input[i*2+1];
             }
         }
     }
@@ -605,6 +605,7 @@ namespace GLTFast.Jobs {
             for (int i = 0; i < count; i++)
             {
                 *resultV = *(Vector2*)off;
+                (*resultV).y = 1-(*resultV).y;
                 off += byteStride;
                 resultV += 1;
             }
