@@ -18,15 +18,23 @@
 
     half4 fragBaseFacing (VertexOutputBaseSimple i, half facing : VFACE) : SV_Target
     {
-#ifdef _TANGENT_TO_WORLD
-        i.tangentToWorldAndPackedData[0].xyz *= facing;
-        i.tangentToWorldAndPackedData[1].xyz *= facing;
+        i.normalWorld.xyz *= facing;
+#ifdef _NORMALMAP
+        i.tangentSpaceLightDir *= facing;
+    #if SPECULAR_HIGHLIGHTS
+        i.tangentSpaceEyeVec *= facing;
+    #endif
 #endif
-        i.tangentToWorldAndPackedData[2].xyz *= facing;
         return fragBase(i);
     }
     half4 fragAddFacing (VertexOutputForwardAddSimple i, half facing : VFACE) : SV_Target {
-        i.tangentSpaceEyeVec.xyz *= facing;
+#if defined(_NORMALMAP)
+    #if SPECULAR_HIGHLIGHTS
+        i.tangentSpaceEyeVec *= facing;
+    #endif
+#else
+        i.normalWorld *= facing;
+#endif
         return fragAdd(i);
     }
 #else
