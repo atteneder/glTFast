@@ -53,6 +53,9 @@ namespace GLTFast {
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
 
+        AccessorDataBase[] accessorData;
+        JobHandle accessorJobsHandle;
+
         PrimitiveCreateContextBase[] primitiveContexts;
 
         Primitive[] primitives;
@@ -504,6 +507,18 @@ namespace GLTFast {
             Profiler.EndSample();
             yield return null;
 
+            PrepareAccessors(gltfRoot);
+            yield return null;
+
+            while(!accessorJobsHandle.IsCompleted) {
+                yield return null;
+            }
+            foreach(var ad in accessorData) {
+                if(ad!=null) {
+                    ad.Unpin();
+                }
+            }
+
             PreparePrimitives(gltfRoot);
             yield return null;
 
@@ -760,6 +775,61 @@ namespace GLTFast {
             }
         }
 
+        abstract class AccessorDataBase {
+            public abstract void Unpin();
+        }
+
+        class AccessorData<T> : AccessorDataBase {
+            public T[] data;
+            public GCHandle gcHandle;
+
+            public override void Unpin() {
+                gcHandle.Free();
+            }
+        }
+
+        void PrepareAccessors( Root gltf ) {
+            accessorData = new AccessorDataBase[gltf.accessors.Length];
+            var tmpList = new List<JobHandle>(accessorData.Length);
+
+            for(int i=0; i<accessorData.Length; i++) {
+                var acc = gltf.accessors[i];
+                JobHandle? jh;
+                AccessorDataBase adb = null;
+                switch(acc.typeEnum) {
+                    case GLTFAccessorAttributeType.VEC3:
+                        var adv3 = new AccessorData<Vector3>();
+                        GetVector3sJob(gltf,i,out adv3.data, out jh, out adv3.gcHandle);
+                        tmpList.Add(jh.Value);
+                        adb = adv3;
+                        break;
+                    case GLTFAccessorAttributeType.VEC2:
+                        var adv2 = new AccessorData<Vector2>();
+                        adv2.data = GetUvsJob(gltf,i, out jh, out adv2.gcHandle);
+                        tmpList.Add(jh.Value);
+                        adb = adv2;
+                        break;
+                    case GLTFAccessorAttributeType.VEC4:
+                        var adv4 = new AccessorData<Vector4>();
+                        GetTangentsJob(gltf,i,out adv4.data, out jh, out adv4.gcHandle);
+                        tmpList.Add(jh.Value);
+                        adb = adv4;
+                        break;
+                    case GLTFAccessorAttributeType.SCALAR:
+                        var ads = new AccessorData<int>();
+                        GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle);
+                        tmpList.Add(jh.Value);
+                        adb = ads;
+                        break;
+                }
+                accessorData[i] = adb;
+            }
+
+            NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(tmpList.ToArray(), Allocator.Temp);
+            accessorJobsHandle = JobHandle.CombineDependencies(jobHandles);
+            jobHandles.Dispose();
+        }
+
         void PreparePrimitives( Root gltf ) {
             Profiler.BeginSample("PreparePrimitives");
             int totalPrimitives = 0;
@@ -806,17 +876,8 @@ namespace GLTFast {
             c.mesh = mesh;
             c.primitive = primitive;
 
-            int jobHandlesCount = 2;
-            if(primitive.attributes.NORMAL>=0) {
-                jobHandlesCount++;
-            }
-            if(primitive.attributes.TANGENT>=0) {
-                jobHandlesCount++;
-            }
-            if(primitive.attributes.TEXCOORD_0>=0) {
-                jobHandlesCount++;
-            }
-            if(primitive.attributes.TEXCOORD_1>=0) {
+            int jobHandlesCount = 0;
+            if(primitive.indices<0) {
                 jobHandlesCount++;
             }
             if(primitive.attributes.COLOR_0>=0) {
@@ -830,10 +891,8 @@ namespace GLTFast {
 
             int vertexCount;
             {
-                JobHandle? jh;
-                vertexCount = GetVector3sJob(gltf,primitive.attributes.POSITION, out c.positions, out jh, out c.gcHandles[jobHandlesCount] );
-                jobHandles[jobHandlesCount] = jh.Value;
-                jobHandlesCount++;
+                c.positions = (accessorData[primitive.attributes.POSITION] as AccessorData<Vector3>).data;
+                vertexCount = c.positions.Length;
             }
 
             switch(primitive.mode) {
@@ -867,38 +926,22 @@ namespace GLTFast {
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             } else {
-                JobHandle? jh;
-                GetIndicesJob(gltf,primitive.indices, out c.indices, out jh, out c.gcHandles[jobHandlesCount] );
-                jobHandles[jobHandlesCount] = jh.Value;
-                jobHandlesCount++;
+                c.indices = (accessorData[primitive.indices] as AccessorData<int>).data;
             }
 
-            
             if(primitive.attributes.NORMAL>=0) {
-                JobHandle? jh;
-                GetVector3sJob(gltf,primitive.attributes.NORMAL, out c.normals, out jh, out c.gcHandles[jobHandlesCount] );
-                jobHandles[jobHandlesCount] = jh.Value;
-                jobHandlesCount++;
+                c.normals = (accessorData[primitive.attributes.NORMAL] as AccessorData<Vector3>).data;
             }
 
             if(primitive.attributes.TEXCOORD_0>=0) {
-                JobHandle? jh;
-                c.uvs0 = GetUvsJob(gltf,primitive.attributes.TEXCOORD_0, out jh, out c.gcHandles[jobHandlesCount] );
-                jobHandles[jobHandlesCount] = jh.Value;
-                jobHandlesCount++;
+                c.uvs0 = (accessorData[primitive.attributes.TEXCOORD_0] as AccessorData<Vector2>).data;
             }
             if(primitive.attributes.TEXCOORD_1>=0) {
-                JobHandle? jh;
-                c.uvs1 = GetUvsJob(gltf,primitive.attributes.TEXCOORD_1, out jh, out c.gcHandles[jobHandlesCount] );
-                jobHandles[jobHandlesCount] = jh.Value;
-                jobHandlesCount++;
+                c.uvs1 = (accessorData[primitive.attributes.TEXCOORD_1] as AccessorData<Vector2>).data;
             }
 
             if(primitive.attributes.TANGENT>=0) {
-                JobHandle? jh;
-                GetTangentsJob(gltf,primitive.attributes.TANGENT, out c.tangents, out jh, out c.gcHandles[jobHandlesCount] );
-                jobHandles[jobHandlesCount] = jh.Value;
-                jobHandlesCount++;
+                c.tangents = (accessorData[primitive.attributes.TANGENT] as AccessorData<Vector4>).data;
             }
 
             if(primitive.attributes.COLOR_0>=0) {
