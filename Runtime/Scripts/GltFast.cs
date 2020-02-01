@@ -738,7 +738,7 @@ namespace GLTFast {
             int vertexCount;
             {
                 JobHandle? jh;
-                vertexCount = GetPositionsJob(gltf,primitive.attributes.POSITION, out c.positions, out jh, out c.gcHandles[jobHandlesCount] );
+                vertexCount = GetVector3sJob(gltf,primitive.attributes.POSITION, out c.positions, out jh, out c.gcHandles[jobHandlesCount] );
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             }
@@ -783,7 +783,7 @@ namespace GLTFast {
             
             if(primitive.attributes.NORMAL>=0) {
                 JobHandle? jh;
-                GetNormalsJob(gltf,primitive.attributes.NORMAL, out c.normals, out jh, out c.gcHandles[jobHandlesCount] );
+                GetVector3sJob(gltf,primitive.attributes.NORMAL, out c.normals, out jh, out c.gcHandles[jobHandlesCount] );
                 jobHandles[jobHandlesCount] = jh.Value;
                 jobHandlesCount++;
             }
@@ -1040,30 +1040,27 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        unsafe int GetPositionsJob(Root gltf, int accessorIndex, out Vector3[] positions, out JobHandle? jobHandle, out GCHandle resultHandle ) {
-            Profiler.BeginSample("PreparePositionsJob");
-            // position
-            int pos = accessorIndex;
-            Assert.IsTrue(pos>=0);
+        unsafe int GetVector3sJob(Root gltf, int accessorIndex, out Vector3[] result, out JobHandle? jobHandle, out GCHandle resultHandle ) {
+            Profiler.BeginSample("GetVector3sJob");
+            Assert.IsTrue(accessorIndex>=0);
             #if DEBUG
-            Assert.AreEqual( GetAccessorTye(gltf.accessors[pos].typeEnum), typeof(Vector3) );
+            Assert.AreEqual( GetAccessorTye(gltf.accessors[accessorIndex].typeEnum), typeof(Vector3) );
             #endif
 
-            // TODO: unify with normals/tangent getter
-            var accessor = gltf.accessors[pos];
+            var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
             var buffer = GetBuffer(bufferView.buffer);
             var chunk = binChunks[bufferView.buffer];
-            int vertexCount = accessor.count;
-            positions = new Vector3[vertexCount];
-            resultHandle = GCHandle.Alloc(positions, GCHandleType.Pinned);
+            int count = accessor.count;
+            result = new Vector3[count];
+            resultHandle = GCHandle.Alloc(result, GCHandleType.Pinned);
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-            if (gltf.IsAccessorInterleaved(pos)) {
+            if (gltf.IsAccessorInterleaved(accessorIndex)) {
                 if(accessor.componentType == GLTFComponentType.Float) {
                     var job = new Jobs.GetVector3sInterleavedJob();
-                    job.count = vertexCount;
+                    job.count = count;
                     job.byteStride = bufferView.byteStride;
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (byte*)src;
                         job.result = (Vector3*)dst;
                     }
@@ -1071,10 +1068,10 @@ namespace GLTFast {
                 } else
                 if(accessor.componentType == GLTFComponentType.UnsignedShort) {
                     var job = new Jobs.GetUInt16PositionsInterleavedJob();
-                    job.count = vertexCount;
+                    job.count = count;
                     job.byteStride = bufferView.byteStride;
                     job.normalize = accessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (byte*)src;
                         job.result = (Vector3*)dst;
                     }
@@ -1083,28 +1080,28 @@ namespace GLTFast {
                 if(accessor.componentType == GLTFComponentType.Short) {
                     // TODO: test. did not have test files
                     var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                    job.count = vertexCount;
+                    job.count = count;
                     job.byteStride = bufferView.byteStride;
                     job.normalize = accessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (byte*)src;
                         job.result = (Vector3*)dst;
                     }
                     jobHandle = job.Schedule();
                 } else
                 if(accessor.componentType == GLTFComponentType.Byte) {
-                    // TODO: test. did not have test files
+                    // TODO: test positions. did not have test files
                     var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
-                        job.Setup(vertexCount,bufferView.byteStride,(sbyte*)src,(Vector3*)dst,accessor.normalized);
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                        job.Setup(count,bufferView.byteStride,(sbyte*)src,(Vector3*)dst,accessor.normalized);
                     }
                     jobHandle = job.Schedule();
                 } else
                 if(accessor.componentType == GLTFComponentType.UnsignedByte) {
                     // TODO: test. did not have test files
                     var job = new Jobs.GetVector3FromByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
-                        job.Setup(vertexCount,bufferView.byteStride,(byte*)src,(Vector3*)dst,accessor.normalized);
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                        job.Setup(count,bufferView.byteStride,(byte*)src,(Vector3*)dst,accessor.normalized);
                     }
                     jobHandle = job.Schedule();
                 } else {
@@ -1115,7 +1112,7 @@ namespace GLTFast {
                 if(accessor.componentType == GLTFComponentType.Float) {
                     var job = new Jobs.GetVector3sJob();
                     job.count = accessor.count;
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (float*)src;
                         job.result = (float*)dst;
                     }
@@ -1125,7 +1122,7 @@ namespace GLTFast {
                     var job = new Jobs.GetUInt16PositionsJob();
                     job.count = accessor.count;
                     job.normalize = accessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (System.UInt16*)src;
                         job.result = (Vector3*)dst;
                     }
@@ -1135,10 +1132,10 @@ namespace GLTFast {
                     // TODO: test. did not have test files
                     // TODO: is a non-interleaved variant faster?
                     var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                    job.count = vertexCount;
+                    job.count = count;
                     job.byteStride = 6; // 2 bytes * 3
                     job.normalize = accessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (byte*)src;
                         job.result = (Vector3*)dst;
                     }
@@ -1148,8 +1145,8 @@ namespace GLTFast {
                     // TODO: test. did not have test files
                     // TODO: is a non-interleaved variant faster?
                     var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
-                        job.Setup(vertexCount,3,(sbyte*)src,(Vector3*)dst,accessor.normalized);
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                        job.Setup(count,3,(sbyte*)src,(Vector3*)dst,accessor.normalized);
                     }
                     jobHandle = job.Schedule();
                 } else
@@ -1157,8 +1154,8 @@ namespace GLTFast {
                     // TODO: test. did not have test files
                     // TODO: is a non-interleaved variant faster?
                     var job = new Jobs.GetVector3FromByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(positions[0]) ) {
-                        job.Setup(vertexCount,3,(byte*)src,(Vector3*)dst,accessor.normalized);
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                        job.Setup(count,3,(byte*)src,(Vector3*)dst,accessor.normalized);
                     }
                     jobHandle = job.Schedule();
                 } else {
@@ -1167,96 +1164,7 @@ namespace GLTFast {
                 }
             }
             Profiler.EndSample();
-            return vertexCount;
-        }
-
-        unsafe void GetNormalsJob(Root gltf, int accessorIndex, out Vector3[] normals, out JobHandle? jobHandle, out GCHandle resultHandle ) {
-            Profiler.BeginSample("PrepareNormals");
-            #if DEBUG
-            Assert.AreEqual( GetAccessorTye(gltf.accessors[accessorIndex].typeEnum), typeof(Vector3) );
-            #endif
-            var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var buffer = GetBuffer(bufferView.buffer);
-            var chunk = binChunks[bufferView.buffer];
-            normals = new Vector3[accessor.count];
-            resultHandle = GCHandle.Alloc(normals, GCHandleType.Pinned);
-            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-            if (gltf.IsAccessorInterleaved((int)accessorIndex)) {
-                if(accessor.componentType == GLTFComponentType.Float) {
-                    var job = new Jobs.GetVector3sInterleavedJob();
-                    job.count = accessor.count;
-                    job.byteStride = bufferView.byteStride;
-                    fixed( void* src = &(buffer[start]), dst = &(normals[0]) ) {
-                        job.input = (byte*)src;
-                        job.result = (Vector3*)dst;
-                    }
-                    jobHandle = job.Schedule();
-                } else
-                if(accessor.componentType == GLTFComponentType.Short) {
-                    var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                    job.count = accessor.count;
-                    job.byteStride = bufferView.byteStride;
-                    job.normalize = true;
-                    fixed( void* src = &(buffer[start]), dst = &(normals[0]) ) {
-                        job.input = (byte*)src;
-                        job.result = (Vector3*)dst;
-                    }
-                    jobHandle = job.Schedule();
-                } else
-                if(accessor.componentType == GLTFComponentType.Byte) {
-                    var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(normals[0]) ) {
-                        job.Setup(accessor.count, bufferView.byteStride,(sbyte*)src, (Vector3*)dst, true);
-                    }
-                    jobHandle = job.Schedule();
-                } else {
-                    Debug.LogErrorFormat( ErrorUnsupportedType, "Normal", accessor.componentType);
-                    jobHandle=null;
-                }
-            } else {
-                if(accessor.componentType == GLTFComponentType.Float) {
-                    var job = new Jobs.GetVector3sJob();
-                    job.count = accessor.count;
-                    fixed( void* src = &(buffer[start]), dst = &(normals[0]) ) {
-                        job.input = (float*)src;
-                        job.result = (float*)dst;
-                    }
-                    jobHandle = job.Schedule();
-                } else
-                if(accessor.componentType == GLTFComponentType.Short) {
-                    // TODO: test. did not have test files
-                    // TODO: is a non-interleaved variant faster?
-                    var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                    job.count = accessor.count;
-                    job.byteStride = 6;
-                    job.normalize = true;
-                    fixed( void* src = &(buffer[start]), dst = &(normals[0]) ) {
-                        job.input = (byte*)src;
-                        job.result = (Vector3*)dst;
-                    }
-                    jobHandle = job.Schedule();
-                } else
-                if(accessor.componentType == GLTFComponentType.Byte) {
-                    // TODO: test. did not have test files
-                    // TODO: is a non-interleaved variant faster?
-                    var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(normals[0]) ) {
-                        job.Setup(
-                            accessor.count,
-                            4, // 3 byte normal + pad byte
-                            (sbyte*)src,
-                            (Vector3*)dst,
-                            true
-                            );
-                    }
-                    jobHandle = job.Schedule();
-                } else {
-                    Debug.LogErrorFormat( ErrorUnsupportedType, "Normal", accessor.componentType);
-                    jobHandle=null;
-                }
-            }
-            Profiler.EndSample();
+            return count;
         }
 
         unsafe void GetTangentsJob(Root gltf, int accessorIndex, out Vector4[] tangents, out JobHandle? jobHandle, out GCHandle resultHandle ) {
