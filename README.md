@@ -35,10 +35,10 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
     - [x] PBR specular-glossiness (via extension)
     - [x] Unlit (via extension)
     - [x] Normal texture
-    - [x] <sup>1</sup>Occlusion texture
-    - [x] <sup>1</sup>Emission texture
-    - [x] <sup>1</sup>Metallic texture
-    - [x] <sup>1</sup>Roughness texture
+    - [x] Occlusion texture
+    - [x] Emission texture
+    - [x] Metallic texture
+    - [x] Roughness texture
     - [x] Alpha mode
     - [x] Double sided
     - [x] Vertex colors
@@ -47,10 +47,10 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [ ] High Definition Render Pipeline ([issue](issues/42))
 - Primitive Types
   - [x] TRIANGLES
-  - [x] <sup>2</sup>POINTS
-  - [x] <sup>2</sup>LINES
-  - [x] <sup>2</sup>LINE_STRIP
-  - [x] <sup>2</sup>LINE_LOOP
+  - [x] <sup>1</sup>POINTS
+  - [x] <sup>1</sup>LINES
+  - [x] <sup>1</sup>LINE_STRIP
+  - [x] <sup>1</sup>LINE_LOOP
   - [ ] TRIANGLE_STRIP
   - [ ] TRIANGLE_FAN
 - [x] Meshes
@@ -73,9 +73,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [ ] Skinning ([issue](issues/13))
 - [ ] Animation
 
-<sup>1</sup>: Slow operation at the moment, since the image channels have to be converted to fit the shader.
-
-<sup>2</sup>: Untested due to lack of demo files.
+<sup>1</sup>: Untested due to lack of demo files.
 
 ### Extensions
 
@@ -83,7 +81,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
 - [x] KHR_texture_transform
-- [ ] KHR_mesh_quantization ([issue](issues/51))
+- [x] KHR_mesh_quantization
 - [ ] KHR_lights_punctual ([issue](issues/17))
 
 ## Installing
