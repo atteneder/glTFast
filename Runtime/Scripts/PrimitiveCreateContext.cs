@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Unity.Jobs;
 using System.Runtime.InteropServices;
+using UnityEngine.Profiling;
 
 namespace GLTFast {
 
@@ -34,7 +35,7 @@ namespace GLTFast {
         }
 
         public override Primitive? CreatePrimitive() {
-            UnityEngine.Profiling.Profiler.BeginSample("CreatePrimitive");
+            Profiler.BeginSample("CreatePrimitive");
             jobHandle.Complete();
             var msh = new UnityEngine.Mesh();
             if( positions.Length > 65536 ) {
@@ -75,7 +76,7 @@ namespace GLTFast {
             // resources.Add(msh);
 
             Dispose();
-            UnityEngine.Profiling.Profiler.EndSample();
+            Profiler.EndSample();
             return new Primitive(msh,primitive.material);
         }
 
