@@ -34,139 +34,6 @@ namespace GLTFast {
             BIN = 0x004e4942
         }
 
-        struct Primitive {
-            public UnityEngine.Mesh mesh;
-            public int materialIndex;
-
-            public Primitive( UnityEngine.Mesh mesh, int materialIndex ) {
-                this.mesh = mesh;
-                this.materialIndex = materialIndex;
-            }
-        }
-              
-        struct ImageCreateContext {
-            public int imageIndex;
-            public byte[] buffer;
-            public GCHandle gcHandle;
-            public JobHandle jobHandle;
-        }
-
-        abstract class PrimitiveCreateContextBase {
-            public int primtiveIndex;
-            public MeshPrimitive primitive;
-            public abstract bool IsCompleted {get;}
-            public abstract Primitive? CreatePrimitive();
-        }
-
-        class PrimitiveCreateContext : PrimitiveCreateContextBase {
-
-            public Mesh mesh;
-
-            /// TODO remove begin
-            public Vector3[] positions;
-            public Vector3[] normals;
-            public Vector2[] uvs0;
-            public Vector2[] uvs1;
-            public Vector4[] tangents;
-            public Color32[] colors32;
-            public Color[] colors;
-            /// TODO remove end
-
-            public JobHandle jobHandle;
-            public int[] indices;
-
-            public GCHandle[] gcHandles;
-
-            public MeshTopology topology;
-
-            public override bool IsCompleted {
-                get {
-                    return jobHandle.IsCompleted;
-                }  
-            }
-
-            public override Primitive? CreatePrimitive() {
-                Profiler.BeginSample("CreatePrimitive");
-                jobHandle.Complete();
-                var msh = new UnityEngine.Mesh();
-                if( positions.Length > 65536 ) {
-#if UNITY_2017_3_OR_NEWER
-                    msh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-#else
-                    throw new System.Exception("Meshes with more than 65536 vertices are only supported from Unity 2017.3 onwards.");
-#endif
-                }
-                msh.name = mesh.name;
-                msh.vertices = positions;
-
-                msh.SetIndices(indices,topology,0);
-
-                if(uvs0!=null) {
-                    msh.uv = uvs0;
-                }
-                if(uvs1!=null) {
-                    msh.uv2 = uvs1;
-                }
-                if(normals!=null) {
-                    msh.normals = normals;
-                } else {
-                    msh.RecalculateNormals();
-                }
-                if (colors!=null) {
-                    msh.colors = colors;
-                } else if(colors32!=null) {
-                    msh.colors32 = colors32;
-                }
-                if(tangents!=null) {
-                    msh.tangents = tangents;
-                } else {
-                    msh.RecalculateTangents();
-                }
-                // primitives[c.primtiveIndex] = new Primitive(msh,c.primitive.material);
-                // resources.Add(msh);
-
-                Dispose();
-                Profiler.EndSample();
-                return new Primitive(msh,primitive.material);
-            }
-
-            void Dispose() {
-                for(int i=0;i<gcHandles.Length;i++) {
-                    gcHandles[i].Free();
-                }
-            }
-        }
-
-        class PrimitiveDracoCreateContext : PrimitiveCreateContextBase {
-            public JobHandle jobHandle;
-            public NativeArray<int> dracoResult;
-            public NativeArray<IntPtr> dracoPtr;
-
-            public override bool IsCompleted {
-                get {
-                    return jobHandle.IsCompleted;
-                }  
-            }
-
-            public override Primitive? CreatePrimitive() {
-                jobHandle.Complete();
-                int result = dracoResult[0];
-                IntPtr dracoMesh = dracoPtr[0];
-
-                dracoResult.Dispose();
-                dracoPtr.Dispose();
-
-                if (result <= 0) {
-                    Debug.LogError ("Failed: Decoding error.");
-                    return null;
-                }
-
-                var msh = DracoMeshLoader.CreateMesh(dracoMesh);
-
-                return new Primitive(msh,primitive.material);
-            }
-        }
-
         byte[][] buffers;
         NativeArray<byte>[] nativeBuffers;
 
@@ -403,7 +270,7 @@ namespace GLTFast {
             }
         }
 
-        public bool InstanciateGltf( Transform parent ) {
+        public bool InstantiateGltf( Transform parent ) {
             CreateGameObjects( gltfRoot, parent );
             return !loadingError;
         }
