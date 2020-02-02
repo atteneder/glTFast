@@ -77,7 +77,7 @@ public class SampleModelsTest
 			Assert.False(glTFast.LoadingError);
 			yield return glTFast.Prepare();
 			Assert.False(glTFast.LoadingError);
-			var success = glTFast.InstanciateGltf(go.transform);
+			var success = glTFast.InstantiateGltf(go.transform);
             Assert.True(success);
 			yield return null;
 			glTFast.Destroy();
@@ -127,7 +127,7 @@ public class SampleModelsTest
 			Assert.False(glTFast.LoadingError);
 			yield return glTFast.Prepare();
 			Assert.False(glTFast.LoadingError);
-			var success = glTFast.InstanciateGltf(go.transform);
+			var success = glTFast.InstantiateGltf(go.transform);
 			Assert.IsTrue(success);
 
             yield return null;

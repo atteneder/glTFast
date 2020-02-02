@@ -19,11 +19,13 @@ struct v2f_meta
     float2 vizUV        : TEXCOORD1;
     float4 lightCoord   : TEXCOORD2;
 #endif
+    half4 color :COLOR;
 };
 
 v2f_meta vert_meta (VertexInput v)
 {
     v2f_meta o;
+    o.color = v.color;
     o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
     o.uv = TexCoords(v);
 #ifdef EDITOR_VISUALIZATION
@@ -55,7 +57,7 @@ float4 frag_meta (v2f_meta i) : SV_Target
 {
     // we're interested in diffuse & specular colors,
     // and surface roughness to produce final albedo.
-    FragmentCommonData data = UNITY_SETUP_BRDF_INPUT (i.uv);
+    FragmentCommonData data = UNITY_SETUP_BRDF_INPUT (i.uv,i.color);
 
     UnityMetaInput o;
     UNITY_INITIALIZE_OUTPUT(UnityMetaInput, o);

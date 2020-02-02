@@ -45,6 +45,8 @@ Shader "glTF/PbrSpecularGlossiness"
         [HideInInspector] _SrcBlend ("__src", Float) = 1.0
         [HideInInspector] _DstBlend ("__dst", Float) = 0.0
         [HideInInspector] _ZWrite ("__zw", Float) = 1.0
+
+        [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2.0
     }
 
     CGINCLUDE
@@ -66,6 +68,7 @@ Shader "glTF/PbrSpecularGlossiness"
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 3.0
@@ -73,10 +76,16 @@ Shader "glTF/PbrSpecularGlossiness"
             // -------------------------------------
 
             #pragma shader_feature _NORMALMAP
-            #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature _EMISSION
+            #if UNITY_VERSION >= 201900
+            #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _DETAIL_MULX2
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
@@ -90,7 +99,7 @@ Shader "glTF/PbrSpecularGlossiness"
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
             #pragma vertex vertBase
-            #pragma fragment fragBase
+            #pragma fragment fragBaseFacing
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
@@ -105,6 +114,7 @@ Shader "glTF/PbrSpecularGlossiness"
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
             ZWrite Off
             ZTest LEqual
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 3.0
@@ -112,9 +122,15 @@ Shader "glTF/PbrSpecularGlossiness"
             // -------------------------------------
 
             #pragma shader_feature _NORMALMAP
+            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             // #pragma shader_feature_local _DETAIL_MULX2
@@ -126,7 +142,7 @@ Shader "glTF/PbrSpecularGlossiness"
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
             #pragma vertex vertAdd
-            #pragma fragment fragAdd
+            #pragma fragment fragAddFacing
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
@@ -138,16 +154,22 @@ Shader "glTF/PbrSpecularGlossiness"
             Tags { "LightMode" = "ShadowCaster" }
 
             ZWrite On ZTest LEqual
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 3.0
 
             // -------------------------------------
 
-
+            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _PARALLAXMAP
             #pragma multi_compile_shadowcaster
@@ -168,6 +190,7 @@ Shader "glTF/PbrSpecularGlossiness"
         {
             Name "DEFERRED"
             Tags { "LightMode" = "Deferred" }
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 3.0
@@ -177,10 +200,16 @@ Shader "glTF/PbrSpecularGlossiness"
             // -------------------------------------
 
             #pragma shader_feature _NORMALMAP
-            #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature _EMISSION
+            #if UNITY_VERSION >= 201900
+            #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             // #pragma shader_feature_local _DETAIL_MULX2
@@ -192,8 +221,9 @@ Shader "glTF/PbrSpecularGlossiness"
             //#pragma multi_compile _ LOD_FADE_CROSSFADE
 
             #pragma vertex vertDeferred
-            #pragma fragment fragDeferred
+            #pragma fragment fragDeferredFacing
 
+            #include "glTFIncludes/glTF.cginc"
             #include "glTFIncludes/glTFUnityStandardCore.cginc"
 
             ENDCG
@@ -214,8 +244,13 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma fragment frag_meta
 
             #pragma shader_feature _EMISSION
+            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION
@@ -239,15 +274,22 @@ Shader "glTF/PbrSpecularGlossiness"
 
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 2.0
 
             #pragma shader_feature _NORMALMAP
-            #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature _EMISSION
+            #if UNITY_VERSION >= 201900
+            #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             // #pragma shader_feature_local _GLOSSYREFLECTIONS_OFF
@@ -260,7 +302,7 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma multi_compile_fog
 
             #pragma vertex vertBase
-            #pragma fragment fragBase
+            #pragma fragment fragBaseFacing
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
@@ -275,14 +317,21 @@ Shader "glTF/PbrSpecularGlossiness"
             Fog { Color (0,0,0,0) } // in additive pass fog should be black
             ZWrite Off
             ZTest LEqual
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 2.0
 
             #pragma shader_feature _NORMALMAP
+            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             // #pragma shader_feature_local _DETAIL_MULX2
@@ -293,7 +342,7 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma multi_compile_fog
 
             #pragma vertex vertAdd
-            #pragma fragment fragAdd
+            #pragma fragment fragAddFacing
             #include "glTFIncludes/glTFUnityStandardCoreForward.cginc"
 
             ENDCG
@@ -305,13 +354,20 @@ Shader "glTF/PbrSpecularGlossiness"
             Tags { "LightMode" = "ShadowCaster" }
 
             ZWrite On ZTest LEqual
+            Cull [_CullMode]
 
             CGPROGRAM
             #pragma target 2.0
 
+            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma skip_variants SHADOWS_SOFT
             #pragma multi_compile_shadowcaster
@@ -338,8 +394,13 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma fragment frag_meta
 
             #pragma shader_feature _EMISSION
+            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _SPECGLOSSMAP
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _SPECGLOSSMAP
+            #pragma shader_feature _UV_ROTATION
+            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION

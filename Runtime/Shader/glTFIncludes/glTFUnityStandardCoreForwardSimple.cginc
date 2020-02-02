@@ -33,7 +33,7 @@ struct VertexOutputBaseSimple
 #if UNITY_REQUIRE_FRAG_WORLDPOS
     float3 posWorld                     : TEXCOORD8;
 #endif
-
+    half4 color                         : COLOR;
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -85,6 +85,7 @@ VertexOutputBaseSimple vertForwardBaseSimple (VertexInput v)
 {
     UNITY_SETUP_INSTANCE_ID(v);
     VertexOutputBaseSimple o;
+    o.color = v.color;
     UNITY_INITIALIZE_OUTPUT(VertexOutputBaseSimple, o);
     UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
@@ -130,7 +131,7 @@ FragmentCommonData FragmentSetupSimple(VertexOutputBaseSimple i)
         clip (alpha - _Cutoff);
     #endif
 
-    FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex);
+    FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.color);
 
     // NOTE: shader relies on pre-multiply alpha-blend (_SrcBlend = One, _DstBlend = OneMinusSrcAlpha)
     s.diffColor = PreMultiplyAlpha (s.diffColor, alpha, s.oneMinusReflectivity, /*out*/ s.alpha);
@@ -255,6 +256,7 @@ struct VertexOutputForwardAddSimple
 #else
     half3 normalWorld                   : TEXCOORD4;
 #endif
+    half4 color                         : COLOR;
 
     UNITY_LIGHTING_COORDS(5, 6)
 
@@ -313,7 +315,7 @@ FragmentCommonData FragmentSetupSimpleAdd(VertexOutputForwardAddSimple i)
         clip (alpha - _Cutoff);
     #endif
 
-    FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex);
+    FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.color);
 
     // NOTE: shader relies on pre-multiply alpha-blend (_SrcBlend = One, _DstBlend = OneMinusSrcAlpha)
     s.diffColor = PreMultiplyAlpha (s.diffColor, alpha, s.oneMinusReflectivity, /*out*/ s.alpha);

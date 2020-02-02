@@ -10,6 +10,7 @@ Properties {
     _Color ("Main Color", Color) = (1,1,1,1)
     _MainTex ("Base (RGB)", 2D) = "white" {}
     _MainTexRotation ("Texture rotation", Vector) = (1,0,0,1)
+    [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode", Float) = 2.0
 }
 
 SubShader {
@@ -17,12 +18,19 @@ SubShader {
     LOD 100
 
     Pass {
+        
+        Cull [_CullMode]
+
         CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 2.0
             #pragma multi_compile_fog
+            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _UV_ROTATION
+            #else
+            #pragma shader_feature _UV_ROTATION
+            #endif
 
             #include "UnityCG.cginc"
 

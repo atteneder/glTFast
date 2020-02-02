@@ -25,7 +25,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] Buffers
   - [x] External URIs
   - [x] glTF binary main buffer
-  - [ ] Embed buffers or textures (base-64 encoded within JSON; [issue](issues/35))
+  - [x] Embed buffers or textures (base-64 encoded within JSON)
 - [x] Images
   - [x] PNG
   - [x] Jpeg
@@ -35,16 +35,24 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
     - [x] PBR specular-glossiness (via extension)
     - [x] Unlit (via extension)
     - [x] Normal texture
-    - [x] <sup>1</sup>Occlusion texture
-    - [x] <sup>1</sup>Emission texture
-    - [x] <sup>1</sup>Metallic texture
-    - [x] <sup>1</sup>Roughness texture
+    - [x] Occlusion texture
+    - [x] Emission texture
+    - [x] Metallic texture
+    - [x] Roughness texture
     - [x] Alpha mode
-    - [ ] Vertex colors
-    - [ ] Double sided ([issue](issues/9))
-    - [ ] Emission
+    - [x] Double sided
+    - [x] Vertex colors
+    - [x] Emission(factor)
   - [ ] Universal Render Pipeline ([issue](issues/41))
   - [ ] High Definition Render Pipeline ([issue](issues/42))
+- Primitive Types
+  - [x] TRIANGLES
+  - [x] <sup>1</sup>POINTS
+  - [x] <sup>1</sup>LINES
+  - [x] <sup>1</sup>LINE_STRIP
+  - [x] <sup>1</sup>LINE_LOOP
+  - [ ] TRIANGLE_STRIP
+  - [ ] TRIANGLE_FAN
 - [x] Meshes
   - [x] Positions
   - [x] Normals
@@ -52,11 +60,11 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [x] Texture coordinates
   - [x] Vertex colors
   - [x] Draco mesh compression (via extension)
+  - [x] Implicit (no) indices
   - [ ] Per primitive material ([issue](issues/32))
   - [ ] Multiple texture coordinates sets ([issue](issues/34))
   - [ ] Joints
   - [ ] Weights
-  - [ ] Implicit (no) indices
 - [ ] Texture sampler ([issue](issues/45))
   - [ ] Filtering
   - [ ] Wrap mode
@@ -65,16 +73,16 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [ ] Skinning ([issue](issues/13))
 - [ ] Animation
 
-<sup>1</sup>: Slow operation at the moment, since the image channels have to be converted to fit the shader.
+<sup>1</sup>: Untested due to lack of demo files.
 
 ### Extensions
 
 - [x] KHR_draco_mesh_compression
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
-- [ ] KHR_mesh_quantization
+- [x] KHR_texture_transform
+- [x] KHR_mesh_quantization
 - [ ] KHR_lights_punctual ([issue](issues/17))
-- [ ] KHR_texture_transform ([issue](issues/18))
 
 ## Installing
 
@@ -135,7 +143,7 @@ gltf.onLoadComplete += YourCallbackMethod;
 ### Materials and Shader Variants
 
 glTF files can contain lots of materials making use of various shader features. You have to make sure all shader variants your project will probably use are included in the build. If not, the materials will be fine in the editor, but not in the builds.
-glTFast uses the Unity Standard Shader. Including all its variants would be quite big. There's an easy way to find the right subset, if you already know what files you'll expect:
+glTFast uses custom shaders that are derived from the Unity Standard shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
 
 - Run your scene that loads all glTFs you expect in the editor.
 - Go to Edit->Project Settings->Graphics
@@ -179,6 +187,7 @@ Such stuff should be able to place on top of this library.
 
 ## Known issues
 
+- Some shader variants (observed with double sided, textured metallic-roughness materials) don't work on older Unity versions (pre 2019.1). Probably cause is the shader feature keyword limit.
 - When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
 
 See details in the [issues](https://github.com/atteneder/glTFast/issues) section.

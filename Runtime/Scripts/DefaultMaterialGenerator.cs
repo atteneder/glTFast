@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Profiling;
-
+﻿using UnityEngine;
 
 namespace GLTFast {
 
@@ -12,32 +8,46 @@ namespace GLTFast {
 
     public class DefaultMaterialGenerator : IMaterialGenerator {
 
-        static readonly Vector2 TEXTURE_SCALE = new Vector2(1,-1);
-        static readonly Vector2 TEXTURE_OFFSET = new Vector2(0,1);
-
         Shader pbrMetallicRoughnessShader;
+        Shader pbrMetallicRoughnessDoubleSideShader;
         Shader pbrSpecularGlossinessShader;
+        Shader pbrSpecularGlossinessDoubleSideShader;
         Shader unlitShader;
 
-        public UnityEngine.Material GetPbrMetallicRoughnessMaterial() {
+        public UnityEngine.Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {
             if(pbrMetallicRoughnessShader==null) {
                 pbrMetallicRoughnessShader = Shader.Find("glTF/PbrMetallicRoughness");
             }
-            return new Material(pbrMetallicRoughnessShader);
+            var mat = new Material(pbrMetallicRoughnessShader);
+            if(doubleSided) {
+                // Turn of back-face culling
+                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
+            }
+            return mat;
         }
 
-        public UnityEngine.Material GetPbrSpecularGlossinessMaterial() {
+        public UnityEngine.Material GetPbrSpecularGlossinessMaterial(bool doubleSided=false) {
             if(pbrSpecularGlossinessShader==null) {
                 pbrSpecularGlossinessShader = Shader.Find("glTF/PbrSpecularGlossiness");
             }
-            return new Material(pbrSpecularGlossinessShader);
+            var mat = new Material(pbrSpecularGlossinessShader);
+            if(doubleSided) {
+                // Turn of back-face culling
+                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
+            }
+            return mat;
         }
 
-        public UnityEngine.Material GetUnlitMaterial() {
+        public UnityEngine.Material GetUnlitMaterial(bool doubleSided=false) {
             if(unlitShader==null) {
                 unlitShader = Shader.Find("glTF/Unlit");
             }
-            return new Material(unlitShader);
+            var mat = new Material(unlitShader);
+            if(doubleSided) {
+                // Turn of back-face culling
+                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
+            }
+            return mat;
         }
 
         public UnityEngine.Material GenerateMaterial(
@@ -49,21 +59,15 @@ namespace GLTFast {
             UnityEngine.Material material;
             
             if (gltfMaterial.extensions!=null && gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness!=null) {
-                material = GetPbrSpecularGlossinessMaterial();
+                material = GetPbrSpecularGlossinessMaterial(gltfMaterial.doubleSided);
             } else
             if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
-                material = GetUnlitMaterial();
+                material = GetUnlitMaterial(gltfMaterial.doubleSided);
             } else {
-                material = GetPbrMetallicRoughnessMaterial();
+                material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);
             }
 
             material.name = gltfMaterial.name;
-
-            if(material.HasProperty(StandardShaderHelper.KW_MAIN_MAP)) {
-                // Initialize texture transform
-                material.mainTextureScale = TEXTURE_SCALE;
-                material.mainTextureOffset = TEXTURE_OFFSET;
-            }
 
             //added support for KHR_materials_pbrSpecularGlossiness
             if (gltfMaterial.extensions != null) {
@@ -109,7 +113,7 @@ namespace GLTFast {
             }
 
             if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,ref textures,ref schemaImages,ref images)) {
-                material.EnableKeyword("_EMISSION");
+                material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
             }
             
             if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
@@ -123,12 +127,9 @@ namespace GLTFast {
 
             if(gltfMaterial.emissive != Color.black) {
                 material.SetColor("_EmissionColor", gltfMaterial.emissive);
-                material.EnableKeyword("_EMISSION");
+                material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
             }
 
-            if(gltfMaterial.doubleSided) {
-                Debug.LogWarning("Double sided shading is not supported!");
-            }
             return material;
         }
 
@@ -159,7 +160,7 @@ namespace GLTFast {
                     {
                         material.SetTexture(propertyId,images[imageIndex]);
                         var isKtx = schemaImages[imageIndex].isKtx;
-                        TrySetTextureTransform(textureInfo,material,propertyId,!isKtx);
+                        TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
                         return true;
                     }
                     else
@@ -190,18 +191,28 @@ namespace GLTFast {
                 if(tt.texCoord!=0) {
                     Debug.LogError("Multiple UV sets are not supported!");
                 }
+
+                float cos = 1;
+                float sin = 0;
+
                 if(tt.offset!=null) {
-                    offset = new Vector2(tt.offset[0],tt.offset[1]);
-                }
-                if(tt.rotation!=0) {
-                    float cos = Mathf.Cos(tt.rotation);
-                    float sin = Mathf.Sin(tt.rotation);
-                    material.SetVector(StandardShaderHelper.mainTexRotatePropId,new Vector4(cos,-sin,sin,cos));
-                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+                    offset.x = tt.offset[0];
+                    offset.y = 1-tt.offset[1];
                 }
                 if(tt.scale!=null) {
-                    scale = new Vector2(tt.scale[0],tt.scale[1]);
+                    scale.x = tt.scale[0];
+                    scale.y = tt.scale[1];
+                    material.SetTextureScale(propertyId,scale);
                 }
+                if(tt.rotation!=0) {
+                    cos = Mathf.Cos(tt.rotation);
+                    sin = Mathf.Sin(tt.rotation);
+                    material.SetVector(StandardShaderHelper.mainTexRotatePropId,new Vector4(cos,sin,-sin,cos));
+                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+                    offset.x += scale.y * sin;
+                }
+                offset.y -= scale.y * cos;
+                material.SetTextureOffset(propertyId,offset);
             }
 
             if(flipY) {

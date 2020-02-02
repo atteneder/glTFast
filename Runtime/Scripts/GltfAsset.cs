@@ -54,7 +54,7 @@ namespace GLTFast
 
             bool allFine = true;
 
-            LoadContentPrimary(dlh);
+            LoadContentPrimary(gLTFastInstance, dlh, url);
             
             allFine = !gLTFastInstance.LoadingError;
 
@@ -92,7 +92,7 @@ namespace GLTFast
                 if( deferAgent.ShouldDefer() ) {
                     yield return null;
                 }
-                allFine = gLTFastInstance.InstanciateGltf(transform);
+                allFine = gLTFastInstance.InstantiateGltf(transform);
             }
 
             if(onLoadComplete!=null) {
@@ -100,7 +100,7 @@ namespace GLTFast
             }
         }
 
-        protected virtual void LoadContentPrimary(DownloadHandler dlh) {
+        protected virtual void LoadContentPrimary(GLTFast gLTFastInstance, DownloadHandler dlh, string url) {
             string json = dlh.text;
             gLTFastInstance.LoadGltf(json,url);
         }

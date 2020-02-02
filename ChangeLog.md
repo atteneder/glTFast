@@ -4,9 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.9.0]
+### Added
+- Support for quantized mesh data via `KHR_mesh_quantization` extension
+### Changed
+- UV space conversion now happens per UV coordinate (not negatively scaled via texture tiling anymore). This helped to fix tangent calculation.
+- glTF standard shaders now have a cull mode, allowing them to be double-sided. The now obsolete `Double` variants were removed (thanks to Ben Golus for support)
+### Fixed
+- Certified correct normal mapping by making normals, UVs and tangents consistent
+- Double sided material fixes
+
+## [0.8.1] - 2019-12-05
+### Fixed
+- Shader compilation error on Vulkan/GLES3
+
+## [0.8.0] - 2019-12-05
 ### Added
 - Support for texture transform (extension KHR_texture_transform)
+- Support for double sided materials
+- Support for data URI / embedded buffers and images
+- Support for vertex colors in materials
+- Support for implicit/undefined primitive indices
+- Experimental support for primitive modes points, lines, line strip and line loop
 ### Changed
 - Using custom glTF shaders instead of Unity Standard shaders. This speeds up occlusion and roughness/metallic texture loading since they don't have to be converted at runtime anymore.
 ### Fixed
