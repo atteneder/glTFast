@@ -23,11 +23,5 @@
         public int bufferView = -1;
 
         public ImageExtension extensions;
-
-        public bool isKtx {
-            get {
-                return mimeType=="image/ktx2" || (extensions!=null && extensions.KHR_image_ktx2!=null);
-            }
-        }
     }
 }

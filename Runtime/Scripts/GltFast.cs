@@ -24,7 +24,6 @@ namespace GLTFast {
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
             "KHR_draco_mesh_compression",
-            "KHR_image_ktx2",
             "KHR_texture_basisu",
             "KHR_materials_pbrSpecularGlossiness",
             "KHR_materials_unlit",
@@ -36,6 +35,13 @@ namespace GLTFast {
         {
             JSON = 0x4e4f534a,
             BIN = 0x004e4942
+        }
+
+        enum ImageFormat {
+            Unknown,
+            PNG,
+            Jpeg,
+            KTX
         }
 
         byte[][] buffers;
@@ -63,6 +69,7 @@ namespace GLTFast {
         /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
         GlbBinChunk? glbBinChunk;
         Texture2D[] images = null;
+        ImageFormat[] imageFormats;
         List<ImageCreateContext> imageCreateContexts;
         List<KtxLoadContextBase> ktxLoadContexts;
         List<KtxLoadContextBase> ktxLoadContextsBuffer;
@@ -200,15 +207,21 @@ namespace GLTFast {
 
         void LoadImages( string baseUri ) {
 
-            if (gltfRoot.images != null) {
+            if (gltfRoot.textures != null && gltfRoot.images != null) {
                 images = new Texture2D[gltfRoot.images.Length];
-                for (int i = 0; i < images.Length; i++) {
-                    var img = gltfRoot.images[i];
+                imageFormats = new ImageFormat[gltfRoot.images.Length];
+                for (int i = 0; i < gltfRoot.textures.Length; i++) {
+                    var texture = gltfRoot.textures[i];
+                    var imgIndex = texture.GetImageIndex();
+                    var img = gltfRoot.images[imgIndex];
 
                     if(!string.IsNullOrEmpty(img.uri) && img.uri.StartsWith("data:")) {
+                        // TODO: jobify (if Unity allows LoadImage to be off the main thread)
+                        // TODO: support embed KTX textures
                         string mimeType;
                         var data = DecodeEmbedBuffer(img.uri,out mimeType);
-                        if(data==null || !IsKnownImageMimeType(mimeType)) {
+                        imageFormats[i] = GetImageFormatFromMimeType(mimeType);
+                        if(data==null || imageFormats[i]==ImageFormat.Unknown) {
                             Debug.LogError("Loading embedded image failed");
                             continue;
                         }
@@ -216,18 +229,19 @@ namespace GLTFast {
                         txt.LoadImage(data);
                         images[i] = txt;
                     } else {
-                        bool knownImageType = false;
+                        ImageFormat imgFormat;
                         if(string.IsNullOrEmpty(img.mimeType)) {
-                            knownImageType = IsKnownImageFileExtension(img.uri);
+                            imgFormat = GetImageFormatFromPath(img.uri);
                         } else {
-                            knownImageType = IsKnownImageMimeType(img.mimeType);
+                            imgFormat = GetImageFormatFromMimeType(img.mimeType);
                         }
 
-                        if (knownImageType) {
+                        if (imgFormat!=ImageFormat.Unknown) {
+                            imageFormats[i] = imgFormat;
                             if (img.bufferView < 0 && !string.IsNullOrEmpty(img.uri))
                             {
                                 // Not Inside buffer
-                                LoadTexture(i,baseUri+img.uri,img.isKtx);
+                                LoadTexture(i,baseUri+img.uri,texture.isKtx);
                             }
                         } else {
                             Debug.LogErrorFormat("Unknown image format (image {0};uri:{1})",i,img.uri);
@@ -271,7 +285,7 @@ namespace GLTFast {
                     }
                     else {
                         var img = gltfRoot.images[dl.Key];
-                        if(img.isKtx) {
+                        if(imageFormats[dl.Key]==ImageFormat.KTX) {
                             if(ktxLoadContexts==null) {
                                 ktxLoadContexts = new List<KtxLoadContextBase>();
                             }
@@ -652,22 +666,20 @@ namespace GLTFast {
                     resources.Add(images[i]);
                 }
                 var img = src_images[i];
-                bool knownImageType = false;
+                ImageFormat imgFormat;
                 if(string.IsNullOrEmpty(img.mimeType)) {
                     // Image is missing mime type
                     // try to determine type by file extension
-                    knownImageType = IsKnownImageFileExtension(img.uri);
+                    imgFormat = GetImageFormatFromMimeType(img.uri);
                 } else {
-                    knownImageType = IsKnownImageMimeType(img.mimeType);
+                    imgFormat = GetImageFormatFromPath(img.mimeType);
                 }
 
-                if (knownImageType)
-                {
-                    if (img.bufferView >= 0)
-                    {
+                if (imgFormat!=ImageFormat.Unknown) {
+                    if (img.bufferView >= 0) {
                         var bufferView = bufferViews[img.bufferView];
                         
-                        if(img.isKtx) {
+                        if(imgFormat == ImageFormat.KTX) {
                             if(ktxLoadContextsBuffer==null) {
                                 ktxLoadContextsBuffer = new List<KtxLoadContextBase>();
                             }
@@ -1413,18 +1425,36 @@ namespace GLTFast {
         }
 
         bool IsKnownImageMimeType(string mimeType) {
-            return mimeType == "image/jpeg"
-            || mimeType == "image/png"
-            || mimeType == "image/ktx"
-            || mimeType == "image/ktx2";
+            return GetImageFormatFromMimeType(mimeType) != ImageFormat.Unknown;
         }
         
         bool IsKnownImageFileExtension(string path) {
-            return path.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(".ktx",StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(".ktx2",StringComparison.OrdinalIgnoreCase);
+            return GetImageFormatFromPath(path) != ImageFormat.Unknown;
+        }
+
+        ImageFormat GetImageFormatFromMimeType(string mimeType) {
+            if(!mimeType.StartsWith("image/")) return ImageFormat.Unknown;
+            var sub = mimeType.Substring(6);
+            switch(sub) {
+                case "jpeg":
+                    return ImageFormat.Jpeg;
+                case "png":
+                    return ImageFormat.PNG;
+                case "ktx":
+                case "ktx2":
+                    return ImageFormat.KTX;
+                default:
+                    return ImageFormat.Unknown;
+            }
+        }
+
+        ImageFormat GetImageFormatFromPath(string path) {
+            if(path.EndsWith(".png",StringComparison.OrdinalIgnoreCase)) return ImageFormat.PNG;
+            if(path.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
+                || path.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase)) return ImageFormat.Jpeg;
+            if(path.EndsWith(".ktx",StringComparison.OrdinalIgnoreCase)
+                || path.EndsWith(".ktx2",StringComparison.OrdinalIgnoreCase)) return ImageFormat.KTX;
+            return ImageFormat.Unknown;
         }
 
 #if DEBUG

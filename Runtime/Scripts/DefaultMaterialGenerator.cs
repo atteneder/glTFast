@@ -159,7 +159,7 @@ namespace GLTFast {
                     if (images != null && imageIndex >= 0 && images.Length > imageIndex)
                     {
                         material.SetTexture(propertyId,images[imageIndex]);
-                        var isKtx = schemaImages[imageIndex].isKtx;
+                        var isKtx = txt.isKtx;
                         TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
                         return true;
                     }
