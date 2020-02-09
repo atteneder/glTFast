@@ -4,6 +4,7 @@ namespace GLTFast
 {
     enum AccessorUsage {
         Unknown,
+        Index,
         Position,
         Normal,
         Tangent,

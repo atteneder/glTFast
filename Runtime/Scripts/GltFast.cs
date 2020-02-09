@@ -799,7 +799,8 @@ namespace GLTFast {
                 var mesh = gltf.meshes[meshIndex];
                 foreach(var primitive in mesh.primitives) {
                     var att = primitive.attributes;
-
+                    if(primitive.indices>=0)
+                        SetAccessorUsage(primitive.indices, AccessorUsage.Index);
                     SetAccessorUsage(att.POSITION, AccessorUsage.Position);
                     if(att.NORMAL>=0)
                         SetAccessorUsage(att.NORMAL, AccessorUsage.Normal);
@@ -847,20 +848,24 @@ namespace GLTFast {
                 AccessorDataBase adb = null;
                 switch(acc.typeEnum) {
                     case GLTFAccessorAttributeType.VEC3:
-                        if(accessorUsage[i]==AccessorUsage.Color) {
-                            adb = LoadAccessorDataColor(gltf,i,out jh);
-                        } else {
+                        if (accessorUsage[i]==AccessorUsage.Position || accessorUsage[i]==AccessorUsage.Normal) {
                             var adv3 = new AccessorData<Vector3>();
                             GetVector3sJob(gltf,i,out adv3.data, out jh, out adv3.gcHandle);
                             adb = adv3;
+                            tmpList.Add(jh.Value);
+                        } else
+                        if(accessorUsage[i]==AccessorUsage.Color) {
+                            adb = LoadAccessorDataColor(gltf,i,out jh);
+                            tmpList.Add(jh.Value);
                         }
-                        tmpList.Add(jh.Value);
                         break;
                     case GLTFAccessorAttributeType.VEC2:
-                        var adv2 = new  AccessorData<Vector2>();
-                        adv2.data = GetUvsJob(gltf,i, out jh, out adv2.gcHandle);
-                        tmpList.Add(jh.Value);
-                        adb = adv2;
+                        if(accessorUsage[i]==AccessorUsage.UV) {
+                            var adv2 = new  AccessorData<Vector2>();
+                            adv2.data = GetUvsJob(gltf,i, out jh, out adv2.gcHandle);
+                            tmpList.Add(jh.Value);
+                            adb = adv2;
+                        }
                         break;
                     case GLTFAccessorAttributeType.VEC4:
                         if(accessorUsage[i]==AccessorUsage.Tangent) {
@@ -874,10 +879,12 @@ namespace GLTFast {
                         }
                         break;
                     case GLTFAccessorAttributeType.SCALAR:
-                        var ads = new  AccessorData<int>();
-                        adb = ads;
-                        GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle);
-                        tmpList.Add(jh.Value);
+                        if(accessorUsage[i]==AccessorUsage.Index) {
+                            var ads = new  AccessorData<int>();
+                            adb = ads;
+                            GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle);
+                            tmpList.Add(jh.Value);
+                        }
                         break;
                 }
                 accessorData[i] = adb;
