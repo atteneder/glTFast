@@ -43,39 +43,46 @@ namespace GLTFast {
         /// </summary>
         MonoBehaviour monoBehaviour;
 
-        protected IDeferAgent deferAgent;
+        IMaterialGenerator materialGenerator;
+        IDeferAgent deferAgent;
+
         public UnityAction<bool> onLoadComplete;
 
+#region VolatileData
+
+        /// <summary>
+        /// These members are only used during loading phase.
+        /// </summary>
         byte[][] buffers;
         NativeArray<byte>[] nativeBuffers;
 
         GlbBinChunk[] binChunks;
-        UnityEngine.Material[] materials;
-        List<UnityEngine.Object> resources;
 
         AccessorDataBase[] accessorData;
         AccessorUsage[] accessorUsage;
         JobHandle accessorJobsHandle;
-
         PrimitiveCreateContextBase[] primitiveContexts;
+        List<ImageCreateContext> imageCreateContexts;
 
-        Primitive[] primitives;
-        int[] meshPrimitiveIndex;
-
-        IMaterialGenerator materialGenerator;
-
-        /// TODO: Some of these class members maybe could be passed
-        /// between loading routines. Turn them into parameters or at
-        /// least dispose them once all ingredients are ready.
-
-        /// Main glTF data structure
-        Root gltfRoot;
+        Texture2D[] images = null;
 
         /// optional glTF-binary buffer
         /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
         GlbBinChunk? glbBinChunk;
-        Texture2D[] images = null;
-        List<ImageCreateContext> imageCreateContexts;
+
+#endregion VolatileData
+
+        /// Main glTF data structure
+        Root gltfRoot;
+        UnityEngine.Material[] materials;
+        List<UnityEngine.Object> resources;
+
+        Primitive[] primitives;
+        int[] meshPrimitiveIndex;
+
+        /// TODO: Some of these class members maybe could be passed
+        /// between loading routines. Turn them into parameters or at
+        /// least dispose them once all ingredients are ready.
 
         bool loadingError = false;
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
@@ -109,6 +116,8 @@ namespace GLTFast {
                 this.deferAgent = deferAgent ?? new DeferTimer();
                 yield return LoadContent(www.downloadHandler,url,gltfBinary);
             }
+            DisposeVolatileData();
+            OnLoadComplete(!loadingError);
         }
 
         IEnumerator LoadContent( DownloadHandler dlh, string url, bool gltfBinary ) {
@@ -152,17 +161,6 @@ namespace GLTFast {
                     yield return null;
                 }
             }
-            
-            if(loadingError) {
-                OnLoadComplete(!loadingError);
-                yield break;
-            }
-            
-            if( deferAgent.ShouldDefer() ) {
-                yield return null;
-            }
-
-            OnLoadComplete(!loadingError);
         }
 
         void OnLoadComplete(bool success) {
@@ -570,13 +568,14 @@ namespace GLTFast {
 
                 yield return null;
             }
-
-            // Free temp resources
-            primitiveContexts = null;
-            DisposeBuffers();
         }
 
-        void DisposeBuffers() {
+        /// <summary>
+        /// Free up volatile loading resources
+        /// </summary>
+        void DisposeVolatileData() {
+            primitiveContexts = null;
+
             foreach (var nativeBuffer in nativeBuffers)
             {
                 if(nativeBuffer.IsCreated) {
@@ -585,6 +584,14 @@ namespace GLTFast {
             }
             nativeBuffers = null;
             buffers = null;
+            binChunks = null;
+
+            accessorData = null;
+            accessorUsage = null;
+            primitiveContexts = null;
+            imageCreateContexts = null;
+            images = null;
+            glbBinChunk = null;
         }
 
         void CreateGameObjects( Root gltf, Transform parent ) {
@@ -713,11 +720,6 @@ namespace GLTFast {
                 }
             }
 
-            foreach( var bv in gltf.bufferViews ) {
-                if(gltf.buffers[bv.buffer].uri == null) {
-                    
-                }
-            }
             Profiler.EndSample();
         }
 
