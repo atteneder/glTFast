@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
+using UnityEngine.Events;
 using Unity.Jobs;
 using Unity.Collections;
 using System.Runtime.InteropServices;
@@ -34,6 +35,16 @@ namespace GLTFast {
             JSON = 0x4e4f534a,
             BIN = 0x004e4942
         }
+
+        /// <summary>
+        /// MonoBehaviour instance that is used for scheduling loading Coroutines.
+        /// Can be an arbitrary one, but cannot be destroyed before the loading
+        /// process finished.
+        /// </summary>
+        MonoBehaviour monoBehaviour;
+
+        protected IDeferAgent deferAgent;
+        public UnityAction<bool> onLoadComplete;
 
         byte[][] buffers;
         NativeArray<byte>[] nativeBuffers;
@@ -70,8 +81,90 @@ namespace GLTFast {
             return new Uri( uri, ".").AbsoluteUri;
         }
 
-        public GLTFast() {
+        public GLTFast( MonoBehaviour monoBehaviour ) {
+            this.monoBehaviour = monoBehaviour;
             materialGenerator = new DefaultMaterialGenerator();
+        }
+
+        public void Load( string url, bool? gltfBinary = null, IDeferAgent deferAgent=null ) {
+            
+            if(!gltfBinary.HasValue) {
+                gltfBinary = url.EndsWith(".glb",StringComparison.OrdinalIgnoreCase);
+            }
+            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary.Value,deferAgent));
+        }
+
+        IEnumerator LoadRoutine( string url, bool gltfBinary, IDeferAgent deferAgent=null ) {
+            UnityWebRequest www = UnityWebRequest.Get(url);
+            yield return www.SendWebRequest();
+     
+            if(www.isNetworkError || www.isHttpError) {
+                Debug.LogErrorFormat("{0} {1}",www.error,url);
+            }
+            else {
+                this.deferAgent = deferAgent ?? new DeferTimer();
+                yield return LoadContent(www.downloadHandler,url,gltfBinary);
+            }
+        }
+
+        IEnumerator LoadContent( DownloadHandler dlh, string url, bool gltfBinary ) {
+            deferAgent.Reset();
+
+            if(gltfBinary) {
+                LoadGlb(dlh.data,url);
+            } else {
+                LoadGltf(dlh.text,url);
+            }
+
+            if(loadingError) {
+                OnLoadComplete(!loadingError);
+                yield break;
+            }
+
+            if( deferAgent.ShouldDefer() ) {
+                yield return null;
+            }
+
+            var routineBuffers = monoBehaviour.StartCoroutine( WaitForBufferDownloads() );
+            var routineTextures = monoBehaviour.StartCoroutine( WaitForTextureDownloads() );
+
+            yield return routineBuffers;
+            yield return routineTextures;
+            
+            // yield return WaitForKtxTextures();
+
+            if(loadingError) {
+                OnLoadComplete(!loadingError);
+                yield break;
+            }
+
+            deferAgent.Reset();
+            var prepareRoutine = Prepare();
+            while(prepareRoutine.MoveNext()) {
+                if(loadingError) {
+                    break;
+                }
+                if( deferAgent.ShouldDefer() ) {
+                    yield return null;
+                }
+            }
+            
+            if(loadingError) {
+                OnLoadComplete(!loadingError);
+                yield break;
+            }
+            
+            if( deferAgent.ShouldDefer() ) {
+                yield return null;
+            }
+
+            OnLoadComplete(!loadingError);
+        }
+
+        void OnLoadComplete(bool success) {
+            if(onLoadComplete!=null) {
+                onLoadComplete(success);
+            }
         }
 
         void ParseJsonAndLoadBuffers( string json, string baseUri ) {
@@ -185,7 +278,7 @@ namespace GLTFast {
             return true;
         }
 
-        public void LoadGltf( string json, string url ) {
+        void LoadGltf( string json, string url ) {
             var baseUri = GetUriBase(url);
             ParseJsonAndLoadBuffers(json,baseUri);
             if(!loadingError) {
@@ -232,7 +325,7 @@ namespace GLTFast {
             }
         }
 
-        public IEnumerator WaitForBufferDownloads() {
+        IEnumerator WaitForBufferDownloads() {
             if(downloads!=null) {
                 foreach( var dl in downloads ) {
                     yield return dl.Value;
@@ -256,7 +349,7 @@ namespace GLTFast {
             }
         }
 
-        public IEnumerator WaitForTextureDownloads() {
+        IEnumerator WaitForTextureDownloads() {
             if(textureDownloads!=null) {
                 foreach( var dl in textureDownloads ) {
                     yield return dl.Value;
@@ -315,7 +408,7 @@ namespace GLTFast {
             textureDownloads[index] = www.SendWebRequest();
         }
 
-        public bool LoadGlb( byte[] bytes, string url ) {
+        bool LoadGlb( byte[] bytes, string url ) {
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
             if (magic != GLB_MAGIC) {
@@ -393,7 +486,7 @@ namespace GLTFast {
             return new NativeSlice<byte>(nativeBuffers[bufferIndex],chunk.start+bufferView.byteOffset,bufferView.byteLength);
         }
 
-        public IEnumerator Prepare() {
+        IEnumerator Prepare() {
             meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
 
             resources = new List<UnityEngine.Object>();
