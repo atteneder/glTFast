@@ -848,21 +848,7 @@ namespace GLTFast {
                 switch(acc.typeEnum) {
                     case GLTFAccessorAttributeType.VEC3:
                         if(accessorUsage[i]==AccessorUsage.Color) {
-                            Color[] colors;
-                            Color32[] colors32;
-                            GCHandle handle;
-                            GetColorsJob(gltf,i,out colors32, out colors, out jh, out handle);
-                            if(colors32!=null) {
-                                var adv3 = new AccessorData<Color32>();
-                                adv3.data = colors32;
-                                adv3.gcHandle = handle;
-                                adb = adv3;
-                            } else {
-                                var adv3 = new AccessorData<Color>();
-                                adv3.data = colors;
-                                adv3.gcHandle = handle;
-                                adb = adv3;
-                            }
+                            adb = LoadAccessorDataColor(gltf,i,out jh);
                         } else {
                             var adv3 = new AccessorData<Vector3>();
                             GetVector3sJob(gltf,i,out adv3.data, out jh, out adv3.gcHandle);
@@ -884,21 +870,7 @@ namespace GLTFast {
                             tmpList.Add(jh.Value);
                         } else
                         if(accessorUsage[i]==AccessorUsage.Color) {
-                            Color[] colors;
-                            Color32[] colors32;
-                            GCHandle handle;
-                            GetColorsJob(gltf,i,out colors32, out colors, out jh, out handle);
-                            if(colors32!=null) {
-                                var adv3 = new AccessorData<Color32>();
-                                adv3.data = colors32;
-                                adv3.gcHandle = handle;
-                                adb = adv3;
-                            } else {
-                                var adv3 = new AccessorData<Color>();
-                                adv3.data = colors;
-                                adv3.gcHandle = handle;
-                                adb = adv3;
-                            }
+                            adb = LoadAccessorDataColor(gltf,i,out jh);
                         }
                         break;
                     case GLTFAccessorAttributeType.SCALAR:
@@ -914,6 +886,24 @@ namespace GLTFast {
             NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(tmpList.ToArray(), Allocator.Temp);
             accessorJobsHandle = JobHandle.CombineDependencies(jobHandles);
             jobHandles.Dispose();
+        }
+
+        AccessorDataBase LoadAccessorDataColor(Root gltf,int accessorIndex, out JobHandle? jh) {
+            Color32[] colors32;
+            Color[] colors;
+            GCHandle handle;
+            GetColorsJob(gltf,accessorIndex,out colors32, out colors, out jh, out handle);
+            if( IsColorAccessorByte(gltf.accessors[accessorIndex]) ) {
+                var adv3 = new AccessorData<Color32>();
+                adv3.data = colors32;
+                adv3.gcHandle = handle;
+                return adv3;
+            } else {
+                var adv3 = new AccessorData<Color>();
+                adv3.data = colors;
+                adv3.gcHandle = handle;
+                return adv3;
+            }
         }
 
         void SetAccessorUsage(int index, AccessorUsage newUsage) {
@@ -1051,13 +1041,10 @@ namespace GLTFast {
             }
 
             if(primitive.attributes.COLOR_0>=0) {
-                var tmpAcc = accessorData[primitive.attributes.COLOR_0] as AccessorData<Color>;
-                if(tmpAcc!=null) {
-                    c.colors = tmpAcc.data;
-                }
-                var tmpAcc2 = accessorData[primitive.attributes.COLOR_0] as AccessorData<Color32>;
-                if(tmpAcc2!=null) {
-                    c.colors32 = tmpAcc2.data;
+                if(IsColorAccessorByte(gltf.accessors[primitive.attributes.COLOR_0])) {
+                    c.colors32 = (accessorData[primitive.attributes.COLOR_0] as AccessorData<Color32>).data;
+                } else {
+                    c.colors = (accessorData[primitive.attributes.COLOR_0] as AccessorData<Color>).data;
                 }
             }
 
@@ -1476,6 +1463,16 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
+        /// <summary>
+        /// Determines whether color accessor data can be retrieved as Color[] (floats) or Color32[] (unsigned bytes)
+        /// </summary>
+        /// <param name="gltf"></param>
+        /// <param name="accessorIndex"></param>
+        /// <returns>True if unsinged byte based colors are sufficient, false otherwise.</returns>
+        bool IsColorAccessorByte( Accessor colorAccessor ) {
+            return colorAccessor.componentType == GLTFComponentType.UnsignedByte;
+        }
+
         unsafe void GetColorsJob( Root gltf, int accessorIndex, out Color32[] colors32, out Color[] colors, out JobHandle? jobHandle, out GCHandle resultHandle ) {
             Profiler.BeginSample("PrepareColors");
             var colorAccessor = gltf.accessors[accessorIndex];
@@ -1485,7 +1482,7 @@ namespace GLTFast {
             var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
             int start = colorAccessor.byteOffset + bufferView.byteOffset + chunk.start;
 
-            if(colorAccessor.componentType == GLTFComponentType.UnsignedByte ) {
+            if(IsColorAccessorByte(colorAccessor)) {
                 colors32 = new Color32[colorAccessor.count];
                 resultHandle = GCHandle.Alloc(colors32,GCHandleType.Pinned);
                 colors = null;
