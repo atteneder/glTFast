@@ -24,7 +24,7 @@ namespace GLTFast {
         public JobHandle jobHandle;
         public int[] indices;
 
-        public GCHandle[] gcHandles;
+        public GCHandle calculatedIndicesHandle;
 
         public MeshTopology topology;
 
@@ -81,11 +81,9 @@ namespace GLTFast {
         }
 
         void Dispose() {
-            if(gcHandles!=null) {
-                for(int i=0;i<gcHandles.Length;i++) {
-                    gcHandles[i].Free();
-                }
+            if(calculatedIndicesHandle.IsAllocated) {
+                calculatedIndicesHandle.Free();
             }
         }
     }
-} 
+}

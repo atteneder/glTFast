@@ -1015,8 +1015,7 @@ namespace GLTFast {
             } else {
                 int vertexCount = gltf.accessors[primitive.attributes.POSITION].count;
                 JobHandle? jh;
-                c.gcHandles = new GCHandle[1];
-                CalculateIndicesJob(gltf,primitive, vertexCount, c.topology, out c.indices, out jh, out c.gcHandles[0] );
+                CalculateIndicesJob(gltf,primitive, vertexCount, c.topology, out c.indices, out jh, out c.calculatedIndicesHandle );
                 c.jobHandle = jh.Value;
             }
             Profiler.EndSample();
