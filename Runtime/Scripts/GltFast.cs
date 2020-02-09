@@ -54,6 +54,7 @@ namespace GLTFast {
         List<UnityEngine.Object> resources;
 
         AccessorDataBase[] accessorData;
+        AccessorUsage[] accessorUsage;
         JobHandle accessorJobsHandle;
 
         PrimitiveCreateContextBase[] primitiveContexts;
@@ -507,7 +508,7 @@ namespace GLTFast {
             Profiler.EndSample();
             yield return null;
 
-            PrepareAccessors(gltfRoot);
+            LoadAccessorData(gltfRoot);
             yield return null;
 
             while(!accessorJobsHandle.IsCompleted) {
@@ -519,7 +520,7 @@ namespace GLTFast {
                 }
             }
 
-            PreparePrimitives(gltfRoot);
+            CreatePrimitiveContexts(gltfRoot);
             yield return null;
 
             if(imageCreateContexts!=null) {
@@ -543,6 +544,16 @@ namespace GLTFast {
             }
             Profiler.EndSample();
             yield return null;
+
+            for(int i=0;i<primitiveContexts.Length;i++) {
+                var primitiveContext = primitiveContexts[i];
+                if(primitiveContext==null) continue;
+                while(!primitiveContext.IsCompleted) {
+                    yield return null;
+                }
+                yield return null;
+            }
+            AssignAllAccessorData(gltfRoot);
 
             for(int i=0;i<primitiveContexts.Length;i++) {
                 var primitiveContext = primitiveContexts[i];
@@ -775,20 +786,58 @@ namespace GLTFast {
             }
         }
 
-        abstract class AccessorDataBase {
-            public abstract void Unpin();
-        }
+        void LoadAccessorData( Root gltf ) {
+#if UNITY_EDITOR
+            /// Content: Number of meshes (not primitives) that use this exact attribute configuration.
+            var vertexAttributeConfigs = new Dictionary<Attributes,VertexAttributeConfig>();
+#endif
+            /// Step 1:
+            /// Iterate over all primitive vertex attributes and remember the accessors usage.
+            accessorUsage = new AccessorUsage[gltf.accessors.Length];
+            for (int meshIndex = 0; meshIndex < gltf.meshes.Length; meshIndex++)
+            {
+                var mesh = gltf.meshes[meshIndex];
+                foreach(var primitive in mesh.primitives) {
+                    var att = primitive.attributes;
 
-        class AccessorData<T> : AccessorDataBase {
-            public T[] data;
-            public GCHandle gcHandle;
+                    SetAccessorUsage(att.POSITION, AccessorUsage.Position);
+                    if(att.NORMAL>=0)
+                        SetAccessorUsage(att.NORMAL, AccessorUsage.Normal);
+                    if(att.TEXCOORD_0>=0)
+                        SetAccessorUsage(att.TEXCOORD_0, AccessorUsage.UV);
+                    if(att.TEXCOORD_1>=0)
+                        SetAccessorUsage(att.TEXCOORD_1, AccessorUsage.UV);
+                    if(att.TANGENT>=0)
+                        SetAccessorUsage(att.TANGENT, AccessorUsage.Tangent);
+                    if(att.COLOR_0>=0)
+                        SetAccessorUsage(att.COLOR_0, AccessorUsage.Color);
 
-            public override void Unpin() {
-                gcHandle.Free();
+#if UNITY_EDITOR
+                    VertexAttributeConfig config;
+                    if(!vertexAttributeConfigs.TryGetValue(att,out config)) {
+                        config = new VertexAttributeConfig();
+                        vertexAttributeConfigs[primitive.attributes] = config;
+                    }
+                    config.meshIndices.Add(meshIndex);
+#endif
+                }
             }
-        }
 
-        void PrepareAccessors( Root gltf ) {
+#if UNITY_EDITOR
+            foreach(var attributeConfig in vertexAttributeConfigs.Values) {
+                if(attributeConfig.meshIndices.Count>1) {
+                    Debug.LogError(@"glTF file uses certain vertex attributes/accessors across multiple meshes!
+                    This may result in low performance and high memory usage. Try optimizing the glTF file.
+                    See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52");
+                    break;
+                }
+            }
+            vertexAttributeConfigs.Clear();
+            vertexAttributeConfigs = null;
+#endif
+
+            /// Step 2:
+            /// Retrieve indices and vertex data jobified, according to accessor usage.
             accessorData = new AccessorDataBase[gltf.accessors.Length];
             var tmpList = new List<JobHandle>(accessorData.Length);
 
@@ -798,28 +847,65 @@ namespace GLTFast {
                 AccessorDataBase adb = null;
                 switch(acc.typeEnum) {
                     case GLTFAccessorAttributeType.VEC3:
-                        var adv3 = new AccessorData<Vector3>();
-                        GetVector3sJob(gltf,i,out adv3.data, out jh, out adv3.gcHandle);
+                        if(accessorUsage[i]==AccessorUsage.Color) {
+                            Color[] colors;
+                            Color32[] colors32;
+                            GCHandle handle;
+                            GetColorsJob(gltf,i,out colors32, out colors, out jh, out handle);
+                            if(colors32!=null) {
+                                var adv3 = new AccessorData<Color32>();
+                                adv3.data = colors32;
+                                adv3.gcHandle = handle;
+                                adb = adv3;
+                            } else {
+                                var adv3 = new AccessorData<Color>();
+                                adv3.data = colors;
+                                adv3.gcHandle = handle;
+                                adb = adv3;
+                            }
+                        } else {
+                            var adv3 = new AccessorData<Vector3>();
+                            GetVector3sJob(gltf,i,out adv3.data, out jh, out adv3.gcHandle);
+                            adb = adv3;
+                        }
                         tmpList.Add(jh.Value);
-                        adb = adv3;
                         break;
                     case GLTFAccessorAttributeType.VEC2:
-                        var adv2 = new AccessorData<Vector2>();
+                        var adv2 = new  AccessorData<Vector2>();
                         adv2.data = GetUvsJob(gltf,i, out jh, out adv2.gcHandle);
                         tmpList.Add(jh.Value);
                         adb = adv2;
                         break;
                     case GLTFAccessorAttributeType.VEC4:
-                        var adv4 = new AccessorData<Vector4>();
-                        GetTangentsJob(gltf,i,out adv4.data, out jh, out adv4.gcHandle);
-                        tmpList.Add(jh.Value);
-                        adb = adv4;
+                        if(accessorUsage[i]==AccessorUsage.Tangent) {
+                            var adv4 = new  AccessorData<Vector4>();
+                            adb = adv4;
+                            GetTangentsJob(gltf,i,out adv4.data, out jh, out adv4.gcHandle);
+                            tmpList.Add(jh.Value);
+                        } else
+                        if(accessorUsage[i]==AccessorUsage.Color) {
+                            Color[] colors;
+                            Color32[] colors32;
+                            GCHandle handle;
+                            GetColorsJob(gltf,i,out colors32, out colors, out jh, out handle);
+                            if(colors32!=null) {
+                                var adv3 = new AccessorData<Color32>();
+                                adv3.data = colors32;
+                                adv3.gcHandle = handle;
+                                adb = adv3;
+                            } else {
+                                var adv3 = new AccessorData<Color>();
+                                adv3.data = colors;
+                                adv3.gcHandle = handle;
+                                adb = adv3;
+                            }
+                        }
                         break;
                     case GLTFAccessorAttributeType.SCALAR:
-                        var ads = new AccessorData<int>();
+                        var ads = new  AccessorData<int>();
+                        adb = ads;
                         GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle);
                         tmpList.Add(jh.Value);
-                        adb = ads;
                         break;
                 }
                 accessorData[i] = adb;
@@ -830,8 +916,17 @@ namespace GLTFast {
             jobHandles.Dispose();
         }
 
-        void PreparePrimitives( Root gltf ) {
-            Profiler.BeginSample("PreparePrimitives");
+        void SetAccessorUsage(int index, AccessorUsage newUsage) {
+#if UNITY_EDITOR
+            if(accessorUsage[index]!=AccessorUsage.Unknown && newUsage!=accessorUsage[index]) {
+                Debug.LogErrorFormat("Inconsistent accessor usage {0} != {1}", accessorUsage[index], newUsage);
+            }
+#endif
+            accessorUsage[index] = newUsage;
+        }
+
+        void CreatePrimitiveContexts( Root gltf ) {
+            Profiler.BeginSample("CreatePrimitiveContexts");
             int totalPrimitives = 0;
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
@@ -858,7 +953,7 @@ namespace GLTFast {
                         context = c;
                     } else {
                         var c = new PrimitiveCreateContext();
-                        PreparePrimitive(gltf,mesh,primitive,ref c);
+                        PreparePrimitiveIndices(gltf,mesh,primitive,ref c);
                         context = c;
                     }
                     context.primtiveIndex = i;
@@ -870,31 +965,27 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        unsafe void PreparePrimitive( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
-
-            Profiler.BeginSample("PreparePrimitivePrepare");
-            c.mesh = mesh;
-            c.primitive = primitive;
-
-            int jobHandlesCount = 0;
-            if(primitive.indices<0) {
-                jobHandlesCount++;
+        void AssignAllAccessorData( Root gltf ) {
+            Profiler.BeginSample("AssignAllAccessorData");
+            int i=0;
+            for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
+                var mesh = gltf.meshes[meshIndex];
+                foreach( var primitive in mesh.primitives ) {
+                    if( primitive.extensions!=null &&
+                        primitive.extensions.KHR_draco_mesh_compression != null )
+                    {
+                    } else {
+                        PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
+                        AssignAccessorData(gltf,mesh,primitive,ref c);
+                    }
+                    i++;
+                }
             }
-            if(primitive.attributes.COLOR_0>=0) {
-                jobHandlesCount++;
-            }
-            NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(jobHandlesCount, Allocator.TempJob);
-            c.gcHandles = new GCHandle[jobHandlesCount];
-            // from now on use it as a counter
-            jobHandlesCount = 0;
             Profiler.EndSample();
+        }
 
-            int vertexCount;
-            {
-                c.positions = (accessorData[primitive.attributes.POSITION] as AccessorData<Vector3>).data;
-                vertexCount = c.positions.Length;
-            }
-
+        void PreparePrimitiveIndices( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
+            Profiler.BeginSample("PreparePrimitiveIndices");
             switch(primitive.mode) {
             case DrawMode.Triangles:
                 c.topology = MeshTopology.Triangles;
@@ -920,13 +1011,28 @@ namespace GLTFast {
                 break;
             }
 
-            if(primitive.indices < 0) {
-                JobHandle? jh;
-                CalculateIndicesJob(gltf,primitive, vertexCount, c.topology, out c.indices, out jh, out c.gcHandles[jobHandlesCount] );
-                jobHandles[jobHandlesCount] = jh.Value;
-                jobHandlesCount++;
-            } else {
+            if(primitive.indices >= 0) {
                 c.indices = (accessorData[primitive.indices] as AccessorData<int>).data;
+            } else {
+                int vertexCount = gltf.accessors[primitive.attributes.POSITION].count;
+                JobHandle? jh;
+                c.gcHandles = new GCHandle[1];
+                CalculateIndicesJob(gltf,primitive, vertexCount, c.topology, out c.indices, out jh, out c.gcHandles[0] );
+                c.jobHandle = jh.Value;
+            }
+            Profiler.EndSample();
+        }
+
+        unsafe void AssignAccessorData( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
+
+            Profiler.BeginSample("AssignAccessorData");
+            c.mesh = mesh;
+            c.primitive = primitive;
+
+            int vertexCount;
+            {
+                c.positions = (accessorData[primitive.attributes.POSITION] as AccessorData<Vector3>).data;
+                vertexCount = c.positions.Length;
             }
 
             if(primitive.attributes.NORMAL>=0) {
@@ -945,14 +1051,17 @@ namespace GLTFast {
             }
 
             if(primitive.attributes.COLOR_0>=0) {
-                JobHandle? jh;
-                GetColorsJob(gltf,primitive.attributes.COLOR_0, out c.colors32, out c.colors, out jh, out c.gcHandles[jobHandlesCount] );
-                jobHandles[jobHandlesCount] = jh.Value;
-                jobHandlesCount++;
+                var tmpAcc = accessorData[primitive.attributes.COLOR_0] as AccessorData<Color>;
+                if(tmpAcc!=null) {
+                    c.colors = tmpAcc.data;
+                }
+                var tmpAcc2 = accessorData[primitive.attributes.COLOR_0] as AccessorData<Color32>;
+                if(tmpAcc2!=null) {
+                    c.colors32 = tmpAcc2.data;
+                }
             }
 
-            c.jobHandle = JobHandle.CombineDependencies(jobHandles);
-            jobHandles.Dispose();
+            Profiler.EndSample();
         }
 
         void PreparePrimitiveDraco( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveDracoCreateContext c ) {

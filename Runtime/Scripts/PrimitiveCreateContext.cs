@@ -81,8 +81,10 @@ namespace GLTFast {
         }
 
         void Dispose() {
-            for(int i=0;i<gcHandles.Length;i++) {
-                gcHandles[i].Free();
+            if(gcHandles!=null) {
+                for(int i=0;i<gcHandles.Length;i++) {
+                    gcHandles[i].Free();
+                }
             }
         }
     }
