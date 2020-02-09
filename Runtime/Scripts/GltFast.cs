@@ -210,38 +210,57 @@ namespace GLTFast {
             if (gltfRoot.textures != null && gltfRoot.images != null) {
                 images = new Texture2D[gltfRoot.images.Length];
                 imageFormats = new ImageFormat[gltfRoot.images.Length];
+
+                // Derive image type from texture extension
                 for (int i = 0; i < gltfRoot.textures.Length; i++) {
                     var texture = gltfRoot.textures[i];
-                    var imgIndex = texture.GetImageIndex();
-                    var img = gltfRoot.images[imgIndex];
+                    if(texture.isKtx) {
+                        var imgIndex = texture.GetImageIndex();
+                        imageFormats[imgIndex] = ImageFormat.KTX;
+                    }
+                }
+
+                for (int i = 0; i < gltfRoot.images.Length; i++) {
+                    var img = gltfRoot.images[i];
 
                     if(!string.IsNullOrEmpty(img.uri) && img.uri.StartsWith("data:")) {
-                        // TODO: jobify (if Unity allows LoadImage to be off the main thread)
-                        // TODO: support embed KTX textures
                         string mimeType;
                         var data = DecodeEmbedBuffer(img.uri,out mimeType);
-                        imageFormats[i] = GetImageFormatFromMimeType(mimeType);
-                        if(data==null || imageFormats[i]==ImageFormat.Unknown) {
+                        var imgFormat = GetImageFormatFromMimeType(mimeType);
+                        if(data==null || imgFormat==ImageFormat.Unknown) {
                             Debug.LogError("Loading embedded image failed");
                             continue;
                         }
+                        if(imageFormats[i]!=ImageFormat.Unknown && imageFormats[i]!=imgFormat) {
+                            Debug.LogErrorFormat("Inconsistent embed image type {0}!={1}",imageFormats[i],imgFormat);
+                        }
+                        imageFormats[i] = imgFormat;
+                        if(imageFormats[i]!=ImageFormat.Jpeg || imageFormats[i]!=ImageFormat.PNG) {
+                            // TODO: support embed KTX textures
+                            Debug.LogErrorFormat("Unsupported embed image format {0}",imageFormats[i]);
+                        }
+                        // TODO: jobify (if Unity allows LoadImage to be off the main thread)
                         var txt = CreateEmptyTexture(img,i);
                         txt.LoadImage(data);
                         images[i] = txt;
                     } else {
                         ImageFormat imgFormat;
-                        if(string.IsNullOrEmpty(img.mimeType)) {
-                            imgFormat = GetImageFormatFromPath(img.uri);
+                        if(imageFormats[i]==ImageFormat.Unknown) {
+                            if(string.IsNullOrEmpty(img.mimeType)) {
+                                imgFormat = GetImageFormatFromPath(img.uri);
+                            } else {
+                                imgFormat = GetImageFormatFromMimeType(img.mimeType);
+                            }
+                            imageFormats[i] = imgFormat;
                         } else {
-                            imgFormat = GetImageFormatFromMimeType(img.mimeType);
+                            imgFormat=imageFormats[i];
                         }
 
                         if (imgFormat!=ImageFormat.Unknown) {
-                            imageFormats[i] = imgFormat;
                             if (img.bufferView < 0 && !string.IsNullOrEmpty(img.uri))
                             {
                                 // Not Inside buffer
-                                LoadTexture(i,baseUri+img.uri,texture.isKtx);
+                                LoadTexture(i,baseUri+img.uri,imgFormat==ImageFormat.KTX);
                             }
                         } else {
                             Debug.LogErrorFormat("Unknown image format (image {0};uri:{1})",i,img.uri);
