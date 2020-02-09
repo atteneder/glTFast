@@ -827,7 +827,7 @@ namespace GLTFast {
 #if UNITY_EDITOR
             foreach(var attributeConfig in vertexAttributeConfigs.Values) {
                 if(attributeConfig.meshIndices.Count>1) {
-                    Debug.LogError(@"glTF file uses certain vertex attributes/accessors across multiple meshes!
+                    Debug.LogWarning(@"glTF file uses certain vertex attributes/accessors across multiple meshes!
                     This may result in low performance and high memory usage. Try optimizing the glTF file.
                     See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52");
                     break;
