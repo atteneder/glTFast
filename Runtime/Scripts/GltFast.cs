@@ -689,9 +689,9 @@ namespace GLTFast {
                 if(string.IsNullOrEmpty(img.mimeType)) {
                     // Image is missing mime type
                     // try to determine type by file extension
-                    imgFormat = GetImageFormatFromMimeType(img.uri);
+                    imgFormat = GetImageFormatFromPath(img.uri);
                 } else {
-                    imgFormat = GetImageFormatFromPath(img.mimeType);
+                    imgFormat = GetImageFormatFromMimeType(img.mimeType);
                 }
 
                 if (imgFormat!=ImageFormat.Unknown) {
