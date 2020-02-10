@@ -800,20 +800,23 @@ namespace GLTFast {
             {
                 var mesh = gltf.meshes[meshIndex];
                 foreach(var primitive in mesh.primitives) {
+                    
+                    var isDraco = primitive.isDracoCompressed;
+
                     var att = primitive.attributes;
                     if(primitive.indices>=0)
-                        SetAccessorUsage(primitive.indices, AccessorUsage.Index);
-                    SetAccessorUsage(att.POSITION, AccessorUsage.Position);
+                        SetAccessorUsage(primitive.indices, isDraco ? AccessorUsage.Ignore : AccessorUsage.Index );
+                    SetAccessorUsage(att.POSITION, isDraco ? AccessorUsage.Ignore : AccessorUsage.Position);
                     if(att.NORMAL>=0)
-                        SetAccessorUsage(att.NORMAL, AccessorUsage.Normal);
+                        SetAccessorUsage(att.NORMAL, isDraco ? AccessorUsage.Ignore : AccessorUsage.Normal);
                     if(att.TEXCOORD_0>=0)
-                        SetAccessorUsage(att.TEXCOORD_0, AccessorUsage.UV);
+                        SetAccessorUsage(att.TEXCOORD_0, isDraco ? AccessorUsage.Ignore : AccessorUsage.UV);
                     if(att.TEXCOORD_1>=0)
-                        SetAccessorUsage(att.TEXCOORD_1, AccessorUsage.UV);
+                        SetAccessorUsage(att.TEXCOORD_1, isDraco ? AccessorUsage.Ignore : AccessorUsage.UV);
                     if(att.TANGENT>=0)
-                        SetAccessorUsage(att.TANGENT, AccessorUsage.Tangent);
+                        SetAccessorUsage(att.TANGENT, isDraco ? AccessorUsage.Ignore : AccessorUsage.Tangent);
                     if(att.COLOR_0>=0)
-                        SetAccessorUsage(att.COLOR_0, AccessorUsage.Color);
+                        SetAccessorUsage(att.COLOR_0, isDraco ? AccessorUsage.Ignore : AccessorUsage.Color);
 
 #if UNITY_EDITOR
                     VertexAttributeConfig config;
@@ -846,6 +849,12 @@ namespace GLTFast {
 
             for(int i=0; i<accessorData.Length; i++) {
                 var acc = gltf.accessors[i];
+                if(acc.bufferView<0) {
+                    // Not actual accessor to data
+                    // Common for draco meshes
+                    // the accessor only holds meta information
+                    continue;
+                }
                 JobHandle? jh;
                 AccessorDataBase adb = null;
                 switch(acc.typeEnum) {

@@ -53,6 +53,12 @@
         //public List<Dictionary<string, AccessorId>> Targets;
 
         public MeshPrimitiveExtensions extensions;
+
+        public bool isDracoCompressed {
+            get {
+                return extensions!=null && extensions.KHR_draco_mesh_compression != null;
+            }
+        }
     }
 
     [System.Serializable]
