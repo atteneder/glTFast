@@ -98,12 +98,9 @@ namespace GLTFast {
             materialGenerator = new DefaultMaterialGenerator();
         }
 
-        public void Load( string url, bool? gltfBinary = null, IDeferAgent deferAgent=null ) {
-            
-            if(!gltfBinary.HasValue) {
-                gltfBinary = url.EndsWith(".glb",StringComparison.OrdinalIgnoreCase);
-            }
-            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary.Value,deferAgent));
+        public void Load( string url, IDeferAgent deferAgent=null ) {
+            bool gltfBinary = url.EndsWith(".glb",StringComparison.OrdinalIgnoreCase);
+            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary,deferAgent));
         }
 
         IEnumerator LoadRoutine( string url, bool gltfBinary, IDeferAgent deferAgent=null ) {

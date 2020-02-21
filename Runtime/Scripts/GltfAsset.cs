@@ -11,10 +11,6 @@ namespace GLTFast
 
         public UnityAction<bool> onLoadComplete;
 
-        protected virtual bool isGltfBinary {
-            get { return false; }
-        }
-
         // Use this for initialization
         void Start()
         {
