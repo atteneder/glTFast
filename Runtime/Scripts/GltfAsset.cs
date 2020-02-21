@@ -25,10 +25,10 @@ namespace GLTFast
             }
             gLTFastInstance = new GLTFast(this);
             gLTFastInstance.onLoadComplete += OnLoadComplete;
-            gLTFastInstance.Load(this.url,isGltfBinary,deferAgent);
+            gLTFastInstance.Load(this.url,deferAgent);
         }
 
-        void OnLoadComplete(bool success) {
+        protected virtual void OnLoadComplete(bool success) {
             gLTFastInstance.onLoadComplete -= OnLoadComplete;
             if(success) {
                 gLTFastInstance.InstantiateGltf(transform);
