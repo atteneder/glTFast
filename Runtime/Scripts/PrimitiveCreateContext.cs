@@ -22,9 +22,9 @@ namespace GLTFast {
         /// TODO remove end
 
         public JobHandle jobHandle;
-        public int[] indices;
+        public int[][] indices;
 
-        public GCHandle[] gcHandles;
+        public GCHandle calculatedIndicesHandle;
 
         public MeshTopology topology;
 
@@ -47,8 +47,11 @@ namespace GLTFast {
             }
             msh.name = mesh.name;
             msh.vertices = positions;
+            msh.subMeshCount = indices.Length;
 
-            msh.SetIndices(indices,topology,0);
+            for (int i = 0; i < indices.Length; i++) {
+                msh.SetIndices(indices[i],topology,i);
+            }
 
             if(uvs0!=null) {
                 msh.uv = uvs0;
@@ -77,13 +80,13 @@ namespace GLTFast {
 
             Dispose();
             Profiler.EndSample();
-            return new Primitive(msh,primitive.material);
+            return new Primitive(msh,materials);
         }
 
         void Dispose() {
-            for(int i=0;i<gcHandles.Length;i++) {
-                gcHandles[i].Free();
+            if(calculatedIndicesHandle.IsAllocated) {
+                calculatedIndicesHandle.Free();
             }
         }
     }
-} 
+}

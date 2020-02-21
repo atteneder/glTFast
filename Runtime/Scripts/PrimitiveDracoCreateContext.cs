@@ -33,7 +33,7 @@ namespace GLTFast {
 
             var msh = DracoMeshLoader.CreateMesh(dracoMesh);
 
-            return new Primitive(msh,primitive.material);
+            return new Primitive(msh,materials);
         }
     }
 } 

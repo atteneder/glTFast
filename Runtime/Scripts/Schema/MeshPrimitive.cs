@@ -53,16 +53,51 @@
         //public List<Dictionary<string, AccessorId>> Targets;
 
         public MeshPrimitiveExtensions extensions;
+
+        public bool isDracoCompressed {
+            get {
+                return extensions!=null && extensions.KHR_draco_mesh_compression != null;
+            }
+        }
     }
 
     [System.Serializable]
     public class Attributes {
-        public int NORMAL = -1;
         public int POSITION = -1;
+        public int NORMAL = -1;
         public int TANGENT = -1;
         public int TEXCOORD_0 = -1;
         public int TEXCOORD_1 = -1;
         public int COLOR_0 = -1;
+
+        public override bool Equals(object obj)
+        {
+            //Check for null and compare run-time types.
+            if ((obj == null) || ! this.GetType().Equals(obj.GetType())) 
+            {
+                return false;
+            }
+            var b = (Attributes) obj; 
+            return POSITION==b.POSITION
+                && NORMAL==b.NORMAL
+                && TANGENT==b.TANGENT
+                && TEXCOORD_0==b.TEXCOORD_0
+                && TEXCOORD_1==b.TEXCOORD_1
+                && COLOR_0==b.COLOR_0
+                ;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 13;
+            hash = hash * 7 + POSITION.GetHashCode();
+            hash = hash * 7 + NORMAL.GetHashCode();
+            hash = hash * 7 + TANGENT.GetHashCode();
+            hash = hash * 7 + TEXCOORD_0.GetHashCode();
+            hash = hash * 7 + TEXCOORD_1.GetHashCode();
+            hash = hash * 7 + COLOR_0.GetHashCode();
+            return hash;
+        }
     }
 
     [System.Serializable]

@@ -1,8 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Networking;
 
 namespace GLTFast
 {
@@ -11,8 +8,6 @@ namespace GLTFast
         public string url;
 
         protected GLTFast gLTFastInstance;
-        Coroutine loadRoutine;
-        protected IDeferAgent deferAgent;
 
         public UnityAction<bool> onLoadComplete;
 
@@ -28,87 +23,17 @@ namespace GLTFast
             if(url!=null) {
                 this.url = url;
             }
-            if(gLTFastInstance==null && loadRoutine==null) {
-                this.deferAgent = deferAgent ?? new DeferTimer();
-                loadRoutine = StartCoroutine(LoadRoutine());
-            }
+            gLTFastInstance = new GLTFast(this);
+            gLTFastInstance.onLoadComplete += OnLoadComplete;
+            gLTFastInstance.Load(this.url,deferAgent);
         }
 
-        IEnumerator LoadRoutine()
-        {
-            UnityWebRequest www = UnityWebRequest.Get(url);
-            yield return www.SendWebRequest();
-     
-            if(www.isNetworkError || www.isHttpError) {
-                Debug.LogErrorFormat("{0} {1}",www.error,url);
+        protected virtual void OnLoadComplete(bool success) {
+            gLTFastInstance.onLoadComplete -= OnLoadComplete;
+            if(success) {
+                gLTFastInstance.InstantiateGltf(transform);
             }
-            else {
-                yield return StartCoroutine( LoadContent(www.downloadHandler) );
-            }
-            loadRoutine = null;
-        }
-
-        protected virtual IEnumerator LoadContent( DownloadHandler dlh ) {
-            deferAgent.Reset();
-            gLTFastInstance = new GLTFast();
-
-            bool allFine = true;
-
-            LoadContentPrimary(gLTFastInstance, dlh, url);
-            
-            allFine = !gLTFastInstance.LoadingError;
-
-            if(allFine) {
-                if( deferAgent.ShouldDefer() ) {
-                    yield return null;
-                }
-                var routineBuffers = StartCoroutine( gLTFastInstance.WaitForBufferDownloads() );
-                var routineTextures = StartCoroutine( gLTFastInstance.WaitForTextureDownloads() );
-
-                yield return routineBuffers;
-                yield return routineTextures;
-
-                yield return StartCoroutine( gLTFastInstance.WaitForKtxTextures() );
-            }
-
-            allFine = !gLTFastInstance.LoadingError;
-
-            if(allFine) {
-                deferAgent.Reset();
-                var prepareRoutine = gLTFastInstance.Prepare();
-                while(prepareRoutine.MoveNext()) {
-                    allFine = !gLTFastInstance.LoadingError;
-                    if(!allFine) {
-                        break;
-                    }
-                    if( deferAgent.ShouldDefer() ) {
-                        yield return null;
-                    }
-                }
-            }
-            
-            allFine = !gLTFastInstance.LoadingError;
-            if(allFine) {
-                if( deferAgent.ShouldDefer() ) {
-                    yield return null;
-                }
-                allFine = gLTFastInstance.InstantiateGltf(transform);
-            }
-
-            if(onLoadComplete!=null) {
-                onLoadComplete(allFine);
-            }
-        }
-
-        protected virtual void LoadContentPrimary(GLTFast gLTFastInstance, DownloadHandler dlh, string url) {
-            string json = dlh.text;
-            gLTFastInstance.LoadGltf(json,url);
-        }
-
-        public IEnumerator WaitForLoaded() {
-            while(loadRoutine!=null) {
-                yield return loadRoutine;         
-            }
+            onLoadComplete(success);
         }
 
         private void OnDestroy()

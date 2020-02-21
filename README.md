@@ -127,10 +127,10 @@ var gltf = new GameObject().AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-Minimum code to load a glTF binary (.glb) file:
+Load glTF binary (.glb) files the same way:
 
 ```csharp
-var gltf = new GameObject().AddComponent<GLTFast.GlbAsset>();
+var gltf = new GameObject().AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb";
 ```
 
