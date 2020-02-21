@@ -793,7 +793,7 @@ namespace GLTFast {
         }
 
         void LoadAccessorData( Root gltf ) {
-#if UNITY_EDITOR
+#if DEBUG
             /// Content: Number of meshes (not primitives) that use this exact attribute configuration.
             var vertexAttributeConfigs = new Dictionary<Attributes,VertexAttributeConfig>();
 #endif
@@ -822,7 +822,7 @@ namespace GLTFast {
                     if(att.COLOR_0>=0)
                         SetAccessorUsage(att.COLOR_0, isDraco ? AccessorUsage.Ignore : AccessorUsage.Color);
 
-#if UNITY_EDITOR
+#if DEBUG
                     VertexAttributeConfig config;
                     if(!vertexAttributeConfigs.TryGetValue(att,out config)) {
                         config = new VertexAttributeConfig();
@@ -833,7 +833,7 @@ namespace GLTFast {
                 }
             }
 
-#if UNITY_EDITOR
+#if DEBUG
             foreach(var attributeConfig in vertexAttributeConfigs.Values) {
                 if(attributeConfig.meshIndices.Count>1) {
                     Debug.LogWarning(@"glTF file uses certain vertex attributes/accessors across multiple meshes!
