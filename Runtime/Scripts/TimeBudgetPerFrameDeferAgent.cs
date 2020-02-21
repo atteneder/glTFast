@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace GLTFast {
     
-    public class DeferTimer : IDeferAgent
+    public class TimeBudgetPerFrameDeferAgent : IDeferAgent
     {
         float lastTime;
         float timeBudget;
 
         // Start is called before the first frame update
-        public DeferTimer( float frameBudget = 0.5f )
+        public TimeBudgetPerFrameDeferAgent( float frameBudget = 0.5f )
         {
             float targetFrameRate = Application.targetFrameRate;
             if(targetFrameRate<0) targetFrameRate = 30;

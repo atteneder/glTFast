@@ -111,7 +111,7 @@ namespace GLTFast {
                 Debug.LogErrorFormat("{0} {1}",www.error,url);
             }
             else {
-                this.deferAgent = deferAgent ?? new DeferTimer();
+                this.deferAgent = deferAgent ?? new TimeBudgetPerFrameDeferAgent();
                 yield return LoadContent(www.downloadHandler,url,gltfBinary);
             }
             DisposeVolatileData();
