@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.0] - 2020-02-22
+### Added
+- Support for Universal Windows Platform (not verified/tested myself)
 ### Changed
 - Refactored GltFast class to control loading coroutine in an effort to make usage and future port to async easier.
 - Optimization: Data loading is now based on accessors (rather than primitives). This reduces redundant loading jobs wherever accessors are used across primitives.
