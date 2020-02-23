@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#if GLTFAST_BASISU
+
+using System.Collections;
 using KtxUnity;
 using Unity.Collections;
 
@@ -19,3 +21,4 @@ namespace GLTFast {
         }
     }
 }
+#endif // GLTFAST_BASISU
