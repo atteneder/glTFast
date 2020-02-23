@@ -25,6 +25,8 @@ namespace GLTFast {
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
             "KHR_draco_mesh_compression",
+            "KHR_texture_cttf", // Obsolete! to be removed
+            "KHR_image_ktx2", // Obsolete! to be removed
             "KHR_texture_basisu",
             "KHR_materials_pbrSpecularGlossiness",
             "KHR_materials_unlit",
