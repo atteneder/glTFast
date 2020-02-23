@@ -3,11 +3,8 @@
 #endif
 
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.Networking;
 
 public class GltfSampleModels {
 
@@ -34,34 +31,35 @@ public class GltfSampleModels {
 	}
 
 	public static IEnumerator LoadGltfFileUrls() {
-        var path = Path.Combine(Application.streamingAssetsPath, "test-gltf-file-list.txt");
-        yield return LoadStreamingAssetFileBlocking(path, (arr) => gltfFileUrls = arr );
-    }
+
+		if(gltfFileUrls!=null) yield break;
+		var set = new GltfSampleSet();
+		set.fileListPath = "test-gltf-file-list.txt";
+		set.streamingAssetsPath = "glTF-Sample-Models/2.0";
+		set.baseUrlWeb = baseUrl;
+		set.baseUrlLocal = baseUrlLocal;
+		yield return set.Load();
+
+		gltfFileUrls = new string[set.itemsLocal.Count];
+		for (int i = 0; i < set.itemsLocal.Count; i++)
+		{
+			gltfFileUrls[i] = set.itemsLocal[i].Item2;
+		}
+	}
 
     public static IEnumerator LoadGlbFileUrls() {
 		if(glbFileUrls!=null) yield break;
-        var path = Path.Combine(Application.streamingAssetsPath, "test-glb-file-list.txt");
-        yield return LoadStreamingAssetFileBlocking(path, (arr) => glbFileUrls = arr );
-    }
+		var set = new GltfSampleSet();
+		set.fileListPath = "test-glb-file-list.txt";
+		set.streamingAssetsPath = "glTF-Sample-Models/2.0";
+		set.baseUrlWeb = baseUrl;
+		set.baseUrlLocal = baseUrlLocal;
+		yield return set.Load();
 
-    static IEnumerator LoadStreamingAssetFileBlocking( string path, UnityAction<string[]> callback ) {
-        var uri = path;
-		
-#if LOCAL_LOADING
-		uri = string.Format( "file://{0}", uri);
-#endif
-
-		Debug.LogFormat("Trying to load file list from {0}",uri);
-		var webRequest = UnityWebRequest.Get(uri);
-		yield return webRequest.SendWebRequest();
-		var lines = webRequest.downloadHandler.text.Split('\n');
-		var filteredLines = new List<string>();
-		foreach (var line in lines)
+		glbFileUrls = new string[set.itemsLocal.Count];
+		for (int i = 0; i < set.itemsLocal.Count; i++)
 		{
-			if(!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
-				filteredLines.Add(line.TrimEnd('\r'));
-			}
+			glbFileUrls[i] = set.itemsLocal[i].Item2;
 		}
-		callback( filteredLines.ToArray() );
 	}
 }
