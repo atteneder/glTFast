@@ -148,13 +148,7 @@ namespace GLTFast {
                 if (textures != null && textures.Length > bcTextureIndex)
                 {
                     var txt = textures[bcTextureIndex];
-                    var imageIndex = txt.source;
-
-                    if(txt.extensions!=null) {
-                        if (txt.extensions.KHR_texture_basisu!=null) {
-                            imageIndex = txt.extensions.KHR_texture_basisu.source;
-                        }
-                    }
+                    var imageIndex = txt.GetImageIndex();
 
                     if (images != null && imageIndex >= 0 && images.Length > imageIndex)
                     {
