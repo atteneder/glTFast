@@ -29,6 +29,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] Images
   - [x] PNG
   - [x] Jpeg
+  - [x] <sup>2</sup>KTX with Basis Universal super compression
 - [x] Materials
   - [x] Unity built-in pipeline
     - [x] PBR metallic-roughness
@@ -75,6 +76,8 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 <sup>1</sup>: Untested due to lack of demo files.
 
+<sup>2</sup>: Experimental
+
 ### Extensions
 
 - [x] KHR_draco_mesh_compression
@@ -82,8 +85,10 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] KHR_materials_unlit
 - [x] KHR_texture_transform
 - [x] KHR_mesh_quantization
+- [x] <sup>1</sup>KHR_texture_basisu
 - [ ] KHR_lights_punctual ([issue](issues/17))
 
+<sup>1</sup>: Experimental
 ## Installing
 
 You have to manually add the package's URL into your [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html)
