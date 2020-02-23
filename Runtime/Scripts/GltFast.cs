@@ -344,7 +344,7 @@ namespace GLTFast {
                             Debug.LogErrorFormat("Inconsistent embed image type {0}!={1}",imageFormats[i],imgFormat);
                         }
                         imageFormats[i] = imgFormat;
-                        if(imageFormats[i]!=ImageFormat.Jpeg || imageFormats[i]!=ImageFormat.PNG) {
+                        if(imageFormats[i]!=ImageFormat.Jpeg && imageFormats[i]!=ImageFormat.PNG) {
                             // TODO: support embed KTX textures
                             Debug.LogErrorFormat("Unsupported embed image format {0}",imageFormats[i]);
                         }
