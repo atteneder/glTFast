@@ -23,9 +23,8 @@ public class SampleModelsTest
     void CheckFileExist(string[] files)
     {
 #if !(UNITY_ANDROID && !UNITY_EDITOR)
-        foreach (var file in files)
+        foreach (var path in files)
         {
-            var path = Path.Combine(Application.streamingAssetsPath, Path.Combine(prefix, file));
             Assert.IsTrue(
                 File.Exists(path)
                 , "file {0} not found"
@@ -52,7 +51,7 @@ public class SampleModelsTest
 #else
                 "file://{0}"
 #endif
-                , Path.Combine(Application.streamingAssetsPath, Path.Combine(prefix, file))
+                ,file
             );
 
             Debug.LogFormat("Testing {0}", path);
@@ -87,7 +86,7 @@ public class SampleModelsTest
 #else
                 "file://{0}"
 #endif
-                , Path.Combine(Application.streamingAssetsPath, Path.Combine(prefix, file))
+                ,file
             );
 
             Debug.LogFormat("Testing {0}", path);
@@ -102,7 +101,7 @@ public class SampleModelsTest
             Assert.NotNull(json);
             Assert.Greater(json.Length, 0);
 
-            var go = new GameObject(GltfSampleModels.GetNameFromPath(file));
+            var go = new GameObject(GltfSampleModels.GetNameFromPath(path));
             var gltfAsset = go.AddComponent<GltfAsset>();
 
             bool done = false;
