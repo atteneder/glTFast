@@ -58,7 +58,7 @@ public class SampleModelsTest
             Debug.LogFormat("Testing {0}", path);
 
             var go = new GameObject();
-            var gltfAsset = go.AddComponent<GlbAsset>();
+            var gltfAsset = go.AddComponent<GltfAsset>();
 
             bool done = false;
 

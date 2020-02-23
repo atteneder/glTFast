@@ -120,10 +120,11 @@ namespace GLTFast {
             yield return www.SendWebRequest();
      
             if(www.isNetworkError || www.isHttpError) {
+                loadingError=true;
                 Debug.LogErrorFormat("{0} {1}",www.error,url);
             }
             else {
-                this.deferAgent = deferAgent ?? new DeferTimer();
+                this.deferAgent = deferAgent ?? new TimeBudgetPerFrameDeferAgent();
                 yield return LoadContent(www.downloadHandler,url,gltfBinary);
             }
             DisposeVolatileData();
@@ -651,10 +652,12 @@ namespace GLTFast {
         void DisposeVolatileData() {
             primitiveContexts = null;
 
-            foreach (var nativeBuffer in nativeBuffers)
-            {
-                if(nativeBuffer.IsCreated) {
-                    nativeBuffer.Dispose();
+            if(nativeBuffers!=null) {
+                foreach (var nativeBuffer in nativeBuffers)
+                {
+                    if(nativeBuffer.IsCreated) {
+                        nativeBuffer.Dispose();
+                    }
                 }
             }
             nativeBuffers = null;
@@ -878,7 +881,7 @@ namespace GLTFast {
         }
 
         void LoadAccessorData( Root gltf ) {
-#if UNITY_EDITOR
+#if DEBUG
             /// Content: Number of meshes (not primitives) that use this exact attribute configuration.
             var vertexAttributeConfigs = new Dictionary<Attributes,VertexAttributeConfig>();
 #endif
@@ -907,7 +910,7 @@ namespace GLTFast {
                     if(att.COLOR_0>=0)
                         SetAccessorUsage(att.COLOR_0, isDraco ? AccessorUsage.Ignore : AccessorUsage.Color);
 
-#if UNITY_EDITOR
+#if DEBUG
                     VertexAttributeConfig config;
                     if(!vertexAttributeConfigs.TryGetValue(att,out config)) {
                         config = new VertexAttributeConfig();
@@ -918,7 +921,7 @@ namespace GLTFast {
                 }
             }
 
-#if UNITY_EDITOR
+#if DEBUG
             foreach(var attributeConfig in vertexAttributeConfigs.Values) {
                 if(attributeConfig.meshIndices.Count>1) {
                     Debug.LogWarning(@"glTF file uses certain vertex attributes/accessors across multiple meshes!
