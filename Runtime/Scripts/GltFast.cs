@@ -1254,7 +1254,9 @@ namespace GLTFast {
             var bufferView = gltf.bufferViews[uvAccessor.bufferView];
             var buffer = GetBuffer(bufferView.buffer);
             var chunk = binChunks[bufferView.buffer];
+            Profiler.BeginSample("Alloc");
             var result = new Vector2[uvAccessor.count];
+            Profiler.EndSample();
             resultHandle = GCHandle.Alloc(result, GCHandleType.Pinned);
             int start = uvAccessor.byteOffset + bufferView.byteOffset + chunk.start;
 
@@ -1390,21 +1392,26 @@ namespace GLTFast {
         }
 
         unsafe void GetIndicesJob(Root gltf, int accessorIndex, out int[] indices, out JobHandle? jobHandle, out GCHandle resultHandle ) {
-            Profiler.BeginSample("PrepareIndicesJob");
+            Profiler.BeginSample("PrepareGetIndicesJob");
             // index
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
             int bufferIndex = bufferView.buffer;
             var buffer = GetBuffer(bufferIndex);
 
+            Profiler.BeginSample("Alloc");
             indices = new int[accessor.count];
+            Profiler.EndSample();
+            Profiler.BeginSample("Pin");
             resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+            Profiler.EndSample();
 
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
+            Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
             case GLTFComponentType.UnsignedByte:
                 var job8 = new Jobs.GetIndicesUInt8Job();
@@ -1439,10 +1446,11 @@ namespace GLTFast {
                 break;
             }
             Profiler.EndSample();
+            Profiler.EndSample();
         }
 
         unsafe int GetVector3sJob(Root gltf, int accessorIndex, out Vector3[] result, out JobHandle? jobHandle, out GCHandle resultHandle ) {
-            Profiler.BeginSample("GetVector3sJob");
+            Profiler.BeginSample("PrepareGetVector3sJob");
             Assert.IsTrue(accessorIndex>=0);
             #if DEBUG
             Assert.AreEqual( GetAccessorTye(gltf.accessors[accessorIndex].typeEnum), typeof(Vector3) );
@@ -1453,7 +1461,9 @@ namespace GLTFast {
             var buffer = GetBuffer(bufferView.buffer);
             var chunk = binChunks[bufferView.buffer];
             int count = accessor.count;
+            Profiler.BeginSample("Alloc");
             result = new Vector3[count];
+            Profiler.EndSample();
             resultHandle = GCHandle.Alloc(result, GCHandleType.Pinned);
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             if (gltf.IsAccessorInterleaved(accessorIndex)) {
@@ -1577,7 +1587,9 @@ namespace GLTFast {
             var bufferView = gltf.bufferViews[accessor.bufferView];
             var buffer = GetBuffer(bufferView.buffer);
             var chunk = binChunks[bufferView.buffer];
+            Profiler.BeginSample("Alloc");
             tangents = new Vector4[accessor.count];
+            Profiler.EndSample();
             resultHandle = GCHandle.Alloc(tangents, GCHandleType.Pinned);
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             var interleaved = gltf.IsAccessorInterleaved((int)accessorIndex);
@@ -1651,6 +1663,7 @@ namespace GLTFast {
             var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
             int start = colorAccessor.byteOffset + bufferView.byteOffset + chunk.start;
 
+            Profiler.BeginSample("AllocPin");
             if(IsColorAccessorByte(colorAccessor)) {
                 colors32 = new Color32[colorAccessor.count];
                 resultHandle = GCHandle.Alloc(colors32,GCHandleType.Pinned);
@@ -1660,6 +1673,7 @@ namespace GLTFast {
                 resultHandle = GCHandle.Alloc(colors,GCHandleType.Pinned);
                 colors32 = null;
             }
+            Profiler.EndSample();
             jobHandle = null;
 
             if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
