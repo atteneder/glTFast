@@ -108,6 +108,7 @@ namespace GLTFast {
             yield return www.SendWebRequest();
      
             if(www.isNetworkError || www.isHttpError) {
+                loadingError=true;
                 Debug.LogErrorFormat("{0} {1}",www.error,url);
             }
             else {
@@ -574,10 +575,12 @@ namespace GLTFast {
         void DisposeVolatileData() {
             primitiveContexts = null;
 
-            foreach (var nativeBuffer in nativeBuffers)
-            {
-                if(nativeBuffer.IsCreated) {
-                    nativeBuffer.Dispose();
+            if(nativeBuffers!=null) {
+                foreach (var nativeBuffer in nativeBuffers)
+                {
+                    if(nativeBuffer.IsCreated) {
+                        nativeBuffer.Dispose();
+                    }
                 }
             }
             nativeBuffers = null;
