@@ -29,7 +29,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] Images
   - [x] PNG
   - [x] Jpeg
-  - [x] <sup>2</sup>KTX with Basis Universal super compression
+  - [x] <sup>2</sup>KTX with Basis Universal super compression ([instructions](#basisu))
 - [x] Materials
   - [x] Unity built-in pipeline
     - [x] PBR metallic-roughness
@@ -50,7 +50,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [x] TRIANGLES
   - [x] <sup>1</sup>POINTS
   - [x] <sup>1</sup>LINES
-  - [x] <sup>1</sup>LINE_STRIP
+  - [x] LINE_STRIP
   - [x] <sup>1</sup>LINE_LOOP
   - [ ] TRIANGLE_STRIP
   - [ ] TRIANGLE_FAN
@@ -85,10 +85,11 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 - [x] KHR_materials_unlit
 - [x] KHR_texture_transform
 - [x] KHR_mesh_quantization
-- [x] <sup>1</sup>KHR_texture_basisu
+- [x] <sup>1</sup>KHR_texture_basisu ([instructions](#basisu))
 - [ ] KHR_lights_punctual ([issue](issues/17))
 
 <sup>1</sup>: Experimental
+
 ## Installing
 
 You have to manually add the package's URL into your [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html)
@@ -157,6 +158,16 @@ glTFast uses custom shaders that are derived from the Unity Standard shaders (an
 - Take this ShaderVariantCollection asset and add it to the "Preloaded Shaders" list
 
 An alternative way is to create placeholder materials for all feature combinations you expect and put them in a "Resource" folder in your project.
+
+## <a name="basisu"></a>Experimental KTX / Basis Universal support
+
+To enable the experimental support for KTX / Basis Universal support, first add the [KtxUnity package](https://github.com/atteneder/KtxUnity) to your manifest.json
+
+```json
+"com.atteneder.ktx": "https://github.com/atteneder/KtxUnity.git",
+```
+
+Second, add `GLTFAST_BASISU` to your projects scripting define symbols in the player settings.
 
 ## Roadmap / Priorities
 
