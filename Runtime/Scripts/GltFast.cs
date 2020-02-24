@@ -936,8 +936,13 @@ namespace GLTFast {
                     var isDraco = primitive.isDracoCompressed;
 
                     var att = primitive.attributes;
-                    if(primitive.indices>=0)
-                        SetAccessorUsage(primitive.indices, isDraco ? AccessorUsage.Ignore : AccessorUsage.Index );
+                    if(primitive.indices>=0) {
+                        var usage = primitive.mode == DrawMode.Triangles
+                        || primitive.mode == DrawMode.TriangleStrip
+                        || primitive.mode == DrawMode.TriangleFan
+                        ? AccessorUsage.IndexFlipped : AccessorUsage.Index;
+                        SetAccessorUsage(primitive.indices, isDraco ? AccessorUsage.Ignore : usage );
+                    }
                     SetAccessorUsage(att.POSITION, isDraco ? AccessorUsage.Ignore : AccessorUsage.Position);
                     if(att.NORMAL>=0)
                         SetAccessorUsage(att.NORMAL, isDraco ? AccessorUsage.Ignore : AccessorUsage.Normal);
@@ -1022,10 +1027,12 @@ namespace GLTFast {
                         }
                         break;
                     case GLTFAccessorAttributeType.SCALAR:
-                        if(accessorUsage[i]==AccessorUsage.Index) {
+                        if( accessorUsage[i]==AccessorUsage.IndexFlipped ||
+                            accessorUsage[i]==AccessorUsage.Index )
+                        {
                             var ads = new  AccessorData<int>();
                             adb = ads;
-                            GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle);
+                            GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle, accessorUsage[i]==AccessorUsage.IndexFlipped);
                             tmpList.Add(jh.Value);
                         }
                         break;
@@ -1166,9 +1173,11 @@ namespace GLTFast {
                 Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
                 c.topology = MeshTopology.Lines;
                 break;
-            case DrawMode.LineStrip:
             case DrawMode.LineLoop:
                 Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                c.topology = MeshTopology.LineStrip;
+                break;
+            case DrawMode.LineStrip:
                 c.topology = MeshTopology.LineStrip;
                 break;
             case DrawMode.TriangleStrip:
@@ -1398,7 +1407,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        unsafe void GetIndicesJob(Root gltf, int accessorIndex, out int[] indices, out JobHandle? jobHandle, out GCHandle resultHandle ) {
+        unsafe void GetIndicesJob(Root gltf, int accessorIndex, out int[] indices, out JobHandle? jobHandle, out GCHandle resultHandle, bool flip) {
             Profiler.BeginSample("PrepareGetIndicesJob");
             // index
             var accessor = gltf.accessors[accessorIndex];
@@ -1421,31 +1430,61 @@ namespace GLTFast {
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
             case GLTFComponentType.UnsignedByte:
-                var job8 = new Jobs.GetIndicesUInt8Job();
-                job8.count = accessor.count;
-                fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                    job8.input = (byte*)src;
-                    job8.result = (int*)dst;
+                if(flip) {
+                    var job8 = new Jobs.GetIndicesUInt8FlippedJob();
+                    job8.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
+                        job8.input = (byte*)src;
+                        job8.result = (int*)dst;
+                    }
+                    jobHandle = job8.Schedule();
+                } else {
+                    var job8 = new Jobs.GetIndicesUInt8Job();
+                    job8.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
+                        job8.input = (byte*)src;
+                        job8.result = (int*)dst;
+                    }
+                    jobHandle = job8.Schedule();
                 }
-                jobHandle = job8.Schedule();
                 break;
             case GLTFComponentType.UnsignedShort:
-                var job16 = new Jobs.GetIndicesUInt16Job();
-                job16.count = accessor.count;
-                fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                    job16.input = (System.UInt16*) src;
-                    job16.result = (int*) dst;
+                if(flip) {
+                    var job16 = new Jobs.GetIndicesUInt16FlippedJob();
+                    job16.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
+                        job16.input = (System.UInt16*) src;
+                        job16.result = (int*) dst;
+                    }
+                    jobHandle = job16.Schedule();
+                } else {
+                    var job16 = new Jobs.GetIndicesUInt16Job();
+                    job16.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
+                        job16.input = (System.UInt16*) src;
+                        job16.result = (int*) dst;
+                    }
+                    jobHandle = job16.Schedule();
                 }
-                jobHandle = job16.Schedule();
                 break;
             case GLTFComponentType.UnsignedInt:
-                var job32 = new Jobs.GetIndicesUInt32Job();
-                job32.count = accessor.count;
-                fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                    job32.input = (System.UInt32*) src;
-                    job32.result = (int*) dst;
+                if(flip) {
+                    var job32 = new Jobs.GetIndicesUInt32FlippedJob();
+                    job32.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
+                        job32.input = (System.UInt32*) src;
+                        job32.result = (int*) dst;
+                    }
+                    jobHandle = job32.Schedule();
+                } else {
+                    var job32 = new Jobs.GetIndicesUInt32Job();
+                    job32.count = accessor.count;
+                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
+                        job32.input = (System.UInt32*) src;
+                        job32.result = (int*) dst;
+                    }
+                    jobHandle = job32.Schedule();
                 }
-                jobHandle = job32.Schedule();
                 break;
             default:
                 Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );

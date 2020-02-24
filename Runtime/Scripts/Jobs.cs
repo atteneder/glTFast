@@ -71,6 +71,50 @@ namespace GLTFast.Jobs {
 
         public void Execute()
         {
+            for (var i = 0; i < count; i++) {
+                result[i] = input[i];
+            }
+        }
+    }
+
+    public unsafe struct GetIndicesUInt8FlippedJob : IJob  {
+            
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        public void Execute()
+        {
+            int triCount = count/3;
+            for (var i = 0; i < triCount; i++) {
+                result[i*3] = input[i*3];
+                result[i*3+2] = input[i*3+1];
+                result[i*3+1] = input[i*3+2];
+            }
+        }
+    }
+    public unsafe struct GetIndicesUInt16FlippedJob : IJob  {
+        
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public System.UInt16* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        public void Execute()
+        {
             int triCount = count/3;
             for (var i = 0; i < triCount; i++) {
                 result[i*3] = input[i*3];
@@ -95,16 +139,34 @@ namespace GLTFast.Jobs {
 
         public void Execute()
         {
-            int triCount = count/3;
-            for (var i = 0; i < triCount; i++) {
-                result[i*3] = input[i*3];
-                result[i*3+2] = input[i*3+1];
-                result[i*3+1] = input[i*3+2];
+            for (var i = 0; i < count; i++) {
+                result[i] = input[i];
             }
         }
     }
 
     public unsafe struct GetIndicesUInt32Job : IJob  {
+
+        [ReadOnly]
+        public int count;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public System.UInt32* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        public void Execute()
+        {
+            for (var i = 0; i < count; i++) {
+                result[i] = (int)input[i];
+            }
+        }
+    }
+
+    public unsafe struct GetIndicesUInt32FlippedJob : IJob  {
 
         [ReadOnly]
         public int count;

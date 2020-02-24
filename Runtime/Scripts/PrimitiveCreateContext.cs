@@ -71,7 +71,8 @@ namespace GLTFast {
             Profiler.BeginSample("SetNormals");
             if(normals!=null) {
                 msh.normals = normals;
-            } else {
+            } else
+            if(topology==MeshTopology.Triangles || topology==MeshTopology.Quads) {
                 msh.RecalculateNormals();
             }
             Profiler.EndSample();
@@ -85,7 +86,8 @@ namespace GLTFast {
             Profiler.BeginSample("SetTangents");
             if(tangents!=null) {
                 msh.tangents = tangents;
-            } else {
+            } else
+            if(topology==MeshTopology.Triangles || topology==MeshTopology.Quads) {
                 // TODO: Improvement idea: by only calculating tangents, if they are actually needed
                 Profiler.BeginSample("RecalculateTangents");
                 msh.RecalculateTangents();

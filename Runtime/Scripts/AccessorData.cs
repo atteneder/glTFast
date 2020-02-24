@@ -6,6 +6,7 @@ namespace GLTFast
         Unknown,
         Ignore,
         Index,
+        IndexFlipped,
         Position,
         Normal,
         Tangent,
