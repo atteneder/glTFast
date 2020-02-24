@@ -20,6 +20,7 @@ namespace GLTFast {
     public class GLTFast {
 
         const uint GLB_MAGIC = 0x46546c67;
+        const string GLB_EXT = ".glb";
 
         const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
         const string ErrorUnsupportedType = "Unsupported {0} type {1}";
@@ -122,7 +123,14 @@ namespace GLTFast {
         }
 
         public void Load( string url, IDeferAgent deferAgent=null ) {
-            bool gltfBinary = url.EndsWith(".glb",StringComparison.OrdinalIgnoreCase);
+            bool gltfBinary = false;
+            // quick glTF-binary check
+            gltfBinary = url.EndsWith(GLB_EXT,StringComparison.OrdinalIgnoreCase);
+            if(!gltfBinary) {
+                // thourough glTF-binary extension check that strips HTTP GET parameters
+                int getIndex = url.LastIndexOf('?');
+                gltfBinary = getIndex>=0 && url.Substring(getIndex-GLB_EXT.Length,GLB_EXT.Length).Equals(GLB_EXT,StringComparison.OrdinalIgnoreCase);
+            }
             monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary,deferAgent));
         }
 

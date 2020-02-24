@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Experimental KTX / Basis Universal support (off by default)
 ### Fixed
 - Proper error handling invalid URL/path
+- Improved glTF-binary URL extension detection
 
 ## [0.10.0] - 2020-02-22
 ### Added
