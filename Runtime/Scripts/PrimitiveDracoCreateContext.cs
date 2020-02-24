@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Profiling;
 using Unity.Jobs;
 using Unity.Collections;
 using IntPtr = System.IntPtr;
@@ -31,9 +32,26 @@ namespace GLTFast {
                 return null;
             }
 
-            var msh = DracoMeshLoader.CreateMesh(dracoMesh);
+            Profiler.BeginSample("DracoMeshLoader.CreateMesh");
+            bool hasTexcoords;
+            bool hasNormals;
+            var mesh = DracoMeshLoader.CreateMesh(dracoMesh, out hasNormals, out hasTexcoords);
+            Profiler.EndSample();
 
-            return new Primitive(msh,materials);
+            if(!hasNormals) {
+                Profiler.BeginSample("Draco.RecalculateNormals");
+                // TODO: Make optional. Only calculate if actually needed
+                mesh.RecalculateNormals();
+                Profiler.EndSample();
+            }
+            if(hasTexcoords) {
+                Profiler.BeginSample("Draco.RecalculateTangents");
+                // TODO: Make optional. Only calculate if actually needed
+                mesh.RecalculateTangents();
+                Profiler.EndSample();
+            }
+
+            return new Primitive(mesh,materials);
         }
     }
 } 
