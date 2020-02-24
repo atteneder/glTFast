@@ -320,8 +320,8 @@ namespace GLTFast {
 
                 // Derive image type from texture extension
                 for (int i = 0; i < gltfRoot.textures.Length; i++) {
-                    var texture = gltfRoot.textures[i];
 #if GLTFAST_BASISU
+                    var texture = gltfRoot.textures[i];
                     if(texture.isKtx) {
                         var imgIndex = texture.GetImageIndex();
                         imageFormats[imgIndex] = ImageFormat.KTX;
@@ -412,7 +412,6 @@ namespace GLTFast {
                         Debug.LogError(www.error);
                     }
                     else {
-                        var img = gltfRoot.images[dl.Key];
                         if(imageFormats[dl.Key]==ImageFormat.KTX) {
 #if GLTFAST_BASISU
                             if(ktxLoadContexts==null) {
