@@ -72,8 +72,10 @@ namespace GLTFast {
             if(normals!=null) {
                 msh.normals = normals;
             } else
-            if(topology==MeshTopology.Triangles || topology==MeshTopology.Quads) {
+            if( needsNormals && ( topology==MeshTopology.Triangles || topology==MeshTopology.Quads ) ) {
+                Profiler.BeginSample("RecalculateNormals");
                 msh.RecalculateNormals();
+                Profiler.EndSample();
             }
             Profiler.EndSample();
             Profiler.BeginSample("SetColor");
@@ -87,15 +89,12 @@ namespace GLTFast {
             if(tangents!=null) {
                 msh.tangents = tangents;
             } else
-            if(topology==MeshTopology.Triangles || topology==MeshTopology.Quads) {
-                // TODO: Improvement idea: by only calculating tangents, if they are actually needed
+            if( needsTangents && uvs0!=null && (topology==MeshTopology.Triangles || topology==MeshTopology.Quads) ) {
                 Profiler.BeginSample("RecalculateTangents");
                 msh.RecalculateTangents();
                 Profiler.EndSample();
             }
             Profiler.EndSample();
-            // primitives[c.primtiveIndex] = new Primitive(msh,c.primitive.material);
-            // resources.Add(msh);
 
             Profiler.BeginSample("Dispose");
             Dispose();

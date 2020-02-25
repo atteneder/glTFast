@@ -115,5 +115,17 @@ namespace GLTFast.Schema {
         /// lighting equation is evaluated.
         /// </summary>
         public bool doubleSided = false;
+
+        public bool requiresNormals {
+            get {
+                return extensions==null || extensions.KHR_materials_unlit==null;
+            }
+        }
+
+        public bool requiresTangents {
+            get {
+                return normalTexture!=null && normalTexture.index>=0;
+            }
+        }
     }
 }

@@ -36,7 +36,7 @@
         /// <summary>
         /// The index of the material to apply to this primitive when rendering.
         /// </summary>
-        public int material;
+        public int material = -1;
 
         /// <summary>
         /// The type of primitives to render. All valid values correspond to WebGL enums.

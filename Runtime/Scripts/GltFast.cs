@@ -1127,6 +1127,9 @@ namespace GLTFast {
                         }
                         context.primtiveIndex = i;
                         context.materials[primIndex] = primitive.material;
+
+                        context.needsNormals |= primitive.material<0 || gltf.materials[primitive.material].requiresNormals;
+                        context.needsTangents |= primitive.material>=0 && gltf.materials[primitive.material].requiresTangents;
                     }
 
                     primitiveContexts[i] = context;
