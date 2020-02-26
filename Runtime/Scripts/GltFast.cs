@@ -608,6 +608,7 @@ namespace GLTFast {
             while(!accessorJobsHandle.IsCompleted) {
                 yield return null;
             }
+            accessorJobsHandle.Complete();
             foreach(var ad in accessorData) {
                 if(ad!=null) {
                     ad.Unpin();
