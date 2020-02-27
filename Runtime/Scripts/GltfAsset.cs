@@ -33,7 +33,9 @@ namespace GLTFast
             if(success) {
                 gLTFastInstance.InstantiateGltf(transform);
             }
-            onLoadComplete(success);
+            if(onLoadComplete!=null) {
+                onLoadComplete(success);
+            }
         }
 
         private void OnDestroy()
