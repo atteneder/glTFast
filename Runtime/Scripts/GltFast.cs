@@ -1,4 +1,9 @@
-﻿using System;
+﻿#if NET_LEGACY || NET_2_0 || NET_2_0_SUBSET
+#warning Consider using .NET 4.x equivalent scripting runtime version or upgrading Unity 2019.1 or newer for better performance
+#define COPY_LEGACY
+#endif
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,6 +26,7 @@ namespace GLTFast {
 
         const uint GLB_MAGIC = 0x46546c67;
         const string GLB_EXT = ".glb";
+        const int DefaultBatchCount = 50000;
 
         const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
         const string ErrorUnsupportedType = "Unsupported {0} type {1}";
@@ -882,6 +888,7 @@ namespace GLTFast {
                             icc.imageIndex = i;
                             icc.buffer = new byte[bufferView.byteLength];
                             icc.gcHandle = GCHandle.Alloc(icc.buffer,GCHandleType.Pinned);
+#if !COPY_LEGACY
                             var job = new Jobs.MemCopyJob();
                             job.bufferSize = bufferView.byteLength;
                             fixed( void* src = &(buffer[bufferView.byteOffset + chunk.start]), dst = &(icc.buffer[0]) ) {
@@ -889,6 +896,14 @@ namespace GLTFast {
                                 job.result = dst;
                             }
                             icc.jobHandle = job.Schedule();
+#else
+                            var job = new Jobs.MemCopyLegacyJob();
+                            fixed( void* src = &(buffer[bufferView.byteOffset + chunk.start]), dst = &(icc.buffer[0]) ) {
+                                job.input = (byte*)src;
+                                job.result = (byte*)dst;
+                            }
+                            icc.jobHandle = job.Schedule(bufferView.byteLength,DefaultBatchCount);
+#endif
                             contexts.Add(icc);
                             
                             images[i] = txt;
@@ -1044,6 +1059,7 @@ namespace GLTFast {
             NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(tmpList.ToArray(), Allocator.Temp);
             accessorJobsHandle = JobHandle.CombineDependencies(jobHandles);
             jobHandles.Dispose();
+            JobHandle.ScheduleBatchedJobs();
         }
 
         AccessorDataBase LoadAccessorDataColor(Root gltf,int accessorIndex, out JobHandle? jh) {
@@ -1284,97 +1300,134 @@ namespace GLTFast {
             case GLTFComponentType.Float:
                 if (gltf.IsAccessorInterleaved(accessorIndex)) {
                     var jobUv = new Jobs.GetVector2sInterleavedJob();
-                    jobUv.count = uvAccessor.count;
                     jobUv.byteStride = bufferView.byteStride;
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         jobUv.input = (byte*)src;
                         jobUv.result = (Vector2*)dst;
                     }
-                    jobHandle = jobUv.Schedule();
+                    jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                 } else {
                     var jobUv = new Jobs.GetUVsFloatJob();
-                    jobUv.count = uvAccessor.count;
+                    // jobUv.count = uvAccessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         jobUv.input = (float*)src;
                         jobUv.result = (Vector2*)dst;
                     }
-                    jobHandle = jobUv.Schedule();
+                    jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                 }
                 break;
             case GLTFComponentType.UnsignedByte:
                 if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                    var jobUv = new Jobs.GetUVsUInt8InterleavedJob();
-                    jobUv.count = uvAccessor.count;
-                    jobUv.byteStride = bufferView.byteStride;
-                    jobUv.normalize = uvAccessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        jobUv.input = (byte*) src;
-                        jobUv.result = (Vector2*)dst;
+                    if (uvAccessor.normalized) {
+                        var jobUv = new Jobs.GetUVsUInt8InterleavedNormalizedJob();
+                        jobUv.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)dst;
+                        }
+                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
+                    } else {
+                        var jobUv = new Jobs.GetUVsUInt8InterleavedJob();
+                        jobUv.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)dst;
+                        }
+                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     }
-                    jobHandle = jobUv.Schedule();
                 } else {
-                    var jobUv = new Jobs.GetUVsUInt8Job();
-                    jobUv.count = uvAccessor.count;
-                    jobUv.normalize = uvAccessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        jobUv.input = (byte*) src;
-                        jobUv.result = (Vector2*)dst;
+                    if(uvAccessor.normalized) {
+                        var jobUv = new Jobs.GetUVsUInt8NormalizedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)dst;
+                        }
+                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
+                    } else {
+                        var jobUv = new Jobs.GetUVsUInt8Job();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)dst;
+                        }
+                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     }
-                    jobHandle = jobUv.Schedule();
                 }
                 break;
             case GLTFComponentType.UnsignedShort:
                 if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                    var jobUv = new Jobs.GetUVsUInt16InterleavedJob();
-                    jobUv.count = uvAccessor.count;
-                    jobUv.byteStride = bufferView.byteStride;
-                    jobUv.normalize = uvAccessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        jobUv.input = (byte*) src;
-                        jobUv.result = (Vector2*)dst;
+                    if (uvAccessor.normalized) {
+                        var jobUv = new Jobs.GetUVsUInt16InterleavedNormalizedJob();
+                        jobUv.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)dst;
+                        }
+                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
+                    } else {
+                        var jobUv = new Jobs.GetUVsUInt16InterleavedJob();
+                        jobUv.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)dst;
+                        }
+                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     }
-                    jobHandle = jobUv.Schedule();
                 } else {
                     if(uvAccessor.normalized) {
                         var jobUv = new Jobs.GetUVsUInt16NormalizedJob();
-                        jobUv.count = uvAccessor.count;
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (System.UInt16*) src;
                             jobUv.result = (Vector2*)dst;
                         }
-                        jobHandle = jobUv.Schedule();
+                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     } else {
                         var jobUv = new Jobs.GetUVsUInt16Job();
-                        jobUv.count = uvAccessor.count;
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (System.UInt16*) src;
                             jobUv.result = (Vector2*)dst;
                         }
-                        jobHandle = jobUv.Schedule();
+                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     }
                 }
                 break;
             case GLTFComponentType.Short:
-                var job = new Jobs.GetUVsInt16InterleavedJob();
-                job.count = uvAccessor.count;
-                job.byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 4;
-                job.normalize = uvAccessor.normalized;
-                fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                    job.input = (System.Int16*) src;
-                    job.result = (Vector2*)dst;
+                if (uvAccessor.normalized) {
+                    var job = new Jobs.GetUVsInt16InterleavedNormalizedJob();
+                    job.byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 4;
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                        job.input = (System.Int16*) src;
+                        job.result = (Vector2*)dst;
+                    }
+                    jobHandle = job.Schedule(uvAccessor.count,DefaultBatchCount);
+                } else {
+                    var job = new Jobs.GetUVsInt16InterleavedJob();
+                    job.byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 4;
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                        job.input = (System.Int16*) src;
+                        job.result = (Vector2*)dst;
+                    }
+                    jobHandle = job.Schedule(uvAccessor.count,DefaultBatchCount);
                 }
-                jobHandle = job.Schedule();
                 break;
             case GLTFComponentType.Byte:
-                var jobInt8 = new Jobs.GetUVsInt8InterleavedJob();
-                jobInt8.count = uvAccessor.count;
-                jobInt8.byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 2;
-                jobInt8.normalize = uvAccessor.normalized;
-                fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                    jobInt8.input = (sbyte*) src;
-                    jobInt8.result = (Vector2*)dst;
+                var byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 2;
+                if (uvAccessor.normalized) {
+                    var jobInt8 = new Jobs.GetUVsInt8InterleavedNormalizedJob();
+                    jobInt8.byteStride = byteStride;
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                        jobInt8.input = (sbyte*) src;
+                        jobInt8.result = (Vector2*)dst;
+                    }
+                    jobHandle = jobInt8.Schedule(uvAccessor.count,DefaultBatchCount);
+                } else {
+                    var jobInt8 = new Jobs.GetUVsInt8InterleavedJob();
+                    jobInt8.byteStride = byteStride;
+                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                        jobInt8.input = (sbyte*) src;
+                        jobInt8.result = (Vector2*)dst;
+                    }
+                    jobHandle = jobInt8.Schedule(uvAccessor.count,DefaultBatchCount);
                 }
-                jobHandle = jobInt8.Schedule();
                 break;
             default:
                 jobHandle = null;
@@ -1394,19 +1447,20 @@ namespace GLTFast {
             resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
             if(topology == MeshTopology.Triangles) {
                 var job8 = new Jobs.CreateIndicesFlippedJob();
-                job8.count = indices.Length;
                 fixed( void* dst = &(indices[0]) ) {
                     job8.result = (int*)dst;
                 }
-                jobHandle = job8.Schedule();
+                jobHandle = job8.Schedule(indices.Length,DefaultBatchCount);
             } else {
                 var job8 = new Jobs.CreateIndicesJob();
-                job8.count = indices.Length;
-                job8.lineLoop = lineLoop;
+                if(lineLoop) {
+                    // Set the last index to the first vertex
+                    indices[vertexCount] = 0;
+                }
                 fixed( void* dst = &(indices[0]) ) {
                     job8.result = (int*)dst;
                 }
-                jobHandle = job8.Schedule();
+                jobHandle = job8.Schedule(vertexCount,DefaultBatchCount);
             }
             Profiler.EndSample();
         }
@@ -1436,58 +1490,52 @@ namespace GLTFast {
             case GLTFComponentType.UnsignedByte:
                 if(flip) {
                     var job8 = new Jobs.GetIndicesUInt8FlippedJob();
-                    job8.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job8.input = (byte*)src;
                         job8.result = (int*)dst;
                     }
-                    jobHandle = job8.Schedule();
+                    jobHandle = job8.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
                     var job8 = new Jobs.GetIndicesUInt8Job();
-                    job8.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job8.input = (byte*)src;
                         job8.result = (int*)dst;
                     }
-                    jobHandle = job8.Schedule();
+                    jobHandle = job8.Schedule(accessor.count,DefaultBatchCount);
                 }
                 break;
             case GLTFComponentType.UnsignedShort:
                 if(flip) {
                     var job16 = new Jobs.GetIndicesUInt16FlippedJob();
-                    job16.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job16.input = (System.UInt16*) src;
                         job16.result = (int*) dst;
                     }
-                    jobHandle = job16.Schedule();
+                    jobHandle = job16.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
                     var job16 = new Jobs.GetIndicesUInt16Job();
-                    job16.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job16.input = (System.UInt16*) src;
                         job16.result = (int*) dst;
                     }
-                    jobHandle = job16.Schedule();
+                    jobHandle = job16.Schedule(accessor.count,DefaultBatchCount);
                 }
                 break;
             case GLTFComponentType.UnsignedInt:
                 if(flip) {
                     var job32 = new Jobs.GetIndicesUInt32FlippedJob();
-                    job32.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job32.input = (System.UInt32*) src;
                         job32.result = (int*) dst;
                     }
-                    jobHandle = job32.Schedule();
+                    jobHandle = job32.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
                     var job32 = new Jobs.GetIndicesUInt32Job();
-                    job32.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job32.input = (System.UInt32*) src;
                         job32.result = (int*) dst;
                     }
-                    jobHandle = job32.Schedule();
+                    jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
                 }
                 break;
             default:
@@ -1519,52 +1567,83 @@ namespace GLTFast {
             if (gltf.IsAccessorInterleaved(accessorIndex)) {
                 if(accessor.componentType == GLTFComponentType.Float) {
                     var job = new Jobs.GetVector3sInterleavedJob();
-                    job.count = count;
                     job.byteStride = bufferView.byteStride;
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (byte*)src;
                         job.result = (Vector3*)dst;
                     }
-                    jobHandle = job.Schedule();
+                    jobHandle = job.Schedule(count,DefaultBatchCount);
                 } else
                 if(accessor.componentType == GLTFComponentType.UnsignedShort) {
-                    var job = new Jobs.GetUInt16PositionsInterleavedJob();
-                    job.count = count;
-                    job.byteStride = bufferView.byteStride;
-                    job.normalize = accessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        job.input = (byte*)src;
-                        job.result = (Vector3*)dst;
+                    if (accessor.normalized) {
+                        var job = new Jobs.GetUInt16PositionsInterleavedNormalizedJob();
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
+                    } else {
+                        var job = new Jobs.GetUInt16PositionsInterleavedJob();
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
-                    jobHandle = job.Schedule();
                 } else
                 if(accessor.componentType == GLTFComponentType.Short) {
                     // TODO: test. did not have test files
-                    var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                    job.count = count;
-                    job.byteStride = bufferView.byteStride;
-                    job.normalize = accessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        job.input = (byte*)src;
-                        job.result = (Vector3*)dst;
+                    if (accessor.normalized) {
+                        var job = new Jobs.GetVector3FromInt16InterleavedNormalizedJob();
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
+                    } else {
+                        var job = new Jobs.GetVector3FromInt16InterleavedJob();
+                        job.byteStride = bufferView.byteStride;
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
-                    jobHandle = job.Schedule();
                 } else
                 if(accessor.componentType == GLTFComponentType.Byte) {
                     // TODO: test positions. did not have test files
-                    var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        job.Setup(count,bufferView.byteStride,(sbyte*)src,(Vector3*)dst,accessor.normalized);
+                    if (accessor.normalized) {
+                        var job = new Jobs.GetVector3FromSByteInterleavedNormalizedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.Setup(bufferView.byteStride,(sbyte*)src,(Vector3*)dst);
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
+                    } else {
+                        var job = new Jobs.GetVector3FromSByteInterleavedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.Setup(bufferView.byteStride,(sbyte*)src,(Vector3*)dst);
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
-                    jobHandle = job.Schedule();
                 } else
                 if(accessor.componentType == GLTFComponentType.UnsignedByte) {
                     // TODO: test. did not have test files
-                    var job = new Jobs.GetVector3FromByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        job.Setup(count,bufferView.byteStride,(byte*)src,(Vector3*)dst,accessor.normalized);
+                    if (accessor.normalized) {
+                        var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.Setup(bufferView.byteStride,(byte*)src,(Vector3*)dst);
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
+                    } else {
+                        var job = new Jobs.GetVector3FromByteInterleavedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.Setup(bufferView.byteStride,(byte*)src,(Vector3*)dst);
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
-                    jobHandle = job.Schedule();
                 } else {
                     Debug.LogError("Unknown componentType");
                     jobHandle = null;
@@ -1572,53 +1651,84 @@ namespace GLTFast {
             } else {
                 if(accessor.componentType == GLTFComponentType.Float) {
                     var job = new Jobs.GetVector3sJob();
-                    job.count = accessor.count;
+                    // job.count = accessor.count;
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (float*)src;
                         job.result = (float*)dst;
                     }
-                    jobHandle = job.Schedule();
+                    jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 } else
                 if(accessor.componentType == GLTFComponentType.UnsignedShort) {
-                    var job = new Jobs.GetUInt16PositionsJob();
-                    job.count = accessor.count;
-                    job.normalize = accessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        job.input = (System.UInt16*)src;
-                        job.result = (Vector3*)dst;
+                    if (accessor.normalized) {
+                        var job = new Jobs.GetUInt16PositionsNormalizedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.input = (System.UInt16*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                    } else {
+                        var job = new Jobs.GetUInt16PositionsJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.input = (System.UInt16*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                     }
-                    jobHandle = job.Schedule();
                 } else
                 if(accessor.componentType == GLTFComponentType.Short) {
                     // TODO: test. did not have test files
                     // TODO: is a non-interleaved variant faster?
-                    var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                    job.count = count;
-                    job.byteStride = 6; // 2 bytes * 3
-                    job.normalize = accessor.normalized;
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        job.input = (byte*)src;
-                        job.result = (Vector3*)dst;
+                    if (accessor.normalized) {
+                        var job = new Jobs.GetVector3FromInt16InterleavedNormalizedJob();
+                        job.byteStride = 6; // 2 bytes * 3
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
+                    } else {
+                        var job = new Jobs.GetVector3FromInt16InterleavedJob();
+                        job.byteStride = 6; // 2 bytes * 3
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)dst;
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
-                    jobHandle = job.Schedule();
                 } else
                 if(accessor.componentType == GLTFComponentType.Byte) {
                     // TODO: test. did not have test files
                     // TODO: is a non-interleaved variant faster?
-                    var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        job.Setup(count,3,(sbyte*)src,(Vector3*)dst,accessor.normalized);
+                    if(accessor.normalized) {
+                        var job = new Jobs.GetVector3FromSByteInterleavedNormalizedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.Setup(3,(sbyte*)src,(Vector3*)dst);
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
+                    } else {
+                        var job = new Jobs.GetVector3FromSByteInterleavedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.Setup(3,(sbyte*)src,(Vector3*)dst);
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
-                    jobHandle = job.Schedule();
                 } else
                 if(accessor.componentType == GLTFComponentType.UnsignedByte) {
                     // TODO: test. did not have test files
                     // TODO: is a non-interleaved variant faster?
-                    var job = new Jobs.GetVector3FromByteInterleavedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
-                        job.Setup(count,3,(byte*)src,(Vector3*)dst,accessor.normalized);
+                    if (accessor.normalized) {
+                        var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.Setup(3,(byte*)src,(Vector3*)dst);
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
+                    } else {
+                        var job = new Jobs.GetVector3FromByteInterleavedJob();
+                        fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
+                            job.Setup(3,(byte*)src,(Vector3*)dst);
+                        }
+                        jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
-                    jobHandle = job.Schedule();
                 } else {
                     Debug.LogError("Unknown componentType");
                     jobHandle = null;
@@ -1647,44 +1757,40 @@ namespace GLTFast {
                 case GLTFComponentType.Float:
                     if(interleaved) {
                         var jobTangentI = new Jobs.GetVector4sInterleavedJob();
-                        jobTangentI.count = accessor.count;
                         jobTangentI.byteStride = bufferView.byteStride;
                         fixed( void* src = &(buffer[start]), dst = &(tangents[0]) ) {
                             jobTangentI.input = (byte*)src;
                             jobTangentI.result = (Vector4*)dst;
                         }
-                        jobHandle = jobTangentI.Schedule();
+                        jobHandle = jobTangentI.Schedule(accessor.count,DefaultBatchCount);
                     } else {
                         var jobTangentFloat = new Jobs.GetVector4sJob();
-                        jobTangentFloat.count = accessor.count;
                         fixed( void* src = &(buffer[start]), dst = &(tangents[0]) ) {
                             jobTangentFloat.input = (float*)src;
                             jobTangentFloat.result = (float*)dst;
                         }
-                        jobHandle = jobTangentFloat.Schedule();
+                        jobHandle = jobTangentFloat.Schedule(accessor.count,DefaultBatchCount);
                     }
                     break;
                 case GLTFComponentType.Short:
                     var jobTangent = new Jobs.GetVector4sInt16NormalizedInterleavedJob();
-                    jobTangent.count = accessor.count;
                     jobTangent.byteStride = interleaved ? bufferView.byteStride : 8;
                     Assert.IsTrue(accessor.normalized);
                     fixed( void* src = &(buffer[start]), dst = &(tangents[0]) ) {
                         jobTangent.input = (System.Int16*)src;
                         jobTangent.result = (Vector4*)dst;
                     }
-                    jobHandle = jobTangent.Schedule();
+                    jobHandle = jobTangent.Schedule(accessor.count,DefaultBatchCount);
                     break;
                 case GLTFComponentType.Byte:
                     var jobTangentByte = new Jobs.GetVector4sInt8NormalizedInterleavedJob();
-                    jobTangentByte.count = accessor.count;
                     jobTangentByte.byteStride = interleaved ? bufferView.byteStride : 4;
                     Assert.IsTrue(accessor.normalized);
                     fixed( void* src = &(buffer[start]), dst = &(tangents[0]) ) {
                         jobTangentByte.input = (sbyte*)src;
                         jobTangentByte.result = (Vector4*)dst;
                     }
-                    jobHandle = jobTangentByte.Schedule();
+                    jobHandle = jobTangentByte.Schedule(accessor.count,DefaultBatchCount);
                     break;
                 default:
                     Debug.LogErrorFormat( ErrorUnsupportedType, "Tangent", accessor.componentType);
@@ -1736,12 +1842,11 @@ namespace GLTFast {
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec3FloatJob();
-                            job.count = colorAccessor.count;
                             fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
                                 job.input = (float*) src;
                                 job.result = (Color*)dst;
                             }
-                            jobHandle = job.Schedule();
+                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
                         }
                         break;
                     case GLTFComponentType.UnsignedByte:
@@ -1750,12 +1855,11 @@ namespace GLTFast {
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec3UInt8Job();
-                            job.count = colorAccessor.count;
                             fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
                                 job.input = (byte*) src;
                                 job.result = (Color32*)dst;
                             }
-                            jobHandle = job.Schedule();
+                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
                         }
                         break;
                     case GLTFComponentType.UnsignedShort:
@@ -1764,12 +1868,11 @@ namespace GLTFast {
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec3UInt16Job();
-                            job.count = colorAccessor.count;
                             fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
                                 job.input = (System.UInt16*) src;
                                 job.result = (Color*)dst;
                             }
-                            jobHandle = job.Schedule();
+                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
                         }
                         break;
                     default:
@@ -1786,6 +1889,7 @@ namespace GLTFast {
                             // TODO
                             Debug.LogError("Not jobified yet!");
                         } else {
+#if !COPY_LEGACY
                             var job = new Jobs.MemCopyJob();
                             job.bufferSize = colorAccessor.count*16;
                             fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
@@ -1793,6 +1897,14 @@ namespace GLTFast {
                                 job.result = dst;
                             }
                             jobHandle = job.Schedule();
+#else
+                            var job = new Jobs.MemCopyLegacyJob();
+                            fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
+                                job.input = (byte*)src;
+                                job.result = (byte*)dst;
+                            }
+                            jobHandle = job.Schedule(colorAccessor.count*16,DefaultBatchCount);
+#endif
                         }
                         break;
                     case GLTFComponentType.UnsignedByte:
@@ -1800,6 +1912,7 @@ namespace GLTFast {
                             // TODO
                             Debug.LogError("Not jobified yet!");
                         } else {
+#if !COPY_LEGACY
                             var job = new Jobs.MemCopyJob();
                             job.bufferSize = colorAccessor.count*4;
                             fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
@@ -1807,6 +1920,14 @@ namespace GLTFast {
                                 job.result = dst;
                             }
                             jobHandle = job.Schedule();
+#else
+                            var job = new Jobs.MemCopyLegacyJob();
+                            fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
+                                job.input = (byte*)src;
+                                job.result = (byte*)dst;
+                            }
+                            jobHandle = job.Schedule(colorAccessor.count*4,DefaultBatchCount);
+#endif
                         }
                         break;
                     case GLTFComponentType.UnsignedShort:
@@ -1815,12 +1936,11 @@ namespace GLTFast {
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec4UInt16Job();
-                            job.count = colorAccessor.count;
                             fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
                                 job.input = (System.UInt16*) src;
                                 job.result = (Color*)dst;
                             }
-                            jobHandle = job.Schedule();
+                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
                         }
                         break;
                     default:
