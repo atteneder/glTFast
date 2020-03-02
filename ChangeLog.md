@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Support for texture samplers' wrapping mode 
+- Support for texture samplers' wrapping mode
+- Support for texture samplers' filter modes (partial; see [issue](/atteneder/glTFast/issues/61))
 ### Changed
 - Increased performance due to more balanced threading by making all C# Jobs parallel
 

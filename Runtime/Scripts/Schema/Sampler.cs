@@ -74,6 +74,25 @@ namespace GLTFast.Schema
             }
         }
 
+        public FilterMode filterMode {
+            get {
+                switch(minFilter) {
+                case (int)MinFilterMode.LinearMipmapLinear:
+                    return FilterMode.Trilinear;
+                case (int)MinFilterMode.Nearest:
+                case (int)MinFilterMode.NearestMipmapNearest:
+                case (int)MinFilterMode.NearestMipmapLinear: // incorrect mip-map filtering in this case!
+                    return FilterMode.Point;
+                }
+                switch(magFilter) {
+                case (int)MagFilterMode.Nearest:
+                    return FilterMode.Point;
+                default:
+                    return FilterMode.Bilinear;
+                }
+            }
+        }
+
         static TextureWrapMode ConvertWrapMode(WrapMode wrapMode) {
             switch(wrapMode) {
             case WrapMode.None:
@@ -85,6 +104,12 @@ namespace GLTFast.Schema
             case WrapMode.MirroredRepeat:
                 return TextureWrapMode.Mirror;
             }
+        }
+
+        public void Apply(Texture2D image) {
+            image.wrapModeU = wrapU;
+            image.wrapModeV = wrapV;
+            image.filterMode = filterMode;
         }
     }
 }

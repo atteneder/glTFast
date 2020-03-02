@@ -66,9 +66,9 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [ ] Multiple texture coordinates sets ([issue](issues/34))
   - [ ] Joints
   - [ ] Weights
-- [ ] Texture sampler ([issue](issues/45))
-  - [ ] Filtering
-  - [ ] Wrap mode
+- [x] Texture sampler
+  - [x] Filtering (see ([limitations](#knownissues)))
+  - [x] Wrap modes
 - [ ] Morph targets ([issue](issues/8))
   - [ ] Sparse accessors
 - [ ] Skinning ([issue](issues/13))
@@ -201,10 +201,13 @@ It also uses fast low-level memory copy methods and [Unity's Job system](https:/
 - Also not a download manager for asset caching/re-usage.
 Such stuff should be able to place on top of this library.
 
-## Known issues
+## <a name="knownissues">Known issues
 
 - <sup>1</sup>Vertex accessors (positions, normals, etc.) that are used across meshes are duplicated and result in higher memory usage
-- <sup>1</sup>Using more than one samplers on the same image (via texture)
+- <sup>1</sup>When using more than one samplers on an image, that image is duplicated and results in higher memory usage
+- Texture sampler minification/magnification filter limitations (see [issue](issues/61)):
+  - <sup>1</sup>There's no differentiation between `minFilter` and `magFilter`. `minFilter` settings are prioritized.
+  - <sup>1</sup>`minFilter` mode `NEAREST_MIPMAP_LINEAR` is not supported and will result in `NEAREST`.
 - When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
 
 <sup>1</sup>: A Unity API limitation.

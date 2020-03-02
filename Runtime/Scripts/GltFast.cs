@@ -662,7 +662,7 @@ namespace GLTFast {
                     var img = images[imageIndex];
                     if(imageVariants[imageIndex]==null) {
                         if(txt.sampler>=0) {
-                            ApplyTextureSampler(gltfRoot.samplers[txt.sampler], img);
+                            gltfRoot.samplers[txt.sampler].Apply(img);
                         }
                         imageVariants[imageIndex] = new Dictionary<int, Texture2D>();
                         imageVariants[imageIndex][txt.sampler] = img;
@@ -675,7 +675,7 @@ namespace GLTFast {
                         Debug.LogWarningFormat("Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory.", imageIndex);
 #endif
                         if(txt.sampler>=0) {
-                            ApplyTextureSampler(gltfRoot.samplers[txt.sampler], newImg);
+                            gltfRoot.samplers[txt.sampler].Apply(newImg);
                         }
                         imageVariants[imageIndex][txt.sampler] = newImg;
                     }
@@ -722,11 +722,6 @@ namespace GLTFast {
 
                 yield return null;
             }
-        }
-
-        void ApplyTextureSampler(Sampler sampler, Texture2D image) {
-            image.wrapModeU = sampler.wrapU;
-            image.wrapModeV = sampler.wrapV;
         }
 
         /// <summary>
