@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace GLTFast {
 
@@ -54,7 +55,7 @@ namespace GLTFast {
             Schema.Material gltfMaterial,
             ref Schema.Texture[] textures,
             ref Schema.Image[] schemaImages,
-            ref UnityEngine.Texture2D[] images
+            ref Dictionary<int,Texture2D>[] imageVariants
         ) {
             UnityEngine.Material material;
             
@@ -77,9 +78,9 @@ namespace GLTFast {
                     material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
                     material.SetFloat(StandardShaderHelper.glossinessPropId,specGloss.glossinessFactor);
 
-                    TrySetTexture(specGloss.diffuseTexture,material,StandardShaderHelper.mainTexPropId,ref textures,ref schemaImages,ref images);
+                    TrySetTexture(specGloss.diffuseTexture,material,StandardShaderHelper.mainTexPropId,ref textures,ref schemaImages, ref imageVariants);
 
-                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,StandardShaderHelper.specGlossMapPropId,ref textures,ref schemaImages,ref images)) {
+                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,StandardShaderHelper.specGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                         material.EnableKeyword(StandardShaderHelper.KW_SPEC_GLOSS_MAP);
                     }
                 }
@@ -96,23 +97,23 @@ namespace GLTFast {
                     StandardShaderHelper.mainTexPropId,
                     ref textures,
                     ref schemaImages,
-                    ref images
+                    ref imageVariants
                     );
                 
-                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,StandardShaderHelper.metallicGlossMapPropId,ref textures,ref schemaImages,ref images)) {
+                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,StandardShaderHelper.metallicGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                     material.EnableKeyword(StandardShaderHelper.KW_METALLIC_ROUGNESS_MAP);
                 }
             }
 
-            if(TrySetTexture(gltfMaterial.normalTexture,material,StandardShaderHelper.bumpMapPropId,ref textures,ref schemaImages,ref images)) {
+            if(TrySetTexture(gltfMaterial.normalTexture,material,StandardShaderHelper.bumpMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                 material.EnableKeyword("_NORMALMAP");
             }
 
-            if(TrySetTexture(gltfMaterial.occlusionTexture,material,StandardShaderHelper.occlusionMapPropId,ref textures,ref schemaImages,ref images)) {
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,StandardShaderHelper.occlusionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                 material.EnableKeyword(StandardShaderHelper.KW_OCCLUSION);
             }
 
-            if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,ref textures,ref schemaImages,ref images)) {
+            if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                 material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
             }
             
@@ -139,7 +140,7 @@ namespace GLTFast {
             int propertyId,
             ref Schema.Texture[] textures,
             ref Schema.Image[] schemaImages,
-            ref Texture2D[] images
+            ref Dictionary<int,Texture2D>[] imageVariants
             )
         {
             if (textureInfo != null && textureInfo.index >= 0)
@@ -150,9 +151,15 @@ namespace GLTFast {
                     var txt = textures[bcTextureIndex];
                     var imageIndex = txt.GetImageIndex();
 
-                    if (images != null && imageIndex >= 0 && images.Length > imageIndex)
+                    Texture2D img = null;
+                    if( imageVariants!=null
+                        && imageIndex >= 0
+                        && imageVariants.Length > imageIndex
+                        && imageVariants[imageIndex]!=null
+                        && imageVariants[imageIndex].TryGetValue(txt.sampler,out img)
+                        )
                     {
-                        material.SetTexture(propertyId,images[imageIndex]);
+                        material.SetTexture(propertyId,img);
                         var isKtx = txt.isKtx;
                         TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
                         return true;

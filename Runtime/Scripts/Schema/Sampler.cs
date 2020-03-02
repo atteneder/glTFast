@@ -1,4 +1,6 @@
-﻿namespace GLTFast.Schema
+﻿using UnityEngine;
+
+namespace GLTFast.Schema
 {
     [System.Serializable]
     public class Sampler : RootChild
@@ -48,16 +50,41 @@
         /// <summary>
         /// Minification filter. All valid values correspond to WebGL enums.
         /// </summary>
-        public int MinFilter = (int) MinFilterMode.NearestMipmapLinear;
+        public int minFilter = (int) MinFilterMode.NearestMipmapLinear;
 
         /// <summary>
         /// s wrapping mode.  All valid values correspond to WebGL enums.
         /// </summary>
-        public int WrapS = (int) WrapMode.Repeat;
+        public int wrapS = (int) WrapMode.Repeat;
 
         /// <summary>
         /// t wrapping mode.  All valid values correspond to WebGL enums.
         /// </summary>
-        public int WrapT = (int) WrapMode.Repeat;
+        public int wrapT = (int) WrapMode.Repeat;
+
+        public TextureWrapMode wrapU {
+            get {
+                return ConvertWrapMode((WrapMode)wrapS);
+            }
+        }
+
+        public TextureWrapMode wrapV {
+            get {
+                return ConvertWrapMode((WrapMode)wrapT);
+            }
+        }
+
+        static TextureWrapMode ConvertWrapMode(WrapMode wrapMode) {
+            switch(wrapMode) {
+            case WrapMode.None:
+            case WrapMode.Repeat:
+            default:
+                return TextureWrapMode.Repeat;
+            case WrapMode.ClampToEdge:
+                return TextureWrapMode.Clamp;
+            case WrapMode.MirroredRepeat:
+                return TextureWrapMode.Mirror;
+            }
+        }
     }
 }

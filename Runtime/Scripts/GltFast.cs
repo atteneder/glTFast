@@ -652,11 +652,46 @@ namespace GLTFast {
                 imageCreateContexts = null;
             }
 
+            Dictionary<int,Texture2D>[] imageVariants = null;
+            if(images!=null && gltfRoot.textures!=null) {
+                imageVariants = new Dictionary<int,Texture2D>[images.Length];
+                for (int textureIndex = 0; textureIndex < gltfRoot.textures.Length; textureIndex++)
+                {
+                    var txt = gltfRoot.textures[textureIndex];
+                    var imageIndex = txt.GetImageIndex();
+                    var img = images[imageIndex];
+                    if(imageVariants[imageIndex]==null) {
+                        if(txt.sampler>=0) {
+                            ApplyTextureSampler(gltfRoot.samplers[txt.sampler], img);
+                        }
+                        imageVariants[imageIndex] = new Dictionary<int, Texture2D>();
+                        imageVariants[imageIndex][txt.sampler] = img;
+                    } else 
+                    if(!imageVariants[imageIndex].ContainsKey(txt.sampler)) {
+                        var newImg = Texture2D.Instantiate(img);
+                        resources.Add(newImg);
+#if DEBUG
+                        newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
+                        Debug.LogWarningFormat("Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory.", imageIndex);
+#endif
+                        if(txt.sampler>=0) {
+                            ApplyTextureSampler(gltfRoot.samplers[txt.sampler], newImg);
+                        }
+                        imageVariants[imageIndex][txt.sampler] = newImg;
+                    }
+                }
+            }
+
             Profiler.BeginSample("GenerateMaterial");
             if(gltfRoot.materials!=null) {
                 materials = new UnityEngine.Material[gltfRoot.materials.Length];
                 for(int i=0;i<materials.Length;i++) {
-                    materials[i] = materialGenerator.GenerateMaterial( gltfRoot.materials[i], ref gltfRoot.textures, ref gltfRoot.images, ref images );
+                    materials[i] = materialGenerator.GenerateMaterial(
+                        gltfRoot.materials[i],
+                        ref gltfRoot.textures,
+                        ref gltfRoot.images,
+                        ref imageVariants
+                        );
                 }
             }
             Profiler.EndSample();
@@ -687,6 +722,11 @@ namespace GLTFast {
 
                 yield return null;
             }
+        }
+
+        void ApplyTextureSampler(Sampler sampler, Texture2D image) {
+            image.wrapModeU = sampler.wrapU;
+            image.wrapModeV = sampler.wrapV;
         }
 
         /// <summary>

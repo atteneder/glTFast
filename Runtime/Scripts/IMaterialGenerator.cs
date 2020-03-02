@@ -1,4 +1,6 @@
-﻿namespace GLTFast {
+﻿using System.Collections.Generic;
+
+namespace GLTFast {
     using Schema;
     public interface IMaterialGenerator {
 
@@ -7,7 +9,7 @@
             Material gltfMaterial,
             ref Schema.Texture[] textures,
             ref Schema.Image[] schemaImages,
-            ref UnityEngine.Texture2D[] images
+            ref Dictionary<int,UnityEngine.Texture2D>[] imageVariants
             );
     }
 }
