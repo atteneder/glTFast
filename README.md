@@ -203,10 +203,11 @@ Such stuff should be able to place on top of this library.
 
 ## Known issues
 
-- Some shader variants (observed with double sided, textured metallic-roughness materials) don't work on older Unity versions (pre 2019.1). Probably cause is the shader feature keyword limit.
+- <sup>1</sup>Vertex accessors (positions, normals, etc.) that are used across meshes are duplicated and result in higher memory usage
+- <sup>1</sup>Using more than one samplers on the same image (via texture)
 - When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
 
-See details in the [issues](https://github.com/atteneder/glTFast/issues) section.
+<sup>1</sup>: A Unity API limitation.
 
 ## Get involved
 
