@@ -31,6 +31,7 @@ namespace GLTFast {
         const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
         const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         const string ErrorUnsupportedPrimitiveMode = "Primitive mode {0} is untested!";
+        const string ErrorMissingImageURL = "Image URL missing";
 #if !GLTFAST_BASISU
         const string ErrorKtxUnsupported = "KTX textures are not supported!";
 #endif
@@ -380,11 +381,14 @@ namespace GLTFast {
                         }
 
                         if (imgFormat!=ImageFormat.Unknown) {
-                            if (img.bufferView < 0 && !string.IsNullOrEmpty(img.uri))
-                            {
+                            if (img.bufferView < 0) {
                                 // Not Inside buffer
-                                LoadTexture(i,baseUri+img.uri,imgFormat==ImageFormat.KTX);
-                            }
+                                if(!string.IsNullOrEmpty(img.uri)) {
+                                    LoadTexture(i,baseUri+img.uri,imgFormat==ImageFormat.KTX);
+                                } else {
+                                    Debug.LogError(ErrorMissingImageURL);
+                                }
+                            } 
                         } else {
                             Debug.LogErrorFormat("Unknown image format (image {0};uri:{1})",i,img.uri);
                         }
@@ -891,13 +895,15 @@ namespace GLTFast {
                     resources.Add(images[i]);
                 }
                 var img = src_images[i];
-                ImageFormat imgFormat;
-                if(string.IsNullOrEmpty(img.mimeType)) {
-                    // Image is missing mime type
-                    // try to determine type by file extension
-                    imgFormat = GetImageFormatFromPath(img.uri);
-                } else {
-                    imgFormat = GetImageFormatFromMimeType(img.mimeType);
+                ImageFormat imgFormat = imageFormats[i];
+                if(imgFormat==ImageFormat.Unknown) {
+                    if(string.IsNullOrEmpty(img.mimeType)) {
+                        // Image is missing mime type
+                        // try to determine type by file extension
+                        imgFormat = GetImageFormatFromPath(img.uri);
+                    } else {
+                        imgFormat = GetImageFormatFromMimeType(img.mimeType);
+                    }
                 }
 
                 if (imgFormat!=ImageFormat.Unknown) {
