@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GLTFast {
     
-    public class TimeBudgetPerFrameDeferAgent : IDeferAgent
+    public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent
     {
         float lastTime;
         float timeBudget;
@@ -18,8 +18,11 @@ namespace GLTFast {
             Reset();
         }
 
-        // Update is called once per frame
-        public void Reset()
+        void Update() {
+            Reset();
+        }
+
+        void Reset()
         {
             lastTime = Time.realtimeSinceStartup;
         }

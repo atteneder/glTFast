@@ -6,26 +6,36 @@ namespace GLTFast
     public class GltfAsset : MonoBehaviour
     {
         public string url;
+        public bool loadOnStartup = true;
 
         protected GLTFast gLTFastInstance;
 
-        public UnityAction<bool> onLoadComplete;
+        public UnityAction<GltfAsset,bool> onLoadComplete;
 
-        // Use this for initialization
+
+        /// <summary>
+        /// Method for manual loading with custom <see cref="IDeferAgent"/>.
+        /// </summary>
+        /// <param name="url">URL of the glTF file.</param>
+        /// <param name="deferAgent">Defer Agent takes care of interrupting the
+        /// loading procedure in order to keep the frame rate responsive.</param>
+        public void Load( string url, IDeferAgent deferAgent=null ) {
+            this.url = url;
+            Load(deferAgent);
+        }
+
         void Start()
         {
-            if(!string.IsNullOrEmpty(url)){
+            if(loadOnStartup && !string.IsNullOrEmpty(url)){
+                // Automatic load on startup
                 Load();
             }
         }
 
-        public void Load( string url = null, IDeferAgent deferAgent=null ) {
-            if(url!=null) {
-                this.url = url;
-            }
+        void Load( IDeferAgent deferAgent=null ) {
             gLTFastInstance = new GLTFast(this);
             gLTFastInstance.onLoadComplete += OnLoadComplete;
-            gLTFastInstance.Load(this.url,deferAgent);
+            gLTFastInstance.Load(url,deferAgent);
         }
 
         protected virtual void OnLoadComplete(bool success) {
@@ -34,7 +44,7 @@ namespace GLTFast
                 gLTFastInstance.InstantiateGltf(transform);
             }
             if(onLoadComplete!=null) {
-                onLoadComplete(success);
+                onLoadComplete(this,success);
             }
         }
 

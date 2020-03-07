@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for texture samplers' filter modes (partial; see [issue](/atteneder/glTFast/issues/61))
 ### Changed
 - Increased performance due to more balanced threading by making all C# Jobs parallel
+- Refactored loading behavior
+  - Main loading class does not interfere with it's IDeferAgent anymore. It just follows its order.
+  - `GltfAsset` now has a `loadOnStartup` flat to disable automatic loading
+  - `GltfAsset.onLoadComplete` now also returns its `GltfAsset` instance for convenience
 
 ## [0.10.2] - 2020-02-26
 ### Changed

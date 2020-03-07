@@ -61,7 +61,7 @@ public class SampleModelsTest
 
             bool done = false;
 
-            gltfAsset.onLoadComplete += (success) => { done = true; Assert.IsTrue(success); };
+            gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
             gltfAsset.url = path;
 
             while (!done)
@@ -106,7 +106,7 @@ public class SampleModelsTest
 
             bool done = false;
 
-            gltfAsset.onLoadComplete += (success) => { done = true; Assert.IsTrue(success); };
+            gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
             gltfAsset.url = path;
 
             while (!done)

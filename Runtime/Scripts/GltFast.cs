@@ -138,10 +138,11 @@ namespace GLTFast {
                 int getIndex = url.LastIndexOf('?');
                 gltfBinary = getIndex>=0 && url.Substring(getIndex-GLB_EXT.Length,GLB_EXT.Length).Equals(GLB_EXT,StringComparison.OrdinalIgnoreCase);
             }
-            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary,deferAgent));
+            var da = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
+            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary,da));
         }
 
-        IEnumerator LoadRoutine( string url, bool gltfBinary, IDeferAgent deferAgent=null ) {
+        IEnumerator LoadRoutine( string url, bool gltfBinary, IDeferAgent deferAgent ) {
             UnityWebRequest www = UnityWebRequest.Get(url);
             yield return www.SendWebRequest();
      
@@ -150,7 +151,7 @@ namespace GLTFast {
                 Debug.LogErrorFormat("{0} {1}",www.error,url);
             }
             else {
-                this.deferAgent = deferAgent ?? new TimeBudgetPerFrameDeferAgent();
+                this.deferAgent = deferAgent;
                 yield return LoadContent(www.downloadHandler,url,gltfBinary);
             }
             DisposeVolatileData();
@@ -158,7 +159,6 @@ namespace GLTFast {
         }
 
         IEnumerator LoadContent( DownloadHandler dlh, string url, bool gltfBinary ) {
-            deferAgent.Reset();
 
             if(gltfBinary) {
                 LoadGlb(dlh.data,url);
@@ -190,7 +190,6 @@ namespace GLTFast {
                 yield break;
             }
 
-            deferAgent.Reset();
             var prepareRoutine = Prepare();
             while(prepareRoutine.MoveNext()) {
                 if(loadingError) {
