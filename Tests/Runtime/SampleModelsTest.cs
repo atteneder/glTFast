@@ -43,6 +43,8 @@ public class SampleModelsTest
     {
         yield return GltfSampleModels.LoadGlbFileUrls();
 
+        var deferAgent = new UninterruptedDeferAgent();
+
         foreach (var file in GltfSampleModels.glbFileUrls)
         {
             var path = string.Format(
@@ -62,7 +64,8 @@ public class SampleModelsTest
             bool done = false;
 
             gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
-            gltfAsset.url = path;
+            gltfAsset.loadOnStartup = false;
+            gltfAsset.Load(path,deferAgent);
 
             while (!done)
             {
@@ -77,6 +80,8 @@ public class SampleModelsTest
     public IEnumerator SampleModelsTestLoadAllGltf()
     {
         yield return GltfSampleModels.LoadGltfFileUrls();
+
+        var deferAgent = new UninterruptedDeferAgent();
 
         foreach (var file in GltfSampleModels.gltfFileUrls)
         {
@@ -107,7 +112,8 @@ public class SampleModelsTest
             bool done = false;
 
             gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
-            gltfAsset.url = path;
+            gltfAsset.loadOnStartup = false;
+            gltfAsset.Load(path,deferAgent);
 
             while (!done)
             {
