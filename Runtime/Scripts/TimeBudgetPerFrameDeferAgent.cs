@@ -9,7 +9,11 @@ namespace GLTFast {
         float lastTime;
         float timeBudget;
 
-        // Start is called before the first frame update
+        /// <summary>
+        /// Defers work to the next frame if a fix time budget is
+        /// used up.
+        /// </summary>
+        /// <param name="frameBudget">Time budget as part of the target frame rate.</param>
         public TimeBudgetPerFrameDeferAgent( float frameBudget = 0.5f )
         {
             float targetFrameRate = Application.targetFrameRate;

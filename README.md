@@ -126,25 +126,79 @@ Next time you open your project in Unity, it will download the packages automati
 
 ## Usage
 
-Minimum code to load a glTF file:
+You can load a glTF asset via HTTP(S) URL or a file path. You can load JSON based glTFs (`*.gltf`) and glTF-binary files (`*.glb`)
+
+> Note: glTFs are loaded via UnityWebRequests. As a result, in the Unity Editor and on certain platforms (e.g. iOS) file paths have to be prefixed with `file://`
+
+### Via adding the `GltfAsset` component
+
+The simplest way to load a glTF file is to add a `GltfAsset` component to a GameObject.
+
+![GltfAsset component][gltfasset_component]
+
+### Via Script
+
+Loading via script can have additional benefits
+
+- Add custom listeners to loading events
+- Load glTF once and instantiate it many times
+- Tweak and optimize loading performance
+
+#### Simple example
+
+This is the most simple way to load a glTF scene from script
 
 ```csharp
-var gltf = new GameObject().AddComponent<GLTFast.GltfAsset>();
+var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-Load glTF binary (.glb) files the same way:
+#### Custom loading event listeners
 
-```csharp
-var gltf = new GameObject().AddComponent<GLTFast.GltfAsset>();
-gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb";
-```
-
-In case you need to know when loading finished, add an event callback:
+In case you want to trigger custom logic when loading finished, add an event callback:
 
 ```csharp
 gltf.onLoadComplete += YourCallbackMethod;
 ```
+
+#### Instantiation
+
+This section is under construction.
+
+#### Tune loading performance
+
+When loading glTFs, glTFast let's you optimize for two diametrical extremes
+
+- A stable frame rate
+- Fastest loading time
+
+By default each `GltfAsset` instance tries not to block the main thread for longer than a certain time budget and defer the remaining loading process to the next frame / game loop iteration.
+
+If you load many glTF files at once, by default they won't be aware of each other and collectively might block the main game loop for too long.
+
+You can solve this by using a common "defer agent". It decides if work should continue right now or at the next game loop iteration. glTFast comes with two defer agents
+
+- `TimeBudgetPerFrameDeferAgent` for stable frame rate
+- `UninterruptedDeferAgent` for fastest, uninterrupted loading
+
+Usage example
+
+```csharp
+IDeferAgent deferAgent;
+// For a stable frame rate:
+deferAgent = gameObject.AddComponent<GLTFast.TimeBudgetPerFrameDeferAgent>();
+// Or for faster loading:
+deferAgent = new GLTFast.UninterruptedDeferAgent();
+foreach( var url in manyUrls) {
+  var gltf = go.AddComponent<GLTFast.GltfAsset>();
+  gltf.loadOnStartup = false; // prevent auto-loading
+  gltf.Load(url,deferAgent); // load manually with custom defer agent
+}
+```
+
+> Note 1: Depending on your glTF scene, using the `UninterruptedDeferAgent` may block the main thread for up to multiple seconds. Be sure to not do this during critical game play action.
+
+> Note2 : Using the `TimeBudgetPerFrameDeferAgent` does **not** guarantee a stutter free frame rate. This is because some sub tasks of the loading routine (like uploading a texture to the GPU) may take too long, cannot be interrupted and **have** to be done on the main thread.
 
 ### Materials and Shader Variants
 
@@ -235,3 +289,5 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+[gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
