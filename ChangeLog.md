@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.11.0] - 2020-03-07
 ### Added
 - Support for texture samplers' wrapping mode
 - Support for texture samplers' filter modes (partial; see [issue](/atteneder/glTFast/issues/61))
@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Main loading class does not interfere with it's IDeferAgent anymore. It just follows its order.
   - `GltfAsset` now has a `loadOnStartup` flat to disable automatic loading
   - `GltfAsset.onLoadComplete` now also returns its `GltfAsset` instance for convenience
+### Fixed
+- Redundant Load calls when using `UninterruptedDeferAgent`
 
 ## [0.10.2] - 2020-02-26
 ### Changed
