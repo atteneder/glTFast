@@ -18,6 +18,10 @@
 #define COPY_LEGACY
 #endif
 
+#if !UNITY_2019_3_OR_NEWER
+#define LEGACY_MESH
+#endif
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -1167,8 +1171,10 @@ namespace GLTFast {
                         SetAccessorUsage(att.NORMAL, isDraco ? AccessorUsage.Ignore : AccessorUsage.Normal);
                     if(att.TEXCOORD_0>=0)
                         SetAccessorUsage(att.TEXCOORD_0, isDraco ? AccessorUsage.Ignore : AccessorUsage.UV);
+#if LEGACY_MESH
                     if(att.TEXCOORD_1>=0)
                         SetAccessorUsage(att.TEXCOORD_1, isDraco ? AccessorUsage.Ignore : AccessorUsage.UV);
+#endif
                     if(att.TANGENT>=0)
                         SetAccessorUsage(att.TANGENT, isDraco ? AccessorUsage.Ignore : AccessorUsage.Tangent);
                     if(att.COLOR_0>=0)
@@ -1442,10 +1448,11 @@ namespace GLTFast {
             if(attributes.TEXCOORD_0>=0) {
                 c.uvs0 = (accessorData[attributes.TEXCOORD_0] as AccessorData<Vector2>).data;
             }
+#if LEGACY_MESH
             if(attributes.TEXCOORD_1>=0) {
                 c.uvs1 = (accessorData[attributes.TEXCOORD_1] as AccessorData<Vector2>).data;
             }
-
+#endif
             if(attributes.TANGENT>=0) {
                 c.tangents = (accessorData[attributes.TANGENT] as AccessorData<Vector4>).data;
             }
