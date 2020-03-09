@@ -33,8 +33,8 @@ public class GltfSampleModels {
 	public static IEnumerator LoadGltfFileUrls() {
 
 		if(gltfFileUrls!=null) yield break;
-		var set = new GltfSampleSet();
-		set.fileListPath = "test-gltf-file-list.txt";
+		var set = ScriptableObject.CreateInstance<GltfSampleSet>();
+		set.fileListPath = "glTF_gltf.txt";
 		set.streamingAssetsPath = "glTF-Sample-Models/2.0";
 		set.baseUrlWeb = baseUrl;
 		set.baseUrlLocal = baseUrlLocal;
@@ -49,8 +49,8 @@ public class GltfSampleModels {
 
     public static IEnumerator LoadGlbFileUrls() {
 		if(glbFileUrls!=null) yield break;
-		var set = new GltfSampleSet();
-		set.fileListPath = "test-glb-file-list.txt";
+		var set = ScriptableObject.CreateInstance<GltfSampleSet>();
+		set.fileListPath = "glTF_glb.txt";
 		set.streamingAssetsPath = "glTF-Sample-Models/2.0";
 		set.baseUrlWeb = baseUrl;
 		set.baseUrlLocal = baseUrlLocal;

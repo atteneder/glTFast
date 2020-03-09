@@ -14,9 +14,11 @@ public class SampleModelsTest
     public IEnumerator SampleModelsTestCheckFiles()
     {
         yield return GltfSampleModels.LoadGlbFileUrls();
+        Assert.AreEqual(GltfSampleModels.glbFileUrls.Length,44);
         CheckFileExist(GltfSampleModels.glbFileUrls);
 
         yield return GltfSampleModels.LoadGltfFileUrls();
+        Assert.AreEqual(GltfSampleModels.gltfFileUrls.Length,120);
         CheckFileExist(GltfSampleModels.gltfFileUrls);
     }
 
