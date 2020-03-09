@@ -18,6 +18,11 @@
             "name": "com.atteneder.draco",
             "expression": "1.1.2",
             "define": "DRACO_UNITY"
+        },
+        {
+            "name": "com.atteneder.ktx",
+            "expression": "0.4.0",
+            "define": "KTX_UNITY"
         }
     ],
     "noEngineReferences": false

@@ -215,13 +215,13 @@ An alternative way is to create placeholder materials for all feature combinatio
 
 ## <a name="basisu"></a>Experimental KTX / Basis Universal support
 
-To enable the experimental support for KTX / Basis Universal support, first add the [KtxUnity package](https://github.com/atteneder/KtxUnity) to your manifest.json
+To enable the experimental support for KTX / Basis Universal support, just add the [KtxUnity package](https://github.com/atteneder/KtxUnity) to your manifest.json
 
 ```json
 "com.atteneder.ktx": "https://github.com/atteneder/KtxUnity.git",
 ```
 
-Second, add `GLTFAST_BASISU` to your projects scripting define symbols in the player settings.
+If you use Unity older than 2019.1, you additionally have to add `KTX_UNITY` to your projects scripting define symbols in the player settings.
 
 ## Roadmap / Priorities
 

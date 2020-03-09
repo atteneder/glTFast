@@ -1,3 +1,5 @@
+#if KTX_UNITY
+
 using UnityEngine;
 
 namespace GLTFast.Schema {
@@ -13,3 +15,4 @@ namespace GLTFast.Schema {
         public uint supercompressionScheme;
     }
 }
+#endif // KTX_UNITY

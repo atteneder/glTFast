@@ -14,9 +14,9 @@ using UnityEngine.Events;
 using Unity.Jobs;
 using Unity.Collections;
 using System.Runtime.InteropServices;
-#if GLTFAST_BASISU
+#if KTX_UNITY
 using KtxUnity;
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
 
 namespace GLTFast {
 
@@ -32,21 +32,25 @@ namespace GLTFast {
         const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         const string ErrorUnsupportedPrimitiveMode = "Primitive mode {0} is untested!";
         const string ErrorMissingImageURL = "Image URL missing";
-#if !GLTFAST_BASISU
+#if !KTX_UNITY
         const string ErrorKtxUnsupported = "KTX textures are not supported!";
 #endif
+        const string ErrorPackageMissing = "{0} package needs to be installed in order to support glTF extension {1}!\nSee https://github.com/atteneder/glTFast#installing for instructions";
 
         const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
+        const string ExtTextureCTTF = "KHR_texture_cttf"; // Obsolete! to be removed
+        const string ExtImageKTX2 = "KHR_image_ktx2"; // Obsolete! to be removed
+        const string ExtTextureBasisu = "KHR_texture_basisu";
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
 #if DRACO_UNITY
             ExtDracoMeshCompression,
 #endif
-#if GLTFAST_BASISU
-            "KHR_texture_cttf", // Obsolete! to be removed
-            "KHR_image_ktx2", // Obsolete! to be removed
-            "KHR_texture_basisu",
-#endif // GLTFAST_BASISU
+#if KTX_UNITY
+            ExtTextureCTTF,
+            ExtImageKTX2,
+            ExtTextureBasisu,
+#endif // KTX_UNITY
             "KHR_materials_pbrSpecularGlossiness",
             "KHR_materials_unlit",
             "KHR_texture_transform",
@@ -94,10 +98,10 @@ namespace GLTFast {
         PrimitiveCreateContextBase[] primitiveContexts;
         Dictionary<Attributes,List<MeshPrimitive>>[] meshPrimitiveCluster;
         List<ImageCreateContext> imageCreateContexts;
-#if GLTFAST_BASISU
+#if KTX_UNITY
         List<KtxLoadContextBase> ktxLoadContexts;
         List<KtxLoadContextBase> ktxLoadContextsBuffer;
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
 
         Texture2D[] images = null;
         ImageFormat[] imageFormats;
@@ -185,9 +189,9 @@ namespace GLTFast {
             yield return routineBuffers;
             yield return routineTextures;
             
-#if GLTFAST_BASISU
+#if KTX_UNITY
             yield return WaitForKtxTextures();
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
 
             if(loadingError) {
                 OnLoadComplete(!loadingError);
@@ -308,7 +312,16 @@ namespace GLTFast {
                     if(!supported) {
 #if !DRACO_UNITY
                         if(ext==ExtDracoMeshCompression) {
-                            Debug.LogErrorFormat("DracoUnity package needs to be installed in order to support glTF extension {0}!\nSee https://github.com/atteneder/glTFast#installing for instructions",ext);
+                            Debug.LogErrorFormat(ErrorPackageMissing,"DracoUnity",ext);
+                        } else
+#endif
+#if !KTX_UNITY
+                        if(
+                            ext==ExtTextureCTTF ||
+                            ext==ExtImageKTX2 ||
+                            ext==ExtTextureBasisu
+                        ) {
+                            Debug.LogErrorFormat(ErrorPackageMissing,"KtxUnity",ext);
                         } else
 #endif
                         {
@@ -345,13 +358,13 @@ namespace GLTFast {
 
                 // Derive image type from texture extension
                 for (int i = 0; i < gltfRoot.textures.Length; i++) {
-#if GLTFAST_BASISU
+#if KTX_UNITY
                     var texture = gltfRoot.textures[i];
                     if(texture.isKtx) {
                         var imgIndex = texture.GetImageIndex();
                         imageFormats[imgIndex] = ImageFormat.KTX;
                     }
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
                 }
 
                 for (int i = 0; i < gltfRoot.images.Length; i++) {
@@ -441,7 +454,7 @@ namespace GLTFast {
                     }
                     else {
                         if(imageFormats[dl.Key]==ImageFormat.KTX) {
-#if GLTFAST_BASISU
+#if KTX_UNITY
                             if(ktxLoadContexts==null) {
                                 ktxLoadContexts = new List<KtxLoadContextBase>();
                             }
@@ -449,7 +462,7 @@ namespace GLTFast {
                             ktxLoadContexts.Add(ktxContext);
 #else
                             Debug.LogError(ErrorKtxUnsupported);
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
                         } else {
                             images[dl.Key] = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
                         }
@@ -459,7 +472,7 @@ namespace GLTFast {
         }
 
 
-#if GLTFAST_BASISU
+#if KTX_UNITY
         public IEnumerator WaitForKtxTextures() {
             if(ktxLoadContexts==null) yield break;
             foreach (var ktx in ktxLoadContexts)
@@ -469,7 +482,7 @@ namespace GLTFast {
             }
             ktxLoadContexts.Clear();
         }
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
 
         public bool InstantiateGltf( Transform parent ) {
             CreateGameObjects( gltfRoot, parent );
@@ -509,12 +522,12 @@ namespace GLTFast {
 
             UnityWebRequest www;
             if(isKtx) {
-#if GLTFAST_BASISU
+#if KTX_UNITY
                 www = UnityWebRequest.Get(url);
 #else
                 Debug.LogError(ErrorKtxUnsupported);
                 return;
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
             } else {
                 www = UnityWebRequestTexture.GetTexture(url);
             }
@@ -638,7 +651,7 @@ namespace GLTFast {
             CreatePrimitiveContexts(gltfRoot);
             yield return null;
 
-#if GLTFAST_BASISU
+#if KTX_UNITY
             if(ktxLoadContextsBuffer!=null) {
 
                 for (int i = 0; i < ktxLoadContextsBuffer.Count; i++)
@@ -652,7 +665,7 @@ namespace GLTFast {
                 }
                 ktxLoadContextsBuffer.Clear();
             }
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
 
             if(imageCreateContexts!=null) {
                 foreach(var jh in imageCreateContexts) {
@@ -921,7 +934,7 @@ namespace GLTFast {
                         var bufferView = bufferViews[img.bufferView];
                         
                         if(imgFormat == ImageFormat.KTX) {
-#if GLTFAST_BASISU
+#if KTX_UNITY
                             if(ktxLoadContextsBuffer==null) {
                                 ktxLoadContextsBuffer = new List<KtxLoadContextBase>();
                             }
@@ -929,7 +942,7 @@ namespace GLTFast {
                             ktxLoadContextsBuffer.Add(ktxContext);
 #else
                             Debug.LogError(ErrorKtxUnsupported);
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY
                         } else {
                             var buffer = GetBuffer(bufferView.buffer);
                             var chunk = binChunks[bufferView.buffer];

@@ -22,6 +22,8 @@
         /// </summary>
         public int bufferView = -1;
 
+#if KTX_UNITY
         public ImageExtension extensions;
+#endif
     }
 }

@@ -1,4 +1,4 @@
-﻿#if GLTFAST_BASISU
+﻿#if KTX_UNITY
 
 using System.Collections;
 using KtxUnity;
@@ -18,4 +18,4 @@ namespace GLTFast {
         }
     }
 }
-#endif // GLTFAST_BASISU
+#endif // KTX_UNITY

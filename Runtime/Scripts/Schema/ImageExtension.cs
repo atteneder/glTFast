@@ -1,3 +1,5 @@
+#if KTX_UNITY
+
 namespace GLTFast.Schema {
 
     [System.Serializable]
@@ -6,3 +8,4 @@ namespace GLTFast.Schema {
         public ImageKtx2 KHR_image_ktx2;
     }
 }
+#endif // KTX_UNITY
