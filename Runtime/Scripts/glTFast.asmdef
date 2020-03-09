@@ -13,5 +13,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [
+        {
+            "name": "com.atteneder.draco",
+            "expression": "1.1.2",
+            "define": "DRACO_UNITY"
+        }
+    ],
+    "noEngineReferences": false
 }

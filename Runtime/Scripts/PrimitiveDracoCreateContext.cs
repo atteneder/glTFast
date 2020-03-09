@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿#if DRACO_UNITY
+
+using UnityEngine;
 using UnityEngine.Profiling;
 using Unity.Jobs;
 using Unity.Collections;
@@ -54,4 +56,5 @@ namespace GLTFast {
             return new Primitive(mesh,materials);
         }
     }
-} 
+}
+#endif // DRACO_UNITY

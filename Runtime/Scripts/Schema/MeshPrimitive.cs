@@ -54,11 +54,13 @@
 
         public MeshPrimitiveExtensions extensions;
 
+#if DRACO_UNITY
         public bool isDracoCompressed {
             get {
                 return extensions!=null && extensions.KHR_draco_mesh_compression != null;
             }
         }
+#endif
     }
 
     [System.Serializable]
@@ -102,12 +104,16 @@
 
     [System.Serializable]
     public class MeshPrimitiveExtensions {
+#if DRACO_UNITY
         public MeshPrimitiveDracoExtension KHR_draco_mesh_compression;
+#endif
     }
 
+#if DRACO_UNITY
     [System.Serializable]
     public class MeshPrimitiveDracoExtension {
         public int bufferView;
         public Attributes attributes;
     }
+#endif
 }

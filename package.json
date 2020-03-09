@@ -4,9 +4,6 @@
   "displayName": "glTFast",
   "description": "Load glTF assets at runtime.",
   "unity": "2019.1",
-  "dependencies": {
-    "com.atteneder.draco": "1.0.1"
-  },
   "keywords": [
     "mesh",
     "gltf",

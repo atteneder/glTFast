@@ -36,8 +36,12 @@ namespace GLTFast {
         const string ErrorKtxUnsupported = "KTX textures are not supported!";
 #endif
 
+        const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
+
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
-            "KHR_draco_mesh_compression",
+#if DRACO_UNITY
+            ExtDracoMeshCompression,
+#endif
 #if GLTFAST_BASISU
             "KHR_texture_cttf", // Obsolete! to be removed
             "KHR_image_ktx2", // Obsolete! to be removed
@@ -302,7 +306,14 @@ namespace GLTFast {
                 foreach(var ext in gltfRoot.extensionsRequired) {
                     var supported = supportedExtensions.Contains(ext);
                     if(!supported) {
-                        Debug.LogErrorFormat("Required glTF extension {0} is not supported!",ext);
+#if !DRACO_UNITY
+                        if(ext==ExtDracoMeshCompression) {
+                            Debug.LogErrorFormat("DracoUnity package needs to be installed in order to support glTF extension {0}!\nSee https://github.com/atteneder/glTFast#installing for instructions",ext);
+                        } else
+#endif
+                        {
+                            Debug.LogErrorFormat("Required glTF extension {0} is not supported!",ext);
+                        }
                         return false;
                     }
                 }
@@ -988,8 +999,12 @@ namespace GLTFast {
             {
                 var mesh = gltf.meshes[meshIndex];
                 foreach(var primitive in mesh.primitives) {
-                    
+
+#if DRACO_UNITY
                     var isDraco = primitive.isDracoCompressed;
+#else
+                    var isDraco = false;
+#endif
 
                     var att = primitive.attributes;
                     if(primitive.indices>=0) {
@@ -1164,13 +1179,15 @@ namespace GLTFast {
 
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++) {
                         var primitive = cluster[primIndex];
-
+#if DRACO_UNITY
                         if( primitive.isDracoCompressed ) {
                             var c = new PrimitiveDracoCreateContext();
                             PreparePrimitiveDraco(gltf,mesh,primitive,ref c);
                             c.materials = new int[1];
                             context = c;
-                        } else {
+                        } else
+#endif
+                        {
                             PrimitiveCreateContext c;
                             if(context==null) {
                                 c = new PrimitiveCreateContext();
@@ -1206,8 +1223,10 @@ namespace GLTFast {
 
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++) {
                         var primitive = cluster[primIndex];
-                    
-                        if( !primitive.isDracoCompressed ) {
+#if DRACO_UNITY
+                        if( !primitive.isDracoCompressed )
+#endif
+                        {
                             PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
                             AssignAccessorData(gltf,mesh,primitive,ref c);
                             break;
@@ -1296,6 +1315,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
+#if DRACO_UNITY
         void PreparePrimitiveDraco( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveDracoCreateContext c ) {
             var draco_ext = primitive.extensions.KHR_draco_mesh_compression;
             
@@ -1313,6 +1333,7 @@ namespace GLTFast {
 
             c.jobHandle = job.Schedule();
         }
+#endif
 
         void OnMeshesLoaded( Mesh mesh ) {
             Debug.Log("draco is ready");
