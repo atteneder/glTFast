@@ -32,6 +32,7 @@ using UnityEngine.Profiling;
 using UnityEngine.Events;
 using Unity.Jobs;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using System.Runtime.InteropServices;
 #if KTX_UNITY
 using KtxUnity;
@@ -877,6 +878,13 @@ namespace GLTFast {
                     yield return null;
                 }
             }
+
+            foreach(var ad in accessorData) {
+                if(ad!=null) {
+                    ad.Dispose();
+                }
+            }
+            accessorData = null;
         }
 
         /// <summary>
@@ -1222,8 +1230,13 @@ namespace GLTFast {
                 switch(acc.typeEnum) {
                     case GLTFAccessorAttributeType.VEC3:
                         if (accessorUsage[i]==AccessorUsage.Position || accessorUsage[i]==AccessorUsage.Normal) {
+#if LEGACY_MESH
                             var adv3 = new AccessorData<Vector3>();
-                            GetVector3sJob(gltf,i,out adv3.data, out jh, out adv3.gcHandle);
+                            GetVector3sJob(gltf,i,out jh,out adv3.data,out adv3.gcHandle);
+#else
+                            var adv3 = new AccessorNativeData<Vector3>();
+                            GetVector3sJob(gltf,i,out jh,out adv3.data);
+#endif
                             adb = adv3;
                             tmpList.Add(jh.Value);
                         } else
@@ -1234,17 +1247,27 @@ namespace GLTFast {
                         break;
                     case GLTFAccessorAttributeType.VEC2:
                         if(accessorUsage[i]==AccessorUsage.UV) {
-                            var adv2 = new  AccessorData<Vector2>();
+#if LEGACY_MESH
+                            var adv2 = new AccessorData<Vector2>();
                             adv2.data = GetUvsJob(gltf,i, out jh, out adv2.gcHandle);
+#else
+                            var adv2 = new AccessorNativeData<Vector2>();
+                            adv2.data = GetUvsJob(gltf,i, out jh);
+#endif
                             tmpList.Add(jh.Value);
                             adb = adv2;
                         }
                         break;
                     case GLTFAccessorAttributeType.VEC4:
                         if(accessorUsage[i]==AccessorUsage.Tangent) {
-                            var adv4 = new  AccessorData<Vector4>();
-                            adb = adv4;
+#if LEGACY_MESH
+                            var adv4 = new AccessorData<Vector4>();
                             GetTangentsJob(gltf,i,out adv4.data, out jh, out adv4.gcHandle);
+#else
+                            var adv4 = new AccessorNativeData<Vector4>();
+                            GetTangentsJob(gltf,i,out adv4.data, out jh);
+#endif
+                            adb = adv4;
                             tmpList.Add(jh.Value);
                         } else
                         if(accessorUsage[i]==AccessorUsage.Color) {
@@ -1274,21 +1297,39 @@ namespace GLTFast {
         }
 
         AccessorDataBase LoadAccessorDataColor(Root gltf,int accessorIndex, out JobHandle? jh) {
-            Color32[] colors32;
-            Color[] colors;
+            var colorAccessor = gltf.accessors[accessorIndex];
+#if LEGACY_MESH
             GCHandle handle;
-            GetColorsJob(gltf,accessorIndex,out colors32, out colors, out jh, out handle);
-            if( IsColorAccessorByte(gltf.accessors[accessorIndex]) ) {
+            if(IsColorAccessorByte(colorAccessor)) {
+                Color32[] colors32;
+                GetColors32Job(gltf,accessorIndex,out colors32,out jh,out handle);
                 var adv3 = new AccessorData<Color32>();
                 adv3.data = colors32;
                 adv3.gcHandle = handle;
                 return adv3;
             } else {
+                Color[] colors;
+                GetColorsJob(gltf,accessorIndex,out colors,out jh,out handle);
                 var adv3 = new AccessorData<Color>();
                 adv3.data = colors;
                 adv3.gcHandle = handle;
                 return adv3;
             }
+#else
+            if(IsColorAccessorByte(colorAccessor)) {
+                NativeArray<Color32> colors32;
+                GetColors32Job(gltf,accessorIndex,out colors32,out jh);
+                var adv3 = new AccessorNativeData<Color32>();
+                adv3.data = colors32;
+                return adv3;
+            } else {
+                NativeArray<Color> colors;
+                GetColorsJob(gltf,accessorIndex,out colors,out jh);
+                var adv3 = new AccessorNativeData<Color>();
+                adv3.data = colors;
+                return adv3;
+            }
+#endif
         }
 
         void SetAccessorUsage(int index, AccessorUsage newUsage) {
@@ -1437,31 +1478,56 @@ namespace GLTFast {
 
             int vertexCount;
             {
+#if LEGACY_MESH
                 c.positions = (accessorData[attributes.POSITION] as AccessorData<Vector3>).data;
+#else
+                c.positions = (accessorData[attributes.POSITION] as AccessorNativeData<Vector3>).data;
+#endif
                 vertexCount = c.positions.Length;
             }
 
             if(attributes.NORMAL>=0) {
+#if LEGACY_MESH
                 c.normals = (accessorData[attributes.NORMAL] as AccessorData<Vector3>).data;
+#else
+                c.normals = (accessorData[attributes.NORMAL] as AccessorNativeData<Vector3>).data;
+#endif
             }
 
+#if LEGACY_MESH
             if(attributes.TEXCOORD_0>=0) {
                 c.uvs0 = (accessorData[attributes.TEXCOORD_0] as AccessorData<Vector2>).data;
             }
-#if LEGACY_MESH
             if(attributes.TEXCOORD_1>=0) {
                 c.uvs1 = (accessorData[attributes.TEXCOORD_1] as AccessorData<Vector2>).data;
             }
+#else
+            if(attributes.TEXCOORD_0>=0) {
+                c.uvs0 = (accessorData[attributes.TEXCOORD_0] as AccessorNativeData<Vector2>).data;
+            }
 #endif
+
             if(attributes.TANGENT>=0) {
+#if LEGACY_MESH
                 c.tangents = (accessorData[attributes.TANGENT] as AccessorData<Vector4>).data;
+#else
+                c.tangents = (accessorData[attributes.TANGENT] as AccessorNativeData<Vector4>).data;
+#endif
             }
 
             if(attributes.COLOR_0>=0) {
                 if(IsColorAccessorByte(gltf.accessors[attributes.COLOR_0])) {
+#if LEGACY_MESH
                     c.colors32 = (accessorData[attributes.COLOR_0] as AccessorData<Color32>).data;
+#else
+                    c.colors32 = (accessorData[attributes.COLOR_0] as AccessorNativeData<Color32>).data;
+#endif
                 } else {
+#if LEGACY_MESH
                     c.colors = (accessorData[attributes.COLOR_0] as AccessorData<Color>).data;
+#else
+                    c.colors = (accessorData[attributes.COLOR_0] as AccessorNativeData<Color>).data;
+#endif
                 }
             }
 
@@ -1492,7 +1558,12 @@ namespace GLTFast {
             Debug.Log("draco is ready");
         }
 
-        unsafe Vector2[] GetUvsJob( Root gltf, int accessorIndex, out JobHandle? jobHandle, out GCHandle resultHandle ) {
+#if LEGACY_MESH
+        unsafe Vector2[] GetUvsJob( Root gltf, int accessorIndex, out JobHandle? jobHandle, out GCHandle resultHandle )
+#else
+        unsafe NativeArray<Vector2> GetUvsJob( Root gltf, int accessorIndex, out JobHandle? jobHandle )
+#endif
+        {
             Profiler.BeginSample("PrepareUVs");
             
             var uvAccessor = gltf.accessors[accessorIndex];
@@ -1505,9 +1576,13 @@ namespace GLTFast {
             var buffer = GetBuffer(bufferView.buffer);
             var chunk = binChunks[bufferView.buffer];
             Profiler.BeginSample("Alloc");
+#if LEGACY_MESH
             var result = new Vector2[uvAccessor.count];
-            Profiler.EndSample();
             resultHandle = GCHandle.Alloc(result, GCHandleType.Pinned);
+#else
+            var result = new NativeArray<Vector2>(uvAccessor.count,Allocator.TempJob);
+#endif
+            Profiler.EndSample();
             int start = uvAccessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             switch( uvAccessor.componentType ) {
@@ -1515,18 +1590,32 @@ namespace GLTFast {
                 if (gltf.IsAccessorInterleaved(accessorIndex)) {
                     var jobUv = new Jobs.GetVector2sInterleavedJob();
                     jobUv.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         jobUv.input = (byte*)src;
                         jobUv.result = (Vector2*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        jobUv.input = (byte*)src;
+                        jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                    }
+#endif
                     jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                 } else {
                     var jobUv = new Jobs.GetUVsFloatJob();
                     // jobUv.count = uvAccessor.count;
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         jobUv.input = (float*)src;
                         jobUv.result = (Vector2*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        jobUv.input = (float*)src;
+                        jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                    }
+#endif
                     jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                 }
                 break;
@@ -1535,34 +1624,62 @@ namespace GLTFast {
                     if (uvAccessor.normalized) {
                         var jobUv = new Jobs.GetUVsUInt8InterleavedNormalizedJob();
                         jobUv.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (byte*) src;
                             jobUv.result = (Vector2*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     } else {
                         var jobUv = new Jobs.GetUVsUInt8InterleavedJob();
                         jobUv.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (byte*) src;
                             jobUv.result = (Vector2*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     }
                 } else {
                     if(uvAccessor.normalized) {
                         var jobUv = new Jobs.GetUVsUInt8NormalizedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (byte*) src;
                             jobUv.result = (Vector2*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     } else {
                         var jobUv = new Jobs.GetUVsUInt8Job();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (byte*) src;
                             jobUv.result = (Vector2*)dst;
                         }
+    #else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+    #endif
                         jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     }
                 }
@@ -1572,34 +1689,62 @@ namespace GLTFast {
                     if (uvAccessor.normalized) {
                         var jobUv = new Jobs.GetUVsUInt16InterleavedNormalizedJob();
                         jobUv.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (byte*) src;
                             jobUv.result = (Vector2*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     } else {
                         var jobUv = new Jobs.GetUVsUInt16InterleavedJob();
                         jobUv.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (byte*) src;
                             jobUv.result = (Vector2*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobUv.input = (byte*) src;
+                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     }
                 } else {
                     if(uvAccessor.normalized) {
                         var jobUv = new Jobs.GetUVsUInt16NormalizedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (System.UInt16*) src;
                             jobUv.result = (Vector2*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobUv.input = (System.UInt16*) src;
+                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     } else {
                         var jobUv = new Jobs.GetUVsUInt16Job();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             jobUv.input = (System.UInt16*) src;
                             jobUv.result = (Vector2*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobUv.input = (System.UInt16*) src;
+                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
                     }
                 }
@@ -1608,18 +1753,32 @@ namespace GLTFast {
                 if (uvAccessor.normalized) {
                     var job = new Jobs.GetUVsInt16InterleavedNormalizedJob();
                     job.byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 4;
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (System.Int16*) src;
                         job.result = (Vector2*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        job.input = (System.Int16*) src;
+                        job.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                    }
+#endif
                     jobHandle = job.Schedule(uvAccessor.count,DefaultBatchCount);
                 } else {
                     var job = new Jobs.GetUVsInt16InterleavedJob();
                     job.byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 4;
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (System.Int16*) src;
                         job.result = (Vector2*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        job.input = (System.Int16*) src;
+                        job.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                    }
+#endif
                     jobHandle = job.Schedule(uvAccessor.count,DefaultBatchCount);
                 }
                 break;
@@ -1628,18 +1787,32 @@ namespace GLTFast {
                 if (uvAccessor.normalized) {
                     var jobInt8 = new Jobs.GetUVsInt8InterleavedNormalizedJob();
                     jobInt8.byteStride = byteStride;
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         jobInt8.input = (sbyte*) src;
                         jobInt8.result = (Vector2*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        jobInt8.input = (sbyte*) src;
+                        jobInt8.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                    }
+#endif
                     jobHandle = jobInt8.Schedule(uvAccessor.count,DefaultBatchCount);
                 } else {
                     var jobInt8 = new Jobs.GetUVsInt8InterleavedJob();
                     jobInt8.byteStride = byteStride;
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         jobInt8.input = (sbyte*) src;
                         jobInt8.result = (Vector2*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        jobInt8.input = (sbyte*) src;
+                        jobInt8.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                    }
+#endif
                     jobHandle = jobInt8.Schedule(uvAccessor.count,DefaultBatchCount);
                 }
                 break;
@@ -1761,7 +1934,14 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        unsafe int GetVector3sJob(Root gltf, int accessorIndex, out Vector3[] result, out JobHandle? jobHandle, out GCHandle resultHandle ) {
+        unsafe int GetVector3sJob(Root gltf, int accessorIndex, out JobHandle? jobHandle,
+#if LEGACY_MESH
+            out Vector3[] result,
+            out GCHandle resultHandle
+#else
+            out NativeArray<Vector3> result
+#endif
+        ) {
             Profiler.BeginSample("PrepareGetVector3sJob");
             Assert.IsTrue(accessorIndex>=0);
             #if DEBUG
@@ -1774,36 +1954,61 @@ namespace GLTFast {
             var chunk = binChunks[bufferView.buffer];
             int count = accessor.count;
             Profiler.BeginSample("Alloc");
+#if LEGACY_MESH
             result = new Vector3[count];
-            Profiler.EndSample();
             resultHandle = GCHandle.Alloc(result, GCHandleType.Pinned);
+#else
+            result = new NativeArray<Vector3>(count,Allocator.TempJob);
+#endif
+            Profiler.EndSample();
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             if (gltf.IsAccessorInterleaved(accessorIndex)) {
                 if(accessor.componentType == GLTFComponentType.Float) {
                     var job = new Jobs.GetVector3sInterleavedJob();
                     job.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (byte*)src;
                         job.result = (Vector3*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        job.input = (byte*)src;
+                        job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                    }
+#endif
                     jobHandle = job.Schedule(count,DefaultBatchCount);
                 } else
                 if(accessor.componentType == GLTFComponentType.UnsignedShort) {
                     if (accessor.normalized) {
                         var job = new Jobs.GetUInt16PositionsInterleavedNormalizedJob();
                         job.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.input = (byte*)src;
                             job.result = (Vector3*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start])) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetUInt16PositionsInterleavedJob();
                         job.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.input = (byte*)src;
                             job.result = (Vector3*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start])) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
                 } else
@@ -1812,18 +2017,32 @@ namespace GLTFast {
                     if (accessor.normalized) {
                         var job = new Jobs.GetVector3FromInt16InterleavedNormalizedJob();
                         job.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.input = (byte*)src;
                             job.result = (Vector3*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetVector3FromInt16InterleavedJob();
                         job.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.input = (byte*)src;
                             job.result = (Vector3*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
                 } else
@@ -1831,15 +2050,27 @@ namespace GLTFast {
                     // TODO: test positions. did not have test files
                     if (accessor.normalized) {
                         var job = new Jobs.GetVector3FromSByteInterleavedNormalizedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.Setup(bufferView.byteStride,(sbyte*)src,(Vector3*)dst);
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.Setup(bufferView.byteStride,(sbyte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetVector3FromSByteInterleavedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.Setup(bufferView.byteStride,(sbyte*)src,(Vector3*)dst);
                         }
+#else
+                        fixed( void* src = &(buffer[start])) {
+                            job.Setup(bufferView.byteStride,(sbyte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
                 } else
@@ -1847,15 +2078,27 @@ namespace GLTFast {
                     // TODO: test. did not have test files
                     if (accessor.normalized) {
                         var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.Setup(bufferView.byteStride,(byte*)src,(Vector3*)dst);
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.Setup(bufferView.byteStride,(byte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetVector3FromByteInterleavedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.Setup(bufferView.byteStride,(byte*)src,(Vector3*)dst);
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.Setup(bufferView.byteStride,(byte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
                 } else {
@@ -1865,27 +2108,47 @@ namespace GLTFast {
             } else {
                 if(accessor.componentType == GLTFComponentType.Float) {
                     var job = new Jobs.GetVector3sJob();
-                    // job.count = accessor.count;
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                         job.input = (float*)src;
                         job.result = (float*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start])) {
+                        job.input = (float*)src;
+                        job.result = (float*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                    }
+#endif
                     jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 } else
                 if(accessor.componentType == GLTFComponentType.UnsignedShort) {
                     if (accessor.normalized) {
                         var job = new Jobs.GetUInt16PositionsNormalizedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.input = (System.UInt16*)src;
                             job.result = (Vector3*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start])) {
+                            job.input = (System.UInt16*)src;
+                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetUInt16PositionsJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.input = (System.UInt16*)src;
                             job.result = (Vector3*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.input = (System.UInt16*)src;
+                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                     }
                 } else
@@ -1895,18 +2158,32 @@ namespace GLTFast {
                     if (accessor.normalized) {
                         var job = new Jobs.GetVector3FromInt16InterleavedNormalizedJob();
                         job.byteStride = 6; // 2 bytes * 3
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.input = (byte*)src;
                             job.result = (Vector3*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetVector3FromInt16InterleavedJob();
                         job.byteStride = 6; // 2 bytes * 3
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.input = (byte*)src;
                             job.result = (Vector3*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.input = (byte*)src;
+                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
                 } else
@@ -1915,15 +2192,27 @@ namespace GLTFast {
                     // TODO: is a non-interleaved variant faster?
                     if(accessor.normalized) {
                         var job = new Jobs.GetVector3FromSByteInterleavedNormalizedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.Setup(3,(sbyte*)src,(Vector3*)dst);
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.Setup(3,(sbyte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetVector3FromSByteInterleavedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.Setup(3,(sbyte*)src,(Vector3*)dst);
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.Setup(3,(sbyte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
                 } else
@@ -1932,15 +2221,27 @@ namespace GLTFast {
                     // TODO: is a non-interleaved variant faster?
                     if (accessor.normalized) {
                         var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.Setup(3,(byte*)src,(Vector3*)dst);
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.Setup(3,(byte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetVector3FromByteInterleavedJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(result[0]) ) {
                             job.Setup(3,(byte*)src,(Vector3*)dst);
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            job.Setup(3,(byte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
+                        }
+#endif
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     }
                 } else {
@@ -1952,7 +2253,12 @@ namespace GLTFast {
             return count;
         }
 
-        unsafe void GetTangentsJob(Root gltf, int accessorIndex, out Vector4[] tangents, out JobHandle? jobHandle, out GCHandle resultHandle ) {
+#if LEGACY_MESH
+        unsafe void GetTangentsJob(Root gltf, int accessorIndex, out Vector4[] tangents, out JobHandle? jobHandle, out GCHandle resultHandle )
+#else
+        unsafe void GetTangentsJob(Root gltf, int accessorIndex, out NativeArray<Vector4> tangents, out JobHandle? jobHandle )
+#endif
+        {
             Profiler.BeginSample("PrepareTangents");
             #if DEBUG
             Assert.AreEqual( GetAccessorTye(gltf.accessors[accessorIndex].typeEnum), typeof(Vector4) );
@@ -1962,9 +2268,13 @@ namespace GLTFast {
             var buffer = GetBuffer(bufferView.buffer);
             var chunk = binChunks[bufferView.buffer];
             Profiler.BeginSample("Alloc");
+#if LEGACY_MESH
             tangents = new Vector4[accessor.count];
-            Profiler.EndSample();
             resultHandle = GCHandle.Alloc(tangents, GCHandleType.Pinned);
+#else
+            tangents = new NativeArray<Vector4>(accessor.count,Allocator.TempJob);
+#endif
+            Profiler.EndSample();
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             var interleaved = gltf.IsAccessorInterleaved((int)accessorIndex);
             switch(accessor.componentType) {
@@ -1972,17 +2282,31 @@ namespace GLTFast {
                     if(interleaved) {
                         var jobTangentI = new Jobs.GetVector4sInterleavedJob();
                         jobTangentI.byteStride = bufferView.byteStride;
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(tangents[0]) ) {
                             jobTangentI.input = (byte*)src;
                             jobTangentI.result = (Vector4*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobTangentI.input = (byte*)src;
+                            jobTangentI.result = (Vector4*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(tangents);
+                        }
+#endif
                         jobHandle = jobTangentI.Schedule(accessor.count,DefaultBatchCount);
                     } else {
                         var jobTangentFloat = new Jobs.GetVector4sJob();
+#if LEGACY_MESH
                         fixed( void* src = &(buffer[start]), dst = &(tangents[0]) ) {
                             jobTangentFloat.input = (float*)src;
                             jobTangentFloat.result = (float*)dst;
                         }
+#else
+                        fixed( void* src = &(buffer[start]) ) {
+                            jobTangentFloat.input = (float*)src;
+                            jobTangentFloat.result = (float*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(tangents);
+                        }
+#endif
                         jobHandle = jobTangentFloat.Schedule(accessor.count,DefaultBatchCount);
                     }
                     break;
@@ -1990,20 +2314,34 @@ namespace GLTFast {
                     var jobTangent = new Jobs.GetVector4sInt16NormalizedInterleavedJob();
                     jobTangent.byteStride = interleaved ? bufferView.byteStride : 8;
                     Assert.IsTrue(accessor.normalized);
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(tangents[0]) ) {
                         jobTangent.input = (System.Int16*)src;
                         jobTangent.result = (Vector4*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        jobTangent.input = (System.Int16*)src;
+                        jobTangent.result = (Vector4*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(tangents);
+                    }
+#endif
                     jobHandle = jobTangent.Schedule(accessor.count,DefaultBatchCount);
                     break;
                 case GLTFComponentType.Byte:
                     var jobTangentByte = new Jobs.GetVector4sInt8NormalizedInterleavedJob();
                     jobTangentByte.byteStride = interleaved ? bufferView.byteStride : 4;
                     Assert.IsTrue(accessor.normalized);
+#if LEGACY_MESH
                     fixed( void* src = &(buffer[start]), dst = &(tangents[0]) ) {
                         jobTangentByte.input = (sbyte*)src;
                         jobTangentByte.result = (Vector4*)dst;
                     }
+#else
+                    fixed( void* src = &(buffer[start]) ) {
+                        jobTangentByte.input = (sbyte*)src;
+                        jobTangentByte.result = (Vector4*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(tangents);
+                    }
+#endif
                     jobHandle = jobTangentByte.Schedule(accessor.count,DefaultBatchCount);
                     break;
                 default:
@@ -2024,7 +2362,116 @@ namespace GLTFast {
             return colorAccessor.componentType == GLTFComponentType.UnsignedByte;
         }
 
-        unsafe void GetColorsJob( Root gltf, int accessorIndex, out Color32[] colors32, out Color[] colors, out JobHandle? jobHandle, out GCHandle resultHandle ) {
+#if LEGACY_MESH
+        unsafe void GetColors32Job( Root gltf, int accessorIndex, out Color32[] colors32, out JobHandle? jobHandle, out GCHandle resultHandle )
+#else
+        unsafe void GetColors32Job( Root gltf, int accessorIndex, out NativeArray<Color32> colors32, out JobHandle? jobHandle )
+#endif
+        {
+            Profiler.BeginSample("PrepareColors32");
+            var colorAccessor = gltf.accessors[accessorIndex];
+            var bufferView = gltf.bufferViews[colorAccessor.bufferView];
+            var buffer = GetBuffer(bufferView.buffer);
+            var chunk = binChunks[bufferView.buffer];
+            var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
+            int start = colorAccessor.byteOffset + bufferView.byteOffset + chunk.start;
+
+            Profiler.BeginSample("AllocPin");
+#if LEGACY_MESH
+            colors32 = new Color32[colorAccessor.count];
+            resultHandle = GCHandle.Alloc(colors32,GCHandleType.Pinned);
+#else
+            colors32 = new NativeArray<Color32>(colorAccessor.count,Allocator.TempJob);
+#endif
+            Profiler.EndSample();
+            jobHandle = null;
+
+            if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
+            {
+                switch (colorAccessor.componentType)
+                {
+                    case GLTFComponentType.UnsignedByte:
+                        if(interleaved) {
+                            // TODO
+                            Debug.LogError("Not jobified yet!");
+                        } else {
+                            var job = new Jobs.GetColorsVec3UInt8Job();
+#if LEGACY_MESH
+                            fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
+                                job.input = (byte*) src;
+                                job.result = (Color32*)dst;
+                            }
+#else
+                            fixed( void* src = &(buffer[start]) ) {
+                                job.input = (byte*) src;
+                                job.result = (Color32*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors32);
+                            }
+#endif
+                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
+                        }
+                        break;
+                    default:
+                        Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
+                        break;
+                }
+            }
+            else if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC4)
+            {
+                switch (colorAccessor.componentType)
+                {
+                    case GLTFComponentType.UnsignedByte:
+                        if(interleaved) {
+                            // TODO
+                            Debug.LogError("Not jobified yet!");
+                        } else {
+#if !COPY_LEGACY
+                            var job = new Jobs.MemCopyJob();
+                            job.bufferSize = colorAccessor.count*4;
+#if LEGACY_MESH
+                            fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
+                                job.input = src;
+                                job.result = dst;
+                            }
+#else
+                            fixed( void* src = &(buffer[start]) ) {
+                                job.input = src;
+                                job.result = NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors32);
+                            }
+#endif
+                            jobHandle = job.Schedule();
+#else
+                            var job = new Jobs.MemCopyLegacyJob();
+#if LEGACY_MESH
+                            fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
+                                job.input = (byte*)src;
+                                job.result = (byte*)dst;
+                            }
+#else
+                            fixed( void* src = &(buffer[start]) ) {
+                                job.input = (byte*)src;
+                                job.result = (byte*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors32);
+                            }
+#endif
+                            jobHandle = job.Schedule(colorAccessor.count*4,DefaultBatchCount);
+#endif
+                        }
+                        break;
+                    default:
+                        Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
+                        break;
+                }
+            } else {
+                Debug.LogErrorFormat( ErrorUnsupportedType, "color accessor", colorAccessor.typeEnum);
+            }
+            Profiler.EndSample();
+        }
+
+#if LEGACY_MESH
+        unsafe void GetColorsJob( Root gltf, int accessorIndex, out Color[] colors, out JobHandle? jobHandle, out GCHandle resultHandle )
+#else
+        unsafe void GetColorsJob( Root gltf, int accessorIndex, out NativeArray<Color> colors, out JobHandle? jobHandle )
+#endif
+        {
             Profiler.BeginSample("PrepareColors");
             var colorAccessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[colorAccessor.bufferView];
@@ -2034,15 +2481,12 @@ namespace GLTFast {
             int start = colorAccessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("AllocPin");
-            if(IsColorAccessorByte(colorAccessor)) {
-                colors32 = new Color32[colorAccessor.count];
-                resultHandle = GCHandle.Alloc(colors32,GCHandleType.Pinned);
-                colors = null;
-            } else {
-                colors = new Color[colorAccessor.count];
-                resultHandle = GCHandle.Alloc(colors,GCHandleType.Pinned);
-                colors32 = null;
-            }
+#if LEGACY_MESH
+            colors = new Color[colorAccessor.count];
+            resultHandle = GCHandle.Alloc(colors,GCHandleType.Pinned);
+#else
+            colors = new NativeArray<Color>(colorAccessor.count,Allocator.TempJob);
+#endif
             Profiler.EndSample();
             jobHandle = null;
 
@@ -2056,23 +2500,17 @@ namespace GLTFast {
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec3FloatJob();
+#if LEGACY_MESH
                             fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
                                 job.input = (float*) src;
                                 job.result = (Color*)dst;
                             }
-                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
-                        }
-                        break;
-                    case GLTFComponentType.UnsignedByte:
-                        if(interleaved) {
-                            // TODO
-                            Debug.LogError("Not jobified yet!");
-                        } else {
-                            var job = new Jobs.GetColorsVec3UInt8Job();
-                            fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
-                                job.input = (byte*) src;
-                                job.result = (Color32*)dst;
+#else
+                            fixed( void* src = &(buffer[start]) ) {
+                                job.input = (float*) src;
+                                job.result = (Color*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
                             }
+#endif
                             jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
                         }
                         break;
@@ -2082,10 +2520,17 @@ namespace GLTFast {
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec3UInt16Job();
+#if LEGACY_MESH
                             fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
                                 job.input = (System.UInt16*) src;
                                 job.result = (Color*)dst;
                             }
+#else
+                            fixed( void* src = &(buffer[start]) ) {
+                                job.input = (System.UInt16*) src;
+                                job.result = (Color*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
+                            }
+#endif
                             jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
                         }
                         break;
@@ -2106,41 +2551,32 @@ namespace GLTFast {
 #if !COPY_LEGACY
                             var job = new Jobs.MemCopyJob();
                             job.bufferSize = colorAccessor.count*16;
+#if LEGACY_MESH
                             fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
                                 job.input = src;
                                 job.result = dst;
                             }
-                            jobHandle = job.Schedule();
 #else
-                            var job = new Jobs.MemCopyLegacyJob();
-                            fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
-                                job.input = (byte*)src;
-                                job.result = (byte*)dst;
+                            fixed( void* src = &(buffer[start]) ) {
+                                job.input = src;
+                                job.result = NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
                             }
-                            jobHandle = job.Schedule(colorAccessor.count*16,DefaultBatchCount);
 #endif
-                        }
-                        break;
-                    case GLTFComponentType.UnsignedByte:
-                        if(interleaved) {
-                            // TODO
-                            Debug.LogError("Not jobified yet!");
-                        } else {
-#if !COPY_LEGACY
-                            var job = new Jobs.MemCopyJob();
-                            job.bufferSize = colorAccessor.count*4;
-                            fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
-                                job.input = src;
-                                job.result = dst;
-                            }
                             jobHandle = job.Schedule();
 #else
                             var job = new Jobs.MemCopyLegacyJob();
-                            fixed( void* src = &(buffer[start]), dst = &(colors32[0]) ) {
+#if LEGACY_MESH
+                            fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
                                 job.input = (byte*)src;
                                 job.result = (byte*)dst;
                             }
-                            jobHandle = job.Schedule(colorAccessor.count*4,DefaultBatchCount);
+#else
+                            fixed( void* src = &(buffer[start])) ) {
+                                job.input = (byte*)src;
+                                job.result = (byte*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
+                            }
+#endif
+                            jobHandle = job.Schedule(colorAccessor.count*16,DefaultBatchCount);
 #endif
                         }
                         break;
@@ -2150,10 +2586,17 @@ namespace GLTFast {
                             Debug.LogError("Not jobified yet!");
                         } else {
                             var job = new Jobs.GetColorsVec4UInt16Job();
+#if LEGACY_MESH
                             fixed( void* src = &(buffer[start]), dst = &(colors[0]) ) {
                                 job.input = (System.UInt16*) src;
                                 job.result = (Color*)dst;
                             }
+#else
+                            fixed( void* src = &(buffer[start]) ) {
+                                job.input = (System.UInt16*) src;
+                                job.result = (Color*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
+                            }
+#endif
                             jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
                         }
                         break;
