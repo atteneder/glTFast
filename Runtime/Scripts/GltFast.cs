@@ -1219,18 +1219,14 @@ namespace GLTFast {
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
 
-                foreach( var cluster in meshPrimitiveCluster[meshIndex].Values) {
-
-                    for (int primIndex = 0; primIndex < cluster.Count; primIndex++) {
-                        var primitive = cluster[primIndex];
+                foreach( var cluster in meshPrimitiveCluster[meshIndex]) {
 #if DRACO_UNITY
-                        if( !primitive.isDracoCompressed )
+                    if( !cluster.Value[0].isDracoCompressed )
 #endif
-                        {
-                            PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
-                            AssignAccessorData(gltf,mesh,primitive,ref c);
-                            break;
-                        }
+                    {
+                        // Create one PrimitiveCreateContext per Primitive cluster
+                        PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
+                        AssignAccessorData(gltf,mesh,cluster.Key,ref c);
                     }
                     i++;
                 }
@@ -1278,37 +1274,37 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        unsafe void AssignAccessorData( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c ) {
+        unsafe void AssignAccessorData( Root gltf, Mesh mesh, Attributes attributes, ref PrimitiveCreateContext c ) {
 
             Profiler.BeginSample("AssignAccessorData");
             c.mesh = mesh;
 
             int vertexCount;
             {
-                c.positions = (accessorData[primitive.attributes.POSITION] as AccessorData<Vector3>).data;
+                c.positions = (accessorData[attributes.POSITION] as AccessorData<Vector3>).data;
                 vertexCount = c.positions.Length;
             }
 
-            if(primitive.attributes.NORMAL>=0) {
-                c.normals = (accessorData[primitive.attributes.NORMAL] as AccessorData<Vector3>).data;
+            if(attributes.NORMAL>=0) {
+                c.normals = (accessorData[attributes.NORMAL] as AccessorData<Vector3>).data;
             }
 
-            if(primitive.attributes.TEXCOORD_0>=0) {
-                c.uvs0 = (accessorData[primitive.attributes.TEXCOORD_0] as AccessorData<Vector2>).data;
+            if(attributes.TEXCOORD_0>=0) {
+                c.uvs0 = (accessorData[attributes.TEXCOORD_0] as AccessorData<Vector2>).data;
             }
-            if(primitive.attributes.TEXCOORD_1>=0) {
-                c.uvs1 = (accessorData[primitive.attributes.TEXCOORD_1] as AccessorData<Vector2>).data;
-            }
-
-            if(primitive.attributes.TANGENT>=0) {
-                c.tangents = (accessorData[primitive.attributes.TANGENT] as AccessorData<Vector4>).data;
+            if(attributes.TEXCOORD_1>=0) {
+                c.uvs1 = (accessorData[attributes.TEXCOORD_1] as AccessorData<Vector2>).data;
             }
 
-            if(primitive.attributes.COLOR_0>=0) {
-                if(IsColorAccessorByte(gltf.accessors[primitive.attributes.COLOR_0])) {
-                    c.colors32 = (accessorData[primitive.attributes.COLOR_0] as AccessorData<Color32>).data;
+            if(attributes.TANGENT>=0) {
+                c.tangents = (accessorData[attributes.TANGENT] as AccessorData<Vector4>).data;
+            }
+
+            if(attributes.COLOR_0>=0) {
+                if(IsColorAccessorByte(gltf.accessors[attributes.COLOR_0])) {
+                    c.colors32 = (accessorData[attributes.COLOR_0] as AccessorData<Color32>).data;
                 } else {
-                    c.colors = (accessorData[primitive.attributes.COLOR_0] as AccessorData<Color>).data;
+                    c.colors = (accessorData[attributes.COLOR_0] as AccessorData<Color>).data;
                 }
             }
 
