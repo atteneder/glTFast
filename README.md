@@ -92,9 +92,25 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 ## Installing
 
-You have to manually add the package's URL into your [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html)
+Add glTFast via Unity's Package Manager ( Window -> Package Manager ). Click the ➕ on the top left and choose *Add package from GIT URL*.
 
-glTFast has a dependency to [DracoUnity](https://gitlab.com/atteneder/DracoUnity) (which provides support for compressed meshes), which also needs to be added.
+![][upm_install]
+
+Enter the following URL:
+
+`https://github.com/atteneder/glTFast.git`
+
+To add support for Draco mesh compression, repeat the last step and also add the DracoUnity packages using this URL:
+
+`https://gitlab.com/atteneder/DracoUnity.git`
+
+> Note: You have to have a GIT LFS client (large file support) installed on your system. Otherwise you will get an error that the native library file (dll on Windows) is corrupt!
+
+If you use Unity older than 2019.1, you additionally have to add `DRACO_UNITY` to your projects scripting define symbols in the player settings.
+
+### Legacy installation
+
+With older versions of Unity and the Package Manager you have to add the package in a manifest file manually. Add the package's URL into your [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html)
 
 Inside your Unity project there's the folder `Packages` containing a file called `manifest.json`. You have to open it and add the following lines inside the `dependencies` category:
 
@@ -119,8 +135,6 @@ It should look something like this:
   }
 }
 ```
-
-Note: You have to have a GIT LFS client (large file support) installed on your system. Otherwise you will get an error that the native library file (dll on Windows) is corrupt!
 
 Next time you open your project in Unity, it will download the packages automatically. There's more detail about how to add packages via GIT URLs in the [Unity documentation](https://docs.unity3d.com/Manual/upm-git.html).
 
@@ -215,7 +229,12 @@ An alternative way is to create placeholder materials for all feature combinatio
 
 ## <a name="basisu"></a>Experimental KTX / Basis Universal support
 
-To enable the experimental support for KTX / Basis Universal support, just add the [KtxUnity package](https://github.com/atteneder/KtxUnity) to your manifest.json
+To enable the experimental support for KTX / Basis Universal support, add the [KtxUnity package](https://github.com/atteneder/KtxUnity) via the Package Manager (see [Installing](#installing))
+
+`https://github.com/atteneder/KtxUnity.git`
+
+
+Or the manual/legacy way, add this to youre manifest.json file:
 
 ```json
 "com.atteneder.ktx": "https://github.com/atteneder/KtxUnity.git",
@@ -291,3 +310,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 [gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
+[upm_install]: ./Documentation~/img/upm_install.png  "Unity Package Manager add menu"
