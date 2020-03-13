@@ -62,7 +62,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
   - [x] Vertex colors
   - [x] Draco mesh compression (via extension)
   - [x] Implicit (no) indices
-  - [ ] Per primitive material ([issue](issues/32))
+  - [x] Per primitive material
   - [ ] Multiple texture coordinates sets ([issue](issues/34))
   - [ ] Joints
   - [ ] Weights
