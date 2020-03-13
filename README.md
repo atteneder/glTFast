@@ -1,5 +1,4 @@
-# glTFast
-
+# glTFast 🚀
 glTFast is a Unity package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
 
 It focuses on speed, memory efficiency and a small build footprint.
