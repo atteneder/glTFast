@@ -11,7 +11,9 @@ using UnityEngine.Rendering;
 
 namespace GLTFast
 {
+#if BURST
     using Unity.Mathematics;
+#endif
     using Schema;
 
     struct VertexInputData {
