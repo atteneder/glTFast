@@ -31,14 +31,17 @@ namespace GLTFast
 
         bool hasNormals;
         bool hasTangents;
+        bool hasColors;
         
         VertexBufferTexCoordsBase texCoords;
+        VertexBufferColors colors;
 
         public override unsafe JobHandle? ScheduleVertexJobs(
             VertexInputData posInput,
             VertexInputData? nrmInput = null,
             VertexInputData? tanInput = null,
-            VertexInputData[] uvInputs = null
+            VertexInputData[] uvInputs = null,
+            VertexInputData? colorInput = null
         ) {
             Profiler.BeginSample("ScheduleVertexJobs");
             vData = new NativeArray<VType>(posInput.count,Allocator.Persistent);
@@ -68,6 +71,12 @@ namespace GLTFast
                         texCoords = new VertexBufferTexCoords<VTexCoord2>();
                         break;
                 }
+            }
+
+            hasColors = colorInput.HasValue;
+            if (hasColors) {
+                jobCount++;
+                colors = new VertexBufferColors();
             }
 
             NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, Allocator.Temp);
@@ -129,9 +138,16 @@ namespace GLTFast
                     }
                 }
             }
-            
+
+            int jhOffset = 2;
             if (texCoords!=null) {
-                texCoords.ScheduleVertexUVJobs(uvInputs, new NativeSlice<JobHandle>(handles,2,uvInputs.Length) );
+                texCoords.ScheduleVertexUVJobs(uvInputs, new NativeSlice<JobHandle>(handles,jhOffset,uvInputs.Length) );
+                jhOffset++;
+            }
+            
+            if (hasColors) {
+                colors.ScheduleVertexColorJob(colorInput.Value, new NativeSlice<JobHandle>(handles, jhOffset, 1));
+                jhOffset++;
             }
             
             var handle = (jobCount > 1) ? JobHandle.CombineDependencies(handles) : handles[0];
@@ -145,32 +161,33 @@ namespace GLTFast
             if (hasNormals) vadLen++;
             if (hasTangents) vadLen++;
             if (texCoords != null) vadLen += texCoords.uvSetCount;
+            if (colors != null) vadLen++;
             vad = new VertexAttributeDescriptor[vadLen];
             var vadCount = 0;
-            vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
+            int stream = 0;
+            vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, stream);
             vadCount++;
             if(hasNormals) {
-                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3, 0);
+                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3, stream);
                 vadCount++;
             }
             if(hasTangents) {
-                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4, 0);
+                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4, stream);
                 vadCount++;
+            }
+            stream++;
+            
+            if (texCoords != null) {
+                texCoords.AddDescriptors(vad,vadCount,stream);
+                vadCount++;
+                stream++;
             }
 
-            if (texCoords != null) {
-                texCoords.AddDescriptors(vad,vadCount);
-            }
-            /*
-            if(colors32.IsCreated) {
-                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.UInt8, 4, vadCount);
+            if (colors != null) {
+                colors.AddDescriptors(vad,vadCount,stream);
                 vadCount++;
-            } else
-            if(colors.IsCreated) {
-                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4, vadCount);
-                vadCount++;
+                stream++;
             }
-            */
         }
 
         public override void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
@@ -185,40 +202,21 @@ namespace GLTFast
             Profiler.EndSample();
 
             Profiler.BeginSample("SetVertexBufferData");
-            int vadCount = 0;
-            msh.SetVertexBufferData(vData,0,0,vData.Length,vadCount,flags);
-            vadCount++;
+            int stream = 0;
+            msh.SetVertexBufferData(vData,0,0,vData.Length,stream,flags);
+            stream++;
             Profiler.EndSample();
 
             if (texCoords != null) {
-                texCoords.ApplyOnMesh(msh,flags);
+                texCoords.ApplyOnMesh(msh,stream,flags);
+                stream++;
             }
-            /*
-            if(uvs0.IsCreated) {
-                Profiler.BeginSample("SetUVs0");
-                msh.SetVertexBufferData(uvs0,0,0,uvs0.Length,vadCount,flags);
-                vadCount++;
-                Profiler.EndSample();
+            
+            if (colors != null) {
+                colors.ApplyOnMesh(msh,stream,flags);
+                stream++;
             }
-            if(uvs1.IsCreated) {
-                Profiler.BeginSample("SetUVs1");
-                msh.SetVertexBufferData(uvs1,0,0,uvs1.Length,vadCount,flags);
-                vadCount++;
-                Profiler.EndSample();
-            }
-            if(colors32.IsCreated) {
-                Profiler.BeginSample("SetColors32");
-                msh.SetVertexBufferData(colors32,0,0,colors32.Length,vadCount,flags);
-                vadCount++;
-                Profiler.EndSample();
-            } else
-            if(colors.IsCreated) {
-                Profiler.BeginSample("SetColors");
-                msh.SetVertexBufferData(colors,0,0,colors.Length,vadCount,flags);
-                vadCount++;
-                Profiler.EndSample();
-            }
-            //*/
+
             Profiler.EndSample();
         }
 
@@ -229,6 +227,10 @@ namespace GLTFast
 
             if (texCoords != null) {
                 texCoords.Dispose();
+            }
+
+            if (colors != null) {
+                colors.Dispose();
             }
         }
     }

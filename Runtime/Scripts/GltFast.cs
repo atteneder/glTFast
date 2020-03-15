@@ -49,7 +49,7 @@ namespace GLTFast {
         const string GLB_EXT = ".glb";
 
         public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
-        const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
+        public const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
         const string ErrorUnsupportedPrimitiveMode = "Primitive mode {0} is untested!";
         const string ErrorMissingImageURL = "Image URL missing";
 #if !KTX_UNITY
@@ -1165,7 +1165,6 @@ namespace GLTFast {
             vertexAttributes = new Dictionary<Attributes,VertexBufferConfigBase>();
             meshPrimitiveCluster = new Dictionary<Attributes,List<MeshPrimitive>>[gltf.meshes.Length];
 
-            /// Step 1:
             /// Iterate over all primitive vertex attributes and remember the accessors usage.
             accessorUsage = new AccessorUsage[gltf.accessors.Length];
             int totalPrimitives = 0;
@@ -1263,7 +1262,12 @@ namespace GLTFast {
                         uvInputs[1] = GetAccessorParams(gltf, att.TEXCOORD_1);
                     }
                 }
-                var jh = attributeConfig.Value.ScheduleVertexJobs(posInput,nrmInput,tanInput,uvInputs);
+                VertexInputData? colorInput = null;
+                if (att.COLOR_0 >= 0) {
+                    colorInput = GetAccessorParams(gltf, att.COLOR_0);
+                }
+
+                var jh = attributeConfig.Value.ScheduleVertexJobs(posInput,nrmInput,tanInput,uvInputs,colorInput);
                 if (jh.HasValue) {
                     tmpList.Add(jh.Value);
                 } else {
@@ -1271,8 +1275,7 @@ namespace GLTFast {
                 }
             }
 
-            /// Step 2:
-            /// Retrieve indices and vertex data jobified, according to accessor usage.
+            /// Retrieve indices data jobified
             accessorData = new AccessorDataBase[gltf.accessors.Length];
 
             for(int i=0; i<accessorData.Length; i++) {
@@ -1283,52 +1286,17 @@ namespace GLTFast {
                     // the accessor only holds meta information
                     continue;
                 }
-                JobHandle? jh;
-                AccessorDataBase adb = null;
-                switch(acc.typeEnum) {
-                    // case GLTFAccessorAttributeType.VEC3:
-                    //     if (accessorUsage[i]==AccessorUsage.Position || accessorUsage[i]==AccessorUsage.Normal) {
-                    //         var adv3 = new AccessorNativeData<Vector3>();
-                    //         GetVector3sJob(gltf,i,out jh,out adv3.data);
-                    //         adb = adv3;
-                    //         tmpList.Add(jh.Value);
-                    //     } else
-                    //     if(accessorUsage[i]==AccessorUsage.Color) {
-                    //         adb = LoadAccessorDataColor(gltf,i,out jh);
-                    //         tmpList.Add(jh.Value);
-                    //     }
-                    //     break;
-                    // case GLTFAccessorAttributeType.VEC2:
-                    //     if(accessorUsage[i]==AccessorUsage.UV) {
-                    //         var adv2 = new AccessorNativeData<Vector2>();
-                    //         adv2.data = GetUvsJob(gltf,i, out jh);
-                    //         tmpList.Add(jh.Value);
-                    //         adb = adv2;
-                    //     }
-                    //     break;
-                    // case GLTFAccessorAttributeType.VEC4:
-                    //     if(accessorUsage[i]==AccessorUsage.Tangent) {
-                    //         var adv4 = new AccessorNativeData<Vector4>();
-                    //         GetTangentsJob(gltf,i,out adv4.data, out jh);
-                    //         adb = adv4;
-                    //         tmpList.Add(jh.Value);
-                    //     } else
-                    //     if(accessorUsage[i]==AccessorUsage.Color) {
-                    //         adb = LoadAccessorDataColor(gltf,i,out jh);
-                    //     }
-                    //     break;
-                    case GLTFAccessorAttributeType.SCALAR:
-                        if( accessorUsage[i]==AccessorUsage.IndexFlipped ||
-                            accessorUsage[i]==AccessorUsage.Index )
-                        {
-                            var ads = new  AccessorData<int>();
-                            adb = ads;
-                            GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle, accessorUsage[i]==AccessorUsage.IndexFlipped);
-                            tmpList.Add(jh.Value);
-                        }
-                        break;
+                if (acc.typeEnum==GLTFAccessorAttributeType.SCALAR
+                    &&( accessorUsage[i]==AccessorUsage.IndexFlipped ||
+                        accessorUsage[i]==AccessorUsage.Index )
+                    )
+                {
+                    JobHandle? jh;
+                    var ads = new  AccessorData<int>();
+                    GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle, accessorUsage[i]==AccessorUsage.IndexFlipped);
+                    tmpList.Add(jh.Value);
+                    accessorData[i] = ads;
                 }
-                accessorData[i] = adb;
             }
 
             int primitiveIndes=0;
@@ -1373,23 +1341,6 @@ namespace GLTFast {
             JobHandle.ScheduleBatchedJobs();
 
             Profiler.EndSample();
-        }
-
-        AccessorDataBase LoadAccessorDataColor(Root gltf,int accessorIndex, out JobHandle? jh) {
-            var colorAccessor = gltf.accessors[accessorIndex];
-            if(IsColorAccessorByte(colorAccessor)) {
-                NativeArray<Color32> colors32;
-                GetColors32Job(gltf,accessorIndex,out colors32,out jh);
-                var adv3 = new AccessorNativeData<Color32>();
-                adv3.data = colors32;
-                return adv3;
-            } else {
-                NativeArray<Color> colors;
-                GetColorsJob(gltf,accessorIndex,out colors,out jh);
-                var adv3 = new AccessorNativeData<Color>();
-                adv3.data = colors;
-                return adv3;
-            }
         }
 
         void SetAccessorUsage(int index, AccessorUsage newUsage) {
@@ -1622,14 +1573,14 @@ namespace GLTFast {
                 if(flip) {
                     var job16 = new Jobs.GetIndicesUInt16FlippedJob();
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job16.input = (System.UInt16*) src;
+                        job16.input = (ushort*) src;
                         job16.result = (int*) dst;
                     }
                     jobHandle = job16.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
                     var job16 = new Jobs.GetIndicesUInt16Job();
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job16.input = (System.UInt16*) src;
+                        job16.input = (ushort*) src;
                         job16.result = (int*) dst;
                     }
                     jobHandle = job16.Schedule(accessor.count,DefaultBatchCount);
@@ -1639,14 +1590,14 @@ namespace GLTFast {
                 if(flip) {
                     var job32 = new Jobs.GetIndicesUInt32FlippedJob();
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job32.input = (System.UInt32*) src;
+                        job32.input = (uint*) src;
                         job32.result = (int*) dst;
                     }
                     jobHandle = job32.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
                     var job32 = new Jobs.GetIndicesUInt32Job();
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job32.input = (System.UInt32*) src;
+                        job32.input = (uint*) src;
                         job32.result = (int*) dst;
                     }
                     jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
@@ -1662,17 +1613,15 @@ namespace GLTFast {
         }
 
         VertexInputData GetAccessorParams(Root gltf, int accessorIndex) {
-            var result = new VertexInputData();
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
             var bufferIndex = bufferView.buffer;
-            result.buffer = GetBuffer(bufferIndex);
-            var chunk = binChunks[bufferIndex];
-            result.count = accessor.count;
-            result.startOffset = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-            result.byteStride = bufferView.byteStride;
-            result.type = accessor.componentType;
-            result.normalize = accessor.normalized;
+            var result = new VertexInputData {
+                accessor = accessor,
+                buffer = GetBuffer(bufferIndex),
+                bufferView = bufferView,
+                chunkStart = binChunks[bufferIndex].start
+            };
             return result;
         }
  /*
@@ -1789,14 +1738,14 @@ namespace GLTFast {
                     if (accessor.normalized) {
                         var job = new Jobs.GetUInt16PositionsNormalizedJob();
                         fixed( void* src = &(buffer[start])) {
-                            job.input = (System.UInt16*)src;
+                            job.input = (ushort*)src;
                             job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
                         }
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetUInt16PositionsJob();
                         fixed( void* src = &(buffer[start]) ) {
-                            job.input = (System.UInt16*)src;
+                            job.input = (ushort*)src;
                             job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
                         }
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
@@ -1876,180 +1825,6 @@ namespace GLTFast {
             return colorAccessor.componentType == GLTFComponentType.UnsignedByte;
         }
 
-        unsafe void GetColors32Job( Root gltf, int accessorIndex, out NativeArray<Color32> colors32, out JobHandle? jobHandle )
-        {
-            Profiler.BeginSample("PrepareColors32");
-            var colorAccessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[colorAccessor.bufferView];
-            var buffer = GetBuffer(bufferView.buffer);
-            var chunk = binChunks[bufferView.buffer];
-            var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
-            int start = colorAccessor.byteOffset + bufferView.byteOffset + chunk.start;
-
-            Profiler.BeginSample("AllocPin");
-            colors32 = new NativeArray<Color32>(colorAccessor.count,Allocator.TempJob);
-            Profiler.EndSample();
-            jobHandle = null;
-
-            if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
-            {
-                switch (colorAccessor.componentType)
-                {
-                    case GLTFComponentType.UnsignedByte:
-                        if(interleaved) {
-                            // TODO
-                            Debug.LogError("Not jobified yet!");
-                        } else {
-                            var job = new Jobs.GetColorsVec3UInt8Job();
-                            fixed( void* src = &(buffer[start]) ) {
-                                job.input = (byte*) src;
-                                job.result = (Color32*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors32);
-                            }
-                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
-                        }
-                        break;
-                    default:
-                        Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
-                        break;
-                }
-            }
-            else if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC4)
-            {
-                switch (colorAccessor.componentType)
-                {
-                    case GLTFComponentType.UnsignedByte:
-                        if(interleaved) {
-                            // TODO
-                            Debug.LogError("Not jobified yet!");
-                        } else {
-#if !COPY_LEGACY
-                            var job = new Jobs.MemCopyJob();
-                            job.bufferSize = colorAccessor.count*4;
-                            fixed( void* src = &(buffer[start]) ) {
-                                job.input = src;
-                                job.result = NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors32);
-                            }
-                            jobHandle = job.Schedule();
-#else
-                            var job = new Jobs.MemCopyLegacyJob();
-                            fixed( void* src = &(buffer[start]) ) {
-                                job.input = (byte*)src;
-                                job.result = (byte*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors32);
-                            }
-                            jobHandle = job.Schedule(colorAccessor.count*4,DefaultBatchCount);
-#endif
-                        }
-                        break;
-                    default:
-                        Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
-                        break;
-                }
-            } else {
-                Debug.LogErrorFormat( ErrorUnsupportedType, "color accessor", colorAccessor.typeEnum);
-            }
-            Profiler.EndSample();
-        }
-
-        unsafe void GetColorsJob( Root gltf, int accessorIndex, out NativeArray<Color> colors, out JobHandle? jobHandle )
-        {
-            Profiler.BeginSample("PrepareColors");
-            var colorAccessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[colorAccessor.bufferView];
-            var buffer = GetBuffer(bufferView.buffer);
-            var chunk = binChunks[bufferView.buffer];
-            var interleaved = gltf.IsAccessorInterleaved( accessorIndex );
-            int start = colorAccessor.byteOffset + bufferView.byteOffset + chunk.start;
-
-            Profiler.BeginSample("AllocPin");
-            colors = new NativeArray<Color>(colorAccessor.count,Allocator.TempJob);
-            Profiler.EndSample();
-            jobHandle = null;
-
-            if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC3)
-            {
-                switch (colorAccessor.componentType)
-                {
-                    case GLTFComponentType.Float:
-                        if(interleaved) {
-                            // TODO
-                            Debug.LogError("Not jobified yet!");
-                        } else {
-                            var job = new Jobs.GetColorsVec3FloatJob();
-                            fixed( void* src = &(buffer[start]) ) {
-                                job.input = (float*) src;
-                                job.result = (Color*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
-                            }
-                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
-                        }
-                        break;
-                    case GLTFComponentType.UnsignedShort:
-                        if(interleaved) {
-                            // TODO
-                            Debug.LogError("Not jobified yet!");
-                        } else {
-                            var job = new Jobs.GetColorsVec3UInt16Job();
-                            fixed( void* src = &(buffer[start]) ) {
-                                job.input = (System.UInt16*) src;
-                                job.result = (Color*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
-                            }
-                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
-                        }
-                        break;
-                    default:
-                        Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
-                        break;
-                }
-            }
-            else if (colorAccessor.typeEnum == GLTFAccessorAttributeType.VEC4)
-            {
-                switch (colorAccessor.componentType)
-                {
-                    case GLTFComponentType.Float:
-                        if(interleaved) {
-                            // TODO
-                            Debug.LogError("Not jobified yet!");
-                        } else {
-#if !COPY_LEGACY
-                            var job = new Jobs.MemCopyJob();
-                            job.bufferSize = colorAccessor.count*16;
-                            fixed( void* src = &(buffer[start]) ) {
-                                job.input = src;
-                                job.result = NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
-                            }
-                            jobHandle = job.Schedule();
-#else
-                            var job = new Jobs.MemCopyLegacyJob();
-                            fixed( void* src = &(buffer[start])) ) {
-                                job.input = (byte*)src;
-                                job.result = (byte*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
-                            }
-                            jobHandle = job.Schedule(colorAccessor.count*16,DefaultBatchCount);
-#endif
-                        }
-                        break;
-                    case GLTFComponentType.UnsignedShort:
-                        if(interleaved) {
-                            // TODO
-                            Debug.LogError("Not jobified yet!");
-                        } else {
-                            var job = new Jobs.GetColorsVec4UInt16Job();
-                            fixed( void* src = &(buffer[start]) ) {
-                                job.input = (System.UInt16*) src;
-                                job.result = (Color*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(colors);
-                            }
-                            jobHandle = job.Schedule(colorAccessor.count,DefaultBatchCount);
-                        }
-                        break;
-                    default:
-                        Debug.LogErrorFormat(ErrorUnsupportedColorFormat, colorAccessor.componentType);
-                        break;
-                }
-            } else {
-                Debug.LogErrorFormat( ErrorUnsupportedType, "color accessor", colorAccessor.typeEnum);
-            }
-            Profiler.EndSample();
-        }
-
         bool IsKnownImageMimeType(string mimeType) {
             return GetImageFormatFromMimeType(mimeType) != ImageFormat.Unknown;
         }
@@ -2113,13 +1888,13 @@ namespace GLTFast {
                 case GLTFComponentType.Float:
                     return typeof(float);
                 case GLTFComponentType.Short:
-                    return typeof(System.Int16);
+                    return typeof(short);
                 case GLTFComponentType.UnsignedByte:
                     return typeof(byte);
                 case GLTFComponentType.UnsignedInt:
                     return typeof(int);
                 case GLTFComponentType.UnsignedShort:
-                    return typeof(System.UInt16);
+                    return typeof(ushort);
                 default:
                     Debug.LogError("Unknown GLTFComponentType");
                     return null;

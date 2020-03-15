@@ -14,8 +14,8 @@ namespace GLTFast {
     abstract class VertexBufferTexCoordsBase {
         public int uvSetCount { get; protected set; }
         public abstract unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles);
-        public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset);
-        public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default);
+        public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
+        public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default);
         public abstract void Dispose();
     }
 
@@ -53,19 +53,19 @@ namespace GLTFast {
             return true;
         }
 
-        public override void AddDescriptors(VertexAttributeDescriptor[] dst, int offset) {
+        public override void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream) {
             VertexAttribute vatt = VertexAttribute.TexCoord0;
             for (int i = 0; i < uvSetCount; i++) {
                 if (i == 1) {
                     vatt = VertexAttribute.TexCoord1;
                 }
-                dst[offset+i] = new VertexAttributeDescriptor(vatt, VertexAttributeFormat.Float32, 2, 1);
+                dst[offset+i] = new VertexAttributeDescriptor(vatt, VertexAttributeFormat.Float32, 2, stream);
             }
         }
 
-        public override void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
+        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
             Profiler.BeginSample("ApplyUVs");
-            msh.SetVertexBufferData(vData,0,0,vData.Length,1,flags);
+            msh.SetVertexBufferData(vData,0,0,vData.Length,stream,flags);
             Profiler.EndSample();
         }
 

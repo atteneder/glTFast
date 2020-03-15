@@ -18,12 +18,34 @@ namespace GLTFast
     using Schema;
 
     struct VertexInputData {
+
+        public Accessor accessor;
+        public BufferView bufferView;
+        public int chunkStart;
         public byte[] buffer;
-        public int startOffset;
-        public int count;
-        public int byteStride;
-        public GLTFComponentType type;
-        public bool normalize;
+
+        public int startOffset {
+            get { return accessor.byteOffset + bufferView.byteOffset + chunkStart; }
+        }
+
+        public int count {
+            get { return accessor.count; }
+        }
+
+        public int byteStride {
+            get { return bufferView.byteStride; }
+        }
+
+        public GLTFComponentType type {
+            get { return accessor.componentType; }
+        }
+
+        public GLTFAccessorAttributeType attributeType {
+            get { return accessor.typeEnum; }
+        }
+        public bool normalize {
+            get { return accessor.normalized; }
+        }
     }
 
     abstract class VertexBufferConfigBase {
@@ -36,7 +58,8 @@ namespace GLTFast
             VertexInputData posInput,
             VertexInputData? nrmInput = null,
             VertexInputData? tanInput = null,
-            VertexInputData[] uvInputs = null
+            VertexInputData[] uvInputs = null,
+            VertexInputData? colorInput = null
             );
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default);
         public abstract void Dispose();
