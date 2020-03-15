@@ -247,11 +247,14 @@ namespace GLTFast.Jobs {
     public unsafe struct GetUVsUInt8InterleavedJob : IJobParallelFor  {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public byte* input;
+
+        [ReadOnly]
+        public int outputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -259,9 +262,10 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            byte* off = input + byteStride*i;
-            result[i].x = *off;
-            result[i].y = 1 - *(off+1);
+            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
+            byte* off = input + inputByteStride*i;
+            *resultV = *off;
+            *(resultV+1) = 1 - *(off+1);
         }
     }
 
@@ -269,11 +273,14 @@ namespace GLTFast.Jobs {
     public unsafe struct GetUVsUInt8InterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public byte* input;
+
+        [ReadOnly]
+        public int outputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -281,9 +288,10 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            byte* off = input + byteStride*i;
-            result[i].x = *off / 255f;
-            result[i].y = 1 - *(off+1) / 255f;
+            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
+            byte* off = input + inputByteStride*i;
+            *resultV = *off / 255f;
+            *(resultV+1) = 1 - *(off+1) / 255f;
         }
     }
 
@@ -291,11 +299,14 @@ namespace GLTFast.Jobs {
     public unsafe struct GetUVsUInt16InterleavedJob : IJobParallelFor  {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public byte* input;
+
+        [ReadOnly]
+        public int outputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -303,9 +314,10 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            System.UInt16* uv = (System.UInt16*) (input + byteStride*i);
-            result[i].x = *uv;
-            result[i].y = 1 - *(uv+1);
+            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
+            System.UInt16* uv = (System.UInt16*) (input + inputByteStride*i);
+            *resultV = *uv;
+            *(resultV+1) = 1 - *(uv+1);
         }
     }
 
@@ -313,11 +325,14 @@ namespace GLTFast.Jobs {
     public unsafe struct GetUVsUInt16InterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public byte* input;
+
+        [ReadOnly]
+        public int outputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -325,9 +340,10 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            System.UInt16* uv = (System.UInt16*) (input + byteStride*i);
-            result[i].x = *uv / Constants.UINT16_MAX;
-            result[i].y = 1 - *(uv+1) / Constants.UINT16_MAX;
+            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
+            System.UInt16* uv = (System.UInt16*) (input + inputByteStride*i);
+            *resultV = *uv / Constants.UINT16_MAX;
+            *(resultV+1) = 1 - *(uv+1) / Constants.UINT16_MAX;
         }
     }
 
@@ -335,11 +351,14 @@ namespace GLTFast.Jobs {
     public unsafe struct GetUVsInt16InterleavedJob : IJobParallelFor  {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public System.Int16* input;
+
+        [ReadOnly]
+        public int outputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -347,9 +366,10 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            System.Int16* uv = (System.Int16*) (input + byteStride*i);
-            result[i].x = *uv;
-            result[i].y = 1 - *(uv+1);
+            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
+            System.Int16* uv = (System.Int16*) (input + inputByteStride*i);
+            *resultV = *uv;
+            *(resultV+1) = 1 - *(uv+1);
         }
     }
 
@@ -357,11 +377,14 @@ namespace GLTFast.Jobs {
     public unsafe struct GetUVsInt16InterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public System.Int16* input;
+
+        [ReadOnly]
+        public int outputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -369,9 +392,10 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            System.Int16* uv = (System.Int16*) (input + byteStride*i);
-            result[i].x = Mathf.Max( *uv / Constants.INT16_MAX, -1.0f);
-            result[i].y = 1 - Mathf.Max( *(uv+1) / Constants.INT16_MAX, -1.0f);
+            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
+            System.Int16* uv = (System.Int16*) (input + inputByteStride*i);
+            *resultV = Mathf.Max( *uv / Constants.INT16_MAX, -1.0f);
+            *(resultV) = 1 - Mathf.Max( *(uv+1) / Constants.INT16_MAX, -1.0f);
         }
     }
 
@@ -379,11 +403,14 @@ namespace GLTFast.Jobs {
     public unsafe struct GetUVsInt8InterleavedJob : IJobParallelFor  {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public sbyte* input;
+
+        [ReadOnly]
+        public int outputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -391,9 +418,10 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            sbyte* off = input + byteStride*i;
-            result[i].x = *off;
-            result[i].y = 1 - *(off+1);
+            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
+            sbyte* off = input + inputByteStride*i;
+            *resultV = *off;
+            *(resultV) = 1 - *(off+1);
         }
     }
 
@@ -401,11 +429,14 @@ namespace GLTFast.Jobs {
     public unsafe struct GetUVsInt8InterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public sbyte* input;
+
+        [ReadOnly]
+        public int outputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -413,9 +444,10 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            sbyte* off = input + byteStride*i;
-            result[i].x = Mathf.Max( *off / 127f, -1.0f);
-            result[i].y = 1 - Mathf.Max( *(off+1) / 127f, -1.0f);
+            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
+            sbyte* off = input + inputByteStride*i;
+            *resultV = Mathf.Max( *off / 127f, -1.0f);
+            *(resultV) = 1 - Mathf.Max( *(off+1) / 127f, -1.0f);
         }
     }
 
@@ -572,19 +604,22 @@ namespace GLTFast.Jobs {
     public unsafe struct GetVector2sInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
-        public int byteStride;
+        public int inputByteStride;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public byte* input;
 
         [ReadOnly]
+        public int outputByteStride;
+
+        [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public Vector2* result;
 
         public void Execute(int i) {
-            Vector2* resultV = result + i;
-            byte* off = input + i*byteStride;
+            Vector2* resultV = (Vector2*) (((byte*)result) + (i*outputByteStride));
+            byte* off = input + (i*inputByteStride);
             *resultV = *(Vector2*)off;
             (*resultV).y = 1-(*resultV).y;
         }

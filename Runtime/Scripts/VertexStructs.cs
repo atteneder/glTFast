@@ -40,4 +40,15 @@ namespace GLTFast.Vertex
         public Vector3 pos;
 #endif
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct VTexCoord1 {
+        public Vector2 uv0;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct VTexCoord2 {
+        public Vector2 uv0;
+        public Vector2 uv1;
+    }
 }

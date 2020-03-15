@@ -32,10 +32,11 @@ namespace GLTFast
 #endif
         protected VertexAttributeDescriptor[] vad;
 
-        public abstract unsafe JobHandle? Init(
+        public abstract unsafe JobHandle? ScheduleVertexJobs(
             VertexInputData posInput,
             VertexInputData? nrmInput = null,
-            VertexInputData? tanInput = null
+            VertexInputData? tanInput = null,
+            VertexInputData[] uvInputs = null
             );
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default);
         public abstract void Dispose();

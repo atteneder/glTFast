@@ -1252,7 +1252,18 @@ namespace GLTFast {
                 if (att.TANGENT >= 0) {
                     tanInput = GetAccessorParams(gltf,att.TANGENT);
                 }
-                var jh = attributeConfig.Value.Init(posInput,nrmInput,tanInput);
+
+                VertexInputData[] uvInputs = null;
+                if (att.TEXCOORD_0 >= 0) {
+                    int uvCount = 1;
+                    if (att.TEXCOORD_1 >= 0) uvCount++;
+                    uvInputs = new VertexInputData[uvCount];
+                    uvInputs[0] = GetAccessorParams(gltf, att.TEXCOORD_0);
+                    if (att.TEXCOORD_1 >= 0) {
+                        uvInputs[1] = GetAccessorParams(gltf, att.TEXCOORD_1);
+                    }
+                }
+                var jh = attributeConfig.Value.ScheduleVertexJobs(posInput,nrmInput,tanInput,uvInputs);
                 if (jh.HasValue) {
                     tmpList.Add(jh.Value);
                 } else {
@@ -1539,166 +1550,6 @@ namespace GLTFast {
 
         void OnMeshesLoaded( Mesh mesh ) {
             Debug.Log("draco is ready");
-        }
-
-        unsafe NativeArray<Vector2> GetUvsJob( Root gltf, int accessorIndex, out JobHandle? jobHandle )
-        {
-            Profiler.BeginSample("PrepareUVs");
-            
-            var uvAccessor = gltf.accessors[accessorIndex];
-            Assert.AreEqual( uvAccessor.typeEnum, GLTFAccessorAttributeType.VEC2 );
-            #if DEBUG
-            Assert.AreEqual( GetAccessorTye(uvAccessor.typeEnum), typeof(Vector2) );
-            #endif
-
-            var bufferView = gltf.bufferViews[uvAccessor.bufferView];
-            var buffer = GetBuffer(bufferView.buffer);
-            var chunk = binChunks[bufferView.buffer];
-            Profiler.BeginSample("Alloc");
-            var result = new NativeArray<Vector2>(uvAccessor.count,Allocator.TempJob);
-            Profiler.EndSample();
-            int start = uvAccessor.byteOffset + bufferView.byteOffset + chunk.start;
-
-            switch( uvAccessor.componentType ) {
-            case GLTFComponentType.Float:
-                if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                    var jobUv = new Jobs.GetVector2sInterleavedJob();
-                    jobUv.byteStride = bufferView.byteStride;
-                    fixed( void* src = &(buffer[start]) ) {
-                        jobUv.input = (byte*)src;
-                        jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                    }
-                    jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                } else {
-                    var jobUv = new Jobs.GetUVsFloatJob();
-                    // jobUv.count = uvAccessor.count;
-                    fixed( void* src = &(buffer[start]) ) {
-                        jobUv.input = (float*)src;
-                        jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                    }
-                    jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                }
-                break;
-            case GLTFComponentType.UnsignedByte:
-                if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                    if (uvAccessor.normalized) {
-                        var jobUv = new Jobs.GetUVsUInt8InterleavedNormalizedJob();
-                        jobUv.byteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobUv.input = (byte*) src;
-                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                    } else {
-                        var jobUv = new Jobs.GetUVsUInt8InterleavedJob();
-                        jobUv.byteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobUv.input = (byte*) src;
-                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                    }
-                } else {
-                    if(uvAccessor.normalized) {
-                        var jobUv = new Jobs.GetUVsUInt8NormalizedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobUv.input = (byte*) src;
-                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                    } else {
-                        var jobUv = new Jobs.GetUVsUInt8Job();
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobUv.input = (byte*) src;
-                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                    }
-                }
-                break;
-            case GLTFComponentType.UnsignedShort:
-                if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                    if (uvAccessor.normalized) {
-                        var jobUv = new Jobs.GetUVsUInt16InterleavedNormalizedJob();
-                        jobUv.byteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobUv.input = (byte*) src;
-                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                    } else {
-                        var jobUv = new Jobs.GetUVsUInt16InterleavedJob();
-                        jobUv.byteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobUv.input = (byte*) src;
-                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                    }
-                } else {
-                    if(uvAccessor.normalized) {
-                        var jobUv = new Jobs.GetUVsUInt16NormalizedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobUv.input = (System.UInt16*) src;
-                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                    } else {
-                        var jobUv = new Jobs.GetUVsUInt16Job();
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobUv.input = (System.UInt16*) src;
-                            jobUv.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = jobUv.Schedule(uvAccessor.count,DefaultBatchCount);
-                    }
-                }
-                break;
-            case GLTFComponentType.Short:
-                if (uvAccessor.normalized) {
-                    var job = new Jobs.GetUVsInt16InterleavedNormalizedJob();
-                    job.byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 4;
-                    fixed( void* src = &(buffer[start]) ) {
-                        job.input = (System.Int16*) src;
-                        job.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                    }
-                    jobHandle = job.Schedule(uvAccessor.count,DefaultBatchCount);
-                } else {
-                    var job = new Jobs.GetUVsInt16InterleavedJob();
-                    job.byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 4;
-                    fixed( void* src = &(buffer[start]) ) {
-                        job.input = (System.Int16*) src;
-                        job.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                    }
-                    jobHandle = job.Schedule(uvAccessor.count,DefaultBatchCount);
-                }
-                break;
-            case GLTFComponentType.Byte:
-                var byteStride = gltf.IsAccessorInterleaved(accessorIndex) ? bufferView.byteStride : 2;
-                if (uvAccessor.normalized) {
-                    var jobInt8 = new Jobs.GetUVsInt8InterleavedNormalizedJob();
-                    jobInt8.byteStride = byteStride;
-                    fixed( void* src = &(buffer[start]) ) {
-                        jobInt8.input = (sbyte*) src;
-                        jobInt8.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                    }
-                    jobHandle = jobInt8.Schedule(uvAccessor.count,DefaultBatchCount);
-                } else {
-                    var jobInt8 = new Jobs.GetUVsInt8InterleavedJob();
-                    jobInt8.byteStride = byteStride;
-                    fixed( void* src = &(buffer[start]) ) {
-                        jobInt8.input = (sbyte*) src;
-                        jobInt8.result = (Vector2*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                    }
-                    jobHandle = jobInt8.Schedule(uvAccessor.count,DefaultBatchCount);
-                }
-                break;
-            default:
-                jobHandle = null;
-                Debug.LogErrorFormat( ErrorUnsupportedType, "UV", uvAccessor.componentType);
-                break;
-            }
-            Profiler.EndSample();
-            return result;
         }
 
         unsafe void CalculateIndicesJob(Root gltf, MeshPrimitive primitive, int vertexCount, MeshTopology topology, out int[] indices, out JobHandle? jobHandle, out GCHandle resultHandle ) {

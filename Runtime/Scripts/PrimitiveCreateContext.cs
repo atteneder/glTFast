@@ -51,30 +51,15 @@ namespace GLTFast {
 
         public override Primitive? CreatePrimitive() {
             Profiler.BeginSample("CreatePrimitive");
-            Profiler.BeginSample("Job Complete");
             jobHandle.Complete();
-            Profiler.EndSample();
             var msh = new UnityEngine.Mesh();
             msh.name = mesh.name;
 
             bool hasUVs = false; // TODO: dynamic
             bool calculateNormals = needsNormals && ( topology==MeshTopology.Triangles || topology==MeshTopology.Quads );
             bool calculateTangents = needsTangents && hasUVs && (topology==MeshTopology.Triangles || topology==MeshTopology.Quads);
-            CreatePrimitiveAdvanced(msh,calculateNormals,calculateTangents);
-
-            Profiler.BeginSample("Dispose");
-            Dispose();
-            Profiler.EndSample();
-            return new Primitive(msh,materials);
-        }
-        
-        void CreatePrimitiveAdvanced(UnityEngine.Mesh msh,bool calculateNormals,bool calculateTangents) {
-
-            Profiler.BeginSample("CreatePrimitiveAdvanced");
-            Profiler.BeginSample("SetVertexBufferParams");
-
+            
             MeshUpdateFlags flags = MeshUpdateFlags.Default;// (MeshUpdateFlags)~0;
-
             vertexData.ApplyOnMesh(msh,flags);
 
             Profiler.BeginSample("SetIndices");
@@ -117,7 +102,12 @@ namespace GLTFast {
             msh.UploadMeshData(true);
             Profiler.EndSample();
 
-            Profiler.EndSample(); // CreatePrimitiveAdvances
+            Profiler.BeginSample("Dispose");
+            Dispose();
+            Profiler.EndSample();
+
+            Profiler.EndSample();
+            return new Primitive(msh,materials);
         }
         
         void Dispose() {

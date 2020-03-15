@@ -1,7 +1,8 @@
 ﻿#if DEBUG
 using System.Collections.Generic;
 #endif
-
+using System;
+using GLTFast.Vertex;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -27,14 +28,19 @@ namespace GLTFast
         }
 
         NativeArray<VType> vData;
+
         bool hasNormals;
         bool hasTangents;
+        
+        VertexBufferTexCoordsBase texCoords;
 
-        public override unsafe JobHandle? Init(
+        public override unsafe JobHandle? ScheduleVertexJobs(
             VertexInputData posInput,
             VertexInputData? nrmInput = null,
-            VertexInputData? tanInput = null
+            VertexInputData? tanInput = null,
+            VertexInputData[] uvInputs = null
         ) {
+            Profiler.BeginSample("ScheduleVertexJobs");
             vData = new NativeArray<VType>(posInput.count,Allocator.Persistent);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
 
@@ -51,8 +57,21 @@ namespace GLTFast
                 jobCount++;
                 outputByteStride += 16;
             }
-            var handles = new JobHandle[jobCount];
+            
+            if (uvInputs!=null && uvInputs.Length>0) {
+                jobCount += uvInputs.Length;
+                switch (uvInputs.Length) {
+                    case 1:
+                        texCoords = new VertexBufferTexCoords<VTexCoord1>();
+                        break;
+                    default:
+                        texCoords = new VertexBufferTexCoords<VTexCoord2>();
+                        break;
+                }
+            }
 
+            NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, Allocator.Temp);
+            
             fixed( void* input = &(posInput.buffer[posInput.startOffset])) {
                 var h = GetVector3sJob(
                     input,
@@ -66,6 +85,7 @@ namespace GLTFast
                 if (h.HasValue) {
                     handles[0] = h.Value;
                 } else {
+                    Profiler.EndSample();
                     return null;
                 }
             }
@@ -84,6 +104,7 @@ namespace GLTFast
                     if (h.HasValue) {
                         handles[1] = h.Value;
                     } else {
+                        Profiler.EndSample();
                         return null;
                     }
                 }
@@ -103,24 +124,27 @@ namespace GLTFast
                     if (h.HasValue) {
                         handles[2] = h.Value;
                     } else {
+                        Profiler.EndSample();
                         return null;
                     }
                 }
             }
-
-            if (jobCount > 1) {
-                NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(handles, Allocator.Temp);
-                var handle = JobHandle.CombineDependencies(jobHandles);
-                jobHandles.Dispose();
-                return handle;
+            
+            if (texCoords!=null) {
+                texCoords.ScheduleVertexUVJobs(uvInputs, new NativeSlice<JobHandle>(handles,2,uvInputs.Length) );
             }
-            return handles[0];
+            
+            var handle = (jobCount > 1) ? JobHandle.CombineDependencies(handles) : handles[0];
+            handles.Dispose();
+            Profiler.EndSample();
+            return handle;
         }
 
         protected void CreateDescriptors() {
             int vadLen = 1;
             if (hasNormals) vadLen++;
             if (hasTangents) vadLen++;
+            if (texCoords != null) vadLen += texCoords.uvSetCount;
             vad = new VertexAttributeDescriptor[vadLen];
             var vadCount = 0;
             vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3, 0);
@@ -133,15 +157,11 @@ namespace GLTFast
                 vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4, 0);
                 vadCount++;
             }
+
+            if (texCoords != null) {
+                texCoords.AddDescriptors(vad,vadCount);
+            }
             /*
-            if(uvs0.IsCreated) {
-                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, vadCount);
-                vadCount++;
-            }
-            if(uvs1.IsCreated) {
-                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.TexCoord1, VertexAttributeFormat.Float32, 2, vadCount);
-                vadCount++;
-            }
             if(colors32.IsCreated) {
                 vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.UInt8, 4, vadCount);
                 vadCount++;
@@ -155,6 +175,7 @@ namespace GLTFast
 
         public override void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
 
+            Profiler.BeginSample("ApplyOnMesh");
             if (vad == null) {
                 CreateDescriptors();
             }
@@ -169,6 +190,9 @@ namespace GLTFast
             vadCount++;
             Profiler.EndSample();
 
+            if (texCoords != null) {
+                texCoords.ApplyOnMesh(msh,flags);
+            }
             /*
             if(uvs0.IsCreated) {
                 Profiler.BeginSample("SetUVs0");
@@ -195,12 +219,17 @@ namespace GLTFast
                 Profiler.EndSample();
             }
             //*/
+            Profiler.EndSample();
         }
 
         public override void Dispose() {
             if (vData.IsCreated) {
                 vData.Dispose();
-            } 
+            }
+
+            if (texCoords != null) {
+                texCoords.Dispose();
+            }
         }
     }
 }
