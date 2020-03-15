@@ -17,7 +17,7 @@ namespace GLTFast.Vertex
 #else
         public Vector3 pos;
         public Vector3 nrm;
-        public Vector3 tan;
+        public Vector4 tan;
 #endif
     }
 

@@ -48,8 +48,8 @@ namespace GLTFast {
         const uint GLB_MAGIC = 0x46546c67;
         const string GLB_EXT = ".glb";
 
+        public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
-        const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         const string ErrorUnsupportedPrimitiveMode = "Primitive mode {0} is untested!";
         const string ErrorMissingImageURL = "Image URL missing";
 #if !KTX_UNITY
@@ -1204,17 +1204,14 @@ namespace GLTFast {
                         cluster[primitive.attributes] = new List<MeshPrimitive>();
                     }
                     cluster[primitive.attributes].Add(primitive);
-                    meshPrimitiveCluster[meshIndex] = cluster;
-                    
+
                     VertexBufferConfigBase config;
                     if(!vertexAttributes.TryGetValue(att,out config)) {
                         if(att.TANGENT>=0) {
-                            // config = new VertexAttributeConfig<Vertex.VPosNormTan>();
-                            config = new VertexBufferConfig<Vertex.VPos>();
+                            config = new VertexBufferConfig<Vertex.VPosNormTan>();
                         } else
                         if(att.NORMAL>=0) {
-                            // config = new VertexAttributeConfig<Vertex.VPosNorm>();
-                            config = new VertexBufferConfig<Vertex.VPos>();
+                            config = new VertexBufferConfig<Vertex.VPosNorm>();
                         } else {
                             config = new VertexBufferConfig<Vertex.VPos>();
                         }
@@ -1224,13 +1221,15 @@ namespace GLTFast {
                     config.meshIndices.Add(meshIndex);
 #endif
                 }
+                meshPrimitiveCluster[meshIndex] = cluster;
                 totalPrimitives += cluster.Count;
             }
 
             meshPrimitiveIndex[gltf.meshes.Length] = totalPrimitives;
             primitives = new Primitive[totalPrimitives];
             primitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
-
+            var tmpList = new List<JobHandle>(vertexAttributes.Count);
+            
             foreach(var attributeConfig in vertexAttributes) {
 #if DEBUG
                 if(attributeConfig.Value.meshIndices.Count>1) {
@@ -1245,19 +1244,25 @@ namespace GLTFast {
                 var att = attributeConfig.Key;
 
                 var posInput = GetAccessorParams(gltf,att.POSITION);
-                var jh = attributeConfig.Value.Init(posInput);
+                VertexInputData? nrmInput = null;
+                VertexInputData? tanInput = null;
+                if (att.NORMAL >= 0) {
+                    nrmInput = GetAccessorParams(gltf,att.NORMAL);
+                }
+                if (att.TANGENT >= 0) {
+                    tanInput = GetAccessorParams(gltf,att.TANGENT);
+                }
+                var jh = attributeConfig.Value.Init(posInput,nrmInput,tanInput);
                 if (jh.HasValue) {
-                    accessorJobsHandle = jh.Value;
+                    tmpList.Add(jh.Value);
                 } else {
                     loadingError = true;
                 }
-                //GetVector3sJob(gltf,i,out jh,out adv3.data);
             }
 
             /// Step 2:
             /// Retrieve indices and vertex data jobified, according to accessor usage.
             accessorData = new AccessorDataBase[gltf.accessors.Length];
-            var tmpList = new List<JobHandle>(accessorData.Length);
 
             for(int i=0; i<accessorData.Length; i++) {
                 var acc = gltf.accessors[i];
@@ -1270,37 +1275,37 @@ namespace GLTFast {
                 JobHandle? jh;
                 AccessorDataBase adb = null;
                 switch(acc.typeEnum) {
-                    case GLTFAccessorAttributeType.VEC3:
-                        if (accessorUsage[i]==AccessorUsage.Position || accessorUsage[i]==AccessorUsage.Normal) {
-                            var adv3 = new AccessorNativeData<Vector3>();
-                            GetVector3sJob(gltf,i,out jh,out adv3.data);
-                            adb = adv3;
-                            tmpList.Add(jh.Value);
-                        } else
-                        if(accessorUsage[i]==AccessorUsage.Color) {
-                            adb = LoadAccessorDataColor(gltf,i,out jh);
-                            tmpList.Add(jh.Value);
-                        }
-                        break;
-                    case GLTFAccessorAttributeType.VEC2:
-                        if(accessorUsage[i]==AccessorUsage.UV) {
-                            var adv2 = new AccessorNativeData<Vector2>();
-                            adv2.data = GetUvsJob(gltf,i, out jh);
-                            tmpList.Add(jh.Value);
-                            adb = adv2;
-                        }
-                        break;
-                    case GLTFAccessorAttributeType.VEC4:
-                        if(accessorUsage[i]==AccessorUsage.Tangent) {
-                            var adv4 = new AccessorNativeData<Vector4>();
-                            GetTangentsJob(gltf,i,out adv4.data, out jh);
-                            adb = adv4;
-                            tmpList.Add(jh.Value);
-                        } else
-                        if(accessorUsage[i]==AccessorUsage.Color) {
-                            adb = LoadAccessorDataColor(gltf,i,out jh);
-                        }
-                        break;
+                    // case GLTFAccessorAttributeType.VEC3:
+                    //     if (accessorUsage[i]==AccessorUsage.Position || accessorUsage[i]==AccessorUsage.Normal) {
+                    //         var adv3 = new AccessorNativeData<Vector3>();
+                    //         GetVector3sJob(gltf,i,out jh,out adv3.data);
+                    //         adb = adv3;
+                    //         tmpList.Add(jh.Value);
+                    //     } else
+                    //     if(accessorUsage[i]==AccessorUsage.Color) {
+                    //         adb = LoadAccessorDataColor(gltf,i,out jh);
+                    //         tmpList.Add(jh.Value);
+                    //     }
+                    //     break;
+                    // case GLTFAccessorAttributeType.VEC2:
+                    //     if(accessorUsage[i]==AccessorUsage.UV) {
+                    //         var adv2 = new AccessorNativeData<Vector2>();
+                    //         adv2.data = GetUvsJob(gltf,i, out jh);
+                    //         tmpList.Add(jh.Value);
+                    //         adb = adv2;
+                    //     }
+                    //     break;
+                    // case GLTFAccessorAttributeType.VEC4:
+                    //     if(accessorUsage[i]==AccessorUsage.Tangent) {
+                    //         var adv4 = new AccessorNativeData<Vector4>();
+                    //         GetTangentsJob(gltf,i,out adv4.data, out jh);
+                    //         adb = adv4;
+                    //         tmpList.Add(jh.Value);
+                    //     } else
+                    //     if(accessorUsage[i]==AccessorUsage.Color) {
+                    //         adb = LoadAccessorDataColor(gltf,i,out jh);
+                    //     }
+                    //     break;
                     case GLTFAccessorAttributeType.SCALAR:
                         if( accessorUsage[i]==AccessorUsage.IndexFlipped ||
                             accessorUsage[i]==AccessorUsage.Index )
@@ -1483,7 +1488,7 @@ namespace GLTFast {
             Profiler.BeginSample("AssignAccessorData");
             c.mesh = mesh;
 
-            int vertexCount;
+            // int vertexCount;
             {
                 // c.positions = (accessorData[attributes.POSITION] as AccessorNativeData<Vector3>).data;
                 // vertexCount = c.positions.Length;
@@ -1816,9 +1821,10 @@ namespace GLTFast {
             result.startOffset = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             result.byteStride = bufferView.byteStride;
             result.type = accessor.componentType;
+            result.normalize = accessor.normalized;
             return result;
         }
- 
+ /*
         unsafe int GetVector3sJob(Root gltf, int accessorIndex, out JobHandle? jobHandle, out NativeArray<Vector3> result) {
             Profiler.BeginSample("PrepareGetVector3sJob");
             Assert.IsTrue(accessorIndex>=0);
@@ -1856,7 +1862,7 @@ namespace GLTFast {
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetUInt16PositionsInterleavedJob();
-                        job.byteStride = bufferView.byteStride;
+                        job.inputByteStride = bufferView.byteStride;
                         fixed( void* src = &(buffer[start])) {
                             job.input = (byte*)src;
                             job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
@@ -1876,7 +1882,7 @@ namespace GLTFast {
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                        job.byteStride = bufferView.byteStride;
+                        job.inputByteStride = bufferView.byteStride;
                         fixed( void* src = &(buffer[start]) ) {
                             job.input = (byte*)src;
                             job.result = (Vector3*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
@@ -1958,7 +1964,7 @@ namespace GLTFast {
                         jobHandle = job.Schedule(count,DefaultBatchCount);
                     } else {
                         var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                        job.byteStride = 6; // 2 bytes * 3
+                        job.inputByteStride = 6; // 2 bytes * 3
                         fixed( void* src = &(buffer[start]) ) {
                             job.input = (byte*)src;
                             job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
@@ -2007,69 +2013,8 @@ namespace GLTFast {
             Profiler.EndSample();
             return count;
         }
-
-        unsafe void GetTangentsJob(Root gltf, int accessorIndex, out NativeArray<Vector4> tangents, out JobHandle? jobHandle)
-        {
-            Profiler.BeginSample("PrepareTangents");
-            #if DEBUG
-            Assert.AreEqual( GetAccessorTye(gltf.accessors[accessorIndex].typeEnum), typeof(Vector4) );
-            #endif
-            var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var buffer = GetBuffer(bufferView.buffer);
-            var chunk = binChunks[bufferView.buffer];
-            Profiler.BeginSample("Alloc");
-            tangents = new NativeArray<Vector4>(accessor.count,Allocator.TempJob);
-            Profiler.EndSample();
-            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-            var interleaved = gltf.IsAccessorInterleaved((int)accessorIndex);
-            switch(accessor.componentType) {
-                case GLTFComponentType.Float:
-                    if(interleaved) {
-                        var jobTangentI = new Jobs.GetVector4sInterleavedJob();
-                        jobTangentI.byteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobTangentI.input = (byte*)src;
-                            jobTangentI.result = (Vector4*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(tangents);
-                        }
-                        jobHandle = jobTangentI.Schedule(accessor.count,DefaultBatchCount);
-                    } else {
-                        var jobTangentFloat = new Jobs.GetVector4sJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            jobTangentFloat.input = (float*)src;
-                            jobTangentFloat.result = (float*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(tangents);
-                        }
-                        jobHandle = jobTangentFloat.Schedule(accessor.count,DefaultBatchCount);
-                    }
-                    break;
-                case GLTFComponentType.Short:
-                    var jobTangent = new Jobs.GetVector4sInt16NormalizedInterleavedJob();
-                    jobTangent.byteStride = interleaved ? bufferView.byteStride : 8;
-                    Assert.IsTrue(accessor.normalized);
-                    fixed( void* src = &(buffer[start]) ) {
-                        jobTangent.input = (System.Int16*)src;
-                        jobTangent.result = (Vector4*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(tangents);
-                    }
-                    jobHandle = jobTangent.Schedule(accessor.count,DefaultBatchCount);
-                    break;
-                case GLTFComponentType.Byte:
-                    var jobTangentByte = new Jobs.GetVector4sInt8NormalizedInterleavedJob();
-                    jobTangentByte.byteStride = interleaved ? bufferView.byteStride : 4;
-                    Assert.IsTrue(accessor.normalized);
-                    fixed( void* src = &(buffer[start]) ) {
-                        jobTangentByte.input = (sbyte*)src;
-                        jobTangentByte.result = (Vector4*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(tangents);
-                    }
-                    jobHandle = jobTangentByte.Schedule(accessor.count,DefaultBatchCount);
-                    break;
-                default:
-                    Debug.LogErrorFormat( ErrorUnsupportedType, "Tangent", accessor.componentType);
-                    jobHandle = null;
-                    break;
-            }
-            Profiler.EndSample();
-        }
-
+*/
+ 
         /// <summary>
         /// Determines whether color accessor data can be retrieved as Color[] (floats) or Color32[] (unsigned bytes)
         /// </summary>

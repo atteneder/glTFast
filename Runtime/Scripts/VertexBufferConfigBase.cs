@@ -6,6 +6,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -22,6 +23,7 @@ namespace GLTFast
         public int count;
         public int byteStride;
         public GLTFComponentType type;
+        public bool normalize;
     }
 
     abstract class VertexBufferConfigBase {
@@ -30,8 +32,12 @@ namespace GLTFast
 #endif
         protected VertexAttributeDescriptor[] vad;
 
-        public abstract unsafe JobHandle? Init(VertexInputData posInput);
-        public abstract void ApplyOnMesh(UnityEngine.Mesh msh);
+        public abstract unsafe JobHandle? Init(
+            VertexInputData posInput,
+            VertexInputData? nrmInput = null,
+            VertexInputData? tanInput = null
+            );
+        public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default);
         public abstract void Dispose();
 
         protected unsafe JobHandle? GetVector3sJob(
@@ -40,29 +46,33 @@ namespace GLTFast
             GLTFComponentType inputType,
             int inputByteStride,
             Vector3* output,
+            int outputByteStride,
             bool normalized = false
         ) {
             JobHandle? jobHandle;
 
-            UnityEngine.Profiling.Profiler.BeginSample("PrepareGetVector3sJob");
+            Profiler.BeginSample("GetVector3sJob");
             if(inputType == GLTFComponentType.Float) {
                 var job = new Jobs.GetVector3sInterleavedJob();
-                job.byteStride = inputByteStride;
+                job.inputByteStride = (inputByteStride>0) ? inputByteStride : 12;
                 job.input = (byte*)input;
+                job.outputByteStride = outputByteStride;
                 job.result = output;
                 jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
             } else
             if(inputType == GLTFComponentType.UnsignedShort) {
                 if (normalized) {
                     var job = new Jobs.GetUInt16PositionsInterleavedNormalizedJob();
-                    job.byteStride = inputByteStride;
+                    job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
                     job.input = (byte*)input;
+                    job.outputByteStride = outputByteStride;
                     job.result = output;
                     jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
                 } else {
                     var job = new Jobs.GetUInt16PositionsInterleavedJob();
-                    job.byteStride = inputByteStride;
+                    job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
                     job.input = (byte*)input;
+                    job.outputByteStride = outputByteStride;
                     job.result = output;
                     jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
                 }
@@ -71,14 +81,16 @@ namespace GLTFast
                 // TODO: test. did not have test files
                 if (normalized) {
                     var job = new Jobs.GetVector3FromInt16InterleavedNormalizedJob();
-                    job.byteStride = inputByteStride;
+                    job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
                     job.input = (byte*)input;
+                    job.outputByteStride = outputByteStride;
                     job.result = output;
                     jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
                 } else {
                     var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                    job.byteStride = inputByteStride;
+                    job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
                     job.input = (byte*)input;
+                    job.outputByteStride = outputByteStride;
                     job.result = output;
                     jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
                 }
@@ -87,11 +99,11 @@ namespace GLTFast
                 // TODO: test positions. did not have test files
                 if (normalized) {
                     var job = new Jobs.GetVector3FromSByteInterleavedNormalizedJob();
-                    job.Setup(inputByteStride,(sbyte*)input,output);
+                    job.Setup((inputByteStride>0) ? inputByteStride : 3, (sbyte*)input,outputByteStride,output);
                     jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
                 } else {
                     var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                    job.Setup(inputByteStride,(sbyte*)input,output);
+                    job.Setup((inputByteStride>0) ? inputByteStride : 3,(sbyte*)input,outputByteStride,output);
                     jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
                 }
             } else
@@ -99,18 +111,67 @@ namespace GLTFast
                 // TODO: test. did not have test files
                 if (normalized) {
                     var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
-                    job.Setup(inputByteStride,(byte*)input,output);
+                    job.Setup((inputByteStride>0) ? inputByteStride : 3,(byte*)input,outputByteStride,output);
                     jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
                 } else {
                     var job = new Jobs.GetVector3FromByteInterleavedJob();
-                    job.Setup(inputByteStride,(byte*)input,output);
+                    job.Setup((inputByteStride>0) ? inputByteStride : 3,(byte*)input,outputByteStride,output);
                     jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
                 }
             } else {
                 Debug.LogError("Unknown componentType");
                 jobHandle = null;
             }
-            UnityEngine.Profiling.Profiler.EndSample();
+            Profiler.EndSample();
+            return jobHandle;
+        }
+        
+        protected unsafe JobHandle? GetTangentsJob(
+            void* input,
+            int count,
+            GLTFComponentType inputType,
+            int inputByteStride,
+            Vector4* output,
+            int outputByteStride,
+            bool normalized = false
+            )
+        {
+            Profiler.BeginSample("GetTangentsJob");
+            JobHandle? jobHandle;
+            switch(inputType) {
+                case GLTFComponentType.Float:
+                    var jobTangentI = new Jobs.GetVector4sInterleavedJob();
+                    jobTangentI.inputByteStride = inputByteStride>0 ? inputByteStride : 16;
+                    jobTangentI.input = (byte*)input;
+                    jobTangentI.outputByteStride = outputByteStride;
+                    jobTangentI.result = output;
+                    jobHandle = jobTangentI.Schedule(count,GLTFast.DefaultBatchCount);
+                    break;
+                case GLTFComponentType.Short:
+                    var jobTangent = new Jobs.GetVector4sInt16NormalizedInterleavedJob();
+                    jobTangent.inputByteStride = inputByteStride>0 ? inputByteStride : 8;;
+                    Assert.IsTrue(normalized);
+                    jobTangent.input = (System.Int16*)input;
+                    jobTangent.outputByteStride = outputByteStride;
+                    jobTangent.result = output;
+                    jobHandle = jobTangent.Schedule(count,GLTFast.DefaultBatchCount);
+                    break;
+                case GLTFComponentType.Byte:
+                    var jobTangentByte = new Jobs.GetVector4sInt8NormalizedInterleavedJob();
+                    jobTangentByte.inputByteStride = inputByteStride>0 ? inputByteStride : 4;
+                    Assert.IsTrue(normalized);
+                    jobTangentByte.input = (sbyte*)input;
+                    jobTangentByte.outputByteStride = outputByteStride;
+                    jobTangentByte.result = output;
+                    jobHandle = jobTangentByte.Schedule(count,GLTFast.DefaultBatchCount);
+                    break;
+                default:
+                    Debug.LogErrorFormat( GLTFast.ErrorUnsupportedType, "Tangent", inputType);
+                    jobHandle = null;
+                    break;
+            }
+
+            Profiler.EndSample();
             return jobHandle;
         }
     }

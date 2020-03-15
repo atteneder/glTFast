@@ -73,9 +73,9 @@ namespace GLTFast {
             Profiler.BeginSample("CreatePrimitiveAdvanced");
             Profiler.BeginSample("SetVertexBufferParams");
 
-            MeshUpdateFlags flags = (MeshUpdateFlags)~0;
+            MeshUpdateFlags flags = MeshUpdateFlags.Default;// (MeshUpdateFlags)~0;
 
-            vertexData.ApplyOnMesh(msh);
+            vertexData.ApplyOnMesh(msh,flags);
 
             Profiler.BeginSample("SetIndices");
             int indexCount = 0;
