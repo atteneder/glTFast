@@ -1,6 +1,6 @@
 {
   "name": "com.atteneder.gltfast",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "displayName": "glTFast",
   "description": "Load glTF assets at runtime.",
   "unity": "2019.1",
@@ -9,7 +9,11 @@
     "gltf",
     "asset",
     "format",
-    "draco"
+    "draco",
+    "ktx",
+    "basis",
+    "universal",
+    "basisu"
   ],
   "author": {
     "name": "Andreas Atteneder",
