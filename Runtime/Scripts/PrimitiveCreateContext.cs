@@ -31,8 +31,6 @@ namespace GLTFast {
 
     class PrimitiveCreateContext : PrimitiveCreateContextBase {
 
-        const int MAX_STREAM = 4;
-
         public Mesh mesh;
         public VertexBufferConfigBase vertexData;
 
