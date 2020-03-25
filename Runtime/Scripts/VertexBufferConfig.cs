@@ -80,6 +80,7 @@ namespace GLTFast
             }
 
             NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, Allocator.Temp);
+            int handleIndex = 0;
             
             fixed( void* input = &(posInput.buffer[posInput.startOffset])) {
                 var h = GetVector3sJob(
@@ -92,7 +93,8 @@ namespace GLTFast
                     posInput.normalize
                 );
                 if (h.HasValue) {
-                    handles[0] = h.Value;
+                    handles[handleIndex] = h.Value;
+                    handleIndex++;
                 } else {
                     Profiler.EndSample();
                     return null;
@@ -111,7 +113,8 @@ namespace GLTFast
                         nrmInput.Value.normalize
                     );
                     if (h.HasValue) {
-                        handles[1] = h.Value;
+                        handles[handleIndex] = h.Value;
+                        handleIndex++;
                     } else {
                         Profiler.EndSample();
                         return null;
@@ -131,7 +134,8 @@ namespace GLTFast
                         tanInput.Value.normalize
                     );
                     if (h.HasValue) {
-                        handles[2] = h.Value;
+                        handles[handleIndex] = h.Value;
+                        handleIndex++;
                     } else {
                         Profiler.EndSample();
                         return null;
@@ -139,15 +143,14 @@ namespace GLTFast
                 }
             }
 
-            int jhOffset = 2;
             if (texCoords!=null) {
-                texCoords.ScheduleVertexUVJobs(uvInputs, new NativeSlice<JobHandle>(handles,jhOffset,uvInputs.Length) );
-                jhOffset++;
+                texCoords.ScheduleVertexUVJobs(uvInputs, new NativeSlice<JobHandle>(handles,handleIndex,uvInputs.Length) );
+                handleIndex++;
             }
             
             if (hasColors) {
-                colors.ScheduleVertexColorJob(colorInput.Value, new NativeSlice<JobHandle>(handles, jhOffset, 1));
-                jhOffset++;
+                colors.ScheduleVertexColorJob(colorInput.Value, new NativeSlice<JobHandle>(handles, handleIndex, 1));
+                handleIndex++;
             }
             
             var handle = (jobCount > 1) ? JobHandle.CombineDependencies(handles) : handles[0];
