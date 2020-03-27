@@ -1162,9 +1162,12 @@ namespace GLTFast {
 
             Profiler.BeginSample("LoadAccessorData");
 
-            vertexAttributes = new Dictionary<Attributes,VertexBufferConfigBase>();
+            var mainBufferTypes = new Dictionary<Attributes,MainBufferType>();
             meshPrimitiveCluster = new Dictionary<Attributes,List<MeshPrimitive>>[gltf.meshes.Length];
-
+#if DEBUG
+            var perAttributeMeshCollection = new Dictionary<Attributes,HashSet<int>>();
+#endif
+            
             /// Iterate over all primitive vertex attributes and remember the accessors usage.
             accessorUsage = new AccessorUsage[gltf.accessors.Length];
             int totalPrimitives = 0;
@@ -1198,20 +1201,34 @@ namespace GLTFast {
                         SetAccessorUsage(primitive.indices, isDraco ? AccessorUsage.Ignore : usage );
                     }
 
-                    VertexBufferConfigBase config;
-                    if(!vertexAttributes.TryGetValue(att,out config)) {
+                    if(!mainBufferTypes.TryGetValue(att,out var mainBufferType)) {
                         if(att.TANGENT>=0) {
-                            config = new VertexBufferConfig<Vertex.VPosNormTan>();
+                            mainBufferType = MainBufferType.PosNormTan;
                         } else
                         if(att.NORMAL>=0) {
-                            config = new VertexBufferConfig<Vertex.VPosNorm>();
+                            mainBufferType = MainBufferType.PosNorm;
                         } else {
-                            config = new VertexBufferConfig<Vertex.VPos>();
+                            mainBufferType = MainBufferType.Position;
                         }
-                        vertexAttributes[primitive.attributes] = config;
                     }
+                    if (primitive.mode == DrawMode.Triangles || primitive.mode == DrawMode.TriangleFan ||
+                        primitive.mode == DrawMode.TriangleStrip)
+                    {
+                        if (primitive.material < 0 || gltf.materials[primitive.material].requiresNormals) {
+                            mainBufferType |= MainBufferType.Normal;
+                        }
+                        if (primitive.material >= 0 && gltf.materials[primitive.material].requiresTangents) {
+                            mainBufferType |= MainBufferType.Tangent;
+                        }
+                    }
+                    mainBufferTypes[primitive.attributes] = mainBufferType;
+                    
 #if DEBUG
-                    config.meshIndices.Add(meshIndex);
+                    if(!perAttributeMeshCollection.TryGetValue(att, out var attributeMesh)) {
+                        attributeMesh = new HashSet<int>();
+                        perAttributeMeshCollection[att] = attributeMesh;
+                    }
+                    attributeMesh.Add(meshIndex);
 #endif
                 }
                 meshPrimitiveCluster[meshIndex] = cluster;
@@ -1221,28 +1238,33 @@ namespace GLTFast {
             meshPrimitiveIndex[gltf.meshes.Length] = totalPrimitives;
             primitives = new Primitive[totalPrimitives];
             primitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
-            var tmpList = new List<JobHandle>(vertexAttributes.Count);
-            
-            foreach(var attributeConfig in vertexAttributes) {
+            var tmpList = new List<JobHandle>(mainBufferTypes.Count);
+            vertexAttributes = new Dictionary<Attributes,VertexBufferConfigBase>(mainBufferTypes.Count);
+
 #if DEBUG
-                if(attributeConfig.Value.meshIndices.Count>1) {
+            foreach (var perAttributeMeshes in perAttributeMeshCollection) {
+                if(perAttributeMeshes.Value.Count>1) {
                     Debug.LogWarning(@"glTF file uses certain vertex attributes/accessors across multiple meshes!
                     This may result in low performance and high memory usage. Try optimizing the glTF file.
                     See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52");
                     break;
                 }
-                attributeConfig.Value.meshIndices = null;
+            }
 #endif
+            
+            foreach(var mainBufferType in mainBufferTypes) {
 
-                var att = attributeConfig.Key;
+                var att = mainBufferType.Key;
 
                 var posInput = GetAccessorParams(gltf,att.POSITION);
+                bool hasNormals = att.NORMAL >= 0;
+                bool hasTangents = att.TANGENT >= 0;
                 VertexInputData? nrmInput = null;
                 VertexInputData? tanInput = null;
-                if (att.NORMAL >= 0) {
+                if (hasNormals) {
                     nrmInput = GetAccessorParams(gltf,att.NORMAL);
                 }
-                if (att.TANGENT >= 0) {
+                if (hasTangents) {
                     tanInput = GetAccessorParams(gltf,att.TANGENT);
                 }
 
@@ -1261,7 +1283,29 @@ namespace GLTFast {
                     colorInput = GetAccessorParams(gltf, att.COLOR_0);
                 }
 
-                var jh = attributeConfig.Value.ScheduleVertexJobs(posInput,nrmInput,tanInput,uvInputs,colorInput);
+                VertexBufferConfigBase config;
+                switch (mainBufferType.Value) {
+                    case MainBufferType.Position:
+                        config = new VertexBufferConfig<Vertex.VPos>();
+                        break;
+                    case MainBufferType.PosNorm:
+                        config = new VertexBufferConfig<Vertex.VPosNorm>();
+                        break;
+                    case MainBufferType.PosNormTan:
+                        config = new VertexBufferConfig<Vertex.VPosNormTan>();
+                        break;
+                    default:
+                        #if DEBUG
+                        Debug.LogErrorFormat("Invalid mainBufferType {0}",mainBufferType);
+                        #endif
+                        loadingError = true;
+                        return;
+                }
+                config.calculateNormals = !hasNormals && (mainBufferType.Value & MainBufferType.Normal) > 0;
+                config.calculateTangents = !hasTangents && (mainBufferType.Value & MainBufferType.Tangent) > 0;
+                vertexAttributes[att] = config;
+                
+                var jh = config.ScheduleVertexJobs(posInput,nrmInput,tanInput,uvInputs,colorInput);
                 if (jh.HasValue) {
                     tmpList.Add(jh.Value);
                 } else {

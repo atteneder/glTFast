@@ -53,10 +53,6 @@ namespace GLTFast {
             var msh = new UnityEngine.Mesh();
             msh.name = mesh.name;
 
-            bool hasUVs = false; // TODO: dynamic
-            bool calculateNormals = needsNormals && ( topology==MeshTopology.Triangles || topology==MeshTopology.Quads );
-            bool calculateTangents = needsTangents && hasUVs && (topology==MeshTopology.Triangles || topology==MeshTopology.Quads);
-            
             MeshUpdateFlags flags = MeshUpdateFlags.Default;// (MeshUpdateFlags)~0;
             vertexData.ApplyOnMesh(msh,flags);
 
@@ -79,18 +75,16 @@ namespace GLTFast {
             }
             Profiler.EndSample();
 
-            /*
-            if(!normals.IsCreated && calculateNormals) {
+            if(vertexData.calculateNormals) {
                 Profiler.BeginSample("RecalculateNormals");
                 msh.RecalculateNormals();
                 Profiler.EndSample();
             }
-            if(!tangents.IsCreated && calculateTangents) {
+            if(vertexData.calculateTangents) {
                 Profiler.BeginSample("RecalculateTangents");
                 msh.RecalculateTangents();
                 Profiler.EndSample();
             }
-            //*/
             
             Profiler.BeginSample("RecalculateBounds");
             msh.RecalculateBounds(); // TODO: make optional! maybe calculate bounds in Job.

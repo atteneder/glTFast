@@ -21,12 +21,6 @@ namespace GLTFast
         VertexBufferConfigBase
         where VType : struct
     {
-        public VertexBufferConfig() {
-#if DEBUG
-            meshIndices = new HashSet<int>();
-#endif
-        }
-
         NativeArray<VType> vData;
 
         bool hasNormals;
@@ -49,15 +43,15 @@ namespace GLTFast
 
             int jobCount = 1;
             int outputByteStride = 12; // sizeof Vector3
-            hasNormals = nrmInput.HasValue;// || calculateNormals; 
+            hasNormals = nrmInput.HasValue || calculateNormals; 
             if (hasNormals) {
-                jobCount++;
+                if(nrmInput.HasValue) jobCount++;
                 outputByteStride += 12;
             }
 
-            hasTangents = tanInput.HasValue; //  || calculateTangents;
+            hasTangents = tanInput.HasValue || calculateTangents;
             if (hasTangents) {
-                jobCount++;
+                if(tanInput.HasValue) jobCount++;
                 outputByteStride += 16;
             }
             
@@ -101,7 +95,7 @@ namespace GLTFast
                 }
             }
 
-            if (hasNormals) {
+            if (nrmInput.HasValue) {
                 fixed( void* input = &(nrmInput.Value.buffer[nrmInput.Value.startOffset])) {
                     var h = GetVector3sJob(
                         input,
@@ -122,7 +116,7 @@ namespace GLTFast
                 }
             }
             
-            if (hasTangents) {
+            if (tanInput.HasValue) {
                 fixed( void* input = &(tanInput.Value.buffer[tanInput.Value.startOffset])) {
                     var h = GetTangentsJob(
                         input,

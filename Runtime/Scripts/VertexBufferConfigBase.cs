@@ -17,6 +17,17 @@ namespace GLTFast
 #endif
     using Schema;
 
+    [System.Flags]
+    enum MainBufferType {
+        None = 0x0,
+        Position = 0x1,
+        Normal = 0x2,
+        Tangent = 0x4,
+        
+        PosNorm = 0x3,
+        PosNormTan = 0x7,
+    }
+
     struct VertexInputData {
 
         public Accessor accessor;
@@ -49,9 +60,10 @@ namespace GLTFast
     }
 
     abstract class VertexBufferConfigBase {
-#if DEBUG
-        public HashSet<int> meshIndices;
-#endif
+
+        public bool calculateNormals = false;
+        public bool calculateTangents = false;
+
         protected VertexAttributeDescriptor[] vad;
 
         public abstract unsafe JobHandle? ScheduleVertexJobs(
