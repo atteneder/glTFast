@@ -1,4 +1,7 @@
 # glTFast 🚀
+
+[![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
+
 glTFast is a Unity package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
 
 It focuses on speed, memory efficiency and a small build footprint.
