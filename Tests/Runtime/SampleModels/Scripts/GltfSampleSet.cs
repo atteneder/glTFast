@@ -43,10 +43,11 @@ public class GltfSampleSet : ScriptableObject {
     }
 
     void AddPaths(string[] paths) {
-#if !UNITY_EDITOR
-        string prefix = GltfSampleModels.baseUrl;
-#else
-        string prefix = GltfSampleModels.baseUrlLocal;
+        string prefix = string.IsNullOrEmpty(baseUrlWeb) ? GltfSampleModels.baseUrl : baseUrlWeb;
+#if UNITY_EDITOR
+        if(!string.IsNullOrEmpty(baseUrlLocal)) {
+            prefix = baseUrlLocal;
+        }
 #endif
 
         var tmpLocalPath = localPath;
