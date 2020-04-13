@@ -61,6 +61,8 @@ namespace GLTFast
 
     abstract class VertexBufferConfigBase {
 
+        public const Allocator defaultAllocator = Allocator.TempJob;
+
         public bool calculateNormals = false;
         public bool calculateTangents = false;
 

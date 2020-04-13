@@ -39,7 +39,7 @@ namespace GLTFast
         ) {
             Profiler.BeginSample("ScheduleVertexJobs");
             Profiler.BeginSample("AllocateNativeArray");
-            vData = new NativeArray<VType>(posInput.count,Allocator.Persistent);
+            vData = new NativeArray<VType>(posInput.count,defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();
 
