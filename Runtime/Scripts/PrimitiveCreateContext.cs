@@ -53,7 +53,7 @@ namespace GLTFast {
             var msh = new UnityEngine.Mesh();
             msh.name = mesh.name;
 
-            MeshUpdateFlags flags = MeshUpdateFlags.Default;// (MeshUpdateFlags)~0;
+            MeshUpdateFlags flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontResetBoneBounds | MeshUpdateFlags.DontValidateIndices;
             vertexData.ApplyOnMesh(msh,flags);
 
             Profiler.BeginSample("SetIndices");
