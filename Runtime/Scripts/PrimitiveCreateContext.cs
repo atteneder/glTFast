@@ -92,9 +92,9 @@ namespace GLTFast {
             msh.RecalculateBounds(); // TODO: make optional! maybe calculate bounds in Job.
             Profiler.EndSample();
 
-            Profiler.BeginSample("UploadMeshData");
-            msh.UploadMeshData(true);
-            Profiler.EndSample();
+            // Profiler.BeginSample("UploadMeshData");
+            // msh.UploadMeshData(true);
+            // Profiler.EndSample();
 
             Profiler.BeginSample("Dispose");
             Dispose();
