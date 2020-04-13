@@ -343,14 +343,18 @@ namespace GLTFast {
         }
 
         void LoadGltf( string json, string url ) {
+            Profiler.BeginSample("LoadGltf");
             var baseUri = GetUriBase(url);
             ParseJsonAndLoadBuffers(json,baseUri);
             if(!loadingError) {
                 LoadImages(baseUri);
             }
+            Profiler.EndSample();
         }
 
         void LoadImages( string baseUri ) {
+
+            Profiler.BeginSample("LoadImages");
 
             if (gltfRoot.textures != null && gltfRoot.images != null) {
                 images = new Texture2D[gltfRoot.images.Length];
@@ -418,6 +422,8 @@ namespace GLTFast {
                     }
                 }
             }
+
+            Profiler.EndSample();
         }
 
         IEnumerator WaitForBufferDownloads() {
@@ -429,11 +435,14 @@ namespace GLTFast {
                         Debug.LogError(www.error);
                     }
                     else {
+                        Profiler.BeginSample("GetData");
                         buffers[dl.Key] = www.downloadHandler.data;
+                        Profiler.EndSample();
                     }
                 }
             }
 
+            Profiler.BeginSample("CreateGlbBinChungs");
             for( int i=0; i<buffers.Length; i++ ) {
                 if(i==0 && glbBinChunk.HasValue) {
                     // Already assigned in LoadGlb
@@ -442,6 +451,7 @@ namespace GLTFast {
                 var b = buffers[i];
                 binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
             }
+            Profiler.EndSample();
         }
 
         IEnumerator WaitForTextureDownloads() {
@@ -508,17 +518,28 @@ namespace GLTFast {
         }
 
         byte[] DecodeEmbedBuffer(string encodedBytes, out string mimeType) {
+            Profiler.BeginSample("DecodeEmbedBuffer");
             mimeType = null;
             Debug.LogWarning("JSON embed buffers are slow! consider using glTF binary");
             var mediaTypeEnd = encodedBytes.IndexOf(';',5,Math.Min(encodedBytes.Length-5,1000) );
-            if(mediaTypeEnd<0) return null;
+            if(mediaTypeEnd<0) {
+                Profiler.EndSample();
+                return null;
+            }
             mimeType = encodedBytes.Substring(5,mediaTypeEnd-5);
             var tmp = encodedBytes.Substring(mediaTypeEnd+1,7);
-            if(tmp!="base64,") return null;
-            return System.Convert.FromBase64String(encodedBytes.Substring(mediaTypeEnd+8));
+            if(tmp!="base64,") {
+                Profiler.EndSample();
+                return null;
+            }
+            var data = System.Convert.FromBase64String(encodedBytes.Substring(mediaTypeEnd+8));
+            Profiler.EndSample();
+            return data;
         }
 
         void LoadTexture( int index, string url, bool isKtx ) {
+
+            Profiler.BeginSample("LoadTexture");
 
             UnityWebRequest www;
             if(isKtx) {
@@ -526,6 +547,7 @@ namespace GLTFast {
                 www = UnityWebRequest.Get(url);
 #else
                 Debug.LogError(ErrorKtxUnsupported);
+                Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
             } else {
@@ -537,16 +559,18 @@ namespace GLTFast {
             }
 
             textureDownloads[index] = www.SendWebRequest();
+            Profiler.EndSample();
         }
 
         bool LoadGlb( byte[] bytes, string url ) {
+            Profiler.BeginSample("LoadGlb");
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
             if (magic != GLB_MAGIC) {
                 loadingError = true;
+                Profiler.EndSample();
                 return false;
             }
-    
 
             uint version = BitConverter.ToUInt32( bytes, 4 );
             //uint length = BitConverter.ToUInt32( bytes, 8 );
@@ -555,6 +579,7 @@ namespace GLTFast {
 
             if (version != 2) {
                 loadingError = true;
+                Profiler.EndSample();
                 return false;
             }
 
@@ -577,10 +602,18 @@ namespace GLTFast {
                 }
                 else if (chType == (uint)ChunkFormat.JSON) {
                     Assert.IsNull(gltfRoot);
+
+                    Profiler.BeginSample("GetJSON");
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength );
                     //Debug.Log( string.Format("chunk: JSON; length: {0}", json ) );
+                    Profiler.EndSample();
+
+                    Profiler.BeginSample("ParseJSON");
                     ParseJsonAndLoadBuffers(json,baseUri);
+                    Profiler.EndSample();
+
                     if(loadingError) {
+                        Profiler.EndSample();
                         return false;
                     }
                 }
@@ -596,11 +629,13 @@ namespace GLTFast {
                     buffers[0] = bytes;
                 }
                 LoadImages(baseUri);
+                Profiler.EndSample();
                 return !loadingError;
             } else {
                 Debug.LogError("Invalid JSON chunk");
                 loadingError = true;
             }
+            Profiler.EndSample();
             return false;
         }
 
@@ -1001,6 +1036,9 @@ namespace GLTFast {
         }
 
         void LoadAccessorData( Root gltf ) {
+
+            Profiler.BeginSample("LoadAccessorData");
+
 #if DEBUG
             /// Content: Number of meshes (not primitives) that use this exact attribute configuration.
             var vertexAttributeConfigs = new Dictionary<Attributes,VertexAttributeConfig>();
@@ -1128,6 +1166,8 @@ namespace GLTFast {
             accessorJobsHandle = JobHandle.CombineDependencies(jobHandles);
             jobHandles.Dispose();
             JobHandle.ScheduleBatchedJobs();
+
+            Profiler.EndSample();
         }
 
         AccessorDataBase LoadAccessorDataColor(Root gltf,int accessorIndex, out JobHandle? jh) {
