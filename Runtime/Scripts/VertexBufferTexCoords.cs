@@ -24,8 +24,10 @@ namespace GLTFast {
 
         public override unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexUVJobs");
+            Profiler.BeginSample("AllocateNativeArray");
             vData = new NativeArray<T>(uvInputs[0].count, Allocator.Persistent);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
+            Profiler.EndSample();
             uvSetCount = uvInputs.Length;
             int outputByteStride = uvInputs.Length * 8;
 

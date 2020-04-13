@@ -23,8 +23,10 @@ namespace GLTFast {
 
         public override unsafe bool ScheduleVertexColorJob(VertexInputData colorInput, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexColorJob");
+            Profiler.BeginSample("AllocateNativeArray");
             vData = new NativeArray<Color>(colorInput.count, Allocator.Persistent);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
+            Profiler.EndSample();
 
             fixed( void* input = &(colorInput.buffer[colorInput.startOffset])) {
                 var h = GetColors32Job(

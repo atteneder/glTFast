@@ -38,8 +38,10 @@ namespace GLTFast
             VertexInputData? colorInput = null
         ) {
             Profiler.BeginSample("ScheduleVertexJobs");
+            Profiler.BeginSample("AllocateNativeArray");
             vData = new NativeArray<VType>(posInput.count,Allocator.Persistent);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
+            Profiler.EndSample();
 
             int jobCount = 1;
             int outputByteStride = 12; // sizeof Vector3

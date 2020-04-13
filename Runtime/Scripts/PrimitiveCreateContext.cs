@@ -61,7 +61,9 @@ namespace GLTFast {
             for (int i = 0; i < indices.Length; i++) {
                 indexCount += indices[i].Length;
             }
+            Profiler.BeginSample("SetIndexBufferParams");
             msh.SetIndexBufferParams(indexCount,IndexFormat.UInt32); //TODO: UInt16 maybe?
+            Profiler.EndSample();
             msh.subMeshCount = indices.Length;
             indexCount = 0;
             for (int i = 0; i < indices.Length; i++) {
