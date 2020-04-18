@@ -583,7 +583,7 @@ namespace GLTFast {
                 return false;
             }
 
-            int index = 12; // first chung header
+            int index = 12; // first chunk header
 
             var baseUri = GetUriBase(url);
 
