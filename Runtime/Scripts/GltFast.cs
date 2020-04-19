@@ -360,16 +360,16 @@ namespace GLTFast {
                 images = new Texture2D[gltfRoot.images.Length];
                 imageFormats = new ImageFormat[gltfRoot.images.Length];
 
+#if KTX_UNITY
                 // Derive image type from texture extension
                 for (int i = 0; i < gltfRoot.textures.Length; i++) {
-#if KTX_UNITY
                     var texture = gltfRoot.textures[i];
                     if(texture.isKtx) {
                         var imgIndex = texture.GetImageIndex();
                         imageFormats[imgIndex] = ImageFormat.KTX;
                     }
-#endif // KTX_UNITY
                 }
+#endif // KTX_UNITY
 
                 for (int i = 0; i < gltfRoot.images.Length; i++) {
                     var img = gltfRoot.images[i];
