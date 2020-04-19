@@ -551,7 +551,11 @@ namespace GLTFast {
                 return;
 #endif // KTX_UNITY
             } else {
-                www = UnityWebRequestTexture.GetTexture(url,true);
+                www = UnityWebRequestTexture.GetTexture(url
+                    /// TODO: Loading non-readable here would save memory, but
+                    /// breaks texture instantiation in case of multiple samplers:
+                    // ,true // nonReadable
+                );
             }
 
             if(textureDownloads==null) {
