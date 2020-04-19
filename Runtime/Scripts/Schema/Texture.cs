@@ -34,16 +34,13 @@ namespace GLTFast.Schema {
                 if(extensions.KHR_texture_basisu!=null && extensions.KHR_texture_basisu.source >= 0 ) {
                     return extensions.KHR_texture_basisu.source;
                 }
-                if(extensions.KHR_texture_cttf!=null && extensions.KHR_texture_cttf.source >= 0) {
-                    return extensions.KHR_texture_cttf.source;
-                }
             }
             return source;
         }
 
         public bool isKtx {
             get {
-                return extensions!=null && (extensions.KHR_texture_basisu!=null || extensions.KHR_texture_cttf!=null);
+                return extensions!=null && extensions.KHR_texture_basisu!=null;
             }
         }
     }

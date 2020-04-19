@@ -54,8 +54,6 @@ namespace GLTFast {
         const string ErrorPackageMissing = "{0} package needs to be installed in order to support glTF extension {1}!\nSee https://github.com/atteneder/glTFast#installing for instructions";
 
         const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
-        const string ExtTextureCTTF = "KHR_texture_cttf"; // Obsolete! to be removed
-        const string ExtImageKTX2 = "KHR_image_ktx2"; // Obsolete! to be removed
         const string ExtTextureBasisu = "KHR_texture_basisu";
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
@@ -63,8 +61,6 @@ namespace GLTFast {
             ExtDracoMeshCompression,
 #endif
 #if KTX_UNITY
-            ExtTextureCTTF,
-            ExtImageKTX2,
             ExtTextureBasisu,
 #endif // KTX_UNITY
             "KHR_materials_pbrSpecularGlossiness",
@@ -333,11 +329,7 @@ namespace GLTFast {
                         } else
 #endif
 #if !KTX_UNITY
-                        if(
-                            ext==ExtTextureCTTF ||
-                            ext==ExtImageKTX2 ||
-                            ext==ExtTextureBasisu
-                        ) {
+                        if(ext==ExtTextureBasisu) {
                             Debug.LogErrorFormat(ErrorPackageMissing,"KtxUnity",ext);
                         } else
 #endif
