@@ -10,93 +10,20 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 ## Features
 
-- [x] Runtime import
-- [x] Fast and small footprint JSON parsing
-- [x] Multi-threading via C# job system
-- [ ] Editor import
-- [ ] Export
+glTFast supports runtime loading of all sorts of glTF 2.0 files. It runs on WebGL, iOS, Android, Windows, macOS and Linux and supports the majority of glTF's features and official extensions.
 
-### Core glTF features
+Most notable restrictions
 
-- [x] glTF (gltf + buffers + textures)
-- [x] glTF binary (glb)
+- Just for static scenes. No animations, skinning/rigs or morph targets supported.
+- Unity's built-in render pipeline only (URP and HDRP are planned)
 
-- [x] Scene
-  - [x] Node hierarchy
-  - [ ] Camera ([issue](issues/12))
-- [x] Buffers
-  - [x] External URIs
-  - [x] glTF binary main buffer
-  - [x] Embed buffers or textures (base-64 encoded within JSON)
-- [x] Images
-  - [x] PNG
-  - [x] Jpeg
-  - [x] <sup>2</sup>KTX with Basis Universal super compression ([instructions](#basisu))
-- [x] Materials
-  - [x] Unity built-in pipeline
-    - [x] PBR metallic-roughness
-    - [x] PBR specular-glossiness (via extension)
-    - [x] Unlit (via extension)
-    - [x] Normal texture
-    - [x] Occlusion texture
-    - [x] Emission texture
-    - [x] Metallic texture
-    - [x] Roughness texture
-    - [x] Alpha mode
-    - [x] Double sided
-    - [x] Vertex colors
-    - [x] Emission(factor)
-  - [ ] Universal Render Pipeline ([issue](issues/41))
-  - [ ] High Definition Render Pipeline ([issue](issues/42))
-- Primitive Types
-  - [x] TRIANGLES
-  - [x] <sup>1</sup>POINTS
-  - [x] <sup>1</sup>LINES
-  - [x] LINE_STRIP
-  - [x] <sup>1</sup>LINE_LOOP
-  - [ ] TRIANGLE_STRIP
-  - [ ] TRIANGLE_FAN
-- [x] Meshes
-  - [x] Positions
-  - [x] Normals
-  - [x] Tangents
-  - [x] Texture coordinates
-  - [x] Vertex colors
-  - [x] Draco mesh compression (via extension)
-  - [x] Implicit (no) indices
-  - [x] Per primitive material
-  - [ ] Multiple texture coordinates sets ([issue](issues/34))
-  - [ ] Joints
-  - [ ] Weights
-- [x] Texture sampler
-  - [x] Filtering (see ([limitations](#knownissues)))
-  - [x] Wrap modes
-- [ ] Morph targets ([issue](issues/8))
-  - [ ] Sparse accessors
-- [ ] Skinning ([issue](issues/13))
-- [ ] Animation
-
-<sup>1</sup>: Untested due to lack of demo files.
-
-<sup>2</sup>: Experimental
-
-### Extensions
-
-- [x] KHR_draco_mesh_compression
-- [x] KHR_materials_pbrSpecularGlossiness
-- [x] KHR_materials_unlit
-- [x] KHR_texture_transform
-- [x] KHR_mesh_quantization
-- [x] <sup>1</sup>KHR_texture_basisu ([instructions](#basisu))
-- [ ] KHR_lights_punctual ([issue](issues/17))
-
-<sup>1</sup>: Experimental
+See the [list of features/extensions](./Documentation~/features.md) for details and limitations.
 
 ## Installing
 
 Add glTFast via Unity's Package Manager ( Window -> Package Manager ). Click the ➕ on the top left and choose *Add package from GIT URL*.
 
-![][upm_install]
+![Package Manager -> + -> Add Package from git URL][upm_install]
 
 Enter the following URL:
 
@@ -109,6 +36,10 @@ To add support for Draco mesh compression, repeat the last step and also add the
 > Note: You have to have a GIT LFS client (large file support) installed on your system. Otherwise you will get an error that the native library file (dll on Windows) is corrupt!
 
 If you use Unity older than 2019.1, you additionally have to add `DRACO_UNITY` to your projects scripting define symbols in the player settings.
+
+### Open Source Unity Package Registry
+
+glTFast can also be installed from the [Open Source Unity Package Registry](https://openupm.com/packages/com.atteneder.gltfast/) (experimental).
 
 ### Legacy installation
 
@@ -235,8 +166,7 @@ To enable the experimental support for KTX / Basis Universal support, add the [K
 
 `https://github.com/atteneder/KtxUnity.git`
 
-
-Or the manual/legacy way, add this to youre manifest.json file:
+Or the manual/legacy way, add this to your manifest.json file:
 
 ```json
 "com.atteneder.ktx": "https://github.com/atteneder/KtxUnity.git",
@@ -275,17 +205,6 @@ It also uses fast low-level memory copy methods and [Unity's Job system](https:/
 - It's not an asset manager with instantiation and reference counting support.
 - Also not a download manager for asset caching/re-usage.
 Such stuff should be able to place on top of this library.
-
-## <a name="knownissues">Known issues
-
-- <sup>1</sup>Vertex accessors (positions, normals, etc.) that are used across meshes are duplicated and result in higher memory usage
-- <sup>1</sup>When using more than one samplers on an image, that image is duplicated and results in higher memory usage
-- Texture sampler minification/magnification filter limitations (see [issue](issues/61)):
-  - <sup>1</sup>There's no differentiation between `minFilter` and `magFilter`. `minFilter` settings are prioritized.
-  - <sup>1</sup>`minFilter` mode `NEAREST_MIPMAP_LINEAR` is not supported and will result in `NEAREST`.
-- When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
-
-<sup>1</sup>: A Unity API limitation.
 
 ## Get involved
 
