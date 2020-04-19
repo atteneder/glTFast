@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Networking;
 using UnityEngine.Profiling;
 using UnityEngine.Events;
@@ -105,6 +106,7 @@ namespace GLTFast {
 
         Texture2D[] images = null;
         ImageFormat[] imageFormats;
+        bool[] imageGamma;
 
         /// optional glTF-binary buffer
         /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
@@ -356,9 +358,52 @@ namespace GLTFast {
 
             Profiler.BeginSample("LoadImages");
 
-            if (gltfRoot.textures != null && gltfRoot.images != null) {
+            if (gltfRoot.textures != null && gltfRoot.images != null && gltfRoot.materials!=null) {
                 images = new Texture2D[gltfRoot.images.Length];
                 imageFormats = new ImageFormat[gltfRoot.images.Length];
+
+                if(QualitySettings.activeColorSpace==ColorSpace.Linear) {
+
+                    imageGamma = new bool[gltfRoot.images.Length];
+
+                    for(int i=0;i<gltfRoot.materials.Length;i++) {
+                        var mat = gltfRoot.materials[i];
+                        if( mat.pbrMetallicRoughness != null ) {
+                            if(
+                                mat.pbrMetallicRoughness.baseColorTexture != null &&
+                                mat.pbrMetallicRoughness.baseColorTexture.index >= 0 &&
+                                mat.pbrMetallicRoughness.baseColorTexture.index < imageGamma.Length
+                            ) {
+                                imageGamma[mat.pbrMetallicRoughness.baseColorTexture.index] = true;
+                            }
+                        }
+                        if(
+                            mat.emissiveTexture != null &&
+                            mat.emissiveTexture.index >= 0 &&
+                            mat.emissiveTexture.index < imageGamma.Length
+                        ) {
+                            imageGamma[mat.emissiveTexture.index] = true;
+                        }
+                        if( mat.extensions != null &&
+                            mat.extensions.KHR_materials_pbrSpecularGlossiness != null )
+                        {
+                            if(
+                                mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture != null &&
+                                mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture.index >= 0 &&
+                                mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture.index < imageGamma.Length
+                            ) {
+                                imageGamma[mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture.index] = true;
+                            }
+                            if(
+                                mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture != null &&
+                                mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture.index >= 0 &&
+                                mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture.index < imageGamma.Length
+                            ) {
+                                imageGamma[mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture.index] = true;
+                            }
+                        }
+                    }
+                }
 
 #if KTX_UNITY
                 // Derive image type from texture extension
@@ -391,7 +436,8 @@ namespace GLTFast {
                             Debug.LogErrorFormat("Unsupported embed image format {0}",imageFormats[i]);
                         }
                         // TODO: jobify (if Unity allows LoadImage to be off the main thread)
-                        var txt = CreateEmptyTexture(img,i);
+                        bool forceSampleLinear = imageGamma!=null && !imageGamma[i];
+                        var txt = CreateEmptyTexture(img,i,forceSampleLinear);
                         txt.LoadImage(data);
                         images[i] = txt;
                     } else {
@@ -474,7 +520,15 @@ namespace GLTFast {
                             Debug.LogError(ErrorKtxUnsupported);
 #endif // KTX_UNITY
                         } else {
-                            images[dl.Key] = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
+                            bool forceSampleLinear = imageGamma!=null && !imageGamma[dl.Key];
+                            Texture2D txt;
+                            if(forceSampleLinear) {
+                                txt = CreateEmptyTexture(gltfRoot.images[dl.Key], dl.Key, forceSampleLinear);
+                                txt.LoadImage(www.downloadHandler.data);
+                            } else {
+                                txt = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
+                            }
+                            images[dl.Key] = txt;
                         }
                     }
                 }
@@ -815,6 +869,7 @@ namespace GLTFast {
             imageCreateContexts = null;
             images = null;
             imageFormats = null;
+            imageGamma = null;
             glbBinChunk = null;
         }
 
@@ -986,8 +1041,9 @@ namespace GLTFast {
                         } else {
                             var buffer = GetBuffer(bufferView.buffer);
                             var chunk = binChunks[bufferView.buffer];
-                            
-                            var txt = CreateEmptyTexture(img,i);
+
+                            bool forceSampleLinear = imageGamma!=null && !imageGamma[i];
+                            var txt = CreateEmptyTexture(img,i,forceSampleLinear);
                             var icc = new ImageCreateContext();
                             icc.imageIndex = i;
                             icc.buffer = new byte[bufferView.byteLength];
@@ -1018,8 +1074,13 @@ namespace GLTFast {
             }
         }
 
-        Texture2D CreateEmptyTexture(Schema.Image img, int index) {
-            var txt = new UnityEngine.Texture2D(4, 4);
+        Texture2D CreateEmptyTexture(Schema.Image img, int index, bool forceSampleLinear) {
+            Texture2D txt;
+            if(forceSampleLinear) {
+                txt = new Texture2D(4,4,GraphicsFormat.R8G8B8A8_UNorm,TextureCreationFlags.MipChain);
+            } else {
+                txt = new UnityEngine.Texture2D(4, 4);
+            }
             txt.name = string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
             return txt;
         }
