@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.1] - 2020-04-19
 ### Changed
 - Using less memory by loading PNG/Jpeg textures as non-readable
+### Fixed
+- Memory leak: free up volatile array `imageFormats`
 
 ## [1.0.0] - 2020-03-13
 ### Changed

@@ -810,6 +810,7 @@ namespace GLTFast {
             meshPrimitiveCluster = null;
             imageCreateContexts = null;
             images = null;
+            imageFormats = null;
             glbBinChunk = null;
         }
 
