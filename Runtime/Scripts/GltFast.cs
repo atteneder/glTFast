@@ -551,7 +551,7 @@ namespace GLTFast {
                 return;
 #endif // KTX_UNITY
             } else {
-                www = UnityWebRequestTexture.GetTexture(url);
+                www = UnityWebRequestTexture.GetTexture(url,true);
             }
 
             if(textureDownloads==null) {
