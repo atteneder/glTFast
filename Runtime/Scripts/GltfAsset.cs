@@ -71,6 +71,15 @@ namespace GLTFast
             _headers = httpHeaders;
         }
 
+        /// <summary>
+        /// If you need to force loading binary in script
+        /// </summary>
+        /// <param name="force"></param>
+        public void SetForceBinary(bool force)
+        {
+            _forceBinary = force;   
+        }
+
         void Start()
         {
             if (loadOnStartup && !string.IsNullOrEmpty(url))
