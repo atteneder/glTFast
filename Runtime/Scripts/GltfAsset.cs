@@ -63,7 +63,10 @@ namespace GLTFast
         {
             var initialSize = _headers == null ? 0 : _headers.Length;
             var httpHeaders = new HttpHeaders[initialSize +1];
-            Array.Copy(_headers, httpHeaders, initialSize);
+            if(_headers != null)
+            {
+                Array.Copy(_headers, httpHeaders, initialSize);
+            }
             httpHeaders[initialSize] = new HttpHeaders() {
                 Key = key,
                 Value = value
