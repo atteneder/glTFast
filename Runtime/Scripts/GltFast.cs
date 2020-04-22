@@ -92,6 +92,7 @@ namespace GLTFast {
         IMaterialGenerator materialGenerator;
         IDeferAgent deferAgent;
 
+        public UnityAction<UnityWebRequest> onSettingRequest;
         public UnityAction<bool> onLoadComplete;
 
 #region VolatileData
@@ -150,7 +151,7 @@ namespace GLTFast {
             materialGenerator = new DefaultMaterialGenerator();
         }
 
-        public void Load( string url, IDeferAgent deferAgent=null ) {
+        public void Load( string url, IDeferAgent deferAgent=null, bool forceBinary = false) {
             bool gltfBinary = false;
             // quick glTF-binary check
             gltfBinary = url.EndsWith(GLB_EXT,StringComparison.OrdinalIgnoreCase);
@@ -160,11 +161,12 @@ namespace GLTFast {
                 gltfBinary = getIndex>=0 && url.Substring(getIndex-GLB_EXT.Length,GLB_EXT.Length).Equals(GLB_EXT,StringComparison.OrdinalIgnoreCase);
             }
             var da = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
-            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary,da));
+            monoBehaviour.StartCoroutine(LoadRoutine(url,forceBinary || gltfBinary,da));
         }
 
         IEnumerator LoadRoutine( string url, bool gltfBinary, IDeferAgent deferAgent ) {
             UnityWebRequest www = UnityWebRequest.Get(url);
+            onSettingRequest?.Invoke(www);
             yield return www.SendWebRequest();
      
             if(www.isNetworkError || www.isHttpError) {

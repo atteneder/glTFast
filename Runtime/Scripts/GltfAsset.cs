@@ -13,19 +13,33 @@
 // limitations under the License.
 //
 
+using System;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Networking;
 
 namespace GLTFast
 {
     public class GltfAsset : MonoBehaviour
     {
+        [Serializable]
+        public class HttpHeaders
+        {
+            public string Key;
+            public string Value;
+        }
+        [Header("Http headers")]
+        [SerializeField]
+        private HttpHeaders[] _headers;
+
+        [SerializeField]
+        private bool _forceBinary = false;
         public string url;
         public bool loadOnStartup = true;
 
         protected GLTFast gLTFastInstance;
 
-        public UnityAction<GltfAsset,bool> onLoadComplete;
+        public UnityAction<GltfAsset, bool> onLoadComplete;
 
 
         /// <summary>
@@ -34,40 +48,56 @@ namespace GLTFast
         /// <param name="url">URL of the glTF file.</param>
         /// <param name="deferAgent">Defer Agent takes care of interrupting the
         /// loading procedure in order to keep the frame rate responsive.</param>
-        public void Load( string url, IDeferAgent deferAgent=null ) {
+        public void Load(string url, IDeferAgent deferAgent = null)
+        {
             this.url = url;
             Load(deferAgent);
         }
 
         void Start()
         {
-            if(loadOnStartup && !string.IsNullOrEmpty(url)){
+            if (loadOnStartup && !string.IsNullOrEmpty(url))
+            {
                 // Automatic load on startup
                 Load();
             }
         }
 
-        void Load( IDeferAgent deferAgent=null ) {
+        void Load(IDeferAgent deferAgent = null)
+        {
             gLTFastInstance = new GLTFast(this);
+            gLTFastInstance.onSettingRequest += OnSettingHeaders;
             gLTFastInstance.onLoadComplete += OnLoadComplete;
-            gLTFastInstance.Load(url,deferAgent);
+            gLTFastInstance.Load(url, deferAgent, _forceBinary);
         }
 
-        protected virtual void OnLoadComplete(bool success) {
+        protected virtual void OnLoadComplete(bool success)
+        {
             gLTFastInstance.onLoadComplete -= OnLoadComplete;
-            if(success) {
+            if (success)
+            {
                 gLTFastInstance.InstantiateGltf(transform);
             }
-            if(onLoadComplete!=null) {
-                onLoadComplete(this,success);
+            if (onLoadComplete != null)
+            {
+                onLoadComplete(this, success);
+            }
+        }
+
+        protected virtual void OnSettingHeaders(UnityWebRequest request)
+        {
+            foreach(var header in _headers)
+            {
+                request.SetRequestHeader(header.Key, header.Value);
             }
         }
 
         private void OnDestroy()
         {
-            if(gLTFastInstance!=null) {
+            if (gLTFastInstance != null)
+            {
                 gLTFastInstance.Destroy();
-                gLTFastInstance=null;
+                gLTFastInstance = null;
             }
         }
     }
