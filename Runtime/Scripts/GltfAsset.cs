@@ -54,6 +54,23 @@ namespace GLTFast
             Load(deferAgent);
         }
 
+        /// <summary>
+        /// Allow to set http header with scripts. Call this method before loading the asset
+        /// </summary>
+        /// <param name="key">Http header key</param>
+        /// <param name="value">Http header value</param>
+        public void AddHttpHeader(string key, string value)
+        {
+            var initialSize = _headers == null ? 0 : _headers.Length;
+            var httpHeaders = new HttpHeaders[initialSize +1];
+            Array.Copy(_headers, httpHeaders, initialSize);
+            httpHeaders[initialSize] = new HttpHeaders() {
+                Key = key,
+                Value = value
+            };
+            _headers = httpHeaders;
+        }
+
         void Start()
         {
             if (loadOnStartup && !string.IsNullOrEmpty(url))
