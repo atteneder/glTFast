@@ -28,7 +28,7 @@ namespace GLTFast {
     }
 
     public class AwaitableDownload : IDownload {
-        protected UnityWebRequest www;
+        protected UnityWebRequest request;
         protected UnityWebRequestAsyncOperation asynOperation;
 
 
@@ -37,8 +37,8 @@ namespace GLTFast {
         }
 
         protected virtual void Init(string url) {
-            www = UnityWebRequest.Get(url);
-            asynOperation = www.SendWebRequest();
+            request = UnityWebRequest.Get(url);
+            asynOperation = request.SendWebRequest();
         }
 
         public object Current { get { return asynOperation; } }
@@ -47,13 +47,13 @@ namespace GLTFast {
 
         public bool success {
             get {
-                return www.isDone && !www.isNetworkError && !www.isHttpError;
+                return request.isDone && !request.isNetworkError && !request.isHttpError;
             }
         }
 
-        public string error { get { return www.error; } }
-        public byte[] data { get { return www.downloadHandler.data; } }
-        public string text { get { return www.downloadHandler.text; } }
+        public string error { get { return request.error; } }
+        public byte[] data { get { return request.downloadHandler.data; } }
+        public string text { get { return request.downloadHandler.text; } }
     }
 
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
@@ -61,17 +61,17 @@ namespace GLTFast {
         public AwaitableTextureDownload(string url):base(url) {}
 
         protected override void Init(string url) {
-            www = UnityWebRequestTexture.GetTexture(url
+            request = UnityWebRequestTexture.GetTexture(url
                 /// TODO: Loading non-readable here would save memory, but
                 /// breaks texture instantiation in case of multiple samplers:
                 // ,true // nonReadable
                 );
-            asynOperation = www.SendWebRequest();
+            asynOperation = request.SendWebRequest();
         }
 
         public Texture2D texture {
             get {
-                return (www.downloadHandler as  DownloadHandlerTexture ).texture;
+                return (request.downloadHandler as  DownloadHandlerTexture ).texture;
             }
         }
     }
