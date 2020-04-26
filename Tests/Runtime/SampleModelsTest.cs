@@ -67,7 +67,7 @@ public class SampleModelsTest
 
             gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
             gltfAsset.loadOnStartup = false;
-            gltfAsset.Load(path,deferAgent);
+            gltfAsset.Load(path,null,deferAgent);
 
             while (!done)
             {
@@ -115,7 +115,7 @@ public class SampleModelsTest
 
             gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
             gltfAsset.loadOnStartup = false;
-            gltfAsset.Load(path,deferAgent);
+            gltfAsset.Load(path,null,deferAgent);
 
             while (!done)
             {

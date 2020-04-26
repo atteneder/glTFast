@@ -145,14 +145,19 @@ namespace GLTFast {
             return new Uri( uri, ".").AbsoluteUri;
         }
 
-        public GLTFast( MonoBehaviour monoBehaviour, IDownloadProvider downloadProvider=null ) {
+        public GLTFast(
+            MonoBehaviour monoBehaviour,
+            IDownloadProvider downloadProvider=null,
+            IDeferAgent deferAgent=null
+            )
+        {
             this.monoBehaviour = monoBehaviour;
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
+            this.deferAgent = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
             materialGenerator = new DefaultMaterialGenerator();
         }
 
-        public void Load( string url, IDeferAgent deferAgent=null ) {
-            this.deferAgent = deferAgent;
+        public void Load( string url ) {
             bool gltfBinary = false;
             // quick glTF-binary check
             gltfBinary = url.EndsWith(GLB_EXT,StringComparison.OrdinalIgnoreCase);
@@ -161,7 +166,6 @@ namespace GLTFast {
                 int getIndex = url.LastIndexOf('?');
                 gltfBinary = getIndex>=0 && url.Substring(getIndex-GLB_EXT.Length,GLB_EXT.Length).Equals(GLB_EXT,StringComparison.OrdinalIgnoreCase);
             }
-            var da = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
             monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary));
         }
 
