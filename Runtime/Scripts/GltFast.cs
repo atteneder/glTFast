@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
-using UnityEngine.Networking;
 using UnityEngine.Profiling;
 using UnityEngine.Events;
 using Unity.Jobs;
@@ -89,6 +88,7 @@ namespace GLTFast {
         /// </summary>
         MonoBehaviour monoBehaviour;
 
+        IDownloadProvider downloadProvider;
         IMaterialGenerator materialGenerator;
         IDeferAgent deferAgent;
 
@@ -145,12 +145,14 @@ namespace GLTFast {
             return new Uri( uri, ".").AbsoluteUri;
         }
 
-        public GLTFast( MonoBehaviour monoBehaviour ) {
+        public GLTFast( MonoBehaviour monoBehaviour, IDownloadProvider downloadProvider=null ) {
             this.monoBehaviour = monoBehaviour;
+            this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
             materialGenerator = new DefaultMaterialGenerator();
         }
 
         public void Load( string url, IDeferAgent deferAgent=null ) {
+            this.deferAgent = deferAgent;
             bool gltfBinary = false;
             // quick glTF-binary check
             gltfBinary = url.EndsWith(GLB_EXT,StringComparison.OrdinalIgnoreCase);
@@ -160,32 +162,31 @@ namespace GLTFast {
                 gltfBinary = getIndex>=0 && url.Substring(getIndex-GLB_EXT.Length,GLB_EXT.Length).Equals(GLB_EXT,StringComparison.OrdinalIgnoreCase);
             }
             var da = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
-            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary,da));
+            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary));
         }
 
-        IEnumerator LoadRoutine( string url, bool gltfBinary, IDeferAgent deferAgent ) {
-            UnityWebRequest www = UnityWebRequest.Get(url);
-            yield return www.SendWebRequest();
-     
-            if(www.isNetworkError || www.isHttpError) {
+        IEnumerator LoadRoutine( string url, bool gltfBinary ) {
+
+            var download = downloadProvider.Request(url);
+            yield return download;
+
+            if(download.success) {
+                if(gltfBinary) {
+                    LoadGlb(download.data,url);
+                } else {
+                    LoadGltf(download.text,url);
+                }
+                yield return LoadContent();
+            } else {
+                Debug.LogErrorFormat("{0} {1}",download.error,url);
                 loadingError=true;
-                Debug.LogErrorFormat("{0} {1}",www.error,url);
             }
-            else {
-                this.deferAgent = deferAgent;
-                yield return LoadContent(www.downloadHandler,url,gltfBinary);
-            }
+
             DisposeVolatileData();
             OnLoadComplete(!loadingError);
         }
 
-        IEnumerator LoadContent( DownloadHandler dlh, string url, bool gltfBinary ) {
-
-            if(gltfBinary) {
-                LoadGlb(dlh.data,url);
-            } else {
-                LoadGltf(dlh.text,url);
-            }
+        IEnumerator LoadContent() {
 
             if(loadingError) {
                 OnLoadComplete(!loadingError);
@@ -481,16 +482,15 @@ namespace GLTFast {
 
         IEnumerator WaitForBufferDownloads() {
             if(downloads!=null) {
-                foreach( var dl in downloads ) {
-                    yield return dl.Value;
-                    var www = dl.Value.webRequest;
-                    if(www.isNetworkError || www.isHttpError) {
-                        Debug.LogError(www.error);
-                    }
-                    else {
+                foreach( var downloadPair in downloads ) {
+                    var download = downloadPair.Value;
+                    yield return download;
+                    if (download.success) {
                         Profiler.BeginSample("GetData");
-                        buffers[dl.Key] = www.downloadHandler.data;
+                        buffers[downloadPair.Key] = download.data;
                         Profiler.EndSample();
+                    } else {
+                        Debug.LogError(download.error);
                     }
                 }
             }
@@ -511,17 +511,14 @@ namespace GLTFast {
             if(textureDownloads!=null) {
                 foreach( var dl in textureDownloads ) {
                     yield return dl.Value;
-                    var www = dl.Value.webRequest;
-                    if(www.isNetworkError || www.isHttpError) {
-                        Debug.LogError(www.error);
-                    }
-                    else {
+                    var www = dl.Value;
+                    if(www.success) {
                         if(imageFormats[dl.Key]==ImageFormat.KTX) {
 #if KTX_UNITY
                             if(ktxLoadContexts==null) {
                                 ktxLoadContexts = new List<KtxLoadContextBase>();
                             }
-                            var ktxContext = new KtxLoadContext(dl.Key,www.downloadHandler.data);
+                            var ktxContext = new KtxLoadContext(dl.Key,www.data);
                             ktxLoadContexts.Add(ktxContext);
 #else
                             Debug.LogError(ErrorKtxUnsupported);
@@ -531,12 +528,14 @@ namespace GLTFast {
                             Texture2D txt;
                             if(forceSampleLinear) {
                                 txt = CreateEmptyTexture(gltfRoot.images[dl.Key], dl.Key, forceSampleLinear);
-                                txt.LoadImage(www.downloadHandler.data);
+                                txt.LoadImage(www.data);
                             } else {
-                                txt = ( www.downloadHandler as  DownloadHandlerTexture ).texture;
+                                txt = (www as ITextureDownload).texture;
                             }
                             images[dl.Key] = txt;
                         }
+                    } else {
+                        Debug.LogError(www.error);
                     }
                 }
             }
@@ -561,17 +560,14 @@ namespace GLTFast {
             return !loadingError;
         }
 
-        Dictionary<int,UnityWebRequestAsyncOperation> downloads;
-        Dictionary<int,UnityWebRequestAsyncOperation> textureDownloads;
+        Dictionary<int,IDownload> downloads;
+        Dictionary<int,IDownload> textureDownloads;
 
         void LoadBuffer( int index, string url ) {
-            UnityWebRequest www = UnityWebRequest.Get(url);
-
             if(downloads==null) {
-                downloads = new Dictionary<int, UnityWebRequestAsyncOperation>();
+                downloads = new Dictionary<int,IDownload>();
             }
-
-            downloads[index] = www.SendWebRequest();
+            downloads[index] = downloadProvider.Request(url);
         }
 
         byte[] DecodeEmbedBuffer(string encodedBytes) {
@@ -603,28 +599,22 @@ namespace GLTFast {
 
             Profiler.BeginSample("LoadTexture");
 
-            UnityWebRequest www;
+            if(textureDownloads==null) {
+                textureDownloads = new Dictionary<int,IDownload>();
+            }
+            IDownload download;
             if(isKtx) {
 #if KTX_UNITY
-                www = UnityWebRequest.Get(url);
+                download = downloadProvider.Request(url);
 #else
                 Debug.LogError(ErrorKtxUnsupported);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
             } else {
-                www = UnityWebRequestTexture.GetTexture(url
-                    /// TODO: Loading non-readable here would save memory, but
-                    /// breaks texture instantiation in case of multiple samplers:
-                    // ,true // nonReadable
-                );
+                download = downloadProvider.RequestTexture(url);
             }
-
-            if(textureDownloads==null) {
-                textureDownloads = new Dictionary<int, UnityWebRequestAsyncOperation>();
-            }
-
-            textureDownloads[index] = www.SendWebRequest();
+            textureDownloads[index] = download;
             Profiler.EndSample();
         }
 
