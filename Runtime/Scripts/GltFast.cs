@@ -548,7 +548,8 @@ namespace GLTFast {
             if(ktxLoadContexts==null) yield break;
             foreach (var ktx in ktxLoadContexts)
             {
-                yield return ktx.LoadKtx();
+                bool forceSampleLinear = imageGamma!=null && !imageGamma[ktx.imageIndex];
+                yield return ktx.LoadKtx(forceSampleLinear);
                 images[ktx.imageIndex] = ktx.texture;
             }
             ktxLoadContexts.Clear();
@@ -757,7 +758,8 @@ namespace GLTFast {
                 for (int i = 0; i < ktxLoadContextsBuffer.Count; i++)
                 {
                     var ktx = ktxLoadContextsBuffer[i];
-                    var ktxRoutine = ktx.LoadKtx();
+                    bool forceSampleLinear = imageGamma!=null && !imageGamma[ktx.imageIndex];
+                    var ktxRoutine = ktx.LoadKtx(forceSampleLinear);
                     while(ktxRoutine.MoveNext()) {
                         yield return null;
                     }

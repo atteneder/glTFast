@@ -30,10 +30,10 @@ namespace GLTFast {
             texture = null;
         }
 
-        public override IEnumerator LoadKtx() {
+        public override IEnumerator LoadKtx(bool linear) {
             ktxTexture.onTextureLoaded += OnKtxLoaded;
             var slice = new NativeArray<byte>(data,KtxNativeInstance.defaultAllocator);
-            yield return ktxTexture.LoadBytesRoutine(slice);
+            yield return ktxTexture.LoadBytesRoutine(slice,linear);
             slice.Dispose();
             data = null;
         }

@@ -25,7 +25,7 @@ namespace GLTFast {
         public Texture2D texture;
         protected KtxTexture ktxTexture;
         
-        public abstract IEnumerator LoadKtx();
+        public abstract IEnumerator LoadKtx(bool linear);
 
         protected void OnKtxLoaded(Texture2D newTexture) {
             ktxTexture.onTextureLoaded -= OnKtxLoaded;

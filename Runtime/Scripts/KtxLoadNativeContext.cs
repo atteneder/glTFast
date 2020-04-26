@@ -30,9 +30,9 @@ namespace GLTFast {
             texture = null;
         }
 
-        public override IEnumerator LoadKtx() {
+        public override IEnumerator LoadKtx(bool linear) {
             ktxTexture.onTextureLoaded += OnKtxLoaded;
-            return ktxTexture.LoadBytesRoutine(slice);
+            return ktxTexture.LoadBytesRoutine(slice,linear);
         }
     }
 }
