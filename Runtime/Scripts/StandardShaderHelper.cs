@@ -81,6 +81,18 @@ namespace GLTFast.Materials {
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
         }
 
+        public static void SetFadeModeBlend(UnityEngine.Material material) {
+            material.SetFloat(modePropId, (int) StandardShaderMode.Fade);
+            material.SetOverrideTag("RenderType", "Transparent");
+            material.setInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            material.SetInt(zWritePropId, 0);
+            material.DisableKeyword("_ALPHATEST_ON");
+            material.EnableKeyword("_ALPHABLEND_ON");
+            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Fade;
+        }
+
         public static void SetOpaqueMode(UnityEngine.Material material) {
             material.SetOverrideTag("RenderType", "Opaque");
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);
