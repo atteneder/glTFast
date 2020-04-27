@@ -86,7 +86,7 @@ namespace GLTFast.Materials {
             material.SetOverrideTag("RenderType", "Transparent");
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            material.SetInt(zWritePropId, 0);
+            material.SetInt(zWritePropId, 1);
             material.DisableKeyword("_ALPHATEST_ON");
             material.EnableKeyword("_ALPHABLEND_ON");
             material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
