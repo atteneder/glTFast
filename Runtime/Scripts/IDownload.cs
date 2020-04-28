@@ -16,7 +16,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace GLTFast {
+namespace GLTFast.Loading {
 
     public interface IDownloadProvider {
         IDownload Request(string url);

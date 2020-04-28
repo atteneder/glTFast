@@ -18,6 +18,8 @@ using UnityEngine.Events;
 
 namespace GLTFast
 {
+    using Loading;
+
     public class GltfAsset : MonoBehaviour
     {
         public string url;

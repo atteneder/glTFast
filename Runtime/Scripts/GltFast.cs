@@ -36,6 +36,7 @@ using KtxUnity;
 namespace GLTFast {
 
     using Schema;
+    using Loading;
 
     public class GLTFast {
 

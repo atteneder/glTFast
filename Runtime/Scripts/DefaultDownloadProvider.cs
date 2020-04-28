@@ -16,7 +16,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace GLTFast {
+namespace GLTFast.Loading {
     public class DefaultDownloadProvider : IDownloadProvider {
         public IDownload Request(string url) {
             return new AwaitableDownload(url);
