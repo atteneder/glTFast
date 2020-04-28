@@ -32,6 +32,8 @@ namespace GLTFast {
         protected UnityWebRequestAsyncOperation asynOperation;
 
 
+        public AwaitableDownload() {}
+
         public AwaitableDownload(string url) {
             Init(url);
         }
@@ -58,14 +60,19 @@ namespace GLTFast {
 
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
 
+        public AwaitableTextureDownload():base() {}
         public AwaitableTextureDownload(string url):base(url) {}
 
-        protected override void Init(string url) {
-            request = UnityWebRequestTexture.GetTexture(url
+        protected static UnityWebRequest CreateRequest(string url) {
+            return UnityWebRequestTexture.GetTexture(url
                 /// TODO: Loading non-readable here would save memory, but
                 /// breaks texture instantiation in case of multiple samplers:
                 // ,true // nonReadable
                 );
+        }
+
+        protected override void Init(string url) {
+            request = CreateRequest(url);
             asynOperation = request.SendWebRequest();
         }
 
