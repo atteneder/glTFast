@@ -89,7 +89,7 @@ namespace GLTFast {
             if (gltfMaterial.extensions != null) {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
-                    material.color = specGloss.diffuseColor;
+                    material.color = specGloss.diffuseColor.gamma;
                     material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
                     material.SetFloat(StandardShaderHelper.glossinessPropId,specGloss.glossinessFactor);
 
@@ -102,7 +102,7 @@ namespace GLTFast {
             }
 
             if (gltfMaterial.pbrMetallicRoughness!=null) {
-                material.color = gltfMaterial.pbrMetallicRoughness.baseColor;
+                material.color = gltfMaterial.pbrMetallicRoughness.baseColor.gamma;
                 material.SetFloat(StandardShaderHelper.metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                 material.SetFloat(StandardShaderHelper.roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
@@ -142,7 +142,7 @@ namespace GLTFast {
             }
 
             if(gltfMaterial.emissive != Color.black) {
-                material.SetColor("_EmissionColor", gltfMaterial.emissive);
+                material.SetColor("_EmissionColor", gltfMaterial.emissive.gamma);
                 material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
             }
 

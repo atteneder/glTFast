@@ -4,16 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.1] - 2020-04-29
 ### Added
 - Abstract interface `IDownloadProvider` let's users implement custom download behavior (useful for authentification or caching)
-
-## [1.0.1] - 2020-04-19
-### Fixed
-- Correct shading in linear color space projects due to correct (linear) sampling of normal, occlusion and metallic-roughness maps
-- Memory leak: free up volatile array `imageFormats`
 ### Changed
 - Removed support for obsolete draft extensions `KHR_texture_cttf` and `KHR_image_ktx2`
+### Fixed
+- Correct (brighter) colors due to color-space conversion (conversion from linear to gamma before applying to material)
+- Correct shading in linear color space projects due to correct (linear) sampling of normal, occlusion and metallic-roughness maps
+- Memory leak: free up volatile array `imageFormats`
 
 ## [1.0.0] - 2020-03-13
 ### Changed
