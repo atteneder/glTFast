@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.1] - 2020-04-29
 ### Added
 - Abstract interface `IDownloadProvider` let's users implement custom download behavior (useful for authentification or caching)
+- Added `CustomHeaderDownloadProvider`, a reference implementation that downloads glTF's files with custom HTTP headers
 ### Changed
 - Removed support for obsolete draft extensions `KHR_texture_cttf` and `KHR_image_ktx2`
 ### Fixed
