@@ -14,7 +14,6 @@
 //
 
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using Unity.Collections;
 
@@ -29,7 +28,8 @@ namespace GLTFast
         Normal,
         Tangent,
         UV,
-        Color
+        Color,
+        InverseBindMatrix
     }
 
     abstract class AccessorDataBase {

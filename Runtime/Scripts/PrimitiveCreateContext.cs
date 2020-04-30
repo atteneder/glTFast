@@ -13,7 +13,6 @@
 // limitations under the License.
 //
 
-using UnityEngine;
 #if !UNITY_2019_3_OR_NEWER
 #define LEGACY_MESH
 #endif

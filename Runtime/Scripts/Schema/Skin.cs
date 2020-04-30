@@ -16,7 +16,9 @@
 namespace GLTFast.Schema {
 
     [System.Serializable]
-    public class RootChild {
-        public string name;
+    public class Skin : RootChild {
+        public int inverseBindMatrices;
+        public int skeleton;
+        public int[] joints;
     }
 }

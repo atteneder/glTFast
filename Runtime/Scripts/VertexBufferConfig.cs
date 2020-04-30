@@ -26,16 +26,20 @@ namespace GLTFast
         bool hasNormals;
         bool hasTangents;
         bool hasColors;
+        bool hasBones;
         
         VertexBufferTexCoordsBase texCoords;
         VertexBufferColors colors;
+        VertexBufferBones bones;
 
         public override unsafe JobHandle? ScheduleVertexJobs(
             VertexInputData posInput,
             VertexInputData? nrmInput = null,
             VertexInputData? tanInput = null,
             VertexInputData[] uvInputs = null,
-            VertexInputData? colorInput = null
+            VertexInputData? colorInput = null,
+            VertexInputData? weightsInput = null,
+            VertexInputData? jointsInput = null
         ) {
             Profiler.BeginSample("ScheduleVertexJobs");
             Profiler.BeginSample("AllocateNativeArray");
@@ -73,6 +77,12 @@ namespace GLTFast
             if (hasColors) {
                 jobCount++;
                 colors = new VertexBufferColors();
+            }
+
+            hasBones = weightsInput.HasValue && jointsInput.HasValue;
+            if(hasBones) {
+                jobCount+=2;
+                bones = new VertexBufferBones();
             }
 
             NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, Allocator.Temp);
@@ -148,6 +158,11 @@ namespace GLTFast
                 colors.ScheduleVertexColorJob(colorInput.Value, new NativeSlice<JobHandle>(handles, handleIndex, 1));
                 handleIndex++;
             }
+
+            if (hasBones) {
+                bones.ScheduleVertexBonesJob(weightsInput.Value, jointsInput.Value, new NativeSlice<JobHandle>(handles, handleIndex, 2) );
+                handleIndex+=2;
+            }
             
             var handle = (jobCount > 1) ? JobHandle.CombineDependencies(handles) : handles[0];
             handles.Dispose();
@@ -161,6 +176,7 @@ namespace GLTFast
             if (hasTangents) vadLen++;
             if (texCoords != null) vadLen += texCoords.uvSetCount;
             if (colors != null) vadLen++;
+            if (bones != null) vadLen+=2;
             vad = new VertexAttributeDescriptor[vadLen];
             var vadCount = 0;
             int stream = 0;
@@ -185,6 +201,12 @@ namespace GLTFast
             if (colors != null) {
                 colors.AddDescriptors(vad,vadCount,stream);
                 vadCount++;
+                stream++;
+            }
+
+            if (bones != null) {
+                bones.AddDescriptors(vad,vadCount,stream);
+                vadCount+=2;
                 stream++;
             }
         }
@@ -216,6 +238,11 @@ namespace GLTFast
                 stream++;
             }
 
+            if (bones != null) {
+                bones.ApplyOnMesh(msh,stream,flags);
+                stream++;
+            }
+
             Profiler.EndSample();
         }
 
@@ -230,6 +257,10 @@ namespace GLTFast
 
             if (colors != null) {
                 colors.Dispose();
+            }
+
+            if (bones != null) {
+                bones.Dispose();
             }
         }
     }

@@ -692,7 +692,7 @@ namespace GLTFast.Jobs {
     }
 
     /// Untested!
-    public unsafe struct GetVector4sInterleavedJob : IJobParallelFor {
+    public unsafe struct GetTangentsInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -717,8 +717,31 @@ namespace GLTFast.Jobs {
         }
     }
 
+    public unsafe struct GetVector4sInterleavedJob : IJobParallelFor {
+
+        [ReadOnly]
+        public int inputByteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        public int outputByteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector4* result;
+
+        public void Execute(int i) {
+            Vector4* resultV = (Vector4*) (((byte*)result) + (i*outputByteStride));
+            byte* off = input + (i*inputByteStride);
+            *resultV = *((Vector4*)off);
+        }
+    }
+
     /// Untested!
-    public unsafe struct GetVector4sInt16NormalizedInterleavedJob : IJobParallelFor {
+    public unsafe struct GetTangentsInt16NormalizedInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -744,6 +767,35 @@ namespace GLTFast.Jobs {
             tmp.z = -Mathf.Max( *(off+2) / (float) short.MaxValue, -1f );
             tmp.w = Mathf.Max( *(off+3) / (float) short.MaxValue, -1f );
             tmp.Normalize();
+            *resultV = tmp;
+        }
+    }
+
+    public unsafe struct GetVector4sInt16NormalizedInterleavedJob : IJobParallelFor {
+
+        [ReadOnly]
+        public int inputByteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public short* input;
+
+        [ReadOnly]
+        public int outputByteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector4* result;
+
+        public void Execute(int i) {
+            Vector4* resultV = (Vector4*) (((byte*)result) + (i*outputByteStride));
+            short* off = (short*) (((byte*)input) + (i*inputByteStride));
+
+            Vector4 tmp;
+            tmp.x = Mathf.Max( *off / (float) short.MaxValue, -1f );
+            tmp.y = Mathf.Max( *(off+1) / (float) short.MaxValue, -1f );
+            tmp.z = Mathf.Max( *(off+2) / (float) short.MaxValue, -1f );
+            tmp.w = Mathf.Max( *(off+3) / (float) short.MaxValue, -1f );
             *resultV = tmp;
         }
     }
@@ -1060,6 +1112,74 @@ namespace GLTFast.Jobs {
             tmp.z = -Mathf.Max(-1,*(off+2)/255f);
             tmp.Normalize();
             *resultV = tmp;
+        }
+    }
+
+    public unsafe struct GetJointsUInt16Job : IJobParallelFor  {
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        public int inputByteStride;
+
+        [WriteOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public uint* result;
+
+        [ReadOnly]
+        public int outputByteStride;
+
+        public void Execute(int i)
+        {
+            uint* resultV = (uint*) (((byte*)result) + (i*outputByteStride));
+            ushort* off = (ushort*) (input + (i*inputByteStride));
+
+            *resultV = *off;
+            *(resultV+1) = *(off+1);
+            *(resultV+2) = *(off+2);
+            *(resultV+3) = *(off+3);
+        }
+    }
+
+    public unsafe struct GetMatricesJob : IJobParallelFor  {
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Matrix4x4* input;
+
+        [WriteOnly]
+        public NativeArray<Matrix4x4> result;
+
+        public void Execute(int i)
+        {
+            result[i] = new Matrix4x4(
+                new Vector4(
+                    input[i].m00,
+                    input[i].m10,
+                    -input[i].m20,
+                    input[i].m30
+                ),
+                new Vector4(
+                    input[i].m01,
+                    input[i].m11,
+                    -input[i].m21,
+                    input[i].m31
+                ),
+                new Vector4(
+                    -input[i].m02,
+                    -input[i].m12,
+                    input[i].m22,
+                    input[i].m32
+                ),
+                new Vector4(
+                    input[i].m03,
+                    input[i].m13,
+                    -input[i].m23,
+                    input[i].m33
+                )
+            );
         }
     }
 }

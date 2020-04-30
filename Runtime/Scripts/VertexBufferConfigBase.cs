@@ -73,7 +73,9 @@ namespace GLTFast
             VertexInputData? nrmInput = null,
             VertexInputData? tanInput = null,
             VertexInputData[] uvInputs = null,
-            VertexInputData? colorInput = null
+            VertexInputData? colorInput = null,
+            VertexInputData? weightsInput = null,
+            VertexInputData? jointsInput = null
             );
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default);
         public abstract void Dispose();
@@ -178,7 +180,7 @@ namespace GLTFast
             JobHandle? jobHandle;
             switch(inputType) {
                 case GLTFComponentType.Float:
-                    var jobTangentI = new Jobs.GetVector4sInterleavedJob();
+                    var jobTangentI = new Jobs.GetTangentsInterleavedJob();
                     jobTangentI.inputByteStride = inputByteStride>0 ? inputByteStride : 16;
                     jobTangentI.input = (byte*)input;
                     jobTangentI.outputByteStride = outputByteStride;
@@ -186,7 +188,7 @@ namespace GLTFast
                     jobHandle = jobTangentI.Schedule(count,GLTFast.DefaultBatchCount);
                     break;
                 case GLTFComponentType.Short:
-                    var jobTangent = new Jobs.GetVector4sInt16NormalizedInterleavedJob();
+                    var jobTangent = new Jobs.GetTangentsInt16NormalizedInterleavedJob();
                     jobTangent.inputByteStride = inputByteStride>0 ? inputByteStride : 8;;
                     Assert.IsTrue(normalized);
                     jobTangent.input = (System.Int16*)input;

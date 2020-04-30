@@ -51,4 +51,18 @@ namespace GLTFast.Vertex
         public Vector2 uv0;
         public Vector2 uv1;
     }
+
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct VBones {
+        public float weight0;
+        public float weight1;
+        public float weight2;
+        public float weight3;
+
+        public uint joint0;
+        public uint joint1;
+        public uint joint2;
+        public uint joint3;
+    }
 }

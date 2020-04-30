@@ -97,7 +97,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// An array of skins. A skin is defined by joints and matrices.
         /// </summary>
-        //public List<Skin> Skins;
+        public Skin[] skins;
 
         /// <summary>
         /// An array of textures.

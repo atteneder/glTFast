@@ -137,6 +137,14 @@ namespace GLTFast {
 
 #endregion VolatileData
 
+#region VolatileDataInstantiation
+
+        /// <summary>
+        /// These members are only used during loading and instatiation phase.
+        /// TODO: Provide dispose method to free up memory after all instantiations
+        /// happened. Maybe a plain Destroy/OnDestroy.
+        /// </summary>
+
         /// Main glTF data structure
         Root gltfRoot;
         UnityEngine.Material[] materials;
@@ -144,6 +152,9 @@ namespace GLTFast {
 
         Primitive[] primitives;
         int[] meshPrimitiveIndex;
+        Matrix4x4[][] skinsInverseBindMatrices;
+
+#endregion VolatileDataInstantiation
 
         /// TODO: Some of these class members maybe could be passed
         /// between loading routines. Turn them into parameters or at
@@ -939,11 +950,6 @@ namespace GLTFast {
             for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
                 var node = gltf.nodes[nodeIndex];
 
-                if( node.children==null && node.mesh<0 ) {
-                    continue;
-                }
-
-                var goName = node.name;
                 var go = new GameObject();
                 nodes[nodeIndex] = go.transform;
 
@@ -1009,6 +1015,19 @@ namespace GLTFast {
                         );
                     }
                 }
+            }
+
+            foreach( var rel in relations ) {
+                if (nodes[rel.Key] != null) {
+                    nodes[rel.Key].SetParent( nodes[rel.Value], false );
+                }
+            }
+
+            for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
+                var node = gltf.nodes[nodeIndex];
+
+                var goName = node.name;
+                var go = nodes[nodeIndex].gameObject;
 
                 if(node.mesh>=0) {
                     int end = meshPrimitiveIndex[node.mesh+1];
@@ -1023,9 +1042,27 @@ namespace GLTFast {
                             meshGo = new GameObject( meshName ?? "Primitive" );
                             meshGo.transform.SetParent(go.transform,false);
                         }
-                        var mf = meshGo.AddComponent<MeshFilter>();
-                        mf.mesh = mesh;
-                        var mr = meshGo.AddComponent<MeshRenderer>();
+                        Renderer renderer;
+                        if(node.skin>=0) {
+                            var smr = meshGo.AddComponent<SkinnedMeshRenderer>();
+                            var skin = gltf.skins[node.skin];
+                            // TODO: see if this can be moved to mesh creation phase / before instantiation
+                            mesh.bindposes = skinsInverseBindMatrices[node.skin];
+                            var bones = new Transform[skin.joints.Length];
+                            for (int j = 0; j < bones.Length; j++)
+                            {
+                                var jointIndex = skin.joints[j];
+                                bones[j] = nodes[jointIndex];
+                            }
+                            smr.bones = bones;
+                            smr.sharedMesh = mesh;
+                            renderer = smr;
+                        } else {
+                            var mf = meshGo.AddComponent<MeshFilter>();
+                            mf.mesh = mesh;
+                            var mr = meshGo.AddComponent<MeshRenderer>();
+                            renderer = mr;
+                        }
                         
                         var primMaterials = new UnityEngine.Material[primitives[i].materialIndices.Length];
                         for (int m = 0; m < primitives[i].materialIndices.Length; m++)
@@ -1037,17 +1074,11 @@ namespace GLTFast {
                                 primMaterials[m] = materialGenerator.GetPbrMetallicRoughnessMaterial();
                             }
                         }
-                        mr.sharedMaterials = primMaterials;
+                        renderer.sharedMaterials = primMaterials;
                     }
                 }
 
                 go.name = goName ?? "Node";
-            }
-
-            foreach( var rel in relations ) {
-                if (nodes[rel.Key] != null) {
-                    nodes[rel.Key].SetParent( nodes[rel.Value], false );
-                }
             }
 
             foreach(var scene in gltf.scenes) {
@@ -1235,6 +1266,13 @@ namespace GLTFast {
                 totalPrimitives += cluster.Count;
             }
 
+            if(gltf.skins!=null) {
+                skinsInverseBindMatrices = new Matrix4x4[gltf.skins.Length][];
+                foreach(var skin in gltf.skins) {
+                    accessorUsage[skin.inverseBindMatrices] = AccessorUsage.InverseBindMatrix;
+                }
+            }
+
             meshPrimitiveIndex[gltf.meshes.Length] = totalPrimitives;
             primitives = new Primitive[totalPrimitives];
             primitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
@@ -1283,6 +1321,15 @@ namespace GLTFast {
                     colorInput = GetAccessorParams(gltf, att.COLOR_0);
                 }
 
+                VertexInputData? weightsInput = null;
+                if (att.WEIGHTS_0 >= 0) {
+                    weightsInput = GetAccessorParams(gltf, att.WEIGHTS_0);
+                }
+                VertexInputData? jointsInput = null;
+                if (att.JOINTS_0 >= 0) {
+                    jointsInput = GetAccessorParams(gltf, att.JOINTS_0);
+                }
+
                 VertexBufferConfigBase config;
                 switch (mainBufferType.Value) {
                     case MainBufferType.Position:
@@ -1305,7 +1352,16 @@ namespace GLTFast {
                 config.calculateTangents = !hasTangents && (mainBufferType.Value & MainBufferType.Tangent) > 0;
                 vertexAttributes[att] = config;
                 
-                var jh = config.ScheduleVertexJobs(posInput,nrmInput,tanInput,uvInputs,colorInput);
+                var jh = config.ScheduleVertexJobs(
+                    posInput,
+                    nrmInput,
+                    tanInput,
+                    uvInputs,
+                    colorInput,
+                    weightsInput,
+                    jointsInput
+                    );
+
                 if (jh.HasValue) {
                     tmpList.Add(jh.Value);
                 } else {
@@ -1332,6 +1388,17 @@ namespace GLTFast {
                     JobHandle? jh;
                     var ads = new  AccessorData<int>();
                     GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle, accessorUsage[i]==AccessorUsage.IndexFlipped);
+                    tmpList.Add(jh.Value);
+                    accessorData[i] = ads;
+                }
+                else if (acc.typeEnum==GLTFAccessorAttributeType.MAT4
+                    && accessorUsage[i]==AccessorUsage.InverseBindMatrix
+                    )
+                {
+                    JobHandle? jh;
+                    // TODO: Maybe use AccessorData, since Mesh.bindposes only accepts C# arrays.
+                    var ads = new  AccessorNativeData<Matrix4x4>();
+                    GetMatricesJob(gltf,i,out ads.data, out jh);
                     tmpList.Add(jh.Value);
                     accessorData[i] = ads;
                 }
@@ -1440,6 +1507,13 @@ namespace GLTFast {
                         AssignAccessorData(gltf,mesh,cluster.Key,ref c);
                     }
                     i++;
+                }
+            }
+            if(gltf.skins!=null) {
+                for (int s = 0; s < gltf.skins.Length; s++)
+                {
+                    var skin = gltf.skins[s];
+                    skinsInverseBindMatrices[s] = (accessorData[skin.inverseBindMatrices] as AccessorNativeData<Matrix4x4>).data.ToArray();
                 }
             }
             Profiler.EndSample();
@@ -1642,6 +1716,42 @@ namespace GLTFast {
                     }
                     jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
                 }
+                break;
+            default:
+                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                jobHandle = null;
+                break;
+            }
+            Profiler.EndSample();
+            Profiler.EndSample();
+        }
+
+        unsafe void GetMatricesJob(Root gltf, int accessorIndex, out NativeArray<Matrix4x4> matrices, out JobHandle? jobHandle) {
+            Profiler.BeginSample("GetMatricesJob");
+            // index
+            var accessor = gltf.accessors[accessorIndex];
+            var bufferView = gltf.bufferViews[accessor.bufferView];
+            int bufferIndex = bufferView.buffer;
+            var buffer = GetBuffer(bufferIndex);
+
+            Profiler.BeginSample("Alloc");
+            matrices = new NativeArray<Matrix4x4>(accessor.count,Allocator.TempJob);
+            Profiler.EndSample();
+            
+            var chunk = binChunks[bufferIndex];
+            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.MAT4);
+            //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
+            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+
+            Profiler.BeginSample("CreateJob");
+            switch( accessor.componentType ) {
+            case GLTFComponentType.Float:
+                var job32 = new Jobs.GetMatricesJob();
+                job32.result = matrices;
+                fixed( void* src = &(buffer[start]) ) {
+                    job32.input = (Matrix4x4*) src;
+                }
+                jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
                 break;
             default:
                 Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
