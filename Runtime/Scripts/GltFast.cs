@@ -138,6 +138,9 @@ namespace GLTFast {
         /// between loading routines. Turn them into parameters or at
         /// least dispose them once all ingredients are ready.
 
+        bool loadingDone = false;
+        public bool LoadingDone { get { return loadingDone; } private set { this.loadingDone = value; } }
+
         bool loadingError = false;
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
 
@@ -188,6 +191,7 @@ namespace GLTFast {
             }
 
             DisposeVolatileData();
+            loadingDone = true;
             OnLoadComplete(!loadingError);
         }
 
@@ -561,8 +565,12 @@ namespace GLTFast {
 #endif // KTX_UNITY
 
         public bool InstantiateGltf( Transform parent ) {
-            CreateGameObjects( gltfRoot, parent );
-            return !loadingError;
+            if(loadingDone) {
+                CreateGameObjects( gltfRoot, parent );
+                return !loadingError;
+            } else {
+                return false;
+            }
         }
 
         Dictionary<int,IDownload> downloads;
