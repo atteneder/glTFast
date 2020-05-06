@@ -636,6 +636,7 @@ namespace GLTFast {
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
             if (magic != GLB_MAGIC) {
+                Debug.LogError("Not a glTF-binary file");
                 loadingError = true;
                 Profiler.EndSample();
                 return false;
@@ -644,9 +645,9 @@ namespace GLTFast {
             uint version = BitConverter.ToUInt32( bytes, 4 );
             //uint length = BitConverter.ToUInt32( bytes, 8 );
 
-            //Debug.Log( string.Format("version: {0:X}; length: {1}", version, length ) );
 
             if (version != 2) {
+                Debug.LogErrorFormat("Unsupported glTF version {0}",version);
                 loadingError = true;
                 Profiler.EndSample();
                 return false;
