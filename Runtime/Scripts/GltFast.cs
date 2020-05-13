@@ -739,7 +739,7 @@ namespace GLTFast {
             resources = new List<UnityEngine.Object>();
 
             Profiler.BeginSample("CreateTexturesFromBuffers");
-            if(gltfRoot.images!=null) {
+            if( gltfRoot.images != null && gltfRoot.textures != null && gltfRoot.materials != null ) {
                 if(images==null) {
                     images = new Texture2D[gltfRoot.images.Length];
                 } else {
