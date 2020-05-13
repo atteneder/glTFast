@@ -8,8 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `GltFast.LoadingDone` state property indicates if loading routine has finished
 - `GltfAssetBase`, a minimum asset component for manual loading via script
+- `GetMaterial` interface, to retrieved imported materials by index.
 ### Changed
 - Added loading state sanity checks to instantiation
+### Fixed
+- Loading glTFs with materials only (no scene/geometry)
 
 ## [1.0.1] - 2020-04-29
 ### Added

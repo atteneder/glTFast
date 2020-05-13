@@ -504,16 +504,18 @@ namespace GLTFast {
                 }
             }
 
-            Profiler.BeginSample("CreateGlbBinChungs");
-            for( int i=0; i<buffers.Length; i++ ) {
-                if(i==0 && glbBinChunk.HasValue) {
-                    // Already assigned in LoadGlb
-                    continue;
+            if(buffers!=null) {
+                Profiler.BeginSample("CreateGlbBinChungs");
+                for( int i=0; i<buffers.Length; i++ ) {
+                    if(i==0 && glbBinChunk.HasValue) {
+                        // Already assigned in LoadGlb
+                        continue;
+                    }
+                    var b = buffers[i];
+                    binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
                 }
-                var b = buffers[i];
-                binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
+                Profiler.EndSample();
             }
-            Profiler.EndSample();
         }
 
         IEnumerator WaitForTextureDownloads() {
@@ -571,6 +573,13 @@ namespace GLTFast {
             } else {
                 return false;
             }
+        }
+
+        public UnityEngine.Material GetMaterial( int index = 0 ) {
+            if(materials!=null && index >= 0 && index < materials.Length ) {
+                return materials[index];
+            }
+            return null;
         }
 
         Dictionary<int,IDownload> downloads;
@@ -723,7 +732,9 @@ namespace GLTFast {
         }
 
         IEnumerator Prepare() {
-            meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
+            if(gltfRoot.meshes!=null) {
+                meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
+            }
 
             resources = new List<UnityEngine.Object>();
 
@@ -740,21 +751,25 @@ namespace GLTFast {
             Profiler.EndSample();
             yield return null;
 
-            LoadAccessorData(gltfRoot);
-            yield return null;
-
-            while(!accessorJobsHandle.IsCompleted) {
+            if(gltfRoot.accessors!=null) {
+                LoadAccessorData(gltfRoot);
                 yield return null;
-            }
-            accessorJobsHandle.Complete();
-            foreach(var ad in accessorData) {
-                if(ad!=null) {
-                    ad.Unpin();
+
+                while(!accessorJobsHandle.IsCompleted) {
+                    yield return null;
+                }
+                accessorJobsHandle.Complete();
+                foreach(var ad in accessorData) {
+                    if(ad!=null) {
+                        ad.Unpin();
+                    }
                 }
             }
 
-            CreatePrimitiveContexts(gltfRoot);
-            yield return null;
+            if(gltfRoot.meshes!=null) {
+                CreatePrimitiveContexts(gltfRoot);
+                yield return null;
+            }
 
 #if KTX_UNITY
             if(ktxLoadContextsBuffer!=null) {
@@ -830,30 +845,32 @@ namespace GLTFast {
             Profiler.EndSample();
             yield return null;
 
-            for(int i=0;i<primitiveContexts.Length;i++) {
-                var primitiveContext = primitiveContexts[i];
-                if(primitiveContext==null) continue;
-                while(!primitiveContext.IsCompleted) {
+            if(primitiveContexts!=null) {
+                for(int i=0;i<primitiveContexts.Length;i++) {
+                    var primitiveContext = primitiveContexts[i];
+                    if(primitiveContext==null) continue;
+                    while(!primitiveContext.IsCompleted) {
+                        yield return null;
+                    }
                     yield return null;
                 }
-                yield return null;
-            }
-            AssignAllAccessorData(gltfRoot);
+                AssignAllAccessorData(gltfRoot);
 
-            for(int i=0;i<primitiveContexts.Length;i++) {
-                var primitiveContext = primitiveContexts[i];
-                while(!primitiveContext.IsCompleted) {
+                for(int i=0;i<primitiveContexts.Length;i++) {
+                    var primitiveContext = primitiveContexts[i];
+                    while(!primitiveContext.IsCompleted) {
+                        yield return null;
+                    }
+                    var primitive = primitiveContext.CreatePrimitive();
+                    if(primitive.HasValue) {
+                        primitives[primitiveContext.primtiveIndex] = primitive.Value;
+                        resources.Add(primitive.Value.mesh);
+                    } else {
+                        loadingError = true;
+                    }
+
                     yield return null;
                 }
-                var primitive = primitiveContext.CreatePrimitive();
-                if(primitive.HasValue) {
-                    primitives[primitiveContext.primtiveIndex] = primitive.Value;
-                    resources.Add(primitive.Value.mesh);
-                } else {
-                    loadingError = true;
-                }
-
-                yield return null;
             }
         }
 

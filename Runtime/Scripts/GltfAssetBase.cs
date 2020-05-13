@@ -59,6 +59,19 @@ namespace GLTFast
             return false;
         }
 
+        /// <summary>
+        /// Returns an imported glTF material.
+        /// Note: Asset has to have finished loading before!
+        /// </summary>
+        /// <param name="index">Index of material in glTF file.</param>
+        /// <returns>glTF material if it was loaded successfully and index is correct, null otherwise.</returns>
+        public UnityEngine.Material GetMaterial( int index = 0 ) {
+            if (gLTFastInstance != null) {
+                return gLTFastInstance.GetMaterial(index);
+            }
+            return null;
+        } 
+
         protected virtual void OnLoadComplete(bool success) {
             gLTFastInstance.onLoadComplete -= OnLoadComplete;
             if(onLoadComplete!=null) {
