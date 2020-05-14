@@ -56,14 +56,14 @@
   - [x] Implicit (no) indices
   - [x] Per primitive material
   - [ ] Multiple texture coordinates sets ([issue](../issues/34))
-  - [ ] Joints
-  - [ ] Weights
+  - [x] Joints (up to 4 per vertex)
+  - [x] Weights (up to 4 per vertex)
 - [x] Texture sampler
   - [x] Filtering (see ([limitations](#knownissues)))
   - [x] Wrap modes
 - [ ] Morph targets ([issue](../issues/8))
   - [ ] Sparse accessors
-- [ ] Skinning ([issue](../issues/13))
+- [x] Skinning
 - [ ] Animation
 
 <sup>1</sup>: Untested due to lack of demo files.
