@@ -1043,18 +1043,24 @@ namespace GLTFast {
                             meshGo.transform.SetParent(go.transform,false);
                         }
                         Renderer renderer;
-                        if(node.skin>=0) {
+                        if( mesh.HasVertexAttribute(UnityEngine.Rendering.VertexAttribute.BlendWeight) ) {
+                            // TODO: Don't use SkinnedMeshRenderer if skin is not available
+                            // Move custom behavior into separate Instantiator class
                             var smr = meshGo.AddComponent<SkinnedMeshRenderer>();
-                            var skin = gltf.skins[node.skin];
-                            // TODO: see if this can be moved to mesh creation phase / before instantiation
-                            mesh.bindposes = skinsInverseBindMatrices[node.skin];
-                            var bones = new Transform[skin.joints.Length];
-                            for (int j = 0; j < bones.Length; j++)
-                            {
-                                var jointIndex = skin.joints[j];
-                                bones[j] = nodes[jointIndex];
+                            if(node.skin>=0) {
+                                var skin = gltf.skins[node.skin];
+                                // TODO: see if this can be moved to mesh creation phase / before instantiation
+                                mesh.bindposes = skinsInverseBindMatrices[node.skin];
+                                var bones = new Transform[skin.joints.Length];
+                                for (int j = 0; j < bones.Length; j++)
+                                {
+                                    var jointIndex = skin.joints[j];
+                                    bones[j] = nodes[jointIndex];
+                                }
+                                smr.bones = bones;
+                            } else {
+                                Debug.LogWarning("Missing skinning");
                             }
-                            smr.bones = bones;
                             smr.sharedMesh = mesh;
                             renderer = smr;
                         } else {
@@ -1063,7 +1069,7 @@ namespace GLTFast {
                             var mr = meshGo.AddComponent<MeshRenderer>();
                             renderer = mr;
                         }
-                        
+
                         var primMaterials = new UnityEngine.Material[primitives[i].materialIndices.Length];
                         for (int m = 0; m < primitives[i].materialIndices.Length; m++)
                         {
