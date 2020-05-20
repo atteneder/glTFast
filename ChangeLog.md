@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added loading state sanity checks to instantiation
 ### Fixed
 - Loading glTFs with materials only (no scene/geometry)
+- Normal texture scale is applied correctly now
 
 ## [1.0.1] - 2020-04-29
 ### Added

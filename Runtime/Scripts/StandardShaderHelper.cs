@@ -48,6 +48,7 @@ namespace GLTFast.Materials {
         public static int mainTexPropId = Shader.PropertyToID(KW_MAIN_MAP);
         public static int mainTexRotatePropId = Shader.PropertyToID("_MainTexRotation");
         public static int bumpMapPropId = Shader.PropertyToID("_BumpMap");
+        public static int bumpScalePropId = Shader.PropertyToID("_BumpScale");
         public static int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
         public static int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
         public static int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
