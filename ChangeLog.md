@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2020-05-25
+### Added
+- `GltFast.LoadingDone` state property indicates if loading routine has finished
+- `GltfAssetBase`, a minimum asset component for manual loading via script
+- `GetMaterial` interface, to retrieved imported materials by index.
+### Changed
+- Added loading state sanity checks to instantiation
+### Fixed
+- Loading glTFs with materials only (no scene/geometry)
+- Normal texture scale is applied correctly now
+
 ## [1.0.1] - 2020-04-29
 ### Added
 - Abstract interface `IDownloadProvider` let's users implement custom download behavior (useful for authentification or caching)

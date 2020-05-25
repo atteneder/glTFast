@@ -138,6 +138,9 @@ namespace GLTFast {
         /// between loading routines. Turn them into parameters or at
         /// least dispose them once all ingredients are ready.
 
+        bool loadingDone = false;
+        public bool LoadingDone { get { return loadingDone; } private set { this.loadingDone = value; } }
+
         bool loadingError = false;
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
 
@@ -188,6 +191,7 @@ namespace GLTFast {
             }
 
             DisposeVolatileData();
+            loadingDone = true;
             OnLoadComplete(!loadingError);
         }
 
@@ -500,16 +504,18 @@ namespace GLTFast {
                 }
             }
 
-            Profiler.BeginSample("CreateGlbBinChungs");
-            for( int i=0; i<buffers.Length; i++ ) {
-                if(i==0 && glbBinChunk.HasValue) {
-                    // Already assigned in LoadGlb
-                    continue;
+            if(buffers!=null) {
+                Profiler.BeginSample("CreateGlbBinChungs");
+                for( int i=0; i<buffers.Length; i++ ) {
+                    if(i==0 && glbBinChunk.HasValue) {
+                        // Already assigned in LoadGlb
+                        continue;
+                    }
+                    var b = buffers[i];
+                    binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
                 }
-                var b = buffers[i];
-                binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
+                Profiler.EndSample();
             }
-            Profiler.EndSample();
         }
 
         IEnumerator WaitForTextureDownloads() {
@@ -561,8 +567,19 @@ namespace GLTFast {
 #endif // KTX_UNITY
 
         public bool InstantiateGltf( Transform parent ) {
-            CreateGameObjects( gltfRoot, parent );
-            return !loadingError;
+            if(loadingDone) {
+                CreateGameObjects( gltfRoot, parent );
+                return !loadingError;
+            } else {
+                return false;
+            }
+        }
+
+        public UnityEngine.Material GetMaterial( int index = 0 ) {
+            if(materials!=null && index >= 0 && index < materials.Length ) {
+                return materials[index];
+            }
+            return null;
         }
 
         Dictionary<int,IDownload> downloads;
@@ -628,6 +645,7 @@ namespace GLTFast {
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
             if (magic != GLB_MAGIC) {
+                Debug.LogError("Not a glTF-binary file");
                 loadingError = true;
                 Profiler.EndSample();
                 return false;
@@ -636,9 +654,9 @@ namespace GLTFast {
             uint version = BitConverter.ToUInt32( bytes, 4 );
             //uint length = BitConverter.ToUInt32( bytes, 8 );
 
-            //Debug.Log( string.Format("version: {0:X}; length: {1}", version, length ) );
 
             if (version != 2) {
+                Debug.LogErrorFormat("Unsupported glTF version {0}",version);
                 loadingError = true;
                 Profiler.EndSample();
                 return false;
@@ -714,12 +732,14 @@ namespace GLTFast {
         }
 
         IEnumerator Prepare() {
-            meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
+            if(gltfRoot.meshes!=null) {
+                meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
+            }
 
             resources = new List<UnityEngine.Object>();
 
             Profiler.BeginSample("CreateTexturesFromBuffers");
-            if(gltfRoot.images!=null) {
+            if( gltfRoot.images != null && gltfRoot.textures != null && gltfRoot.materials != null ) {
                 if(images==null) {
                     images = new Texture2D[gltfRoot.images.Length];
                 } else {
@@ -731,21 +751,25 @@ namespace GLTFast {
             Profiler.EndSample();
             yield return null;
 
-            LoadAccessorData(gltfRoot);
-            yield return null;
-
-            while(!accessorJobsHandle.IsCompleted) {
+            if(gltfRoot.accessors!=null) {
+                LoadAccessorData(gltfRoot);
                 yield return null;
-            }
-            accessorJobsHandle.Complete();
-            foreach(var ad in accessorData) {
-                if(ad!=null) {
-                    ad.Unpin();
+
+                while(!accessorJobsHandle.IsCompleted) {
+                    yield return null;
+                }
+                accessorJobsHandle.Complete();
+                foreach(var ad in accessorData) {
+                    if(ad!=null) {
+                        ad.Unpin();
+                    }
                 }
             }
 
-            CreatePrimitiveContexts(gltfRoot);
-            yield return null;
+            if(gltfRoot.meshes!=null) {
+                CreatePrimitiveContexts(gltfRoot);
+                yield return null;
+            }
 
 #if KTX_UNITY
             if(ktxLoadContextsBuffer!=null) {
@@ -821,30 +845,32 @@ namespace GLTFast {
             Profiler.EndSample();
             yield return null;
 
-            for(int i=0;i<primitiveContexts.Length;i++) {
-                var primitiveContext = primitiveContexts[i];
-                if(primitiveContext==null) continue;
-                while(!primitiveContext.IsCompleted) {
+            if(primitiveContexts!=null) {
+                for(int i=0;i<primitiveContexts.Length;i++) {
+                    var primitiveContext = primitiveContexts[i];
+                    if(primitiveContext==null) continue;
+                    while(!primitiveContext.IsCompleted) {
+                        yield return null;
+                    }
                     yield return null;
                 }
-                yield return null;
-            }
-            AssignAllAccessorData(gltfRoot);
+                AssignAllAccessorData(gltfRoot);
 
-            for(int i=0;i<primitiveContexts.Length;i++) {
-                var primitiveContext = primitiveContexts[i];
-                while(!primitiveContext.IsCompleted) {
+                for(int i=0;i<primitiveContexts.Length;i++) {
+                    var primitiveContext = primitiveContexts[i];
+                    while(!primitiveContext.IsCompleted) {
+                        yield return null;
+                    }
+                    var primitive = primitiveContext.CreatePrimitive();
+                    if(primitive.HasValue) {
+                        primitives[primitiveContext.primtiveIndex] = primitive.Value;
+                        resources.Add(primitive.Value.mesh);
+                    } else {
+                        loadingError = true;
+                    }
+
                     yield return null;
                 }
-                var primitive = primitiveContext.CreatePrimitive();
-                if(primitive.HasValue) {
-                    primitives[primitiveContext.primtiveIndex] = primitive.Value;
-                    resources.Add(primitive.Value.mesh);
-                } else {
-                    loadingError = true;
-                }
-
-                yield return null;
             }
         }
 

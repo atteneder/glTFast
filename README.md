@@ -89,6 +89,7 @@ Loading via script can have additional benefits
 
 - Add custom listeners to loading events
 - Load glTF once and instantiate it many times
+- Access data of glTF scene (for example get material)
 - Tweak and optimize loading performance
 
 #### Simple example
@@ -106,6 +107,23 @@ In case you want to trigger custom logic when loading finished, add an event cal
 
 ```csharp
 gltf.onLoadComplete += YourCallbackMethod;
+…
+void YourCallbackMethod(GltfAssetBase gltfAsset, bool success) {
+    // Good practice: remove listener right away
+    gltfAsset.onLoadComplete -= YourCallbackMethod;
+    if(success) {
+        // Get the first material
+        var material = gltfAsset.GetMaterial();
+        Debug.LogFormat("The first material is called {0}", material.name);
+
+        // Instantiate the scene multiple times
+        gltfAsset.Instantiate( new GameObject("Instance 1").transform );
+        gltfAsset.Instantiate( new GameObject("Instance 2").transform );
+        gltfAsset.Instantiate( new GameObject("Instance 3").transform );
+    } else {
+        Debug.LogError("Loading glTF failed!");
+    }
+}
 ```
 
 #### Instantiation
