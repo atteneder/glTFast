@@ -1,6 +1,6 @@
 {
   "name": "com.atteneder.gltfast",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "displayName": "glTFast",
   "description": "Load glTF assets at runtime.",
   "unity": "2019.1",
