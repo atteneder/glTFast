@@ -52,12 +52,14 @@ SubShader {
             struct appdata_t {
                 float4 vertex : POSITION;
                 float2 texcoord : TEXCOORD0;
+                fixed4 color : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f {
                 float4 vertex : SV_POSITION;
                 float2 texcoord : TEXCOORD0;
+                fixed4 color : COLOR;
                 UNITY_FOG_COORDS(1)
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -84,6 +86,7 @@ SubShader {
 #endif
 
                 UNITY_TRANSFER_FOG(o,o.vertex);
+                o.color = v.color;
                 return o;
             }
 
@@ -92,6 +95,7 @@ SubShader {
                 fixed4 col = tex2D(_MainTex, i.texcoord) * _Color;
                 UNITY_APPLY_FOG(i.fogCoord, col);
                 UNITY_OPAQUE_ALPHA(col.a);
+                col *= i.color;
                 return col;
             }
         ENDCG
