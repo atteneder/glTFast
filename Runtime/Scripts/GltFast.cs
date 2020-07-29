@@ -152,13 +152,14 @@ namespace GLTFast {
         public GLTFast(
             MonoBehaviour monoBehaviour,
             IDownloadProvider downloadProvider=null,
-            IDeferAgent deferAgent=null
+            IDeferAgent deferAgent=null,
+            IMaterialGenerator materialGenerator=null
             )
         {
             this.monoBehaviour = monoBehaviour;
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
             this.deferAgent = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
-            materialGenerator = new DefaultMaterialGenerator();
+            this.materialGenerator = materialGenerator ?? new DefaultMaterialGenerator();
         }
 
         public void Load( string url ) {
