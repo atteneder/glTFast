@@ -12,9 +12,10 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 glTFast supports runtime loading of all sorts of glTF 2.0 files. It runs on WebGL, iOS, Android, Windows, macOS and Linux and supports the majority of glTF's features and official extensions.
 
-Most notable restrictions
+It is planned to become feature complete. Most notable missing features are:
 
-- Just for static scenes. No animations, skinning/rigs or morph targets supported.
+- No animations
+- No morph targets
 - Unity's built-in render pipeline only (URP and HDRP are planned)
 
 See the [list of features/extensions](./Documentation~/features.md) for details and limitations.
@@ -85,11 +86,12 @@ The simplest way to load a glTF file is to add a `GltfAsset` component to a Game
 
 ### Via Script
 
-Loading via script can have additional benefits
+Loading via script is slightly more overhead but gives you more customization options
 
-- Add custom listeners to loading events
-- Load glTF once and instantiate it many times
-- Access data of glTF scene (for example get material)
+- React to loading events by [adding event listeners](#custom-loading-event-listeners)
+- Customize [instantiation](#Instantiation)
+- Load glTF once and instantiate it many times (see example [below](#custom-loading-event-listeners))
+- Access data of glTF scene (for example get material; see example [below](#custom-loading-event-listeners))
 - Tweak and optimize loading performance
 
 #### Simple example
@@ -128,7 +130,21 @@ void YourCallbackMethod(GltfAssetBase gltfAsset, bool success) {
 
 #### Instantiation
 
-This section is under construction.
+Creating actual GameObjects (or Entities) from the imported data (Meshes, Materials) is called instantiation.
+
+You can customize it by providing an implementation of `IInstantiator` ( see [source](./Runtime/Scripts/IInstatiator.cs) and the reference implementation [`GameObjectInstantiator`](./Runtime/Scripts/GameObjectInstantiator.cs) for details).
+
+Inject your custom instantiation like so
+
+```csharp
+public class YourCustomInstantiator : GLTFast.IInstantiator {
+  // Your code here
+}
+…
+
+  // Within the `onLoadComplete` event listener, use it like this
+  gltfAsset.Instantiate( new YourCustomInstantiator() );
+```
 
 #### Tune loading performance
 
@@ -197,7 +213,7 @@ If you use Unity older than 2019.1, you additionally have to add `KTX_UNITY` to 
 Besides speed, the focus at the moment is on users that:
 
 - control the content (are able to create compatible glTFs)
-- use it for static content (no animation, skinning or morphing)
+- use it for static content (no animation or morphing)
 
 I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
  section.
@@ -231,6 +247,10 @@ Contributions like ideas, comments, critique, bug reports, pull requests are hig
 Also, you can show your appreciation and...
 
 [![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
+
+## Supporters
+
+Thanks to [Embibe](https://www.embibe.com) for sponsoring the development of skin support! ❤️
 
 ## License
 

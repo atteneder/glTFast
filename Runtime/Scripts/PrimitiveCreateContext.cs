@@ -13,8 +13,14 @@
 // limitations under the License.
 //
 
+#if !UNITY_2019_3_OR_NEWER
+#define LEGACY_MESH
+#endif
+
 using UnityEngine;
+using UnityEngine.Rendering;
 using Unity.Jobs;
+using Unity.Collections;
 using System.Runtime.InteropServices;
 using UnityEngine.Profiling;
 
@@ -25,16 +31,7 @@ namespace GLTFast {
     class PrimitiveCreateContext : PrimitiveCreateContextBase {
 
         public Mesh mesh;
-
-        /// TODO remove begin
-        public Vector3[] positions;
-        public Vector3[] normals;
-        public Vector2[] uvs0;
-        public Vector2[] uvs1;
-        public Vector4[] tangents;
-        public Color32[] colors32;
-        public Color[] colors;
-        /// TODO remove end
+        public VertexBufferConfigBase vertexData;
 
         public JobHandle jobHandle;
         public int[][] indices;
@@ -51,77 +48,61 @@ namespace GLTFast {
 
         public override Primitive? CreatePrimitive() {
             Profiler.BeginSample("CreatePrimitive");
-            Profiler.BeginSample("Job Complete");
             jobHandle.Complete();
-            Profiler.EndSample();
             var msh = new UnityEngine.Mesh();
-            if( positions.Length > 65536 ) {
-#if UNITY_2017_3_OR_NEWER
-                msh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-#else
-                throw new System.Exception("Meshes with more than 65536 vertices are only supported from Unity 2017.3 onwards.");
-#endif
-            }
             msh.name = mesh.name;
-            Profiler.BeginSample("SetVertices");
-            msh.vertices = positions;
-            Profiler.EndSample();
+
+            MeshUpdateFlags flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontResetBoneBounds | MeshUpdateFlags.DontValidateIndices;
+            vertexData.ApplyOnMesh(msh,flags);
 
             Profiler.BeginSample("SetIndices");
-            msh.subMeshCount = indices.Length;
+            int indexCount = 0;
             for (int i = 0; i < indices.Length; i++) {
-                msh.SetIndices(indices[i],topology,i);
+                indexCount += indices[i].Length;
+            }
+            Profiler.BeginSample("SetIndexBufferParams");
+            msh.SetIndexBufferParams(indexCount,IndexFormat.UInt32); //TODO: UInt16 maybe?
+            Profiler.EndSample();
+            msh.subMeshCount = indices.Length;
+            indexCount = 0;
+            for (int i = 0; i < indices.Length; i++) {
+                Profiler.BeginSample("SetIndexBufferData");
+                msh.SetIndexBufferData(indices[i],0,indexCount,indices[i].Length,flags);
+                Profiler.EndSample();
+                Profiler.BeginSample("SetSubMesh");
+                msh.SetSubMesh(i,new SubMeshDescriptor(indexCount,indices[i].Length,topology),flags);
+                Profiler.EndSample();
+                indexCount += indices[i].Length;
             }
             Profiler.EndSample();
 
-            Profiler.BeginSample("SetUVs");
-            if(uvs0!=null) {
-                msh.uv = uvs0;
-            }
-            if(uvs1!=null) {
-                msh.uv2 = uvs1;
-            }
-            Profiler.EndSample();
-
-            Profiler.BeginSample("SetNormals");
-            if(normals!=null) {
-                msh.normals = normals;
-            } else
-            if( needsNormals && ( topology==MeshTopology.Triangles || topology==MeshTopology.Quads ) ) {
+            if(vertexData.calculateNormals) {
                 Profiler.BeginSample("RecalculateNormals");
                 msh.RecalculateNormals();
                 Profiler.EndSample();
             }
-            Profiler.EndSample();
-            Profiler.BeginSample("SetColor");
-            if (colors!=null) {
-                msh.colors = colors;
-            } else if(colors32!=null) {
-                msh.colors32 = colors32;
-            }
-            Profiler.EndSample();
-            Profiler.BeginSample("SetTangents");
-            if(tangents!=null) {
-                msh.tangents = tangents;
-            } else
-            if( needsTangents && uvs0!=null && (topology==MeshTopology.Triangles || topology==MeshTopology.Quads) ) {
+            if(vertexData.calculateTangents) {
                 Profiler.BeginSample("RecalculateTangents");
                 msh.RecalculateTangents();
                 Profiler.EndSample();
             }
+            
+            Profiler.BeginSample("RecalculateBounds");
+            msh.RecalculateBounds(); // TODO: make optional! maybe calculate bounds in Job.
             Profiler.EndSample();
 
-            Profiler.BeginSample("UploadMeshData");
-            msh.UploadMeshData(true);
-            Profiler.EndSample();
+            // Profiler.BeginSample("UploadMeshData");
+            // msh.UploadMeshData(true);
+            // Profiler.EndSample();
 
             Profiler.BeginSample("Dispose");
             Dispose();
             Profiler.EndSample();
+
             Profiler.EndSample();
             return new Primitive(msh,materials);
         }
-
+        
         void Dispose() {
             if(calculatedIndicesHandle.IsAllocated) {
                 calculatedIndicesHandle.Free();

@@ -54,5 +54,9 @@ namespace GLTFast.Schema {
         /// Number of elements must match number of Morph Targets of used mesh.
         /// </summary>
         //public double[] weights;
+
+        /// <summary>
+        /// </summary>
+        public int skin = -1;
     }
 }

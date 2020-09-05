@@ -86,6 +86,8 @@ namespace GLTFast.Schema {
         public int TEXCOORD_0 = -1;
         public int TEXCOORD_1 = -1;
         public int COLOR_0 = -1;
+        public int JOINTS_0 = -1;
+        public int WEIGHTS_0 = -1;
 
         public override bool Equals(object obj)
         {
