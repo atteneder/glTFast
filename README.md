@@ -12,9 +12,10 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 glTFast supports runtime loading of all sorts of glTF 2.0 files. It runs on WebGL, iOS, Android, Windows, macOS and Linux and supports the majority of glTF's features and official extensions.
 
-Most notable restrictions
+It is planned to become feature complete. Most notable missing features are:
 
-- Just for static scenes. No animations, skinning/rigs or morph targets supported.
+- No animations
+- No morph targets
 - Unity's built-in render pipeline only (URP and HDRP are planned)
 
 See the [list of features/extensions](./Documentation~/features.md) for details and limitations.
@@ -212,7 +213,7 @@ If you use Unity older than 2019.1, you additionally have to add `KTX_UNITY` to 
 Besides speed, the focus at the moment is on users that:
 
 - control the content (are able to create compatible glTFs)
-- use it for static content (no animation, skinning or morphing)
+- use it for static content (no animation or morphing)
 
 I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
  section.
@@ -246,6 +247,10 @@ Contributions like ideas, comments, critique, bug reports, pull requests are hig
 Also, you can show your appreciation and...
 
 [![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
+
+## Supporters
+
+Thanks to [Embibe](https://www.embibe.com) for sponsoring the development of skin support! ❤️
 
 ## License
 

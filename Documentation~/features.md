@@ -63,7 +63,7 @@
   - [x] Wrap modes
 - [ ] Morph targets ([issue](../issues/8))
   - [ ] Sparse accessors
-- [x] Skinning
+- [x] [Skins](https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins) (sponsored by [Embibe](https://www.embibe.com))
 - [ ] Animation
 
 <sup>1</sup>: Untested due to lack of demo files.
