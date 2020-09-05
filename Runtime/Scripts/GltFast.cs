@@ -590,8 +590,12 @@ namespace GLTFast {
 #endif // KTX_UNITY
 
         public bool InstantiateGltf( Transform parent ) {
+            return InstantiateGltf( new GameObjectInstantiator(parent) );
+        }
+
+        public bool InstantiateGltf( IInstantiator instantiator ) {
             if(loadingDone) {
-                CreateGameObjects( gltfRoot, parent );
+                CreateGameObjects( gltfRoot, instantiator );
                 return !loadingError;
             } else {
                 return false;
@@ -941,17 +945,20 @@ namespace GLTFast {
             glbBinChunk = null;
         }
 
-        void CreateGameObjects( Root gltf, Transform parent ) {
+        void CreateGameObjects( Root gltf, IInstantiator instantiator ) {
 
             Profiler.BeginSample("CreateGameObjects");
-            var nodes = new Transform[gltf.nodes.Length];
+
+            instantiator.Init(gltf.nodes.Length);
+
             var relations = new Dictionary<uint,uint>();
 
             for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
                 var node = gltf.nodes[nodeIndex];
 
-                var go = new GameObject();
-                nodes[nodeIndex] = go.transform;
+                Vector3 position = Vector3.zero;
+                Quaternion rotation = Quaternion.identity;
+                Vector3 scale = Vector3.one;
 
                 if(node.children!=null) {
                     foreach( var child in node.children ) {
@@ -979,9 +986,9 @@ namespace GLTFast {
                     m.m33 = node.matrix[15];
 
                     if(m.ValidTRS()) {
-                        go.transform.localPosition = new Vector3( m.m03, m.m13, m.m23 );
-                        go.transform.localRotation = m.rotation;
-                        go.transform.localScale = m.lossyScale;
+                        position = new Vector3( m.m03, m.m13, m.m23 );
+                        rotation = m.rotation;
+                        scale = m.lossyScale;
                     } else {
                         Debug.LogErrorFormat("Invalid matrix on node {0}",nodeIndex);
                         Profiler.EndSample();
@@ -991,7 +998,7 @@ namespace GLTFast {
                 } else {
                     if(node.translation!=null) {
                         Assert.AreEqual( node.translation.Length, 3 );
-                        go.transform.localPosition = new Vector3(
+                        position = new Vector3(
                             node.translation[0],
                             node.translation[1],
                             -node.translation[2]
@@ -999,7 +1006,7 @@ namespace GLTFast {
                     }
                     if(node.rotation!=null) {
                         Assert.AreEqual( node.rotation.Length, 4 );
-                        go.transform.localRotation = new Quaternion(
+                        rotation = new Quaternion(
                             -node.rotation[0],
                             -node.rotation[1],
                             node.rotation[2],
@@ -1008,66 +1015,45 @@ namespace GLTFast {
                     }
                     if(node.scale!=null) {
                         Assert.AreEqual( node.scale.Length, 3 );
-                        go.transform.localScale = new Vector3(
+                        scale = new Vector3(
                             node.scale[0],
                             node.scale[1],
                             node.scale[2]
                         );
                     }
                 }
+
+                instantiator.CreateNode(nodeIndex,position,rotation,scale);
             }
 
             foreach( var rel in relations ) {
-                if (nodes[rel.Key] != null) {
-                    nodes[rel.Key].SetParent( nodes[rel.Value], false );
-                }
+                instantiator.SetParent(rel.Key,rel.Value);
             }
 
             for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
                 var node = gltf.nodes[nodeIndex];
 
                 var goName = node.name;
-                var go = nodes[nodeIndex].gameObject;
 
                 if(node.mesh>=0) {
                     int end = meshPrimitiveIndex[node.mesh+1];
-                    GameObject meshGo = null;
+                    bool firstPrimitive = true;
                     for( int i=meshPrimitiveIndex[node.mesh]; i<end; i++ ) {
                         var mesh = primitives[i].mesh;
                         var meshName = string.IsNullOrEmpty(mesh.name) ? null : mesh.name;
-                        if(meshGo==null) {
-                            meshGo = go;
-                            goName = goName ?? meshName;
-                        } else {
-                            meshGo = new GameObject( meshName ?? "Primitive" );
-                            meshGo.transform.SetParent(go.transform,false);
-                        }
-                        Renderer renderer;
+                        // Fallback name for Node is first valid Mesh name
+                        goName = goName ?? meshName;
+                        int[] joints = null;
+
                         if( mesh.HasVertexAttribute(UnityEngine.Rendering.VertexAttribute.BlendWeight) ) {
-                            // TODO: Don't use SkinnedMeshRenderer if skin is not available
-                            // Move custom behavior into separate Instantiator class
-                            var smr = meshGo.AddComponent<SkinnedMeshRenderer>();
                             if(node.skin>=0) {
                                 var skin = gltf.skins[node.skin];
                                 // TODO: see if this can be moved to mesh creation phase / before instantiation
                                 mesh.bindposes = skinsInverseBindMatrices[node.skin];
-                                var bones = new Transform[skin.joints.Length];
-                                for (int j = 0; j < bones.Length; j++)
-                                {
-                                    var jointIndex = skin.joints[j];
-                                    bones[j] = nodes[jointIndex];
-                                }
-                                smr.bones = bones;
+                                joints = skin.joints;
                             } else {
                                 Debug.LogWarning("Missing skinning");
                             }
-                            smr.sharedMesh = mesh;
-                            renderer = smr;
-                        } else {
-                            var mf = meshGo.AddComponent<MeshFilter>();
-                            mf.mesh = mesh;
-                            var mr = meshGo.AddComponent<MeshRenderer>();
-                            renderer = mr;
                         }
 
                         var primMaterials = new UnityEngine.Material[primitives[i].materialIndices.Length];
@@ -1080,22 +1066,25 @@ namespace GLTFast {
                                 primMaterials[m] = materialGenerator.GetPbrMetallicRoughnessMaterial();
                             }
                         }
-                        renderer.sharedMaterials = primMaterials;
+
+                        instantiator.AddPrimitive(
+                            nodeIndex,
+                            meshName,
+                            mesh,
+                            primMaterials,
+                            joints,
+                            firstPrimitive
+                            );
+
+                        firstPrimitive = false;
                     }
                 }
 
-                go.name = goName ?? "Node";
+                instantiator.SetNodeName(nodeIndex,goName);
             }
 
             foreach(var scene in gltf.scenes) {
-                var go = new GameObject(scene.name ?? "Scene");
-                go.transform.SetParent( parent, false);
-
-                foreach(var nodeIndex in scene.nodes) {
-                    if (nodes[nodeIndex] != null) {
-                        nodes[nodeIndex].SetParent( go.transform, false );
-                    }
-                }
+                instantiator.AddScene(scene.name,scene.nodes);
             }
 
             Profiler.EndSample();

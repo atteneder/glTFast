@@ -85,11 +85,12 @@ The simplest way to load a glTF file is to add a `GltfAsset` component to a Game
 
 ### Via Script
 
-Loading via script can have additional benefits
+Loading via script is slightly more overhead but gives you more customization options
 
-- Add custom listeners to loading events
-- Load glTF once and instantiate it many times
-- Access data of glTF scene (for example get material)
+- React to loading events by [adding event listeners](#custom-loading-event-listeners)
+- Customize [instantiation](#Instantiation)
+- Load glTF once and instantiate it many times (see example [below](#custom-loading-event-listeners))
+- Access data of glTF scene (for example get material; see example [below](#custom-loading-event-listeners))
 - Tweak and optimize loading performance
 
 #### Simple example
@@ -128,7 +129,21 @@ void YourCallbackMethod(GltfAssetBase gltfAsset, bool success) {
 
 #### Instantiation
 
-This section is under construction.
+Creating actual GameObjects (or Entities) from the imported data (Meshes, Materials) is called instantiation.
+
+You can customize it by providing an implementation of `IInstantiator` ( see [source](./Runtime/Scripts/IInstatiator.cs) and the reference implementation [`GameObjectInstantiator`](./Runtime/Scripts/GameObjectInstantiator.cs) for details).
+
+Inject your custom instantiation like so
+
+```csharp
+public class YourCustomInstantiator : GLTFast.IInstantiator {
+  // Your code here
+}
+…
+
+  // Within the `onLoadComplete` event listener, use it like this
+  gltfAsset.Instantiate( new YourCustomInstantiator() );
+```
 
 #### Tune loading performance
 
