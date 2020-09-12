@@ -22,6 +22,8 @@ See the [list of features/extensions](./Documentation~/features.md) for details 
 
 ## Installing
 
+> glTFast 2.0 requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](#legacy-installation).
+
 Add glTFast via Unity's Package Manager ( Window -> Package Manager ). Click the ➕ on the top left and choose *Add package from GIT URL*.
 
 ![Package Manager -> + -> Add Package from git URL][upm_install]
@@ -36,13 +38,13 @@ To add support for Draco mesh compression, repeat the last step and also add the
 
 > Note: You have to have a GIT LFS client (large file support) installed on your system. Otherwise you will get an error that the native library file (dll on Windows) is corrupt!
 
-If you use Unity older than 2019.1, you additionally have to add `DRACO_UNITY` to your projects scripting define symbols in the player settings.
-
 ### Open Source Unity Package Registry
 
 glTFast can also be installed from the [Open Source Unity Package Registry](https://openupm.com/packages/com.atteneder.gltfast/) (experimental).
 
 ### Legacy installation
+
+Unity versions between 2018.2 and 2019.2 are supported by [glTFast 1.0](https://github.com/atteneder/glTFast/tree/gltfast-1), which can be found in the [`gltfast-1` branch](https://github.com/atteneder/glTFast/tree/gltfast-1)
 
 With older versions of Unity and the Package Manager you have to add the package in a manifest file manually. Add the package's URL into your [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html)
 
@@ -71,6 +73,10 @@ It should look something like this:
 ```
 
 Next time you open your project in Unity, it will download the packages automatically. There's more detail about how to add packages via GIT URLs in the [Unity documentation](https://docs.unity3d.com/Manual/upm-git.html).
+
+> Older Unity versions are buggy and may run into an error like `com.atteneder.gltfast: Version is invalid. Expected a pattern like 'x.x.x[-prerelease]', got 'https://github.com/atteneder/glTFast.git' instead.`. A workaround would be to make a local clone of the [`gltfast-1` branch](https://github.com/atteneder/glTFast/tree/gltfast-1) and add it via a local path (see the [documentation](https://docs.unity3d.com/Manual/upm-localpath.html)).
+
+If you use Unity older than 2019.1 and glTFast with DracoUnity, you additionally have to add `DRACO_UNITY` to your projects scripting define symbols in the player settings.
 
 ## Usage
 
@@ -229,7 +235,7 @@ This project aims to be a low-profile alternative.
 
 It uses [Unity's JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) for parsing, which has little overhead, is fast and memory-efficient (See <https://docs.unity3d.com/Manual/JSONSerialization.html>).
 
-It also uses fast low-level memory copy methods and [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html).
+It also uses fast low-level memory copy methods, [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html) and the [Advanced Mesh API](https://docs.unity3d.com/ScriptReference/Mesh.html).
 
 ## What it is NOT
 
@@ -254,7 +260,7 @@ Thanks to [Embibe](https://www.embibe.com) for sponsoring the development of ski
 
 ## License
 
-Copyright (c) 2019 Andreas Atteneder, All Rights Reserved.
+Copyright (c) 2020 Andreas Atteneder, All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use files in this repository except in compliance with the License.
