@@ -22,7 +22,7 @@ See the [list of features/extensions](./Documentation~/features.md) for details 
 
 ## Installing
 
-> glTFast 2.0 requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](#legacy-installation).
+> glTFast 2.0 requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
 
 Add glTFast via Unity's Package Manager ( Window -> Package Manager ). Click the ➕ on the top left and choose *Add package from GIT URL*.
 
@@ -41,42 +41,6 @@ To add support for Draco mesh compression, repeat the last step and also add the
 ### Open Source Unity Package Registry
 
 glTFast can also be installed from the [Open Source Unity Package Registry](https://openupm.com/packages/com.atteneder.gltfast/) (experimental).
-
-### Legacy installation
-
-Unity versions between 2018.2 and 2019.2 are supported by [glTFast 1.0](https://github.com/atteneder/glTFast/tree/gltfast-1), which can be found in the [`gltfast-1` branch](https://github.com/atteneder/glTFast/tree/gltfast-1)
-
-With older versions of Unity and the Package Manager you have to add the package in a manifest file manually. Add the package's URL into your [project manifest](https://docs.unity3d.com/Manual/upm-manifestPrj.html)
-
-Inside your Unity project there's the folder `Packages` containing a file called `manifest.json`. You have to open it and add the following lines inside the `dependencies` category:
-
-```json
-"com.atteneder.draco": "https://gitlab.com/atteneder/DracoUnity.git",
-"com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git",
-```
-
-It should look something like this:
-
-```json
-{
-  "dependencies": {
-    "com.atteneder.draco": "https://gitlab.com/atteneder/DracoUnity.git",
-    "com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git",
-    "com.unity.package-manager-ui": "2.1.2",
-    "com.unity.modules.imageconversion": "1.0.0",
-    "com.unity.modules.imgui": "1.0.0",
-    "com.unity.modules.jsonserialize": "1.0.0",
-    "com.unity.modules.unitywebrequest": "1.0.0",
-    "com.unity.modules.unitywebrequesttexture": "1.0.0"
-  }
-}
-```
-
-Next time you open your project in Unity, it will download the packages automatically. There's more detail about how to add packages via GIT URLs in the [Unity documentation](https://docs.unity3d.com/Manual/upm-git.html).
-
-> Older Unity versions are buggy and may run into an error like `com.atteneder.gltfast: Version is invalid. Expected a pattern like 'x.x.x[-prerelease]', got 'https://github.com/atteneder/glTFast.git' instead.`. A workaround would be to make a local clone of the [`gltfast-1` branch](https://github.com/atteneder/glTFast/tree/gltfast-1) and add it via a local path (see the [documentation](https://docs.unity3d.com/Manual/upm-localpath.html)).
-
-If you use Unity older than 2019.1 and glTFast with DracoUnity, you additionally have to add `DRACO_UNITY` to your projects scripting define symbols in the player settings.
 
 ## Usage
 
