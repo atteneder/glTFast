@@ -19,11 +19,12 @@ namespace GLTFast
     {
         public string url;
         public bool loadOnStartup = true;
+        public bool uploadMeshOnLoad = true;
 
         protected virtual void Start() {
             if(loadOnStartup && !string.IsNullOrEmpty(url)) {
                 // Automatic load on startup
-                Load(url);
+                Load(url, uploadMeshOnLoad);
             }
         }
 

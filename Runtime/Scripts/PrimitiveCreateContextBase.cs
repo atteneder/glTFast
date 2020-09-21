@@ -22,6 +22,7 @@ namespace GLTFast {
         public int[] materials;
         public bool needsNormals;
         public bool needsTangents;
+        public bool uploadMeshOnLoad;
         public abstract bool IsCompleted {get;}
         public abstract Primitive? CreatePrimitive();
     }

@@ -9,7 +9,7 @@ using GLTFast;
 public class SampleModelsTest
 {
     const string prefix = "glTF-Sample-Models/2.0/";
-
+    const bool uploadMeshOnLoad = true;
     [UnityTest]
     public IEnumerator SampleModelsTestCheckFiles()
     {
@@ -67,7 +67,7 @@ public class SampleModelsTest
 
             gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
             gltfAsset.loadOnStartup = false;
-            gltfAsset.Load(path,null,deferAgent);
+            gltfAsset.Load(path, uploadMeshOnLoad, null,deferAgent);
 
             while (!done)
             {
@@ -115,7 +115,7 @@ public class SampleModelsTest
 
             gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
             gltfAsset.loadOnStartup = false;
-            gltfAsset.Load(path,null,deferAgent);
+            gltfAsset.Load(path, uploadMeshOnLoad, null,deferAgent);
 
             while (!done)
             {

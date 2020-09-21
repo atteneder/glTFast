@@ -47,6 +47,7 @@ namespace GLTFast {
         public const int DefaultBatchCount = 50000;
         const uint GLB_MAGIC = 0x46546c67;
         const string GLB_EXT = ".glb";
+        bool UploadMeshOnLoad = true;
 
         public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         public const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
@@ -184,7 +185,8 @@ namespace GLTFast {
             this.materialGenerator = materialGenerator ?? new DefaultMaterialGenerator();
         }
 
-        public void Load( string url ) {
+        public void Load( string url ,bool uploadMeshOnLoad) {
+            UploadMeshOnLoad = uploadMeshOnLoad;
             bool gltfBinary = false;
             // quick glTF-binary check
             gltfBinary = url.EndsWith(GLB_EXT,StringComparison.OrdinalIgnoreCase);
@@ -196,7 +198,7 @@ namespace GLTFast {
             monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary));
         }
 
-        IEnumerator LoadRoutine( string url, bool gltfBinary ) {
+        IEnumerator LoadRoutine( string url, bool gltfBinary) {
 
             var download = downloadProvider.Request(url);
             yield return download;
@@ -1432,6 +1434,7 @@ namespace GLTFast {
 
                         context.needsNormals |= primitive.material<0 || gltf.materials[primitive.material].requiresNormals;
                         context.needsTangents |= primitive.material>=0 && gltf.materials[primitive.material].requiresTangents;
+                        context.uploadMeshOnLoad = UploadMeshOnLoad;
                     }
 
                     primitiveContexts[primitiveIndes] = context;

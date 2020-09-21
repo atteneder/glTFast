@@ -92,7 +92,7 @@ namespace GLTFast {
             Profiler.EndSample();
 
             // Profiler.BeginSample("UploadMeshData");
-            // msh.UploadMeshData(true);
+            // msh.UploadMeshData(uploadMeshOnLoad);
             // Profiler.EndSample();
 
             Profiler.BeginSample("Dispose");

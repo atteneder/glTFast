@@ -41,10 +41,10 @@ namespace GLTFast
         /// <param name="downloadProvider">Download Provider for custom loading (e.g. caching or HTTP authorization)</param>
         /// <param name="deferAgent">Defer Agent takes care of interrupting the
         /// loading procedure in order to keep the frame rate responsive.</param>
-        public virtual void Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
+        public virtual void Load( string url, bool uploadMeshOnLoad = true,IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
             gLTFastInstance = new GLTFast(this,downloadProvider,deferAgent, materialGenerator);
             gLTFastInstance.onLoadComplete += OnLoadComplete;
-            gLTFastInstance.Load(url);
+            gLTFastInstance.Load(url, uploadMeshOnLoad);
         }
 
         /// <summary>
