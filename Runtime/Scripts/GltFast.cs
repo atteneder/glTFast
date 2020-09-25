@@ -47,6 +47,7 @@ namespace GLTFast {
         public const int DefaultBatchCount = 50000;
         const uint GLB_MAGIC = 0x46546c67;
         const string GLB_EXT = ".glb";
+        const string GLB_MIME = "model/gltf-binary";
 
         public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         public const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
@@ -185,24 +186,40 @@ namespace GLTFast {
         }
 
         public void Load( string url ) {
-            bool gltfBinary = false;
-            // quick glTF-binary check
-            gltfBinary = url.EndsWith(GLB_EXT,StringComparison.OrdinalIgnoreCase);
-            if(!gltfBinary) {
-                // thourough glTF-binary extension check that strips HTTP GET parameters
-                int getIndex = url.LastIndexOf('?');
-                gltfBinary = getIndex>=0 && url.Substring(getIndex-GLB_EXT.Length,GLB_EXT.Length).Equals(GLB_EXT,StringComparison.OrdinalIgnoreCase);
-            }
-            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary));
+            monoBehaviour.StartCoroutine(LoadRoutine(url));
         }
 
-        IEnumerator LoadRoutine( string url, bool gltfBinary ) {
+        IEnumerator LoadRoutine( string url ) {
 
             var download = downloadProvider.Request(url);
             yield return download;
 
             if(download.success) {
-                if(gltfBinary) {
+                bool gltfBinary = false;
+                // Check the content type
+                if (!gltfBinary)
+                {
+                    gltfBinary = download.contentType == GLB_MIME;
+                }
+                // Check the URL for *.glb
+                if (!gltfBinary)
+                {
+                    gltfBinary = url.EndsWith(GLB_EXT, StringComparison.OrdinalIgnoreCase);
+                }
+                if (!gltfBinary)
+                {
+                    // thourough glTF-binary extension check that strips HTTP GET parameters
+                    int getIndex = url.LastIndexOf('?');
+                    gltfBinary = getIndex >= 0 && url.Substring(getIndex - GLB_EXT.Length, GLB_EXT.Length).Equals(GLB_EXT, StringComparison.OrdinalIgnoreCase);
+                }
+                if (!gltfBinary)
+                {
+                    // Check for the magic
+                    gltfBinary = BitConverter.ToUInt32(download.data, 0) == GLB_MAGIC;
+                }
+
+
+                if (gltfBinary) {
                     LoadGlb(download.data,url);
                 } else {
                     LoadGltf(download.text,url);
