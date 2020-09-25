@@ -56,6 +56,7 @@ namespace GLTFast.Loading {
         public string error { get { return request.error; } }
         public byte[] data { get { return request.downloadHandler.data; } }
         public string text { get { return request.downloadHandler.text; } }
+        public string contentType { get { return !success ? null : request.GetResponseHeader("ContentType"); } }
     }
 
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
