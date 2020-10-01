@@ -28,7 +28,7 @@ namespace GLTFast.Loading {
         string error {get;}
         byte[] data { get; }
         string text { get; }
-        string contentType { get; }
+        bool? isBinary { get; }
     }
 
     public interface ITextureDownload : IDownload {

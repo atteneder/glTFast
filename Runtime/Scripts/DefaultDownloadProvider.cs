@@ -28,6 +28,9 @@ namespace GLTFast.Loading {
     }
 
     public class AwaitableDownload : IDownload {
+        const string GLB_MIME = "model/gltf-binary";
+        const string GLTF_MIME = "model/gltf+json";
+
         protected UnityWebRequest request;
         protected UnityWebRequestAsyncOperation asynOperation;
 
@@ -56,7 +59,21 @@ namespace GLTFast.Loading {
         public string error { get { return request.error; } }
         public byte[] data { get { return request.downloadHandler.data; } }
         public string text { get { return request.downloadHandler.text; } }
-        public string contentType { get { return !success ? null : request.GetResponseHeader("ContentType"); } }
+        public bool? isBinary
+        {
+            get
+            {
+                if (success)
+                {
+                    string contentType = request.GetResponseHeader("ContentType");
+                    if (contentType == GLB_MIME)
+                        return true;
+                    if (contentType == GLTF_MIME)
+                        return false;
+                }
+                return null;
+            }
+        }
     }
 
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
