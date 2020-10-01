@@ -47,7 +47,6 @@ namespace GLTFast {
         public const int DefaultBatchCount = 50000;
         const uint GLB_MAGIC = 0x46546c67;
         const string GLB_EXT = ".glb";
-        const string GLB_MIME = "model/gltf-binary";
 
         public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         public const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
@@ -195,31 +194,27 @@ namespace GLTFast {
             yield return download;
 
             if(download.success) {
-                bool gltfBinary = false;
-                // Check the content type
-                if (!gltfBinary)
+
+                bool? gltfBinary = download.isBinary;
+                if (!gltfBinary.HasValue)
                 {
-                    gltfBinary = download.contentType == GLB_MIME;
+                    // quick glTF-binary check
+                    if (url.EndsWith(GLB_EXT, StringComparison.OrdinalIgnoreCase))
+                    {
+                        gltfBinary = true;
+                    }
                 }
-                // Check the URL for *.glb
-                if (!gltfBinary)
-                {
-                    gltfBinary = url.EndsWith(GLB_EXT, StringComparison.OrdinalIgnoreCase);
-                }
-                if (!gltfBinary)
+                if (!gltfBinary.HasValue)
                 {
                     // thourough glTF-binary extension check that strips HTTP GET parameters
                     int getIndex = url.LastIndexOf('?');
-                    gltfBinary = getIndex >= 0 && url.Substring(getIndex - GLB_EXT.Length, GLB_EXT.Length).Equals(GLB_EXT, StringComparison.OrdinalIgnoreCase);
-                }
-                if (!gltfBinary)
-                {
-                    // Check for the magic
-                    gltfBinary = BitConverter.ToUInt32(download.data, 0) == GLB_MAGIC;
+                    if (getIndex >= 0 && url.Substring(getIndex - GLB_EXT.Length, GLB_EXT.Length).Equals(GLB_EXT, StringComparison.OrdinalIgnoreCase))
+                    {
+                        gltfBinary = true;
+                    }
                 }
 
-
-                if (gltfBinary) {
+                if (gltfBinary ?? false) {
                     LoadGlb(download.data,url);
                 } else {
                     LoadGltf(download.text,url);
