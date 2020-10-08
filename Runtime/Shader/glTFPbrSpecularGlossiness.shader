@@ -427,4 +427,5 @@ Shader "glTF/PbrSpecularGlossiness"
 
     FallBack "VertexLit"
     // CustomEditor "StandardShaderGUI"
+    CustomEditor "GLTFast.Editor.GLTFastShaderGUI"
 }

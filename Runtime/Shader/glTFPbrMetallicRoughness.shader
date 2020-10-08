@@ -451,4 +451,5 @@ Shader "glTF/PbrMetallicRoughness"
 
     FallBack "VertexLit"
     // CustomEditor "StandardShaderGUI"
+    CustomEditor "GLTFast.Editor.GLTFastShaderGUI"
 }
