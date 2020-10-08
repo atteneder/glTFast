@@ -57,8 +57,9 @@ namespace GLTFast.Materials {
         // public static int glossMapScaleId = Shader.PropertyToID("_GlossMapScale");
         public static int cullModePropId = Shader.PropertyToID("_CullMode");
 
-        public static void SetAlphaModeMask( UnityEngine.Material material,Schema.Material gltfMaterial) {
-			material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
+        public static void SetAlphaModeMask(UnityEngine.Material material, float alphaCutoff)
+        {
+            material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
             material.SetOverrideTag("RenderType", "TransparentCutout");
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);
             material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.Zero);
@@ -67,7 +68,12 @@ namespace GLTFast.Materials {
             material.DisableKeyword("_ALPHABLEND_ON");
             material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;  //2450
-            material.SetFloat(cutoffPropId, gltfMaterial.alphaCutoff);
+            material.SetFloat(cutoffPropId, alphaCutoff);
+        }
+
+        public static void SetAlphaModeMask(UnityEngine.Material material, Schema.Material gltfMaterial)
+        {
+            SetAlphaModeMask(material, gltfMaterial.alphaCutoff);
         }
 
         public static void SetAlphaModeBlend( UnityEngine.Material material ) {
