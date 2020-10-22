@@ -21,7 +21,7 @@
         },
         {
             "name": "com.atteneder.ktx",
-            "expression": "0.7.0",
+            "expression": "0.8.0",
             "define": "KTX_UNITY"
         }
     ],

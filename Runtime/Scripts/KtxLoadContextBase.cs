@@ -27,7 +27,7 @@ namespace GLTFast {
         
         public abstract IEnumerator LoadKtx(bool linear);
 
-        protected void OnKtxLoaded(Texture2D newTexture) {
+        protected void OnKtxLoaded(Texture2D newTexture, TextureOrientation orientation) {
             ktxTexture.onTextureLoaded -= OnKtxLoaded;
             texture = newTexture;
         }
