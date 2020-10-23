@@ -30,6 +30,13 @@ namespace GLTFast {
         public NativeArray<int> dracoResult;
         public NativeArray<IntPtr> dracoPtr;
 
+        public override JobHandle JobHandle
+        {
+            get {
+                return jobHandle;
+            }
+        }
+
         public override bool IsCompleted {
             get {
                 return jobHandle.IsCompleted;

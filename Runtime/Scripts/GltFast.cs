@@ -26,6 +26,9 @@ using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 using UnityEngine.Events;
+#if GLTF_DOTS
+using Unity.Entities;
+#endif
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -184,6 +187,15 @@ namespace GLTFast {
             this.materialGenerator = materialGenerator ?? new DefaultMaterialGenerator();
         }
 
+        public GLTFast(
+            IMaterialGenerator materialGenerator = null
+            )
+        {
+            this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
+            this.deferAgent = new UninterruptedDeferAgent();
+            this.materialGenerator = materialGenerator ?? new DefaultEntityMaterialGenerator();
+        }
+
         public void Load( string url ) {
             bool gltfBinary = false;
             // quick glTF-binary check
@@ -193,7 +205,34 @@ namespace GLTFast {
                 int getIndex = url.LastIndexOf('?');
                 gltfBinary = getIndex>=0 && url.Substring(getIndex-GLB_EXT.Length,GLB_EXT.Length).Equals(GLB_EXT,StringComparison.OrdinalIgnoreCase);
             }
-            monoBehaviour.StartCoroutine(LoadRoutine(url,gltfBinary));
+            if (monoBehaviour != null)
+                monoBehaviour.StartCoroutine(LoadRoutine(url, gltfBinary));
+            else
+                LoadBurst(url, gltfBinary);
+        }
+
+        void LoadBurst(string url, bool gltfBinary)
+        {
+#if GLTF_DOTS
+            string filename = url.Replace("file://", "");
+            if (gltfBinary)
+            {
+                byte[] data = System.IO.File.ReadAllBytes(filename);
+                loadingError = LoadGlb(data, url);
+                loadingError = !loadingError;
+            }
+            else
+            {
+                string json = System.IO.File.ReadAllText(filename);
+                LoadGltf(json, url);
+            }
+
+            PrepareBurst();
+
+            DisposeVolatileData();
+            loadingDone = true;
+            OnLoadComplete(!loadingError);
+#endif
         }
 
         IEnumerator LoadRoutine( string url, bool gltfBinary ) {
@@ -752,7 +791,7 @@ namespace GLTFast {
         NativeSlice<byte> GetBufferView(BufferView bufferView) {
             int bufferIndex = bufferView.buffer;
             if(!nativeBuffers[bufferIndex].IsCreated) {
-                nativeBuffers[bufferIndex] = new NativeArray<byte>(GetBuffer(bufferIndex),Allocator.Persistent);
+                nativeBuffers[bufferIndex] = new NativeArray<byte>(GetBuffer(bufferIndex),Allocator.Temp);
             }
             var chunk = binChunks[bufferIndex];
             return new NativeSlice<byte>(nativeBuffers[bufferIndex],chunk.start+bufferView.byteOffset,bufferView.byteLength);
@@ -902,6 +941,178 @@ namespace GLTFast {
 
             foreach(var ad in accessorData) {
                 if(ad!=null) {
+                    ad.Dispose();
+                }
+            }
+            accessorData = null;
+        }
+
+        void PrepareBurst ()
+        {
+            if (gltfRoot.meshes != null)
+            {
+                meshPrimitiveIndex = new int[gltfRoot.meshes.Length + 1];
+            }
+
+            resources = new List<UnityEngine.Object>();
+
+            Profiler.BeginSample("CreateTexturesFromBuffers");
+            if (gltfRoot.images != null && gltfRoot.textures != null && gltfRoot.materials != null)
+            {
+                if (images == null)
+                {
+                    images = new Texture2D[gltfRoot.images.Length];
+                }
+                else
+                {
+                    Assert.AreEqual(images.Length, gltfRoot.images.Length);
+                }
+                imageCreateContexts = new List<ImageCreateContext>();
+                CreateTexturesFromBuffers(gltfRoot.images, gltfRoot.bufferViews, imageCreateContexts);
+            }
+            Profiler.EndSample();
+
+            if (gltfRoot.accessors != null)
+            {
+                LoadAccessorData(gltfRoot);
+
+                //accessorJobsHandle.Complete();
+
+                foreach (var ad in accessorData)
+                {
+                    if (ad != null)
+                    {
+                        ad.Unpin();
+                    }
+                }
+            }
+
+            if (gltfRoot.meshes != null)
+            {
+                CreatePrimitiveContexts(gltfRoot);
+            }
+
+#if KTX_UNITY
+        if(ktxLoadContextsBuffer!=null) {
+
+            for (int i = 0; i < ktxLoadContextsBuffer.Count; i++)
+            {
+                var ktx = ktxLoadContextsBuffer[i];
+                bool forceSampleLinear = imageGamma!=null && !imageGamma[ktx.imageIndex];
+                var ktxRoutine = ktx.LoadKtx(forceSampleLinear);
+                while(ktxRoutine.MoveNext()) {
+                    yield return null;
+                }
+                images[ktx.imageIndex] = ktx.texture;
+            }
+            ktxLoadContextsBuffer.Clear();
+        }
+#endif // KTX_UNITY
+
+            if (imageCreateContexts != null)
+            {
+                foreach (var jh in imageCreateContexts)
+                {
+                    jh.jobHandle.Complete();
+                    images[jh.imageIndex].LoadImage(jh.buffer);
+                    jh.gcHandle.Free();
+                }
+                imageCreateContexts = null;
+            }
+
+            Dictionary<int, Texture2D>[] imageVariants = null;
+            if (images != null && gltfRoot.textures != null)
+            {
+                imageVariants = new Dictionary<int, Texture2D>[images.Length];
+                for (int textureIndex = 0; textureIndex < gltfRoot.textures.Length; textureIndex++)
+                {
+                    var txt = gltfRoot.textures[textureIndex];
+                    var imageIndex = txt.GetImageIndex();
+                    var img = images[imageIndex];
+                    if (imageVariants[imageIndex] == null)
+                    {
+                        if (txt.sampler >= 0)
+                        {
+                            gltfRoot.samplers[txt.sampler].Apply(img);
+                        }
+                        imageVariants[imageIndex] = new Dictionary<int, Texture2D>();
+                        imageVariants[imageIndex][txt.sampler] = img;
+                    }
+                    else
+                    if (!imageVariants[imageIndex].ContainsKey(txt.sampler))
+                    {
+                        var newImg = Texture2D.Instantiate(img);
+                        resources.Add(newImg);
+#if DEBUG
+                        newImg.name = string.Format("{0}_sampler{1}", img.name, txt.sampler);
+                        Debug.LogWarningFormat("Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory.", imageIndex);
+#endif
+                        if (txt.sampler >= 0)
+                        {
+                            gltfRoot.samplers[txt.sampler].Apply(newImg);
+                        }
+                        imageVariants[imageIndex][txt.sampler] = newImg;
+                    }
+                }
+            }
+
+            Profiler.BeginSample("GenerateMaterial");
+            if (gltfRoot.materials != null)
+            {
+                materials = new UnityEngine.Material[gltfRoot.materials.Length];
+                for (int i = 0; i < materials.Length; i++)
+                {
+                    materials[i] = materialGenerator.GenerateMaterial(
+                        gltfRoot.materials[i],
+                        ref gltfRoot.textures,
+                        ref gltfRoot.images,
+                        ref imageVariants
+                        );
+                }
+            }
+            Profiler.EndSample();
+
+            if (primitiveContexts != null)
+            {
+                for (int i = 0; i < primitiveContexts.Length; i++)
+                {
+                    var primitiveContext = primitiveContexts[i];
+                    if (primitiveContext == null) continue;
+                    primitiveContext.JobHandle.Complete();
+                    //while (!primitiveContext.IsCompleted)
+                    //{
+                    //    yield return null;
+                    //}
+                }
+                AssignAllAccessorData(gltfRoot);
+
+                for (int i = 0; i < primitiveContexts.Length; i++)
+                {
+                    var primitiveContext = primitiveContexts[i];
+                    primitiveContext.JobHandle.Complete();
+                    //while (!primitiveContext.IsCompleted)
+                    //{
+                    //    yield return null;
+                    //}
+                    var primitive = primitiveContext.CreatePrimitive();
+                    if (primitive.HasValue)
+                    {
+                        primitives[primitiveContext.primtiveIndex] = primitive.Value;
+                        resources.Add(primitive.Value.mesh);
+                    }
+                    else
+                    {
+                        loadingError = true;
+                    }
+
+                    //yield return null;
+                }
+            }
+
+            foreach (var ad in accessorData)
+            {
+                if (ad != null)
+                {
                     ad.Dispose();
                 }
             }
@@ -1358,7 +1569,8 @@ namespace GLTFast {
                     );
 
                 if (jh.HasValue) {
-                    tmpList.Add(jh.Value);
+                    jh.Value.Complete();
+                    //tmpList.Add(jh.Value);
                 } else {
                     loadingError = true;
                 }
@@ -1439,10 +1651,10 @@ namespace GLTFast {
                 }
             }
             
-            NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(tmpList.ToArray(), Allocator.Temp);
-            accessorJobsHandle = JobHandle.CombineDependencies(jobHandles);
-            jobHandles.Dispose();
-            JobHandle.ScheduleBatchedJobs();
+            //NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(tmpList.ToArray(), Allocator.Temp);
+            //accessorJobsHandle = JobHandle.CombineDependencies(jobHandles);
+            //jobHandles.Dispose();
+            //JobHandle.ScheduleBatchedJobs();
 
             Profiler.EndSample();
         }
@@ -1597,8 +1809,10 @@ namespace GLTFast {
 
             var job = new DracoMeshLoader.DracoJob();
 
-            c.dracoResult = new NativeArray<int>(1,DracoMeshLoader.defaultAllocator);
-            c.dracoPtr = new NativeArray<IntPtr>(1,DracoMeshLoader.defaultAllocator);
+            //c.dracoResult = new NativeArray<int>(1,DracoMeshLoader.defaultAllocator);
+            //c.dracoPtr = new NativeArray<IntPtr>(1,DracoMeshLoader.defaultAllocator);
+            c.dracoResult = new NativeArray<int>(1, Allocator.Temp);
+            c.dracoPtr = new NativeArray<IntPtr>(1, Allocator.Temp);
 
             job.data = buffer;
             job.result = c.dracoResult;
@@ -1606,7 +1820,8 @@ namespace GLTFast {
             job.weightsId = draco_ext.attributes.WEIGHTS_0;
 		    job.jointsId = draco_ext.attributes.JOINTS_0;
 
-            c.jobHandle = job.Schedule();
+            //c.jobHandle = job.Schedule();
+            job.Execute();
         }
 #endif
 
