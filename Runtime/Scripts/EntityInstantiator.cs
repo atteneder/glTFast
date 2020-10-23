@@ -1,13 +1,16 @@
+#if GLTF_DOTS
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
+#endif
 using UnityEngine;
 
 namespace GLTFast
 {
     public class EntityInstantiator : IInstantiator
     {
+#if GLTF_DOTS
         EntityManager entityManager;
 
         Entity parent;
@@ -49,10 +52,13 @@ namespace GLTFast
 
             parent = ent;
         }
+#endif
 
         public void Init(int nodeCount)
         {
+#if GLTF_DOTS
             nodes = new Entity[nodeCount];
+#endif
         }
 
         public void CreateNode(
@@ -62,6 +68,7 @@ namespace GLTFast
             Vector3 scale
         )
         {
+#if GLTF_DOTS
             var ent = entityManager.CreateEntity(
                 typeof(LocalToWorld),
                 typeof(Translation),
@@ -74,10 +81,12 @@ namespace GLTFast
             if (scale != Vector3.one)
                 entityManager.AddComponentData(ent, new NonUniformScale { Value = scale });
             nodes[nodeIndex] = ent;
+#endif
         }
 
         public void SetParent(uint nodeIndex, uint parentIndex)
         {
+#if GLTF_DOTS
             if (nodes[nodeIndex] == null || nodes[parentIndex] == null)
             {
                 Debug.LogError("Invalid hierarchy");
@@ -91,12 +100,14 @@ namespace GLTFast
             {
                 Value = nodes[parentIndex]
             });
+#endif
         }
 
         public void SetNodeName(uint nodeIndex, string name)
         {
-            //nodes[nodeIndex].name = name ?? "Node";
+#if GLTF_DOTS
             entityManager.SetName(nodes[nodeIndex], name);
+#endif
         }
 
         public void AddPrimitive(
@@ -108,6 +119,7 @@ namespace GLTFast
             bool first = true
         )
         {
+#if GLTF_DOTS
             Entity entity;
             if (first)
             {
@@ -148,10 +160,12 @@ namespace GLTFast
             {
                 // Do something
             }
+#endif
         }
 
         public void AddScene(string name, uint[] nodeIndices)
         {
+#if GLTF_DOTS
             entityManager.SetName(parent, name ?? "Scene");
             foreach (var nodeIndex in nodeIndices)
             {
@@ -167,6 +181,7 @@ namespace GLTFast
                     });
                 }
             }
+#endif
         }
     }
 }

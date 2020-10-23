@@ -1,10 +1,15 @@
 {
     "name": "glTFast",
+    "rootNamespace": "",
     "references": [
         "Draco",
         "glTFastSchema",
         "glTFastFakeSchema",
-        "Ktx"
+        "Ktx",
+        "Unity.Rendering.Hybrid",
+        "Unity.Entities",
+        "Unity.Transforms",
+        "Unity.Mathematics"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -23,6 +28,16 @@
             "name": "com.atteneder.ktx",
             "expression": "0.7.0",
             "define": "KTX_UNITY"
+        },
+        {
+            "name": "com.unity.rendering.hybrid",
+            "expression": "0.7.0",
+            "define": "GLTF_DOTS"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "1.3.0",
+            "define": "BURST"
         }
     ],
     "noEngineReferences": false
