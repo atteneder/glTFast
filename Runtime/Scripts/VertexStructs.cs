@@ -43,13 +43,23 @@ namespace GLTFast.Vertex
 
     [StructLayout(LayoutKind.Sequential)]
     struct VTexCoord1 {
+#if BURST
+        public float2 uv0;
+#else
         public Vector2 uv0;
+#endif
+
     }
 
     [StructLayout(LayoutKind.Sequential)]
     struct VTexCoord2 {
+#if BURST
+        public float2 uv0;
+        public float2 uv1;
+#else
         public Vector2 uv0;
         public Vector2 uv1;
+#endif
     }
 
 
