@@ -1063,6 +1063,7 @@ namespace GLTFast {
                             if( materials!=null && materialIndex>=0 && materialIndex<materials.Length ) {
                                 primMaterials[m] = materials[materialIndex];
                             } else {
+                                // No valid material found -> Fall back to default material.
                                 primMaterials[m] = materialGenerator.GetPbrMetallicRoughnessMaterial();
                             }
                         }
