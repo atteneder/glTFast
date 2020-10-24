@@ -1,9 +1,9 @@
 {
   "name": "com.atteneder.gltfast",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "displayName": "glTFast",
   "description": "Load glTF assets at runtime.",
-  "unity": "2019.1",
+  "unity": "2019.3",
   "keywords": [
     "mesh",
     "gltf",
