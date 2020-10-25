@@ -21,7 +21,7 @@
 - [x] Images
   - [x] PNG
   - [x] Jpeg
-  - [x] <sup>2</sup>KTX with Basis Universal super compression ([instructions](#basisu))
+  - [x] <sup>2</sup>KTX with Basis Universal super compression (via [KTX/Basis Texture Unity Package](https://github.com/atteneder/KtxUnity))
 - [x] Materials
   - [x] Unity built-in pipeline
     - [x] PBR metallic-roughness
@@ -52,7 +52,7 @@
   - [x] Tangents
   - [x] Texture coordinates
   - [x] Vertex colors
-  - [x] Draco mesh compression (via extension)
+  - [x] Draco mesh compression (via [Draco 3D Data Compression Unity Package](https://github.com/atteneder/DracoUnity))
   - [x] Implicit (no) indices
   - [x] Per primitive material
   - [ ] Multiple texture coordinates sets ([issue](../issues/34))
@@ -68,7 +68,7 @@
 
 <sup>1</sup>: Untested due to lack of demo files.
 
-<sup>2</sup>: Experimental
+<sup>2</sup>: Beta
 
 ## Extensions
 
@@ -77,12 +77,12 @@
 - [x] KHR_materials_unlit
 - [x] KHR_texture_transform
 - [x] KHR_mesh_quantization
-- [x] <sup>1</sup>KHR_texture_basisu ([instructions](#basisu))
+- [x] <sup>1</sup>KHR_texture_basisu
 - [ ] KHR_lights_punctual ([issue](../issues/17))
 - [ ] KHR_materials_clearcoat ([issue](../issues/68))
 - [ ] KHR_techniques_webgl (won't be supported)
 
-<sup>1</sup>: Experimental
+<sup>1</sup>: Beta
 
 ## <a name="knownissues">Known issues
 

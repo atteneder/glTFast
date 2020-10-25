@@ -22,7 +22,18 @@ See the [list of features/extensions](./Documentation~/features.md) for details 
 
 ## Installing
 
-> glTFast 2.0 requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
+The easiest way to install is to download and open the [Installer Package](https://package-installer.glitch.me/v1/installer/OpenUPM/com.atteneder.gltfast?registry=https%3A%2F%2Fpackage.openupm.com&scope=com.atteneder)
+
+It runs a script that installs glTFast via a [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html).
+
+Afterwards glTFast and further, optional packages are listed in the *Package Manager* (under *My Registries*) and can be installed and updated from there.
+
+The optional packages (that extend glTFasts) are:
+
+- [Draco 3D Data Compression Unity Package](https://github.com/atteneder/DracoUnity) (provides support for [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression))
+- [KTX/Basis Texture Unity Package](https://github.com/atteneder/KtxUnity) (in Beta; provides support for [KHR_texture_basisu](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu))
+
+<details><summary>Alternative: Install via GIT URL</summary>
 
 Add glTFast via Unity's Package Manager ( Window -> Package Manager ). Click the ➕ on the top left and choose *Add package from GIT URL*.
 
@@ -38,9 +49,9 @@ To add support for Draco mesh compression, repeat the last step and also add the
 
 > Note: You have to have a GIT LFS client (large file support) installed on your system. Otherwise you will get an error that the native library file (dll on Windows) is corrupt!
 
-### Open Source Unity Package Registry
+</details>
 
-glTFast can also be installed from the [Open Source Unity Package Registry](https://openupm.com/packages/com.atteneder.gltfast/) (experimental).
+glTFast 2.0 requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
 
 ## Usage
 
