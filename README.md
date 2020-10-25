@@ -75,9 +75,9 @@ Loading via script is slightly more overhead but gives you more customization op
 - Access data of glTF scene (for example get material; see example [below](#custom-loading-event-listeners))
 - Tweak and optimize loading performance
 
-#### Simple example
+#### Minimal example
 
-This is the most simple way to load a glTF scene from script
+Load a glTF scene from script
 
 ```csharp
 var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
