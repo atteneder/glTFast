@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.0] - 2020-10-24
+## [2.1.0] - 2020-10-25
 ### Changed
-- Updated KtxUnity to 0.8.0
+- Updated KTX/Basis Texture Unity Package to 0.8.x
+- The KTX specification changed (from ~draft20 to pr-draft2), thus older KTX files cannot be loaded anymore.
+### Added
+- Support for KTX specification 2.0 pr-draft2 (fixes #16)
+- Support for Basis Universal UASTC supercompression mode (higher quality)
 
 ## [2.0.0] - 2020-09-05
 ### Added
