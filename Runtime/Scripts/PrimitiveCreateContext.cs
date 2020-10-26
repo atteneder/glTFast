@@ -27,6 +27,7 @@ using UnityEngine.Profiling;
 namespace GLTFast {
 
     using Schema;
+    using System.Runtime.InteropServices.WindowsRuntime;
 
     class PrimitiveCreateContext : PrimitiveCreateContextBase {
 
@@ -40,6 +41,11 @@ namespace GLTFast {
 
         public MeshTopology topology;
 
+        public override JobHandle JobHandle {
+            get {
+                return jobHandle;
+            }
+        }
         public override bool IsCompleted {
             get {
                 return jobHandle.IsCompleted;

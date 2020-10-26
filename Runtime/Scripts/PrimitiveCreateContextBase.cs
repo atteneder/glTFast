@@ -16,12 +16,14 @@
 namespace GLTFast {
     
     using Schema;
-    
+    using Unity.Jobs;
+
     abstract class PrimitiveCreateContextBase {
         public int primtiveIndex;
         public int[] materials;
         public bool needsNormals;
         public bool needsTangents;
+        public abstract JobHandle JobHandle { get; }
         public abstract bool IsCompleted {get;}
         public abstract Primitive? CreatePrimitive();
     }
