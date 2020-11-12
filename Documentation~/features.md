@@ -80,7 +80,11 @@
 - [x] <sup>1</sup>KHR_texture_basisu
 - [ ] KHR_lights_punctual ([issue](../issues/17))
 - [ ] KHR_materials_clearcoat ([issue](../issues/68))
+- [ ] KHR_materials_sheen
+- [ ] KHR_materials_transmission
+- [ ] KHR_materials_variants
 - [ ] KHR_techniques_webgl (won't be supported)
+- [ ] KHR_xmp
 
 <sup>1</sup>: Beta
 
