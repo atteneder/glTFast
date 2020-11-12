@@ -26,7 +26,9 @@ Missing:
 - KHR_lights_punctual
 - KHR_xmp
 
-#### glTF 2.0 Vendor extensions
+- KHR_texture_basisu: XY-normal map support
+
+#### glTF 2.0 vendor extensions
 
 Interesting:
 
@@ -96,6 +98,7 @@ Like Standard Shader inspector, but for glTF shaders
 ### Unit Tests
 
 - Import sample set
+- Measure speed and detect regressions
 - Render image and compare for changes
 - Check key indicators like node/mesh/vertex count etc
 
@@ -158,6 +161,30 @@ Copy values directly into unity buffer:
 <https://bitbucket.org/Unity-Technologies/graphicsdemos/src/6fd22b55d6a0c21f2a4d18629ba1b6c61d44ca23/NativeRenderingPlugin/UnityProject/Assets/UseRenderingPlugin.cs?at=default&fileviewer=file-view-default>
 
 Faster than new Mesh API?
+
+## Demo
+
+- CI/CD
+
+### WebGL
+
+- Full-screen
+- Drag'n'drop support
+- Tiny
+
+### Mobile
+
+- Open file from file system
+- Official App/Play store apps
+
+### Desktop
+
+- Open file from file system
+- Drag'n'drop support
+
+### Compare
+
+Make up-to-date comparisons/benchmarks with similar projects (UnityGLTF, GLTFUtility, ...)
 
 ## Far Future Features
 
