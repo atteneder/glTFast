@@ -47,22 +47,6 @@ var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-### Materials and Shader Variants
-
-❗ IMPORTANT ❗
-
-glTF materials might require many shader/features combinations. You **have** to make sure all shader variants your project will ever use are included, or the materials will not work in builds (even if they work in the Editor).
-
-*glTFast* uses custom shaders that are derived from the Unity Standard shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
-
-- Run your scene that loads all glTFs you expect in the editor.
-- Go to Edit->Project Settings->Graphics
-- At the bottom end you'll see the "Shader Preloading" section
-- Save the currently tracked shaders/variants to an asset
-- Take this ShaderVariantCollection asset and add it to the "Preloaded Shaders" list
-
-An alternative way is to create placeholder materials for all feature combinations you expect and put them in a "Resource" folder in your project.
-
 ### Customize loading behavior
 
 Loading via script allows you to:
@@ -150,6 +134,30 @@ foreach( var url in manyUrls) {
 > Note 1: Depending on your glTF scene, using the `UninterruptedDeferAgent` may block the main thread for up to multiple seconds. Be sure to not do this during critical game play action.
 
 > Note2 : Using the `TimeBudgetPerFrameDeferAgent` does **not** guarantee a stutter free frame rate. This is because some sub tasks of the loading routine (like uploading a texture to the GPU) may take too long, cannot be interrupted and **have** to be done on the main thread.
+
+## Project Setup
+
+### Materials and Shader Variants
+
+❗ IMPORTANT ❗
+
+glTF materials might require many shader/features combinations. You **have** to make sure all shader variants your project will ever use are included, or the materials will not work in builds (even if they work in the Editor).
+
+*glTFast* uses custom shaders that are derived from the Unity Standard shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
+
+- Run your scene that loads all glTFs you expect in the editor.
+- Go to Edit->Project Settings->Graphics
+- At the bottom end you'll see the "Shader Preloading" section
+- Save the currently tracked shaders/variants to an asset
+- Take this ShaderVariantCollection asset and add it to the "Preloaded Shaders" list
+
+An alternative way is to create placeholder materials for all feature combinations you expect and put them in a "Resource" folder in your project.
+
+### Readable Mesh Data
+
+By default glTFast discards mesh data after it was uploaded to the GPU to free up main memory (see [`markNoLongerReadable`](https://docs.unity3d.com/ScriptReference/Mesh.UploadMeshData.html)). You can disable this globally by using the scripting define `GLTFAST_KEEP_MESH_DATA`.
+
+Motivations for this might be using meshes as physics colliders amongst [other cases](https://docs.unity3d.com/ScriptReference/Mesh-isReadable.html).
 
 ## Implementation details
 

@@ -91,9 +91,17 @@ namespace GLTFast {
             msh.RecalculateBounds(); // TODO: make optional! maybe calculate bounds in Job.
             Profiler.EndSample();
 
+#if GLTFAST_KEEP_MESH_DATA
+            Profiler.BeginSample("UploadMeshData");
+            msh.UploadMeshData(false);
+            Profiler.EndSample();
+#else
+            /// Don't upload explicitely. Unity takes care of upload on demand/deferred
+
             // Profiler.BeginSample("UploadMeshData");
             // msh.UploadMeshData(true);
             // Profiler.EndSample();
+#endif
 
             Profiler.BeginSample("Dispose");
             Dispose();

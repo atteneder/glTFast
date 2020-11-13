@@ -68,9 +68,17 @@ namespace GLTFast {
                 Profiler.EndSample();
             }
 
+#if GLTFAST_KEEP_MESH_DATA
             Profiler.BeginSample("UploadMeshData");
-            mesh.UploadMeshData(true);
+            mesh.UploadMeshData(false);
             Profiler.EndSample();
+#else
+            /// Don't upload explicitely. Unity takes care of upload on demand/deferred
+
+            // Profiler.BeginSample("UploadMeshData");
+            // mesh.UploadMeshData(true);
+            // Profiler.EndSample();
+#endif
 
             return new Primitive(mesh,materials);
         }
