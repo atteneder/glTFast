@@ -2,7 +2,7 @@
 
 [![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
 
-glTFast is a Unity package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
+*glTFast* is a Unity package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
 
 It focuses on speed, memory efficiency and a small build footprint.
 
@@ -10,7 +10,7 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 ## Features
 
-glTFast supports runtime loading of all sorts of glTF 2.0 files. It runs on WebGL, iOS, Android, Windows, macOS and Linux and supports the majority of glTF's features and official extensions.
+*glTFast* supports runtime loading of all sorts of glTF 2.0 files. It runs on WebGL, iOS, Android, Windows, macOS and Linux and supports the majority of glTF's features and official extensions.
 
 It is planned to become feature complete. Most notable missing features are:
 
@@ -24,18 +24,18 @@ See the [list of features/extensions](./Documentation~/features.md) for details 
 
 The easiest way to install is to download and open the [Installer Package](https://package-installer.glitch.me/v1/installer/OpenUPM/com.atteneder.gltfast?registry=https%3A%2F%2Fpackage.openupm.com&scope=com.atteneder)
 
-It runs a script that installs glTFast via a [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html).
+It runs a script that installs *glTFast* via a [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html).
 
-Afterwards glTFast and further, optional packages are listed in the *Package Manager* (under *My Registries*) and can be installed and updated from there.
+Afterwards *glTFast* and further, optional packages are listed in the *Package Manager* (under *My Registries*) and can be installed and updated from there.
 
-The optional packages (that extend glTFasts) are:
+The optional packages (that extend *glTFast*) are:
 
 - [Draco 3D Data Compression Unity Package](https://github.com/atteneder/DracoUnity) (provides support for [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression))
 - [KTX/Basis Texture Unity Package](https://github.com/atteneder/KtxUnity) (in Beta; provides support for [KHR_texture_basisu](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu))
 
 <details><summary>Alternative: Install via GIT URL</summary>
 
-Add glTFast via Unity's Package Manager ( Window -> Package Manager ). Click the ➕ on the top left and choose *Add package from GIT URL*.
+Add *glTFast* via Unity's Package Manager ( Window -> Package Manager ). Click the ➕ on the top left and choose *Add package from GIT URL*.
 
 ![Package Manager -> + -> Add Package from git URL][upm_install]
 
@@ -51,7 +51,7 @@ To add support for Draco mesh compression, repeat the last step and also add the
 
 </details>
 
-glTFast 2.0 requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
+*glTFast* 2.0 requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
 
 ## Usage
 
@@ -129,7 +129,7 @@ public class YourCustomInstantiator : GLTFast.IInstantiator {
 
 #### Tune loading performance
 
-When loading glTFs, glTFast let's you optimize for two diametrical extremes
+When loading glTFs, *glTFast* let's you optimize for two diametrical extremes
 
 - A stable frame rate
 - Fastest loading time
@@ -138,7 +138,7 @@ By default each `GltfAsset` instance tries not to block the main thread for long
 
 If you load many glTF files at once, by default they won't be aware of each other and collectively might block the main game loop for too long.
 
-You can solve this by using a common "defer agent". It decides if work should continue right now or at the next game loop iteration. glTFast comes with two defer agents
+You can solve this by using a common "defer agent". It decides if work should continue right now or at the next game loop iteration. *glTFast* comes with two defer agents
 
 - `TimeBudgetPerFrameDeferAgent` for stable frame rate
 - `UninterruptedDeferAgent` for fastest, uninterrupted loading
@@ -165,7 +165,7 @@ foreach( var url in manyUrls) {
 ### Materials and Shader Variants
 
 glTF files can contain lots of materials making use of various shader features. You have to make sure all shader variants your project will probably use are included in the build. If not, the materials will be fine in the editor, but not in the builds.
-glTFast uses custom shaders that are derived from the Unity Standard shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
+*glTFast* uses custom shaders that are derived from the Unity Standard shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
 
 - Run your scene that loads all glTFs you expect in the editor.
 - Go to Edit->Project Settings->Graphics
@@ -223,7 +223,7 @@ Such stuff should be able to place on top of this library.
 
 ## Get involved
 
-Contributions like ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving glTFast.
+Contributions like ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *glTFast*.
 
 Also, you can show your appreciation and...
 
