@@ -4,7 +4,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/atteneder/glTFast)](https://github.com/atteneder/glTFast/issues)
 [![GitHub license](https://img.shields.io/github/license/atteneder/glTFast)](https://github.com/atteneder/glTFast/blob/main/LICENSE.md)
 
-*glTFast* is a [Unity](https://unity.com) package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
+*glTFast* enables loading [glTF 3D](https://www.khronos.org/gltf) asset files in [Unity](https://unity.com).
 
 It focuses on speed, memory efficiency and a small build footprint.
 
@@ -12,9 +12,19 @@ Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out t
 
 ## Features
 
-*glTFast* supports runtime loading of all sorts of glTF 2.0 files. It runs on WebGL, iOS, Android, Windows, macOS and Linux and supports the majority of glTF's features and official extensions.
+*glTFast* supports runtime loading of glTF 2.0 files.
 
-It is planned to become feature complete. Most notable missing features are:
+It supports large parts of the glTF 2.0 specification plus many extensions and runs on following platforms:
+
+- WebGL
+- iOS
+- Android
+- Windows
+- macOS
+- Linux
+- Universal Windows Platform
+
+It is [planned](#goals) to become feature complete. Most notable missing features are:
 
 - No animations
 - No morph targets
@@ -30,7 +40,7 @@ It runs a script that installs *glTFast* via a [scoped registry](https://docs.un
 
 Afterwards *glTFast* and further, optional packages are listed in the *Package Manager* (under *My Registries*) and can be installed and updated from there.
 
-The optional packages (that extend *glTFast*) are:
+### Optional dependencies
 
 - [Draco 3D Data Compression Unity Package](https://github.com/atteneder/DracoUnity) (provides support for [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression))
 - [KTX/Basis Texture Unity Package](https://github.com/atteneder/KtxUnity) (in Beta; provides support for [KHR_texture_basisu](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu))
@@ -57,171 +67,76 @@ To add support for Draco mesh compression, repeat the last step and also add the
 
 ## Usage
 
-You can load a glTF asset via HTTP(S) URL or a file path. You can load JSON based glTFs (`*.gltf`) and glTF-binary files (`*.glb`)
+You can load a glTF asset from an URL or a file path.
 
-> Note: glTFs are loaded via UnityWebRequests. As a result, in the Unity Editor and on certain platforms (e.g. iOS) file paths have to be prefixed with `file://`
+### Load via Component
 
-### Via adding the `GltfAsset` component
-
-The simplest way to load a glTF file is to add a `GltfAsset` component to a GameObject.
+Add a `GltfAsset` component to a GameObject.
 
 ![GltfAsset component][gltfasset_component]
 
-### Via Script
-
-Loading via script is slightly more overhead but gives you more customization options
-
-- React to loading events by [adding event listeners](#custom-loading-event-listeners)
-- Customize [instantiation](#Instantiation)
-- Load glTF once and instantiate it many times (see example [below](#custom-loading-event-listeners))
-- Access data of glTF scene (for example get material; see example [below](#custom-loading-event-listeners))
-- Tweak and optimize loading performance
-
-#### Minimal example
-
-Load a glTF scene from script
+### Load via Script
 
 ```csharp
 var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-#### Custom loading event listeners
-
-In case you want to trigger custom logic when loading finished, add an event callback:
-
-```csharp
-gltf.onLoadComplete += YourCallbackMethod;
-…
-void YourCallbackMethod(GltfAssetBase gltfAsset, bool success) {
-    // Good practice: remove listener right away
-    gltfAsset.onLoadComplete -= YourCallbackMethod;
-    if(success) {
-        // Get the first material
-        var material = gltfAsset.GetMaterial();
-        Debug.LogFormat("The first material is called {0}", material.name);
-
-        // Instantiate the scene multiple times
-        gltfAsset.Instantiate( new GameObject("Instance 1").transform );
-        gltfAsset.Instantiate( new GameObject("Instance 2").transform );
-        gltfAsset.Instantiate( new GameObject("Instance 3").transform );
-    } else {
-        Debug.LogError("Loading glTF failed!");
-    }
-}
-```
-
-#### Instantiation
-
-Creating actual GameObjects (or Entities) from the imported data (Meshes, Materials) is called instantiation.
-
-You can customize it by providing an implementation of `IInstantiator` ( see [source](./Runtime/Scripts/IInstatiator.cs) and the reference implementation [`GameObjectInstantiator`](./Runtime/Scripts/GameObjectInstantiator.cs) for details).
-
-Inject your custom instantiation like so
-
-```csharp
-public class YourCustomInstantiator : GLTFast.IInstantiator {
-  // Your code here
-}
-…
-
-  // Within the `onLoadComplete` event listener, use it like this
-  gltfAsset.Instantiate( new YourCustomInstantiator() );
-```
-
-#### Tune loading performance
-
-When loading glTFs, *glTFast* let's you optimize for two diametrical extremes
-
-- A stable frame rate
-- Fastest loading time
-
-By default each `GltfAsset` instance tries not to block the main thread for longer than a certain time budget and defer the remaining loading process to the next frame / game loop iteration.
-
-If you load many glTF files at once, by default they won't be aware of each other and collectively might block the main game loop for too long.
-
-You can solve this by using a common "defer agent". It decides if work should continue right now or at the next game loop iteration. *glTFast* comes with two defer agents
-
-- `TimeBudgetPerFrameDeferAgent` for stable frame rate
-- `UninterruptedDeferAgent` for fastest, uninterrupted loading
-
-Usage example
-
-```csharp
-IDeferAgent deferAgent;
-// For a stable frame rate:
-deferAgent = gameObject.AddComponent<GLTFast.TimeBudgetPerFrameDeferAgent>();
-// Or for faster loading:
-deferAgent = new GLTFast.UninterruptedDeferAgent();
-foreach( var url in manyUrls) {
-  var gltf = go.AddComponent<GLTFast.GltfAsset>();
-  gltf.loadOnStartup = false; // prevent auto-loading
-  gltf.Load(url,deferAgent); // load manually with custom defer agent
-}
-```
-
-> Note 1: Depending on your glTF scene, using the `UninterruptedDeferAgent` may block the main thread for up to multiple seconds. Be sure to not do this during critical game play action.
-
-> Note2 : Using the `TimeBudgetPerFrameDeferAgent` does **not** guarantee a stutter free frame rate. This is because some sub tasks of the loading routine (like uploading a texture to the GPU) may take too long, cannot be interrupted and **have** to be done on the main thread.
-
 ### Materials and Shader Variants
 
-glTF files can contain lots of materials making use of various shader features. You have to make sure all shader variants your project will probably use are included in the build. If not, the materials will be fine in the editor, but not in the builds.
-*glTFast* uses custom shaders that are derived from the Unity Standard shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
+❗ IMPORTANT ❗
 
-- Run your scene that loads all glTFs you expect in the editor.
-- Go to Edit->Project Settings->Graphics
-- At the bottom end you'll see the "Shader Preloading" section
-- Save the currently tracked shaders/variants to an asset
-- Take this ShaderVariantCollection asset and add it to the "Preloaded Shaders" list
+*glTFast* uses custom shaders that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
 
-An alternative way is to create placeholder materials for all feature combinations you expect and put them in a "Resource" folder in your project.
+Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/glTFast.md#materials-and-shader-variants) for details.
 
-## <a name="basisu"></a>Experimental KTX / Basis Universal support
+### Advanced
 
-To enable the experimental support for KTX / Basis Universal support, add the [KtxUnity package](https://github.com/atteneder/KtxUnity) via the Package Manager (see [Installing](#installing))
+The loading behavior can be highly customized:
 
-`https://github.com/atteneder/KtxUnity.git`
+- React to loading events by [adding event listeners](./Documentation~/glTFast.md#custom-loading-event-listeners)
+- Customize [instantiation](./Documentation~/glTFast.md#instantiation)
+- Load glTF once and instantiate it many times (see [example](./Documentation~/glTFast.md#custom-loading-event-listeners))
+- Access data of glTF scene (for example get material; see [example](./Documentation~/glTFast.md#custom-loading-event-listeners))
+- Tweak and optimize loading performance
 
-Or the manual/legacy way, add this to your manifest.json file:
+See the [Documentation](./Documentation~/glTFast.md) for details.
 
-```json
-"com.atteneder.ktx": "https://github.com/atteneder/KtxUnity.git",
-```
+## Roadmap
 
-If you use Unity older than 2019.1, you additionally have to add `KTX_UNITY` to your projects scripting define symbols in the player settings.
-
-## Roadmap / Priorities
-
-Besides speed, the focus at the moment is on users that:
-
-- control the content (are able to create compatible glTFs)
-- use it for static content (no animation or morphing)
-
-I try to keep an up-to-date, detailed roadmap in the [milestones](https://github.com/atteneder/glTFast/milestones)
- section.
+Find plans for upcoming changes at the [milestones](https://github.com/atteneder/glTFast/milestones).
 
 ## Motivation
 
-The Khronos group (creators of glTF) already provides an excellent Unity Plug-In called [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF).
+### Goals
 
-It is very well written, has many features and is stable. However, building a project with it (especially WebGL) will lead to huge binary files.
-This project aims to be a low-profile alternative.
+- Stay fast, memory efficient and small
+- Become feature complete
+  - Support 100% of the glTF 2.0 specification
+  - Support all official Khronos extensions
+  - Support selected vendor extension
+- Universally usable…
+  - …across all popular Unity versions
+  - …across all platforms and devices
+  - …across different project setups (built-in or other render pipelines, GameObject or entity component system based, DOTS, Tiny, etc.)
+- Allow customization
 
-## Why is it smaller
+### Extended goals
 
-It uses [Unity's JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) for parsing, which has little overhead, is fast and memory-efficient (See <https://docs.unity3d.com/Manual/JSONSerialization.html>).
+- glTF Import (create prefab from glTF in the Editor)
+- glTF Authoring (create optimized glTFs from prefabs)
+- glTF Runtime Export
 
-It also uses fast low-level memory copy methods, [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html) and the [Advanced Mesh API](https://docs.unity3d.com/ScriptReference/Mesh.html).
+### Non-goals
 
-## What it is NOT
+- glTF 1.0 backwards compatibility
 
-...and probably never will be:
+### Out of scope
 
-- It won't be backwards compatible to glTF 1.0
-- It's not an asset manager with instantiation and reference counting support.
-- Also not a download manager for asset caching/re-usage.
-Such stuff should be able to place on top of this library.
+Ideas worth pursuing, but not within this package:
+
+- Asset lifetime management
+- Download management with asset caching
 
 ## Get involved
 
