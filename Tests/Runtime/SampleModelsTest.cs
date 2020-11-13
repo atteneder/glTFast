@@ -18,7 +18,7 @@ public class SampleModelsTest
         CheckFileExist(GltfSampleModels.glbFileUrls);
 
         yield return GltfSampleModels.LoadGltfFileUrls();
-        Assert.AreEqual(GltfSampleModels.gltfFileUrls.Length,120);
+        Assert.AreEqual(GltfSampleModels.gltfFileUrls.Length,128);
         CheckFileExist(GltfSampleModels.gltfFileUrls);
     }
 

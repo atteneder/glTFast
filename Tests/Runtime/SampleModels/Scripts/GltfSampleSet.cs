@@ -85,8 +85,9 @@ public class GltfSampleSet : ScriptableObject {
         var filteredLines = new List<string>();
         foreach (var line in lines)
         {
-            if(!line.StartsWith("#") && !string.IsNullOrEmpty(line)) {
-                filteredLines.Add(line.TrimEnd('\r'));
+            var trimmedLine = line.TrimEnd('\r');
+            if(!trimmedLine.StartsWith("#") && !string.IsNullOrEmpty(trimmedLine)) {
+                filteredLines.Add(trimmedLine);
             }
         }
         callback( filteredLines.ToArray() );
