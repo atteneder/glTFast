@@ -4,7 +4,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/atteneder/glTFast)](https://github.com/atteneder/glTFast/issues)
 [![GitHub license](https://img.shields.io/github/license/atteneder/glTFast)](https://github.com/atteneder/glTFast/blob/main/LICENSE.md)
 
-*glTFast* is a Unity package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
+*glTFast* is a [Unity](https://unity.com) package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
 
 It focuses on speed, memory efficiency and a small build footprint.
 
