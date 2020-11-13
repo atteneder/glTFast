@@ -1,6 +1,7 @@
 # glTFast 🚀
 
 [![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
+[![GitHub issues](https://img.shields.io/github/issues/atteneder/glTFast)](https://github.com/atteneder/glTFast/issues)
 
 *glTFast* is a Unity package for loading [glTF 3D](https://www.khronos.org/gltf) files at runtime.
 
