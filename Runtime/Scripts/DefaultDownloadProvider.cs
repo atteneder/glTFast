@@ -65,7 +65,7 @@ namespace GLTFast.Loading {
             {
                 if (success)
                 {
-                    string contentType = request.GetResponseHeader("ContentType");
+                    string contentType = request.GetResponseHeader("Content-Type");
                     if (contentType == GLB_MIME)
                         return true;
                     if (contentType == GLTF_MIME)
