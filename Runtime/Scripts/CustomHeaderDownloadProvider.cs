@@ -36,11 +36,11 @@ namespace GLTFast.Loading {
             _headers = headers;
         }
 
-        public IDownload Request(string url) {
+        public IDownload Request(Uri url) {
             return new CustomHeaderDownload(url,RegisterHttpHeaders);
         }
 
-        public ITextureDownload RequestTexture(string url) {
+        public ITextureDownload RequestTexture(Uri url) {
             return new CustomHeaderTextureDownload(url,RegisterHttpHeaders);
         }
 
@@ -56,7 +56,7 @@ namespace GLTFast.Loading {
     }
 
     public class CustomHeaderDownload : AwaitableDownload {
-        public CustomHeaderDownload(string url, EditUnityWebRequest editor) : base() {
+        public CustomHeaderDownload(Uri url, EditUnityWebRequest editor) : base() {
             request = UnityWebRequest.Get(url);
             editor(request);
             asynOperation = request.SendWebRequest();
@@ -65,7 +65,7 @@ namespace GLTFast.Loading {
 
     public class CustomHeaderTextureDownload : AwaitableTextureDownload {
 
-        public CustomHeaderTextureDownload(string url, EditUnityWebRequest editor) : base() {
+        public CustomHeaderTextureDownload(Uri url, EditUnityWebRequest editor) : base() {
             request = CreateRequest(url);
             editor(request);
             asynOperation = request.SendWebRequest();

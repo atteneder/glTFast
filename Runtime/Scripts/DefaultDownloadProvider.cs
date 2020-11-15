@@ -13,16 +13,17 @@
 // limitations under the License.
 //
 
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace GLTFast.Loading {
     public class DefaultDownloadProvider : IDownloadProvider {
-        public IDownload Request(string url) {
+        public IDownload Request(Uri url) {
             return new AwaitableDownload(url);
         }
 
-        public ITextureDownload RequestTexture(string url) {
+        public ITextureDownload RequestTexture(Uri url) {
             return new AwaitableTextureDownload(url);
         }
     }
@@ -37,11 +38,11 @@ namespace GLTFast.Loading {
 
         public AwaitableDownload() {}
 
-        public AwaitableDownload(string url) {
+        public AwaitableDownload(Uri url) {
             Init(url);
         }
 
-        protected virtual void Init(string url) {
+        protected virtual void Init(Uri url) {
             request = UnityWebRequest.Get(url);
             asynOperation = request.SendWebRequest();
         }
@@ -79,9 +80,9 @@ namespace GLTFast.Loading {
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
 
         public AwaitableTextureDownload():base() {}
-        public AwaitableTextureDownload(string url):base(url) {}
+        public AwaitableTextureDownload(Uri url):base(url) {}
 
-        protected static UnityWebRequest CreateRequest(string url) {
+        protected static UnityWebRequest CreateRequest(Uri url) {
             return UnityWebRequestTexture.GetTexture(url
                 /// TODO: Loading non-readable here would save memory, but
                 /// breaks texture instantiation in case of multiple samplers:
@@ -89,7 +90,7 @@ namespace GLTFast.Loading {
                 );
         }
 
-        protected override void Init(string url) {
+        protected override void Init(Uri url) {
             request = CreateRequest(url);
             asynOperation = request.SendWebRequest();
         }

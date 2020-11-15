@@ -46,7 +46,6 @@ namespace GLTFast {
 
         public const int DefaultBatchCount = 50000;
         const uint GLB_MAGIC = 0x46546c67;
-        const string GLB_EXT = ".glb";
 
         public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         public const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
@@ -166,11 +165,6 @@ namespace GLTFast {
         bool loadingError = false;
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
 
-        static string GetUriBase( string url ) {
-            var uri = new Uri(url);
-            return new Uri( uri, ".").AbsoluteUri;
-        }
-
         public GLTFast(
             MonoBehaviour monoBehaviour,
             IDownloadProvider downloadProvider=null,
@@ -184,11 +178,25 @@ namespace GLTFast {
             this.materialGenerator = materialGenerator ?? new DefaultMaterialGenerator();
         }
 
+        /// <summary>
+        /// Load a glTF file (JSON or binary)
+        /// The URL can be a file path (using the "file://" scheme) or a web adress.
+        /// </summary>
+        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
         public void Load( string url ) {
+            Load(new Uri(url,UriKind.RelativeOrAbsolute));
+        }
+
+        /// <summary>
+        /// Load a glTF file (JSON or binary)
+        /// The URL can be a file path (using the "file://" scheme) or a web adress.
+        /// </summary>
+        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
+        public void Load( Uri url ) {
             monoBehaviour.StartCoroutine(LoadRoutine(url));
         }
 
-        IEnumerator LoadRoutine( string url ) {
+        IEnumerator LoadRoutine( Uri url ) {
 
             var download = downloadProvider.Request(url);
             yield return download;
@@ -198,24 +206,11 @@ namespace GLTFast {
                 bool? gltfBinary = download.isBinary;
                 if (!gltfBinary.HasValue)
                 {
-                    // quick glTF-binary check
-                    if (url.EndsWith(GLB_EXT, StringComparison.OrdinalIgnoreCase))
-                    {
-                        gltfBinary = true;
-                    }
-                }
-                if (!gltfBinary.HasValue)
-                {
-                    // thourough glTF-binary extension check that strips HTTP GET parameters
-                    int getIndex = url.LastIndexOf('?');
-                    if (getIndex >= 0 && url.Substring(getIndex - GLB_EXT.Length, GLB_EXT.Length).Equals(GLB_EXT, StringComparison.OrdinalIgnoreCase))
-                    {
-                        gltfBinary = true;
-                    }
+                    gltfBinary = UriHelper.IsGltfBinary(url);
                 }
 
                 if (gltfBinary ?? false) {
-                    LoadGlb(download.data,url);
+                    LoadGltfBinary(download.data,url);
                 } else {
                     LoadGltf(download.text,url);
                 }
@@ -273,7 +268,7 @@ namespace GLTFast {
             }
         }
 
-        void ParseJsonAndLoadBuffers( string json, string baseUri ) {
+        void ParseJsonAndLoadBuffers( string json, Uri baseUri ) {
             gltfRoot = ParseJson(json);
 
             if(!CheckExtensionSupport(gltfRoot)) {
@@ -298,7 +293,7 @@ namespace GLTFast {
                             loadingError = true;
                         }
                     } else {
-                        LoadBuffer( i, baseUri+buffer.uri );
+                        LoadBuffer( i, UriHelper.GetUriString(buffer.uri,baseUri) );
                     }
                 }
             }
@@ -396,9 +391,9 @@ namespace GLTFast {
             return true;
         }
 
-        void LoadGltf( string json, string url ) {
+        void LoadGltf( string json, Uri url ) {
             Profiler.BeginSample("LoadGltf");
-            var baseUri = GetUriBase(url);
+            var baseUri = UriHelper.GetBaseUri(url);
             ParseJsonAndLoadBuffers(json,baseUri);
             if(!loadingError) {
                 LoadImages(baseUri);
@@ -406,7 +401,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        void LoadImages( string baseUri ) {
+        void LoadImages( Uri baseUri ) {
 
             Profiler.BeginSample("LoadImages");
 
@@ -509,7 +504,7 @@ namespace GLTFast {
                             if (img.bufferView < 0) {
                                 // Not Inside buffer
                                 if(!string.IsNullOrEmpty(img.uri)) {
-                                    LoadTexture(i,baseUri+img.uri,imgFormat==ImageFormat.KTX);
+                                    LoadTexture(i,UriHelper.GetUriString(img.uri,baseUri),imgFormat==ImageFormat.KTX);
                                 } else {
                                     Debug.LogError(ErrorMissingImageURL);
                                 }
@@ -543,7 +538,7 @@ namespace GLTFast {
                 Profiler.BeginSample("CreateGlbBinChungs");
                 for( int i=0; i<buffers.Length; i++ ) {
                     if(i==0 && glbBinChunk.HasValue) {
-                        // Already assigned in LoadGlb
+                        // Already assigned in LoadGltfBinary
                         continue;
                     }
                     var b = buffers[i];
@@ -624,7 +619,7 @@ namespace GLTFast {
         Dictionary<int,IDownload> downloads;
         Dictionary<int,IDownload> textureDownloads;
 
-        void LoadBuffer( int index, string url ) {
+        void LoadBuffer( int index, Uri url ) {
             if(downloads==null) {
                 downloads = new Dictionary<int,IDownload>();
             }
@@ -656,7 +651,7 @@ namespace GLTFast {
             return data;
         }
 
-        void LoadTexture( int index, string url, bool isKtx ) {
+        void LoadTexture( int index, Uri url, bool isKtx ) {
 
             Profiler.BeginSample("LoadTexture");
 
@@ -679,8 +674,14 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        bool LoadGlb( byte[] bytes, string url ) {
-            Profiler.BeginSample("LoadGlb");
+        /// <summary>
+        /// Load a glTF-binary asset from a byte array.
+        /// </summary>
+        /// <param name="bytes">byte array containing glTF-binary</param>
+        /// <param name="url">Base URL for relative paths of external buffers or images</param>
+        /// <returns></returns>
+        public bool LoadGltfBinary( byte[] bytes, Uri uri = null ) {
+            Profiler.BeginSample("LoadGltfBinary");
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
             if (magic != GLB_MAGIC) {
@@ -703,7 +704,7 @@ namespace GLTFast {
 
             int index = 12; // first chunk header
 
-            var baseUri = GetUriBase(url);
+            var baseUri = UriHelper.GetBaseUri(uri);
 
             while( index < bytes.Length ) {
                 uint chLength = BitConverter.ToUInt32( bytes, index );

@@ -9,8 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blend mode can be set in inspector for glTF materials via custom ShaderGUI (thanks @camnewnham for #89)
 - Option to make all mesh data readable via `GLTFAST_KEEP_MESH_DATA` scripting define (alternative to #86)
 - Better support for URLs without file extension. glTF type (JSON or binary) is derived from HTTP Content-Type header, if present. (thanks @camnewnham for #87)
+- Method `GltFast.LoadGltfBinary` to load .glb files from byte arrays is public now (#81)
+### Changed
+- Switched internal URL type from `string` to `Uri`
 ### Fixed
 - Unit tests updated to latest glTF-Sample-Models
+- Absolute URI in external resources
+- Special characters in URL (#79)
 
 ## [2.1.0] - 2020-10-25
 ### Changed

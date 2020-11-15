@@ -13,14 +13,15 @@
 // limitations under the License.
 //
 
+using System;
 using System.Collections;
 using UnityEngine;
 
 namespace GLTFast.Loading {
 
     public interface IDownloadProvider {
-        IDownload Request(string url);
-        ITextureDownload RequestTexture(string url);
+        IDownload Request(Uri url);
+        ITextureDownload RequestTexture(Uri url);
     }
 
     public interface IDownload : IEnumerator {
