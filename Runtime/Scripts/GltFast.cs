@@ -27,7 +27,6 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 using UnityEngine.Events;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 #if BURST
 using Unity.Mathematics;
