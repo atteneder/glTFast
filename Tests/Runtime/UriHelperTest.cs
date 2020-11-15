@@ -48,28 +48,32 @@ public class UriHelperTest
     public void GetBaseUriTest()
     {
         // HTTP(s) gltf
-        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri("http://www.server.com/dir/sub/file.gltf"));
-        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri("https://www.server.com/dir/sub/file.gltf"));
-        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri("http://www.server.com/dir/sub/file.gltf?a=123&b=456"));
-        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri("https://www.server.com/dir/sub/file.gltf?a=123&b=456"));
+        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("http://www.server.com/dir/sub/file.gltf")));
+        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file.gltf")));
+        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("http://www.server.com/dir/sub/file.gltf?a=123&b=456")));
+        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file.gltf?a=123&b=456")));
         // HTTP(s) glb
-        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri("http://www.server.com/dir/sub/file.glb"));
-        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri("https://www.server.com/dir/sub/file.glb"));
-        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri("http://www.server.com/dir/sub/file.glb?a=123&b=456"));
-        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri("https://www.server.com/dir/sub/file.glb?a=123&b=456"));
+        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("http://www.server.com/dir/sub/file.glb")));
+        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file.glb")));
+        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("http://www.server.com/dir/sub/file.glb?a=123&b=456")));
+        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file.glb?a=123&b=456")));
         // HTTP(s) none
-        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri("http://www.server.com/dir/sub/file"));
-        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri("https://www.server.com/dir/sub/file"));
-        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri("http://www.server.com/dir/sub/file?a=123&b=456"));
-        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri("https://www.server.com/dir/sub/file?a=123&b=456"));
+        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("http://www.server.com/dir/sub/file")));
+        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file")));
+        Assert.AreEqual(new Uri("http://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("http://www.server.com/dir/sub/file?a=123&b=456")));
+        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file?a=123&b=456")));
 
         // file paths
-        Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri("file:///dir/sub/file.gltf"));
-        Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri("/dir/sub/file.gltf"));
+        Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri(new Uri("file:///dir/sub/file.gltf")));
+#if UNITY_EDITOR_WIN
+        Assert.AreEqual(new Uri("file://c:\\dir\\sub\\"),UriHelper.GetBaseUri(new Uri("c:\\dir\\sub\\file.gltf")));
+#else
+        Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri(new Uri("/dir/sub/file.gltf")));
+#endif
 
         // special char `+`
-        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri("https://www.server.com/dir/sub/file+test.gltf"));
-        Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri("file:///dir/sub/file+test.gltf"));
+        Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file+test.gltf")));
+        Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri(new Uri("file:///dir/sub/file+test.gltf")));
     }
 
     [Test]

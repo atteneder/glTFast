@@ -23,12 +23,6 @@ namespace GLTFast {
         const string GLB_EXT = ".glb";
         const string GLTF_EXT = ".gltf";
 
-        public static Uri GetBaseUri( string url ) {
-            if(string.IsNullOrEmpty(url)) return null;
-            var uri = new Uri(url);
-            return new Uri(uri, ".");
-        }
-
         public static Uri GetBaseUri( Uri uri ) {
             if(uri==null) return null;
             return new Uri(uri, ".");
