@@ -65,9 +65,8 @@ public class UriHelperTest
 
         // file paths
         Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri(new Uri("file:///dir/sub/file.gltf")));
-#if UNITY_EDITOR_WIN
         Assert.AreEqual(new Uri("file://c:\\dir\\sub\\"),UriHelper.GetBaseUri(new Uri("c:\\dir\\sub\\file.gltf")));
-#else
+#if !UNITY_EDITOR_WIN
         Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri(new Uri("/dir/sub/file.gltf")));
 #endif
 
