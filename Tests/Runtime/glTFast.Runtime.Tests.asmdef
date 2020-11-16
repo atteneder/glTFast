@@ -2,7 +2,8 @@
     "name": "glTFastTests",
     "references": [
         "glTFast",
-        "glTFSampleModels"
+        "glTFSampleModels",
+        "Unity.Mathematics"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

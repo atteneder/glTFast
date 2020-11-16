@@ -4,7 +4,8 @@
         "Draco",
         "glTFastSchema",
         "glTFastFakeSchema",
-        "Ktx"
+        "Ktx",
+        "Unity.Mathematics"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

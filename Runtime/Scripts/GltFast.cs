@@ -998,9 +998,11 @@ namespace GLTFast {
                     m.m33 = node.matrix[15];
 
                     if(m.ValidTRS()) {
-                        position = new Vector3( m.m03, m.m13, m.m23 );
-                        rotation = m.rotation;
-                        scale = m.lossyScale;
+                        m.Decompose(out var t, out var r, out var s);
+                        position = t;
+                        rotation = r;
+                        scale = s;
+
                     } else {
                         Debug.LogErrorFormat("Invalid matrix on node {0}",nodeIndex);
                         Profiler.EndSample();
