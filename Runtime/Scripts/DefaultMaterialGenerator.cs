@@ -24,15 +24,33 @@ namespace GLTFast {
 
     public class DefaultMaterialGenerator : IMaterialGenerator {
 
+        const string SHADER_PBR_METALLIC_ROUGHNESS = "glTF/PbrMetallicRoughness";
+        const string SHADER_PBR_SPECULAR_GLOSSINESS = "glTF/PbrSpecularGlossiness";
+        const string SHADER_UNLIT = "glTF/Unlit";
+
         Shader pbrMetallicRoughnessShader;
         Shader pbrMetallicRoughnessDoubleSideShader;
         Shader pbrSpecularGlossinessShader;
         Shader pbrSpecularGlossinessDoubleSideShader;
         Shader unlitShader;
 
+        static Shader FindShader(string shaderName) {
+            var shader = Shader.Find(shaderName);
+            if(shader==null) {
+                Debug.LogErrorFormat(
+                    "Shader \"{0}\" is missing. Make sure to include it in the build (see https://github.com/atteneder/glTFast/blob/main/Documentation%7E/glTFast.md#materials-and-shader-variants )",
+                    shaderName
+                    );
+            }
+            return shader;
+        }
+
         public UnityEngine.Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {
             if(pbrMetallicRoughnessShader==null) {
-                pbrMetallicRoughnessShader = Shader.Find("glTF/PbrMetallicRoughness");
+                pbrMetallicRoughnessShader = FindShader(SHADER_PBR_METALLIC_ROUGHNESS);
+            }
+            if(pbrMetallicRoughnessShader==null) {
+                return null;
             }
             var mat = new Material(pbrMetallicRoughnessShader);
             if(doubleSided) {
@@ -44,7 +62,10 @@ namespace GLTFast {
 
         public UnityEngine.Material GetPbrSpecularGlossinessMaterial(bool doubleSided=false) {
             if(pbrSpecularGlossinessShader==null) {
-                pbrSpecularGlossinessShader = Shader.Find("glTF/PbrSpecularGlossiness");
+                pbrSpecularGlossinessShader = FindShader(SHADER_PBR_SPECULAR_GLOSSINESS);
+            }
+            if(pbrSpecularGlossinessShader==null) {
+                return null;
             }
             var mat = new Material(pbrSpecularGlossinessShader);
             if(doubleSided) {
@@ -56,7 +77,10 @@ namespace GLTFast {
 
         public UnityEngine.Material GetUnlitMaterial(bool doubleSided=false) {
             if(unlitShader==null) {
-                unlitShader = Shader.Find("glTF/Unlit");
+                unlitShader = FindShader(SHADER_UNLIT);
+            }
+            if(unlitShader==null) {
+                return null;
             }
             var mat = new Material(unlitShader);
             if(doubleSided) {
@@ -82,6 +106,8 @@ namespace GLTFast {
             } else {
                 material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);
             }
+
+            if(material==null) return null;
 
             material.name = gltfMaterial.name;
 

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Absolute URI in external resources
 - Special characters in URL (#79)
 - Corner-case matrix decomposition errors (#99)
+- Missing `Shader` results in error message instead of exception (#88)
 
 ## [2.1.0] - 2020-10-25
 ### Changed
