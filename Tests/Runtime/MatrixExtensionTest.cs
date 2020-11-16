@@ -61,17 +61,19 @@ public class MatrixExtensionTest {
             );
 
         for (int i = 0; i < 100000; i++) {
-            Profiler.BeginSample("Matrix4x4.DecomposeOld");
-            Vector3 t1 = new Vector3( m.m03, m.m13, m.m23 );
-            Quaternion r1 = m.rotation;
-            Vector3 s1 = m.lossyScale;
+            Profiler.BeginSample("Matrix4x4.DecomposeUnity");
+            if(m.ValidTRS()) {
+                Vector3 t1 = new Vector3( m.m03, m.m13, m.m23 );
+                Quaternion r1 = m.rotation;
+                Vector3 s1 = m.lossyScale;
+            }
             Profiler.EndSample();
 
-            Profiler.BeginSample("Matrix4x4.DecomposeNew");
+            Profiler.BeginSample("Matrix4x4.DecomposeCustom");
             m.Decompose(out var t, out var r, out var s);
             Profiler.EndSample();
 
-            Profiler.BeginSample("Matrix4x4.DecomposeNew2");
+            Profiler.BeginSample("float4x4.Decompose");
             m2.Decompose(out var t3, out var r3, out var s3);
             Profiler.EndSample();
         }
