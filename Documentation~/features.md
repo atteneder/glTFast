@@ -72,6 +72,8 @@
 
 ## Extensions
 
+### Official Khronos extensions
+
 - [x] KHR_draco_mesh_compression
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
@@ -83,10 +85,36 @@
 - [ ] KHR_materials_sheen
 - [ ] KHR_materials_transmission
 - [ ] KHR_materials_variants
-- [ ] KHR_techniques_webgl (won't be supported)
 - [ ] KHR_xmp
 
 <sup>1</sup>: Beta
+
+Will not be supported:
+
+- KHR_techniques_webgl
+
+### Vendor extensions
+
+- [ ] EXT_mesh_gpu_instancing
+- [ ] EXT_meshopt_compression (#106)
+- [ ] EXT_lights_image_based
+
+Not investigated yet:
+
+- [ ] AGI_articulations
+- [ ] AGI_stk_metadata
+- [ ] CESIUM_primitive_outline
+- [ ] MSFT_lod
+- [ ] MSFT_packing_normalRoughnessMetallic
+- [ ] MSFT_packing_occlusionRoughnessMetallic
+
+Will not be supported:
+
+- ADOBE_materials_clearcoat_specular (prefer KHR_materials_clearcoat)
+- ADOBE_materials_thin_transparency (prefer KHR_materials_transmission)
+- EXT_texture_webp (prefer KTX/basisu)
+- FB_geometry_metadata (prefer KTX_xmp)
+- MSFT_texture_dds (prefer KTX/basisu)
 
 ## <a name="knownissues">Known issues
 
