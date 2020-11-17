@@ -95,18 +95,18 @@ Will not be supported:
 
 ### Vendor extensions
 
-- [ ] EXT_mesh_gpu_instancing
-- [ ] EXT_meshopt_compression (#106)
-- [ ] EXT_lights_image_based
+- [ ] EXT_mesh_gpu_instancing ([issue](../issues/107))
+- [ ] EXT_meshopt_compression ([issue](../issues/106))
+- [ ] EXT_lights_image_based ([issue](../issues/108))
 
 Not investigated yet:
 
-- [ ] AGI_articulations
-- [ ] AGI_stk_metadata
-- [ ] CESIUM_primitive_outline
-- [ ] MSFT_lod
-- [ ] MSFT_packing_normalRoughnessMetallic
-- [ ] MSFT_packing_occlusionRoughnessMetallic
+- AGI_articulations
+- AGI_stk_metadata
+- CESIUM_primitive_outline
+- MSFT_lod
+- MSFT_packing_normalRoughnessMetallic
+- MSFT_packing_occlusionRoughnessMetallic
 
 Will not be supported:
 
