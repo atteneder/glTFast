@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.2.0] - 2020-11-20
 ### Added
 - Blend mode can be set in inspector for glTF materials via custom ShaderGUI (thanks @camnewnham for #89)
 - Option to make all mesh data readable via `GLTFAST_KEEP_MESH_DATA` scripting define (alternative to #86)
@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Method `GltFast.LoadGltfBinary` to load .glb files from byte arrays is public now (#81)
 ### Changed
 - Switched internal URL type from `string` to `Uri`
+- Dependency on com.unity.mathematics was added (for matrix decomposition; see fix below)
 ### Fixed
 - Unit tests updated to latest glTF-Sample-Models
 - Absolute URI in external resources
