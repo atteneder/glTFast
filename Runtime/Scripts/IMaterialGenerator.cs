@@ -19,7 +19,12 @@ namespace GLTFast {
     using Schema;
     public interface IMaterialGenerator {
 
-        UnityEngine.Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false);
+        /// <summary>
+        /// Get fallback material that is assigned to nodes without a material.
+        /// </summary>
+        /// <returns>fallback material</returns>
+        UnityEngine.Material GetDefaultMaterial();
+
         UnityEngine.Material GenerateMaterial(
             Material gltfMaterial,
             ref Schema.Texture[] textures,

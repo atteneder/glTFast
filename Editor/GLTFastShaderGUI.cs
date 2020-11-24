@@ -20,20 +20,20 @@ namespace GLTFast.Editor
         {
             if (materialEditor.target is Material material)
             {
-                string current = material.GetTag("RenderType", false);
+                string current = material.GetTag(TAG_RENDER_TYPE, false);
                 BlendModeOption currentBlendMode = BlendModeOption.Opaque;
 
                 switch (current)
                 {
                     case "":
-                    case "Opaque":
+                    case TAG_RENDER_TYPE_OPAQUE:
                         currentBlendMode = BlendModeOption.Opaque;
                         break;
 
-                    case "TransparentCutout":
+                    case TAG_RENDER_TYPE_CUTOUT:
                         currentBlendMode = BlendModeOption.Cutout;
                         break;
-                    case "Transparent":
+                    case TAG_RENDER_TYPE_TRANSPARENT:
                         currentBlendMode = BlendModeOption.Transparent;
                         break;
 

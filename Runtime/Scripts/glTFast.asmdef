@@ -24,6 +24,11 @@
             "name": "com.atteneder.ktx",
             "expression": "0.8.0",
             "define": "KTX_UNITY"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "7.3.1",
+            "define": "GLTFAST_URP"
         }
     ],
     "noEngineReferences": false

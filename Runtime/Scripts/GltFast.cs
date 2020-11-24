@@ -174,7 +174,7 @@ namespace GLTFast {
             this.monoBehaviour = monoBehaviour;
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
             this.deferAgent = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
-            this.materialGenerator = materialGenerator ?? new DefaultMaterialGenerator();
+            this.materialGenerator = materialGenerator ?? MaterialGenerator.GetDefaultMaterialGenerator();
         }
 
         /// <summary>
@@ -1078,7 +1078,7 @@ namespace GLTFast {
                                 primMaterials[m] = materials[materialIndex];
                             } else {
                                 // No valid material found -> Fall back to default material.
-                                primMaterials[m] = materialGenerator.GetPbrMetallicRoughnessMaterial();
+                                primMaterials[m] = materialGenerator.GetDefaultMaterial();
                             }
                         }
 
