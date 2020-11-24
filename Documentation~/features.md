@@ -82,9 +82,9 @@
 - [x] <sup>1</sup>KHR_texture_basisu
 - [ ] KHR_lights_punctual ([issue](../issues/17))
 - [ ] KHR_materials_clearcoat ([issue](../issues/68))
-- [ ] KHR_materials_sheen
-- [ ] KHR_materials_transmission
-- [ ] KHR_materials_variants
+- [ ] KHR_materials_sheen ([issue](../issues/110))
+- [ ] KHR_materials_transmission ([issue](../issues/111))
+- [ ] KHR_materials_variants ([issue](../issues/112))
 - [ ] KHR_xmp
 
 <sup>1</sup>: Beta
