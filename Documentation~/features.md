@@ -13,7 +13,7 @@
 
 - [x] Scene
   - [x] Node hierarchy
-  - [ ] Camera ([issue](../issues/12))
+  - [ ] Camera ([issue](https://github.com/atteneder/glTFast/issues/12))
 - [x] Buffers
   - [x] External URIs
   - [x] glTF binary main buffer
@@ -36,8 +36,8 @@
     - [x] Double sided
     - [x] Vertex colors
     - [x] Emission(factor)
-  - [ ] Universal Render Pipeline ([issue](../issues/41))
-  - [ ] High Definition Render Pipeline ([issue](../issues/42))
+  - [ ] Universal Render Pipeline ([issue](https://github.com/atteneder/glTFast/issues/41))
+  - [ ] High Definition Render Pipeline ([issue](https://github.com/atteneder/glTFast/issues/42))
 - Primitive Types
   - [x] TRIANGLES
   - [x] <sup>1</sup>POINTS
@@ -55,13 +55,13 @@
   - [x] Draco mesh compression (via [Draco 3D Data Compression Unity Package](https://github.com/atteneder/DracoUnity))
   - [x] Implicit (no) indices
   - [x] Per primitive material
-  - [ ] Multiple texture coordinates sets ([issue](../issues/34))
+  - [ ] Multiple texture coordinates sets ([issue](https://github.com/atteneder/glTFast/issues/34))
   - [x] Joints (up to 4 per vertex)
   - [x] Weights (up to 4 per vertex)
 - [x] Texture sampler
   - [x] Filtering (see ([limitations](#knownissues)))
   - [x] Wrap modes
-- [ ] Morph targets ([issue](../issues/8))
+- [ ] Morph targets ([issue](https://github.com/atteneder/glTFast/issues/8))
   - [ ] Sparse accessors
 - [x] [Skins](https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins) (sponsored by [Embibe](https://www.embibe.com))
 - [ ] Animation
@@ -80,11 +80,11 @@
 - [x] KHR_texture_transform
 - [x] KHR_mesh_quantization
 - [x] <sup>1</sup>KHR_texture_basisu
-- [ ] KHR_lights_punctual ([issue](../issues/17))
-- [ ] KHR_materials_clearcoat ([issue](../issues/68))
-- [ ] KHR_materials_sheen ([issue](../issues/110))
-- [ ] KHR_materials_transmission ([issue](../issues/111))
-- [ ] KHR_materials_variants ([issue](../issues/112))
+- [ ] KHR_lights_punctual ([issue](https://github.com/atteneder/glTFast/issues/17))
+- [ ] KHR_materials_clearcoat ([issue](https://github.com/atteneder/glTFast/issues/68))
+- [ ] KHR_materials_sheen ([issue](https://github.com/atteneder/glTFast/issues/110))
+- [ ] KHR_materials_transmission ([issue](https://github.com/atteneder/glTFast/issues/111))
+- [ ] KHR_materials_variants ([issue](https://github.com/atteneder/glTFast/issues/112))
 - [ ] KHR_xmp
 
 <sup>1</sup>: Beta
@@ -95,9 +95,9 @@ Will not be supported:
 
 ### Vendor extensions
 
-- [ ] EXT_mesh_gpu_instancing ([issue](../issues/107))
-- [ ] EXT_meshopt_compression ([issue](../issues/106))
-- [ ] EXT_lights_image_based ([issue](../issues/108))
+- [ ] EXT_mesh_gpu_instancing ([issue](https://github.com/atteneder/glTFast/issues/107))
+- [ ] EXT_meshopt_compression ([issue](https://github.com/atteneder/glTFast/issues/106))
+- [ ] EXT_lights_image_based ([issue](https://github.com/atteneder/glTFast/issues/108))
 
 Not investigated yet:
 
