@@ -149,10 +149,8 @@ namespace GLTFast {
                 }
             }
 
-            if (metallic && gltfMaterial.pbrMetallicRoughness!=null) {
+            if (gltfMaterial.pbrMetallicRoughness!=null) {
                 material.SetVector(baseColorFactorPropId, gltfMaterial.pbrMetallicRoughness.baseColor.gamma);
-                material.SetFloat(metallicFactorPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
-                material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
                 TrySetTexture(
                     gltfMaterial.pbrMetallicRoughness.baseColorTexture,
@@ -162,15 +160,21 @@ namespace GLTFast {
                     ref schemaImages,
                     ref imageVariants
                     );
-                
-                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,ormTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
-                    // material.EnableKeyword(StandardShaderHelper.KW_METALLICSPECGLOSSMAP);
-                }
 
-                if (DifferentIndex(gltfMaterial.occlusionTexture,gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture)) {
-                    // Could be avoided by providing two texture slots
-                    // But that would mean two samplers instead of one :/
-                    Debug.LogError("Inconsistent textures O!=RM");
+                if (metallic)
+                {
+                    material.SetFloat(metallicFactorPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
+                    material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
+
+                    if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,ormTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
+                        // material.EnableKeyword(StandardShaderHelper.KW_METALLICSPECGLOSSMAP);
+                    }
+
+                    if (DifferentIndex(gltfMaterial.occlusionTexture,gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture)) {
+                        // Could be avoided by providing two texture slots
+                        // But that would mean two samplers instead of one :/
+                        Debug.LogError("Inconsistent textures O!=RM");
+                    }
                 }
             }
 
