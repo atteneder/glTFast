@@ -35,7 +35,7 @@ namespace GLTFast {
             Max = 0x8
         }
         
-        const string SHADER_UNLIT = "Universal Render Pipeline/Unlit";
+        const string SHADER_UNLIT = "Shader Graphs/glTF-unlit-opaque";
 
         // Keywords
         const string KW_OCCLUSION = "OCCLUSION";
@@ -56,7 +56,7 @@ namespace GLTFast {
         static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
 
         private Shader[] litShaders = new Shader[(int)ShaderFeature.Max];
-        Shader unlitShader;
+        private Shader[] unlitShaders = new Shader[2]; // one- and double-sided
 
         public override UnityEngine.Material GetDefaultMaterial() {
             return GetLitMaterial();
@@ -90,21 +90,20 @@ namespace GLTFast {
             return mat;
         }
 
-        UnityEngine.Material GetUnlitMaterial(bool doubleSided=false) {
-            if(unlitShader==null) {
-                unlitShader = FindShader(SHADER_UNLIT);
+        UnityEngine.Material GetUnlitMaterial(bool doubleSided=false)
+        {
+            int index = doubleSided ? 0 : 1;
+            if(unlitShaders[index]==null) {
+                var shaderName = doubleSided ? string.Format("{0}{2}",SHADER_UNLIT,"-double") : SHADER_UNLIT;
+                unlitShaders[index] = FindShader(shaderName);
             }
-            if(unlitShader==null) {
+            if(unlitShaders[index]==null) {
                 return null;
             }
-            var mat = new Material(unlitShader);
-            if(doubleSided) {
-                // Turn off back-face culling
-                // mat.SetFloat(StandardShaderHelper.cullPropId,0);
+            var mat = new Material(unlitShaders[index]);
 #if UNITY_EDITOR
-                mat.doubleSidedGI = true;
+            mat.doubleSidedGI = doubleSided;
 #endif
-            }
             return mat;
         }
 
