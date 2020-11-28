@@ -1,13 +1,13 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using Unity.Mathematics;
 using static GLTFast.Materials.StandardShaderHelper;
 
 namespace GLTFast.Editor
 {
-    public class GLTFastShaderGUI : ShaderGUI
+    public class GLTFastShaderGUI : GLTFastShaderGUIBase
     {
-        private const float TOLERANCE = 0.001f;
 
         /// <summary>
         /// Subset of <see cref="StandardShaderMode"/> as not all configurations are supported
@@ -19,7 +19,7 @@ namespace GLTFast.Editor
             Transparent = StandardShaderMode.Transparent,
         }
 
-        private float? uvRotation;
+        private UvTransform? uvTransform;
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
@@ -53,17 +53,14 @@ namespace GLTFast.Editor
                     ConfigureBlendMode(material, blend);
                 }
 
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Texture Rotation");
-                float oldUvRotation = uvRotation.HasValue ? uvRotation.Value : GetUvRotation(material);
-                float newUvRotation = EditorGUILayout.Slider(oldUvRotation,0,360);
-                GUILayout.EndHorizontal();
-                
-                if (Math.Abs(newUvRotation - oldUvRotation) > TOLERANCE) {
-                    uvRotation = newUvRotation;
-                    float cos = Mathf.Cos(uvRotation.Value*Mathf.Deg2Rad);
-                    float sin = Mathf.Sin(uvRotation.Value*Mathf.Deg2Rad);
-                    material.SetVector(mainTexRotatePropId,new Vector4(cos,sin,-sin,cos));
+                uvTransform = TextureRotationSlider(material, uvTransform, mainTexRotatePropId, true);
+                if (uvTransform.HasValue)
+                {
+                    if (uvTransform.Value.rotation != 0) {
+                        material.EnableKeyword(KW_UV_ROTATION);
+                    } else {
+                        material.DisableKeyword(KW_UV_ROTATION);
+                    }
                 }
             }
 
@@ -84,18 +81,6 @@ namespace GLTFast.Editor
                     SetAlphaModeBlend(material);
                     break;
             }
-        }
-
-        /// <summary>
-        /// Extracts a material's texture rotation (degrees) from the 2 by 2 matrix
-        /// </summary>
-        /// <param name="material"></param>
-        /// <returns>texture rotation in degrees</returns>
-        float GetUvRotation(Material material) {
-            var r = material.GetVector(mainTexRotatePropId);
-            var acos = Mathf.Acos(r.x);
-            if (r.y < 0) acos = (Mathf.PI*2)-acos;
-            return acos * Mathf.Rad2Deg;
         }
     }
 }

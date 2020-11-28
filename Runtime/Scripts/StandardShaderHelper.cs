@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#if ! (GLTFAST_URP || GLTFAST_HDRP)
+#if !GLTFAST_SHADER_GRAPH
 #define GLTFAST_BUILTIN_RP
 #endif
 
@@ -76,7 +76,7 @@ namespace GLTFast.Materials {
 
 #endif
 
-#if GLTFAST_URP || UNITY_EDITOR
+#if GLTFAST_SHADER_GRAPH || UNITY_EDITOR
 
         public const string KW_METALLICSPECGLOSSMAP = "_METALLICSPECGLOSSMAP";
         public const string KW_OCCLUSIONMAP = "_OCCLUSIONMAP";
@@ -100,7 +100,7 @@ namespace GLTFast.Materials {
             material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;  //2450
 
-#if GLTFAST_URP
+#if GLTFAST_SHADER_GRAPH
             material.SetFloat(alphaClipPropId, 1);
 #else
             material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
@@ -117,7 +117,7 @@ namespace GLTFast.Materials {
         }
 
         public static void SetAlphaModeBlend( UnityEngine.Material material ) {
-#if GLTFAST_URP
+#if GLTFAST_SHADER_GRAPH
             material.SetInt(blendPropId, 0);
 #else
             material.SetFloat(modePropId, (int)StandardShaderMode.Transparent);
@@ -134,7 +134,7 @@ namespace GLTFast.Materials {
         }
 
         public static void SetOpaqueMode(UnityEngine.Material material) {
-#if GLTFAST_URP
+#if GLTFAST_SHADER_GRAPH
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;  //2000;
 #else
             material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_OPAQUE);

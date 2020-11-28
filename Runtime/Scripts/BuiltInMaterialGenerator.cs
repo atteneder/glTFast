@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#if ! (GLTFAST_URP || GLTFAST_HDRP)
+#if ! GLTFAST_SHADER_GRAPH
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -179,4 +179,4 @@ namespace GLTFast {
         }
     }
 }
-#endif // ! (GLTFAST_URP || GLTFAST_HDRP)
+#endif // !GLTFAST_SHADER_GRAPH

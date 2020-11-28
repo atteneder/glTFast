@@ -21,7 +21,7 @@ namespace GLTFast {
 
     using Unity.Mathematics;
 
-    public static class Matrix4x4Extension
+    public static class Mathematics
     {
         /// <summary>
         /// Decomposes a 4x4 TRS matrix into separate transforms (translation * rotation * scale)
@@ -105,6 +105,12 @@ namespace GLTFast {
         static bool IsNegative(this float3x3 m) {
             var cross = math.cross(m.c0,m.c1);
             return math.dot(cross,m.c2)<0f;
+        }
+        
+        public static float normalize(float2 input,out float2 output) {
+            float len = math.length(input);
+            output = input/len;
+            return len;
         }
     }
 }

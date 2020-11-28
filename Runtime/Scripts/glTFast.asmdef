@@ -28,7 +28,7 @@
         {
             "name": "com.unity.render-pipelines.universal",
             "expression": "7.3.1",
-            "define": "GLTFAST_URP"
+            "define": "GLTFAST_SHADER_GRAPH"
         }
     ],
     "noEngineReferences": false

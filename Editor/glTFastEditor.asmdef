@@ -1,8 +1,9 @@
 {
     "name": "glTFastEditor",
     "references": [
-        "GUID:a42927d1d4a3b4cda9b076a7adecb9cc",
-        "GUID:339cc51f8f5f946a99be775bcfa83f2e"
+        "Unity.Mathematics",
+        "glTFast",
+        "glTFastSchema"
     ],
     "includePlatforms": [
         "Editor"
@@ -13,6 +14,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "7.3.1",
+            "define": "GLTFAST_SHADER_GRAPH"
+        }
+    ],
     "noEngineReferences": false
 }

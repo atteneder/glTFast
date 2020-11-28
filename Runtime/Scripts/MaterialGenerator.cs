@@ -13,12 +13,13 @@
 // limitations under the License.
 //
 
-#if ! (GLTFAST_URP || GLTFAST_HDRP)
+#if !GLTFAST_SHADER_GRAPH
 #define GLTFAST_BUILTIN_RP
 #endif
 
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace GLTFast {
 
@@ -34,11 +35,9 @@ namespace GLTFast {
             /// actual render pipeline.
             /// Show warning explaining how to setup project properly
 
-#if GLTFAST_URP
-            return new URPMaterialGenerator();
-#endif
-
-#if ! (GLTFAST_URP || GLTFAST_HDRP)
+#if GLTFAST_SHADER_GRAPH
+            return new ShaderGraphMaterialGenerator();
+#else
             return new BuiltInMaterialGenerator();
 #endif
         }
@@ -105,6 +104,10 @@ namespace GLTFast {
             }
             return false;
         }
+        
+        protected static bool DifferentIndex(Schema.TextureInfo a, Schema.TextureInfo b) {
+            return a != null && b != null && a.index>=0 && b.index>=0 && a.index != b.index;
+        }
 
         protected static void TrySetTextureTransform(
             Schema.TextureInfo textureInfo,
@@ -132,17 +135,30 @@ namespace GLTFast {
                 if(tt.scale!=null) {
                     scale.x = tt.scale[0];
                     scale.y = tt.scale[1];
+#if !GLTFAST_SHADER_GRAPH
                     material.SetTextureScale(propertyId,scale);
+#endif
                 }
                 if(tt.rotation!=0) {
                     cos = Mathf.Cos(tt.rotation);
                     sin = Mathf.Sin(tt.rotation);
+#if !GLTFAST_SHADER_GRAPH
                     material.SetVector(StandardShaderHelper.mainTexRotatePropId,new Vector4(cos,sin,-sin,cos));
                     material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+#endif
                     offset.x += scale.y * sin;
                 }
                 offset.y -= scale.y * cos;
+#if GLTFAST_SHADER_GRAPH
+                material.SetVector("baseColorTextureOffset",offset);
+                float2x2 rotScale = math.mul(new float2x2(cos, sin, -sin, cos), new float2x2(scale.x,0,0,scale.y));
+                material.SetVector(
+                    ShaderGraphMaterialGenerator.baseColorTextureRotationScalePropId,
+                    new Vector4(rotScale.c0.x,rotScale.c1.x,rotScale.c0.y,rotScale.c1.y)
+                    );
+#else
                 material.SetTextureOffset(propertyId,offset);
+#endif
             }
 
             if(flipY) {
