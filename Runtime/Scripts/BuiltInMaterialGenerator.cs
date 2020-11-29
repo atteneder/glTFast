@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#if ! GLTFAST_SHADER_GRAPH
+#if ! GLTFAST_SHADER_GRAPH || UNITY_EDITOR
 
 using System.Collections.Generic;
 using UnityEngine;

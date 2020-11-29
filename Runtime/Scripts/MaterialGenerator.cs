@@ -20,6 +20,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
+using UnityEngine.Rendering;
 
 namespace GLTFast {
 
@@ -31,10 +32,20 @@ namespace GLTFast {
 
         public static IMaterialGenerator GetDefaultMaterialGenerator() {
 
-            /// TODO: Dynamically detect if scripting defines don't match
-            /// actual render pipeline.
-            /// Show warning explaining how to setup project properly
+            // TODO: Dynamically detect if scripting defines don't match
+            // actual render pipeline.
+            // Show warning explaining how to setup project properly
 
+#if UNITY_EDITOR
+            string srpName = GraphicsSettings.renderPipelineAsset?.GetType().ToString();
+#if GLTFAST_SHADER_GRAPH
+            if (string.IsNullOrEmpty(srpName)) {
+                Debug.LogError("URP/HDRP is installed but no render pipeline asset is assigned! Falling back to built-in. This will NOT work in builds");
+                return new BuiltInMaterialGenerator();
+            }
+#endif
+#endif
+            
 #if GLTFAST_SHADER_GRAPH
             return new ShaderGraphMaterialGenerator();
 #else

@@ -29,6 +29,11 @@
             "name": "com.unity.render-pipelines.universal",
             "expression": "7.3.1",
             "define": "GLTFAST_SHADER_GRAPH"
+        },
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "7.3.1",
+            "define": "GLTFAST_SHADER_GRAPH"
         }
     ],
     "noEngineReferences": false
