@@ -55,7 +55,7 @@ namespace GLTFast {
         private static readonly int metallicRoughnessTexturePropId = Shader.PropertyToID("metallicRoughnessTexture");
         private static readonly int normalScalePropId = Shader.PropertyToID("normalScale");
         private static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
-        private static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexturePropId");
+        private static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexture");
         private static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
         private static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
         private static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
