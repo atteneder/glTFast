@@ -120,7 +120,7 @@ namespace GLTFast {
             return a != null && b != null && a.index>=0 && b.index>=0 && a.index != b.index;
         }
 
-        protected static void TrySetTextureTransform(
+        private static void TrySetTextureTransform(
             Schema.TextureInfo textureInfo,
             UnityEngine.Material material,
             int propertyId,

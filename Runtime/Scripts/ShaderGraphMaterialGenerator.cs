@@ -15,6 +15,7 @@
 
 #if GLTFAST_SHADER_GRAPH
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,8 +26,9 @@ namespace GLTFast {
     using AlphaMode = Schema.Material.AlphaMode;
 
     public class ShaderGraphMaterialGenerator : MaterialGenerator {
-
-        enum ShaderFeature {
+        
+        [Flags]
+        private enum ShaderFeature {
             None = 0x0,
             Metallic = 0x1,
             Opaque = 0x2,
@@ -34,27 +36,29 @@ namespace GLTFast {
             All = 0x7,
             Max = 0x8
         }
-        
-        const string SHADER_UNLIT = "Shader Graphs/glTF-unlit-opaque";
+
+        private const string SHADER_UNLIT = "Shader Graphs/glTF-unlit-opaque";
 
         // Keywords
-        const string KW_OCCLUSION = "OCCLUSION";
-        const string KW_EMISSION = "EMISSION";
+        private const string KW_OCCLUSION = "OCCLUSION";
+        private const string KW_EMISSION = "EMISSION";
 
-        static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");
         public static readonly int baseColorTextureRotationScalePropId = Shader.PropertyToID("baseColorTextureRotationScale");
-        static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
-        static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
-        static readonly int metallicFactorPropId = Shader.PropertyToID("metallicFactor");
-        static readonly int metallicRoughnessTexturePropId = Shader.PropertyToID("metallicRoughnessTexture");
-        static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexturePropId");
-        static readonly int normalScalePropId = Shader.PropertyToID("normalScale");
-        static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
-        static readonly int emissiveFactorPropId = Shader.PropertyToID("emissiveFactor");
-        static readonly int emissiveTexturePropId = Shader.PropertyToID("emissiveTexture");
-        static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
-        static readonly int glossinessFactorPropId = Shader.PropertyToID("glossinessFactor");
-        static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
+
+        private static readonly int alphaCutoffPropId = Shader.PropertyToID("alphaCutoff");
+        private static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
+        private static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");
+        private static readonly int emissiveFactorPropId = Shader.PropertyToID("emissiveFactor");
+        private static readonly int emissiveTexturePropId = Shader.PropertyToID("emissiveTexture");
+        private static readonly int glossinessFactorPropId = Shader.PropertyToID("glossinessFactor");
+        private static readonly int metallicFactorPropId = Shader.PropertyToID("metallicFactor");
+        private static readonly int metallicRoughnessTexturePropId = Shader.PropertyToID("metallicRoughnessTexture");
+        private static readonly int normalScalePropId = Shader.PropertyToID("normalScale");
+        private static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
+        private static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexturePropId");
+        private static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
+        private static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
+        private static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
 
         private Shader[] litShaders = new Shader[(int)ShaderFeature.Max];
         private Shader[] unlitShaders = new Shader[2]; // one- and double-sided
@@ -63,7 +67,7 @@ namespace GLTFast {
             return GetLitMaterial();
         }
 
-        UnityEngine.Material GetLitMaterial( bool metallic = true, bool opaque = true, bool doubleSided=false )
+        private UnityEngine.Material GetLitMaterial( bool metallic = true, bool opaque = true, bool doubleSided=false )
         {
             ShaderFeature sf = ShaderFeature.None;
             if (metallic) sf |= ShaderFeature.Metallic;
@@ -91,7 +95,7 @@ namespace GLTFast {
             return mat;
         }
 
-        UnityEngine.Material GetUnlitMaterial(bool doubleSided=false)
+        private UnityEngine.Material GetUnlitMaterial(bool doubleSided=false)
         {
             int index = doubleSided ? 0 : 1;
             if(unlitShaders[index]==null) {
@@ -145,7 +149,7 @@ namespace GLTFast {
                     TrySetTexture(specGloss.diffuseTexture,material,baseColorTexturePropId,ref textures,ref schemaImages, ref imageVariants);
 
                     if (TrySetTexture(specGloss.specularGlossinessTexture,material,specularGlossinessTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
-                        // material.EnableKeyword(StandardShaderHelper.KW_METALLICSPECGLOSSMAP);
+                        // material.EnableKeyword();
                     }
                 }
             }
@@ -168,7 +172,7 @@ namespace GLTFast {
                     material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
                     if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicRoughnessTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
-                        // material.EnableKeyword(StandardShaderHelper.KW_METALLICSPECGLOSSMAP);
+                        // material.EnableKeyword(KW_METALLIC_ROUGHNESS_MAP);
                     }
 
                     // TODO: When the occlusionTexture equals the metallicRoughnessTexture, we could sample just once instead of twice.
@@ -179,7 +183,7 @@ namespace GLTFast {
             }
 
             if(TrySetTexture(gltfMaterial.normalTexture,material,normalTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
-                material.EnableKeyword(StandardShaderHelper.KW_NORMALMAP);
+                // material.EnableKeyword(KW_NORMALMAP);
                 material.SetFloat(normalScalePropId,gltfMaterial.normalTexture.scale);
             }
             
@@ -192,11 +196,16 @@ namespace GLTFast {
             }
             
             if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
-                StandardShaderHelper.SetAlphaModeMask(material, gltfMaterial.alphaCutoff);
+                material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaCutoff);
+                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest; //2450
             } else if(gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
-                StandardShaderHelper.SetAlphaModeBlend(material);
+                // Disable Alpha testing
+                material.SetFloat(alphaCutoffPropId, 0);
+                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
             } else {
-                StandardShaderHelper.SetOpaqueMode(material);
+                // Disable Alpha testing
+                material.SetFloat(alphaCutoffPropId, 0);
+                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;  //2000;
             }
 
             if(gltfMaterial.emissive != Color.black) {
