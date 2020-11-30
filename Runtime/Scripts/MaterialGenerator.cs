@@ -30,6 +30,13 @@ namespace GLTFast {
 
     public abstract class MaterialGenerator : IMaterialGenerator {
 
+        public enum MaterialType {
+            Unknown,
+            MetallicRoughness,
+            SpecularGlossiness,
+            Unlit,
+        }
+        
         public static IMaterialGenerator GetDefaultMaterialGenerator() {
 
             // TODO: Dynamically detect if scripting defines don't match

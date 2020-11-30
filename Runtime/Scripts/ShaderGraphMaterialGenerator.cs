@@ -120,15 +120,17 @@ namespace GLTFast {
         ) {
             UnityEngine.Material material;
 
-            bool metallic = false;
+            MaterialType materialType = MaterialType.Unknown;
 
             if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial.doubleSided);
+                materialType = MaterialType.Unlit;
             } else {
-                metallic = gltfMaterial.extensions == null ||
+                bool isMetallicRoughness = gltfMaterial.extensions == null ||
                            gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness == null;
+                materialType = isMetallicRoughness ? MaterialType.MetallicRoughness : MaterialType.SpecularGlossiness;
                 material = GetLitMaterial(
-                    metallic,
+                    isMetallicRoughness,
                     gltfMaterial.alphaModeEnum==AlphaMode.OPAQUE, 
                     gltfMaterial.doubleSided
                     );
@@ -157,16 +159,19 @@ namespace GLTFast {
             if (gltfMaterial.pbrMetallicRoughness!=null) {
                 material.SetVector(baseColorFactorPropId, gltfMaterial.pbrMetallicRoughness.baseColor);
 
-                TrySetTexture(
-                    gltfMaterial.pbrMetallicRoughness.baseColorTexture,
-                    material,
-                    baseColorTexturePropId,
-                    ref textures,
-                    ref schemaImages,
-                    ref imageVariants
-                    );
+                if (materialType != MaterialType.SpecularGlossiness) {
+                    // baseColorTexture can be used by both MetallicRoughness AND Unlit materials
+                    TrySetTexture(
+                        gltfMaterial.pbrMetallicRoughness.baseColorTexture,
+                        material,
+                        baseColorTexturePropId,
+                        ref textures,
+                        ref schemaImages,
+                        ref imageVariants
+                        );
+                }
 
-                if (metallic)
+                if (materialType==MaterialType.MetallicRoughness)
                 {
                     material.SetFloat(metallicFactorPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                     material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
