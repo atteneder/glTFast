@@ -43,8 +43,6 @@ namespace GLTFast {
         private const string KW_OCCLUSION = "OCCLUSION";
         private const string KW_EMISSION = "EMISSION";
 
-        public static readonly int baseColorTextureRotationScalePropId = Shader.PropertyToID("baseColorTextureRotationScale");
-
         private static readonly int alphaCutoffPropId = Shader.PropertyToID("alphaCutoff");
         private static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
         private static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");

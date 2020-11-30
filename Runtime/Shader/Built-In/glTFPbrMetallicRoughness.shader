@@ -21,7 +21,7 @@ Shader "glTF/PbrMetallicRoughness"
     {
         _Color("Color", Color) = (1,1,1,1)
         _MainTex("Albedo", 2D) = "white" {}
-        _MainTexRotation ("Texture rotation", Vector) = (1,0,0,1)
+        _MainTexRotation ("Texture rotation", Vector) = (0,0,0,0)
 
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using GLTFast.Materials;
 using UnityEditor;
 using UnityEngine;
 using Unity.Mathematics;
@@ -19,7 +20,8 @@ namespace GLTFast.Editor
         protected UvTransform? TextureRotationSlider(
             Material material,
             UvTransform? uvTransform,
-            int propertyId,
+            int scaleTransformPropertyId,
+            int rotationPropertyId,
             bool freezeScale = false
             )
         {
@@ -30,7 +32,7 @@ namespace GLTFast.Editor
                 oldUvTransform = uvTransform.Value;
                 newUvTransform = uvTransform.Value;
             } else {
-                GetUvTransform(material,propertyId,out oldUvTransform);
+                GetUvTransform(material,scaleTransformPropertyId,rotationPropertyId,out oldUvTransform);
                 newUvTransform = new UvTransform();
             }
             
@@ -66,10 +68,17 @@ namespace GLTFast.Editor
             }
             
             if(update) {
-                var cos = Mathf.Cos(newUvTransform.rotation*Mathf.Deg2Rad);
-                var sin = Mathf.Sin(newUvTransform.rotation*Mathf.Deg2Rad);
+                var cos = math.cos(newUvTransform.rotation*Mathf.Deg2Rad);
+                var sin = math.sin(newUvTransform.rotation*Mathf.Deg2Rad);
+                var currentScaleTransform = material.GetVector(scaleTransformPropertyId);
                 float2x2 rotScale = math.mul(new float2x2(cos, sin, -sin, cos), new float2x2(newUvTransform.scale.x,0,0,newUvTransform.scale.y));
-                material.SetVector(propertyId,new Vector4(rotScale.c0.x,rotScale.c1.x,rotScale.c0.y,rotScale.c1.y));
+                material.SetVector(scaleTransformPropertyId,new Vector4(rotScale.c0.x,rotScale.c1.y,currentScaleTransform.z,currentScaleTransform.w));
+                material.SetVector(rotationPropertyId,new Vector4(rotScale.c0.y,rotScale.c1.x,0,0));
+                if (newUvTransform.rotation == 0) {
+                    material.DisableKeyword(KW_UV_ROTATION);
+                } else {
+                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+                }
                 return newUvTransform;
             }
 
@@ -81,10 +90,12 @@ namespace GLTFast.Editor
         /// </summary>
         /// <param name="material"></param>
         /// <returns>texture rotation in degrees</returns>
-        static void GetUvTransform(Material material, int propertyId, out UvTransform uvTransform) {
-            float4 r = material.GetVector(propertyId);
-            uvTransform.scale.x = Mathematics.normalize(r.xz, out var r1);
-            uvTransform.scale.y = Mathematics.normalize(r.yw, out var r2);
+        static void GetUvTransform(Material material, int scaleTransformPropertyId, int rotationPropertyId, out UvTransform uvTransform) {
+            float4 st = material.GetVector(scaleTransformPropertyId);
+            float2 r = (Vector2)material.GetVector(rotationPropertyId);
+
+            uvTransform.scale.x = Mathematics.normalize(new float2(st.x,r.x), out var r1);
+            uvTransform.scale.y = Mathematics.normalize(new float2(st.y,r.y), out var r2);
 
             var acos = Mathf.Acos(r1.x);
             if (r2.x < 0) acos = Mathf.PI*2-acos;

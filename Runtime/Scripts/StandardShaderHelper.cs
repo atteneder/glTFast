@@ -34,22 +34,23 @@ namespace GLTFast.Materials {
 
         private const string KW_ALPHAPREMULTIPLY_ON = "_ALPHAPREMULTIPLY_ON";
         private const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
+        
+        public static readonly int bumpMapPropId = Shader.PropertyToID("_BumpMap");
+        public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
+        public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
+        public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
+        public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
+        public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
+        public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
+        public static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
+        public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
+        public static readonly int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
+        public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
+        public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
 
-        public static int bumpMapPropId = Shader.PropertyToID("_BumpMap");
-        public static int bumpScalePropId = Shader.PropertyToID("_BumpScale");
-        public static int cutoffPropId = Shader.PropertyToID("_Cutoff");
-        public static int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
-        public static int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
-        public static int mainTexRotatePropId = Shader.PropertyToID("_MainTexRotation");
-        public static int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
-        public static int metallicPropId = Shader.PropertyToID("_Metallic");
-        public static int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
-        public static int specColorPropId = Shader.PropertyToID("_SpecColor");
-        public static int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
-
-        private static int dstBlendPropId = Shader.PropertyToID("_DstBlend");
-        private static int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
-        private static int zWritePropId = Shader.PropertyToID("_ZWrite");
+        private static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
+        private static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
+        private static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
 
 #if GLTFAST_BUILTIN_RP || UNITY_EDITOR
 

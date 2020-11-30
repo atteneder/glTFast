@@ -134,8 +134,11 @@ namespace GLTFast {
             bool flipY = false
             )
         {
-            Vector2 offset = Vector2.zero;
-            Vector2 scale = Vector2.one;
+            // Scale (x,y) and Transform (z,w)
+            float4 textureST = new float4(
+                1,1,// scale
+                0,0 // transform
+                );
 
             if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
                 var tt = textureInfo.extensions.KHR_texture_transform;
@@ -147,45 +150,35 @@ namespace GLTFast {
                 float sin = 0;
 
                 if(tt.offset!=null) {
-                    offset.x = tt.offset[0];
-                    offset.y = 1-tt.offset[1];
+                    textureST.z = tt.offset[0];
+                    textureST.w = 1-tt.offset[1];
                 }
                 if(tt.scale!=null) {
-                    scale.x = tt.scale[0];
-                    scale.y = tt.scale[1];
-#if !GLTFAST_SHADER_GRAPH
-                    material.SetTextureScale(propertyId,scale);
-#endif
+                    textureST.x = tt.scale[0];
+                    textureST.y = tt.scale[1];
                 }
                 if(tt.rotation!=0) {
-                    cos = Mathf.Cos(tt.rotation);
-                    sin = Mathf.Sin(tt.rotation);
-#if !GLTFAST_SHADER_GRAPH
-                    material.SetVector(StandardShaderHelper.mainTexRotatePropId,new Vector4(cos,sin,-sin,cos));
+                    cos = math.cos(tt.rotation);
+                    sin = math.sin(tt.rotation);
+
+                    var newRot = new Vector2(textureST.x * sin, textureST.y * -sin );
+                    material.SetVector(StandardShaderHelper.mainTexRotation, newRot);
+                    textureST.x *= cos;
+                    textureST.y *= cos;
+
                     material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
-#endif
-                    offset.x += scale.y * sin;
+                    textureST.z -= newRot.y; // move offset to move rotation point (horizontally) 
                 }
-                offset.y -= scale.y * cos;
-#if GLTFAST_SHADER_GRAPH
-                material.SetVector("baseColorTextureOffset",offset);
-                float2x2 rotScale = math.mul(new float2x2(cos, sin, -sin, cos), new float2x2(scale.x,0,0,scale.y));
-                material.SetVector(
-                    ShaderGraphMaterialGenerator.baseColorTextureRotationScalePropId,
-                    new Vector4(rotScale.c0.x,rotScale.c1.x,rotScale.c0.y,rotScale.c1.y)
-                    );
-#else
-                material.SetTextureOffset(propertyId,offset);
-#endif
+
+                textureST.w -= textureST.y * cos; // move offset to move flip axis point (vertically)
             }
 
             if(flipY) {
-                offset.y = 1-offset.y;
-                scale.y = -scale.y;
+                textureST.z = 1-textureST.z; // flip offset in Y
+                textureST.y = -textureST.y; // flip scale in Y
             }
-
-            material.SetTextureOffset(propertyId,offset);
-            material.SetTextureScale(propertyId,scale);
+            
+            material.SetVector(StandardShaderHelper.mainTexScaleTransform, textureST);
         }
     }
 }

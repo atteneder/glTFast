@@ -40,7 +40,7 @@ half        _Cutoff;
 
 sampler2D   _MainTex;
 float4      _MainTex_ST;
-float4      _MainTexRotation;
+float2      _MainTexRotation;
 
 sampler2D   _DetailAlbedoMap;
 float4      _DetailAlbedoMap_ST;
@@ -92,12 +92,9 @@ float4 TexCoords(VertexInput v)
     float4 texcoord;
 #ifdef _UV_ROTATION
 
-    // Scale/Tiling
-    texcoord.xy = v.uv0.xy * _MainTex_ST.xy;
-
-    // Rotation: 2x2 matrix multiplication
-    texcoord.z = texcoord.x * _MainTexRotation.x + texcoord.y * _MainTexRotation.z;
-    texcoord.w = texcoord.x * _MainTexRotation.y + texcoord.y * _MainTexRotation.w;
+    // Scale and Rotation: 2x2 matrix multiplication
+    texcoord.z = v.uv0.x * _MainTex_ST.x + v.uv0.y * _MainTexRotation.y;
+    texcoord.w = v.uv0.x * _MainTexRotation.x + v.uv0.y * _MainTex_ST.y;
 
     // Transform/Offset
     texcoord.xy = texcoord.zw + _MainTex_ST.zw;
