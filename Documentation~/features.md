@@ -13,7 +13,7 @@
 
 - [x] Scene
   - [x] Node hierarchy
-  - [ ] Camera ([issue](https://github.com/atteneder/glTFast/issues/12))
+  - [ ] Camera ([issue][Cameras])
 - [x] Buffers
   - [x] External URIs
   - [x] glTF binary main buffer
@@ -22,22 +22,10 @@
   - [x] PNG
   - [x] Jpeg
   - [x] <sup>2</sup>KTX with Basis Universal super compression (via [KTX/Basis Texture Unity Package](https://github.com/atteneder/KtxUnity))
-- [x] Materials
-  - [x] Unity built-in pipeline
-    - [x] PBR metallic-roughness
-    - [x] PBR specular-glossiness (via extension)
-    - [x] Unlit (via extension)
-    - [x] Normal texture
-    - [x] Occlusion texture
-    - [x] Emission texture
-    - [x] Metallic texture
-    - [x] Roughness texture
-    - [x] Alpha mode
-    - [x] Double sided
-    - [x] Vertex colors
-    - [x] Emission(factor)
-  - [ ] Universal Render Pipeline ([issue](https://github.com/atteneder/glTFast/issues/41))
-  - [ ] High Definition Render Pipeline ([issue](https://github.com/atteneder/glTFast/issues/42))
+- [x] Materials (see section [Materials](#materials) for details)
+  - [x] [Universal Render Pipeline (URP)][URP]
+  - [x] [High Definition Render Pipeline (HDRP)][HDRP]
+  - [x] Built-in Render Pipeline
 - Primitive Types
   - [x] TRIANGLES
   - [x] <sup>1</sup>POINTS
@@ -55,15 +43,15 @@
   - [x] Draco mesh compression (via [Draco 3D Data Compression Unity Package](https://github.com/atteneder/DracoUnity))
   - [x] Implicit (no) indices
   - [x] Per primitive material
-  - [ ] Multiple texture coordinates sets ([issue](https://github.com/atteneder/glTFast/issues/34))
+  - [ ] Multiple texture coordinates / UV sets ([issue][UVsets])
   - [x] Joints (up to 4 per vertex)
   - [x] Weights (up to 4 per vertex)
 - [x] Texture sampler
   - [x] Filtering (see ([limitations](#knownissues)))
   - [x] Wrap modes
-- [ ] Morph targets ([issue](https://github.com/atteneder/glTFast/issues/8))
+- [ ] Morph targets ([issue][MorphTargets])
   - [ ] Sparse accessors
-- [x] [Skins](https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins) (sponsored by [Embibe](https://www.embibe.com))
+- [x] [Skins][Skins] (sponsored by [Embibe](https://www.embibe.com))
 - [ ] Animation
 
 <sup>1</sup>: Untested due to lack of demo files.
@@ -80,11 +68,11 @@
 - [x] KHR_texture_transform
 - [x] KHR_mesh_quantization
 - [x] <sup>1</sup>KHR_texture_basisu
-- [ ] KHR_lights_punctual ([issue](https://github.com/atteneder/glTFast/issues/17))
-- [ ] KHR_materials_clearcoat ([issue](https://github.com/atteneder/glTFast/issues/68))
-- [ ] KHR_materials_sheen ([issue](https://github.com/atteneder/glTFast/issues/110))
-- [ ] KHR_materials_transmission ([issue](https://github.com/atteneder/glTFast/issues/111))
-- [ ] KHR_materials_variants ([issue](https://github.com/atteneder/glTFast/issues/112))
+- [ ] KHR_lights_punctual ([issue][PointLights])
+- [ ] KHR_materials_clearcoat ([issue][ClearCoat])
+- [ ] KHR_materials_sheen ([issue][Sheen])
+- [ ] KHR_materials_transmission ([issue][Transmission])
+- [ ] KHR_materials_variants ([issue][Variants])
 - [ ] KHR_xmp
 
 <sup>1</sup>: Beta
@@ -95,9 +83,9 @@ Will not be supported:
 
 ### Vendor extensions
 
-- [ ] EXT_mesh_gpu_instancing ([issue](https://github.com/atteneder/glTFast/issues/107))
-- [ ] EXT_meshopt_compression ([issue](https://github.com/atteneder/glTFast/issues/106))
-- [ ] EXT_lights_image_based ([issue](https://github.com/atteneder/glTFast/issues/108))
+- [ ] EXT_mesh_gpu_instancing ([issue][GPUinstancing])
+- [ ] EXT_meshopt_compression ([issue][MeshOpt])
+- [ ] EXT_lights_image_based ([issue][IBL])
 
 Not investigated yet:
 
@@ -116,13 +104,61 @@ Will not be supported:
 - FB_geometry_metadata (prefer KTX_xmp)
 - MSFT_texture_dds (prefer KTX/basisu)
 
+## Materials
+
+| Material Feature              | URP | HDRP | Built-In |
+|-------------------------------|-----|------|----------|
+| PBR<sup>1</sup> Metallic-Roughness        | ✅  | ✅   | ✅       |
+| PBR<sup>1</sup> Specular-Glossiness       | ✅  | ✅   | ✅       |
+| Unlit                         | ✅  | ✅   | ✅       |
+| Normal texture                | ✅  | ✅   | ✅       |
+| Occlusion texture             | ✅  | ✅   | ✅       |
+| Emission texture              | ✅  | ✅   | ✅       |
+| Alpha modes OPAQUE/MASK/BLEND | ✅  | ✅   | ✅       |
+| Double sided / Two sided      | ✅  | ✅   | ✅       |
+| Vertex colors                 | ✅  | ✅   | ✅       |
+| Multiple UV sets              | [ℹ][UVsets] | [ℹ][UVsets] | [❌][newIssue] |
+| Texture Transform             | ✓<sup>2</sup>  | ✓<sup>2</sup>   | ✓<sup>2</sup>       |
+| Clear coat                    | [ℹ][ClearCoat] | [ℹ][ClearCoat] | [❌][ClearCoat] |
+| Sheen                         | [ℹ][Sheen] | [ℹ][Sheen] | [❌][Sheen] |
+| Transmission                  | [ℹ][Transmission] | [ℹ][Transmission] | [❌][Transmission] |
+| Variants                      | [ℹ][Variants] | [ℹ][Variants] | [ℹ][Variants] |
+
+<sup>1</sup>: Physically-Based Rendering (PBR) material model
+
+<sup>2</sup>: The texture transform of baseColorTexture (or diffuseTexture for Specular-Glossiness) is re-used for all other textures. If you need different texture transforms for different texture types, [create an issue][newIssue].
+
+Legend:
+
+- ✅ Fully supported
+- ✓ Supported partially
+- ℹ Planned (click for issue)
+- ❌ No plan to support (click to create issue)
+
 ## <a name="knownissues">Known issues
 
 - <sup>1</sup>Vertex accessors (positions, normals, etc.) that are used across meshes are duplicated and result in higher memory usage
 - <sup>1</sup>When using more than one samplers on an image, that image is duplicated and results in higher memory usage
-- Texture sampler minification/magnification filter limitations (see [issue](issues/61)):
+- Texture sampler minification/magnification filter limitations (see [issue][SamplerFilter]):
   - <sup>1</sup>There's no differentiation between `minFilter` and `magFilter`. `minFilter` settings are prioritized.
   - <sup>1</sup>`minFilter` mode `NEAREST_MIPMAP_LINEAR` is not supported and will result in `NEAREST`.
 - When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
 
 <sup>1</sup>: A Unity API limitation.
+
+[URP]: https://unity.com/srp/universal-render-pipeline
+[HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
+[newIssue]: https://github.com/atteneder/glTFast/issues/new
+[Cameras]: https://github.com/atteneder/glTFast/issues/12
+[MorphTargets]: https://github.com/atteneder/glTFast/issues/8
+[PointLights]: https://github.com/atteneder/glTFast/issues/17
+[Skins]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins
+[UVsets]: https://github.com/atteneder/glTFast/issues/34
+[ClearCoat]: https://github.com/atteneder/glTFast/issues/68
+[Sheen]: https://github.com/atteneder/glTFast/issues/110
+[Transmission]: https://github.com/atteneder/glTFast/issues/111
+[Variants]: https://github.com/atteneder/glTFast/issues/112
+[GPUinstancing]: https://github.com/atteneder/glTFast/issues/107
+[MeshOpt]: https://github.com/atteneder/glTFast/issues/106
+[IBL]: https://github.com/atteneder/glTFast/issues/108
+[SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 

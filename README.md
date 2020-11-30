@@ -28,7 +28,6 @@ It is [planned](#goals) to become feature complete. Most notable missing feature
 
 - No animations
 - No morph targets
-- Unity's built-in render pipeline only (URP and HDRP are planned)
 
 See the [list of features/extensions](./Documentation~/features.md) for details and limitations.
 
