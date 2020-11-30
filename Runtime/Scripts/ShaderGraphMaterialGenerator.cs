@@ -46,7 +46,8 @@ namespace GLTFast {
         static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
         static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
         static readonly int metallicFactorPropId = Shader.PropertyToID("metallicFactor");
-        static readonly int ormTexturePropId = Shader.PropertyToID("ormTexture");
+        static readonly int metallicRoughnessTexturePropId = Shader.PropertyToID("metallicRoughnessTexture");
+        static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexturePropId");
         static readonly int normalScalePropId = Shader.PropertyToID("normalScale");
         static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
         static readonly int emissiveFactorPropId = Shader.PropertyToID("emissiveFactor");
@@ -166,15 +167,14 @@ namespace GLTFast {
                     material.SetFloat(metallicFactorPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                     material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
-                    if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,ormTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
+                    if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicRoughnessTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
                         // material.EnableKeyword(StandardShaderHelper.KW_METALLICSPECGLOSSMAP);
                     }
 
-                    if (DifferentIndex(gltfMaterial.occlusionTexture,gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture)) {
-                        // Could be avoided by providing two texture slots
-                        // But that would mean two samplers instead of one :/
-                        Debug.LogError("Inconsistent textures O!=RM");
-                    }
+                    // TODO: When the occlusionTexture equals the metallicRoughnessTexture, we could sample just once instead of twice.
+                    // if (!DifferentIndex(gltfMaterial.occlusionTexture,gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture)) {
+                    //    ...
+                    // }
                 }
             }
 
@@ -183,7 +183,7 @@ namespace GLTFast {
                 material.SetFloat(normalScalePropId,gltfMaterial.normalTexture.scale);
             }
             
-            if(TrySetTexture(gltfMaterial.occlusionTexture,material,ormTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
                 material.EnableKeyword(KW_OCCLUSION);
             }
 
