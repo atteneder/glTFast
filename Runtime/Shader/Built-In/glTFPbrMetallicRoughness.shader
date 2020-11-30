@@ -93,17 +93,11 @@ Shader "glTF/PbrMetallicRoughness"
 
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _EMISSION
-            #if UNITY_VERSION >= 201900
+
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _DETAIL_MULX2
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
@@ -141,17 +135,11 @@ Shader "glTF/PbrMetallicRoughness"
 
 
             #pragma shader_feature _NORMALMAP
-            #if UNITY_VERSION >= 201900
+
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             // #pragma shader_feature_local _DETAIL_MULX2
@@ -182,17 +170,10 @@ Shader "glTF/PbrMetallicRoughness"
 
             // -------------------------------------
 
-            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _PARALLAXMAP
             #pragma multi_compile_shadowcaster
@@ -224,17 +205,11 @@ Shader "glTF/PbrMetallicRoughness"
 
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _EMISSION
-            #if UNITY_VERSION >= 201900
+
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             // #pragma shader_feature_local _DETAIL_MULX2
@@ -270,15 +245,9 @@ Shader "glTF/PbrMetallicRoughness"
 
             #pragma shader_feature _EMISSION
 
-            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION
@@ -309,17 +278,11 @@ Shader "glTF/PbrMetallicRoughness"
 
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature _EMISSION
-            #if UNITY_VERSION >= 201900
+
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             // #pragma shader_feature_local _GLOSSYREFLECTIONS_OFF
@@ -354,17 +317,11 @@ Shader "glTF/PbrMetallicRoughness"
             #pragma target 2.0
 
             #pragma shader_feature _NORMALMAP
-            #if UNITY_VERSION >= 201900
+
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
             // #pragma shader_feature_local _DETAIL_MULX2
@@ -392,17 +349,10 @@ Shader "glTF/PbrMetallicRoughness"
             CGPROGRAM
             #pragma target 2.0
 
-            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma skip_variants SHADOWS_SOFT
             #pragma multi_compile_shadowcaster
@@ -430,15 +380,10 @@ Shader "glTF/PbrMetallicRoughness"
             #pragma fragment frag_meta
 
             #pragma shader_feature _EMISSION
-            #if UNITY_VERSION >= 201900
+
             #pragma shader_feature_local _METALLICGLOSSMAP
             #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _METALLICGLOSSMAP
-            #pragma shader_feature _OCCLUSION
-            #pragma shader_feature _UV_ROTATION
-            #endif
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _DETAIL_MULX2
             #pragma shader_feature EDITOR_VISUALIZATION

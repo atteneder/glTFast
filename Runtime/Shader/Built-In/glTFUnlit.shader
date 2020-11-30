@@ -41,11 +41,7 @@ SubShader {
             #pragma fragment frag
             #pragma target 2.0
             #pragma multi_compile_fog
-            #if UNITY_VERSION >= 201900
             #pragma shader_feature_local _UV_ROTATION
-            #else
-            #pragma shader_feature _UV_ROTATION
-            #endif
 
             #include "UnityCG.cginc"
 
