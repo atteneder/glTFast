@@ -141,11 +141,9 @@ Ideas worth pursuing, but not within this package:
 
 Contributions like ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *glTFast*.
 
-Also, you can show your appreciation and...
-
-[![Buy me a coffee](https://az743702.vo.msecnd.net/cdn/kofi1.png?v=0)](https://ko-fi.com/C0C3BW7G)
-
 ## Supporters
+
+[Unity Technologies](https://unity.com)
 
 Thanks to [Embibe](https://www.embibe.com) for sponsoring the development of skin support! ❤️
 
