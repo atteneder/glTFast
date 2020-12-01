@@ -117,7 +117,7 @@ Find plans for upcoming changes at the [milestones](https://github.com/atteneder
 - Universally usable…
   - …across all popular Unity versions
   - …across all platforms and devices
-  - …across different project setups (built-in or other render pipelines, GameObject or entity component system based, DOTS, Tiny, etc.)
+  - …across different project setups (all important render pipelines, GameObject or entity component system based, DOTS, Tiny, etc.)
 - Allow customization
 
 ### Extended goals
