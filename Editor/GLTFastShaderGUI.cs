@@ -62,6 +62,10 @@ namespace GLTFast.Editor
                         material.DisableKeyword(KW_UV_ROTATION);
                     }
                 }
+                
+                if (GUI.changed) {
+                    EditorUtility.SetDirty(material);
+                }
             }
 
             base.OnGUI(materialEditor, properties);

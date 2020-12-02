@@ -22,6 +22,10 @@ namespace GLTFast.Editor
                     mainTexScaleTransform,
                     mainTexRotation
                     );
+
+                if (GUI.changed) {
+                    EditorUtility.SetDirty(material);
+                }
             }
 
             // var filteredProperties = new List<MaterialProperty>();
