@@ -1,9 +1,11 @@
 {
     "name": "glTFastEditor",
+    "rootNamespace": "",
     "references": [
         "Unity.Mathematics",
         "glTFast",
-        "glTFastSchema"
+        "glTFastSchema",
+        "glTFSampleModels"
     ],
     "includePlatforms": [
         "Editor"
