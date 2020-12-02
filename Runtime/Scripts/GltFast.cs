@@ -996,19 +996,12 @@ namespace GLTFast {
                     m.m13 = node.matrix[13];
                     m.m23 = -node.matrix[14];
                     m.m33 = node.matrix[15];
+                    
+                    m.Decompose(out var t, out var r, out var s);
+                    position = t;
+                    rotation = r;
+                    scale = s;
 
-                    if(m.ValidTRS()) {
-                        m.Decompose(out var t, out var r, out var s);
-                        position = t;
-                        rotation = r;
-                        scale = s;
-
-                    } else {
-                        Debug.LogErrorFormat("Invalid matrix on node {0}",nodeIndex);
-                        Profiler.EndSample();
-                        loadingError = true;
-                        return;
-                    }
                 } else {
                     if(node.translation!=null) {
                         Assert.AreEqual( node.translation.Length, 3 );

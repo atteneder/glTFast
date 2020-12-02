@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed shader compiler warnings for built-in shaders
 - Removed compiler warnings in Unity 2020.1/2020.2
 - Changes to materials (in custom shader GUI) are saved now
+- Invalid matrix error. ValidTRS reports error in matrix data that does look correct (fixes #116)
 
 ## [2.2.0] - 2020-11-20
 ### Added
