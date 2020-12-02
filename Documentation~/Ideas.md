@@ -53,13 +53,6 @@ Not interesting:
 - FB_geometry_metadata (prefer KTX_xmp)
 - MSFT_texture_dds (prefer KTX/basisu)
 
-### Render Pipes
-
-Support scripted render pipes, namely
-
-- Universal Render Pipe
-- High Definition Render Pipe
-
 ### Import Customization
 
 - Provide physics collider instantiator example
