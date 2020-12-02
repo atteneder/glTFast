@@ -51,11 +51,11 @@ namespace GLTFast.Loading {
         public bool MoveNext() { return !asynOperation.isDone; }
         public void Reset() {}
 
-        public bool success {
-            get {
-                return request.isDone && !request.isNetworkError && !request.isHttpError;
-            }
-        }
+#if UNITY_2020_1_OR_NEWER
+        public bool success => request.isDone && request.result == UnityWebRequest.Result.Success;
+#else
+        public bool success => request.isDone && !request.isNetworkError && !request.isHttpError;
+#endif
 
         public string error { get { return request.error; } }
         public byte[] data { get { return request.downloadHandler.data; } }
