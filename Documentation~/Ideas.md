@@ -181,6 +181,19 @@ Make up-to-date comparisons/benchmarks with similar projects (UnityGLTF, GLTFUti
 
 ## Far Future Features
 
+### Asset Analyzing
+
+Give Feedback whenever assets are not optimal and ideally offer solutions (like re-encoding/optimizing).
+
+- Unneccessary Shader Variant usage. Examples:
+  - occlusion textures is not roughness texture
+  - different texture transforms on different maps
+  - two UV sets
+  - texture rotation
+- Embedd buffers
+- Shared vertex attribute buffers (see #52)
+- Jpeg/PNG textures (instead of KTX)
+
 ### Editor Import
 
 Create prefabs in editor at import time. Not investigated, but probably not that hard.
