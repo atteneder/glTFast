@@ -101,8 +101,12 @@ public class SampleModelsTest
             var webRequest = UnityWebRequest.Get(path);
             yield return webRequest.SendWebRequest();
             Assert.Null(webRequest.error, webRequest.error);
+#if UNITY_2020_1_OR_NEWER
+            Assert.AreEqual(webRequest.result,UnityWebRequest.Result.Success);
+#else
             Assert.IsFalse(webRequest.isNetworkError);
             Assert.IsFalse(webRequest.isHttpError);
+#endif
             var json = webRequest.downloadHandler.text;
 
             Assert.NotNull(json);
