@@ -1,5 +1,5 @@
 {
-    "name": "glTFSampleModels",
+    "name": "glTFastSample",
     "references": [
         "glTFast"
     ],
@@ -10,5 +10,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }

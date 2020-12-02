@@ -1,13 +1,14 @@
 {
-    "name": "glTFastTests",
+    "name": "glTFastEditorTests",
     "references": [
-        "glTFast",
-        "glTFastSample",
-        "Unity.Mathematics",
+        "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "UnityEngine.TestRunner"
+        "glTFast",
+        "Unity.Mathematics"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,

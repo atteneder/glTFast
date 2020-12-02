@@ -17,28 +17,24 @@
 #define LOCAL_LOADING
 #endif
 
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine.Events;
-using UnityEngine.Networking;
 using UnityEngine;
-using GLTFast;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "glTF-SampleSet", menuName = "ScriptableObjects/GltfSampleSet", order = 1)]
 public class GltfSampleSet : ScriptableObject {
-    public string fileListPath = "test-gltf-file-list.txt";
+
     public string baseLocalPath = "";
     public string streamingAssetsPath = "glTF-Sample-Models/2.0";
     public string baseUrlWeb = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/";
     public string baseUrlLocal = "http://localhost:8080/glTF-Sample-Models/2.0/";
 
-    [System.NonSerialized]
-    public List<Tuple<string,string>> items;
+    [FormerlySerializedAs("items2")] [SerializeField]
+    private GltfSampleSetItemEntry[] items;
 
-    [System.NonSerialized]
-    public List<Tuple<string,string>> itemsLocal;
-    
+    public int itemCount => items.Length;
+
     public string localPath {
         get {
             string path;
@@ -51,60 +47,54 @@ public class GltfSampleSet : ScriptableObject {
         }
     }
 
-    public IEnumerator Load() {
-        if(fileListPath==null) yield break;
-        var path = Path.Combine(Application.streamingAssetsPath, fileListPath);
-        yield return GltfSampleSet.LoadStreamingAssetFileBlocking(path, AddPaths );
-    }
-
-    void AddPaths(string[] paths) {
-        string prefix = string.IsNullOrEmpty(baseUrlWeb) ? GltfSampleModels.baseUrl : baseUrlWeb;
-#if UNITY_EDITOR
-        if(!string.IsNullOrEmpty(baseUrlLocal)) {
-            prefix = baseUrlLocal;
-        }
-#endif
-
-        var tmpLocalPath = localPath;
-        items = new List<Tuple<string, string>>();
-        itemsLocal = new List<Tuple<string, string>>();
-        foreach(var path in paths) {
-            var name = GltfSampleModels.GetNameFromPath(path);
+    public IEnumerable<GltfSampleSetItem> GetItems( bool local = true ) {
+        var prefix = local ? localPath : Prefix();
+        foreach (var entry in items)
+        {
+            if (!entry.active) continue;
             if(!string.IsNullOrEmpty(prefix)) {
                 var p = string.Format(
                     "{0}/{1}"
                     ,prefix
-                    ,path
+                    ,entry.item.path
                 );
-                items.Add(new Tuple<string, string>(name,p));
+                yield return new GltfSampleSetItem(entry.item.name, p);
             }
-            var localPath = string.Format(
-                "{0}/{1}"
-                ,tmpLocalPath
-                ,path
-            );
-            itemsLocal.Add(new Tuple<string, string>(name,localPath));
         }
     }
 
-    public static IEnumerator LoadStreamingAssetFileBlocking( string path, UnityAction<string[]> callback ) {
-        var uri = path;
-#if LOCAL_LOADING
-        uri = string.Format( "file://{0}", uri);
-#endif
-
-        Debug.LogFormat("Trying to load file list from {0}",uri);
-        var webRequest = UnityWebRequest.Get(uri);
-        yield return webRequest.SendWebRequest();
-        var lines = webRequest.downloadHandler.text.Split('\n');
-        var filteredLines = new List<string>();
-        foreach (var line in lines)
+    private string Prefix()
+    {
+        string prefix = string.IsNullOrEmpty(baseUrlWeb) ? "<baseUrlWeb not set!>" : baseUrlWeb;
+#if UNITY_EDITOR
+        if (!string.IsNullOrEmpty(baseUrlLocal))
         {
-            var trimmedLine = line.TrimEnd('\r');
-            if(!trimmedLine.StartsWith("#") && !string.IsNullOrEmpty(trimmedLine)) {
-                filteredLines.Add(trimmedLine);
-            }
+            prefix = baseUrlLocal;
         }
-        callback( filteredLines.ToArray() );
+#endif
+        return prefix;
+    }
+
+    public void LoadItemsFromPath(string searchPattern) {
+        var basePath = string.IsNullOrEmpty(streamingAssetsPath)
+            ? baseLocalPath
+            : Path.Combine(Application.streamingAssetsPath, streamingAssetsPath);
+        
+        var dir = new DirectoryInfo(basePath);
+        var dirLength = dir.FullName.Length+1;
+        
+        var newItems = new List<GltfSampleSetItemEntry>();
+        
+        foreach (var file in dir.GetFiles(searchPattern, SearchOption.AllDirectories))
+        {
+            var ext = file.Extension;
+            if(ext!=".gltf" && ext!=".glb") continue;
+            var i = new GltfSampleSetItemEntry();
+            i.active = true;
+            i.item.name = file.Name;
+            i.item.path = file.FullName.Substring(dirLength);
+            newItems.Add(i);
+        }
+        items = newItems.ToArray();
     }
 }

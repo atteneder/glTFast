@@ -13,121 +13,61 @@
 // limitations under the License.
 //
 
-using UnityEngine;
-using UnityEngine.TestTools;
-using UnityEngine.Networking;
-using NUnit.Framework;
 using System.Collections;
 using System.IO;
-using GLTFast;
+using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.TestTools;
 
-public class SampleModelsTest
-{
-    const string prefix = "glTF-Sample-Models/2.0/";
+namespace GLTFast.Tests {
 
-    [UnityTest]
-    public IEnumerator SampleModelsTestCheckFiles()
-    {
-        yield return GltfSampleModels.LoadGlbFileUrls();
-        Assert.AreEqual(GltfSampleModels.glbFileUrls.Length,44);
-        CheckFileExist(GltfSampleModels.glbFileUrls);
+    public class SampleModelsTest {
 
-        yield return GltfSampleModels.LoadGltfFileUrls();
-        Assert.AreEqual(GltfSampleModels.gltfFileUrls.Length,128);
-        CheckFileExist(GltfSampleModels.gltfFileUrls);
-    }
-
-    void CheckFileExist(string[] files)
-    {
-#if !(UNITY_ANDROID && !UNITY_EDITOR)
-        foreach (var path in files)
+        [Test]
+        public void CheckFiles()
         {
+            var sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>("Assets/SampleSets/glTF-Sample-Models.asset");
+            Assert.AreEqual(174, sampleSet.itemCount);
+
+            foreach (var item in sampleSet.GetItems()) {
+                CheckFileExists(item.path);
+            }
+        }
+
+        void CheckFileExists(string path) {
+#if !(UNITY_ANDROID && !UNITY_EDITOR)
             Assert.IsTrue(
                 File.Exists(path)
                 , "file {0} not found"
                 , path
             );
-        }
 #else
 		// See https://docs.unity3d.com/Manual/StreamingAssets.html
 		Debug.Log("File access doesn't work on Android");
 #endif
-    }
+        }
 
-    [UnityTest]
-    [Timeout(1000000)]
-    public IEnumerator SampleModelsTestLoadAllGlb()
-    {
-        yield return GltfSampleModels.LoadGlbFileUrls();
-
-        var deferAgent = new UninterruptedDeferAgent();
-
-        foreach (var file in GltfSampleModels.glbFileUrls)
+        [UnityTest]
+        [UseGltfSampleSetTestCase("Assets/SampleSets/glTF-Sample-Models.asset")]
+        public IEnumerator Load(GltfSampleSetItem testCase)
         {
+            Debug.LogFormat("Testing {0}", testCase);
+
+            var deferAgent = new UninterruptedDeferAgent();
+        
             var path = string.Format(
 #if UNITY_ANDROID && !UNITY_EDITOR
-				"{0}"
+			"{0}"
 #else
                 "file://{0}"
 #endif
-                ,file
+                ,testCase.path
             );
 
             Debug.LogFormat("Testing {0}", path);
 
             var go = new GameObject();
-            var gltfAsset = go.AddComponent<GltfAsset>();
-
-            bool done = false;
-
-            gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
-            gltfAsset.loadOnStartup = false;
-            gltfAsset.Load(path,null,deferAgent);
-
-            while (!done)
-            {
-                yield return null;
-            }
-            Object.Destroy(go);
-        }
-    }
-
-    [UnityTest]
-    [Timeout(1000000)]
-    public IEnumerator SampleModelsTestLoadAllGltf()
-    {
-        yield return GltfSampleModels.LoadGltfFileUrls();
-
-        var deferAgent = new UninterruptedDeferAgent();
-
-        foreach (var file in GltfSampleModels.gltfFileUrls)
-        {
-            var path = string.Format(
-#if UNITY_ANDROID && !UNITY_EDITOR
-                "{0}"
-#else
-                "file://{0}"
-#endif
-                ,file
-            );
-
-            Debug.LogFormat("Testing {0}", path);
-
-            var webRequest = UnityWebRequest.Get(path);
-            yield return webRequest.SendWebRequest();
-            Assert.Null(webRequest.error, webRequest.error);
-#if UNITY_2020_1_OR_NEWER
-            Assert.AreEqual(webRequest.result,UnityWebRequest.Result.Success);
-#else
-            Assert.IsFalse(webRequest.isNetworkError);
-            Assert.IsFalse(webRequest.isHttpError);
-#endif
-            var json = webRequest.downloadHandler.text;
-
-            Assert.NotNull(json);
-            Assert.Greater(json.Length, 0);
-
-            var go = new GameObject(GltfSampleModels.GetNameFromPath(path));
             var gltfAsset = go.AddComponent<GltfAsset>();
 
             bool done = false;
