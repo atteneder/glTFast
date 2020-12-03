@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Material inspector: texture rotation value (in degrees) for both built-in and Shader Graph materials
 ### Changed
 - Texture transform UV rotation: Using standard `_ST` property (Scale-Translation) by default. When rotation is enabled, scale values act as m00/m11 values of 2-by-2 rotation/scale matrix and are supplemented by two rotation values (for m01/m10).
+- Textures that fail to load don't cause the whole loading process to fail (thanks @Bersaelor for #117)
 ### Fixed
 - Removed shader compiler warnings for built-in shaders
 - Removed compiler warnings in Unity 2020.1/2020.2
