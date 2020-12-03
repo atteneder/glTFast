@@ -575,7 +575,7 @@ namespace GLTFast {
                             images[dl.Key] = txt;
                         }
                     } else {
-                        Debug.LogWarning(www.error);
+                        Debug.LogError(www.error);
                     }
                 }
             }
