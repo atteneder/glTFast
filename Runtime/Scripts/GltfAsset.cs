@@ -13,17 +13,30 @@
 // limitations under the License.
 //
 
+using System.IO;
+using UnityEngine;
+
 namespace GLTFast
 {
     public class GltfAsset : GltfAssetBase
     {
+        [Tooltip("URL to load the glTF from.")]
         public string url;
+        
+        [Tooltip("Automatically load at start.")]
         public bool loadOnStartup = true;
+        
+        [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
+        public bool streamingAsset = false;
 
         protected virtual void Start() {
             if(loadOnStartup && !string.IsNullOrEmpty(url)) {
                 // Automatic load on startup
-                Load(url);
+                Load(
+                    streamingAsset
+                        ? Path.Combine(Application.streamingAssetsPath,url)
+                        : url
+                    );
             }
         }
 
