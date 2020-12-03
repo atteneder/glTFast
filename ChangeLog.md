@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GltfAsset` now provides a `streamingAssets` option (default is off), for loading relative paths from the [StreamingAssets](https://docs.unity3d.com/Manual/StreamingAssets.html) folder
 - `GameObjectBoundsInstantiator`, a derived version of `GameObjectInstantiator` that calculates the glTF's axis-aligned bounding box 
 - `GltfBoundsAsset`, a derived version of `GltfAsset` that adds a BoxCollider to instantiations 
+- Render Tests: Minimize chance of visual regression by checking import results against reference images
 ### Changed
 - Texture transform UV rotation: Using standard `_ST` property (Scale-Translation) by default. When rotation is enabled, scale values act as m00/m11 values of 2-by-2 rotation/scale matrix and are supplemented by two rotation values (for m01/m10).
 - Textures that fail to load don't cause the whole loading process to fail (thanks @Bersaelor for #117)

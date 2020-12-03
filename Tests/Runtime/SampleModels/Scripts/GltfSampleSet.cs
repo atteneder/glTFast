@@ -19,6 +19,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -35,7 +36,7 @@ public class GltfSampleSet : ScriptableObject {
 
     public int itemCount => items.Length;
 
-    public string localPath {
+    public string localFilePath {
         get {
             string path;
             if(string.IsNullOrEmpty(streamingAssetsPath)) {
@@ -47,11 +48,37 @@ public class GltfSampleSet : ScriptableObject {
         }
     }
 
-    public IEnumerable<GltfSampleSetItem> GetItems( bool local = true ) {
-        var prefix = local ? localPath : Prefix();
-        foreach (var entry in items)
+    private string remoteUri
+    {
+        get
         {
-            if (!entry.active) continue;
+            string uriPrefix = string.IsNullOrEmpty(baseUrlWeb) ? "<baseUrlWeb not set!>" : baseUrlWeb;
+#if UNITY_EDITOR
+            if (!string.IsNullOrEmpty(baseUrlLocal))
+            {
+                uriPrefix = baseUrlLocal;
+            }
+#endif
+            return uriPrefix;
+        }
+    }
+    
+    public IEnumerable<GltfSampleSetItem> GetItems()
+    {
+        foreach (var x in items)
+        {
+            if (!x.active) continue;
+            yield return new GltfSampleSetItem(
+                string.Format("{0}-{1:X}",x.item.name,x.item.path.GetHashCode()),
+                x.item.path
+                );
+        }
+    }
+
+    public IEnumerable<GltfSampleSetItem> GetItemsPrefixed( bool local = true ) {
+        var prefix = local ? localFilePath : remoteUri;
+        foreach (var entry in items.Where(x => x.active))
+        {
             if(!string.IsNullOrEmpty(prefix)) {
                 var p = string.Format(
                     "{0}/{1}"
@@ -62,17 +89,20 @@ public class GltfSampleSet : ScriptableObject {
             }
         }
     }
-
-    private string Prefix()
-    {
-        string prefix = string.IsNullOrEmpty(baseUrlWeb) ? "<baseUrlWeb not set!>" : baseUrlWeb;
-#if UNITY_EDITOR
-        if (!string.IsNullOrEmpty(baseUrlLocal))
+    
+    public IEnumerable<GltfSampleSetItem> GetTestItems( bool local = true ) {
+        var prefix = local ? localFilePath : remoteUri;
+        foreach (var entry in items.Where(x => x.active))
         {
-            prefix = baseUrlLocal;
+            if(!string.IsNullOrEmpty(prefix)) {
+                var p = string.Format(
+                    "{0}/{1}"
+                    ,prefix
+                    ,entry.item.path
+                );
+                yield return new GltfSampleSetItem(entry.item.name, p);
+            }
         }
-#endif
-        return prefix;
     }
 
     public void LoadItemsFromPath(string searchPattern) {

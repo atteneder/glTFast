@@ -13,22 +13,23 @@
 // limitations under the License.
 //
 
-using System;
-using System.IO;
+#if GLTFAST_RENDER_TEST
 
-[Serializable]
-public struct GltfSampleSetItem {
-    public string name;
-    public string path;
+using UnityEngine.TestTools.Graphics;
 
-    public GltfSampleSetItem(string name,string path) {
-        this.name = name;
-        this.path = path;
-    }
+public class UniversalGraphicsTestSettings : GraphicsTestSettings
+{
+    public int WaitFrames = 0;
+    public bool XRCompatible = true;
 
-    public string[] directoryParts {
-        get {
-            return Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar);
-        }
+    public UniversalGraphicsTestSettings()
+    {
+        ImageComparisonSettings.TargetWidth = 512;
+        ImageComparisonSettings.TargetHeight = 512;
+        ImageComparisonSettings.AverageCorrectnessThreshold = 0.005f;
+        ImageComparisonSettings.PerPixelCorrectnessThreshold = 0.001f;
+        ImageComparisonSettings.UseBackBuffer = false;
     }
 }
+
+#endif

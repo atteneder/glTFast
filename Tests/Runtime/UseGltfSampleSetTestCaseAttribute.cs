@@ -37,16 +37,16 @@ public class UseGltfSampleSetTestCaseAttribute : UnityEngine.TestTools.UnityTest
         var nameCounts = new Dictionary<string, int>();
         
         try {
-            foreach (var gltfSample in m_sampleSet.GetItems()) {
-                var data = new TestCaseData( new object[]{ gltfSample } );
+            foreach (var testCase in m_sampleSet.GetTestItems()) {
+                var data = new TestCaseData( new object[]{ testCase } );
 
                 string name;
-                if (nameCounts.TryGetValue(gltfSample.name, out int count)) {
-                    name = string.Format("{0}-{1}", gltfSample.name, count);
-                    nameCounts[gltfSample.name] = count + 1;
+                if (nameCounts.TryGetValue(testCase.name, out int count)) {
+                    name = string.Format("{0}-{1}", testCase.name, count);
+                    nameCounts[testCase.name] = count + 1;
                 } else {
-                    name = gltfSample.name;
-                    nameCounts[gltfSample.name] = 1;
+                    name = testCase.name;
+                    nameCounts[testCase.name] = 1;
                 }
 
                 data.SetName(name);

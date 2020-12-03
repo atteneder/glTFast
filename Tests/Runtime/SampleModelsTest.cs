@@ -22,15 +22,17 @@ using UnityEngine.TestTools;
 
 namespace GLTFast.Tests {
 
-    public class SampleModelsTest {
+    public class SampleModelsTest
+    {
+        private const string glTFSampleSetAssetPath = "Assets/SampleSets/glTF-Sample-Models.asset";
 
         [Test]
         public void CheckFiles()
         {
-            var sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>("Assets/SampleSets/glTF-Sample-Models.asset");
+            var sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>(glTFSampleSetAssetPath);
             Assert.AreEqual(174, sampleSet.itemCount);
 
-            foreach (var item in sampleSet.GetItems()) {
+            foreach (var item in sampleSet.GetItemsPrefixed()) {
                 CheckFileExists(item.path);
             }
         }
@@ -43,31 +45,35 @@ namespace GLTFast.Tests {
                 , path
             );
 #else
-		// See https://docs.unity3d.com/Manual/StreamingAssets.html
-		Debug.Log("File access doesn't work on Android");
+		    // See https://docs.unity3d.com/Manual/StreamingAssets.html
+		    Debug.Log("File access doesn't work on Android");
 #endif
         }
 
         [UnityTest]
-        [UseGltfSampleSetTestCase("Assets/SampleSets/glTF-Sample-Models.asset")]
+        [UseGltfSampleSetTestCase(glTFSampleSetAssetPath)]
         public IEnumerator Load(GltfSampleSetItem testCase)
         {
-            Debug.LogFormat("Testing {0}", testCase);
+            var go = new GameObject();
+            yield return LoadGltfSampleSetItem(testCase, go);
+            Object.Destroy(go);
+        }
 
+        private IEnumerator LoadGltfSampleSetItem(GltfSampleSetItem testCase, GameObject go)
+        {
             var deferAgent = new UninterruptedDeferAgent();
         
             var path = string.Format(
 #if UNITY_ANDROID && !UNITY_EDITOR
-			"{0}"
+			    "{0}"
 #else
                 "file://{0}"
 #endif
                 ,testCase.path
             );
 
-            Debug.LogFormat("Testing {0}", path);
-
-            var go = new GameObject();
+            // Debug.LogFormat("Testing {0}", path);
+            
             var gltfAsset = go.AddComponent<GltfAsset>();
 
             bool done = false;
@@ -80,7 +86,6 @@ namespace GLTFast.Tests {
             {
                 yield return null;
             }
-            Object.Destroy(go);
         }
     }
 }

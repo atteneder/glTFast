@@ -1,10 +1,13 @@
 {
     "name": "glTFastEditor",
+    "rootNamespace": "",
     "references": [
         "Unity.Mathematics",
         "glTFast",
         "glTFastSchema",
-        "glTFastSample"
+        "glTFastSample",
+        "glTFastTests",
+        "UnityEngine.TestTools.Graphics"
     ],
     "includePlatforms": [
         "Editor"
@@ -25,6 +28,11 @@
             "name": "com.unity.render-pipelines.high-definition",
             "expression": "7.3.1",
             "define": "GLTFAST_SHADER_GRAPH"
+        },
+        {
+            "name": "com.unity.testframework.graphics",
+            "expression": "7.7.0",
+            "define": "GLTFAST_RENDER_TEST"
         }
     ],
     "noEngineReferences": false
