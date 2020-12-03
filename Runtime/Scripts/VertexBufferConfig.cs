@@ -100,7 +100,7 @@ namespace GLTFast
                 bones = new VertexBufferBones();
             }
 
-            NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, Allocator.Temp);
+            NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, defaultAllocator);
             int handleIndex = 0;
             
             fixed( void* input = &(posInput.buffer[posInput.startOffset])) {

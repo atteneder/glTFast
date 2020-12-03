@@ -1447,7 +1447,7 @@ namespace GLTFast {
                 }
             }
             
-            NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(tmpList.ToArray(), Allocator.Temp);
+            NativeArray<JobHandle> jobHandles = new NativeArray<JobHandle>(tmpList.ToArray(), Allocator.Persistent);
             accessorJobsHandle = JobHandle.CombineDependencies(jobHandles);
             jobHandles.Dispose();
             JobHandle.ScheduleBatchedJobs();
@@ -1740,7 +1740,7 @@ namespace GLTFast {
             var buffer = GetBuffer(bufferIndex);
 
             Profiler.BeginSample("Alloc");
-            matrices = new NativeArray<Matrix4x4>(accessor.count,Allocator.TempJob);
+            matrices = new NativeArray<Matrix4x4>(accessor.count,Allocator.Persistent);
             Profiler.EndSample();
             
             var chunk = binChunks[bufferIndex];
@@ -1793,7 +1793,7 @@ namespace GLTFast {
             var chunk = binChunks[bufferView.buffer];
             int count = accessor.count;
             Profiler.BeginSample("Alloc");
-            result = new NativeArray<Vector3>(count,Allocator.TempJob);
+            result = new NativeArray<Vector3>(count,Allocator.Persistent);
             Profiler.EndSample();
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
             if (gltf.IsAccessorInterleaved(accessorIndex)) {
