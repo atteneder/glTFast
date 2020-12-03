@@ -122,6 +122,7 @@ namespace GLTFast.Schema
         }
 
         public void Apply(Texture2D image) {
+            if (image == null) return;
             image.wrapModeU = wrapU;
             image.wrapModeV = wrapV;
             image.filterMode = filterMode;
