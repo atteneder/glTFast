@@ -308,8 +308,8 @@ namespace GLTFast {
             var root = JsonUtility.FromJson<Root>(json);
             Profiler.EndSample();
 
-            /// Step two:
-            /// detect, if a secondary null-check is necessary.
+            // Step two:
+            // detect, if a secondary null-check is necessary.
             Profiler.BeginSample("JSON extension check");
             bool check = false;
             if(root.materials!=null) {
@@ -325,11 +325,11 @@ namespace GLTFast {
             }
             Profiler.EndSample();
 
-            /// Step three:
-            /// If we have to make an explicit check, parse the JSON again with a
-            /// different, minimal Root class, where class members are serialized to
-            /// the type string. In case the string is null, there's no JSON node.
-            /// Otherwise the string would be empty ("").
+            // Step three:
+            // If we have to make an explicit check, parse the JSON again with a
+            // different, minimal Root class, where class members are serialized to
+            // the type string. In case the string is null, there's no JSON node.
+            // Otherwise the string would be empty ("").
             if(check) {
                 Profiler.BeginSample("JSON secondary");
                 var fakeRoot = JsonUtility.FromJson<FakeSchema.Root>(json);
