@@ -66,7 +66,7 @@ To add support for Draco mesh compression, repeat the last step and also add the
 
 </details>
 
-*glTFast* 2.0 requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
+*glTFast* 2.x requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
 
 ## Usage
 
