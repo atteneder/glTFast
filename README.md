@@ -1,10 +1,14 @@
 # glTFast 🚀
 
+<p align="center">
+<img src="./Documentation~/img/gltf-unity-logos.png" />
+</p>
+
 [![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
 [![GitHub issues](https://img.shields.io/github/issues/atteneder/glTFast)](https://github.com/atteneder/glTFast/issues)
 [![GitHub license](https://img.shields.io/github/license/atteneder/glTFast)](https://github.com/atteneder/glTFast/blob/main/LICENSE.md)
 
-*glTFast* enables loading [glTF 3D](https://www.khronos.org/gltf) asset files in [Unity](https://unity.com).
+*glTFast* enables loading [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
 
 It focuses on speed, memory efficiency and a small build footprint.
 
@@ -143,9 +147,9 @@ Contributions like ideas, comments, critique, bug reports, pull requests are hig
 
 ## Supporters
 
-[Unity Technologies](https://unity.com)
+[Unity Technologies][unity]
 
-Thanks to [Embibe](https://www.embibe.com) for sponsoring the development of skin support! ❤️
+Thanks to [Embibe][embibe] for sponsoring the development of skin support! ❤️
 
 ## License
 
@@ -163,5 +167,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+## Trademarks
+
+*Unity* is a registered trademark of [Unity Technologies][unity].
+
+*Khronos®* is a registered trademark and *glTF™* is a trademark of [The Khronos Group Inc][khronos].
+
+[unity]: https://unity.com
+[gltf]: https://www.khronos.org/gltf
+[khronos]: https://www.khronos.org
+[embibe]: https://www.embibe.com
 [gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
 [upm_install]: ./Documentation~/img/upm_install.png  "Unity Package Manager add menu"
