@@ -65,7 +65,7 @@ public class GltfSampleSetEditor : Editor
             var graphicsTestSettings = settingsGameObject.AddComponent<UniversalGraphicsTestSettings>();
 
             var go = new GameObject(item.name);
-            var gltfAsset = go.AddComponent<GltfAsset>();
+            var gltfAsset = go.AddComponent<GltfBoundsAsset>();
             
             if(string.IsNullOrEmpty(sampleSet.streamingAssetsPath)) {
                 gltfAsset.url = Path.Combine(sampleSet.baseLocalPath, item.path);
@@ -73,8 +73,8 @@ public class GltfSampleSetEditor : Editor
                 gltfAsset.url = Path.Combine(sampleSet.streamingAssetsPath, item.path);
                 gltfAsset.streamingAsset = true;
             }
-
             gltfAsset.loadOnStartup = true;
+            gltfAsset.createBoxCollider = false;
             
             var sceneDirectory = CertifyDirectory(item.directoryParts, string.Format("Assets/Scenes/{0}", sampleSet.name));
             var scenePath = Path.Combine(sceneDirectory, item.name+".unity");

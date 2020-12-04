@@ -60,15 +60,18 @@ namespace GLTFast.Tests
             var settings = Object.FindObjectOfType<UniversalGraphicsTestSettings>();
             Assert.IsNotNull(settings, "Invalid test scene, couldn't find UniversalGraphicsTestSettings");
 
-            var gltf = Object.FindObjectOfType<GltfAsset>();
+            var gltf = Object.FindObjectOfType<GltfBoundsAsset>();
             Assert.IsNotNull(gltf, "Invalid test scene, couldn't find GltfAsset");
 
             while (!gltf.isDone) {
                 yield return null;
             }
-        
-            // TODO: position camera based on AABB
-        
+
+            
+            // position camera based on AABB
+            var cam = cameras.First();
+            FrameBoundsCamera.FrameBounds(cam,gltf.transform,gltf.bounds);
+
 // #if ENABLE_VR
 //         if (XRGraphicsAutomatedTests.enabled)
 //         {
