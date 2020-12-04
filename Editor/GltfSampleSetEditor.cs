@@ -41,6 +41,14 @@ public class GltfSampleSetEditor : Editor
         if (GUILayout.Button("Find in path")) {
             _sampleSet.LoadItemsFromPath(searchPattern);
         }
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Activate All")) {
+            _sampleSet.SetAllActive();
+        }
+        if (GUILayout.Button("Deactivate All")) {
+            _sampleSet.SetAllActive(false);
+        }
+        GUILayout.EndHorizontal();
         if (GUILayout.Button("Create render test scenes")) {
             CreateRenderTestScenes(_sampleSet);
         }

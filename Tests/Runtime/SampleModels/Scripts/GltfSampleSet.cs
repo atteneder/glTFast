@@ -31,7 +31,7 @@ public class GltfSampleSet : ScriptableObject {
     public string baseUrlWeb = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/";
     public string baseUrlLocal = "http://localhost:8080/glTF-Sample-Models/2.0/";
 
-    [FormerlySerializedAs("items2")] [SerializeField]
+    [SerializeField]
     private GltfSampleSetItemEntry[] items;
 
     public int itemCount => items.Length;
@@ -126,5 +126,11 @@ public class GltfSampleSet : ScriptableObject {
             newItems.Add(i);
         }
         items = newItems.ToArray();
+    }
+
+    public void SetAllActive(bool active = true) {
+        for (int i = 0; i < items.Length; i++) {
+            items[i].active = active;
+        }
     }
 }
