@@ -19,15 +19,15 @@ using UnityEngine;
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
 
-        Transform parent;
+        protected Transform parent;
 
-        GameObject[] nodes;
+        protected GameObject[] nodes;
 
         public GameObjectInstantiator(Transform parent) {
             this.parent = parent;
         }
 
-        public void Init(int nodeCount) {
+        public virtual void Init(int nodeCount) {
             nodes = new GameObject[nodeCount];
         }
 
@@ -56,7 +56,7 @@ namespace GLTFast {
             nodes[nodeIndex].name = name ?? "Node";
         }
 
-        public void AddPrimitive(
+        public virtual void AddPrimitive(
             uint nodeIndex,
             string meshName,
             UnityEngine.Mesh mesh,
