@@ -21,7 +21,7 @@ using UnityEngine;
 namespace GLTFast {
 
     using Materials;
-   
+    using static Materials.StandardShaderHelper;
     using AlphaMode = Schema.Material.AlphaMode;
 
     public class BuiltInMaterialGenerator : MaterialGenerator {
@@ -48,7 +48,7 @@ namespace GLTFast {
             var mat = new Material(pbrMetallicRoughnessShader);
             if(doubleSided) {
                 // Turn off back-face culling
-                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
+                mat.SetFloat(cullModePropId,0);
 #if UNITY_EDITOR
                 mat.doubleSidedGI = true;
 #endif
@@ -66,7 +66,7 @@ namespace GLTFast {
             var mat = new Material(pbrSpecularGlossinessShader);
             if(doubleSided) {
                 // Turn off back-face culling
-                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
+                mat.SetFloat(cullModePropId,0);
 #if UNITY_EDITOR
                 mat.doubleSidedGI = true;
 #endif
@@ -84,7 +84,7 @@ namespace GLTFast {
             var mat = new Material(unlitShader);
             if(doubleSided) {
                 // Turn off back-face culling
-                mat.SetFloat(StandardShaderHelper.cullModePropId,0);
+                mat.SetFloat(cullModePropId,0);
 #if UNITY_EDITOR
                 mat.doubleSidedGI = true;
 #endif
@@ -113,66 +113,121 @@ namespace GLTFast {
 
             material.name = gltfMaterial.name;
 
-            //added support for KHR_materials_pbrSpecularGlossiness
+            StandardShaderMode shaderMode = StandardShaderMode.Opaque;
+            Color baseColorLinear = Color.white;
+
+            if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
+                material.SetFloat(cutoffPropId, gltfMaterial.alphaCutoff);
+                shaderMode = StandardShaderMode.Cutout;
+            } else if(gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
+                SetAlphaModeBlend( material );
+                shaderMode = StandardShaderMode.Fade;
+            }
+
             if (gltfMaterial.extensions != null) {
+                // Specular glossiness
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
-                    material.color = specGloss.diffuseColor.gamma;
-                    material.SetVector(StandardShaderHelper.specColorPropId, specGloss.specularColor);
-                    material.SetFloat(StandardShaderHelper.glossinessPropId,specGloss.glossinessFactor);
+                    baseColorLinear = specGloss.diffuseColor;
+                    material.SetVector(specColorPropId, specGloss.specularColor);
+                    material.SetFloat(glossinessPropId,specGloss.glossinessFactor);
 
-                    TrySetTexture(specGloss.diffuseTexture,material,StandardShaderHelper.mainTexPropId,ref textures,ref schemaImages, ref imageVariants);
+                    TrySetTexture(specGloss.diffuseTexture,material,mainTexPropId,ref textures,ref schemaImages, ref imageVariants);
 
-                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,StandardShaderHelper.specGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
-                        material.EnableKeyword(StandardShaderHelper.KW_SPEC_GLOSS_MAP);
+                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,specGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+                        material.EnableKeyword(KW_SPEC_GLOSS_MAP);
                     }
                 }
             }
 
             if (gltfMaterial.pbrMetallicRoughness!=null) {
-                material.color = gltfMaterial.pbrMetallicRoughness.baseColor.gamma;
-                material.SetFloat(StandardShaderHelper.metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
-                material.SetFloat(StandardShaderHelper.roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
+                baseColorLinear = gltfMaterial.pbrMetallicRoughness.baseColor;
+                material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
+                material.SetFloat(roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
                 TrySetTexture(
                     gltfMaterial.pbrMetallicRoughness.baseColorTexture,
                     material,
-                    StandardShaderHelper.mainTexPropId,
+                    mainTexPropId,
                     ref textures,
                     ref schemaImages,
                     ref imageVariants
                     );
                 
-                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,StandardShaderHelper.metallicGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
-                    material.EnableKeyword(StandardShaderHelper.KW_METALLIC_ROUGNESS_MAP);
+                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+                    material.EnableKeyword(KW_METALLIC_ROUGNESS_MAP);
                 }
             }
 
-            if(TrySetTexture(gltfMaterial.normalTexture,material,StandardShaderHelper.bumpMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
-                material.EnableKeyword(StandardShaderHelper.KW_NORMALMAP);
-                material.SetFloat(StandardShaderHelper.bumpScalePropId,gltfMaterial.normalTexture.scale);
+            if(TrySetTexture(gltfMaterial.normalTexture,material,bumpMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+                material.EnableKeyword(KW_NORMALMAP);
+                material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
             }
 
-            if(TrySetTexture(gltfMaterial.occlusionTexture,material,StandardShaderHelper.occlusionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
-                material.EnableKeyword(StandardShaderHelper.KW_OCCLUSION);
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+                material.EnableKeyword(KW_OCCLUSION);
             }
 
-            if(TrySetTexture(gltfMaterial.emissiveTexture,material,StandardShaderHelper.emissionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
-                material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
+            if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+                material.EnableKeyword(KW_EMISSION);
+            }
+
+            if (gltfMaterial.extensions != null) {
+
+                // Transmission - Approximation
+                var transmission = gltfMaterial.extensions.KHR_materials_transmission;
+                if (transmission != null) {
+#if !GLTFAST_SHADER_GRAPH && UNITY_EDITOR
+                    Debug.LogWarning("Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!");
+#endif
+                    // Correct transmission is not supported in Built-In renderer
+                    // This is an approximation for some corner cases
+                    if (transmission.transmissionFactor > 0f && transmission.transmissionTexture.index < 0) {
+                        var min = Mathf.Min(Mathf.Min(baseColorLinear.r, baseColorLinear.g), baseColorLinear.b);
+                        var max = baseColorLinear.maxColorComponent;
+                        if (max - min < .1f) {
+                            // R/G/B components don't diverge too much
+                            // -> white/grey/black-ish color
+                            // -> Approximation via Transparent mode should be close to real transmission
+                            shaderMode = StandardShaderMode.Transparent;
+                            baseColorLinear.a *= 1-transmission.transmissionFactor;
+                        } else {
+                            // Color is somewhat saturated
+                            // -> Fallback to Blend mode
+                            // -> Dial down transmissionFactor by 50% to avoid material completely disappearing
+                            // Shows at least some color tinting
+                            shaderMode = StandardShaderMode.Fade;
+                            baseColorLinear.a *= 1-transmission.transmissionFactor*0.5f;
+                            // Premultiply color? Decided not to. I prefered vivid (but too bright) colors over desaturation effect. 
+                            // baseColorLinear.r *= baseColorLinear.a;
+                            // baseColorLinear.g *= baseColorLinear.a;
+                            // baseColorLinear.b *= baseColorLinear.a;
+                        }
+                    }
+                }
             }
             
-            if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
-                material.SetFloat(StandardShaderHelper.cutoffPropId, gltfMaterial.alphaCutoff);
-                StandardShaderHelper.SetAlphaModeMask( material, gltfMaterial);
-            } else if(gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
-                StandardShaderHelper.SetAlphaModeBlend( material );
-            } else {
-                StandardShaderHelper.SetOpaqueMode(material);
+            switch (shaderMode)
+            {
+                case StandardShaderMode.Cutout:
+                    SetAlphaModeMask( material, gltfMaterial);
+                    break;
+                case StandardShaderMode.Fade:
+                    SetAlphaModeBlend( material );
+                    break;
+                case StandardShaderMode.Transparent:
+                    SetAlphaModeTransparent( material );
+                    break;
+                default:
+                    SetOpaqueMode(material);
+                    break;
             }
 
+            material.color = baseColorLinear.gamma;
+            
             if(gltfMaterial.emissive != Color.black) {
-                material.SetColor(StandardShaderHelper.emissionColorPropId, gltfMaterial.emissive.gamma);
-                material.EnableKeyword(StandardShaderHelper.KW_EMISSION);
+                material.SetColor(emissionColorPropId, gltfMaterial.emissive.gamma);
+                material.EnableKeyword(KW_EMISSION);
             }
 
             return material;

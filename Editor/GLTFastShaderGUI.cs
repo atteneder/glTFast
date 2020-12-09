@@ -29,6 +29,7 @@ namespace GLTFast.Editor
         {
             Opaque = StandardShaderMode.Opaque,
             Cutout = StandardShaderMode.Cutout,
+            Fade = StandardShaderMode.Fade,
             Transparent = StandardShaderMode.Transparent,
         }
 
@@ -50,6 +51,9 @@ namespace GLTFast.Editor
 
                     case TAG_RENDER_TYPE_CUTOUT:
                         currentBlendMode = BlendModeOption.Cutout;
+                        break;
+                    case TAG_RENDER_TYPE_FADE:
+                        currentBlendMode = BlendModeOption.Fade;
                         break;
                     case TAG_RENDER_TYPE_TRANSPARENT:
                         currentBlendMode = BlendModeOption.Transparent;
@@ -94,8 +98,11 @@ namespace GLTFast.Editor
                 case BlendModeOption.Cutout:
                     SetAlphaModeMask(material, material.GetFloat(cutoffPropId));
                     break;
-                case BlendModeOption.Transparent:
+                case BlendModeOption.Fade:
                     SetAlphaModeBlend(material);
+                    break;
+                case BlendModeOption.Transparent:
+                    SetAlphaModeTransparent(material);
                     break;
             }
         }

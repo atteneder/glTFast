@@ -68,7 +68,8 @@ namespace GLTFast {
             "KHR_materials_pbrSpecularGlossiness",
             "KHR_materials_unlit",
             "KHR_texture_transform",
-            "KHR_mesh_quantization"
+            "KHR_mesh_quantization",
+            "KHR_materials_transmission",
         };
 
         enum ChunkFormat : uint

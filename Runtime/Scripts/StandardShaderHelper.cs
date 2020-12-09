@@ -64,6 +64,7 @@ namespace GLTFast.Materials {
         public const string TAG_RENDER_TYPE = "RenderType";
         public const string TAG_RENDER_TYPE_CUTOUT = "TransparentCutout";
         public const string TAG_RENDER_TYPE_OPAQUE = "Opaque";
+        public const string TAG_RENDER_TYPE_FADE = "Fade";
         public const string TAG_RENDER_TYPE_TRANSPARENT = "Transparent";
 
         public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
@@ -106,8 +107,8 @@ namespace GLTFast.Materials {
 
         public static void SetAlphaModeBlend( UnityEngine.Material material ) {
 #if GLTFAST_BUILTIN_RP || UNITY_EDITOR
-            material.SetFloat(modePropId, (int)StandardShaderMode.Transparent);
-            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
+            material.SetFloat(modePropId, (int)StandardShaderMode.Fade);
+            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_FADE);
             material.EnableKeyword(KW_ALPHABLEND_ON);
 #endif
 
@@ -115,6 +116,20 @@ namespace GLTFast.Materials {
             material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);//10
             material.SetInt(zWritePropId, 0);
             material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
+            material.DisableKeyword(KW_ALPHATEST_ON);
+            material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
+        }
+
+        public static void SetAlphaModeTransparent( UnityEngine.Material material ) {
+#if GLTFAST_BUILTIN_RP || UNITY_EDITOR
+            material.SetFloat(modePropId, (int)StandardShaderMode.Fade);
+            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
+            material.EnableKeyword(KW_ALPHAPREMULTIPLY_ON);
+#endif
+            material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);//1
+            material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);//10
+            material.SetInt(zWritePropId, 0);
+            material.DisableKeyword(KW_ALPHABLEND_ON);
             material.DisableKeyword(KW_ALPHATEST_ON);
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
         }

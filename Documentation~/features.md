@@ -121,12 +121,14 @@ Will not be supported:
 | Texture Transform             | ✓<sup>2</sup>  | ✓<sup>2</sup>   | ✓<sup>2</sup>       |
 | Clear coat                    | [ℹ][ClearCoat] | [ℹ][ClearCoat] | [❌][ClearCoat] |
 | Sheen                         | [ℹ][Sheen] | [ℹ][Sheen] | [❌][Sheen] |
-| Transmission                  | [ℹ][Transmission] | [ℹ][Transmission] | [❌][Transmission] |
+| Transmission                  | [ℹ][Transmission] | [ℹ][Transmission] | [✓][Transmission]<sup>3</sup> |
 | Variants                      | [ℹ][Variants] | [ℹ][Variants] | [ℹ][Variants] |
 
 <sup>1</sup>: Physically-Based Rendering (PBR) material model
 
 <sup>2</sup>: The texture transform of baseColorTexture (or diffuseTexture for Specular-Glossiness) is re-used for all other textures. If you need different texture transforms for different texture types, [create an issue][newIssue].
+
+<sup>3</sup>: Transmission in Built-In render pipeline does not support transmission textures and is only 100% correct in certain cases like clear glass (100% transmission, white base color). Otherwise it's an approximation.
 
 Legend:
 
