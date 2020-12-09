@@ -346,6 +346,15 @@ namespace GLTFast {
                     if(fake.KHR_materials_pbrSpecularGlossiness==null) {
                         mat.extensions.KHR_materials_pbrSpecularGlossiness = null;
                     }
+                    if(fake.KHR_materials_transmission==null) {
+                        mat.extensions.KHR_materials_transmission = null;
+                    }
+                    if(fake.KHR_materials_clearcoat==null) {
+                        mat.extensions.KHR_materials_clearcoat = null;
+                    }
+                    if(fake.KHR_materials_sheen==null) {
+                        mat.extensions.KHR_materials_sheen = null;
+                    }
                 }
                 Profiler.EndSample();
             }

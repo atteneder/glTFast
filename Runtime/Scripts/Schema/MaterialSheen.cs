@@ -13,14 +13,29 @@
 // limitations under the License.
 //
 
-namespace GLTFast.FakeSchema {
+using UnityEngine;
+
+namespace GLTFast.Schema {
 
     [System.Serializable]
-    public class MaterialExtension {
-        public string KHR_materials_pbrSpecularGlossiness;
-        public string KHR_materials_unlit;
-        public string KHR_materials_transmission;
-        public string KHR_materials_clearcoat;
-        public string KHR_materials_sheen;
+    public class Sheen {
+
+        public float[] sheenColorFactor = {1,1,1,1};
+
+        public Color sheenColor {
+            get {
+                return new Color(
+                    sheenColor[0],
+                    sheenColor[1],
+                    sheenColor[2],
+                    sheenColor[3]
+                );
+            }
+        }
+
+        public TextureInfo sheenColorTexture = null;
+        
+        public float sheenRoughnessFactor = 0;
+        public TextureInfo sheenRoughnessTexture = null;
     }
 }

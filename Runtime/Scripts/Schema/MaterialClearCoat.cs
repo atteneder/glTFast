@@ -13,14 +13,18 @@
 // limitations under the License.
 //
 
-namespace GLTFast.FakeSchema {
+namespace GLTFast.Schema {
 
     [System.Serializable]
-    public class MaterialExtension {
-        public string KHR_materials_pbrSpecularGlossiness;
-        public string KHR_materials_unlit;
-        public string KHR_materials_transmission;
-        public string KHR_materials_clearcoat;
-        public string KHR_materials_sheen;
+    public class ClearCoat {
+
+        public float clearcoatFactor = 0;
+        public TextureInfo clearcoatTexture = null;
+        
+        public float clearcoatRoughnessFactor = 0;
+        public TextureInfo clearcoatRoughnessTexture = null;
+
+        public TextureInfo clearcoatNormalTexture = null;
+
     }
 }

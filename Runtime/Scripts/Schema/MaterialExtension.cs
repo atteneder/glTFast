@@ -19,5 +19,8 @@ namespace GLTFast.Schema {
     public class MaterialExtension {
         public PbrSpecularGlossiness KHR_materials_pbrSpecularGlossiness;
         public MaterialUnlit KHR_materials_unlit;
+        public Transmission KHR_materials_transmission;
+        public ClearCoat KHR_materials_clearcoat;
+        public Sheen KHR_materials_sheen;
     }
 }
