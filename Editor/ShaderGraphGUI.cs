@@ -20,7 +20,7 @@ using static GLTFast.Materials.StandardShaderHelper;
 
 namespace GLTFast.Editor
 {
-    public class GLTFastShaderGraphGUI : GLTFastShaderGUIBase
+    public class ShaderGraphGUI : ShaderGUIBase
     {
 
         private UvTransform? uvTransform;

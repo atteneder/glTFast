@@ -19,7 +19,7 @@ using static GLTFast.Materials.StandardShaderHelper;
 
 namespace GLTFast.Editor
 {
-    public class GLTFastShaderGUI : GLTFastShaderGUIBase
+    public class BuiltInShaderGUI : ShaderGUIBase
     {
 
         /// <summary>
