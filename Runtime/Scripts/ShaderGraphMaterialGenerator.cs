@@ -97,7 +97,7 @@ namespace GLTFast {
         {
             int index = doubleSided ? 0 : 1;
             if(unlitShaders[index]==null) {
-                var shaderName = doubleSided ? string.Format("{0}{2}",SHADER_UNLIT,"-double") : SHADER_UNLIT;
+                var shaderName = doubleSided ? string.Format("{0}{1}",SHADER_UNLIT,"-double") : SHADER_UNLIT;
                 unlitShaders[index] = FindShader(shaderName);
             }
             if(unlitShaders[index]==null) {
