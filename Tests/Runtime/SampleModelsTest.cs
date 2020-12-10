@@ -30,7 +30,7 @@ namespace GLTFast.Tests {
         public void CheckFiles()
         {
             var sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>(glTFSampleSetAssetPath);
-            Assert.AreEqual(174, sampleSet.itemCount);
+            Assert.AreEqual(177, sampleSet.itemCount);
 
             foreach (var item in sampleSet.GetItemsPrefixed()) {
                 CheckFileExists(item.path);
