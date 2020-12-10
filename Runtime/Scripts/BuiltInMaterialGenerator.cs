@@ -34,13 +34,26 @@ namespace GLTFast {
         Shader pbrSpecularGlossinessShader;
         Shader unlitShader;
 
-        public override UnityEngine.Material GetDefaultMaterial() {
+        public override Material GetDefaultMaterial() {
             return GetPbrMetallicRoughnessMaterial();
         }
+        
+        protected virtual Shader FinderShaderMetallicRoughness() {
+            return FindShader(SHADER_PBR_METALLIC_ROUGHNESS);
+        }
+        
+        protected virtual Shader FinderShaderSpecularGlossiness() {
+            return FindShader(SHADER_PBR_SPECULAR_GLOSSINESS);
+        }
 
-        UnityEngine.Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {
-            if(pbrMetallicRoughnessShader==null) {
-                pbrMetallicRoughnessShader = FindShader(SHADER_PBR_METALLIC_ROUGHNESS);
+        protected virtual Shader FinderShaderUnlit() {
+            return FindShader(SHADER_UNLIT);
+        }
+
+        Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {
+            if(pbrMetallicRoughnessShader==null)
+            {
+                pbrMetallicRoughnessShader = FinderShaderMetallicRoughness();
             }
             if(pbrMetallicRoughnessShader==null) {
                 return null;
@@ -56,9 +69,9 @@ namespace GLTFast {
             return mat;
         }
 
-        UnityEngine.Material GetPbrSpecularGlossinessMaterial(bool doubleSided=false) {
+        Material GetPbrSpecularGlossinessMaterial(bool doubleSided=false) {
             if(pbrSpecularGlossinessShader==null) {
-                pbrSpecularGlossinessShader = FindShader(SHADER_PBR_SPECULAR_GLOSSINESS);
+                pbrSpecularGlossinessShader = FinderShaderSpecularGlossiness();
             }
             if(pbrSpecularGlossinessShader==null) {
                 return null;
@@ -74,9 +87,9 @@ namespace GLTFast {
             return mat;
         }
 
-        UnityEngine.Material GetUnlitMaterial(bool doubleSided=false) {
+        Material GetUnlitMaterial(bool doubleSided=false) {
             if(unlitShader==null) {
-                unlitShader = FindShader(SHADER_UNLIT);
+                unlitShader = FinderShaderUnlit();
             }
             if(unlitShader==null) {
                 return null;
@@ -92,13 +105,13 @@ namespace GLTFast {
             return mat;
         }
 
-        public override UnityEngine.Material GenerateMaterial(
+        public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
             ref Schema.Texture[] textures,
             ref Schema.Image[] schemaImages,
             ref Dictionary<int,Texture2D>[] imageVariants
         ) {
-            UnityEngine.Material material;
+            Material material;
             
             if (gltfMaterial.extensions!=null && gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness!=null) {
                 material = GetPbrSpecularGlossinessMaterial(gltfMaterial.doubleSided);
