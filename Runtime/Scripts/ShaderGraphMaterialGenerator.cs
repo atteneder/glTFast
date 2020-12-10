@@ -17,18 +17,17 @@
 
 using System;
 using System.Collections.Generic;
+using GLTFast.Materials;
 using UnityEngine;
 
 namespace GLTFast {
 
-    using Materials;
-   
     using AlphaMode = Schema.Material.AlphaMode;
 
     public class ShaderGraphMaterialGenerator : MaterialGenerator {
         
         [Flags]
-        private enum ShaderFeature {
+        enum ShaderFeature {
             None = 0x0,
             Metallic = 0x1,
             Opaque = 0x2,
@@ -37,35 +36,35 @@ namespace GLTFast {
             Max = 0x8
         }
 
-        private const string SHADER_UNLIT = "Shader Graphs/glTF-unlit-opaque";
+        const string SHADER_UNLIT = "Shader Graphs/glTF-unlit-opaque";
 
         // Keywords
-        private const string KW_OCCLUSION = "OCCLUSION";
-        private const string KW_EMISSION = "EMISSION";
+        const string KW_OCCLUSION = "OCCLUSION";
+        const string KW_EMISSION = "EMISSION";
 
-        private static readonly int alphaCutoffPropId = Shader.PropertyToID("alphaCutoff");
-        private static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
-        private static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");
-        private static readonly int emissiveFactorPropId = Shader.PropertyToID("emissiveFactor");
-        private static readonly int emissiveTexturePropId = Shader.PropertyToID("emissiveTexture");
-        private static readonly int glossinessFactorPropId = Shader.PropertyToID("glossinessFactor");
-        private static readonly int metallicFactorPropId = Shader.PropertyToID("metallicFactor");
-        private static readonly int metallicRoughnessTexturePropId = Shader.PropertyToID("metallicRoughnessTexture");
-        private static readonly int normalScalePropId = Shader.PropertyToID("normalScale");
-        private static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
-        private static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexture");
-        private static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
-        private static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
-        private static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
+        static readonly int alphaCutoffPropId = Shader.PropertyToID("alphaCutoff");
+        static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
+        static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");
+        static readonly int emissiveFactorPropId = Shader.PropertyToID("emissiveFactor");
+        static readonly int emissiveTexturePropId = Shader.PropertyToID("emissiveTexture");
+        static readonly int glossinessFactorPropId = Shader.PropertyToID("glossinessFactor");
+        static readonly int metallicFactorPropId = Shader.PropertyToID("metallicFactor");
+        static readonly int metallicRoughnessTexturePropId = Shader.PropertyToID("metallicRoughnessTexture");
+        static readonly int normalScalePropId = Shader.PropertyToID("normalScale");
+        static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
+        static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexture");
+        static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
+        static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
+        static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
 
-        private Shader[] litShaders = new Shader[(int)ShaderFeature.Max];
-        private Shader[] unlitShaders = new Shader[2]; // one- and double-sided
+        static Shader[] litShaders = new Shader[(int)ShaderFeature.Max];
+        static Shader[] unlitShaders = new Shader[2]; // one- and double-sided
 
-        public override UnityEngine.Material GetDefaultMaterial() {
+        public override Material GetDefaultMaterial() {
             return GetLitMaterial();
         }
 
-        private UnityEngine.Material GetLitMaterial( bool metallic = true, bool opaque = true, bool doubleSided=false )
+        Material GetLitMaterial( bool metallic = true, bool opaque = true, bool doubleSided=false )
         {
             ShaderFeature sf = ShaderFeature.None;
             if (metallic) sf |= ShaderFeature.Metallic;
@@ -93,7 +92,7 @@ namespace GLTFast {
             return mat;
         }
 
-        private UnityEngine.Material GetUnlitMaterial(bool doubleSided=false)
+        static Material GetUnlitMaterial(bool doubleSided=false)
         {
             int index = doubleSided ? 0 : 1;
             if(unlitShaders[index]==null) {
@@ -110,13 +109,13 @@ namespace GLTFast {
             return mat;
         }
 
-        public override UnityEngine.Material GenerateMaterial(
+        public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
             ref Schema.Texture[] textures,
             ref Schema.Image[] schemaImages,
             ref Dictionary<int,Texture2D>[] imageVariants
         ) {
-            UnityEngine.Material material;
+            Material material;
 
             MaterialType materialType = MaterialType.Unknown;
 
