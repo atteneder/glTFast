@@ -18,6 +18,7 @@
 #endif
 
 using System.Collections.Generic;
+using GLTFast.Schema;
 using UnityEngine;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
@@ -25,13 +26,10 @@ using UnityEngine.Rendering;
 namespace GLTFast {
 
     using Materials;
-   
-    using AlphaMode = Schema.Material.AlphaMode;
 
     public abstract class MaterialGenerator : IMaterialGenerator {
-
-        public enum MaterialType {
-            Unknown,
+        protected enum MaterialType {
+            // Unknown,
             MetallicRoughness,
             SpecularGlossiness,
             Unlit,
@@ -179,6 +177,39 @@ namespace GLTFast {
             }
             
             material.SetVector(StandardShaderHelper.mainTexScaleTransform, textureST);
+        }
+        
+        /// <summary>
+        /// Approximates Transmission material effect for Render Pipelines / Shaders where filtering the
+        /// backbuffer is not possible.
+        /// </summary>
+        /// <param name="transmission">glTF transmission extension data</param>
+        /// <param name="baseColorLinear">BaseColor reference. Alpha will be altered according to transmission</param>
+        /// <returns>True when the transmission can be approximated with Premultiply mode. False if blending is better</returns>
+        protected static bool TransmissionWorkaroundShaderMode(Transmission transmission, ref Color baseColorLinear) {
+            var min = Mathf.Min(Mathf.Min(baseColorLinear.r, baseColorLinear.g), baseColorLinear.b);
+            var max = baseColorLinear.maxColorComponent;
+            if (max - min < .1f) {
+                // R/G/B components don't diverge too much
+                // -> white/grey/black-ish color
+                // -> Approximation via Transparent mode should be close to real transmission
+                baseColorLinear.a *= 1 - transmission.transmissionFactor;
+                return true;
+            }
+            else {
+                // Color is somewhat saturated
+                // -> Fallback to Blend mode
+                // -> Dial down transmissionFactor by 50% to avoid material completely disappearing
+                // Shows at least some color tinting
+                baseColorLinear.a *= 1 - transmission.transmissionFactor * 0.5f;
+
+                // Premultiply color? Decided not to. I prefered vivid (but too bright) colors over desaturation effect. 
+                // baseColorLinear.r *= baseColorLinear.a;
+                // baseColorLinear.g *= baseColorLinear.a;
+                // baseColorLinear.b *= baseColorLinear.a;
+
+                return false;
+            }
         }
     }
 }

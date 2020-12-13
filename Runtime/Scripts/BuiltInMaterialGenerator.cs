@@ -17,10 +17,9 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using Material = UnityEngine.Material;
 
 namespace GLTFast {
-
-    using Materials;
     using static Materials.StandardShaderHelper;
     using AlphaMode = Schema.Material.AlphaMode;
 
@@ -196,26 +195,8 @@ namespace GLTFast {
                     // Correct transmission is not supported in Built-In renderer
                     // This is an approximation for some corner cases
                     if (transmission.transmissionFactor > 0f && transmission.transmissionTexture.index < 0) {
-                        var min = Mathf.Min(Mathf.Min(baseColorLinear.r, baseColorLinear.g), baseColorLinear.b);
-                        var max = baseColorLinear.maxColorComponent;
-                        if (max - min < .1f) {
-                            // R/G/B components don't diverge too much
-                            // -> white/grey/black-ish color
-                            // -> Approximation via Transparent mode should be close to real transmission
-                            shaderMode = StandardShaderMode.Transparent;
-                            baseColorLinear.a *= 1-transmission.transmissionFactor;
-                        } else {
-                            // Color is somewhat saturated
-                            // -> Fallback to Blend mode
-                            // -> Dial down transmissionFactor by 50% to avoid material completely disappearing
-                            // Shows at least some color tinting
-                            shaderMode = StandardShaderMode.Fade;
-                            baseColorLinear.a *= 1-transmission.transmissionFactor*0.5f;
-                            // Premultiply color? Decided not to. I prefered vivid (but too bright) colors over desaturation effect. 
-                            // baseColorLinear.r *= baseColorLinear.a;
-                            // baseColorLinear.g *= baseColorLinear.a;
-                            // baseColorLinear.b *= baseColorLinear.a;
-                        }
+                        var premul = TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
+                        shaderMode = premul ? StandardShaderMode.Transparent : StandardShaderMode.Fade;
                     }
                 }
             }

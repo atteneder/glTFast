@@ -87,11 +87,11 @@ namespace GLTFast.Materials {
         {
             material.EnableKeyword(KW_ALPHATEST_ON);
             material.SetInt(zWritePropId, 1);
-            material.SetFloat(cutoffPropId, alphaCutoff);
             material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;  //2450
 
 #if GLTFAST_BUILTIN_RP || UNITY_EDITOR
+            material.SetFloat(cutoffPropId, alphaCutoff);
             material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
             material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_CUTOUT);
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);

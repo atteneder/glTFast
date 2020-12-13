@@ -27,16 +27,36 @@ namespace GLTFast {
     public class ShaderGraphMaterialGenerator : MaterialGenerator {
         
         [Flags]
-        enum ShaderFeature {
-            None = 0x0,
-            Metallic = 0x1,
-            Opaque = 0x2,
-            DoubleSided = 0x4,
-            All = 0x7,
-            Max = 0x8
+        public enum ShaderMode {
+            Opaque = 0,
+            Blend = 1,
+            Premultiply = 1<<1,
         }
 
-        const string SHADER_UNLIT = "Shader Graphs/glTF-unlit-opaque";
+        [Flags]
+        enum MetallicShaderFeatures {
+            Default = 0,
+            // Bits 0-1 are the shader modes
+            ModeMask = 0x3,
+            ModeOpaque = 0,
+            ModeFade = 1,
+            ModeTransparent = 1<<1,
+            // Other flags
+            DoubleSided = 1<<2,
+            ClearCoat = 1<<3,
+            Sheen = 1<<4,
+        }
+
+        
+        [Flags]
+        enum SpecularShaderFeatures {
+            Default = 0,
+            AlphaBlend = 1<<1,
+            DoubleSided = 1<<2
+        }
+
+        const string SHADER_UNLIT = "Shader Graphs/glTF-unlit-Opaque";
+        const string SHADER_SPECULAR = "Shader Graphs/glTF-specular";
 
         // Keywords
         const string KW_OCCLUSION = "OCCLUSION";
@@ -57,35 +77,39 @@ namespace GLTFast {
         static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
         static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
 
-        static Shader[] litShaders = new Shader[(int)ShaderFeature.Max];
-        static Shader[] unlitShaders = new Shader[2]; // one- and double-sided
+        static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
+        static Dictionary<SpecularShaderFeatures,Shader> specularShaders = new Dictionary<SpecularShaderFeatures,Shader>();
+        static Shader[] unlitShaders = new Shader[2]; // single- and double-sided
 
         public override Material GetDefaultMaterial() {
-            return GetLitMaterial();
+            return GetMetallicMaterial(MetallicShaderFeatures.Default);
         }
 
-        Material GetLitMaterial( bool metallic = true, bool opaque = true, bool doubleSided=false )
-        {
-            ShaderFeature sf = ShaderFeature.None;
-            if (metallic) sf |= ShaderFeature.Metallic;
-            if (opaque) sf |= ShaderFeature.Opaque;
-            if (doubleSided) sf |= ShaderFeature.DoubleSided;
-            int index = (int)sf;
-
-            if(litShaders[index]==null)
-            {
+        Material GetMetallicMaterial( MetallicShaderFeatures metallicShaderFeatures ) {
+            
+            bool doubleSided = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0;
+            
+            if(!metallicShaders.TryGetValue(metallicShaderFeatures,value: out var shader)) {
+                ShaderMode mode = (ShaderMode) (metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
+                // TODO: add ClearCoat support
+                bool coat = false; // (metallicShaderFeatures & MetallicShaderFeatures.ClearCoat) != 0;
+                // TODO: add sheen support
+                bool sheen = false; // (metallicShaderFeatures & MetallicShaderFeatures.Sheen) != 0;
+                
                 var shaderName = string.Format(
-                    "Shader Graphs/glTF-{0}-{1}{2}",
-                    metallic ? "metallic" : "specular",
-                    opaque ? "opaque" : "transparent",
+                    "Shader Graphs/glTF-metallic-{0}{1}{2}{3}",
+                    mode,
+                    coat ? "-coat" : "",
+                    sheen ? "-sheen" : "",
                     doubleSided ? "-double" : ""
                 );
-                litShaders[index] = FindShader(shaderName);
+                shader = FindShader(shaderName);
+                metallicShaders[metallicShaderFeatures] = shader;
             }
-            if(litShaders[index]==null) {
+            if(shader==null) {
                 return null;
             }
-            var mat = new Material(litShaders[index]);
+            var mat = new Material(shader);
 #if UNITY_EDITOR
             mat.doubleSidedGI = doubleSided; 
 #endif
@@ -108,6 +132,30 @@ namespace GLTFast {
 #endif
             return mat;
         }
+        
+        static Material GetSpecularMaterial(SpecularShaderFeatures features) {
+            bool doubleSided = (features & SpecularShaderFeatures.DoubleSided) != 0;
+            Shader shader = null;
+            if(!specularShaders.TryGetValue(features,out shader)) {
+                bool alphaBlend = (features & SpecularShaderFeatures.AlphaBlend) != 0;
+                var shaderName = string.Format(
+                    "{0}{1}{2}",
+                    SHADER_SPECULAR,
+                    alphaBlend ? "-Blend" : "-Opaque",
+                    doubleSided ? "-double" : ""
+                    );
+                shader = FindShader(shaderName);
+                specularShaders[features] = shader;
+            }
+            if(shader==null) {
+                return null;
+            }
+            var mat = new Material(shader);
+#if UNITY_EDITOR
+            mat.doubleSidedGI = doubleSided;
+#endif
+            return mat;
+        }
 
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
@@ -117,7 +165,8 @@ namespace GLTFast {
         ) {
             Material material;
 
-            MaterialType materialType = MaterialType.Unknown;
+            MaterialType? materialType = null;
+            ShaderMode shaderMode = ShaderMode.Opaque;
 
             if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial.doubleSided);
@@ -125,23 +174,33 @@ namespace GLTFast {
             } else {
                 bool isMetallicRoughness = gltfMaterial.extensions == null ||
                            gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness == null;
-                materialType = isMetallicRoughness ? MaterialType.MetallicRoughness : MaterialType.SpecularGlossiness;
-                material = GetLitMaterial(
-                    isMetallicRoughness,
-                    gltfMaterial.alphaModeEnum==AlphaMode.OPAQUE, 
-                    gltfMaterial.doubleSided
-                    );
+                if (isMetallicRoughness) {
+                    materialType = MaterialType.MetallicRoughness;
+                    var metallicShaderFeatures = GetMetallicShaderFeatures(gltfMaterial);
+                    material = GetMetallicMaterial(metallicShaderFeatures);
+                    shaderMode = (ShaderMode)(metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
+                }
+                else {
+                    materialType = MaterialType.SpecularGlossiness;
+                    var specularShaderFeatures = GetSpecularShaderFeatures(gltfMaterial);
+                    material = GetSpecularMaterial(specularShaderFeatures);
+                    if ((specularShaderFeatures & SpecularShaderFeatures.AlphaBlend) != 0) {
+                        shaderMode = ShaderMode.Blend;
+                    }
+                }
             }
 
             if(material==null) return null;
 
             material.name = gltfMaterial.name;
 
+            Color baseColorLinear = Color.white;
+            
             //added support for KHR_materials_pbrSpecularGlossiness
             if (gltfMaterial.extensions != null) {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
-                    material.SetVector(baseColorFactorPropId, specGloss.diffuseColor);
+                    baseColorLinear = specGloss.diffuseColor;
                     material.SetVector(specularFactorPropId, specGloss.specularColor);
                     material.SetFloat(glossinessFactorPropId, specGloss.glossinessFactor);
 
@@ -154,7 +213,7 @@ namespace GLTFast {
             }
 
             if (gltfMaterial.pbrMetallicRoughness!=null) {
-                material.SetVector(baseColorFactorPropId, gltfMaterial.pbrMetallicRoughness.baseColor);
+                baseColorLinear = gltfMaterial.pbrMetallicRoughness.baseColor;
 
                 if (materialType != MaterialType.SpecularGlossiness) {
                     // baseColorTexture can be used by both MetallicRoughness AND Unlit materials
@@ -197,25 +256,81 @@ namespace GLTFast {
                 material.EnableKeyword(KW_EMISSION);
             }
             
-            if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
-                material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaCutoff);
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest; //2450
-            } else if(gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
-                // Disable Alpha testing
-                material.SetFloat(alphaCutoffPropId, 0);
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
+            if (gltfMaterial.extensions != null) {
+
+                // Transmission - Approximation
+                var transmission = gltfMaterial.extensions.KHR_materials_transmission;
+                if (transmission != null) {
+#if !GLTFAST_SHADER_GRAPH && UNITY_EDITOR
+                    Debug.LogWarning("Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!");
+#endif
+                    // Correct transmission is not supported in Built-In renderer
+                    // This is an approximation for some corner cases
+                    if (transmission.transmissionFactor > 0f && transmission.transmissionTexture.index < 0) {
+                        var premul = TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
+                    }
+                }
+            }
+            
+            material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaModeEnum == AlphaMode.MASK ? gltfMaterial.alphaCutoff : 0);
+            if(shaderMode == ShaderMode.Opaque) {
+                material.renderQueue = gltfMaterial.alphaModeEnum == AlphaMode.MASK
+                    ? (int)UnityEngine.Rendering.RenderQueue.AlphaTest //2450
+                    : material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;  //2000
             } else {
-                // Disable Alpha testing
-                material.SetFloat(alphaCutoffPropId, 0);
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;  //2000;
+                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
             }
 
+            material.SetVector(baseColorFactorPropId, baseColorLinear);
+            
             if(gltfMaterial.emissive != Color.black) {
                 material.SetColor(emissiveFactorPropId, gltfMaterial.emissive);
                 material.EnableKeyword(KW_EMISSION);
             }
 
             return material;
+        }
+        
+        static MetallicShaderFeatures GetMetallicShaderFeatures(Schema.Material gltfMaterial) {
+
+            var feature = MetallicShaderFeatures.Default;
+            ShaderMode? sm = null;
+
+            if (gltfMaterial.extensions != null) {
+                if (
+                    gltfMaterial.extensions.KHR_materials_transmission != null
+                    && gltfMaterial.extensions.KHR_materials_transmission.transmissionFactor > 0
+                ) {
+                    Color baseColorLinear = Color.white;
+                    var premul = TransmissionWorkaroundShaderMode(gltfMaterial.extensions.KHR_materials_transmission,ref baseColorLinear);
+                    sm = premul ? ShaderMode.Premultiply : ShaderMode.Blend;
+                }
+                if (gltfMaterial.extensions.KHR_materials_clearcoat != null &&
+                    gltfMaterial.extensions.KHR_materials_clearcoat.clearcoatFactor > 0) feature |= MetallicShaderFeatures.ClearCoat;
+                if (gltfMaterial.extensions.KHR_materials_sheen != null &&
+                    gltfMaterial.extensions.KHR_materials_sheen.sheenColor.maxColorComponent > 0) feature |= MetallicShaderFeatures.Sheen;
+            }
+
+            if (gltfMaterial.doubleSided) feature |= MetallicShaderFeatures.DoubleSided;
+
+            if (!sm.HasValue) {
+                sm = gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE ? ShaderMode.Blend : ShaderMode.Opaque;
+            } 
+            
+            feature |= (MetallicShaderFeatures)sm;
+
+            return feature;
+        }
+        
+        static SpecularShaderFeatures GetSpecularShaderFeatures(Schema.Material gltfMaterial) {
+
+            var feature = SpecularShaderFeatures.Default;
+            if (gltfMaterial.doubleSided) feature |= SpecularShaderFeatures.DoubleSided;
+
+            if (gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE) {
+                feature |= SpecularShaderFeatures.AlphaBlend;
+            }
+            return feature;
         }
     }
 }
