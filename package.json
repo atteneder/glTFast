@@ -21,6 +21,9 @@
     "url": "https://pixel.engineer"
   },
   "dependencies": {
+    "com.unity.modules.jsonserialize": "1.0.0",
+    "com.unity.modules.unitywebrequest": "1.0.0",
+    "com.unity.modules.unitywebrequesttexture": "1.0.0",
     "com.unity.mathematics": "1.2.1"
   },
   "type": "library"
