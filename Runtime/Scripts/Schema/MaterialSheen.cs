@@ -20,18 +20,14 @@ namespace GLTFast.Schema {
     [System.Serializable]
     public class Sheen {
 
-        public float[] sheenColorFactor = {1,1,1,1};
+        public float[] sheenColorFactor = {1,1,1};
 
-        public Color sheenColor {
-            get {
-                return new Color(
-                    sheenColor[0],
-                    sheenColor[1],
-                    sheenColor[2],
-                    sheenColor[3]
-                );
-            }
-        }
+        public Color sheenColor =>
+            new Color(
+                sheenColorFactor[0],
+                sheenColorFactor[1],
+                sheenColorFactor[2]
+            );
 
         public TextureInfo sheenColorTexture = null;
         
