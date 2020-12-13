@@ -13,6 +13,10 @@
 // limitations under the License.
 //
 
+#if USING_URP || USING_HDRP
+#define GLTFAST_SHADER_GRAPH
+#endif
+
 #if !GLTFAST_SHADER_GRAPH
 #define GLTFAST_BUILTIN_RP
 #endif

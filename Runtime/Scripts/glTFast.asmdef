@@ -1,6 +1,5 @@
 {
     "name": "glTFast",
-    "rootNamespace": "",
     "references": [
         "Draco",
         "glTFastSchema",
@@ -29,12 +28,12 @@
         {
             "name": "com.unity.render-pipelines.universal",
             "expression": "7.3.1",
-            "define": "GLTFAST_SHADER_GRAPH"
+            "define": "USING_URP"
         },
         {
             "name": "com.unity.render-pipelines.high-definition",
             "expression": "7.3.1",
-            "define": "GLTFAST_SHADER_GRAPH"
+            "define": "USING_HDRP"
         }
     ],
     "noEngineReferences": false
