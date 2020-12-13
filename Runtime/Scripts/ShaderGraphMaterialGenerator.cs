@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using GLTFast.Materials;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace GLTFast {
 
@@ -76,6 +77,8 @@ namespace GLTFast {
         static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
         static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
         static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
+        static readonly int transmissionFactorPropId = Shader.PropertyToID("transmissionFactor");
+        static readonly int transmissionTexturePropId = Shader.PropertyToID("transmissionTexture");
 
         static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
         static Dictionary<SpecularShaderFeatures,Shader> specularShaders = new Dictionary<SpecularShaderFeatures,Shader>();
@@ -195,6 +198,7 @@ namespace GLTFast {
             material.name = gltfMaterial.name;
 
             Color baseColorLinear = Color.white;
+            RenderQueue? renderQueue = null;
             
             //added support for KHR_materials_pbrSpecularGlossiness
             if (gltfMaterial.extensions != null) {
@@ -261,6 +265,7 @@ namespace GLTFast {
                 // Transmission - Approximation
                 var transmission = gltfMaterial.extensions.KHR_materials_transmission;
                 if (transmission != null) {
+#if URP_NO_SCREEN_GRAB
 #if !GLTFAST_SHADER_GRAPH && UNITY_EDITOR
                     Debug.LogWarning("Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!");
 #endif
@@ -269,17 +274,30 @@ namespace GLTFast {
                     if (transmission.transmissionFactor > 0f && transmission.transmissionTexture.index < 0) {
                         var premul = TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
                     }
+#else
+                    if (transmission.transmissionFactor > 0f) {
+                        material.EnableKeyword("TRANSMISSION");
+                        material.SetFloat(transmissionFactorPropId,transmission.transmissionFactor);
+                        renderQueue = RenderQueue.Transparent;
+                        if (TrySetTexture(transmission.transmissionTexture, material, transmissionTexturePropId, ref textures,ref schemaImages, ref imageVariants)) {
+                        }
+                    }
+#endif
                 }
             }
             
             material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaModeEnum == AlphaMode.MASK ? gltfMaterial.alphaCutoff : 0);
-            if(shaderMode == ShaderMode.Opaque) {
-                material.renderQueue = gltfMaterial.alphaModeEnum == AlphaMode.MASK
-                    ? (int)UnityEngine.Rendering.RenderQueue.AlphaTest //2450
-                    : material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;  //2000
-            } else {
-                material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
+            if (!renderQueue.HasValue) {
+                if(shaderMode == ShaderMode.Opaque) {
+                    renderQueue = gltfMaterial.alphaModeEnum == AlphaMode.MASK
+                        ? RenderQueue.AlphaTest
+                        : RenderQueue.Geometry;
+                } else {
+                    renderQueue = RenderQueue.Transparent;
+                }
             }
+
+            material.renderQueue = (int) renderQueue.Value;
 
             material.SetVector(baseColorFactorPropId, baseColorLinear);
             
@@ -297,6 +315,7 @@ namespace GLTFast {
             ShaderMode? sm = null;
 
             if (gltfMaterial.extensions != null) {
+#if URP_NO_SCREEN_GRAB
                 if (
                     gltfMaterial.extensions.KHR_materials_transmission != null
                     && gltfMaterial.extensions.KHR_materials_transmission.transmissionFactor > 0
@@ -305,6 +324,7 @@ namespace GLTFast {
                     var premul = TransmissionWorkaroundShaderMode(gltfMaterial.extensions.KHR_materials_transmission,ref baseColorLinear);
                     sm = premul ? ShaderMode.Premultiply : ShaderMode.Blend;
                 }
+#endif
                 if (gltfMaterial.extensions.KHR_materials_clearcoat != null &&
                     gltfMaterial.extensions.KHR_materials_clearcoat.clearcoatFactor > 0) feature |= MetallicShaderFeatures.ClearCoat;
                 if (gltfMaterial.extensions.KHR_materials_sheen != null &&
