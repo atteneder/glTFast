@@ -22,8 +22,11 @@
 using System;
 using System.Collections.Generic;
 using GLTFast.Materials;
+using GLTFast.Schema;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Material = UnityEngine.Material;
+using Texture = GLTFast.Schema.Texture;
 
 namespace GLTFast {
 
@@ -39,7 +42,7 @@ namespace GLTFast {
         }
 
         [Flags]
-        enum MetallicShaderFeatures {
+        protected enum MetallicShaderFeatures {
             Default = 0,
             // Bits 0-1 are the shader modes
             ModeMask = 0x3,
@@ -54,7 +57,7 @@ namespace GLTFast {
 
         
         [Flags]
-        enum SpecularShaderFeatures {
+        protected enum SpecularShaderFeatures {
             Default = 0,
             AlphaBlend = 1<<1,
             DoubleSided = 1<<2
@@ -81,8 +84,8 @@ namespace GLTFast {
         static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
         static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
         static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
-        static readonly int transmissionFactorPropId = Shader.PropertyToID("transmissionFactor");
-        static readonly int transmissionTexturePropId = Shader.PropertyToID("transmissionTexture");
+        protected static readonly int transmissionFactorPropId = Shader.PropertyToID("transmissionFactor");
+        protected static readonly int transmissionTexturePropId = Shader.PropertyToID("transmissionTexture");
 
         static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
         static Dictionary<SpecularShaderFeatures,Shader> specularShaders = new Dictionary<SpecularShaderFeatures,Shader>();
@@ -269,24 +272,7 @@ namespace GLTFast {
                 // Transmission - Approximation
                 var transmission = gltfMaterial.extensions.KHR_materials_transmission;
                 if (transmission != null) {
-#if URP_NO_SCREEN_GRAB
-#if !GLTFAST_SHADER_GRAPH && UNITY_EDITOR
-                    Debug.LogWarning("Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!");
-#endif
-                    // Correct transmission is not supported in Built-In renderer
-                    // This is an approximation for some corner cases
-                    if (transmission.transmissionFactor > 0f && transmission.transmissionTexture.index < 0) {
-                        var premul = TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
-                    }
-#else
-                    if (transmission.transmissionFactor > 0f) {
-                        material.EnableKeyword("TRANSMISSION");
-                        material.SetFloat(transmissionFactorPropId,transmission.transmissionFactor);
-                        renderQueue = RenderQueue.Transparent;
-                        if (TrySetTexture(transmission.transmissionTexture, material, transmissionTexturePropId, ref textures,ref schemaImages, ref imageVariants)) {
-                        }
-                    }
-#endif
+                    renderQueue = ApplyTransmission(ref baseColorLinear, ref textures, ref schemaImages, ref imageVariants, transmission, material, renderQueue);
                 }
             }
             
@@ -312,27 +298,47 @@ namespace GLTFast {
 
             return material;
         }
-        
-        static MetallicShaderFeatures GetMetallicShaderFeatures(Schema.Material gltfMaterial) {
+
+        protected virtual RenderQueue? ApplyTransmission(
+            ref Color baseColorLinear,
+            ref Texture[] textures,
+            ref Image[] schemaImages,
+            ref Dictionary<int, Texture2D>[] imageVariants,
+            Transmission transmission,
+            Material material,
+            RenderQueue? renderQueue
+            )
+        {
+#if UNITY_EDITOR
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+            Debug.LogWarning("Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!");
+#endif
+            // Correct transmission is not supported in Built-In renderer
+            // This is an approximation for some corner cases
+            if (transmission.transmissionFactor > 0f && transmission.transmissionTexture.index < 0) {
+                var premul = TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
+            }
+            return renderQueue;
+        }
+
+        protected MetallicShaderFeatures GetMetallicShaderFeatures(Schema.Material gltfMaterial) {
 
             var feature = MetallicShaderFeatures.Default;
             ShaderMode? sm = null;
 
             if (gltfMaterial.extensions != null) {
-#if URP_NO_SCREEN_GRAB
-                if (
-                    gltfMaterial.extensions.KHR_materials_transmission != null
-                    && gltfMaterial.extensions.KHR_materials_transmission.transmissionFactor > 0
-                ) {
-                    Color baseColorLinear = Color.white;
-                    var premul = TransmissionWorkaroundShaderMode(gltfMaterial.extensions.KHR_materials_transmission,ref baseColorLinear);
-                    sm = premul ? ShaderMode.Premultiply : ShaderMode.Blend;
-                }
-#endif
+
                 if (gltfMaterial.extensions.KHR_materials_clearcoat != null &&
                     gltfMaterial.extensions.KHR_materials_clearcoat.clearcoatFactor > 0) feature |= MetallicShaderFeatures.ClearCoat;
                 if (gltfMaterial.extensions.KHR_materials_sheen != null &&
                     gltfMaterial.extensions.KHR_materials_sheen.sheenColor.maxColorComponent > 0) feature |= MetallicShaderFeatures.Sheen;
+
+                if (
+                    gltfMaterial.extensions.KHR_materials_transmission != null
+                    && gltfMaterial.extensions.KHR_materials_transmission.transmissionFactor > 0
+                ) {
+                    sm = ApplyTransmissionShaderFeatures(gltfMaterial);
+                }
             }
 
             if (gltfMaterial.doubleSided) feature |= MetallicShaderFeatures.DoubleSided;
@@ -345,7 +351,15 @@ namespace GLTFast {
 
             return feature;
         }
-        
+
+        protected virtual ShaderMode? ApplyTransmissionShaderFeatures(Schema.Material gltfMaterial) {
+            // Makeshift approximation
+            Color baseColorLinear = Color.white;
+            var premul = TransmissionWorkaroundShaderMode(gltfMaterial.extensions.KHR_materials_transmission, ref baseColorLinear);
+            ShaderMode? sm = premul ? ShaderMode.Premultiply : ShaderMode.Blend;
+            return sm;
+        }
+
         static SpecularShaderFeatures GetSpecularShaderFeatures(Schema.Material gltfMaterial) {
 
             var feature = SpecularShaderFeatures.Default;

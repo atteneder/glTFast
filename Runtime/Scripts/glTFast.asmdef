@@ -5,7 +5,8 @@
         "glTFastSchema",
         "glTFastFakeSchema",
         "Ktx",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

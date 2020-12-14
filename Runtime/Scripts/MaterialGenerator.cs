@@ -24,6 +24,9 @@ using GLTFast.Schema;
 using UnityEngine;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
+#if USING_URP
+using UnityEngine.Rendering.Universal;
+#endif
 
 namespace GLTFast {
 
@@ -36,27 +39,33 @@ namespace GLTFast {
             SpecularGlossiness,
             Unlit,
         }
+
+        static IMaterialGenerator defaultMaterialGenerator;
         
         public static IMaterialGenerator GetDefaultMaterialGenerator() {
 
-            // TODO: Dynamically detect if scripting defines don't match
-            // actual render pipeline.
-            // Show warning explaining how to setup project properly
+            if (defaultMaterialGenerator != null) return defaultMaterialGenerator;
 
-#if UNITY_EDITOR
-            string srpName = GraphicsSettings.renderPipelineAsset?.GetType().ToString();
-#if GLTFAST_SHADER_GRAPH
-            if (string.IsNullOrEmpty(srpName)) {
-                Debug.LogError("URP/HDRP is installed but no render pipeline asset is assigned! Falling back to built-in. This will NOT work in builds");
-                return new BuiltInMaterialGenerator();
+            // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
+            if (GraphicsSettings.renderPipelineAsset != null) {
+#if USING_URP
+                if (GraphicsSettings.renderPipelineAsset is UniversalRenderPipelineAsset urpAsset) {
+                    defaultMaterialGenerator = new UniveralRPMaterialGenerator(urpAsset);
+                    return defaultMaterialGenerator;
+                }
+#endif
+#if USING_HDRP
+                if (GraphicsSettings.renderPipelineAsset is HighDefinitionPipelineAsset) {
+                    defaultMaterialGenerator = new HighDefinitionRPMaterialGenerator();
+                    return defaultMaterialGenerator;
+                }
+#endif
+                // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+                Debug.LogError("glTFast: Unknown Render Pipeline");
             }
-#endif
-#endif
-            
-#if GLTFAST_SHADER_GRAPH
-            return new ShaderGraphMaterialGenerator();
-#else
-            return new BuiltInMaterialGenerator();
+#if GLTFAST_BUILTIN_RP || UNITY_EDITOR
+            defaultMaterialGenerator = new BuiltInMaterialGenerator();
+            return defaultMaterialGenerator;
 #endif
         }
 
