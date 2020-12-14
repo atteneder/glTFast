@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#if USING_URP
+#if USING_HDRP
 
 using System;
 using UnityEngine;

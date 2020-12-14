@@ -311,7 +311,10 @@ namespace GLTFast {
         {
 #if UNITY_EDITOR
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-            Debug.LogWarning("Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!");
+            Debug.LogWarning(
+                "Chance of incorrect materials! glTF transmission"
+                + " is approximated. Enable Opaque Texture access in Universal Render Pipeline!"
+                );
 #endif
             // Correct transmission is not supported in Built-In renderer
             // This is an approximation for some corner cases

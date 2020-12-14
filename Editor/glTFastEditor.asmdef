@@ -6,7 +6,8 @@
         "glTFastSchema",
         "glTFastSample",
         "glTFastTests",
-        "UnityEngine.TestTools.Graphics"
+        "UnityEngine.TestTools.Graphics",
+        "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
     "includePlatforms": [
         "Editor"
