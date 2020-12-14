@@ -16,12 +16,20 @@
 #if USING_HDRP
 
 using System;
+using System.Collections.Generic;
+using GLTFast.Schema;
 using UnityEngine;
+using Material = UnityEngine.Material;
+using Texture = GLTFast.Schema.Texture;
 
 namespace GLTFast.Materials {
 
     public class HighDefinitionRPMaterialGenerator : ShaderGraphMaterialGenerator {
-        
+        protected override void ApplyClearcoat(ref Texture[] textures, ref Image[] schemaImages, ref Dictionary<int, Texture2D>[] imageVariants, Material material, ClearCoat clearcoat) {
+            base.ApplyClearcoat(ref textures,ref schemaImages,ref imageVariants,material,clearcoat);
+
+            if (TrySetTexture(clearcoat.clearcoatNormalTexture, material, clearcoatNormalTexturePropId, ref textures, ref schemaImages, ref imageVariants)) { }
+        }
     }
 }
 #endif // USING_URP

@@ -68,10 +68,15 @@ namespace GLTFast.Materials {
         // Keywords
         const string KW_OCCLUSION = "OCCLUSION";
         const string KW_EMISSION = "EMISSION";
+        const string KW_CLEARCOAT_MAP = "CLEARCOAT_MAP";
 
         static readonly int alphaCutoffPropId = Shader.PropertyToID("alphaCutoff");
         static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
         static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");
+        static readonly int clearcoatFactorPropId = Shader.PropertyToID("clearcoatFactor");
+        static readonly int clearcoatRoughnessFactorPropId = Shader.PropertyToID("clearcoatRoughnessFactor");
+        static readonly int clearcoatTexturePropId = Shader.PropertyToID("clearcoatTexture");
+        protected static readonly int clearcoatNormalTexturePropId = Shader.PropertyToID("clearcoatNormalTexture");
         static readonly int emissiveFactorPropId = Shader.PropertyToID("emissiveFactor");
         static readonly int emissiveTexturePropId = Shader.PropertyToID("emissiveTexture");
         static readonly int glossinessFactorPropId = Shader.PropertyToID("glossinessFactor");
@@ -100,8 +105,7 @@ namespace GLTFast.Materials {
             
             if(!metallicShaders.TryGetValue(metallicShaderFeatures,value: out var shader)) {
                 ShaderMode mode = (ShaderMode) (metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
-                // TODO: add ClearCoat support
-                bool coat = false; // (metallicShaderFeatures & MetallicShaderFeatures.ClearCoat) != 0;
+                bool coat = (metallicShaderFeatures & MetallicShaderFeatures.ClearCoat) != 0;
                 // TODO: add sheen support
                 bool sheen = false; // (metallicShaderFeatures & MetallicShaderFeatures.Sheen) != 0;
                 
@@ -273,6 +277,11 @@ namespace GLTFast.Materials {
                 if (transmission != null) {
                     renderQueue = ApplyTransmission(ref baseColorLinear, ref textures, ref schemaImages, ref imageVariants, transmission, material, renderQueue);
                 }
+
+                var clearcoat = gltfMaterial.extensions.KHR_materials_clearcoat;
+                if (clearcoat != null) {
+                    ApplyClearcoat(ref textures, ref schemaImages, ref imageVariants, material, clearcoat);
+                }
             }
             
             material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaModeEnum == AlphaMode.MASK ? gltfMaterial.alphaCutoff : 0);
@@ -296,6 +305,18 @@ namespace GLTFast.Materials {
             }
 
             return material;
+        }
+
+        protected virtual void ApplyClearcoat(ref Texture[] textures, ref Image[] schemaImages, ref Dictionary<int, Texture2D>[] imageVariants, Material material, ClearCoat clearcoat) {
+            material.SetFloat(clearcoatFactorPropId, clearcoat.clearcoatFactor);
+            material.SetFloat(clearcoatRoughnessFactorPropId, clearcoat.clearcoatRoughnessFactor);
+            if (TrySetTexture(clearcoat.clearcoatTexture, material, clearcoatTexturePropId, ref textures, ref schemaImages, ref imageVariants)) {
+                material.EnableKeyword(KW_CLEARCOAT_MAP);
+            }
+
+            if (TrySetTexture(clearcoat.clearcoatRoughnessTexture, material, clearcoatTexturePropId, ref textures, ref schemaImages, ref imageVariants)) {
+                material.EnableKeyword(KW_CLEARCOAT_MAP);
+            }
         }
 
         protected virtual RenderQueue? ApplyTransmission(

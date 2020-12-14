@@ -119,7 +119,7 @@ Will not be supported:
 | Vertex colors                 | ✅  | ✅   | ✅       |
 | Multiple UV sets              | [ℹ][UVsets] | [ℹ][UVsets] | [❌][newIssue] |
 | Texture Transform             | ✓<sup>2</sup>  | ✓<sup>2</sup>   | ✓<sup>2</sup>       |
-| Clear coat                    | [ℹ][ClearCoat] | [ℹ][ClearCoat] | [❌][ClearCoat] |
+| Clear coat                    | [✓][ClearCoat]<sup>5</sup> | ✅ | [❌][ClearCoat] |
 | Sheen                         | [ℹ][Sheen] | [ℹ][Sheen] | [❌][Sheen] |
 | Transmission                  | [✓][Transmission]<sup>3</sup> | [✓][Transmission]<sup>4</sup> | [✓][Transmission]<sup>4</sup> |
 | Variants                      | [ℹ][Variants] | [ℹ][Variants] | [ℹ][Variants] |
@@ -131,6 +131,8 @@ Will not be supported:
 <sup>3</sup>: There are two approximation implementations for transmission in Universal render pipeline. If the Opaque Texture is enabled (in the Universal RP Asset settings), it is sampled to provide proper transmissive filtering. The downside of this approach is transparent objects are not rendered on top of each other. If the opaque texture is not available, the common approximation (see <sup>4</sup> below) is used.
 
 <sup>4</sup>: Transmission in Built-In and HD render pipeline does not support transmission textures and is only 100% correct in certain cases like clear glass (100% transmission, white base color). Otherwise it's an approximation.
+
+<sup>5</sup>: Clear coat normal maps is not supported. Clear coat will have the same normal as the base layer.
 
 Legend:
 
