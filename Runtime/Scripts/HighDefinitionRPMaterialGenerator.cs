@@ -18,7 +18,7 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast {
+namespace GLTFast.Materials {
 
     public class HighDefinitionRPMaterialGenerator : ShaderGraphMaterialGenerator {
         

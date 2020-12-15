@@ -17,10 +17,10 @@
 #define GLTFAST_SHADER_GRAPH
 #endif
 
-#if GLTFAST_SHADER_GRAPH
+#if GLTFAST_SHADER_GRAPH || UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
-using static GLTFast.Materials.StandardShaderHelper;
+using static GLTFast.Materials.MaterialGenerator;
 
 namespace GLTFast.Editor
 {

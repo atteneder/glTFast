@@ -21,16 +21,15 @@
 
 using System;
 using System.Collections.Generic;
-using GLTFast.Materials;
 using GLTFast.Schema;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Material = UnityEngine.Material;
-using Texture = GLTFast.Schema.Texture;
 
-namespace GLTFast {
+namespace GLTFast.Materials {
 
     using AlphaMode = Schema.Material.AlphaMode;
+    using Texture = Schema.Texture;
 
     public class ShaderGraphMaterialGenerator : MaterialGenerator {
         

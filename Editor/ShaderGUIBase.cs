@@ -14,11 +14,10 @@
 //
 
 using System;
-using GLTFast.Materials;
 using UnityEditor;
 using UnityEngine;
 using Unity.Mathematics;
-using static GLTFast.Materials.StandardShaderHelper;
+using static GLTFast.Materials.MaterialGenerator;
 
 namespace GLTFast.Editor
 {
@@ -92,7 +91,7 @@ namespace GLTFast.Editor
                 if (newUvTransform.rotation == 0) {
                     material.DisableKeyword(KW_UV_ROTATION);
                 } else {
-                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+                    material.EnableKeyword(KW_UV_ROTATION);
                 }
                 return newUvTransform;
             }

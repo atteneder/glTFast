@@ -24,7 +24,7 @@ using UnityEngine.Rendering.Universal;
 using Material = UnityEngine.Material;
 using Texture = GLTFast.Schema.Texture;
 
-namespace GLTFast {
+namespace GLTFast.Materials {
 
     public class UniveralRPMaterialGenerator : ShaderGraphMaterialGenerator {
 

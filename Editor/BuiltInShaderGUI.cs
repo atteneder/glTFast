@@ -15,10 +15,13 @@
 
 using UnityEditor;
 using UnityEngine;
-using static GLTFast.Materials.StandardShaderHelper;
+using static GLTFast.Materials.MaterialGenerator;
+using static GLTFast.Materials.BuiltInMaterialGenerator;
 
 namespace GLTFast.Editor
 {
+    using Materials;
+
     public class BuiltInShaderGUI : ShaderGUIBase
     {
 

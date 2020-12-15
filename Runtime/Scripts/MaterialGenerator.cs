@@ -31,9 +31,7 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering.HighDefinition;
 #endif
 
-namespace GLTFast {
-
-    using Materials;
+namespace GLTFast.Materials {
 
     public abstract class MaterialGenerator : IMaterialGenerator {
         protected enum MaterialType {
@@ -42,7 +40,12 @@ namespace GLTFast {
             SpecularGlossiness,
             Unlit,
         }
-
+        
+        public const string KW_UV_ROTATION = "_UV_ROTATION";
+        
+        public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
+        public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
+        
         static IMaterialGenerator defaultMaterialGenerator;
         
         public static IMaterialGenerator GetDefaultMaterialGenerator() {
@@ -174,11 +177,11 @@ namespace GLTFast {
                     sin = math.sin(tt.rotation);
 
                     var newRot = new Vector2(textureST.x * sin, textureST.y * -sin );
-                    material.SetVector(StandardShaderHelper.mainTexRotation, newRot);
+                    material.SetVector(mainTexRotation, newRot);
                     textureST.x *= cos;
                     textureST.y *= cos;
 
-                    material.EnableKeyword(StandardShaderHelper.KW_UV_ROTATION);
+                    material.EnableKeyword(KW_UV_ROTATION);
                     textureST.z -= newRot.y; // move offset to move rotation point (horizontally) 
                 }
 
@@ -190,7 +193,7 @@ namespace GLTFast {
                 textureST.y = -textureST.y; // flip scale in Y
             }
             
-            material.SetVector(StandardShaderHelper.mainTexScaleTransform, textureST);
+            material.SetVector(mainTexScaleTransform, textureST);
         }
         
         /// <summary>

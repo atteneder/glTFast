@@ -175,7 +175,7 @@ namespace GLTFast {
             this.monoBehaviour = monoBehaviour;
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
             this.deferAgent = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
-            this.materialGenerator = materialGenerator ?? MaterialGenerator.GetDefaultMaterialGenerator();
+            this.materialGenerator = materialGenerator ?? Materials.MaterialGenerator.GetDefaultMaterialGenerator();
         }
 
         /// <summary>

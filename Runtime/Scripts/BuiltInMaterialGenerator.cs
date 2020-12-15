@@ -13,26 +13,71 @@
 // limitations under the License.
 //
 
-#if USING_URP || USING_HDRP
-#define GLTFAST_SHADER_GRAPH
+#if ! ( USING_URP || USING_HDRP )
+#define GLTFAST_BUILTIN_RP
 #endif
 
-#if ! GLTFAST_SHADER_GRAPH || UNITY_EDITOR
+#if GLTFAST_BUILTIN_RP || UNITY_EDITOR
 
 using System.Collections.Generic;
 using UnityEngine;
 using Material = UnityEngine.Material;
 
-namespace GLTFast {
-    using static Materials.StandardShaderHelper;
+namespace GLTFast.Materials {
+
     using AlphaMode = Schema.Material.AlphaMode;
 
+    public enum StandardShaderMode {
+        Opaque = 0,
+        Cutout = 1,
+        Fade = 2,
+        Transparent = 3
+    }
+    
     public class BuiltInMaterialGenerator : MaterialGenerator {
+
+        public const string TAG_RENDER_TYPE = "RenderType";
+        public const string TAG_RENDER_TYPE_CUTOUT = "TransparentCutout";
+        public const string TAG_RENDER_TYPE_OPAQUE = "Opaque";
+        public const string TAG_RENDER_TYPE_FADE = "Fade";
+        public const string TAG_RENDER_TYPE_TRANSPARENT = "Transparent";
+
+        // Built-in Render Pipeline
+        public const string KW_ALPHAPREMULTIPLY_ON = "_ALPHAPREMULTIPLY_ON";
+        public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
+        public const string KW_EMISSION = "_EMISSION";
+        public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
+        public const string KW_NORMALMAP = "_NORMALMAP";
+        public const string KW_OCCLUSION = "_OCCLUSION";        
+        public const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
+
+        const string KW_ALPHABLEND_ON = "_ALPHABLEND_ON";
+        const string KW_MAIN_MAP = "_MainTex";
+
+        public static readonly int bumpMapPropId = Shader.PropertyToID("_BumpMap");
+        public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
+        public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
+        public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
+        public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
+        public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
+        public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
+        public static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
+        public static readonly int mainTexPropId = Shader.PropertyToID(KW_MAIN_MAP);
+        public static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
+        public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
+        public static readonly int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
+        public static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");
+        public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
+        public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
+        public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
+        public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
+
+        static readonly int modePropId = Shader.PropertyToID("_Mode");
 
         const string SHADER_PBR_METALLIC_ROUGHNESS = "glTF/PbrMetallicRoughness";
         const string SHADER_PBR_SPECULAR_GLOSSINESS = "glTF/PbrSpecularGlossiness";
         const string SHADER_UNLIT = "glTF/Unlit";
-
+        
         Shader pbrMetallicRoughnessShader;
         Shader pbrSpecularGlossinessShader;
         Shader unlitShader;
@@ -193,7 +238,7 @@ namespace GLTFast {
                 // Transmission - Approximation
                 var transmission = gltfMaterial.extensions.KHR_materials_transmission;
                 if (transmission != null) {
-#if !GLTFAST_SHADER_GRAPH && UNITY_EDITOR
+#if UNITY_EDITOR
                     Debug.LogWarning("Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!");
 #endif
                     // Correct transmission is not supported in Built-In renderer
@@ -230,6 +275,60 @@ namespace GLTFast {
 
             return material;
         }
+        
+        public static void SetAlphaModeMask(UnityEngine.Material material, float alphaCutoff)
+        {
+            material.EnableKeyword(KW_ALPHATEST_ON);
+            material.SetInt(zWritePropId, 1);
+            material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
+            material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;  //2450
+            material.SetFloat(cutoffPropId, alphaCutoff);
+            material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
+            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_CUTOUT);
+            material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);
+            material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.Zero);
+            material.DisableKeyword(KW_ALPHABLEND_ON);
+        }
+
+        public static void SetAlphaModeMask(UnityEngine.Material material, Schema.Material gltfMaterial)
+        {
+            SetAlphaModeMask(material, gltfMaterial.alphaCutoff);
+        }
+
+        public static void SetAlphaModeBlend( UnityEngine.Material material ) {
+            material.SetFloat(modePropId, (int)StandardShaderMode.Fade);
+            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_FADE);
+            material.EnableKeyword(KW_ALPHABLEND_ON);
+            material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);//5
+            material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);//10
+            material.SetInt(zWritePropId, 0);
+            material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
+            material.DisableKeyword(KW_ALPHATEST_ON);
+            material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
+        }
+
+        public static void SetAlphaModeTransparent( UnityEngine.Material material ) {
+            material.SetFloat(modePropId, (int)StandardShaderMode.Fade);
+            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
+            material.EnableKeyword(KW_ALPHAPREMULTIPLY_ON);
+            material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);//1
+            material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);//10
+            material.SetInt(zWritePropId, 0);
+            material.DisableKeyword(KW_ALPHABLEND_ON);
+            material.DisableKeyword(KW_ALPHATEST_ON);
+            material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
+        }
+
+        public static void SetOpaqueMode(UnityEngine.Material material) {
+            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_OPAQUE);
+            material.DisableKeyword(KW_ALPHABLEND_ON);
+            material.renderQueue = -1;
+            material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);
+            material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.Zero);
+            material.SetInt(zWritePropId, 1);
+            material.DisableKeyword(KW_ALPHATEST_ON);
+            material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
+        }
     }
 }
-#endif // !GLTFAST_SHADER_GRAPH
+#endif // GLTFAST_BUILTIN_RP || UNITY_EDITOR
