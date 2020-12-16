@@ -18,10 +18,13 @@ using System.IO;
 using System.Linq;
 using System.Security.AccessControl;
 using GLTFast;
+using GLTFast.Materials;
 using GLTFast.Schema;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 
 [CustomEditor(typeof(GltfSampleSet))]
 public class GltfSampleSetEditor : Editor
@@ -65,9 +68,12 @@ public class GltfSampleSetEditor : Editor
         var allScenes = new List<EditorBuildSettingsScene>();
         Texture2D dummyReference = null;
 
+        var renderPipeline = DetectRenderPipeline();
+        var prefix = renderPipeline == RenderPipeline.HighDefinition ? "HDRP" : "";
+
         foreach (var item in sampleSet.GetItems())
         {
-            var testScene = EditorSceneManager.OpenScene("Assets/Scenes/TestScene.unity");
+            var testScene = EditorSceneManager.OpenScene($"Assets/Scenes/TestScene{prefix}.unity");
             
             var settingsGameObject = new GameObject("GraphicsTestSettings");
             var graphicsTestSettings = settingsGameObject.AddComponent<UniversalGraphicsTestSettings>();
@@ -84,8 +90,8 @@ public class GltfSampleSetEditor : Editor
             gltfAsset.loadOnStartup = true;
             gltfAsset.createBoxCollider = false;
             
-            var sceneDirectory = CertifyDirectory(item.directoryParts, string.Format("Assets/Scenes/{0}", sampleSet.name));
-            var scenePath = Path.Combine(sceneDirectory, item.name+".unity");
+            var sceneDirectory = CertifyDirectory(item.directoryParts, $"Assets/Scenes/{sampleSet.name}");
+            var scenePath = Path.Combine(sceneDirectory, $"{prefix}{item.name}.unity");
 
             EditorSceneManager.SaveScene(testScene,scenePath);
             allScenes.Add(new EditorBuildSettingsScene(scenePath,true));
@@ -108,6 +114,31 @@ public class GltfSampleSetEditor : Editor
 #else
         Debug.LogWarning("Please install  the Graphics Test Framework for render tests to work.");
 #endif
+    }
+
+    enum RenderPipeline {
+        Unknown,
+        BuiltIn,
+        Universal,
+        HighDefinition,
+    }
+    
+    static RenderPipeline DetectRenderPipeline() {
+        // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
+        if (GraphicsSettings.renderPipelineAsset != null) {
+#if USING_URP
+                if (GraphicsSettings.renderPipelineAsset is UniversalRenderPipelineAsset urpAsset) {
+                    return defaultMaterialGenerator;
+                }
+#endif
+#if USING_HDRP
+            if (GraphicsSettings.renderPipelineAsset is HDRenderPipelineAsset) {
+                return RenderPipeline.HighDefinition;
+            }
+#endif
+            return RenderPipeline.Unknown;
+        }
+        return RenderPipeline.BuiltIn;
     }
 
     private static string CertifyDirectory(string[] directoryParts, string directoyPath)
