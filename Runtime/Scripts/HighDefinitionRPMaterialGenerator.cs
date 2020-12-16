@@ -30,6 +30,7 @@ namespace GLTFast.Materials {
     public class HighDefinitionRPMaterialGenerator : ShaderGraphMaterialGenerator {
         
         const string KW_DISABLE_SSR_TRANSPARENT = "_DISABLE_SSR_TRANSPARENT";
+        const string KW_DOUBLESIDED_ON = "_DOUBLESIDED_ON";
         const string KW_ENABLE_FOG_ON_TRANSPARENT = "_ENABLE_FOG_ON_TRANSPARENT";
         const string KW_NORMALMAP_TANGENT_SPACE = "_NORMALMAP_TANGENT_SPACE";
         const string KW_SURFACE_TYPE_TRANSPARENT = "_SURFACE_TYPE_TRANSPARENT";
@@ -37,6 +38,10 @@ namespace GLTFast.Materials {
         static readonly int alphaCutoffEnablePropId = Shader.PropertyToID("_AlphaCutoffEnable");
         static readonly int alphaDstBlendPropId = Shader.PropertyToID("_AlphaDstBlend");
         static readonly int alphaSrcBlendPropId = Shader.PropertyToID("_AlphaSrcBlend");
+        static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
+        static readonly int cullModeForwardPropId = Shader.PropertyToID("_CullModeForward");
+        static readonly int doubleSidedEnablePropId = Shader.PropertyToID("_DoubleSidedEnable");
+        static readonly int doubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
         static readonly int enableBlendModePreserveSpecularLightingPropId = Shader.PropertyToID("_EnableBlendModePreserveSpecularLighting");
 
         public override Material GenerateMaterial(
@@ -48,6 +53,13 @@ namespace GLTFast.Materials {
             var material = base.GenerateMaterial(gltfMaterial, ref textures, ref schemaImages, ref imageVariants);
             material.EnableKeyword(KW_NORMALMAP_TANGENT_SPACE);
             material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
+            if (gltfMaterial.doubleSided) {
+                material.EnableKeyword(KW_DOUBLESIDED_ON);
+                material.SetInt(doubleSidedEnablePropId,1);
+                material.SetInt(doubleSidedNormalModePropId,0);
+                material.SetInt(cullModePropId,0);
+                material.SetInt(cullModeForwardPropId,0);
+            }
             return material;
         }
 
@@ -79,7 +91,7 @@ namespace GLTFast.Materials {
             // TODO: add sheen support
             bool sheen = false; // (metallicShaderFeatures & MetallicShaderFeatures.Sheen) != 0;
             bool doubleSided = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0;
-            return $"Shader Graphs/glTF-metallic-Opaque{(coat ? "-coat" : "")}{(sheen ? "-sheen" : "")}{(doubleSided ? "-double" : "")}";
+            return $"Shader Graphs/glTF-metallic-Opaque{(coat ? "-coat" : "")}{(sheen ? "-sheen" : "")}";
         }
         
         public override void SetAlphaModeBlend( Material material ) {
