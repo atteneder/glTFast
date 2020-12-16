@@ -42,9 +42,13 @@ namespace GLTFast.Materials {
         }
         
         public const string KW_UV_ROTATION = "_UV_ROTATION";
+        public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
         
         public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
         public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
+        public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
+        public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
+        public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
         
         static IMaterialGenerator defaultMaterialGenerator;
         

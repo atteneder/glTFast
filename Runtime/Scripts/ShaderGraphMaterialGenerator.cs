@@ -70,7 +70,7 @@ namespace GLTFast.Materials {
         const string KW_EMISSION = "EMISSION";
         const string KW_CLEARCOAT_MAP = "CLEARCOAT_MAP";
 
-        static readonly int alphaCutoffPropId = Shader.PropertyToID("alphaCutoff");
+        protected static readonly int alphaCutoffPropId = Shader.PropertyToID("alphaCutoff");
         static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
         static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");
         static readonly int clearcoatFactorPropId = Shader.PropertyToID("clearcoatFactor");
@@ -104,19 +104,7 @@ namespace GLTFast.Materials {
             bool doubleSided = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0;
             
             if(!metallicShaders.TryGetValue(metallicShaderFeatures,value: out var shader)) {
-                ShaderMode mode = (ShaderMode) (metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
-                bool coat = (metallicShaderFeatures & MetallicShaderFeatures.ClearCoat) != 0;
-                // TODO: add sheen support
-                bool sheen = false; // (metallicShaderFeatures & MetallicShaderFeatures.Sheen) != 0;
-                
-                var shaderName = string.Format(
-                    "Shader Graphs/glTF-metallic-{0}{1}{2}{3}",
-                    mode,
-                    coat ? "-coat" : "",
-                    sheen ? "-sheen" : "",
-                    doubleSided ? "-double" : ""
-                );
-                shader = FindShader(shaderName);
+                shader = FindShader(GetShaderName(metallicShaderFeatures));
                 metallicShaders[metallicShaderFeatures] = shader;
             }
             if(shader==null) {
@@ -127,6 +115,19 @@ namespace GLTFast.Materials {
             mat.doubleSidedGI = doubleSided; 
 #endif
             return mat;
+        }
+
+        /// <summary>
+        /// Get the shader's name that supports the required features.
+        /// </summary>
+        /// <param name="metallicShaderFeatures">Required features</param>
+        protected virtual string GetShaderName(MetallicShaderFeatures metallicShaderFeatures) {
+            ShaderMode mode = (ShaderMode) (metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
+            bool coat = (metallicShaderFeatures & MetallicShaderFeatures.ClearCoat) != 0;
+            // TODO: add sheen support
+            bool sheen = false; // (metallicShaderFeatures & MetallicShaderFeatures.Sheen) != 0;
+            bool doubleSided = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0;
+            return $"Shader Graphs/glTF-metallic-{mode}{(coat ? "-coat" : "")}{(sheen ? "-sheen" : "")}{(doubleSided ? "-double" : "")}";
         }
 
         static Material GetUnlitMaterial(bool doubleSided=false)
@@ -172,8 +173,8 @@ namespace GLTFast.Materials {
 
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
-            ref Schema.Texture[] textures,
-            ref Schema.Image[] schemaImages,
+            ref Texture[] textures,
+            ref Image[] schemaImages,
             ref Dictionary<int,Texture2D>[] imageVariants
         ) {
             Material material;
@@ -212,7 +213,7 @@ namespace GLTFast.Materials {
             
             //added support for KHR_materials_pbrSpecularGlossiness
             if (gltfMaterial.extensions != null) {
-                Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
+                PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
                     baseColorLinear = specGloss.diffuseColor;
                     material.SetVector(specularFactorPropId, specGloss.specularColor);
@@ -283,8 +284,9 @@ namespace GLTFast.Materials {
                     ApplyClearcoat(ref textures, ref schemaImages, ref imageVariants, material, clearcoat);
                 }
             }
+
+            ApplyAlphaCutoff(material,gltfMaterial.alphaModeEnum==AlphaMode.MASK, gltfMaterial.alphaCutoff);
             
-            material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaModeEnum == AlphaMode.MASK ? gltfMaterial.alphaCutoff : 0);
             if (!renderQueue.HasValue) {
                 if(shaderMode == ShaderMode.Opaque) {
                     renderQueue = gltfMaterial.alphaModeEnum == AlphaMode.MASK
@@ -296,7 +298,16 @@ namespace GLTFast.Materials {
             }
 
             material.renderQueue = (int) renderQueue.Value;
-
+            switch (shaderMode) {
+                case ShaderMode.Opaque:
+                    break;
+                case ShaderMode.Blend:
+                    SetAlphaModeBlend(material);
+                    break;
+                case ShaderMode.Premultiply:
+                    SetAlphaModeTransparent(material);
+                    break;
+            }
             material.SetVector(baseColorFactorPropId, baseColorLinear);
             
             if(gltfMaterial.emissive != Color.black) {
@@ -305,6 +316,17 @@ namespace GLTFast.Materials {
             }
 
             return material;
+        }
+
+        protected virtual void ApplyAlphaCutoff(Material material, bool enable, float alphaCutoff) {
+            if (enable) {
+                material.EnableKeyword(KW_ALPHATEST_ON);
+                material.SetFloat(alphaCutoffPropId, alphaCutoff);
+            }
+            else {
+                material.DisableKeyword(KW_ALPHATEST_ON);
+                material.SetFloat(alphaCutoffPropId, 0);
+            }
         }
 
         protected virtual void ApplyClearcoat(ref Texture[] textures, ref Image[] schemaImages, ref Dictionary<int, Texture2D>[] imageVariants, Material material, ClearCoat clearcoat) {
@@ -393,6 +415,10 @@ namespace GLTFast.Materials {
             }
             return feature;
         }
+        
+        public virtual void SetAlphaModeBlend( Material material ) {}
+
+        public virtual void SetAlphaModeTransparent( Material material ) {}
     }
 }
 #endif // GLTFAST_SHADER_GRAPH

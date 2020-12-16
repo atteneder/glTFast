@@ -44,7 +44,6 @@ namespace GLTFast.Materials {
 
         // Built-in Render Pipeline
         public const string KW_ALPHAPREMULTIPLY_ON = "_ALPHAPREMULTIPLY_ON";
-        public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
         public const string KW_EMISSION = "_EMISSION";
         public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
         public const string KW_NORMALMAP = "_NORMALMAP";
@@ -58,7 +57,6 @@ namespace GLTFast.Materials {
         public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
         public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
         public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
-        public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
         public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
         public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
         public static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
@@ -69,8 +67,6 @@ namespace GLTFast.Materials {
         public static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");
         public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
         public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
-        public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
-        public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
 
         static readonly int modePropId = Shader.PropertyToID("_Mode");
 
