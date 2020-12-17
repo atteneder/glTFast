@@ -33,6 +33,7 @@ namespace GLTFast.Materials {
         const string KW_DOUBLESIDED_ON = "_DOUBLESIDED_ON";
         const string KW_ENABLE_FOG_ON_TRANSPARENT = "_ENABLE_FOG_ON_TRANSPARENT";
         const string KW_NORMALMAP_TANGENT_SPACE = "_NORMALMAP_TANGENT_SPACE";
+        const string KW_REFRACTION_THIN = "_REFRACTION_THIN";
         const string KW_SURFACE_TYPE_TRANSPARENT = "_SURFACE_TYPE_TRANSPARENT";
         
         static readonly int alphaCutoffEnablePropId = Shader.PropertyToID("_AlphaCutoffEnable");
@@ -92,6 +93,36 @@ namespace GLTFast.Materials {
             base.ApplyClearcoat(ref textures,ref schemaImages,ref imageVariants,material,clearcoat);
 
             if (TrySetTexture(clearcoat.clearcoatNormalTexture, material, clearcoatNormalTexturePropId, ref textures, ref schemaImages, ref imageVariants)) { }
+        }
+        
+        protected override ShaderMode? ApplyTransmissionShaderFeatures(Schema.Material gltfMaterial) {
+            // No explicitly change in shader features
+            return null;
+        }
+        
+        protected override bool? ApplyTransmission(
+            ref Color baseColorLinear,
+            ref Texture[] textures,
+            ref Image[] schemaImages,
+            ref Dictionary<int, Texture2D>[] imageVariants,
+            Transmission transmission,
+            Material material,
+            ref RenderQueue? renderQueue
+        ) {
+            if (transmission.transmissionFactor > 0f) {
+                // material.EnableKeyword("TRANSMISSION");
+                material.EnableKeyword(KW_REFRACTION_THIN);
+                material.SetFloat(transmissionFactorPropId, transmission.transmissionFactor);
+                material.SetFloat(transmissionFactorPropId, transmission.transmissionFactor);
+                renderQueue = RenderQueue.Transparent;
+                if (TrySetTexture(transmission.transmissionTexture, material, transmissionTexturePropId, ref textures, ref schemaImages, ref imageVariants)) {
+                    
+                } else {
+                    baseColorLinear.a *= 1 - transmission.transmissionFactor;
+                }
+                return false;
+            }
+            return null;
         }
         
         /// <summary>

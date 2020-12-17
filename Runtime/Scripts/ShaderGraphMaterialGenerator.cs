@@ -276,7 +276,17 @@ namespace GLTFast.Materials {
                 // Transmission - Approximation
                 var transmission = gltfMaterial.extensions.KHR_materials_transmission;
                 if (transmission != null) {
-                    renderQueue = ApplyTransmission(ref baseColorLinear, ref textures, ref schemaImages, ref imageVariants, transmission, material, renderQueue);
+                    var premul = ApplyTransmission(ref baseColorLinear, ref textures, ref schemaImages, ref imageVariants, transmission, material, ref renderQueue);
+                    if (premul.HasValue) {
+                        if (premul.Value) {
+                            renderQueue = RenderQueue.Transparent;
+                            shaderMode = ShaderMode.Premultiply;
+                        }
+                        else {
+                            renderQueue = RenderQueue.Transparent;
+                            shaderMode = ShaderMode.Blend;
+                        }
+                    }
                 }
 
                 var clearcoat = gltfMaterial.extensions.KHR_materials_clearcoat;
@@ -345,14 +355,25 @@ namespace GLTFast.Materials {
             }
         }
 
-        protected virtual RenderQueue? ApplyTransmission(
+        /// <summary>
+        /// Applies Material Transmission
+        /// </summary>
+        /// <param name="baseColorLinear"></param>
+        /// <param name="textures"></param>
+        /// <param name="schemaImages"></param>
+        /// <param name="imageVariants"></param>
+        /// <param name="transmission"></param>
+        /// <param name="material"></param>
+        /// <param name="renderQueue"></param>
+        /// <returns>True, when premultiplied makeshift solution was applied</returns>
+        protected virtual bool? ApplyTransmission(
             ref Color baseColorLinear,
             ref Texture[] textures,
             ref Image[] schemaImages,
             ref Dictionary<int, Texture2D>[] imageVariants,
             Transmission transmission,
             Material material,
-            RenderQueue? renderQueue
+            ref RenderQueue? renderQueue
             )
         {
 #if UNITY_EDITOR
@@ -365,9 +386,9 @@ namespace GLTFast.Materials {
             // Correct transmission is not supported in Built-In renderer
             // This is an approximation for some corner cases
             if (transmission.transmissionFactor > 0f && transmission.transmissionTexture.index < 0) {
-                var premul = TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
+                return TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
             }
-            return renderQueue;
+            return null;
         }
 
         protected MetallicShaderFeatures GetMetallicShaderFeatures(Schema.Material gltfMaterial) {

@@ -43,14 +43,14 @@ namespace GLTFast.Materials {
             return null;
         }
         
-        protected override RenderQueue? ApplyTransmission(
+        protected override bool? ApplyTransmission(
             ref Color baseColorLinear,
             ref Texture[] textures,
             ref Image[] schemaImages,
             ref Dictionary<int, Texture2D>[] imageVariants,
             Transmission transmission,
             Material material,
-            RenderQueue? renderQueue
+            ref RenderQueue? renderQueue
         ) {
             if (supportsCameraOpaqueTexture) {
                 if (transmission.transmissionFactor > 0f) {
@@ -59,7 +59,7 @@ namespace GLTFast.Materials {
                     renderQueue = RenderQueue.Transparent;
                     if (TrySetTexture(transmission.transmissionTexture, material, transmissionTexturePropId, ref textures, ref schemaImages, ref imageVariants)) { }
                 }
-                return renderQueue;
+                return true;
             }
 
             return base.ApplyTransmission(
@@ -69,7 +69,7 @@ namespace GLTFast.Materials {
                 ref imageVariants,
                 transmission,
                 material,
-                renderQueue
+                ref renderQueue
                 );
         }
     }
