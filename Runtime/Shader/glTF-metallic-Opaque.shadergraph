@@ -230,20 +230,6 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
-                    "m_Id": "29e3017c13268285bdae40a33316bc24"
-                },
-                "m_SlotId": 2
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "a80a7268c104488ca45e2ab68bed1fa2"
-                },
-                "m_SlotId": 0
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
                     "m_Id": "32b4b42c749e8c8582eaf571f0218212"
                 },
                 "m_SlotId": 0
@@ -1388,9 +1374,6 @@
         },
         {
             "m_Id": "ec0667961e4fc2829e3a16b3416bbc54"
-        },
-        {
-            "m_Id": "d6c0c7d991fa4a148447ce425ebc7e7e"
         }
     ],
     "synonyms": [],
@@ -2006,7 +1989,7 @@
     "m_SurfaceType": 0,
     "m_AlphaMode": 0,
     "m_TwoSided": false,
-    "m_AlphaClip": true,
+    "m_AlphaClip": false,
     "m_CustomEditorGUI": "GLTFast.Editor.ShaderGraphGUI"
 }
 
@@ -3536,21 +3519,6 @@
 
 {
     "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
-    "m_ObjectId": "d6c0c7d991fa4a148447ce425ebc7e7e",
-    "m_Id": 2,
-    "m_DisplayName": "TransmissionFactor",
-    "m_SlotType": 1,
-    "m_Hidden": false,
-    "m_ShaderOutputName": "TransmissionFactor",
-    "m_StageCapability": 2,
-    "m_Value": 0.0,
-    "m_DefaultValue": 0.0,
-    "m_Labels": []
-}
-
-{
-    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.BlockNode",
     "m_ObjectId": "d73d798f07bf4c568a1292ec3fd764f0",
     "m_Group": {
@@ -3777,10 +3745,10 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
     "m_ObjectId": "ec0667961e4fc2829e3a16b3416bbc54",
     "m_Id": 1,
-    "m_DisplayName": "AlbedoColor",
+    "m_DisplayName": "Out_Vector3",
     "m_SlotType": 1,
     "m_Hidden": false,
-    "m_ShaderOutputName": "AlbedoColor",
+    "m_ShaderOutputName": "OutVector3",
     "m_StageCapability": 2,
     "m_Value": {
         "x": 0.0,
