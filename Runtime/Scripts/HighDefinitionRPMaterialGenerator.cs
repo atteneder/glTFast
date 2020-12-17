@@ -44,6 +44,12 @@ namespace GLTFast.Materials {
         static readonly int doubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
         static readonly int enableBlendModePreserveSpecularLightingPropId = Shader.PropertyToID("_EnableBlendModePreserveSpecularLighting");
 
+        /// <summary>
+        /// In HDRP emission has to be in nits (or exposure values?), so we multiply the color
+        /// with the emissionIntensity.
+        /// </summary>
+        public float emissionIntensity = 10000;
+
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
             ref Texture[] textures,
@@ -61,6 +67,13 @@ namespace GLTFast.Materials {
                 material.SetInt(cullModeForwardPropId,0);
             }
             return material;
+        }
+        
+        protected override void ApplyEmission(Material material,Color emissive) {
+            emissive.r *= emissionIntensity;
+            emissive.g *= emissionIntensity;
+            emissive.b *= emissionIntensity;
+            base.ApplyEmission(material,emissive);
         }
 
         protected override void ApplyAlphaCutoff(Material material, bool enable, float alphaCutoff) {
