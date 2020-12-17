@@ -76,6 +76,9 @@ namespace GLTFast.Materials {
 #if GLTFAST_BUILTIN_RP || UNITY_EDITOR
             defaultMaterialGenerator = new BuiltInMaterialGenerator();
             return defaultMaterialGenerator;
+#else
+            Debug.LogError("glTFast: Could not detect Render Pipeline");
+            return null;
 #endif
         }
 
