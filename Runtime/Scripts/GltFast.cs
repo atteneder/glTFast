@@ -772,13 +772,20 @@ namespace GLTFast {
             return buffers[index];
         }
 
-        NativeSlice<byte> GetBufferView(BufferView bufferView) {
+        NativeArray<byte> GetNativeBuffer(BufferView bufferView, out int start) {
             int bufferIndex = bufferView.buffer;
             if(!nativeBuffers[bufferIndex].IsCreated) {
                 nativeBuffers[bufferIndex] = new NativeArray<byte>(GetBuffer(bufferIndex),Allocator.Persistent);
             }
             var chunk = binChunks[bufferIndex];
-            return new NativeSlice<byte>(nativeBuffers[bufferIndex],chunk.start+bufferView.byteOffset,bufferView.byteLength);
+            start = chunk.start;
+            return nativeBuffers[bufferIndex];
+        }
+        
+        NativeSlice<byte> GetBufferView(BufferView bufferView) {
+            int bufferIndex = bufferView.buffer;
+            var nativeBuffer = GetNativeBuffer(bufferView, out int start);
+            return new NativeSlice<byte>(nativeBuffer,start+bufferView.byteOffset,bufferView.byteLength);
         }
 
         IEnumerator Prepare() {
@@ -945,15 +952,15 @@ namespace GLTFast {
             
             primitiveContexts = null;
 
-            if(nativeBuffers!=null) {
-                foreach (var nativeBuffer in nativeBuffers)
-                {
-                    if(nativeBuffer.IsCreated) {
-                        nativeBuffer.Dispose();
-                    }
-                }
-            }
-            nativeBuffers = null;
+            // if(nativeBuffers!=null) {
+            //     foreach (var nativeBuffer in nativeBuffers)
+            //     {
+            //         if(nativeBuffer.IsCreated) {
+            //             nativeBuffer.Dispose();
+            //         }
+            //     }
+            // }
+            // nativeBuffers = null;
             buffers = null;
             binChunks = null;
 
@@ -1251,7 +1258,11 @@ namespace GLTFast {
                             mainBufferType = MainBufferType.PosNormTan;
                         } else
                         if(att.NORMAL>=0) {
-                            mainBufferType = MainBufferType.PosNorm;
+                            if (att.TEXCOORD_0 >= 0) {
+                                mainBufferType = MainBufferType.PosNormTexCoords;
+                            } else {
+                                mainBufferType = MainBufferType.PosNorm;
+                            }
                         } else {
                             mainBufferType = MainBufferType.Position;
                         }
@@ -1355,6 +1366,10 @@ namespace GLTFast {
                     case MainBufferType.PosNormTan:
                         config = new VertexBufferConfig<Vertex.VPosNormTan>();
                         break;
+                    case MainBufferType.PosNormTexCoords:
+                        // config = new VertexBufferConfig<Vertex.VPosNormTexCoords>();
+                        config = new VertexBufferConfigInterleaved<Vertex.VPosNormTexCoords>();
+                        break;
                     default:
                         #if DEBUG
                         Debug.LogErrorFormat("Invalid mainBufferType {0}",mainBufferType);
@@ -1379,7 +1394,7 @@ namespace GLTFast {
                 if (jh.HasValue) {
                     tmpList.Add(jh.Value);
                 } else {
-                    loadingError = true;
+                    // loadingError = true;
                 }
             }
 
@@ -1782,9 +1797,11 @@ namespace GLTFast {
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
             var bufferIndex = bufferView.buffer;
+            var nativeBuffer = GetNativeBuffer(bufferView, out int start);
             var result = new VertexInputData {
                 accessor = accessor,
                 buffer = GetBuffer(bufferIndex),
+                nativeBuffer = nativeBuffer,
                 bufferView = bufferView,
                 chunkStart = binChunks[bufferIndex].start
             };

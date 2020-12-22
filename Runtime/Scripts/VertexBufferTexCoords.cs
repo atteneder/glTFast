@@ -31,67 +31,8 @@ namespace GLTFast {
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default);
         public abstract void Dispose();
-    }
-
-    class VertexBufferTexCoords<T> : VertexBufferTexCoordsBase where T : struct {
-        NativeArray<T> vData;
-
-        public override unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles) {
-            Profiler.BeginSample("ScheduleVertexUVJobs");
-            Profiler.BeginSample("AllocateNativeArray");
-            vData = new NativeArray<T>(uvInputs[0].count, VertexBufferConfigBase.defaultAllocator);
-            var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
-            Profiler.EndSample();
-            uvSetCount = uvInputs.Length;
-            int outputByteStride = uvInputs.Length * 8;
-
-            for (int i=0; i<uvInputs.Length; i++) {
-                var uvInput = uvInputs[i];
-                fixed( void* input = &(uvInput.buffer[uvInput.startOffset])) {
-                    var h = GetUvsJob(
-                        input,
-                        uvInput.count,
-                        uvInput.type,
-                        uvInput.byteStride,
-                        (Vector2*) (vDataPtr+(i*8)),
-                        outputByteStride,
-                        uvInput.normalize
-                    );
-                    if (h.HasValue) {
-                        handles[i] = h.Value;
-                    } else {
-                        Profiler.EndSample();
-                        return false;
-                    }
-                }
-            }
-            Profiler.EndSample();
-            return true;
-        }
-
-        public override void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream) {
-            VertexAttribute vatt = VertexAttribute.TexCoord0;
-            for (int i = 0; i < uvSetCount; i++) {
-                if (i == 1) {
-                    vatt = VertexAttribute.TexCoord1;
-                }
-                dst[offset+i] = new VertexAttributeDescriptor(vatt, VertexAttributeFormat.Float32, 2, stream);
-            }
-        }
-
-        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
-            Profiler.BeginSample("ApplyUVs");
-            msh.SetVertexBufferData(vData,0,0,vData.Length,stream,flags);
-            Profiler.EndSample();
-        }
-
-        public override void Dispose() {
-            if (vData.IsCreated) {
-                vData.Dispose();
-            }
-        }
-
-        unsafe JobHandle? GetUvsJob(
+        
+        public static unsafe JobHandle? GetUvsJob(
             void* input,
             int count,
             GLTFComponentType inputType,
@@ -199,6 +140,65 @@ namespace GLTFast {
             }
             Profiler.EndSample();
             return jobHandle;
+        }
+    }
+
+    class VertexBufferTexCoords<T> : VertexBufferTexCoordsBase where T : struct {
+        NativeArray<T> vData;
+
+        public override unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles) {
+            Profiler.BeginSample("ScheduleVertexUVJobs");
+            Profiler.BeginSample("AllocateNativeArray");
+            vData = new NativeArray<T>(uvInputs[0].count, VertexBufferConfigBase.defaultAllocator);
+            var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
+            Profiler.EndSample();
+            uvSetCount = uvInputs.Length;
+            int outputByteStride = uvInputs.Length * 8;
+
+            for (int i=0; i<uvInputs.Length; i++) {
+                var uvInput = uvInputs[i];
+                fixed( void* input = &(uvInput.buffer[uvInput.startOffset])) {
+                    var h = GetUvsJob(
+                        input,
+                        uvInput.count,
+                        uvInput.type,
+                        uvInput.byteStride,
+                        (Vector2*) (vDataPtr+(i*8)),
+                        outputByteStride,
+                        uvInput.normalize
+                    );
+                    if (h.HasValue) {
+                        handles[i] = h.Value;
+                    } else {
+                        Profiler.EndSample();
+                        return false;
+                    }
+                }
+            }
+            Profiler.EndSample();
+            return true;
+        }
+
+        public override void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream) {
+            VertexAttribute vatt = VertexAttribute.TexCoord0;
+            for (int i = 0; i < uvSetCount; i++) {
+                if (i == 1) {
+                    vatt = VertexAttribute.TexCoord1;
+                }
+                dst[offset+i] = new VertexAttributeDescriptor(vatt, VertexAttributeFormat.Float32, 2, stream);
+            }
+        }
+
+        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
+            Profiler.BeginSample("ApplyUVs");
+            msh.SetVertexBufferData(vData,0,0,vData.Length,stream,flags);
+            Profiler.EndSample();
+        }
+
+        public override void Dispose() {
+            if (vData.IsCreated) {
+                vData.Dispose();
+            }
         }
     }
 }

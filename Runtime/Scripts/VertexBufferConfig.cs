@@ -39,6 +39,7 @@ namespace GLTFast
         NativeArray<VType> vData;
 
         bool hasNormals;
+        bool hasTexCoords;
         bool hasTangents;
         bool hasColors;
         bool hasBones;
@@ -69,25 +70,17 @@ namespace GLTFast
                 if(nrmInput.HasValue) jobCount++;
                 outputByteStride += 12;
             }
-
+            hasTexCoords = uvInputs!=null && uvInputs.Length>0;
+            if (hasTexCoords) {
+                jobCount += uvInputs.Length;
+                outputByteStride += 8*uvInputs.Length;
+            }
             hasTangents = tanInput.HasValue || calculateTangents;
             if (hasTangents) {
                 if(tanInput.HasValue) jobCount++;
                 outputByteStride += 16;
             }
             
-            if (uvInputs!=null && uvInputs.Length>0) {
-                jobCount += uvInputs.Length;
-                switch (uvInputs.Length) {
-                    case 1:
-                        texCoords = new VertexBufferTexCoords<VTexCoord1>();
-                        break;
-                    default:
-                        texCoords = new VertexBufferTexCoords<VTexCoord2>();
-                        break;
-                }
-            }
-
             hasColors = colorInput.HasValue;
             if (hasColors) {
                 jobCount++;
@@ -132,6 +125,28 @@ namespace GLTFast
                         (Vector3*) (vDataPtr+12),
                         outputByteStride,
                         nrmInput.Value.normalize
+                    );
+                    if (h.HasValue) {
+                        handles[handleIndex] = h.Value;
+                        handleIndex++;
+                    } else {
+                        Profiler.EndSample();
+                        return null;
+                    }
+                }
+            }
+            
+            if (uvInputs!=null) {
+                var uvInput = uvInputs[0];
+                fixed( void* input = &(uvInput.buffer[uvInput.startOffset])) {
+                    var h = VertexBufferTexCoordsBase.GetUvsJob(
+                        input,
+                        uvInput.count,
+                        uvInput.type,
+                        uvInput.byteStride,
+                        (Vector2*) (vDataPtr+24),
+                        outputByteStride,
+                        uvInput.normalize
                     );
                     if (h.HasValue) {
                         handles[handleIndex] = h.Value;
@@ -188,6 +203,7 @@ namespace GLTFast
         protected void CreateDescriptors() {
             int vadLen = 1;
             if (hasNormals) vadLen++;
+            if (hasTexCoords) vadLen++;
             if (hasTangents) vadLen++;
             if (texCoords != null) vadLen += texCoords.uvSetCount;
             if (colors != null) vadLen++;
@@ -201,17 +217,21 @@ namespace GLTFast
                 vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3, stream);
                 vadCount++;
             }
+            if (hasTexCoords) {
+                vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2, stream);
+                vadCount++;
+            }
             if(hasTangents) {
                 vad[vadCount] = new VertexAttributeDescriptor(VertexAttribute.Tangent, VertexAttributeFormat.Float32, 4, stream);
                 vadCount++;
             }
             stream++;
             
-            if (texCoords != null) {
-                texCoords.AddDescriptors(vad,vadCount,stream);
-                vadCount++;
-                stream++;
-            }
+            // if (texCoords != null) {
+            //     texCoords.AddDescriptors(vad,vadCount,stream);
+            //     vadCount++;
+            //     stream++;
+            // }
 
             if (colors != null) {
                 colors.AddDescriptors(vad,vadCount,stream);
@@ -243,10 +263,10 @@ namespace GLTFast
             stream++;
             Profiler.EndSample();
 
-            if (texCoords != null) {
-                texCoords.ApplyOnMesh(msh,stream,flags);
-                stream++;
-            }
+            // if (texCoords != null) {
+            //     texCoords.ApplyOnMesh(msh,stream,flags);
+            //     stream++;
+            // }
             
             if (colors != null) {
                 colors.ApplyOnMesh(msh,stream,flags);

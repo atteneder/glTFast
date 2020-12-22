@@ -37,6 +37,19 @@ namespace GLTFast.Vertex
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    public struct VPosNormTexCoords {
+#if BURST
+        public float3 pos;
+        public float3 nrm;
+        public float2 uv;
+#else
+        public Vector3 pos;
+        public Vector3 nrm;
+        public Vector2 uv;
+#endif
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     struct VPosNorm {
 #if BURST
         public float3 pos;

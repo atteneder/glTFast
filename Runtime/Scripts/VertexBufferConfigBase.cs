@@ -35,12 +35,13 @@ namespace GLTFast
     [System.Flags]
     enum MainBufferType {
         None = 0x0,
-        Position = 0x1,
-        Normal = 0x2,
-        Tangent = 0x4,
-        
-        PosNorm = 0x3,
-        PosNormTan = 0x7,
+        Position = 1,
+        Normal = 1<<1,
+        Tangent = 1<<2,
+        TexCoords = 1<<3,
+        PosNorm = Position | Normal,
+        PosNormTan = Position | Normal | Tangent,
+        PosNormTexCoords = Position | Normal | TexCoords,
     }
 
     struct VertexInputData {
@@ -49,6 +50,7 @@ namespace GLTFast
         public BufferView bufferView;
         public int chunkStart;
         public byte[] buffer;
+        public NativeArray<byte> nativeBuffer;
 
         public int startOffset {
             get { return accessor.byteOffset + bufferView.byteOffset + chunkStart; }
