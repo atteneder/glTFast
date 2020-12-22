@@ -97,6 +97,8 @@ Like Standard Shader inspector, but for glTF shaders
 
 ## Optimization
 
+- Investigate [Mesh API 2020.1 improvements](https://docs.google.com/document/d/1QC7NV7JQcvibeelORJvsaTReTyszllOlxdfEsaVL2oA/edit#heading=h.3lwfbowmy03j)
+
 ### Minimize Requirements
 
 Minimize build size by making as many dependencies as possible optional.
