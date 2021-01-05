@@ -60,7 +60,7 @@ namespace GLTFast.Materials {
             if (GraphicsSettings.renderPipelineAsset != null) {
 #if USING_URP
                 if (GraphicsSettings.renderPipelineAsset is UniversalRenderPipelineAsset urpAsset) {
-                    defaultMaterialGenerator = new UniveralRPMaterialGenerator(urpAsset);
+                    defaultMaterialGenerator = new UniversalRPMaterialGenerator(urpAsset);
                     return defaultMaterialGenerator;
                 }
 #endif
