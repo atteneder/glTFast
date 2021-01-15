@@ -68,23 +68,13 @@ namespace GLTFast.Materials {
         // Keywords
         const string KW_OCCLUSION = "OCCLUSION";
         const string KW_EMISSION = "EMISSION";
-
-        static readonly int alphaCutoffPropId = Shader.PropertyToID("alphaCutoff");
-        static readonly int baseColorFactorPropId = Shader.PropertyToID("baseColorFactor");
-        static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");
-        static readonly int emissiveFactorPropId = Shader.PropertyToID("emissiveFactor");
-        static readonly int emissiveTexturePropId = Shader.PropertyToID("emissiveTexture");
-        static readonly int glossinessFactorPropId = Shader.PropertyToID("glossinessFactor");
-        static readonly int metallicFactorPropId = Shader.PropertyToID("metallicFactor");
+        
+        static readonly int baseColorPropId = Shader.PropertyToID("_BaseColor");
+        static readonly int baseMapPropId = Shader.PropertyToID("_BaseMap");
         static readonly int metallicRoughnessTexturePropId = Shader.PropertyToID("metallicRoughnessTexture");
-        static readonly int normalScalePropId = Shader.PropertyToID("normalScale");
-        static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
-        static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexture");
-        static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
-        static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
-        static readonly int specularGlossinessTexturePropId = Shader.PropertyToID("specularGlossinessTexture");
+        static readonly int smoothnessPropId = Shader.PropertyToID("_Smoothness");
         protected static readonly int transmissionFactorPropId = Shader.PropertyToID("transmissionFactor");
-        protected static readonly int transmissionTexturePropId = Shader.PropertyToID("transmissionTexture");
+        protected static readonly int transmissionTexturePropId = Shader.PropertyToID("_TransmittanceColorMap");
 
         static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
         static Dictionary<SpecularShaderFeatures,Shader> specularShaders = new Dictionary<SpecularShaderFeatures,Shader>();
@@ -211,12 +201,12 @@ namespace GLTFast.Materials {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
                     baseColorLinear = specGloss.diffuseColor;
-                    material.SetVector(specularFactorPropId, specGloss.specularColor);
-                    material.SetFloat(glossinessFactorPropId, specGloss.glossinessFactor);
+                    material.SetVector(specColorPropId, specGloss.specularColor);
+                    material.SetFloat(smoothnessPropId, specGloss.glossinessFactor);
 
-                    TrySetTexture(specGloss.diffuseTexture,material,baseColorTexturePropId,ref textures,ref schemaImages, ref imageVariants);
+                    TrySetTexture(specGloss.diffuseTexture,material,baseMapPropId,ref textures,ref schemaImages, ref imageVariants);
 
-                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,specularGlossinessTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
+                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,specGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                         // material.EnableKeyword();
                     }
                 }
@@ -230,7 +220,7 @@ namespace GLTFast.Materials {
                     TrySetTexture(
                         gltfMaterial.pbrMetallicRoughness.baseColorTexture,
                         material,
-                        baseColorTexturePropId,
+                        baseMapPropId,
                         ref textures,
                         ref schemaImages,
                         ref imageVariants
@@ -239,8 +229,8 @@ namespace GLTFast.Materials {
 
                 if (materialType==MaterialType.MetallicRoughness)
                 {
-                    material.SetFloat(metallicFactorPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
-                    material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
+                    material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
+                    material.SetFloat(smoothnessPropId, 1-gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
                     if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicRoughnessTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
                         // material.EnableKeyword(KW_METALLIC_ROUGHNESS_MAP);
@@ -253,16 +243,17 @@ namespace GLTFast.Materials {
                 }
             }
 
-            if(TrySetTexture(gltfMaterial.normalTexture,material,normalTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.normalTexture,material,bumpMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                 // material.EnableKeyword(KW_NORMALMAP);
-                material.SetFloat(normalScalePropId,gltfMaterial.normalTexture.scale);
+                material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
             }
             
-            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                 material.EnableKeyword(KW_OCCLUSION);
+                material.SetFloat(occlusionStrengthPropId,gltfMaterial.occlusionTexture.strength);
             }
 
-            if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissiveTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                 material.EnableKeyword(KW_EMISSION);
             }
             
@@ -275,7 +266,7 @@ namespace GLTFast.Materials {
                 }
             }
             
-            material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaModeEnum == AlphaMode.MASK ? gltfMaterial.alphaCutoff : 0);
+            material.SetFloat(cutoffPropId, gltfMaterial.alphaModeEnum == AlphaMode.MASK ? gltfMaterial.alphaCutoff : 0);
             if (!renderQueue.HasValue) {
                 if(shaderMode == ShaderMode.Opaque) {
                     renderQueue = gltfMaterial.alphaModeEnum == AlphaMode.MASK
@@ -288,10 +279,10 @@ namespace GLTFast.Materials {
 
             material.renderQueue = (int) renderQueue.Value;
 
-            material.SetVector(baseColorFactorPropId, baseColorLinear);
+            material.SetVector(baseColorPropId, baseColorLinear);
             
             if(gltfMaterial.emissive != Color.black) {
-                material.SetColor(emissiveFactorPropId, gltfMaterial.emissive);
+                material.SetColor(emissionColorPropId, gltfMaterial.emissive);
                 material.EnableKeyword(KW_EMISSION);
             }
 

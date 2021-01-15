@@ -52,23 +52,13 @@ namespace GLTFast.Materials {
         public const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
 
         const string KW_ALPHABLEND_ON = "_ALPHABLEND_ON";
-        const string KW_MAIN_MAP = "_MainTex";
 
-        public static readonly int bumpMapPropId = Shader.PropertyToID("_BumpMap");
-        public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
         public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
-        public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
         public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
-        public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
-        public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
         public static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
-        public static readonly int mainTexPropId = Shader.PropertyToID(KW_MAIN_MAP);
+        public static readonly int mainTexPropId = Shader.PropertyToID("_MainTex");
         public static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
-        public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
-        public static readonly int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
         public static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");
-        public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
-        public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
         public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
         public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
 
@@ -227,6 +217,7 @@ namespace GLTFast.Materials {
 
             if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
                 material.EnableKeyword(KW_OCCLUSION);
+                material.SetFloat(occlusionStrengthPropId,gltfMaterial.occlusionTexture.strength);
             }
 
             if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {

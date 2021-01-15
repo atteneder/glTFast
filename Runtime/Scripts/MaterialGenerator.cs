@@ -43,8 +43,18 @@ namespace GLTFast.Materials {
         
         public const string KW_UV_ROTATION = "_UV_ROTATION";
         
+        public static readonly int bumpMapPropId = Shader.PropertyToID("_BumpMap");
+        public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
+        public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
+        public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
+        public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
         public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
         public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
+        public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
+        public static readonly int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
+        public static readonly int occlusionStrengthPropId = Shader.PropertyToID("_OcclusionStrength");
+        public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
+        public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
         
         static IMaterialGenerator defaultMaterialGenerator;
         
