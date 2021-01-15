@@ -64,10 +64,10 @@ Many glTF entities like nodes can have custom data in form of an `extras` dictio
 #### Low-Level Interfaces
 
 - Loading progress
-- meshes ready
-- materials/textures ready
-- animation ready
-- everything ready
+  - meshes ready
+  - materials/textures ready
+  - animation ready
+  - everything ready
 
 #### Partial Loading
 
@@ -76,7 +76,7 @@ Many glTF entities like nodes can have custom data in form of an `extras` dictio
 - Only parts loaded
 - Load texture failed
 
-## Technical
+## Technical Improvements
 
 ### Async instead of Coroutine
 
@@ -96,6 +96,11 @@ Like Standard Shader inspector, but for glTF shaders
 - Check key indicators like node/mesh/vertex count etc
 
 ## Optimization
+
+- Investigate [Mesh API 2020.1 improvements](https://docs.google.com/document/d/1QC7NV7JQcvibeelORJvsaTReTyszllOlxdfEsaVL2oA/edit#heading=h.3lwfbowmy03j)
+- Use Mesh.AllocateWritableMeshData
+- Move as much as possible to threads
+  - Parsing JSON
 
 ### Minimize Requirements
 
@@ -185,12 +190,12 @@ Make up-to-date comparisons/benchmarks with similar projects (UnityGLTF, GLTFUti
 
 Give Feedback whenever assets are not optimal and ideally offer solutions (like re-encoding/optimizing).
 
-- Unneccessary Shader Variant usage. Examples:
+- Unnecessary Shader Variant usage. Examples:
   - occlusion textures is not roughness texture
   - different texture transforms on different maps
   - two UV sets
   - texture rotation
-- Embedd buffers
+- Embed buffers
 - Shared vertex attribute buffers (see #52)
 - Jpeg/PNG textures (instead of KTX)
 

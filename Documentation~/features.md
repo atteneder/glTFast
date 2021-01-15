@@ -52,7 +52,7 @@
 - [ ] Morph targets ([issue][MorphTargets])
   - [ ] Sparse accessors
 - [x] [Skins][Skins] (sponsored by [Embibe](https://www.embibe.com))
-- [ ] Animation
+- [ ] Animation ([issue][Animation])
 
 <sup>1</sup>: Untested due to lack of demo files.
 
@@ -150,6 +150,7 @@ Legend:
 
 <sup>1</sup>: A Unity API limitation.
 
+[Animation]: https://github.com/atteneder/glTFast/issues/124
 [URP]: https://unity.com/srp/universal-render-pipeline
 [HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [newIssue]: https://github.com/atteneder/glTFast/issues/new
