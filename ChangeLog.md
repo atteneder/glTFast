@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Consistent casing in shader graph names
 - Apply material's occlusion strength properly
+- Removed artifacts on double sided opaque materials
 
 ## [2.5.0] - 2020-12-14
 ### Added

@@ -265,8 +265,15 @@ namespace GLTFast.Materials {
                     renderQueue = ApplyTransmission(ref baseColorLinear, ref textures, ref schemaImages, ref imageVariants, transmission, material, renderQueue);
                 }
             }
-            
-            material.SetFloat(cutoffPropId, gltfMaterial.alphaModeEnum == AlphaMode.MASK ? gltfMaterial.alphaCutoff : 0);
+
+            if (gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
+                material.SetFloat(cutoffPropId, gltfMaterial.alphaCutoff);
+            } else {
+                material.SetFloat(cutoffPropId, 0);
+                // double sided opaque would make errors in HDRP 7.3 otherwise
+                material.SetOverrideTag("MotionVector","User");
+                material.SetShaderPassEnabled("MOTIONVECTORS",false);
+            }
             if (!renderQueue.HasValue) {
                 if(shaderMode == ShaderMode.Opaque) {
                     renderQueue = gltfMaterial.alphaModeEnum == AlphaMode.MASK
