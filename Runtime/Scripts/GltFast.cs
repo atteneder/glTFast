@@ -108,6 +108,9 @@ namespace GLTFast {
 
         GlbBinChunk[] binChunks;
 
+        Dictionary<int,IDownload> downloads;
+        Dictionary<int,IDownload> textureDownloads;
+        
         AccessorDataBase[] accessorData;
         AccessorUsage[] accessorUsage;
         JobHandle accessorJobsHandle;
@@ -625,9 +628,6 @@ namespace GLTFast {
             return null;
         }
 
-        Dictionary<int,IDownload> downloads;
-        Dictionary<int,IDownload> textureDownloads;
-
         void LoadBuffer( int index, Uri url ) {
             if(downloads==null) {
                 downloads = new Dictionary<int,IDownload>();
@@ -956,6 +956,9 @@ namespace GLTFast {
             buffers = null;
             binChunks = null;
 
+            downloads = null;
+            textureDownloads = null;
+            
             accessorData = null;
             accessorUsage = null;
             primitiveContexts = null;
