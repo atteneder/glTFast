@@ -82,6 +82,8 @@ namespace GLTFast.Materials {
 #if GLTFAST_BUILTIN_RP || UNITY_EDITOR
             defaultMaterialGenerator = new BuiltInMaterialGenerator();
             return defaultMaterialGenerator;
+#else
+            throw new System.Exception("Could not determine default MaterialGenerator");
 #endif
         }
 
