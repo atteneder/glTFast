@@ -14,7 +14,9 @@
 //
 
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Unity.PerformanceTesting;
 using UnityEditor;
@@ -68,10 +70,12 @@ namespace GLTFast.Tests {
             var deferAgent = new UninterruptedDeferAgent();
             SampleGroup loadTime = new SampleGroup("LoadTime", SampleUnit.Millisecond);
             // First time without measuring
-            yield return LoadGltfSampleSetItem(testCase, go, deferAgent);
+            var task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+            yield return WaitForTask(task);
             using (Measure.Frames().Scope()) {
                 for (int i = 0; i < k_Repetitions; i++) {
-                    yield return LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+                    task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+                    yield return WaitForTask(task);
                 }
             }
             
@@ -88,10 +92,12 @@ namespace GLTFast.Tests {
             var deferAgent = go.AddComponent<TimeBudgetPerFrameDeferAgent>();
             SampleGroup loadTime = new SampleGroup("LoadTime", SampleUnit.Millisecond);
             // First time without measuring
-            yield return LoadGltfSampleSetItem(testCase, go, deferAgent);
+            var task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+            yield return WaitForTask(task);
             using (Measure.Frames().Scope()) {
                 for (int i = 0; i < k_Repetitions; i++) {
-                    yield return LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+                    task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+                    yield return WaitForTask(task);
                     // Wait one more frame. Usually some more action happens in this one.
                     yield return null;
                 }
@@ -99,7 +105,7 @@ namespace GLTFast.Tests {
             Object.Destroy(go);
         }
 
-        IEnumerator LoadGltfSampleSetItem(GltfSampleSetItem testCase, GameObject go, IDeferAgent deferAgent, SampleGroup loadTime = null)
+        async Task LoadGltfSampleSetItem(GltfSampleSetItem testCase, GameObject go, IDeferAgent deferAgent, SampleGroup loadTime = null)
         {
             var path = string.Format(
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -116,22 +122,25 @@ namespace GLTFast.Tests {
             var stopWatch = go.AddComponent<StopWatch>();
             stopWatch.StartTime();
 
-            bool done = false;
-
-            gltfAsset.onLoadComplete += (asset,success) => { done = true; Assert.IsTrue(success); };
             gltfAsset.loadOnStartup = false;
-            gltfAsset.Load(path,null,deferAgent);
-
-            while (!done)
-            {
-                yield return null;
-            }
+            var success = await gltfAsset.Load(path,null,deferAgent);
+            Assert.IsTrue(success);
             
             stopWatch.StopTime();
 
             if (loadTime != null) {
                 Measure.Custom(loadTime, stopWatch.lastDuration);
             }
+        }
+        
+        static IEnumerator WaitForTask(Task task) {
+            while(!task.IsCompleted) {
+                if (task.Exception != null)
+                    throw task.Exception;
+                yield return null;
+            }
+            if (task.Exception != null)
+                throw task.Exception;
         }
     }
 }

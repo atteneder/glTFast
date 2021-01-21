@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using System.Threading.Tasks;
+
 namespace GLTFast {
 
     /// <summary>
@@ -28,5 +30,7 @@ namespace GLTFast {
         /// be deferred to the next frame/Update loop invocation. False if
         /// work can continue.</returns>
         bool ShouldDefer();
+
+        Task BreakPoint();
     }
 }

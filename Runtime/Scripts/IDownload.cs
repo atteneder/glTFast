@@ -15,13 +15,14 @@
 
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GLTFast.Loading {
 
     public interface IDownloadProvider {
-        IDownload Request(Uri url);
-        ITextureDownload RequestTexture(Uri url);
+        Task<IDownload> Request(Uri url);
+        Task<ITextureDownload> RequestTexture(Uri url);
     }
 
     public interface IDownload : IEnumerator {

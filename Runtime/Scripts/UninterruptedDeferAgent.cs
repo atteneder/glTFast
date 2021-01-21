@@ -13,12 +13,20 @@
 // limitations under the License.
 //
 
+using System.Threading.Tasks;
+
 namespace GLTFast {
 
     public class UninterruptedDeferAgent : IDeferAgent
     {
         public bool ShouldDefer() {
             return false;
+        }
+        
+        public async Task BreakPoint() {
+            if (ShouldDefer()) {
+                await Task.Yield();
+            }
         }
     }
 }

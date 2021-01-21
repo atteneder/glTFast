@@ -16,6 +16,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
 using System;
+using System.Threading.Tasks;
 
 namespace GLTFast.Loading {
 
@@ -36,12 +37,20 @@ namespace GLTFast.Loading {
             _headers = headers;
         }
 
-        public IDownload Request(Uri url) {
-            return new CustomHeaderDownload(url,RegisterHttpHeaders);
+        public async Task<IDownload> Request(Uri url) {
+            var req = new CustomHeaderDownload(url,RegisterHttpHeaders);
+            while (req.MoveNext()) {
+                await Task.Yield();
+            }
+            return req;
         }
 
-        public ITextureDownload RequestTexture(Uri url) {
-            return new CustomHeaderTextureDownload(url,RegisterHttpHeaders);
+        public async Task<ITextureDownload> RequestTexture(Uri url) {
+            var req = new CustomHeaderTextureDownload(url,RegisterHttpHeaders);
+            while (req.MoveNext()) {
+                await Task.Yield();
+            }
+            return req;
         }
 
         void RegisterHttpHeaders(UnityWebRequest request)

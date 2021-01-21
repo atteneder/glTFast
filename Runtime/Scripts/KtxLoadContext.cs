@@ -15,7 +15,7 @@
 
 #if KTX_UNITY
 
-using System.Collections;
+using System.Threading.Tasks;
 using KtxUnity;
 using Unity.Collections;
 
@@ -27,15 +27,14 @@ namespace GLTFast {
             this.imageIndex = index;
             this.data = data;
             ktxTexture = new KtxTexture();
-            texture = null;
         }
 
-        public override IEnumerator LoadKtx(bool linear) {
-            ktxTexture.onTextureLoaded += OnKtxLoaded;
+        public override async Task<TextureResult> LoadKtx(bool linear) {
             var slice = new NativeArray<byte>(data,KtxNativeInstance.defaultAllocator);
-            yield return ktxTexture.LoadBytesRoutine(slice,linear);
+            var result = await ktxTexture.LoadBytesRoutine(slice,linear);
             slice.Dispose();
             data = null;
+            return result;
         }
     }
 }

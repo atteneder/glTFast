@@ -32,6 +32,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 #endif
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 #if KTX_UNITY
 using KtxUnity;
 #endif // KTX_UNITY
@@ -84,19 +85,12 @@ namespace GLTFast {
             Jpeg,
             KTX
         }
-
-        /// <summary>
-        /// MonoBehaviour instance that is used for scheduling loading Coroutines.
-        /// Can be an arbitrary one, but cannot be destroyed before the loading
-        /// process finished.
-        /// </summary>
-        MonoBehaviour monoBehaviour;
-
+        
+        static IDeferAgent defaultDeferAgent;
+        
         IDownloadProvider downloadProvider;
         IMaterialGenerator materialGenerator;
         IDeferAgent deferAgent;
-
-        public UnityAction<bool> onLoadComplete;
 
 #region VolatileData
 
@@ -108,9 +102,12 @@ namespace GLTFast {
 
         GlbBinChunk[] binChunks;
 
-        Dictionary<int,IDownload> downloads;
-        Dictionary<int,IDownload> textureDownloads;
-        
+        Dictionary<int,Task<IDownload>> downloadTasks;
+#if KTX_UNITY
+        Dictionary<int,Task<IDownload>> ktxDownloadTasks;
+#endif
+        Dictionary<int,Task<ITextureDownload>> textureDownloadTasks;
+
         AccessorDataBase[] accessorData;
         AccessorUsage[] accessorUsage;
         JobHandle accessorJobsHandle;
@@ -125,7 +122,6 @@ namespace GLTFast {
         Dictionary<Attributes,List<MeshPrimitive>>[] meshPrimitiveCluster;
         List<ImageCreateContext> imageCreateContexts;
 #if KTX_UNITY
-        List<KtxLoadContextBase> ktxLoadContexts;
         List<KtxLoadContextBase> ktxLoadContextsBuffer;
 #endif // KTX_UNITY
 
@@ -158,26 +154,34 @@ namespace GLTFast {
 
 #endregion VolatileDataInstantiation
 
-        /// TODO: Some of these class members maybe could be passed
-        /// between loading routines. Turn them into parameters or at
-        /// least dispose them once all ingredients are ready.
-
         bool loadingDone = false;
+        /// <summary>
+        /// True, when loading has finished and glTF can be instantiated
+        /// </summary>
         public bool LoadingDone { get { return loadingDone; } private set { this.loadingDone = value; } }
-
+        
         bool loadingError = false;
+        /// <summary>
+        /// True if an error happened during glTF loading
+        /// </summary>
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
 
         public GLTFast(
-            MonoBehaviour monoBehaviour,
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null
             )
         {
-            this.monoBehaviour = monoBehaviour;
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
-            this.deferAgent = deferAgent ?? monoBehaviour.gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
+
+            if (deferAgent == null) {
+                if (defaultDeferAgent == null) {
+                    defaultDeferAgent = new GameObject("glTFast_DeferAgent").AddComponent<TimeBudgetPerFrameDeferAgent>(); 
+                }
+                this.deferAgent = defaultDeferAgent;
+            } else {
+                this.deferAgent = deferAgent; 
+            }
             this.materialGenerator = materialGenerator ?? Materials.MaterialGenerator.GetDefaultMaterialGenerator();
         }
 
@@ -186,25 +190,25 @@ namespace GLTFast {
         /// The URL can be a file path (using the "file://" scheme) or a web adress.
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
-        public void Load( string url ) {
-            Load(new Uri(url,UriKind.RelativeOrAbsolute));
+        public async Task<bool> Load( string url ) {
+            return await Load(new Uri(url,UriKind.RelativeOrAbsolute));
         }
-
+        
         /// <summary>
         /// Load a glTF file (JSON or binary)
         /// The URL can be a file path (using the "file://" scheme) or a web adress.
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
-        public void Load( Uri url ) {
-            monoBehaviour.StartCoroutine(LoadRoutine(url));
+        public async Task<bool> Load( Uri url ) {
+            return await LoadRoutine(url);
         }
 
-        IEnumerator LoadRoutine( Uri url ) {
+        async Task<bool> LoadRoutine( Uri url ) {
 
-            var download = downloadProvider.Request(url);
-            yield return download;
-
-            if(download.success) {
+            var download = await downloadProvider.Request(url);
+            var success = download.success;
+            
+            if(success) {
 
                 bool? gltfBinary = download.isBinary;
                 if (!gltfBinary.HasValue)
@@ -213,70 +217,47 @@ namespace GLTFast {
                 }
 
                 if (gltfBinary ?? false) {
-                    LoadGltfBinary(download.data,url);
+                    success = LoadGltfBinary(download.data,url);
                 } else {
-                    LoadGltf(download.text,url);
+                    success = LoadGltf(download.text,url);
                 }
-                yield return LoadContent();
+                if(success) await LoadContent();
+                success = success && await Prepare();
             } else {
                 Debug.LogErrorFormat("{0} {1}",download.error,url);
-                loadingError=true;
             }
 
             DisposeVolatileData();
+            loadingError = !success;
             loadingDone = true;
-            OnLoadComplete(!loadingError);
+            return success;
         }
 
-        IEnumerator LoadContent() {
+        async Task LoadContent() {
 
-            if(loadingError) {
-                OnLoadComplete(!loadingError);
-                yield break;
+            await deferAgent.BreakPoint();
+            await WaitForBufferDownloads();
+            downloadTasks?.Clear();
+
+            if (textureDownloadTasks != null) {
+                await WaitForTextureDownloads();
+                textureDownloadTasks.Clear();
             }
-
-            if( deferAgent.ShouldDefer() ) {
-                yield return null;
-            }
-
-            var routineBuffers = monoBehaviour.StartCoroutine( WaitForBufferDownloads() );
-            var routineTextures = monoBehaviour.StartCoroutine( WaitForTextureDownloads() );
-
-            yield return routineBuffers;
-            yield return routineTextures;
             
 #if KTX_UNITY
-            yield return WaitForKtxTextures();
+            if (ktxDownloadTasks != null) {
+                await WaitForKtxDownloads();
+                ktxDownloadTasks.Clear();
+            }
+
 #endif // KTX_UNITY
-
-            if(loadingError) {
-                OnLoadComplete(!loadingError);
-                yield break;
-            }
-
-            var prepareRoutine = Prepare();
-            while(prepareRoutine.MoveNext()) {
-                if(loadingError) {
-                    break;
-                }
-                if( deferAgent.ShouldDefer() ) {
-                    yield return null;
-                }
-            }
         }
 
-        void OnLoadComplete(bool success) {
-            if(onLoadComplete!=null) {
-                onLoadComplete(success);
-            }
-        }
-
-        void ParseJsonAndLoadBuffers( string json, Uri baseUri ) {
+        bool ParseJsonAndLoadBuffers( string json, Uri baseUri ) {
             gltfRoot = ParseJson(json);
 
             if(!CheckExtensionSupport(gltfRoot)) {
-                loadingError = true;
-                return;
+                return false;
             }
 
             var bufferCount = gltfRoot.buffers.Length;
@@ -293,13 +274,15 @@ namespace GLTFast {
                         buffers[i] = DecodeEmbedBuffer(buffer.uri);
                         if(buffers[i]==null) {
                             Debug.LogError("Error loading embed buffer!");
-                            loadingError = true;
+                            return false;
                         }
                     } else {
                         LoadBuffer( i, UriHelper.GetUriString(buffer.uri,baseUri) );
                     }
                 }
             }
+
+            return true;
         }
 
         Root ParseJson(string json) {
@@ -403,14 +386,13 @@ namespace GLTFast {
             return true;
         }
 
-        void LoadGltf( string json, Uri url ) {
+        bool LoadGltf( string json, Uri url ) {
             Profiler.BeginSample("LoadGltf");
             var baseUri = UriHelper.GetBaseUri(url);
-            ParseJsonAndLoadBuffers(json,baseUri);
-            if(!loadingError) {
-                LoadImages(baseUri);
-            }
+            var success = ParseJsonAndLoadBuffers(json,baseUri);
+            if(success) LoadImages(baseUri);
             Profiler.EndSample();
+            return success;
         }
 
         void LoadImages( Uri baseUri ) {
@@ -531,11 +513,10 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        IEnumerator WaitForBufferDownloads() {
-            if(downloads!=null) {
-                foreach( var downloadPair in downloads ) {
-                    var download = downloadPair.Value;
-                    yield return download;
+        async Task WaitForBufferDownloads() {
+            if(downloadTasks!=null) {
+                foreach( var downloadPair in downloadTasks ) {
+                    var download = await downloadPair.Value;
                     if (download.success) {
                         Profiler.BeginSample("GetData");
                         buffers[downloadPair.Key] = download.data;
@@ -560,51 +541,41 @@ namespace GLTFast {
             }
         }
 
-        IEnumerator WaitForTextureDownloads() {
-            if(textureDownloads!=null) {
-                foreach( var dl in textureDownloads ) {
-                    yield return dl.Value;
-                    var www = dl.Value;
-                    if(www.success) {
-                        if(imageFormats[dl.Key]==ImageFormat.KTX) {
-#if KTX_UNITY
-                            if(ktxLoadContexts==null) {
-                                ktxLoadContexts = new List<KtxLoadContextBase>();
-                            }
-                            var ktxContext = new KtxLoadContext(dl.Key,www.data);
-                            ktxLoadContexts.Add(ktxContext);
-#else
-                            Debug.LogError(ErrorKtxUnsupported);
-#endif // KTX_UNITY
-                        } else {
-                            bool forceSampleLinear = imageGamma!=null && !imageGamma[dl.Key];
-                            Texture2D txt;
-                            if(forceSampleLinear) {
-                                txt = CreateEmptyTexture(gltfRoot.images[dl.Key], dl.Key, forceSampleLinear);
-                                txt.LoadImage(www.data);
-                            } else {
-                                txt = (www as ITextureDownload).texture;
-                            }
-                            images[dl.Key] = txt;
-                        }
+        async Task WaitForTextureDownloads() {
+            foreach( var dl in textureDownloadTasks ) {
+                var www = await dl.Value;
+                
+                if(www.success) {
+                    bool forceSampleLinear = imageGamma!=null && !imageGamma[dl.Key];
+                    Texture2D txt;
+                    if(forceSampleLinear) {
+                        txt = CreateEmptyTexture(gltfRoot.images[dl.Key], dl.Key, forceSampleLinear);
+                        // TODO: Investigate for NativeArray variant to avoid `www.data`
+                        txt.LoadImage(www.data);
                     } else {
-                        Debug.LogError(www.error);
+                        txt = (www as ITextureDownload).texture;
                     }
+                    images[dl.Key] = txt;
+                } else {
+                    Debug.LogError(www.error);
                 }
             }
         }
 
 
 #if KTX_UNITY
-        public IEnumerator WaitForKtxTextures() {
-            if(ktxLoadContexts==null) yield break;
-            foreach (var ktx in ktxLoadContexts)
-            {
-                bool forceSampleLinear = imageGamma!=null && !imageGamma[ktx.imageIndex];
-                yield return ktx.LoadKtx(forceSampleLinear);
-                images[ktx.imageIndex] = ktx.texture;
+        async Task WaitForKtxDownloads() {
+            foreach( var dl in ktxDownloadTasks ) {
+                var www = await dl.Value;
+                if(www.success) {
+                    var ktxContext = new KtxLoadContext(dl.Key,www.data);
+                    bool forceSampleLinear = imageGamma!=null && !imageGamma[ktxContext.imageIndex];
+                    var textureResult = await ktxContext.LoadKtx(forceSampleLinear);
+                    images[ktxContext.imageIndex] = textureResult.texture;
+                } else {
+                    Debug.LogError(www.error);
+                }
             }
-            ktxLoadContexts.Clear();
         }
 #endif // KTX_UNITY
 
@@ -613,12 +584,9 @@ namespace GLTFast {
         }
 
         public bool InstantiateGltf( IInstantiator instantiator ) {
-            if(loadingDone) {
-                CreateGameObjects( gltfRoot, instantiator );
-                return !loadingError;
-            } else {
-                return false;
-            }
+            if (!loadingDone || loadingError) return false;
+            CreateGameObjects( gltfRoot, instantiator );
+            return true;
         }
 
         public UnityEngine.Material GetMaterial( int index = 0 ) {
@@ -629,10 +597,10 @@ namespace GLTFast {
         }
 
         void LoadBuffer( int index, Uri url ) {
-            if(downloads==null) {
-                downloads = new Dictionary<int,IDownload>();
+            if(downloadTasks==null) {
+                downloadTasks = new Dictionary<int, Task<IDownload>>();
             }
-            downloads[index] = downloadProvider.Request(url);
+            downloadTasks.Add(index,downloadProvider.Request(url));
         }
 
         byte[] DecodeEmbedBuffer(string encodedBytes) {
@@ -664,22 +632,25 @@ namespace GLTFast {
 
             Profiler.BeginSample("LoadTexture");
 
-            if(textureDownloads==null) {
-                textureDownloads = new Dictionary<int,IDownload>();
-            }
-            IDownload download;
             if(isKtx) {
 #if KTX_UNITY
-                download = downloadProvider.Request(url);
+                var downloadTask = downloadProvider.Request(url);
+                if(ktxDownloadTasks==null) {
+                    ktxDownloadTasks = new Dictionary<int, Task<IDownload>>();
+                }
+                ktxDownloadTasks.Add(index, downloadTask);
 #else
                 Debug.LogError(ErrorKtxUnsupported);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
             } else {
-                download = downloadProvider.RequestTexture(url);
+                var downloadTask = downloadProvider.RequestTexture(url);
+                if(textureDownloadTasks==null) {
+                    textureDownloadTasks = new Dictionary<int, Task<ITextureDownload>>();
+                }
+                textureDownloadTasks.Add(index, downloadTask);
             }
-            textureDownloads[index] = download;
             Profiler.EndSample();
         }
 
@@ -695,18 +666,15 @@ namespace GLTFast {
 
             if (magic != GLB_MAGIC) {
                 Debug.LogError("Not a glTF-binary file");
-                loadingError = true;
                 Profiler.EndSample();
                 return false;
             }
 
             uint version = BitConverter.ToUInt32( bytes, 4 );
             //uint length = BitConverter.ToUInt32( bytes, 8 );
-
-
+            
             if (version != 2) {
                 Debug.LogErrorFormat("Unsupported glTF version {0}",version);
-                loadingError = true;
                 Profiler.EndSample();
                 return false;
             }
@@ -737,10 +705,10 @@ namespace GLTFast {
                     Profiler.EndSample();
 
                     Profiler.BeginSample("ParseJSON");
-                    ParseJsonAndLoadBuffers(json,baseUri);
+                    var success = ParseJsonAndLoadBuffers(json,baseUri);
                     Profiler.EndSample();
 
-                    if(loadingError) {
+                    if(!success) {
                         Profiler.EndSample();
                         return false;
                     }
@@ -750,21 +718,20 @@ namespace GLTFast {
             }
 
             //Debug.Log(index);
-            if(gltfRoot!=null) {
-                //Debug.Log(gltf);
-                if(glbBinChunk.HasValue) {
-                    binChunks[0] = glbBinChunk.Value;
-                    buffers[0] = bytes;
-                }
-                LoadImages(baseUri);
-                Profiler.EndSample();
-                return !loadingError;
-            } else {
+            if(gltfRoot==null) {
                 Debug.LogError("Invalid JSON chunk");
-                loadingError = true;
+                Profiler.EndSample();
+                return false;
             }
+            
+            //Debug.Log(gltf);
+            if(glbBinChunk.HasValue) {
+                binChunks[0] = glbBinChunk.Value;
+                buffers[0] = bytes;
+            }
+            LoadImages(baseUri);
             Profiler.EndSample();
-            return false;
+            return true;
         }
 
         byte[] GetBuffer(int index) {
@@ -780,7 +747,7 @@ namespace GLTFast {
             return new NativeSlice<byte>(nativeBuffers[bufferIndex],chunk.start+bufferView.byteOffset,bufferView.byteLength);
         }
 
-        IEnumerator Prepare() {
+        async Task<bool> Prepare() {
             if(gltfRoot.meshes!=null) {
                 meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
             }
@@ -798,14 +765,16 @@ namespace GLTFast {
                 CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews,imageCreateContexts);
             }
             Profiler.EndSample();
-            yield return null;
-
+            await deferAgent.BreakPoint();
+            
+            var success = true;
+            
             if(gltfRoot.accessors!=null) {
-                LoadAccessorData(gltfRoot);
-                yield return null;
+                success = LoadAccessorData(gltfRoot);
+                await deferAgent.BreakPoint();
 
                 while(!accessorJobsHandle.IsCompleted) {
-                    yield return null;
+                    await Task.Yield();
                 }
                 accessorJobsHandle.Complete();
                 foreach(var ad in accessorData) {
@@ -814,10 +783,11 @@ namespace GLTFast {
                     }
                 }
             }
+            if (!success) return success;
 
             if(gltfRoot.meshes!=null) {
                 CreatePrimitiveContexts(gltfRoot);
-                yield return null;
+                await deferAgent.BreakPoint();
             }
 
 #if KTX_UNITY
@@ -827,11 +797,8 @@ namespace GLTFast {
                 {
                     var ktx = ktxLoadContextsBuffer[i];
                     bool forceSampleLinear = imageGamma!=null && !imageGamma[ktx.imageIndex];
-                    var ktxRoutine = ktx.LoadKtx(forceSampleLinear);
-                    while(ktxRoutine.MoveNext()) {
-                        yield return null;
-                    }
-                    images[ktx.imageIndex] = ktx.texture;
+                    var textureResult = await ktx.LoadKtx(forceSampleLinear);
+                    images[ktx.imageIndex] = textureResult.texture;
                 }
                 ktxLoadContextsBuffer.Clear();
             }
@@ -840,7 +807,7 @@ namespace GLTFast {
             if(imageCreateContexts!=null) {
                 foreach(var jh in imageCreateContexts) {
                     while(!jh.jobHandle.IsCompleted) {
-                        yield return null;
+                        await deferAgent.BreakPoint();
                     }
                     jh.jobHandle.Complete();
                     images[jh.imageIndex].LoadImage(jh.buffer);
@@ -892,42 +859,42 @@ namespace GLTFast {
                 }
             }
             Profiler.EndSample();
-            yield return null;
+            await deferAgent.BreakPoint();
 
             if(primitiveContexts!=null) {
                 for(int i=0;i<primitiveContexts.Length;i++) {
                     var primitiveContext = primitiveContexts[i];
                     if(primitiveContext==null) continue;
                     while(!primitiveContext.IsCompleted) {
-                        yield return null;
+                        await Task.Yield();
                     }
-                    yield return null;
+                    await deferAgent.BreakPoint();
                 }
                 AssignAllAccessorData(gltfRoot);
 
                 for(int i=0;i<primitiveContexts.Length;i++) {
                     var primitiveContext = primitiveContexts[i];
                     while(!primitiveContext.IsCompleted) {
-                        yield return null;
+                        await Task.Yield();
                     }
                     var primitive = primitiveContext.CreatePrimitive();
                     if(primitive.HasValue) {
                         primitives[primitiveContext.primtiveIndex] = primitive.Value;
                         resources.Add(primitive.Value.mesh);
                     } else {
-                        loadingError = true;
+                        success = false;
+                        break;
                     }
 
-                    yield return null;
+                    await deferAgent.BreakPoint();
                 }
             }
 
             foreach(var ad in accessorData) {
-                if(ad!=null) {
-                    ad.Dispose();
-                }
+                ad?.Dispose();
             }
             accessorData = null;
+            return success;
         }
 
         /// <summary>
@@ -956,8 +923,8 @@ namespace GLTFast {
             buffers = null;
             binChunks = null;
 
-            downloads = null;
-            textureDownloads = null;
+            downloadTasks = null;
+            textureDownloadTasks = null;
             
             accessorData = null;
             accessorUsage = null;
@@ -1205,7 +1172,7 @@ namespace GLTFast {
             }
         }
 
-        void LoadAccessorData( Root gltf ) {
+        bool LoadAccessorData( Root gltf ) {
 
             Profiler.BeginSample("LoadAccessorData");
 
@@ -1305,7 +1272,9 @@ namespace GLTFast {
                 }
             }
 #endif
-            
+
+            var success = true;
+
             foreach(var mainBufferType in mainBufferTypes) {
 
                 var att = mainBufferType.Key;
@@ -1361,8 +1330,7 @@ namespace GLTFast {
                         #if DEBUG
                         Debug.LogErrorFormat("Invalid mainBufferType {0}",mainBufferType);
                         #endif
-                        loadingError = true;
-                        return;
+                        return false;
                 }
                 config.calculateNormals = !hasNormals && (mainBufferType.Value & MainBufferType.Normal) > 0;
                 config.calculateTangents = !hasTangents && (mainBufferType.Value & MainBufferType.Tangent) > 0;
@@ -1381,10 +1349,16 @@ namespace GLTFast {
                 if (jh.HasValue) {
                     tmpList.Add(jh.Value);
                 } else {
-                    loadingError = true;
+                    success = false;
+                    break;
                 }
             }
 
+            if (!success) {
+                Profiler.EndSample();
+                return false;
+            }
+            
             /// Retrieve indices data jobified
             accessorData = new AccessorDataBase[gltf.accessors.Length];
 
@@ -1466,6 +1440,7 @@ namespace GLTFast {
             JobHandle.ScheduleBatchedJobs();
 
             Profiler.EndSample();
+            return success;
         }
 
         void SetAccessorUsage(int index, AccessorUsage newUsage) {

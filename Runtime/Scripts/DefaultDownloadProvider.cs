@@ -14,17 +14,26 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace GLTFast.Loading {
     public class DefaultDownloadProvider : IDownloadProvider {
-        public IDownload Request(Uri url) {
-            return new AwaitableDownload(url);
+        public async  Task<IDownload> Request(Uri url) {
+            var req = new AwaitableDownload(url);
+            while (req.MoveNext()) {
+                await Task.Yield();
+            }
+            return req;
         }
 
-        public ITextureDownload RequestTexture(Uri url) {
-            return new AwaitableTextureDownload(url);
+        public async Task<ITextureDownload> RequestTexture(Uri url) {
+            var req = new AwaitableTextureDownload(url);
+            while (req.MoveNext()) {
+                await Task.Yield();
+            }
+            return req;
         }
     }
 

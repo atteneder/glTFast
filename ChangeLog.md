@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.1] - 2021-01-22
 ### Changed
+- Converted API and internals to async/await. This is more convenient in some cases and ease future optimizations.
 - Renamed glTF shader graph properties to match Unity Lit/BuiltIn Standard shader properties. Switching shaders preserves more attributes this way.
 ### Fixed
 - Consistent casing in shader graph names
