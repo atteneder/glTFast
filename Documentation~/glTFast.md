@@ -42,7 +42,7 @@ Add a `GltfAsset` component to a GameObject.
 
 ### Load via Script
 
-```csharp
+```C#
 var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
@@ -51,31 +51,34 @@ gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/ma
 
 Loading via script allows you to:
 
-- React to loading events by [adding event listeners](#custom-loading-event-listeners)
+- Custom download or file loading behaviour (see [`IDownloadProvider`](../Runtime/Scripts/IDownload.cs))
+- Custom material generation (see [`IMaterialGenerator`](../Runtime/Scripts/IMaterialGenerator.cs))
 - Customize [instantiation](#Instantiation)
-- Load glTF once and instantiate it many times (see example [below](#custom-loading-event-listeners))
-- Access data of glTF scene (for example get material; see example [below](#custom-loading-event-listeners))
+- Load glTF once and instantiate it many times (see example [below](#custom-post-loading-Script))
+- Access data of glTF scene (for example get material; see example [below](#custom-post-loading-Script))
 - Tweak and optimize loading performance
 
-#### Custom loading event listeners
+#### Custom Post-Loading Script
 
 In case you want to trigger custom logic when loading finished, add an event callback:
 
-```csharp
-gltf.onLoadComplete += YourCallbackMethod;
-…
-void YourCallbackMethod(GltfAssetBase gltfAsset, bool success) {
-    // Good practice: remove listener right away
-    gltfAsset.onLoadComplete -= YourCallbackMethod;
-    if(success) {
+```C#
+async void Start() {
+    // First step: load glTF
+    var gltf = new GLTFast.GLTFast();
+    var success = await gltf.Load("file:///path/to/file.gltf");
+
+    if (success) {
+        // Here you can customize the post-loading behavior
+        
         // Get the first material
-        var material = gltfAsset.GetMaterial();
+        var material = gltf.GetMaterial();
         Debug.LogFormat("The first material is called {0}", material.name);
 
-        // Instantiate the scene multiple times
-        gltfAsset.Instantiate( new GameObject("Instance 1").transform );
-        gltfAsset.Instantiate( new GameObject("Instance 2").transform );
-        gltfAsset.Instantiate( new GameObject("Instance 3").transform );
+        // Instantiate the scenes multiple times
+        gltf.InstantiateGltf( new GameObject("Instance 1").transform );
+        gltf.InstantiateGltf( new GameObject("Instance 2").transform );
+        gltf.InstantiateGltf( new GameObject("Instance 3").transform );
     } else {
         Debug.LogError("Loading glTF failed!");
     }
@@ -96,8 +99,8 @@ public class YourCustomInstantiator : GLTFast.IInstantiator {
 }
 …
 
-  // Within the `onLoadComplete` event listener, use it like this
-  gltfAsset.Instantiate( new YourCustomInstantiator() );
+  // In your custom post-loading script, use it like this
+  gltfAsset.InstantiateGltf( new YourCustomInstantiator() );
 ```
 
 #### Tune loading performance
@@ -118,16 +121,27 @@ You can solve this by using a common "defer agent". It decides if work should co
 
 Usage example
 
-```csharp
-IDeferAgent deferAgent;
-// For a stable frame rate:
-deferAgent = gameObject.AddComponent<GLTFast.TimeBudgetPerFrameDeferAgent>();
-// Or for faster loading:
-deferAgent = new GLTFast.UninterruptedDeferAgent();
-foreach( var url in manyUrls) {
-  var gltf = go.AddComponent<GLTFast.GltfAsset>();
-  gltf.loadOnStartup = false; // prevent auto-loading
-  gltf.Load(url,deferAgent); // load manually with custom defer agent
+```C#
+async void CustomDeferAgent() {
+    // Recommended: Use a common defer agent across multiple GLTFast instances!
+    // For a stable frame rate:
+    IDeferAgent deferAgent = gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
+    // Or for faster loading:
+    deferAgent = new UninterruptedDeferAgent();
+
+    var tasks = new List<Task>();
+    
+    foreach( var url in manyUrls) {
+        var gltf = new GLTFast.GLTFast(null,deferAgent);
+        var task = gltf.Load(url).ContinueWith(t => {
+            if (t.Result) {
+                gltf.InstantiateGltf(transform);
+            }
+        });
+        tasks.Add(task);
+    }
+
+    await Task.WhenAll(tasks);
 }
 ```
 
