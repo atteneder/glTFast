@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] - 2021-01-22
+### Changed
+- Converted API and internals to async/await. This is more convenient in some cases and ease future optimizations.
+
 ## [Unreleased] -
 ### Added
 - Support for performance benchmark package
@@ -12,7 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.5.1] - 2021-01-22
 ### Changed
-- Converted API and internals to async/await. This is more convenient in some cases and ease future optimizations.
 - Renamed glTF shader graph properties to match Unity Lit/BuiltIn Standard shader properties. Switching shaders preserves more attributes this way.
 ### Fixed
 - Consistent casing in shader graph names
