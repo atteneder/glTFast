@@ -1495,7 +1495,7 @@ namespace GLTFast {
                     {
                         // Create one PrimitiveCreateContext per Primitive cluster
                         PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
-                        AssignAccessorData(gltf,mesh,cluster.Key,ref c);
+                        c.mesh = mesh;
                     }
                     i++;
                 }
@@ -1549,41 +1549,7 @@ namespace GLTFast {
             }
             Profiler.EndSample();
         }
-
-        unsafe void AssignAccessorData( Root gltf, Mesh mesh, Attributes attributes, ref PrimitiveCreateContext c ) {
-
-            Profiler.BeginSample("AssignAccessorData");
-            c.mesh = mesh;
-
-            // int vertexCount;
-            {
-                // c.positions = (accessorData[attributes.POSITION] as AccessorNativeData<Vector3>).data;
-                // vertexCount = c.positions.Length;
-            }
-
-            if(attributes.NORMAL>=0) {
-                // c.normals = (accessorData[attributes.NORMAL] as AccessorNativeData<Vector3>).data;
-            }
-            
-            if(attributes.TEXCOORD_0>=0) {
-                // c.uvs0 = (accessorData[attributes.TEXCOORD_0] as AccessorNativeData<Vector2>).data;
-            }
-
-            if(attributes.TANGENT>=0) {
-                // c.tangents = (accessorData[attributes.TANGENT] as AccessorNativeData<Vector4>).data;
-            }
-
-            if(attributes.COLOR_0>=0) {
-                if(IsColorAccessorByte(gltf.accessors[attributes.COLOR_0])) {
-                    // c.colors32 = (accessorData[attributes.COLOR_0] as AccessorNativeData<Color32>).data;
-                } else {
-                    // c.colors = (accessorData[attributes.COLOR_0] as AccessorNativeData<Color>).data;
-                }
-            }
-
-            Profiler.EndSample();
-        }
-
+        
 #if DRACO_UNITY
         void PreparePrimitiveDraco( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveDracoCreateContext c ) {
             var draco_ext = primitive.extensions.KHR_draco_mesh_compression;
