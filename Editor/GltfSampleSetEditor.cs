@@ -13,116 +13,122 @@
 // limitations under the License.
 //
 
-using System.Collections.Generic;
 using System.IO;
+using UnityEditor;
+using UnityEngine;
+
+#if GLTFAST_RENDER_TEST
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.AccessControl;
 using GLTFast;
 using GLTFast.Schema;
-using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEngine;
-
-[CustomEditor(typeof(GltfSampleSet))]
-public class GltfSampleSetEditor : Editor
-{
-    private GltfSampleSet _sampleSet;
-    private string searchPattern = "*.gl*";
-
-    public void OnEnable() {
-        _sampleSet = (GltfSampleSet)target;
-    }
-
-    public override void OnInspectorGUI() {
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Search Pattern");
-        searchPattern = GUILayout.TextField(searchPattern);
-        GUILayout.EndHorizontal();
-        if (GUILayout.Button("Find in path")) {
-            _sampleSet.LoadItemsFromPath(searchPattern);
-        }
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("Activate All")) {
-            _sampleSet.SetAllActive();
-        }
-        if (GUILayout.Button("Deactivate All")) {
-            _sampleSet.SetAllActive(false);
-        }
-        GUILayout.EndHorizontal();
-        if (GUILayout.Button("Create render test scenes")) {
-            CreateRenderTestScenes(_sampleSet);
-        }
-        base.OnInspectorGUI();
-        
-        if (GUI.changed) {
-            EditorUtility.SetDirty(_sampleSet);
-        }
-    }
-    
-    public static void CreateRenderTestScenes(GltfSampleSet sampleSet)
-    {
-#if GLTFAST_RENDER_TEST
-        var allScenes = new List<EditorBuildSettingsScene>();
-        Texture2D dummyReference = null;
-
-        foreach (var item in sampleSet.GetItems())
-        {
-            var testScene = EditorSceneManager.OpenScene("Assets/Scenes/TestScene.unity");
-            
-            var settingsGameObject = new GameObject("GraphicsTestSettings");
-            var graphicsTestSettings = settingsGameObject.AddComponent<UniversalGraphicsTestSettings>();
-
-            var go = new GameObject(item.name);
-            var gltfAsset = go.AddComponent<GltfBoundsAsset>();
-            
-            if(string.IsNullOrEmpty(sampleSet.streamingAssetsPath)) {
-                gltfAsset.url = Path.Combine(sampleSet.baseLocalPath, item.path);
-            } else {
-                gltfAsset.url = Path.Combine(sampleSet.streamingAssetsPath, item.path);
-                gltfAsset.streamingAsset = true;
-            }
-            gltfAsset.loadOnStartup = true;
-            gltfAsset.createBoxCollider = false;
-            
-            var sceneDirectory = CertifyDirectory(item.directoryParts, string.Format("Assets/Scenes/{0}", sampleSet.name));
-            var scenePath = Path.Combine(sceneDirectory, item.name+".unity");
-
-            EditorSceneManager.SaveScene(testScene,scenePath);
-            allScenes.Add(new EditorBuildSettingsScene(scenePath,true));
-
-            var referenceImagePath =
-                Path.Combine(Application.dataPath, "ReferenceImages/Linear/OSXEditor/Metal/None", item.name + ".png");
-            if (!File.Exists(referenceImagePath)) {
-                Debug.LogFormat("Create dummy reference at path {0}", referenceImagePath);
-                dummyReference = dummyReference!=null
-                    ? dummyReference
-                    : new Texture2D(
-                    graphicsTestSettings.ImageComparisonSettings.TargetWidth,
-                    graphicsTestSettings.ImageComparisonSettings.TargetHeight
-                );
-                File.WriteAllBytes(referenceImagePath, dummyReference.EncodeToPNG());
-            }
-        }
-        AssetDatabase.Refresh();
-        EditorBuildSettings.scenes = allScenes.ToArray();
-#else
-        Debug.LogWarning("Please install  the Graphics Test Framework for render tests to work.");
 #endif
-    }
 
-    private static string CertifyDirectory(string[] directoryParts, string directoyPath)
+namespace GLTFast.Tests {
+
+    [CustomEditor(typeof(GltfSampleSet))]
+    public class GltfSampleSetEditor : UnityEditor.Editor
     {
-        foreach (var dirPart in directoryParts)
-        {
-            var newFolder = Path.Combine(directoyPath, dirPart);
-            if (!AssetDatabase.IsValidFolder(newFolder))
-            {
-                AssetDatabase.CreateFolder(directoyPath, dirPart);
-            }
+        private GltfSampleSet _sampleSet;
+        private string searchPattern = "*.gl*";
 
-            directoyPath = newFolder;
+        public void OnEnable() {
+            _sampleSet = (GltfSampleSet)target;
         }
 
-        return directoyPath;
+        public override void OnInspectorGUI() {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search Pattern");
+            searchPattern = GUILayout.TextField(searchPattern);
+            GUILayout.EndHorizontal();
+            if (GUILayout.Button("Find in path")) {
+                _sampleSet.LoadItemsFromPath(searchPattern);
+            }
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Activate All")) {
+                _sampleSet.SetAllActive();
+            }
+            if (GUILayout.Button("Deactivate All")) {
+                _sampleSet.SetAllActive(false);
+            }
+            GUILayout.EndHorizontal();
+            if (GUILayout.Button("Create render test scenes")) {
+                CreateRenderTestScenes(_sampleSet);
+            }
+            base.OnInspectorGUI();
+            
+            if (GUI.changed) {
+                EditorUtility.SetDirty(_sampleSet);
+            }
+        }
+        
+        public static void CreateRenderTestScenes(GltfSampleSet sampleSet)
+        {
+    #if GLTFAST_RENDER_TEST
+            var allScenes = new List<EditorBuildSettingsScene>();
+            Texture2D dummyReference = null;
+
+            foreach (var item in sampleSet.GetItems())
+            {
+                var testScene = EditorSceneManager.OpenScene("Assets/Scenes/TestScene.unity");
+                
+                var settingsGameObject = new GameObject("GraphicsTestSettings");
+                var graphicsTestSettings = settingsGameObject.AddComponent<UniversalGraphicsTestSettings>();
+
+                var go = new GameObject(item.name);
+                var gltfAsset = go.AddComponent<GltfBoundsAsset>();
+                
+                if(string.IsNullOrEmpty(sampleSet.streamingAssetsPath)) {
+                    gltfAsset.url = Path.Combine(sampleSet.baseLocalPath, item.path);
+                } else {
+                    gltfAsset.url = Path.Combine(sampleSet.streamingAssetsPath, item.path);
+                    gltfAsset.streamingAsset = true;
+                }
+                gltfAsset.loadOnStartup = true;
+                gltfAsset.createBoxCollider = false;
+                
+                var sceneDirectory = CertifyDirectory(item.directoryParts, string.Format("Assets/Scenes/{0}", sampleSet.name));
+                var scenePath = Path.Combine(sceneDirectory, item.name+".unity");
+
+                EditorSceneManager.SaveScene(testScene,scenePath);
+                allScenes.Add(new EditorBuildSettingsScene(scenePath,true));
+
+                var referenceImagePath =
+                    Path.Combine(Application.dataPath, "ReferenceImages/Linear/OSXEditor/Metal/None", item.name + ".png");
+                if (!File.Exists(referenceImagePath)) {
+                    Debug.LogFormat("Create dummy reference at path {0}", referenceImagePath);
+                    dummyReference = dummyReference!=null
+                        ? dummyReference
+                        : new Texture2D(
+                        graphicsTestSettings.ImageComparisonSettings.TargetWidth,
+                        graphicsTestSettings.ImageComparisonSettings.TargetHeight
+                    );
+                    File.WriteAllBytes(referenceImagePath, dummyReference.EncodeToPNG());
+                }
+            }
+            AssetDatabase.Refresh();
+            EditorBuildSettings.scenes = allScenes.ToArray();
+    #else
+            Debug.LogWarning("Please install  the Graphics Test Framework for render tests to work.");
+    #endif
+        }
+
+        private static string CertifyDirectory(string[] directoryParts, string directoyPath)
+        {
+            foreach (var dirPart in directoryParts)
+            {
+                var newFolder = Path.Combine(directoyPath, dirPart);
+                if (!AssetDatabase.IsValidFolder(newFolder))
+                {
+                    AssetDatabase.CreateFolder(directoyPath, dirPart);
+                }
+
+                directoyPath = newFolder;
+            }
+
+            return directoyPath;
+        }
     }
 }

@@ -15,8 +15,11 @@
 
 using System;
 
-[Serializable]
-public struct GltfSampleSetItemEntry {
-    public bool active;
-    public GltfSampleSetItem item;
+namespace GLTFast.Tests {
+
+    [Serializable]
+    public struct GltfSampleSetItemEntry {
+        public bool active;
+        public GltfSampleSetItem item;
+    }
 }

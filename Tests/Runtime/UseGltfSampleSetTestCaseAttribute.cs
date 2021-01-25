@@ -22,53 +22,56 @@ using NUnit.Framework.Internal.Builders;
 using UnityEditor;
 using UnityEngine;
 
-public class UseGltfSampleSetTestCaseAttribute : UnityEngine.TestTools.UnityTestAttribute, ITestBuilder
-{
-    GltfSampleSet m_sampleSet = null;
+namespace GLTFast.Tests {
 
-    NUnitTestCaseBuilder _builder = new NUnitTestCaseBuilder();
+    public class UseGltfSampleSetTestCaseAttribute : UnityEngine.TestTools.UnityTestAttribute, ITestBuilder {
+        GltfSampleSet m_sampleSet = null;
 
-    public UseGltfSampleSetTestCaseAttribute(string sampleSetPath) {
-        m_sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>(sampleSetPath);
-    }
+        NUnitTestCaseBuilder _builder = new NUnitTestCaseBuilder();
 
-    IEnumerable<TestMethod> ITestBuilder.BuildFrom(IMethodInfo method, Test suite) {
-        List<TestMethod> results = new List<TestMethod>();
-        var nameCounts = new Dictionary<string, int>();
-        
-        try {
-            foreach (var testCase in m_sampleSet.GetTestItems()) {
-                var data = new TestCaseData( new object[]{ testCase } );
+        public UseGltfSampleSetTestCaseAttribute(string sampleSetPath) {
+            m_sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>(sampleSetPath);
+        }
 
-                string name;
-                if (nameCounts.TryGetValue(testCase.name, out int count)) {
-                    name = string.Format("{0}-{1}", testCase.name, count);
-                    nameCounts[testCase.name] = count + 1;
-                } else {
-                    name = testCase.name;
-                    nameCounts[testCase.name] = 1;
+        IEnumerable<TestMethod> ITestBuilder.BuildFrom(IMethodInfo method, Test suite) {
+            List<TestMethod> results = new List<TestMethod>();
+            var nameCounts = new Dictionary<string, int>();
+
+            try {
+                foreach (var testCase in m_sampleSet.GetTestItems()) {
+                    var data = new TestCaseData(new object[] { testCase });
+
+                    string name;
+                    if (nameCounts.TryGetValue(testCase.name, out int count)) {
+                        name = string.Format("{0}-{1}", testCase.name, count);
+                        nameCounts[testCase.name] = count + 1;
+                    }
+                    else {
+                        name = testCase.name;
+                        nameCounts[testCase.name] = 1;
+                    }
+
+                    data.SetName(name);
+                    data.ExpectedResult = new UnityEngine.Object();
+                    data.HasExpectedResult = true;
+
+                    var test = this._builder.BuildTestMethod(method, suite, data);
+                    if (test.parms != null)
+                        test.parms.HasExpectedResult = false;
+
+                    test.Name = name;
+
+                    results.Add(test);
                 }
-
-                data.SetName(name);
-                data.ExpectedResult = new UnityEngine.Object();
-                data.HasExpectedResult = true;
-
-                var test = this._builder.BuildTestMethod(method, suite, data);
-                if (test.parms != null)
-                    test.parms.HasExpectedResult = false;
-
-                test.Name = name;
-
-                results.Add(test);
             }
-        }
-        catch (Exception ex) {
-            Console.WriteLine("Failed to generate glTF testcases!");
-            Debug.LogException(ex);
-            throw;
-        }
+            catch (Exception ex) {
+                Console.WriteLine("Failed to generate glTF testcases!");
+                Debug.LogException(ex);
+                throw;
+            }
 
-        Console.WriteLine("Generated {0} glTF test cases.", results.Count);
-        return results;
+            Console.WriteLine("Generated {0} glTF test cases.", results.Count);
+            return results;
+        }
     }
 }

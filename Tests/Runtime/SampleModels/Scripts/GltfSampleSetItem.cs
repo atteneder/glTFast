@@ -16,19 +16,20 @@
 using System;
 using System.IO;
 
-[Serializable]
-public struct GltfSampleSetItem {
-    public string name;
-    public string path;
+namespace GLTFast.Tests {
 
-    public GltfSampleSetItem(string name,string path) {
-        this.name = name;
-        this.path = path;
-    }
+    [Serializable]
+    public struct GltfSampleSetItem {
+        public string name;
+        public string path;
 
-    public string[] directoryParts {
-        get {
-            return Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar);
+        public GltfSampleSetItem(string name, string path) {
+            this.name = name;
+            this.path = path;
+        }
+
+        public string[] directoryParts {
+            get { return Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar); }
         }
     }
 }
