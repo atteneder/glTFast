@@ -1,12 +1,12 @@
 {
     "name": "glTFastTests",
-    "rootNamespace": "",
     "references": [
         "glTFast",
         "glTFastSample",
         "Unity.Mathematics",
         "UnityEditor.TestRunner",
         "UnityEngine.TestRunner",
+        "Unity.PerformanceTesting",
         "UnityEngine.TestTools.Graphics"
     ],
     "includePlatforms": [],

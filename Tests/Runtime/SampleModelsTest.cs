@@ -16,6 +16,7 @@
 using System.Collections;
 using System.IO;
 using NUnit.Framework;
+using Unity.PerformanceTesting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -29,12 +30,16 @@ namespace GLTFast.Tests {
         [Test]
         public void CheckFiles()
         {
+#if UNITY_EDITOR
             var sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>(glTFSampleSetAssetPath);
             Assert.AreEqual(177, sampleSet.itemCount);
 
             foreach (var item in sampleSet.GetItemsPrefixed()) {
                 CheckFileExists(item.path);
             }
+#else
+            Debug.Log("Editor only test");
+#endif
         }
 
         void CheckFileExists(string path) {
@@ -52,10 +57,14 @@ namespace GLTFast.Tests {
 
         [UnityTest]
         [UseGltfSampleSetTestCase(glTFSampleSetAssetPath)]
+        [Performance]
+        [Version("main")] 
         public IEnumerator Load(GltfSampleSetItem testCase)
         {
             var go = new GameObject();
-            yield return LoadGltfSampleSetItem(testCase, go);
+            using (Measure.Frames().Scope()) {
+                yield return LoadGltfSampleSetItem(testCase, go);
+            }
             Object.Destroy(go);
         }
 
