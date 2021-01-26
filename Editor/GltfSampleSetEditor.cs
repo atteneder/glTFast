@@ -39,13 +39,16 @@ namespace GLTFast.Tests {
         }
 
         public override void OnInspectorGUI() {
+            
             GUILayout.BeginHorizontal();
             GUILayout.Label("Search Pattern");
             searchPattern = GUILayout.TextField(searchPattern);
             GUILayout.EndHorizontal();
+            
             if (GUILayout.Button("Find in path")) {
                 _sampleSet.LoadItemsFromPath(searchPattern);
             }
+            
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Activate All")) {
                 _sampleSet.SetAllActive();
@@ -54,9 +57,15 @@ namespace GLTFast.Tests {
                 _sampleSet.SetAllActive(false);
             }
             GUILayout.EndHorizontal();
+            
+            if (GUILayout.Button("Create JSONs")) {
+                CreateJSON(_sampleSet,target);
+            }
+            
             if (GUILayout.Button("Create render test scenes")) {
                 CreateRenderTestScenes(_sampleSet);
             }
+            
             base.OnInspectorGUI();
             
             if (GUI.changed) {
@@ -113,6 +122,13 @@ namespace GLTFast.Tests {
     #else
             Debug.LogWarning("Please install  the Graphics Test Framework for render tests to work.");
     #endif
+        }
+
+        public static void CreateJSON(GltfSampleSet sampleSet, Object target) {
+            var jsonPathAbsolute = Path.Combine( Application.streamingAssetsPath, $"{sampleSet.name}.json");
+            Debug.Log(jsonPathAbsolute);
+            var json = JsonUtility.ToJson(sampleSet);
+            File.WriteAllText(jsonPathAbsolute,json);
         }
 
         private static string CertifyDirectory(string[] directoryParts, string directoyPath)

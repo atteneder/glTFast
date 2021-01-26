@@ -25,7 +25,8 @@ namespace GLTFast.Tests {
 
     public class SampleModelsTest
     {
-        private const string glTFSampleSetAssetPath = "Assets/SampleSets/glTF-Sample-Models.asset";
+        const string glTFSampleSetAssetPath = "Assets/SampleSets/glTF-Sample-Models.asset";
+        const string glTFSampleSetJsonPath = "glTF-Sample-Models.json";
 
         [Test]
         public void CheckFiles()
@@ -56,7 +57,7 @@ namespace GLTFast.Tests {
         }
 
         [UnityTest]
-        [UseGltfSampleSetTestCase(glTFSampleSetAssetPath)]
+        [UseGltfSampleSetTestCase(glTFSampleSetJsonPath)]
         [Performance]
         [Version("main")] 
         public IEnumerator Load(GltfSampleSetItem testCase)

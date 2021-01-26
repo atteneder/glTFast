@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -30,12 +31,18 @@ namespace GLTFast.Tests {
         NUnitTestCaseBuilder _builder = new NUnitTestCaseBuilder();
 
         public UseGltfSampleSetTestCaseAttribute(string sampleSetPath) {
-            m_sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>(sampleSetPath);
+            var json = File.ReadAllText(Path.Combine(Application.streamingAssetsPath, sampleSetPath));
+            m_sampleSet = ScriptableObject.CreateInstance<GltfSampleSet>();
+            JsonUtility.FromJsonOverwrite(json,m_sampleSet);
         }
 
         IEnumerable<TestMethod> ITestBuilder.BuildFrom(IMethodInfo method, Test suite) {
             List<TestMethod> results = new List<TestMethod>();
             var nameCounts = new Dictionary<string, int>();
+
+            if (m_sampleSet == null) {
+                throw new Exception("SampleSet not set");
+            }
 
             try {
                 foreach (var testCase in m_sampleSet.GetTestItems()) {
