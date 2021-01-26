@@ -39,8 +39,8 @@ namespace GLTFast.Tests {
         public float lastDuration => m_Duration;
         public int frameCount => m_EndFrameCount-m_StartFrameCount;
         public float averageFrameTime => m_FPSDuration / frameCount;
-        public float minFrameTimeTime => m_MinFrameTime;
-        public float maxFrameTimeTime => m_MaxFrameTime;
+        public float minFrameTime => m_MinFrameTime;
+        public float maxFrameTime => m_MaxFrameTime;
 
         void Awake() {
             Time.maximumDeltaTime = maxDeltaTime;
@@ -61,6 +61,16 @@ namespace GLTFast.Tests {
             m_Running = false;
             m_Duration = now;
             m_ConsiderLastFrame = true;
+        }
+
+        public string GetTextReport() {
+            return string.Format(
+                "{3} ms (fps avg: {0} min: {1} ms max: {2} ms)"
+                , averageFrameTime.ToString("0.00")
+                , minFrameTime < float.MaxValue ? minFrameTime.ToString("0.00") : "-"
+                , maxFrameTime > float.MinValue ? maxFrameTime.ToString("0.00") : "-"
+                , lastDuration >= 0 ? lastDuration.ToString("0.00") : "-"
+            );
         }
 
         void Update() {
