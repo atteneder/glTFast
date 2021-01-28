@@ -134,7 +134,7 @@ namespace GLTFast {
                 // case GLTFComponentType.UnsignedByte:
                 //     break;
                 default:
-                    Debug.LogErrorFormat( GLTFast.ErrorUnsupportedType, "Tangent", inputType);
+                    Debug.LogErrorFormat( GLTFast.ErrorUnsupportedType, "Weights", inputType);
                     jobHandle = null;
                     break;
             }
