@@ -167,12 +167,11 @@ namespace GLTFast.Materials {
             MaterialType? materialType = null;
             ShaderMode shaderMode = ShaderMode.Opaque;
 
-            if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
+            if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial.doubleSided);
                 materialType = MaterialType.Unlit;
             } else {
-                bool isMetallicRoughness = gltfMaterial.extensions == null ||
-                           gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness == null;
+                bool isMetallicRoughness = gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness == null;
                 if (isMetallicRoughness) {
                     materialType = MaterialType.MetallicRoughness;
                     var metallicShaderFeatures = GetMetallicShaderFeatures(gltfMaterial);

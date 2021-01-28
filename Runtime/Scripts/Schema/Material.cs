@@ -131,16 +131,8 @@ namespace GLTFast.Schema {
         /// </summary>
         public bool doubleSided = false;
 
-        public bool requiresNormals {
-            get {
-                return extensions==null || extensions.KHR_materials_unlit==null;
-            }
-        }
+        public bool requiresNormals => extensions?.KHR_materials_unlit == null;
 
-        public bool requiresTangents {
-            get {
-                return normalTexture!=null && normalTexture.index>=0;
-            }
-        }
+        public bool requiresTangents => normalTexture!=null && normalTexture.index>=0;
     }
 }

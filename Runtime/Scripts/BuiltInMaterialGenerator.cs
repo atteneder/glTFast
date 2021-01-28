@@ -151,10 +151,10 @@ namespace GLTFast.Materials {
         ) {
             Material material;
             
-            if (gltfMaterial.extensions!=null && gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness!=null) {
+            if (gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness != null) {
                 material = GetPbrSpecularGlossinessMaterial(gltfMaterial.doubleSided);
             } else
-            if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
+            if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial.doubleSided);
             } else {
                 material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);

@@ -13,6 +13,10 @@
 // limitations under the License.
 //
 
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("glTFastEditorTests")]
+
 namespace GLTFast.Schema {
     
     [System.Serializable]

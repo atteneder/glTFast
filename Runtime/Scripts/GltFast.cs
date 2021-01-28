@@ -14,13 +14,12 @@
 //
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
-using UnityEngine.Events;
 using Unity.Collections;
 using Unity.Jobs;
 #if BURST
@@ -30,8 +29,10 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
 #if KTX_UNITY
-using KtxUnity;
+
 #endif // KTX_UNITY
+
+[assembly: InternalsVisibleTo("glTFastEditorTests")]
 
 namespace GLTFast {
 
@@ -281,7 +282,7 @@ namespace GLTFast {
             return true;
         }
 
-        Root ParseJson(string json) {
+        internal static Root ParseJson(string json) {
             // JsonUtility sometimes creates non-null default instances of objects-type members
             // even though there are none in the original JSON.
             // This work-around makes sure not existent JSON nodes will be null in the result.
@@ -298,12 +299,15 @@ namespace GLTFast {
             if(root.materials!=null) {
                 for (int i = 0; i < root.materials.Length; i++) {
                     var mat = root.materials[i];
-                    check = mat.extensions!=null &&
-                    (
-                        mat.extensions.KHR_materials_pbrSpecularGlossiness!=null
-                        || mat.extensions.KHR_materials_unlit!=null
-                    );
-                    if(check) break;
+                    // mat.extension is always set (not null), because JsonUtility constructs a default
+                    // if any of mat.extension's members is not null, it is because there was
+                    // a legit extensions node in JSON => we have to check which ones
+                    if (mat.extensions.KHR_materials_unlit != null) {
+                        check = true;
+                    } else {
+                        // otherwise dump the wrongfully constructed MaterialExtension
+                        mat.extensions = null;
+                    }
                 }
             }
             Profiler.EndSample();
@@ -421,22 +425,24 @@ namespace GLTFast {
                         ) {
                             imageGamma[mat.emissiveTexture.index] = true;
                         }
-                        if( mat.extensions != null &&
-                            mat.extensions.KHR_materials_pbrSpecularGlossiness != null )
+                        if( mat.extensions?.KHR_materials_pbrSpecularGlossiness != null )
                         {
+                            var diffuseTexture = mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture;
                             if(
-                                mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture != null &&
-                                mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture.index >= 0 &&
-                                mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture.index < imageGamma.Length
+                                diffuseTexture != null &&
+                                diffuseTexture.index >= 0 &&
+                                diffuseTexture.index < imageGamma.Length
                             ) {
-                                imageGamma[mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture.index] = true;
+                                imageGamma[diffuseTexture.index] = true;
                             }
+
+                            var specularGlossinessTexture = mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture;
                             if(
-                                mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture != null &&
-                                mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture.index >= 0 &&
-                                mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture.index < imageGamma.Length
+                                specularGlossinessTexture != null &&
+                                specularGlossinessTexture.index >= 0 &&
+                                specularGlossinessTexture.index < imageGamma.Length
                             ) {
-                                imageGamma[mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture.index] = true;
+                                imageGamma[specularGlossinessTexture.index] = true;
                             }
                         }
                     }
