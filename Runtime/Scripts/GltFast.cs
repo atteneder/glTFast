@@ -801,14 +801,24 @@ namespace GLTFast {
 #endif // KTX_UNITY
 
             if(imageCreateContexts!=null) {
-                foreach(var jh in imageCreateContexts) {
-                    while(!jh.jobHandle.IsCompleted) {
+                var imageCreateContextsLeft = true;
+                while (imageCreateContextsLeft) {
+                    var loadedAny = false;
+                    for (int i = imageCreateContexts.Count - 1; i >= 0; i--) {
+                        var jh = imageCreateContexts[i];
+                        if(jh.jobHandle.IsCompleted) {
+                            jh.jobHandle.Complete();
+                            images[jh.imageIndex].LoadImage(jh.buffer);
+                            jh.gcHandle.Free();
+                            imageCreateContexts.RemoveAt(i);
+                            loadedAny = true;
+                            await deferAgent.BreakPoint();
+                        }
+                    }
+                    imageCreateContextsLeft = imageCreateContexts.Count > 0;
+                    if(!loadedAny && imageCreateContextsLeft) {
                         await Task.Yield();
                     }
-                    jh.jobHandle.Complete();
-                    images[jh.imageIndex].LoadImage(jh.buffer);
-                    jh.gcHandle.Free();
-                    await deferAgent.BreakPoint();
                 }
                 imageCreateContexts = null;
             }
