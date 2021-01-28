@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,19 +23,23 @@ namespace GLTFast {
     public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent
     {
         float lastTime;
-        float timeBudget;
+        float timeBudget = .5f/30;
 
         /// <summary>
         /// Defers work to the next frame if a fix time budget is
         /// used up.
         /// </summary>
         /// <param name="frameBudget">Time budget as part of the target frame rate.</param>
-        public TimeBudgetPerFrameDeferAgent( float frameBudget = 0.5f )
+        public void SetFrameBudget( float frameBudget = 0.5f )
         {
             float targetFrameRate = Application.targetFrameRate;
             if(targetFrameRate<0) targetFrameRate = 30;
             timeBudget = frameBudget/targetFrameRate;
             Reset();
+        }
+
+        void Awake() {
+            SetFrameBudget();
         }
 
         void Update() {

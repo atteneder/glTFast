@@ -83,7 +83,7 @@ namespace GLTFast.Tests {
         public IEnumerator SmoothLoading(GltfSampleSetItem testCase)
         {
             var go = new GameObject();
-            var deferAgent = new TimeBudgetPerFrameDeferAgent();
+            var deferAgent = go.AddComponent<TimeBudgetPerFrameDeferAgent>();
             SampleGroup loadTime = new SampleGroup("LoadTime", SampleUnit.Millisecond);
             // First time without measuring
             yield return LoadGltfSampleSetItem(testCase, go, deferAgent);
