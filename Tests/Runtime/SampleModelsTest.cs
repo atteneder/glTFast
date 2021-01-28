@@ -23,8 +23,10 @@ using UnityEngine.TestTools;
 
 namespace GLTFast.Tests {
 
-    public class SampleModelsTest
-    {
+    public class SampleModelsTest {
+        const string k_TestVersion = "main";
+        const int k_Repetitions = 10;
+        
         const string glTFSampleSetAssetPath = "Assets/SampleSets/glTF-Sample-Models.asset";
         const string glTFSampleSetJsonPath = "glTF-Sample-Models.json";
 
@@ -59,7 +61,7 @@ namespace GLTFast.Tests {
         [UnityTest]
         [UseGltfSampleSetTestCase(glTFSampleSetJsonPath)]
         [Performance]
-        [Version("main")]
+        [Version(k_TestVersion)]
         public IEnumerator UninterruptedLoading(GltfSampleSetItem testCase)
         {
             var go = new GameObject();
@@ -68,7 +70,7 @@ namespace GLTFast.Tests {
             // First time without measuring
             yield return LoadGltfSampleSetItem(testCase, go, deferAgent);
             using (Measure.Frames().Scope()) {
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < k_Repetitions; i++) {
                     yield return LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
                 }
             }
@@ -79,7 +81,7 @@ namespace GLTFast.Tests {
         [UnityTest]
         [UseGltfSampleSetTestCase(glTFSampleSetJsonPath)]
         [Performance]
-        [Version("main")] 
+        [Version(k_TestVersion)]
         public IEnumerator SmoothLoading(GltfSampleSetItem testCase)
         {
             var go = new GameObject();
@@ -88,7 +90,7 @@ namespace GLTFast.Tests {
             // First time without measuring
             yield return LoadGltfSampleSetItem(testCase, go, deferAgent);
             using (Measure.Frames().Scope()) {
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < k_Repetitions; i++) {
                     yield return LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
                     // Wait one more frame. Usually some more action happens in this one.
                     yield return null;
