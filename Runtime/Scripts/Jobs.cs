@@ -13,11 +13,6 @@
 // limitations under the License.
 //
 
-#if NET_LEGACY || NET_2_0 || NET_2_0_SUBSET
-#warning Consider using .NET 4.x equivalent scripting runtime version or upgrading Unity 2019.1 or newer for better performance
-#define COPY_LEGACY
-#endif
-
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
