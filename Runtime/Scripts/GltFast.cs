@@ -1474,10 +1474,10 @@ namespace GLTFast {
                 var mesh = gltf.meshes[meshIndex];
                 foreach( var kvp in meshPrimitiveCluster[meshIndex]) {
                     var cluster = kvp.Value;
+                    Profiler.BeginSample( "CreatePrimitiveContext");
                     PrimitiveCreateContextBase context = primitiveContexts[i];
 
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++) {
-                        Profiler.BeginSample("CreatePrimitiveContext");
                         var primitive = cluster[primIndex];
 #if DRACO_UNITY
                         if( primitive.isDracoCompressed ) {
@@ -1490,9 +1490,9 @@ namespace GLTFast {
                             c.vertexData = vertexAttributes[kvp.Key];
                             PreparePrimitiveIndices(gltf,mesh,primitive,ref c,primIndex);
                         }
-                        Profiler.EndSample();
-                        await deferAgent.BreakPoint();
-                    }
+                    }   
+                    Profiler.EndSample();
+                    await deferAgent.BreakPoint();
                     i++;
                 }
             }
