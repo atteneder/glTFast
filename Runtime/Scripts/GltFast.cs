@@ -875,8 +875,8 @@ namespace GLTFast {
                     while(!primitiveContext.IsCompleted) {
                         await Task.Yield();
                     }
-                    await deferAgent.BreakPoint();
                 }
+                await deferAgent.BreakPoint();
                 
                 await AssignAllAccessorData(gltfRoot);
 
