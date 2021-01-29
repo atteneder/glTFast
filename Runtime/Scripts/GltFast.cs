@@ -589,6 +589,7 @@ namespace GLTFast {
         }
 
         public bool InstantiateGltf( IInstantiator instantiator ) {
+            // TODO: Make instantiation preemptive (via deferAgent) as well!
             if (!loadingDone || loadingError) return false;
             CreateGameObjects( gltfRoot, instantiator );
             return true;
