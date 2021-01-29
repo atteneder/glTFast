@@ -41,6 +41,13 @@ namespace GLTFast {
         bool ShouldDefer( float duration );
 
         /// <summary>
+        /// Indicates if an upcoming, time-critical process should be run in a thread
+        /// </summary>
+        /// <param name="duration">Predicted duration of upcoming processing in seconds</param>
+        /// <returns>True if the process should be offloaded to a thread. False if it can be processed on main thread.</returns>
+        bool ShouldThread( float duration );
+        
+        /// <summary>
         /// Conditional yield. May continue right away or yield once, based on time.
         /// </summary>
         /// <returns>If <see cref="ShoudDefer"/> returns true, returns Task.Yield(). Otherwise returns sync</returns>

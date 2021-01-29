@@ -283,8 +283,9 @@ namespace GLTFast {
 
         async Task<bool> ParseJsonAndLoadBuffers( string json, Uri baseUri ) {
 
+            var predictedTime = json.Length / (float)k_JsonParseSpeed;
 #if !MEASURE_TIMINGS
-            if (deferAgent.ShouldDefer(json.Length/(float)k_JsonParseSpeed) ) {
+            if (deferAgent.ShouldThread(predictedTime)) {
                 // JSON is larger than threshold
                 // => parse in a thread
                 gltfRoot = await Task.Run( () => ParseJson(json) );

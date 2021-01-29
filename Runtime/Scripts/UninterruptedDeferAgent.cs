@@ -26,6 +26,10 @@ namespace GLTFast {
         public bool ShouldDefer( float duration ) {
             return false;
         }
+
+        public bool ShouldThread(float duration) {
+            return false;
+        }
         
 #pragma warning disable 1998
         public async Task BreakPoint() {}
