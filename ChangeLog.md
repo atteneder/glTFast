@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Converted API and internals to async/await. This is more convenient in some cases and eases future optimizations.
 - Performance improvement: Non-trivial JSONs are parsed in a thread now
 - Performance improvement: More consistent frame rates due to task duration estimation in various places along the loading code
+- Performance improvement: Embed base 64 buffers are decoded in a thread now
 ### Fixed
 - Unit tests are working in builds again (not just in the Editor)
 

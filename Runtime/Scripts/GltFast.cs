@@ -313,20 +313,8 @@ namespace GLTFast {
                 var buffer = gltfRoot.buffers[i];
                 if( !string.IsNullOrEmpty(buffer.uri) ) {
                     if(buffer.uri.StartsWith("data:")) {
-                        await deferAgent.BreakPoint(buffer.uri.Length/(float)k_Base64DecodeSpeed);
-                        // TODO: thread!
-
-#if MEASURE_TIMINGS
-                        var stopWatch = new StopWatch();
-                        stopWatch.StartTime();
-#endif
-                        buffers[i] = DecodeEmbedBuffer(buffer.uri);
-#if MEASURE_TIMINGS
-                        stopWatch.StopTime();
-                        var throughput = buffer.uri.Length / (stopWatch.lastDuration / 1000);
-                        Debug.Log($"base 64 throughput: {throughput} ({buffer.uri.Length} in {stopWatch.lastDuration})");
-#endif
-
+                        var decodedBuffer = await DecodeEmbedBufferAsync(buffer.uri);
+                        buffers[i] = decodedBuffer.Item1;
                         if(buffers[i]==null) {
                             Debug.LogError("Error loading embed buffer!");
                             return false;
@@ -456,15 +444,16 @@ namespace GLTFast {
         async Task<bool> LoadGltf( string json, Uri url ) {
             var baseUri = UriHelper.GetBaseUri(url);
             var success = await ParseJsonAndLoadBuffers(json,baseUri);
-            if(success) LoadImages(baseUri);
+            if(success) await LoadImages(baseUri);
             return success;
         }
 
-        void LoadImages( Uri baseUri ) {
-
-            Profiler.BeginSample("LoadImages");
-
+        async Task LoadImages( Uri baseUri ) {
+            
             if (gltfRoot.textures != null && gltfRoot.images != null && gltfRoot.materials!=null) {
+                
+                Profiler.BeginSample("LoadImages.Prepare");
+                
                 images = new Texture2D[gltfRoot.images.Length];
                 imageFormats = new ImageFormat[gltfRoot.images.Length];
 
@@ -524,12 +513,16 @@ namespace GLTFast {
                 }
 #endif // KTX_UNITY
 
+                Profiler.EndSample();
+                
                 for (int i = 0; i < gltfRoot.images.Length; i++) {
                     var img = gltfRoot.images[i];
 
                     if(!string.IsNullOrEmpty(img.uri) && img.uri.StartsWith("data:")) {
-                        string mimeType;
-                        var data = DecodeEmbedBuffer(img.uri,out mimeType);
+                        var decodedBuffer = await DecodeEmbedBufferAsync(img.uri);
+                        Profiler.BeginSample("LoadImages.FromBase64");
+                        var data = decodedBuffer.Item1;
+                        string mimeType = decodedBuffer.Item2;
                         var imgFormat = GetImageFormatFromMimeType(mimeType);
                         if(data==null || imgFormat==ImageFormat.Unknown) {
                             Debug.LogError("Loading embedded image failed");
@@ -548,6 +541,7 @@ namespace GLTFast {
                         var txt = CreateEmptyTexture(img,i,forceSampleLinear);
                         txt.LoadImage(data);
                         images[i] = txt;
+                        Profiler.EndSample();
                     } else {
                         ImageFormat imgFormat;
                         if(imageFormats[i]==ImageFormat.Unknown) {
@@ -576,8 +570,6 @@ namespace GLTFast {
                     }
                 }
             }
-
-            Profiler.EndSample();
         }
 
         async Task WaitForBufferDownloads() {
@@ -676,21 +668,40 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        byte[] DecodeEmbedBuffer(string encodedBytes) {
-            string tmp;
-            return DecodeEmbedBuffer(encodedBytes,out tmp);
+        async Task<Tuple<byte[],string>> DecodeEmbedBufferAsync(string encodedBytes) {
+            var predictedTime = encodedBytes.Length / (float)k_Base64DecodeSpeed;
+#if MEASURE_TIMINGS
+            await deferAgent.BreakPoint(predictedTime);
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+#else
+            if (deferAgent.ShouldThread(predictedTime)) {
+                return await Task.Run(() => DecodeEmbedBuffer(encodedBytes));
+            }
+#endif
+            var decodedBuffer = DecodeEmbedBuffer(encodedBytes);
+#if MEASURE_TIMINGS
+            stopWatch.Stop();
+            var elapsedSeconds = stopWatch.ElapsedMilliseconds / 1000f;
+            var relativeDiff = (elapsedSeconds-predictedTime) / predictedTime;
+            if (Mathf.Abs(relativeDiff) > .2f) {
+                Debug.LogWarning($"Base 64 unexpected duration! diff: {relativeDiff:0.00}% predicted: {predictedTime} sec actual: {elapsedSeconds} sec");
+            }
+            var throughput = encodedBytes.Length / elapsedSeconds;
+            Debug.Log($"Base 64 throughput: {throughput} bytes/sec ({encodedBytes.Length} bytes in {elapsedSeconds} seconds)");
+#endif
+            return decodedBuffer;
         }
 
-        byte[] DecodeEmbedBuffer(string encodedBytes, out string mimeType) {
+        static Tuple<byte[],string> DecodeEmbedBuffer(string encodedBytes) {
             Profiler.BeginSample("DecodeEmbedBuffer");
-            mimeType = null;
             Debug.LogWarning("JSON embed buffers are slow! consider using glTF binary");
             var mediaTypeEnd = encodedBytes.IndexOf(';',5,Math.Min(encodedBytes.Length-5,1000) );
             if(mediaTypeEnd<0) {
                 Profiler.EndSample();
                 return null;
             }
-            mimeType = encodedBytes.Substring(5,mediaTypeEnd-5);
+            var mimeType = encodedBytes.Substring(5,mediaTypeEnd-5);
             var tmp = encodedBytes.Substring(mediaTypeEnd+1,7);
             if(tmp!="base64,") {
                 Profiler.EndSample();
@@ -698,7 +709,7 @@ namespace GLTFast {
             }
             var data = System.Convert.FromBase64String(encodedBytes.Substring(mediaTypeEnd+8));
             Profiler.EndSample();
-            return data;
+            return new Tuple<byte[], string>(data, mimeType);
         }
 
         void LoadTexture( int index, Uri url, bool isKtx ) {
@@ -802,7 +813,7 @@ namespace GLTFast {
                 binChunks[0] = glbBinChunk.Value;
                 buffers[0] = bytes;
             }
-            LoadImages(baseUri);
+            await LoadImages(baseUri);
             Profiler.EndSample();
             return true;
         }
