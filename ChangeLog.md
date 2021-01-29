@@ -4,14 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.0.0] - 2021-01-22
-### Changed
-- Converted API and internals to async/await. This is more convenient in some cases and ease future optimizations.
-
 ## [Unreleased] -
 ### Added
 - Support for performance benchmark package
-- Predicted duration for more consistent frame rates during loading 
+- Predicted duration for more consistent frame rates during loading
+### Changed
+- Converted API and internals to async/await. This is more convenient in some cases and eases future optimizations.
+- Performance improvement: Non-trivial JSONs are parsed in a thread now
 ### Fixed
 - Unit tests are working in builds again (not just in the Editor)
 

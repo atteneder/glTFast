@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+// #define MEASURE_TIMINGS
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -28,6 +30,10 @@ using Unity.Mathematics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
+#if MEASURE_TIMINGS
+using GLTFast.Tests;
+#endif
+
 #if KTX_UNITY
 
 #endif // KTX_UNITY
@@ -55,6 +61,17 @@ namespace GLTFast {
 
         const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
         const string ExtTextureBasisu = "KHR_texture_basisu";
+        
+        // JSON parse speed in bytes per second
+        // Measurements based on a MacBook Pro Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
+        // and reduced by ~ 20%
+        const int k_JsonParseSpeed = 
+#if UNITY_EDITOR
+            45_000_000;
+#else
+            80_000_000;
+#endif
+        
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
 #if DRACO_UNITY
@@ -214,9 +231,9 @@ namespace GLTFast {
                 }
 
                 if (gltfBinary ?? false) {
-                    success = LoadGltfBinary(download.data,url);
+                    success = await LoadGltfBinary(download.data,url);
                 } else {
-                    success = LoadGltf(download.text,url);
+                    success = await LoadGltf(download.text,url);
                 }
                 if(success) await LoadContent();
                 success = success && await Prepare();
@@ -232,7 +249,6 @@ namespace GLTFast {
 
         async Task LoadContent() {
 
-            await deferAgent.BreakPoint();
             await WaitForBufferDownloads();
             downloadTasks?.Clear();
 
@@ -250,8 +266,21 @@ namespace GLTFast {
 #endif // KTX_UNITY
         }
 
-        bool ParseJsonAndLoadBuffers( string json, Uri baseUri ) {
-            gltfRoot = ParseJson(json);
+        async Task<bool> ParseJsonAndLoadBuffers( string json, Uri baseUri ) {
+
+#if !MEASURE_TIMINGS
+            if (deferAgent.ShouldDefer(json.Length/(float)k_JsonParseSpeed) ) {
+                // JSON is larger than threshold
+                // => parse in a thread
+                gltfRoot = await Task.Run( () => ParseJson(json) );
+            } else
+#endif
+            {
+                // Parse immediately on main thread
+                gltfRoot = ParseJson(json);
+                // Loading subsequent buffers and images has to start asap.
+                // That's why parsing JSON right away is *very* important. 
+            }
 
             if(!CheckExtensionSupport(gltfRoot)) {
                 return false;
@@ -286,7 +315,10 @@ namespace GLTFast {
             // JsonUtility sometimes creates non-null default instances of objects-type members
             // even though there are none in the original JSON.
             // This work-around makes sure not existent JSON nodes will be null in the result.
-
+#if MEASURE_TIMINGS
+            var stopWatch = new StopWatch();
+            stopWatch.StartTime();
+#endif
             // Step one: main JSON parsing
             Profiler.BeginSample("JSON main");
             var root = JsonUtility.FromJson<Root>(json);
@@ -345,6 +377,11 @@ namespace GLTFast {
                 }
                 Profiler.EndSample();
             }
+#if MEASURE_TIMINGS
+            stopWatch.StopTime();
+            var throughput = json.Length / (stopWatch.lastDuration / 1000);
+            Debug.Log($"JSON throughput: {throughput} ({json.Length} in {stopWatch.lastDuration})");
+#endif
             return root;
         }
 
@@ -386,12 +423,10 @@ namespace GLTFast {
             return true;
         }
 
-        bool LoadGltf( string json, Uri url ) {
-            Profiler.BeginSample("LoadGltf");
+        async Task<bool> LoadGltf( string json, Uri url ) {
             var baseUri = UriHelper.GetBaseUri(url);
-            var success = ParseJsonAndLoadBuffers(json,baseUri);
+            var success = await ParseJsonAndLoadBuffers(json,baseUri);
             if(success) LoadImages(baseUri);
-            Profiler.EndSample();
             return success;
         }
 
@@ -603,10 +638,12 @@ namespace GLTFast {
         }
 
         void LoadBuffer( int index, Uri url ) {
+            Profiler.BeginSample("LoadBuffer");
             if(downloadTasks==null) {
                 downloadTasks = new Dictionary<int, Task<IDownload>>();
             }
             downloadTasks.Add(index,downloadProvider.Request(url));
+            Profiler.EndSample();
         }
 
         byte[] DecodeEmbedBuffer(string encodedBytes) {
@@ -666,7 +703,7 @@ namespace GLTFast {
         /// <param name="bytes">byte array containing glTF-binary</param>
         /// <param name="url">Base URL for relative paths of external buffers or images</param>
         /// <returns></returns>
-        public bool LoadGltfBinary( byte[] bytes, Uri uri = null ) {
+        public async Task<bool> LoadGltfBinary( byte[] bytes, Uri uri = null ) {
             Profiler.BeginSample("LoadGltfBinary");
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
@@ -711,7 +748,7 @@ namespace GLTFast {
                     Profiler.EndSample();
 
                     Profiler.BeginSample("ParseJSON");
-                    var success = ParseJsonAndLoadBuffers(json,baseUri);
+                    var success = await ParseJsonAndLoadBuffers(json,baseUri);
                     Profiler.EndSample();
 
                     if(!success) {
