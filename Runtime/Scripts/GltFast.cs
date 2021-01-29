@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -30,6 +31,7 @@ using Unity.Mathematics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
+using Debug = UnityEngine.Debug;
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
 #endif
@@ -47,7 +49,31 @@ namespace GLTFast {
 
     public class GLTFast {
 
+        /// <summary>
+        /// JSON parse speed in bytes per second
+        /// Measurements based on a MacBook Pro Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
+        /// and reduced by ~ 20%
+        /// </summary>
+        const int k_JsonParseSpeed = 
+#if UNITY_EDITOR
+            45_000_000;
+#else
+            80_000_000;
+#endif
+        /// <summary>
+        /// Base 64 string to byte array decode speed in bytes per second
+        /// Measurements based on a MacBook Pro Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
+        /// and reduced by ~ 20%
+        /// </summary>
+        const int k_Base64DecodeSpeed =
+#if UNITY_EDITOR
+            60_000_000;
+#else
+            150_000_000;
+#endif
+        
         public const int DefaultBatchCount = 50000;
+
         const uint GLB_MAGIC = 0x46546c67;
 
         public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
@@ -61,17 +87,6 @@ namespace GLTFast {
 
         const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
         const string ExtTextureBasisu = "KHR_texture_basisu";
-        
-        // JSON parse speed in bytes per second
-        // Measurements based on a MacBook Pro Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
-        // and reduced by ~ 20%
-        const int k_JsonParseSpeed = 
-#if UNITY_EDITOR
-            45_000_000;
-#else
-            80_000_000;
-#endif
-        
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
 #if DRACO_UNITY
@@ -297,7 +312,20 @@ namespace GLTFast {
                 var buffer = gltfRoot.buffers[i];
                 if( !string.IsNullOrEmpty(buffer.uri) ) {
                     if(buffer.uri.StartsWith("data:")) {
+                        await deferAgent.BreakPoint(buffer.uri.Length/(float)k_Base64DecodeSpeed);
+                        // TODO: thread!
+
+#if MEASURE_TIMINGS
+                        var stopWatch = new StopWatch();
+                        stopWatch.StartTime();
+#endif
                         buffers[i] = DecodeEmbedBuffer(buffer.uri);
+#if MEASURE_TIMINGS
+                        stopWatch.StopTime();
+                        var throughput = buffer.uri.Length / (stopWatch.lastDuration / 1000);
+                        Debug.Log($"base 64 throughput: {throughput} ({buffer.uri.Length} in {stopWatch.lastDuration})");
+#endif
+
                         if(buffers[i]==null) {
                             Debug.LogError("Error loading embed buffer!");
                             return false;
