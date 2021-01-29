@@ -900,6 +900,7 @@ namespace GLTFast {
             if(gltfRoot.materials!=null) {
                 materials = new UnityEngine.Material[gltfRoot.materials.Length];
                 for(int i=0;i<materials.Length;i++) {
+                    await deferAgent.BreakPoint(.0001f);
                     Profiler.BeginSample("GenerateMaterial");
                     materials[i] = materialGenerator.GenerateMaterial(
                         gltfRoot.materials[i],
