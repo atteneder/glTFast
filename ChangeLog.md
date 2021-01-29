@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] -
 ### Added
 - Support for performance benchmark package
+- Predicted duration for more consistent frame rates during loading 
 ### Fixed
 - Unit tests are working in builds again (not just in the Editor)
 

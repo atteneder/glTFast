@@ -14,15 +14,14 @@
 //
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GLTFast {
     
-    public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent
-    {
+    [DefaultExecutionOrder(-10)]
+    public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent {
+        
         float lastTime;
         float timeBudget = .5f/30;
 
@@ -60,9 +59,25 @@ namespace GLTFast {
             }
             return false;
         }
+        
+        public bool ShouldDefer( float duration ) {
+            if (duration > timeBudget) return true;
+            var now = Time.realtimeSinceStartup;
+            if( duration > timeBudget - (now-lastTime) ) {
+                lastTime = now;
+                return true;
+            }
+            return false;
+        }
 
         public async Task BreakPoint() {
             if (ShouldDefer()) {
+                await Task.Yield();
+            }
+        }
+        
+        public async Task BreakPoint( float duration ) {
+            if (ShouldDefer(duration)) {
                 await Task.Yield();
             }
         }

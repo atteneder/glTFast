@@ -23,10 +23,13 @@ namespace GLTFast {
             return false;
         }
         
-        public async Task BreakPoint() {
-            if (ShouldDefer()) {
-                await Task.Yield();
-            }
+        public bool ShouldDefer( float duration ) {
+            return false;
         }
+        
+#pragma warning disable 1998
+        public async Task BreakPoint() {}
+        public async Task BreakPoint(float duration) {}
+#pragma warning restore 1998
     }
 }
