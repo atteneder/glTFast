@@ -745,7 +745,7 @@ namespace GLTFast {
         /// <param name="url">Base URL for relative paths of external buffers or images</param>
         /// <returns></returns>
         public async Task<bool> LoadGltfBinary( byte[] bytes, Uri uri = null ) {
-            Profiler.BeginSample("LoadGltfBinary");
+            Profiler.BeginSample("LoadGltfBinary.Phase1");
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
             if (magic != GLB_MAGIC) {
@@ -767,6 +767,8 @@ namespace GLTFast {
 
             var baseUri = UriHelper.GetBaseUri(uri);
 
+            Profiler.EndSample();
+            
             while( index < bytes.Length ) {
                 uint chLength = BitConverter.ToUInt32( bytes, index );
                 index += 4;
@@ -787,13 +789,10 @@ namespace GLTFast {
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength );
                     //Debug.Log( string.Format("chunk: JSON; length: {0}", json ) );
                     Profiler.EndSample();
-
-                    Profiler.BeginSample("ParseJSON");
+                    
                     var success = await ParseJsonAndLoadBuffers(json,baseUri);
-                    Profiler.EndSample();
 
                     if(!success) {
-                        Profiler.EndSample();
                         return false;
                     }
                 }
@@ -804,7 +803,6 @@ namespace GLTFast {
             //Debug.Log(index);
             if(gltfRoot==null) {
                 Debug.LogError("Invalid JSON chunk");
-                Profiler.EndSample();
                 return false;
             }
             
@@ -814,7 +812,6 @@ namespace GLTFast {
                 buffers[0] = bytes;
             }
             await LoadImages(baseUri);
-            Profiler.EndSample();
             return true;
         }
 
