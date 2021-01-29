@@ -345,8 +345,8 @@ namespace GLTFast {
             // even though there are none in the original JSON.
             // This work-around makes sure not existent JSON nodes will be null in the result.
 #if MEASURE_TIMINGS
-            var stopWatch = new StopWatch();
-            stopWatch.StartTime();
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
 #endif
             // Step one: main JSON parsing
             Profiler.BeginSample("JSON main");
@@ -407,9 +407,10 @@ namespace GLTFast {
                 Profiler.EndSample();
             }
 #if MEASURE_TIMINGS
-            stopWatch.StopTime();
-            var throughput = json.Length / (stopWatch.lastDuration / 1000);
-            Debug.Log($"JSON throughput: {throughput} ({json.Length} in {stopWatch.lastDuration})");
+            stopWatch.Stop();
+            var elapsedSeconds = stopWatch.ElapsedMilliseconds / 1000f;
+            var throughput = json.Length / elapsedSeconds;
+            Debug.Log($"JSON throughput: {throughput} bytes/sec ({json.Length} bytes in {elapsedSeconds} seconds)");
 #endif
             return root;
         }
