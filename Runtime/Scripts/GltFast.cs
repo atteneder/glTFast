@@ -565,6 +565,7 @@ namespace GLTFast {
 
         async Task LoadImageFromBuffer(Task<Tuple<byte[],string>> decodeBufferTask, int imageIndex, Image img) {
             var decodedBuffer = await decodeBufferTask;
+            await deferAgent.BreakPoint();
             Profiler.BeginSample("LoadImages.FromBase64");
             var data = decodedBuffer.Item1;
             string mimeType = decodedBuffer.Item2;
