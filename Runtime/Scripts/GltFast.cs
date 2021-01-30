@@ -313,7 +313,10 @@ namespace GLTFast {
                 var buffer = gltfRoot.buffers[i];
                 if( !string.IsNullOrEmpty(buffer.uri) ) {
                     if(buffer.uri.StartsWith("data:")) {
-                        var decodedBuffer = await DecodeEmbedBufferAsync(buffer.uri);
+                        var decodedBuffer = await DecodeEmbedBufferAsync(
+                            buffer.uri,
+                            true // usually there's just one buffer and it's time-critical
+                            );
                         buffers[i] = decodedBuffer.Item1;
                         if(buffers[i]==null) {
                             Debug.LogError("Error loading embed buffer!");
@@ -514,34 +517,18 @@ namespace GLTFast {
 #endif // KTX_UNITY
 
                 Profiler.EndSample();
-                
+                List<Task> imageTasks = null;
+
                 for (int i = 0; i < gltfRoot.images.Length; i++) {
                     var img = gltfRoot.images[i];
 
                     if(!string.IsNullOrEmpty(img.uri) && img.uri.StartsWith("data:")) {
-                        var decodedBuffer = await DecodeEmbedBufferAsync(img.uri);
-                        Profiler.BeginSample("LoadImages.FromBase64");
-                        var data = decodedBuffer.Item1;
-                        string mimeType = decodedBuffer.Item2;
-                        var imgFormat = GetImageFormatFromMimeType(mimeType);
-                        if(data==null || imgFormat==ImageFormat.Unknown) {
-                            Debug.LogError("Loading embedded image failed");
-                            continue;
+                        var decodedBufferTask = DecodeEmbedBufferAsync(img.uri);
+                        if (imageTasks == null) {
+                            imageTasks = new List<Task>();
                         }
-                        if(imageFormats[i]!=ImageFormat.Unknown && imageFormats[i]!=imgFormat) {
-                            Debug.LogErrorFormat("Inconsistent embed image type {0}!={1}",imageFormats[i],imgFormat);
-                        }
-                        imageFormats[i] = imgFormat;
-                        if(imageFormats[i]!=ImageFormat.Jpeg && imageFormats[i]!=ImageFormat.PNG) {
-                            // TODO: support embed KTX textures
-                            Debug.LogErrorFormat("Unsupported embed image format {0}",imageFormats[i]);
-                        }
-                        // TODO: jobify (if Unity allows LoadImage to be off the main thread)
-                        bool forceSampleLinear = imageGamma!=null && !imageGamma[i];
-                        var txt = CreateEmptyTexture(img,i,forceSampleLinear);
-                        txt.LoadImage(data);
-                        images[i] = txt;
-                        Profiler.EndSample();
+                        var imageTask = LoadImageFromBuffer(decodedBufferTask, i, img);
+                        imageTasks.Add(imageTask);
                     } else {
                         ImageFormat imgFormat;
                         if(imageFormats[i]==ImageFormat.Unknown) {
@@ -569,7 +556,40 @@ namespace GLTFast {
                         }
                     }
                 }
+
+                if (imageTasks != null) {
+                    await Task.WhenAll(imageTasks);
+                }
             }
+        }
+
+        async Task LoadImageFromBuffer(Task<Tuple<byte[],string>> decodeBufferTask, int imageIndex, Image img) {
+            var decodedBuffer = await decodeBufferTask;
+            Profiler.BeginSample("LoadImages.FromBase64");
+            var data = decodedBuffer.Item1;
+            string mimeType = decodedBuffer.Item2;
+            var imgFormat = GetImageFormatFromMimeType(mimeType);
+            if (data == null || imgFormat == ImageFormat.Unknown) {
+                Debug.LogError("Loading embedded image failed");
+                return;
+            }
+
+            if (imageFormats[imageIndex] != ImageFormat.Unknown && imageFormats[imageIndex] != imgFormat) {
+                Debug.LogErrorFormat("Inconsistent embed image type {0}!={1}", imageFormats[imageIndex], imgFormat);
+            }
+
+            imageFormats[imageIndex] = imgFormat;
+            if (imageFormats[imageIndex] != ImageFormat.Jpeg && imageFormats[imageIndex] != ImageFormat.PNG) {
+                // TODO: support embed KTX textures
+                Debug.LogErrorFormat("Unsupported embed image format {0}", imageFormats[imageIndex]);
+            }
+
+            // TODO: Investigate alternative: native texture creation in worker thread
+            bool forceSampleLinear = imageGamma != null && !imageGamma[imageIndex];
+            var txt = CreateEmptyTexture(img, imageIndex, forceSampleLinear);
+            txt.LoadImage(data);
+            images[imageIndex] = txt;
+            Profiler.EndSample();
         }
 
         async Task WaitForBufferDownloads() {
@@ -668,14 +688,14 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        async Task<Tuple<byte[],string>> DecodeEmbedBufferAsync(string encodedBytes) {
+        async Task<Tuple<byte[],string>> DecodeEmbedBufferAsync(string encodedBytes,bool timeCritical = false) {
             var predictedTime = encodedBytes.Length / (float)k_Base64DecodeSpeed;
 #if MEASURE_TIMINGS
             await deferAgent.BreakPoint(predictedTime);
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 #else
-            if (deferAgent.ShouldThread(predictedTime)) {
+            if (!timeCritical || deferAgent.ShouldThread(predictedTime)) {
                 return await Task.Run(() => DecodeEmbedBuffer(encodedBytes));
             }
 #endif
