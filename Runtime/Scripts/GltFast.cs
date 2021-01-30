@@ -285,7 +285,7 @@ namespace GLTFast {
 
             var predictedTime = json.Length / (float)k_JsonParseSpeed;
 #if !MEASURE_TIMINGS
-            if (deferAgent.ShouldThread(predictedTime)) {
+            if (deferAgent.ShouldDefer(predictedTime)) {
                 // JSON is larger than threshold
                 // => parse in a thread
                 gltfRoot = await Task.Run( () => ParseJson(json) );
@@ -696,7 +696,7 @@ namespace GLTFast {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 #else
-            if (!timeCritical || deferAgent.ShouldThread(predictedTime)) {
+            if (!timeCritical || deferAgent.ShouldDefer(predictedTime)) {
                 return await Task.Run(() => DecodeEmbedBuffer(encodedBytes));
             }
 #endif

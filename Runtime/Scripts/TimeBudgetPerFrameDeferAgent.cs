@@ -52,29 +52,15 @@ namespace GLTFast {
         }
 
         public bool ShouldDefer() {
-            float now = Time.realtimeSinceStartup;
-            if( now-lastTime > timeBudget ) {
-                lastTime = now;
-                return true;
-            }
-            return false;
+            return !FitsInCurrentFrame(0);
         }
         
         public bool ShouldDefer( float duration ) {
-            if (!FitsInCurrentFrame(duration, out var now)) {
-                lastTime = now;
-                return true;
-            }
-            return false;
+            return !FitsInCurrentFrame(duration);
         }
         
-        public bool ShouldThread(float duration) {
-            return !FitsInCurrentFrame(duration, out _);
-        }
-
-        bool FitsInCurrentFrame(float duration, out float now) {
-            now = Time.realtimeSinceStartup;
-            return duration <= timeBudget - (now - lastTime);
+        bool FitsInCurrentFrame(float duration) {
+            return duration <= timeBudget - (Time.realtimeSinceStartup - lastTime);
         }
 
         public async Task BreakPoint() {
