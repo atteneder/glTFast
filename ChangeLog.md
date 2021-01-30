@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for performance benchmark package
 ### Changed
 - Converted API and internals to async/await. This is more convenient in some cases and eases future optimizations.
-- Performance improvement: Non-trivial JSONs are parsed in a thread now
-- Performance improvement: More consistent frame rates due to task duration estimation in various places along the loading code
-- Performance improvement: Embed base 64 buffers are decoded in a thread now
+- Performance improvements
+  - Non-trivial JSONs are parsed in a thread now
+  - More consistent frame rates due to task duration estimation in various places along the loading code
+  - Embed base 64 buffers are decoded in a thread now
+  - Less memory usage (and likely faster) du to Jpeg and PNG textures being loaded non-readable (if possible)
 ### Fixed
 - Unit tests are working in builds again (not just in the Editor)
 

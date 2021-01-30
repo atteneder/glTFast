@@ -156,6 +156,7 @@ namespace GLTFast {
 
         Texture2D[] images = null;
         ImageFormat[] imageFormats;
+        bool[] imageReadable;
         bool[] imageGamma;
 
         /// optional glTF-binary buffer
@@ -515,6 +516,23 @@ namespace GLTFast {
                     }
                 }
 #endif // KTX_UNITY
+                
+                // Determine which images need to be readable, because they
+                // are applied using different samplers.
+                var imageVariants = new HashSet<int>[images.Length];
+                foreach (var txt in gltfRoot.textures) {
+                    var imageIndex = txt.GetImageIndex();
+                    var img = images[imageIndex];
+                    if(imageVariants[imageIndex]==null) {
+                        imageVariants[imageIndex] = new HashSet<int>();
+                    }
+                    imageVariants[imageIndex].Add(txt.sampler);
+                }
+
+                imageReadable = new bool[images.Length];
+                for (int i = 0; i < images.Length; i++) {
+                    imageReadable[i] = imageVariants[i]!=null && imageVariants[i].Count > 1;
+                }
 
                 Profiler.EndSample();
                 List<Task> imageTasks = null;
@@ -546,7 +564,7 @@ namespace GLTFast {
                             if (img.bufferView < 0) {
                                 // Not Inside buffer
                                 if(!string.IsNullOrEmpty(img.uri)) {
-                                    LoadTexture(i,UriHelper.GetUriString(img.uri,baseUri),imgFormat==ImageFormat.KTX);
+                                    LoadTexture(i,UriHelper.GetUriString(img.uri,baseUri), !imageReadable[i], imgFormat==ImageFormat.KTX);
                                 } else {
                                     Debug.LogError(ErrorMissingImageURL);
                                 }
@@ -588,7 +606,7 @@ namespace GLTFast {
             // TODO: Investigate alternative: native texture creation in worker thread
             bool forceSampleLinear = imageGamma != null && !imageGamma[imageIndex];
             var txt = CreateEmptyTexture(img, imageIndex, forceSampleLinear);
-            txt.LoadImage(data);
+            txt.LoadImage(data,!imageReadable[imageIndex]);
             images[imageIndex] = txt;
             Profiler.EndSample();
         }
@@ -626,18 +644,19 @@ namespace GLTFast {
                 var www = await dl.Value;
                 
                 if(www.success) {
-                    bool forceSampleLinear = imageGamma!=null && !imageGamma[dl.Key];
+                    var imageIndex = dl.Key;
+                    bool forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
                     Texture2D txt;
                     // TODO: Loading Jpeg/PNG textures like this creates major frame stalls. Main thread is waiting
                     // on Render thread, which is occupied by Gfx.UploadTextureData for 19 ms for a 2k by 2k texture
                     if(forceSampleLinear) {
-                        txt = CreateEmptyTexture(gltfRoot.images[dl.Key], dl.Key, forceSampleLinear);
+                        txt = CreateEmptyTexture(gltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
-                        txt.LoadImage(www.data);
+                        txt.LoadImage(www.data,!imageReadable[imageIndex]);
                     } else {
                         txt = www.texture;
                     }
-                    images[dl.Key] = txt;
+                    images[imageIndex] = txt;
                     await deferAgent.BreakPoint();
                 } else {
                     Debug.LogError(www.error);
@@ -733,7 +752,7 @@ namespace GLTFast {
             return new Tuple<byte[], string>(data, mimeType);
         }
 
-        void LoadTexture( int index, Uri url, bool isKtx ) {
+        void LoadTexture( int index, Uri url, bool nonReadable, bool isKtx ) {
 
             Profiler.BeginSample("LoadTexture");
 
@@ -750,7 +769,7 @@ namespace GLTFast {
                 return;
 #endif // KTX_UNITY
             } else {
-                var downloadTask = downloadProvider.RequestTexture(url);
+                var downloadTask = downloadProvider.RequestTexture(url,nonReadable);
                 if(textureDownloadTasks==null) {
                     textureDownloadTasks = new Dictionary<int, Task<ITextureDownload>>();
                 }
@@ -911,7 +930,7 @@ namespace GLTFast {
                         var jh = imageCreateContexts[i];
                         if(jh.jobHandle.IsCompleted) {
                             jh.jobHandle.Complete();
-                            images[jh.imageIndex].LoadImage(jh.buffer);
+                            images[jh.imageIndex].LoadImage(jh.buffer,!imageReadable[jh.imageIndex]);
                             jh.gcHandle.Free();
                             imageCreateContexts.RemoveAt(i);
                             loadedAny = true;
@@ -1045,6 +1064,7 @@ namespace GLTFast {
             imageCreateContexts = null;
             images = null;
             imageFormats = null;
+            imageReadable = null;
             imageGamma = null;
             glbBinChunk = null;
         }

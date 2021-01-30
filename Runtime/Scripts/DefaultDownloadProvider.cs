@@ -28,8 +28,8 @@ namespace GLTFast.Loading {
             return req;
         }
 
-        public async Task<ITextureDownload> RequestTexture(Uri url) {
-            var req = new AwaitableTextureDownload(url);
+        public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+            var req = new AwaitableTextureDownload(url,nonReadable);
             while (req.MoveNext()) {
                 await Task.Yield();
             }
@@ -51,7 +51,7 @@ namespace GLTFast.Loading {
             Init(url);
         }
 
-        protected virtual void Init(Uri url) {
+        protected void Init(Uri url) {
             request = UnityWebRequest.Get(url);
             asynOperation = request.SendWebRequest();
         }
@@ -91,16 +91,16 @@ namespace GLTFast.Loading {
         public AwaitableTextureDownload():base() {}
         public AwaitableTextureDownload(Uri url):base(url) {}
 
-        protected static UnityWebRequest CreateRequest(Uri url) {
-            return UnityWebRequestTexture.GetTexture(url
-                /// TODO: Loading non-readable here would save memory, but
-                /// breaks texture instantiation in case of multiple samplers:
-                // ,true // nonReadable
-                );
+        public AwaitableTextureDownload(Uri url, bool nonReadable) {
+            Init(url,nonReadable);
         }
 
-        protected override void Init(Uri url) {
-            request = CreateRequest(url);
+        protected static UnityWebRequest CreateRequest(Uri url, bool nonReadable) {
+            return UnityWebRequestTexture.GetTexture(url,nonReadable);
+        }
+
+        protected void Init(Uri url, bool nonReadable) {
+            request = CreateRequest(url,nonReadable);
             asynOperation = request.SendWebRequest();
         }
 

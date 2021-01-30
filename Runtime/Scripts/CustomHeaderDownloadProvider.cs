@@ -45,8 +45,8 @@ namespace GLTFast.Loading {
             return req;
         }
 
-        public async Task<ITextureDownload> RequestTexture(Uri url) {
-            var req = new CustomHeaderTextureDownload(url,RegisterHttpHeaders);
+        public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+            var req = new CustomHeaderTextureDownload(url,nonReadable,RegisterHttpHeaders);
             while (req.MoveNext()) {
                 await Task.Yield();
             }
@@ -74,8 +74,8 @@ namespace GLTFast.Loading {
 
     public class CustomHeaderTextureDownload : AwaitableTextureDownload {
 
-        public CustomHeaderTextureDownload(Uri url, EditUnityWebRequest editor) : base() {
-            request = CreateRequest(url);
+        public CustomHeaderTextureDownload(Uri url, bool nonReadable, EditUnityWebRequest editor) : base() {
+            request = CreateRequest(url,nonReadable);
             editor(request);
             asynOperation = request.SendWebRequest();
         }
