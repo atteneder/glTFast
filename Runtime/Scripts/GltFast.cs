@@ -1604,6 +1604,7 @@ namespace GLTFast {
 
         async Task CreatePrimitiveContexts( Root gltf ) {
             int i=0;
+            bool schedule = false;
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
                 foreach( var kvp in meshPrimitiveCluster[meshIndex]) {
@@ -1617,6 +1618,7 @@ namespace GLTFast {
                         if( primitive.isDracoCompressed ) {
                             var c = (PrimitiveDracoCreateContext) context;
                             PreparePrimitiveDraco(gltf,mesh,primitive,ref c);
+                            schedule = true;
                         } else
 #endif
                         {
@@ -1629,6 +1631,11 @@ namespace GLTFast {
                     await deferAgent.BreakPoint();
                     i++;
                 }
+            }
+            // TODO: not necesary with ECS
+            // https://docs.unity3d.com/Manual/JobSystemTroubleshooting.html
+            if (schedule) {
+                JobHandle.ScheduleBatchedJobs();
             }
         }
 
