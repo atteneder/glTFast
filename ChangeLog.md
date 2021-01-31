@@ -4,9 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.0] - 2021-01-31
-### Added
-- Support for performance benchmark package
+## [3.0.0-preview] - 2021-02-01
 ### Changed
 - Converted API and internals to async/await. This is more convenient in some cases and eases future optimizations.
 - Performance improvements
@@ -14,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - More consistent frame rates due to task duration estimation in various places along the loading code
   - Embed base 64 buffers are decoded in a thread now
   - Less memory usage (and likely faster) du to Jpeg and PNG textures being loaded non-readable (if possible)
+
+## [2.6.0] - 2021-01-31
+### Added
+- Support for performance benchmark package
 ### Fixed
 - Unit tests are working in builds again (not just in the Editor)
 
