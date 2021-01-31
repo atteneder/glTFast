@@ -92,7 +92,7 @@ namespace GLTFast.Tests {
             var deferAgent = go.AddComponent<TimeBudgetPerFrameDeferAgent>();
             SampleGroup loadTime = new SampleGroup("LoadTime", SampleUnit.Millisecond);
             // First time without measuring
-            var task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+            var task = LoadGltfSampleSetItem(testCase, go, deferAgent);
             yield return WaitForTask(task);
             using (Measure.Frames().Scope()) {
                 for (int i = 0; i < k_Repetitions; i++) {
