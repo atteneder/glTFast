@@ -66,6 +66,7 @@ namespace GLTFast.Tests {
         [Version(k_TestVersion)]
         public IEnumerator UninterruptedLoading(GltfSampleSetItem testCase)
         {
+            Debug.Log($"Testing {testCase.path}");
             var go = new GameObject();
             var deferAgent = new UninterruptedDeferAgent();
             SampleGroup loadTime = new SampleGroup("LoadTime", SampleUnit.Millisecond);
@@ -88,6 +89,7 @@ namespace GLTFast.Tests {
         [Version(k_TestVersion)]
         public IEnumerator SmoothLoading(GltfSampleSetItem testCase)
         {
+            Debug.Log($"Testing {testCase.path}");
             var go = new GameObject();
             var deferAgent = go.AddComponent<TimeBudgetPerFrameDeferAgent>();
             SampleGroup loadTime = new SampleGroup("LoadTime", SampleUnit.Millisecond);
