@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,8 @@
 //
 
 using System;
-using System.IO;
+using System.Threading.Tasks;
+using GLTFast.Loading;
 using UnityEngine;
 
 namespace GLTFast
@@ -27,7 +28,8 @@ namespace GLTFast
         [NonSerialized]
         public Bounds bounds;
 
-        protected override void OnLoadComplete(bool success) {
+        public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
+            var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator);
             if(success) {
                 var insta = new GameObjectBoundsInstantiator(transform);
                 // Auto-Instantiate
@@ -43,7 +45,7 @@ namespace GLTFast
                     }
                 }
             }
-            base.OnLoadComplete(success);
+            return success;
         }
     }
 }

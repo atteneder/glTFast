@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -167,12 +167,11 @@ namespace GLTFast.Materials {
             MaterialType? materialType = null;
             ShaderMode shaderMode = ShaderMode.Opaque;
 
-            if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
+            if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial.doubleSided);
                 materialType = MaterialType.Unlit;
             } else {
-                bool isMetallicRoughness = gltfMaterial.extensions == null ||
-                           gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness == null;
+                bool isMetallicRoughness = gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness == null;
                 if (isMetallicRoughness) {
                     materialType = MaterialType.MetallicRoughness;
                     var metallicShaderFeatures = GetMetallicShaderFeatures(gltfMaterial);

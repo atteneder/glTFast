@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,21 +16,16 @@
 #if KTX_UNITY
 
 using System.Collections;
+using System.Threading.Tasks;
 using KtxUnity;
 using UnityEngine;
 
 namespace GLTFast {
     abstract class KtxLoadContextBase {
         public int imageIndex;
-        public Texture2D texture;
         protected KtxTexture ktxTexture;
         
-        public abstract IEnumerator LoadKtx(bool linear);
-
-        protected void OnKtxLoaded(Texture2D newTexture,TextureOrientation orientation) {
-            ktxTexture.onTextureLoaded -= OnKtxLoaded;
-            texture = newTexture;
-        }
+        public abstract Task<TextureResult> LoadKtx(bool linear);
     }
 }
 #endif // KTX_UNITY

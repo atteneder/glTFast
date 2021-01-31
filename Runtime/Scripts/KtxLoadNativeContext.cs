@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 
 #if KTX_UNITY
 
-using System.Collections;
+using System.Threading.Tasks;
 using KtxUnity;
 using Unity.Collections;
 
@@ -27,12 +27,10 @@ namespace GLTFast {
             this.imageIndex = index;
             this.slice = slice;
             ktxTexture = new KtxTexture();
-            texture = null;
         }
 
-        public override IEnumerator LoadKtx(bool linear) {
-            ktxTexture.onTextureLoaded += OnKtxLoaded;
-            return ktxTexture.LoadBytesRoutine(slice,linear);
+        public override async Task<TextureResult> LoadKtx(bool linear) {
+            return await ktxTexture.LoadBytesRoutine(slice,linear);
         }
     }
 }

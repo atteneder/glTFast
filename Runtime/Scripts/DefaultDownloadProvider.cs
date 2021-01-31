@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,26 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
 namespace GLTFast.Loading {
     public class DefaultDownloadProvider : IDownloadProvider {
-        public IDownload Request(Uri url) {
-            return new AwaitableDownload(url);
+        public async  Task<IDownload> Request(Uri url) {
+            var req = new AwaitableDownload(url);
+            while (req.MoveNext()) {
+                await Task.Yield();
+            }
+            return req;
         }
 
-        public ITextureDownload RequestTexture(Uri url) {
-            return new AwaitableTextureDownload(url);
+        public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+            var req = new AwaitableTextureDownload(url,nonReadable);
+            while (req.MoveNext()) {
+                await Task.Yield();
+            }
+            return req;
         }
     }
 
@@ -42,7 +51,7 @@ namespace GLTFast.Loading {
             Init(url);
         }
 
-        protected virtual void Init(Uri url) {
+        protected void Init(Uri url) {
             request = UnityWebRequest.Get(url);
             asynOperation = request.SendWebRequest();
         }
@@ -82,16 +91,16 @@ namespace GLTFast.Loading {
         public AwaitableTextureDownload():base() {}
         public AwaitableTextureDownload(Uri url):base(url) {}
 
-        protected static UnityWebRequest CreateRequest(Uri url) {
-            return UnityWebRequestTexture.GetTexture(url
-                /// TODO: Loading non-readable here would save memory, but
-                /// breaks texture instantiation in case of multiple samplers:
-                // ,true // nonReadable
-                );
+        public AwaitableTextureDownload(Uri url, bool nonReadable) {
+            Init(url,nonReadable);
         }
 
-        protected override void Init(Uri url) {
-            request = CreateRequest(url);
+        protected static UnityWebRequest CreateRequest(Uri url, bool nonReadable) {
+            return UnityWebRequestTexture.GetTexture(url,nonReadable);
+        }
+
+        protected void Init(Uri url, bool nonReadable) {
+            request = CreateRequest(url,nonReadable);
             asynOperation = request.SendWebRequest();
         }
 

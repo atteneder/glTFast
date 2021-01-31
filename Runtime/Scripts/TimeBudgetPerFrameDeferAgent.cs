@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
 //
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GLTFast {
     
-    public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent
-    {
+    [DefaultExecutionOrder(-10)]
+    public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent {
+        
         float lastTime;
         float timeBudget = .5f/30;
 
@@ -52,12 +52,27 @@ namespace GLTFast {
         }
 
         public bool ShouldDefer() {
-            float now = Time.realtimeSinceStartup;
-            if( now-lastTime > timeBudget ) {
-                lastTime = now;
-                return true;
+            return !FitsInCurrentFrame(0);
+        }
+        
+        public bool ShouldDefer( float duration ) {
+            return !FitsInCurrentFrame(duration);
+        }
+        
+        bool FitsInCurrentFrame(float duration) {
+            return duration <= timeBudget - (Time.realtimeSinceStartup - lastTime);
+        }
+
+        public async Task BreakPoint() {
+            if (ShouldDefer()) {
+                await Task.Yield();
             }
-            return false;
+        }
+        
+        public async Task BreakPoint( float duration ) {
+            if (ShouldDefer(duration)) {
+                await Task.Yield();
+            }
         }
     }
 }

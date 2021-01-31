@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 //
 
 using System.IO;
+using System.Threading.Tasks;
+using GLTFast.Loading;
 using UnityEngine;
 
 namespace GLTFast
@@ -29,23 +31,25 @@ namespace GLTFast
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
-        protected virtual void Start() {
+        protected virtual async void Start() {
             if(loadOnStartup && !string.IsNullOrEmpty(url)) {
                 // Automatic load on startup
-                Load(
+                await Load(
                     streamingAsset
                         ? Path.Combine(Application.streamingAssetsPath,url)
                         : url
-                    );
+                );
             }
         }
 
-        protected override void OnLoadComplete(bool success) {
+        public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
+            var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator);
             if(success) {
+                if (deferAgent != null) await deferAgent.BreakPoint();
                 // Auto-Instantiate
                 gLTFastInstance.InstantiateGltf(transform);
             }
-            base.OnLoadComplete(success);
+            return success;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
 
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GLTFast.Loading {
 
     public interface IDownloadProvider {
-        IDownload Request(Uri url);
-        ITextureDownload RequestTexture(Uri url);
+        Task<IDownload> Request(Uri url);
+        Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable);
     }
 
     public interface IDownload : IEnumerator {

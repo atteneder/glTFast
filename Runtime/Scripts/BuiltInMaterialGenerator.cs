@@ -1,4 +1,4 @@
-﻿// Copyright 2020 Andreas Atteneder
+﻿// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -151,10 +151,10 @@ namespace GLTFast.Materials {
         ) {
             Material material;
             
-            if (gltfMaterial.extensions!=null && gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness!=null) {
+            if (gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness != null) {
                 material = GetPbrSpecularGlossinessMaterial(gltfMaterial.doubleSided);
             } else
-            if (gltfMaterial.extensions.KHR_materials_unlit!=null) {
+            if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial.doubleSided);
             } else {
                 material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);
