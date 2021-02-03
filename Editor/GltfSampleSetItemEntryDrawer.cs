@@ -16,15 +16,17 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace GLTFast.Tests {
+namespace GLTFast.Editor {
 
-    [CustomPropertyDrawer(typeof(GltfSampleSetItemEntry))]
-    public class GltfSampleSetItemEntryDrawer : PropertyDrawer {
+    using Samples;
+
+    [CustomPropertyDrawer(typeof(SampleSetItemEntry))]
+    public class SampleSetItemEntryDrawer : PropertyDrawer {
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
 
-            var active = property.FindPropertyRelative(nameof(GltfSampleSetItemEntry.active));
-            var item = property.FindPropertyRelative(nameof(GltfSampleSetItemEntry.item));
+            var active = property.FindPropertyRelative(nameof(SampleSetItemEntry.active));
+            var item = property.FindPropertyRelative(nameof(SampleSetItemEntry.item));
 
             EditorGUI.BeginProperty(position, label, property);
             {
@@ -41,7 +43,7 @@ namespace GLTFast.Tests {
                 EditorGUI.BeginDisabledGroup(!active.boolValue);
                 {
                     float nameWidth = width * 0.4f;
-                    var nameProp = item.FindPropertyRelative(nameof(GltfSampleSetItem.name));
+                    var nameProp = item.FindPropertyRelative(nameof(SampleSetItem.name));
                     nameProp.stringValue = EditorGUI.TextField(
                         new Rect(position.x + x, position.y, nameWidth, position.height),
                         nameProp.stringValue
@@ -49,7 +51,7 @@ namespace GLTFast.Tests {
                     width -= nameWidth;
                     x += nameWidth;
 
-                    var pathProp = item.FindPropertyRelative(nameof(GltfSampleSetItem.path));
+                    var pathProp = item.FindPropertyRelative(nameof(SampleSetItem.path));
                     pathProp.stringValue = EditorGUI.TextField(
                         new Rect(position.x + x, position.y, width, position.height),
                         pathProp.stringValue

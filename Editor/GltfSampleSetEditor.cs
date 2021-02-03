@@ -26,16 +26,18 @@ using GLTFast.Schema;
 using UnityEditor.SceneManagement;
 #endif
 
-namespace GLTFast.Tests {
+namespace GLTFast.Editor {
 
-    [CustomEditor(typeof(GltfSampleSet))]
-    public class GltfSampleSetEditor : UnityEditor.Editor
+    using Samples;
+
+    [CustomEditor(typeof(SampleSet))]
+    public class SampleSetEditor : UnityEditor.Editor
     {
-        private GltfSampleSet _sampleSet;
+        private SampleSet _sampleSet;
         private string searchPattern = "*.gl*";
 
         public void OnEnable() {
-            _sampleSet = (GltfSampleSet)target;
+            _sampleSet = (SampleSet)target;
         }
 
         public override void OnInspectorGUI() {
@@ -73,7 +75,7 @@ namespace GLTFast.Tests {
             }
         }
         
-        public static void CreateRenderTestScenes(GltfSampleSet sampleSet)
+        public static void CreateRenderTestScenes(SampleSet sampleSet)
         {
     #if GLTFAST_RENDER_TEST
             var allScenes = new List<EditorBuildSettingsScene>();
@@ -87,7 +89,7 @@ namespace GLTFast.Tests {
                 var graphicsTestSettings = settingsGameObject.AddComponent<UniversalGraphicsTestSettings>();
 
                 var go = new GameObject(item.name);
-                var gltfAsset = go.AddComponent<GltfBoundsAsset>();
+                var gltfAsset = go.AddComponent<BoundsAsset>();
                 
                 if(string.IsNullOrEmpty(sampleSet.streamingAssetsPath)) {
                     gltfAsset.url = Path.Combine(sampleSet.baseLocalPath, item.path);
@@ -124,7 +126,7 @@ namespace GLTFast.Tests {
     #endif
         }
 
-        public static void CreateJSON(GltfSampleSet sampleSet, Object target) {
+        public static void CreateJSON(SampleSet sampleSet, Object target) {
             var jsonPathAbsolute = Path.Combine( Application.streamingAssetsPath, $"{sampleSet.name}.json");
             Debug.Log(jsonPathAbsolute);
             var json = JsonUtility.ToJson(sampleSet);

@@ -14,12 +14,22 @@
 //
 
 using System;
+using System.IO;
 
-namespace GLTFast.Tests {
+namespace GLTFast.Samples {
 
     [Serializable]
-    public struct GltfSampleSetItemEntry {
-        public bool active;
-        public GltfSampleSetItem item;
+    public struct SampleSetItem {
+        public string name;
+        public string path;
+
+        public SampleSetItem(string name, string path) {
+            this.name = name;
+            this.path = path;
+        }
+
+        public string[] directoryParts {
+            get { return Path.GetDirectoryName(path).Split(Path.DirectorySeparatorChar); }
+        }
     }
 }

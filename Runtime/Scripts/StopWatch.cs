@@ -15,7 +15,7 @@
 
 using UnityEngine;
 
-namespace GLTFast.Tests {
+namespace GLTFast.Utils {
 
     public class StopWatch : MonoBehaviour {
         
