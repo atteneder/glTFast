@@ -36,6 +36,11 @@
             "name": "com.unity.render-pipelines.high-definition",
             "expression": "7.3.1",
             "define": "USING_HDRP"
+        },
+        {
+            "name": "com.unity.modules.physics",
+            "expression": "1.0.0",
+            "define": "UNITY_PHYSICS"
         }
     ],
     "noEngineReferences": false

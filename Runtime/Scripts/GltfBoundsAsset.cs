@@ -39,9 +39,13 @@ namespace GLTFast
                 if (sceneBounds.HasValue) {
                     bounds = sceneBounds.Value;
                     if (createBoxCollider) {
+#if UNITY_PHYSICS
                         var boxCollider = gameObject.AddComponent<BoxCollider>();
                         boxCollider.center = bounds.center;
                         boxCollider.size = bounds.size;
+#else
+                        Debug.LogError("GltfBoundsAsset requires the built-in Physics package to be enabled (in the Package Manager)");
+#endif
                     }
                 }
             }
