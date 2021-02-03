@@ -1,5 +1,6 @@
 {
     "name": "glTFastSchema",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -11,12 +12,12 @@
     "versionDefines": [
         {
             "name": "com.atteneder.draco",
-            "expression": "1.1.2",
+            "expression": "1.4.0",
             "define": "DRACO_UNITY"
         },
         {
             "name": "com.atteneder.ktx",
-            "expression": "0.4.0",
+            "expression": "1.0.0",
             "define": "KTX_UNITY"
         }
     ],
