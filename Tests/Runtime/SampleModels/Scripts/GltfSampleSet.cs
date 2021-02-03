@@ -19,7 +19,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UnityEngine;
 
 namespace GLTFast.Tests {
@@ -75,7 +74,8 @@ namespace GLTFast.Tests {
 
         public IEnumerable<GltfSampleSetItem> GetItemsPrefixed(bool local = true) {
             var prefix = local ? localFilePath : remoteUri;
-            foreach (var entry in items.Where(x => x.active)) {
+            foreach (var entry in items) {
+                if(!entry.active) continue;
                 if (!string.IsNullOrEmpty(prefix)) {
                     var p = string.Format(
                         "{0}/{1}"
@@ -89,7 +89,8 @@ namespace GLTFast.Tests {
 
         public IEnumerable<GltfSampleSetItem> GetTestItems(bool local = true) {
             var prefix = local ? localFilePath : remoteUri;
-            foreach (var entry in items.Where(x => x.active)) {
+            foreach (var entry in items) {
+                if(!entry.active) continue;
                 if (!string.IsNullOrEmpty(prefix)) {
                     var p = string.Format(
                         "{0}/{1}"
