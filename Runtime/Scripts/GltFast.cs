@@ -882,7 +882,10 @@ namespace GLTFast {
                     Assert.AreEqual(images.Length,gltfRoot.images.Length);
                 }
                 imageCreateContexts = new List<ImageCreateContext>();
-                await CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews,imageCreateContexts);
+#if KTX_UNITY
+                await
+#endif
+                CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews,imageCreateContexts);
             }
             await deferAgent.BreakPoint();
             
@@ -1210,7 +1213,12 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        async Task CreateTexturesFromBuffers( Schema.Image[] src_images, Schema.BufferView[] bufferViews, List<ImageCreateContext> contexts ) {
+#if KTX_UNITY
+        async Task
+#else
+        void
+#endif
+        CreateTexturesFromBuffers( Schema.Image[] src_images, Schema.BufferView[] bufferViews, List<ImageCreateContext> contexts ) {
             for (int i = 0; i < images.Length; i++) {
                 Profiler.BeginSample("CreateTexturesFromBuffers.ImageFormat");
                 if(images[i]!=null) {

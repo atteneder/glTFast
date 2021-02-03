@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Build size optimization: Physics package is not required anymore (`GltfBoundsAsset` won't work as expected in that case)
 - Build size optimization: Removed usage of `System.Linq`
+- Removed compiler warnings (in case KtxUnity is missing)
 
 ## [3.0.0-preview] - 2021-02-01
 ### Changed
