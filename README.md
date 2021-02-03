@@ -12,7 +12,7 @@
 
 It focuses on speed, memory efficiency and a small build footprint.
 
-Try the [WebGL Demo](https://atteneder.github.io/glTFastWebDemo) and check out the [demo project](https://github.com/atteneder/glTFastDemo).
+Try the [WebGL Demo][gltfast-web-demo] and check out the [demo project](https://github.com/atteneder/glTFastDemo).
 
 ## Features
 
@@ -177,6 +177,7 @@ limitations under the License.
 
 [unity]: https://unity.com
 [gltf]: https://www.khronos.org/gltf
+[gltfast-web-demo]: https://gltf.pixel.engineer
 [khronos]: https://www.khronos.org
 [embibe]: https://www.embibe.com
 [gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
