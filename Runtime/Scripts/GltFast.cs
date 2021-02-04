@@ -363,6 +363,18 @@ namespace GLTFast {
                     }
                 }
             }
+#if DRACO_UNITY
+            if(!check && root.meshes!=null) {
+                foreach (var mesh in root.meshes) {
+                    foreach (var primitive in mesh.primitives) {
+                        if (primitive.extensions?.KHR_draco_mesh_compression != null) {
+                            check = true;
+                            break;
+                        }
+                    }
+                }
+            }
+#endif
             Profiler.EndSample();
 
             // Step three:
@@ -374,28 +386,54 @@ namespace GLTFast {
                 Profiler.BeginSample("JSON secondary");
                 var fakeRoot = JsonUtility.FromJson<FakeSchema.Root>(json);
 
-                for (int i = 0; i < root.materials.Length; i++)
-                {
-                    var mat = root.materials[i];
-                    if(mat.extensions == null) continue;
-                    Assert.AreEqual(mat.name,fakeRoot.materials[i].name);
-                    var fake = fakeRoot.materials[i].extensions;
-                    if(fake.KHR_materials_unlit==null) {
-                        mat.extensions.KHR_materials_unlit = null;
-                    }
-                    if(fake.KHR_materials_pbrSpecularGlossiness==null) {
-                        mat.extensions.KHR_materials_pbrSpecularGlossiness = null;
-                    }
-                    if(fake.KHR_materials_transmission==null) {
-                        mat.extensions.KHR_materials_transmission = null;
-                    }
-                    if(fake.KHR_materials_clearcoat==null) {
-                        mat.extensions.KHR_materials_clearcoat = null;
-                    }
-                    if(fake.KHR_materials_sheen==null) {
-                        mat.extensions.KHR_materials_sheen = null;
+                if (root.materials != null) {
+                    for (var i = 0; i < root.materials.Length; i++) {
+                        var mat = root.materials[i];
+                        if (mat.extensions == null) continue;
+                        Assert.AreEqual(mat.name, fakeRoot.materials[i].name);
+                        var fake = fakeRoot.materials[i].extensions;
+                        if (fake.KHR_materials_unlit == null) {
+                            mat.extensions.KHR_materials_unlit = null;
+                        }
+
+                        if (fake.KHR_materials_pbrSpecularGlossiness == null) {
+                            mat.extensions.KHR_materials_pbrSpecularGlossiness = null;
+                        }
+
+                        if (fake.KHR_materials_transmission == null) {
+                            mat.extensions.KHR_materials_transmission = null;
+                        }
+
+                        if (fake.KHR_materials_clearcoat == null) {
+                            mat.extensions.KHR_materials_clearcoat = null;
+                        }
+
+                        if (fake.KHR_materials_sheen == null) {
+                            mat.extensions.KHR_materials_sheen = null;
+                        }
                     }
                 }
+
+#if DRACO_UNITY
+                if (root.meshes != null) {
+                    for (var i = 0; i < root.meshes.Length; i++) {
+                        var mesh = root.meshes[i];
+                        Assert.AreEqual(mesh.name, fakeRoot.meshes[i].name);
+                        for (var j = 0; j < mesh.primitives.Length; j++) {
+                            var primitive = mesh.primitives[j];
+                            if (primitive.extensions == null ) continue;
+                            var fake = fakeRoot.meshes[i].primitives[j];
+                            if (fake.extensions.KHR_draco_mesh_compression == null) {
+                                // TODO: Differentiate Primitive extensions here
+                                // since Draco is the only primitive extension, we
+                                // remove the whole extensions property.
+                                // primitive.extensions.KHR_draco_mesh_compression = null;
+                                primitive.extensions = null;
+                            }
+                        }
+                    }
+                }
+#endif
                 Profiler.EndSample();
             }
 #if MEASURE_TIMINGS

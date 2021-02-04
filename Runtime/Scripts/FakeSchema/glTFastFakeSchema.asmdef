@@ -1,5 +1,6 @@
 {
     "name": "glTFastFakeSchema",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -8,5 +9,12 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [
+        {
+            "name": "com.atteneder.draco",
+            "expression": "1.4.0",
+            "define": "DRACO_UNITY"
+        }
+    ],
+    "noEngineReferences": false
 }

@@ -13,18 +13,19 @@
 // limitations under the License.
 //
 
+#if DRACO_UNITY
+
 namespace GLTFast.FakeSchema {
     
     [System.Serializable]
-    public class Root
-    {
-        /// <summary>
-        /// An array of materials. A material defines the appearance of a primitive.
-        /// </summary>
-        public Material[] materials;
+    public class MeshPrimitive {
+        public MeshPrimitiveExtensions extensions;
+    }
 
-#if DRACO_UNITY
-        public Mesh[] meshes;
-#endif
+    [System.Serializable]
+    public class MeshPrimitiveExtensions {
+        public string KHR_draco_mesh_compression;
     }
 }
+
+#endif
