@@ -23,6 +23,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using GLTFast;
 using GLTFast.Schema;
+using GLTFast.Tests;
 using UnityEditor.SceneManagement;
 #endif
 
@@ -89,7 +90,7 @@ namespace GLTFast.Editor {
                 var graphicsTestSettings = settingsGameObject.AddComponent<UniversalGraphicsTestSettings>();
 
                 var go = new GameObject(item.name);
-                var gltfAsset = go.AddComponent<BoundsAsset>();
+                var gltfAsset = go.AddComponent<GltfBoundsAsset>();
                 
                 if(string.IsNullOrEmpty(sampleSet.streamingAssetsPath)) {
                     gltfAsset.url = Path.Combine(sampleSet.baseLocalPath, item.path);

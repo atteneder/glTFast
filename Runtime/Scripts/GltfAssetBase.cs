@@ -24,6 +24,12 @@ namespace GLTFast
     public class GltfAssetBase : MonoBehaviour
     {
         protected GLTFast gLTFastInstance;
+        
+        /// <summary>
+        /// Indicates wheter the glTF was loaded (no matter if successfully or not)
+        /// </summary>
+        /// <value>True when loading routine ended, false otherwise.</value>
+        public bool isDone => gLTFastInstance!=null && gLTFastInstance.LoadingDone;
 
         /// <summary>
         /// Method for manual loading with custom <see cref="IDownloadProvider"/> and <see cref="IDeferAgent"/>.
