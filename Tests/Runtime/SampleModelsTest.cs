@@ -101,7 +101,7 @@ namespace GLTFast.Tests {
             yield return WaitForTask(task);
             using (Measure.Frames().Scope()) {
                 for (int i = 0; i < k_Repetitions; i++) {
-                    var task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+                    task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
                     yield return WaitForTask(task);
                     // Wait one more frame. Usually some more action happens in this one.
                     yield return null;
