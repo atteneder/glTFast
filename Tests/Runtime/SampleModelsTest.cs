@@ -40,7 +40,7 @@ namespace GLTFast.Tests {
         {
 #if UNITY_EDITOR
             var sampleSet = AssetDatabase.LoadAssetAtPath<SampleSet>(glTFSampleSetAssetPath);
-            Assert.AreEqual(177, sampleSet.itemCount);
+            Assert.AreEqual(182, sampleSet.itemCount);
 
             foreach (var item in sampleSet.GetItemsPrefixed()) {
                 CheckFileExists(item.path);
@@ -60,6 +60,23 @@ namespace GLTFast.Tests {
 #else
 		    // See https://docs.unity3d.com/Manual/StreamingAssets.html
 		    Debug.Log("File access doesn't work on Android");
+#endif
+        }
+
+        /// <summary>
+        /// Editor-only test to quickly load all models once
+        /// </summary>
+        [UnityTest]
+        [UseGltfSampleSetTestCase(glTFSampleSetJsonPath)]
+        public IEnumerator QuickLoad(SampleSetItem testCase)
+        {
+#if UNITY_EDITOR
+            Debug.Log($"Testing {testCase.path}");
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var task = LoadGltfSampleSetItem(testCase, go, deferAgent);
+            yield return WaitForTask(task);
+            Object.Destroy(go);
 #endif
         }
 

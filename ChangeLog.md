@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Error message when a UV set other than the first one is used (is unsupported; see issue #34)
+- Unit test for loading all models once (good for quick checks in comparison to performance tests, which take very long)
 ### Fixed
 - No more exception on models with `KHR_materials_variants` glTF extension ([not supported](https://github.com/atteneder/glTFast/issues/112) yet)
 - Compiler errors in Tests assembly due to inconsistent/incomplete class names/namespaces changes
