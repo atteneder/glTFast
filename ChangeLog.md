@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Error message when a UV set other than the first one is used (is unsupported; see issue #34)
 ### Fixed
 - No more exception on models with `KHR_materials_variants` glTF extension ([not supported](https://github.com/atteneder/glTFast/issues/112) yet)
 - Compiler errors in Tests assembly due to inconsistent/incomplete class names/namespaces changes

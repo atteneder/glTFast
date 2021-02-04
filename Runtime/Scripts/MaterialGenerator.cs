@@ -55,6 +55,8 @@ namespace GLTFast.Materials {
         public static readonly int occlusionStrengthPropId = Shader.PropertyToID("_OcclusionStrength");
         public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
         public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
+
+        const string ERROR_MULTI_UVS = "Multiple UV sets are not supported!";
         
         static IMaterialGenerator defaultMaterialGenerator;
         
@@ -132,6 +134,9 @@ namespace GLTFast.Materials {
                         && imageVariants[imageIndex].TryGetValue(txt.sampler,out img)
                         )
                     {
+                        if(textureInfo.texCoord!=0) {
+                            Debug.LogError(ERROR_MULTI_UVS);
+                        }
                         material.SetTexture(propertyId,img);
                         var isKtx = txt.isKtx;
                         TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
@@ -170,7 +175,7 @@ namespace GLTFast.Materials {
             if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
                 var tt = textureInfo.extensions.KHR_texture_transform;
                 if(tt.texCoord!=0) {
-                    Debug.LogError("Multiple UV sets are not supported!");
+                    Debug.LogError(ERROR_MULTI_UVS);
                 }
 
                 float cos = 1;
