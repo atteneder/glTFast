@@ -25,14 +25,16 @@ using UnityEngine;
 
 namespace GLTFast.Tests {
 
+    using Samples;
+
     public class UseGltfSampleSetTestCaseAttribute : UnityEngine.TestTools.UnityTestAttribute, ITestBuilder {
-        GltfSampleSet m_sampleSet = null;
+        SampleSet m_sampleSet = null;
 
         NUnitTestCaseBuilder _builder = new NUnitTestCaseBuilder();
 
         public UseGltfSampleSetTestCaseAttribute(string sampleSetPath) {
             var json = File.ReadAllText(Path.Combine(Application.streamingAssetsPath, sampleSetPath));
-            m_sampleSet = ScriptableObject.CreateInstance<GltfSampleSet>();
+            m_sampleSet = ScriptableObject.CreateInstance<SampleSet>();
             JsonUtility.FromJsonOverwrite(json,m_sampleSet);
         }
 

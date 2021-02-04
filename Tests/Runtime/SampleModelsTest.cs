@@ -25,6 +25,9 @@ using UnityEngine.TestTools;
 
 namespace GLTFast.Tests {
 
+    using Samples;
+    using Utils;
+
     public class SampleModelsTest {
         const string k_TestVersion = "main";
         const int k_Repetitions = 10;
@@ -36,7 +39,7 @@ namespace GLTFast.Tests {
         public void CheckFiles()
         {
 #if UNITY_EDITOR
-            var sampleSet = AssetDatabase.LoadAssetAtPath<GltfSampleSet>(glTFSampleSetAssetPath);
+            var sampleSet = AssetDatabase.LoadAssetAtPath<SampleSet>(glTFSampleSetAssetPath);
             Assert.AreEqual(177, sampleSet.itemCount);
 
             foreach (var item in sampleSet.GetItemsPrefixed()) {
@@ -64,7 +67,7 @@ namespace GLTFast.Tests {
         [UseGltfSampleSetTestCase(glTFSampleSetJsonPath)]
         [Performance]
         [Version(k_TestVersion)]
-        public IEnumerator UninterruptedLoading(GltfSampleSetItem testCase)
+        public IEnumerator UninterruptedLoading(SampleSetItem testCase)
         {
             Debug.Log($"Testing {testCase.path}");
             var go = new GameObject();
@@ -87,7 +90,7 @@ namespace GLTFast.Tests {
         [UseGltfSampleSetTestCase(glTFSampleSetJsonPath)]
         [Performance]
         [Version(k_TestVersion)]
-        public IEnumerator SmoothLoading(GltfSampleSetItem testCase)
+        public IEnumerator SmoothLoading(SampleSetItem testCase)
         {
             Debug.Log($"Testing {testCase.path}");
             var go = new GameObject();
@@ -98,7 +101,7 @@ namespace GLTFast.Tests {
             yield return WaitForTask(task);
             using (Measure.Frames().Scope()) {
                 for (int i = 0; i < k_Repetitions; i++) {
-                    task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
+                    var task = LoadGltfSampleSetItem(testCase, go, deferAgent, loadTime);
                     yield return WaitForTask(task);
                     // Wait one more frame. Usually some more action happens in this one.
                     yield return null;
@@ -107,7 +110,7 @@ namespace GLTFast.Tests {
             Object.Destroy(go);
         }
 
-        async Task LoadGltfSampleSetItem(GltfSampleSetItem testCase, GameObject go, IDeferAgent deferAgent, SampleGroup loadTime = null)
+        async Task LoadGltfSampleSetItem(SampleSetItem testCase, GameObject go, IDeferAgent deferAgent, SampleGroup loadTime = null)
         {
             var path = string.Format(
 #if UNITY_ANDROID && !UNITY_EDITOR
