@@ -35,6 +35,7 @@ namespace GLTFast {
         /// <param name="baseUri">Base URI</param>
         /// <returns>Absolute URI that is potentially relative to baseUri</returns>
         public static Uri GetUriString( string uri, Uri baseUri ) {
+            uri = Uri.UnescapeDataString(uri);
             if(Uri.TryCreate(uri, UriKind.Absolute, out var result)){
                 return result;
             }

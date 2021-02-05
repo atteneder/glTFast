@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Had to bring back `GltfAsset.isDone` for render tests
 ### Fixed
--  Rendertests work again
+- Escaped, relative buffer/texture URIs now work on local file system consistently 
+- Rendertests work again
 
 ## [3.0.1] - 2020-02-04
 ### Added
