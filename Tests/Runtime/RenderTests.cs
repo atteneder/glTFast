@@ -63,11 +63,12 @@ namespace GLTFast.Tests
             var gltf = Object.FindObjectOfType<GltfBoundsAsset>();
             Assert.IsNotNull(gltf, "Invalid test scene, couldn't find GltfAsset");
 
-            while (!gltf.isDone) {
+            var task = gltf.Load(gltf.FullUrl);
+
+            while (!task.IsCompleted) {
                 yield return null;
             }
 
-            
             // position camera based on AABB
             var cam = cameras.First();
             FrameBoundsCamera.FrameBounds(cam,gltf.transform,gltf.bounds);

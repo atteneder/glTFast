@@ -31,14 +31,14 @@ namespace GLTFast
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
+        public string FullUrl => streamingAsset
+            ? Path.Combine(Application.streamingAssetsPath, url)
+            : url;
+
         protected virtual async void Start() {
             if(loadOnStartup && !string.IsNullOrEmpty(url)) {
                 // Automatic load on startup
-                await Load(
-                    streamingAsset
-                        ? Path.Combine(Application.streamingAssetsPath,url)
-                        : url
-                );
+                await Load(FullUrl);
             }
         }
 

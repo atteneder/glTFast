@@ -98,7 +98,7 @@ namespace GLTFast.Editor {
                     gltfAsset.url = Path.Combine(sampleSet.streamingAssetsPath, item.path);
                     gltfAsset.streamingAsset = true;
                 }
-                gltfAsset.loadOnStartup = true;
+                gltfAsset.loadOnStartup = false;
                 gltfAsset.createBoxCollider = false;
                 
                 var sceneDirectory = CertifyDirectory(item.directoryParts, string.Format("Assets/Scenes/{0}", sampleSet.name));
