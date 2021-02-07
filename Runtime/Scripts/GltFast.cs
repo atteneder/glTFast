@@ -13,6 +13,10 @@
 // limitations under the License.
 //
 
+#if !UNITY_WEBGL || UNITY_EDITOR
+#define GLTFAST_THREADS
+#endif
+
 // #define MEASURE_TIMINGS
 
 using System;
@@ -35,10 +39,6 @@ using Debug = UnityEngine.Debug;
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
 #endif
-
-#if KTX_UNITY
-
-#endif // KTX_UNITY
 
 [assembly: InternalsVisibleTo("glTFastEditorTests")]
 
@@ -285,7 +285,7 @@ namespace GLTFast {
         async Task<bool> ParseJsonAndLoadBuffers( string json, Uri baseUri ) {
 
             var predictedTime = json.Length / (float)k_JsonParseSpeed;
-#if !MEASURE_TIMINGS
+#if GLTFAST_THREADS && !MEASURE_TIMINGS
             if (deferAgent.ShouldDefer(predictedTime)) {
                 // JSON is larger than threshold
                 // => parse in a thread
@@ -749,14 +749,14 @@ namespace GLTFast {
         async Task<Tuple<byte[],string>> DecodeEmbedBufferAsync(string encodedBytes,bool timeCritical = false) {
             var predictedTime = encodedBytes.Length / (float)k_Base64DecodeSpeed;
 #if MEASURE_TIMINGS
-            await deferAgent.BreakPoint(predictedTime);
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-#else
+#elif GLTFAST_THREADS
             if (!timeCritical || deferAgent.ShouldDefer(predictedTime)) {
                 return await Task.Run(() => DecodeEmbedBuffer(encodedBytes));
             }
 #endif
+            await deferAgent.BreakPoint(predictedTime);
             var decodedBuffer = DecodeEmbedBuffer(encodedBytes);
 #if MEASURE_TIMINGS
             stopWatch.Stop();

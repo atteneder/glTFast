@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Had to bring back `GltfAsset.isDone` for render tests
 ### Fixed
+- WebGL loading by not using unsupported `System.Threading.Task.Run` (fixes #131)
 - Escaped, relative buffer/texture URIs now work on local file system consistently 
 - Rendertests work again
 
