@@ -48,6 +48,7 @@ namespace GLTFast.Materials {
         public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
         public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
         public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
+        public static readonly int mainTexPropId = Shader.PropertyToID("_MainTex");
         public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
         public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
         public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
@@ -210,6 +211,8 @@ namespace GLTFast.Materials {
                 textureST.y = -textureST.y; // flip scale in Y
             }
             
+            material.SetTextureOffset(mainTexPropId, textureST.zw);
+            material.SetTextureScale(mainTexPropId, textureST.xy);
             material.SetVector(mainTexScaleTransform, textureST);
         }
         
