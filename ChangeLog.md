@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Properly freeing up memory of animation clips
 - `GameObjectBoundsInstantiator` correctly calculates bounds for scenes that contain multi-primitive meshes (fixes #173)
+- Corrected linear/gamma sampling whenever texture index does not equal image index (fixes #172)
 
 ## [3.2.0] - 2020-04-13
 ### Added

@@ -518,43 +518,27 @@ namespace GLTFast {
 
                     imageGamma = new bool[gltfRoot.images.Length];
 
+                    void SetImageGamma(TextureInfo txtInfo) {
+                        if(
+                            txtInfo != null &&
+                            txtInfo.index >= 0 &&
+                            txtInfo.index < gltfRoot.textures.Length
+                        ) {
+                            var imageIndex = gltfRoot.textures[txtInfo.index].GetImageIndex();
+                            imageGamma[imageIndex] = true;
+                        }
+                    }
+                    
                     for(int i=0;i<gltfRoot.materials.Length;i++) {
                         var mat = gltfRoot.materials[i];
                         if( mat.pbrMetallicRoughness != null ) {
-                            if(
-                                mat.pbrMetallicRoughness.baseColorTexture != null &&
-                                mat.pbrMetallicRoughness.baseColorTexture.index >= 0 &&
-                                mat.pbrMetallicRoughness.baseColorTexture.index < imageGamma.Length
-                            ) {
-                                imageGamma[mat.pbrMetallicRoughness.baseColorTexture.index] = true;
-                            }
+                            SetImageGamma(mat.pbrMetallicRoughness.baseColorTexture);
                         }
-                        if(
-                            mat.emissiveTexture != null &&
-                            mat.emissiveTexture.index >= 0 &&
-                            mat.emissiveTexture.index < imageGamma.Length
-                        ) {
-                            imageGamma[mat.emissiveTexture.index] = true;
-                        }
+                        SetImageGamma(mat.emissiveTexture);
                         if( mat.extensions?.KHR_materials_pbrSpecularGlossiness != null )
                         {
-                            var diffuseTexture = mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture;
-                            if(
-                                diffuseTexture != null &&
-                                diffuseTexture.index >= 0 &&
-                                diffuseTexture.index < imageGamma.Length
-                            ) {
-                                imageGamma[diffuseTexture.index] = true;
-                            }
-
-                            var specularGlossinessTexture = mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture;
-                            if(
-                                specularGlossinessTexture != null &&
-                                specularGlossinessTexture.index >= 0 &&
-                                specularGlossinessTexture.index < imageGamma.Length
-                            ) {
-                                imageGamma[specularGlossinessTexture.index] = true;
-                            }
+                            SetImageGamma(mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture);
+                            SetImageGamma(mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture);
                         }
                     }
                 }
