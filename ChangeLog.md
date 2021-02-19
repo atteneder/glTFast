@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 
 ### Fixed
-- Texture offset/tiling values don't get lost when switching shaders (#140 by [@hybridherbst](https://github.com/hybridherbst))
+- Texture offset/tiling values don't get lost when switching shaders (thanks [@hybridherbst](https://github.com/hybridherbst) for #140)
 
 ## [3.0.2] - 2020-02-07
 ### Changed
