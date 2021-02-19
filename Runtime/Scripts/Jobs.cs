@@ -499,12 +499,14 @@ namespace GLTFast.Jobs {
         [WriteOnly]
         public NativeArray<Color> result;
 
-        public void Execute(int i) {
-            ushort* src = (ushort*) (((byte*) input) + (i * inputByteStride));
-            result[i] = new Color {
-                r = src[i] / (float) ushort.MaxValue,
-                g = src[i+1] / (float) ushort.MaxValue,
-                b = src[i+2] / (float) ushort.MaxValue,
+        public void Execute(int i)
+        {
+            ushort* src = (ushort*)(((byte*)input) + (i * inputByteStride));
+            result[i] = new Color
+            {
+                r = src[0] / (float)ushort.MaxValue,
+                g = src[1] / (float)ushort.MaxValue,
+                b = src[2] / (float)ushort.MaxValue,
                 a = 1f
             };
         }
@@ -545,13 +547,15 @@ namespace GLTFast.Jobs {
         [WriteOnly]
         public NativeArray<Color> result;
 
-        public void Execute(int i) {
-            ushort* src = (ushort*) (((byte*) input) + (i * inputByteStride));
-            result[i] = new Color {
-                r = src[i] / (float) ushort.MaxValue,
-                g = src[i+1] / (float) ushort.MaxValue,
-                b = src[i+2] / (float) ushort.MaxValue,
-                a = src[i+3] / (float) ushort.MaxValue
+        public void Execute(int i)
+        {
+            ushort* src = (ushort*)(((byte*)input) + (i * inputByteStride));
+            result[i] = new Color
+            {
+                r = src[0] / (float)ushort.MaxValue,
+                g = src[1] / (float)ushort.MaxValue,
+                b = src[2] / (float)ushort.MaxValue,
+                a = src[3] / (float)ushort.MaxValue
             };
         }
     }
@@ -568,13 +572,15 @@ namespace GLTFast.Jobs {
         [WriteOnly]
         public NativeArray<Color> result;
 
-        public void Execute(int i) {
+        public void Execute(int i)
+        {
             byte* src = input + (i * inputByteStride);
-            result[i] = new Color {
-                r = src[i] / (float) byte.MaxValue,
-                g = src[i+1] / (float) byte.MaxValue,
-                b = src[i+2] / (float) byte.MaxValue,
-                a = src[i+3] / (float) byte.MaxValue
+            result[i] = new Color
+            {
+                r = src[0] / (float)byte.MaxValue,
+                g = src[1] / (float)byte.MaxValue,
+                b = src[2] / (float)byte.MaxValue,
+                a = src[3] / (float)byte.MaxValue
             };
         }
     }
