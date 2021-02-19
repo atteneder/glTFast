@@ -56,7 +56,6 @@ namespace GLTFast.Materials {
         public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
         public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
         public static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
-        public static readonly int mainTexPropId = Shader.PropertyToID("_MainTex");
         public static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
         public static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");
         public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
