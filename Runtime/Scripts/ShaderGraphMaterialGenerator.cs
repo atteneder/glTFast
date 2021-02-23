@@ -174,6 +174,7 @@ namespace GLTFast.Materials {
             if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial);
                 materialType = MaterialType.Unlit;
+                shaderMode = gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE ? ShaderMode.Blend : ShaderMode.Opaque;
             } else {
                 bool isMetallicRoughness = gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness == null;
                 if (isMetallicRoughness) {
