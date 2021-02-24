@@ -211,8 +211,12 @@ namespace GLTFast.Materials {
                 textureST.y = -textureST.y; // flip scale in Y
             }
             
-            material.SetTextureOffset(mainTexPropId, textureST.zw);
-            material.SetTextureScale(mainTexPropId, textureST.xy);
+            if(material.HasProperty(mainTexPropId)) {
+                material.SetTextureOffset(mainTexPropId, textureST.zw);
+                material.SetTextureScale(mainTexPropId, textureST.xy);
+            }
+            material.SetTextureOffset(propertyId, textureST.zw);
+            material.SetTextureScale(propertyId, textureST.xy);
             material.SetVector(mainTexScaleTransform, textureST);
         }
         
