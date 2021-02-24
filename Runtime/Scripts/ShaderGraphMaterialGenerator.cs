@@ -62,7 +62,7 @@ namespace GLTFast.Materials {
             DoubleSided = 1<<2
         }
 
-        const string SHADER_UNLIT = "Shader Graphs/glTF-unlit-Opaque";
+        const string SHADER_UNLIT = "Shader Graphs/glTF-unlit";
         const string SHADER_SPECULAR = "Shader Graphs/glTF-specular";
 
         // Keywords
@@ -115,11 +115,15 @@ namespace GLTFast.Materials {
             return mat;
         }
 
-        static Material GetUnlitMaterial(bool doubleSided=false)
+        static Material GetUnlitMaterial(Schema.Material gltfMaterial)
         {
-            int index = doubleSided ? 0 : 1;
+            int index = gltfMaterial.doubleSided ? 0 : 1;
             if(unlitShaders[index]==null) {
-                var shaderName = doubleSided ? string.Format("{0}{1}",SHADER_UNLIT,"-double") : SHADER_UNLIT;
+                var mode = gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE ? ShaderMode.Blend : ShaderMode.Opaque;
+                var shaderName = string.Format("{0}-{1}{2}",
+                    SHADER_UNLIT,
+                    mode,
+                    gltfMaterial.doubleSided ? "-double" : "");
                 unlitShaders[index] = FindShader(shaderName);
             }
             if(unlitShaders[index]==null) {
@@ -127,7 +131,7 @@ namespace GLTFast.Materials {
             }
             var mat = new Material(unlitShaders[index]);
 #if UNITY_EDITOR
-            mat.doubleSidedGI = doubleSided;
+            mat.doubleSidedGI = gltfMaterial.doubleSided;
 #endif
             return mat;
         }
@@ -168,8 +172,9 @@ namespace GLTFast.Materials {
             ShaderMode shaderMode = ShaderMode.Opaque;
 
             if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
-                material = GetUnlitMaterial(gltfMaterial.doubleSided);
+                material = GetUnlitMaterial(gltfMaterial);
                 materialType = MaterialType.Unlit;
+                shaderMode = gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE ? ShaderMode.Blend : ShaderMode.Opaque;
             } else {
                 bool isMetallicRoughness = gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness == null;
                 if (isMetallicRoughness) {
