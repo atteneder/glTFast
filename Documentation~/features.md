@@ -65,9 +65,9 @@
 - [x] KHR_draco_mesh_compression
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
-- [x] KHR_texture_transform
+- [x] <sup>1</sup>KHR_texture_transform
 - [x] KHR_mesh_quantization
-- [x] <sup>1</sup>KHR_texture_basisu
+- [x] <sup>2</sup>KHR_texture_basisu
 - [ ] KHR_lights_punctual ([issue][PointLights])
 - [ ] KHR_materials_clearcoat ([issue][ClearCoat])
 - [ ] KHR_materials_sheen ([issue][Sheen])
@@ -75,7 +75,9 @@
 - [ ] KHR_materials_variants ([issue][Variants])
 - [ ] KHR_xmp
 
-<sup>1</sup>: Beta
+<sup>1</sup>: See [Materials](#materials) for limitations
+
+<sup>2</sup>: Beta
 
 Will not be supported:
 
