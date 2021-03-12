@@ -29,7 +29,6 @@ namespace GLTFast.Tests {
     using Utils;
 
     public class SampleModelsTest {
-        const string k_TestVersion = "main";
         const int k_Repetitions = 10;
         
         const string glTFSampleSetAssetPath = "Assets/SampleSets/glTF-Sample-Models.asset";
@@ -83,7 +82,6 @@ namespace GLTFast.Tests {
         [UnityTest]
         [UseGltfSampleSetTestCase(glTFSampleSetJsonPath)]
         [Performance]
-        [Version(k_TestVersion)]
         public IEnumerator UninterruptedLoading(SampleSetItem testCase)
         {
             Debug.Log($"Testing {testCase.path}");
@@ -106,7 +104,6 @@ namespace GLTFast.Tests {
         [UnityTest]
         [UseGltfSampleSetTestCase(glTFSampleSetJsonPath)]
         [Performance]
-        [Version(k_TestVersion)]
         public IEnumerator SmoothLoading(SampleSetItem testCase)
         {
             Debug.Log($"Testing {testCase.path}");
