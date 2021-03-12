@@ -47,6 +47,15 @@ namespace GLTFast
         VertexBufferColors colors;
         VertexBufferBones bones;
 
+        public override int vertexCount {
+            get {
+                if (vData.IsCreated) {
+                    return vData.Length;
+                }
+                return 0;
+            }
+        }
+
         public override unsafe JobHandle? ScheduleVertexJobs(
             VertexInputData posInput,
             VertexInputData? nrmInput = null,

@@ -13,7 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Texture offset/tiling values don't get lost when switching shaders (thanks [@hybridherbst](https://github.com/hybridherbst) for #140)
 - Correct vertex colors for RGB/unsigned short, RGBA/unsigned short and RGBA/unsigned byte. (thanks [@camogram](https://github.com/camogram) for #139)
-- Error when tryting to set texture offset/scale but material doesn't have _MainTex property (thanks [@hybridherbst](https://github.com/hybridherbst) for #142)
+- Error when trying to set texture offset/scale but material doesn't have _MainTex property (thanks [@hybridherbst](https://github.com/hybridherbst) for #142)
+- Crash when trying to combine meshes created by glTFast by setting proper submesh vertex count (fixes #100)
 
 ## [3.0.2] - 2020-02-07
 ### Changed

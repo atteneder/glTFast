@@ -69,7 +69,15 @@ namespace GLTFast {
                 msh.SetIndexBufferData(indices[i],0,indexCount,indices[i].Length,defaultMeshUpdateFlags);
                 Profiler.EndSample();
                 Profiler.BeginSample("SetSubMesh");
-                msh.SetSubMesh(i,new SubMeshDescriptor(indexCount,indices[i].Length,topology),flags);
+                var subMeshDescriptor = new SubMeshDescriptor{
+                    indexStart = indexCount,
+                    indexCount = indices[i].Length,
+                    topology = topology,
+                    baseVertex = 0,
+                    firstVertex = 0,
+                    vertexCount = vertexData.vertexCount
+                };
+                msh.SetSubMesh(i,subMeshDescriptor,defaultMeshUpdateFlags);
                 Profiler.EndSample();
                 indexCount += indices[i].Length;
             }

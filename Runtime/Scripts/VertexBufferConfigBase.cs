@@ -93,6 +93,7 @@ namespace GLTFast
             VertexInputData? jointsInput = null
             );
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
+        public abstract int vertexCount { get; }
         public abstract void Dispose();
 
         protected unsafe JobHandle? GetVector3sJob(
