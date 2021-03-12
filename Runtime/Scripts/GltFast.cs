@@ -80,9 +80,6 @@ namespace GLTFast {
         public const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
         const string ErrorUnsupportedPrimitiveMode = "Primitive mode {0} is untested!";
         const string ErrorMissingImageURL = "Image URL missing";
-#if !KTX_UNITY
-        const string ErrorKtxUnsupported = "KTX textures are not supported!";
-#endif
         const string ErrorPackageMissing = "{0} package needs to be installed in order to support glTF extension {1}!\nSee https://github.com/atteneder/glTFast#installing for instructions";
 
         const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
@@ -476,7 +473,19 @@ namespace GLTFast {
                 foreach(var ext in gltfRoot.extensionsUsed) {
                     var supported = supportedExtensions.Contains(ext);
                     if(!supported) {
-                        Debug.LogWarningFormat("glTF extension {0} is not supported!",ext);
+#if !DRACO_UNITY
+                        if(ext==ExtDracoMeshCompression) {
+                            Debug.LogWarningFormat(ErrorPackageMissing,"DracoUnity",ext);
+                        } else
+#endif
+#if !KTX_UNITY
+                        if(ext==ExtTextureBasisu) {
+                            Debug.LogWarningFormat(ErrorPackageMissing,"KtxUnity",ext);
+                        } else
+#endif
+                        {
+                            Debug.LogWarningFormat("glTF extension {0} is not supported!",ext);
+                        }
                     }
                 }
             }
@@ -802,7 +811,7 @@ namespace GLTFast {
                 }
                 ktxDownloadTasks.Add(index, downloadTask);
 #else
-                Debug.LogError(ErrorKtxUnsupported);
+                Debug.LogErrorFormat(ErrorPackageMissing,"KtxUnity",ExtTextureBasisu);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
@@ -1290,7 +1299,7 @@ namespace GLTFast {
                             Profiler.EndSample();
                             await deferAgent.BreakPoint();
 #else
-                            Debug.LogError(ErrorKtxUnsupported);
+                            Debug.LogErrorFormat(ErrorPackageMissing,"KtxUnity",ExtTextureBasisu);
 #endif // KTX_UNITY
                         } else {
                             Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBuffer");
