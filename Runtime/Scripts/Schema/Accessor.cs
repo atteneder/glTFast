@@ -14,6 +14,7 @@
 //
 
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace GLTFast.Schema {
 
@@ -121,7 +122,7 @@ namespace GLTFast.Schema {
         /// <minItems>1</minItems>
         /// <maxItems>16</maxItems>
         /// </summary>
-        public double[] max;
+        public float[] max;
 
         /// <summary>
         /// Minimum value of each component in this attribute.
@@ -139,7 +140,7 @@ namespace GLTFast.Schema {
         /// <minItems>1</minItems>
         /// <maxItems>16</maxItems>
         /// </summary>
-        public double[] min;
+        public float[] min;
 
         /// <summary>
         /// Sparse storage of attributes that deviate from their initialization value.
@@ -184,6 +185,21 @@ namespace GLTFast.Schema {
                     Debug.LogError("Unknown GLTFAccessorAttributeType");
                     return 0;
             }
+        }
+
+        /// <summary>
+        /// For 3D positional data, returns accessor's bounding box. Applies coordinate system transform (glTF to Unity)
+        /// </summary>
+        /// <returns>Bounding box enclosing the minimum and maximum values</returns>
+        public Bounds? TryGetBounds() {
+            Assert.AreEqual(GLTFAccessorAttributeType.VEC3 ,typeEnum);
+            if (min != null && min.Length > 2 && max != null && max.Length > 2) {
+                return new Bounds {
+                    max = new Vector3(max[0], max[1], -min[2]),
+                    min = new Vector3(min[0], min[1], -max[2])
+                };
+            }
+            return null;
         }
     }
 }
