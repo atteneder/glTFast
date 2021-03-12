@@ -1115,6 +1115,35 @@ namespace GLTFast.Jobs {
             *resultV = tmp;
         }
     }
+    
+    public unsafe struct GetJointsUInt8Job : IJobParallelFor  {
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        public int inputByteStride;
+
+        [WriteOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public uint* result;
+
+        [ReadOnly]
+        public int outputByteStride;
+
+        public void Execute(int i)
+        {
+            uint* resultV = (uint*) (((byte*)result) + (i*outputByteStride));
+            byte* off = (byte*) (input + (i*inputByteStride));
+
+            *resultV = *off;
+            *(resultV+1) = *(off+1);
+            *(resultV+2) = *(off+2);
+            *(resultV+3) = *(off+3);
+        }
+    }
+
 
     public unsafe struct GetJointsUInt16Job : IJobParallelFor  {
 

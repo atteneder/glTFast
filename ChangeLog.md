@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 
 ### Added
 - Unlit alpha blended ShaderGraph variants (thanks [@hybridherbst](https://github.com/hybridherbst) for #144)
+- Support for unsigned byte joint indices
 ### Changed
 - Improved log message when DracoUnity/KtxUnity packages are missing
 ### Fixed
