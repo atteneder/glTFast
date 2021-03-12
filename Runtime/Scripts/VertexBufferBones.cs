@@ -33,7 +33,7 @@ namespace GLTFast {
             NativeSlice<JobHandle> handles
             );
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
-        public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default);
+        public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
     }
 
@@ -95,7 +95,7 @@ namespace GLTFast {
             dst[offset+1] = new VertexAttributeDescriptor(VertexAttribute.BlendIndices, VertexAttributeFormat.UInt32, 4, stream);
         }
 
-        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
+        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags) {
             Profiler.BeginSample("ApplyBones");
             msh.SetVertexBufferData(vData,0,0,vData.Length,stream,flags);
             Profiler.EndSample();

@@ -52,8 +52,7 @@ namespace GLTFast {
             var msh = new UnityEngine.Mesh();
             msh.name = mesh.name;
 
-            MeshUpdateFlags flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontResetBoneBounds | MeshUpdateFlags.DontValidateIndices;
-            vertexData.ApplyOnMesh(msh,flags);
+            vertexData.ApplyOnMesh(msh,defaultMeshUpdateFlags);
 
             Profiler.BeginSample("SetIndices");
             int indexCount = 0;
@@ -67,7 +66,7 @@ namespace GLTFast {
             indexCount = 0;
             for (int i = 0; i < indices.Length; i++) {
                 Profiler.BeginSample("SetIndexBufferData");
-                msh.SetIndexBufferData(indices[i],0,indexCount,indices[i].Length,flags);
+                msh.SetIndexBufferData(indices[i],0,indexCount,indices[i].Length,defaultMeshUpdateFlags);
                 Profiler.EndSample();
                 Profiler.BeginSample("SetSubMesh");
                 msh.SetSubMesh(i,new SubMeshDescriptor(indexCount,indices[i].Length,topology),flags);

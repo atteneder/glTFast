@@ -13,11 +13,20 @@
 // limitations under the License.
 //
 
+using UnityEngine.Rendering;
+
 namespace GLTFast {
     
     using Schema;
     
     abstract class PrimitiveCreateContextBase {
+        
+        public const MeshUpdateFlags defaultMeshUpdateFlags =
+            MeshUpdateFlags.DontNotifyMeshUsers
+            | MeshUpdateFlags.DontRecalculateBounds
+            | MeshUpdateFlags.DontResetBoneBounds
+            | MeshUpdateFlags.DontValidateIndices;
+        
         public int primtiveIndex;
         public int[] materials;
         public bool needsNormals;

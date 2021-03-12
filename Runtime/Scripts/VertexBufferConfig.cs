@@ -226,7 +226,7 @@ namespace GLTFast
             }
         }
 
-        public override void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
+        public override void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags) {
 
             Profiler.BeginSample("ApplyOnMesh");
             if (vad == null) {

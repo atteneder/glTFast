@@ -29,7 +29,7 @@ namespace GLTFast {
         public int uvSetCount { get; protected set; }
         public abstract unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles);
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
-        public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default);
+        public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
     }
 
@@ -79,7 +79,7 @@ namespace GLTFast {
             }
         }
 
-        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = MeshUpdateFlags.Default) {
+        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags) {
             Profiler.BeginSample("ApplyUVs");
             msh.SetVertexBufferData(vData,0,0,vData.Length,stream,flags);
             Profiler.EndSample();
