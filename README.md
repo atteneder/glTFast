@@ -85,7 +85,7 @@ var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-See [Load via Script](./Documentation~/gltfast.md) in the detailed documentation for instructions how to customize the loading behaviour via script.
+See [Load via Script](./Documentation~/glTFast.md#load-via-script) in the detailed documentation for instructions how to customize the loading behaviour via script.
 
 ### Materials and Shader Variants
 
