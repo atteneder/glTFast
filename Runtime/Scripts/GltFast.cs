@@ -244,7 +244,7 @@ namespace GLTFast {
                 }
 
                 if (gltfBinary ?? false) {
-                    success = await LoadGltfBinary(download.data,url);
+                    success = await LoadGltfBinaryBuffer(download.data,url);
                 } else {
                     success = await LoadGltf(download.text,url);
                 }
@@ -829,9 +829,19 @@ namespace GLTFast {
         /// Load a glTF-binary asset from a byte array.
         /// </summary>
         /// <param name="bytes">byte array containing glTF-binary</param>
-        /// <param name="url">Base URL for relative paths of external buffers or images</param>
-        /// <returns></returns>
-        public async Task<bool> LoadGltfBinary( byte[] bytes, Uri uri = null ) {
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null) {
+            var success = await LoadGltfBinaryBuffer(bytes,uri);
+            if(success) await LoadContent();
+            success = success && await Prepare();
+            DisposeVolatileData();
+            loadingError = !success;
+            loadingDone = true;
+            return success;
+        }
+        
+        async Task<bool> LoadGltfBinaryBuffer( byte[] bytes, Uri uri = null ) {
             Profiler.BeginSample("LoadGltfBinary.Phase1");
             uint magic = BitConverter.ToUInt32( bytes, 0 );
 
@@ -1687,7 +1697,7 @@ namespace GLTFast {
                     i++;
                 }
             }
-            // TODO: not necesary with ECS
+            // TODO: not necessary with ECS
             // https://docs.unity3d.com/Manual/JobSystemTroubleshooting.html
             if (schedule) {
                 JobHandle.ScheduleBatchedJobs();

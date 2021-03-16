@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -22,6 +23,7 @@ using Unity.PerformanceTesting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 
 namespace GLTFast.Tests {
 
@@ -33,6 +35,7 @@ namespace GLTFast.Tests {
         
         const string glTFSampleSetAssetPath = "Assets/SampleSets/glTF-Sample-Models.asset";
         const string glTFSampleSetJsonPath = "glTF-Sample-Models.json";
+        const string glTFSampleSetBinaryJsonPath = "glTF-Sample-Models-glb.json";
 
         [Test]
         public void CheckFiles()
@@ -121,6 +124,27 @@ namespace GLTFast.Tests {
                     yield return null;
                 }
             }
+            Object.Destroy(go);
+        }
+        
+        /// <summary>
+        /// Load glTF-binary files from memory
+        /// </summary>
+        [UnityTest]
+        [UseGltfSampleSetTestCase(glTFSampleSetBinaryJsonPath)]
+        public IEnumerator LoadGlbFromMemory(SampleSetItem testCase)
+        {
+            Debug.Log($"Testing {testCase.path}");
+            var data = File.ReadAllBytes(testCase.path);
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var gltf = new GLTFast();
+            var task = gltf.LoadGltfBinary(data, new Uri(testCase.path));
+            yield return WaitForTask(task);
+            var success = task.Result;
+            Assert.IsTrue(success);
+            success = gltf.InstantiateGltf(go.transform);
+            Assert.IsTrue(success);
             Object.Destroy(go);
         }
 

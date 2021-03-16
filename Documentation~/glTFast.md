@@ -47,6 +47,23 @@ var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
+#### Load from byte array
+
+In case you want to handle download/file loading yourself, you can load glTF binary files directly from C# byte[] like so:
+
+```csharp
+async void LoadGltfBinaryFromMemory() {
+    byte[] data = File.ReadAllBytes("/path/to/file.glb");
+    var gltf = new GLTFast();
+    bool success = await gltf.LoadGltfBinary(data, new Uri(m_Path));
+    if (success) {
+        success = gltf.InstantiateGltf(transform);
+    }
+}
+```
+
+> Note: Most users want to load self-contained glTF binary files this way, but `LoadGltfBinary` also takes the original URI of glTF file as second parameter, so it can resolve relative URIs.
+
 ### Customize loading behavior
 
 Loading via script allows you to:
