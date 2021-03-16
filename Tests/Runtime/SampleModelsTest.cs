@@ -79,6 +79,8 @@ namespace GLTFast.Tests {
             var task = LoadGltfSampleSetItem(testCase, go, deferAgent);
             yield return WaitForTask(task);
             Object.Destroy(go);
+#else
+            yield break;            
 #endif
         }
 
