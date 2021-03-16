@@ -11,12 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Accelerated loading meshes by obtaining and setting bounds from accessors min/max values instead of recalculating them  
 - Improved log message when DracoUnity/KtxUnity packages are missing
+- Restored/simplified `GLTFast.LoadGltfBinary`, allowing users to load glTF binary files from byte arrays directly (also added documentation; fixes #148)
 ### Fixed
 - Texture offset/tiling values don't get lost when switching shaders (thanks [@hybridherbst](https://github.com/hybridherbst) for #140)
 - Correct vertex colors for RGB/unsigned short, RGBA/unsigned short and RGBA/unsigned byte. (thanks [@camogram](https://github.com/camogram) for #139)
 - Error when trying to set texture offset/scale but material doesn't have _MainTex property (thanks [@hybridherbst](https://github.com/hybridherbst) for #142)
 - Crash when trying to combine meshes created by glTFast by setting proper submesh vertex count (fixes #100)
-- Restored `GLTFast.LoadGltfBinary`, allowing users to load glTF binary files from byte arrays directly (fixes #148)
 
 ## [3.0.2] - 2020-02-07
 ### Changed
