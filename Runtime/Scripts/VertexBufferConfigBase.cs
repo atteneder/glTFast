@@ -43,7 +43,7 @@ namespace GLTFast
         PosNormTan = 0x7,
     }
 
-    struct VertexInputData {
+    public struct VertexInputData {
 
         public Accessor accessor;
         public BufferView bufferView;

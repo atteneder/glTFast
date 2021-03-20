@@ -15,7 +15,7 @@
 
 namespace GLTFast {
     
-    struct Primitive {
+    public struct Primitive {
         public UnityEngine.Mesh mesh;
         public int[] materialIndices;
 

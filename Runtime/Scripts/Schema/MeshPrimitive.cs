@@ -13,6 +13,9 @@
 // limitations under the License.
 //
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
 namespace GLTFast.Schema {
 
     public enum DrawMode
@@ -79,43 +82,105 @@ namespace GLTFast.Schema {
     }
 
     [System.Serializable]
-    public class Attributes {
-        public int POSITION = -1;
-        public int NORMAL = -1;
-        public int TANGENT = -1;
-        public int TEXCOORD_0 = -1;
-        public int TEXCOORD_1 = -1;
-        public int COLOR_0 = -1;
-        public int JOINTS_0 = -1;
-        public int WEIGHTS_0 = -1;
-
-        public override bool Equals(object obj)
+    public class Attributes : ReadOnlyDictionary<string, int> {
+        private const string POSITION_KEY = "POSITION";
+        private const string NORMAL_KEY = "NORMAL";
+        private const string TANGENT_KEY = "TANGENT";
+        private const string TEXCOORD_0_KEY = "TEXCOORD_0";
+        private const string TEXCOORD_1_KEY = "TEXCOORD_1";
+        private const string TEXCOORD_2_KEY = "TEXCOORD_2";
+        private const string TEXCOORD_3_KEY = "TEXCOORD_3";
+        private const string COLOR_0_KEY = "COLOR_0";
+        private const string JOINTS_0_KEY = "JOINTS_0";
+        private const string WEIGHTS_0_KEY = "WEIGHTS_0";
+        
+        public Attributes(IDictionary<string, int> dictionary) : base(dictionary)
         {
-            //Check for null and compare run-time types.
-            if ((obj == null) || ! this.GetType().Equals(obj.GetType())) 
-            {
-                return false;
-            }
-            var b = (Attributes) obj; 
-            return POSITION==b.POSITION
-                && NORMAL==b.NORMAL
-                && TANGENT==b.TANGENT
-                && TEXCOORD_0==b.TEXCOORD_0
-                && TEXCOORD_1==b.TEXCOORD_1
-                && COLOR_0==b.COLOR_0
-                ;
+        }
+        
+        private int TryGetDefault(string key, int defaultVal)
+        {
+            int index;
+            return TryGetValue(key, out index) ? index : defaultVal;
         }
 
-        public override int GetHashCode()
+        public int POSITION
         {
-            int hash = 13;
-            hash = hash * 7 + POSITION.GetHashCode();
-            hash = hash * 7 + NORMAL.GetHashCode();
-            hash = hash * 7 + TANGENT.GetHashCode();
-            hash = hash * 7 + TEXCOORD_0.GetHashCode();
-            hash = hash * 7 + TEXCOORD_1.GetHashCode();
-            hash = hash * 7 + COLOR_0.GetHashCode();
-            return hash;
+            get
+            {
+                return TryGetDefault(POSITION_KEY, -1);
+            }
+        }
+
+        public int NORMAL
+        {
+            get
+            {
+                return TryGetDefault(NORMAL_KEY, -1);
+            }
+        }
+
+        public int TEXCOORD_0
+        {
+            get
+            {
+                return TryGetDefault(TEXCOORD_0_KEY, -1);
+            }
+        }
+
+        public int TEXCOORD_1
+        {
+            get
+            {
+                return TryGetDefault(TEXCOORD_1_KEY, -1);
+            }
+        }
+
+        public int TEXCOORD_2
+        {
+            get
+            {
+                return TryGetDefault(TEXCOORD_2_KEY, -1);
+            }
+        }
+
+        public int TEXCOORD_3
+        {
+            get
+            {
+                return TryGetDefault(TEXCOORD_3_KEY, -1);
+            }
+        }
+
+        public int COLOR_0
+        {
+            get
+            {
+                return TryGetDefault(COLOR_0_KEY, -1);
+            }
+        }
+
+        public int TANGENT
+        {
+            get
+            {
+                return TryGetDefault(TANGENT_KEY, -1);
+            }
+        }
+        public int WEIGHTS_0
+        {
+            get
+            {
+                return TryGetDefault(WEIGHTS_0_KEY, -1);
+            }
+        }
+
+        public int JOINTS_0
+        {
+            get
+            {
+                return TryGetDefault(JOINTS_0_KEY, -1);
+            }
         }
     }
 

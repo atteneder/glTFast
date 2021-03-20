@@ -33,6 +33,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 #endif
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
 using Debug = UnityEngine.Debug;
@@ -171,7 +172,7 @@ namespace GLTFast {
         /// </summary>
 
         /// Main glTF data structure
-        Root gltfRoot;
+        public Root gltfRoot;
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
 
@@ -217,8 +218,8 @@ namespace GLTFast {
         /// The URL can be a file path (using the "file://" scheme) or a web adress.
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
-        public async Task<bool> Load( string url ) {
-            return await Load(new Uri(url,UriKind.RelativeOrAbsolute));
+        public async Task<bool> Load( string url, bool disposeData = true ) {
+            return await Load(new Uri(url,UriKind.RelativeOrAbsolute), disposeData);
         }
         
         /// <summary>
@@ -226,11 +227,11 @@ namespace GLTFast {
         /// The URL can be a file path (using the "file://" scheme) or a web adress.
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
-        public async Task<bool> Load( Uri url ) {
-            return await LoadRoutine(url);
+        public async Task<bool> Load( Uri url, bool disposeData = true ) {
+            return await LoadRoutine(url, disposeData);
         }
 
-        async Task<bool> LoadRoutine( Uri url ) {
+        async Task<bool> LoadRoutine( Uri url, bool disposeData ) {
 
             var download = await downloadProvider.Request(url);
             var success = download.success;
@@ -254,7 +255,10 @@ namespace GLTFast {
                 Debug.LogErrorFormat("{0} {1}",download.error,url);
             }
 
-            DisposeVolatileData();
+            if (disposeData)
+            {
+                DisposeVolatileData();
+            }
             loadingError = !success;
             loadingDone = true;
             return success;
@@ -433,6 +437,37 @@ namespace GLTFast {
 #endif
                 Profiler.EndSample();
             }
+            
+            // Step Four:
+            // Deserialize attributes, including custom attributes
+            var meshPrimitiveAttributes = GetGltfMeshPrimitiveAttributes(json);
+            int numPrimitives = 0;
+
+            for (var i = 0; i < root.meshes?.Length; i++)
+            {
+                numPrimitives += root.meshes[i]?.primitives?.Length ?? 0;
+            }
+
+            if (numPrimitives != meshPrimitiveAttributes.Count)
+            {
+                Debug.LogError("The number of mesh primitive attributes does not match the number of mesh primitives");
+                return null;
+            }
+
+            int primitiveIndex = 0;
+
+            for (int i = 0; i < root.meshes?.Length; i++)
+            {
+                for (int j = 0; j < root.meshes[i].primitives.Length; j++)
+                {
+                    root.meshes[i]
+                            .primitives[j]
+                            .attributes =
+                        new Attributes(JsonHelper.StringIntDictionaryFromJson(meshPrimitiveAttributes[primitiveIndex]));
+                    primitiveIndex++;
+                }
+            }
+            
 #if MEASURE_TIMINGS
             stopWatch.Stop();
             var elapsedSeconds = stopWatch.ElapsedMilliseconds / 1000f;
@@ -440,6 +475,31 @@ namespace GLTFast {
             Debug.Log($"JSON throughput: {throughput} bytes/sec ({json.Length} bytes in {elapsedSeconds} seconds)");
 #endif
             return root;
+        }
+        
+        private static List<string> GetGltfMeshPrimitiveAttributes(string jsonString)
+        {
+            var regex = new Regex("\"attributes\" ?: ?(?<Data>{[^}]+})");
+            return GetGltfMeshPrimitiveAttributes(jsonString, regex);
+        }
+
+        private static List<string> GetGltfMeshPrimitiveAttributes(string jsonString, Regex regex)
+        {
+            var jsonObjects = new List<string>();
+
+            if (!regex.IsMatch(jsonString))
+            {
+                return jsonObjects;
+            }
+
+            MatchCollection matches = regex.Matches(jsonString);
+
+            for (var i = 0; i < matches.Count; i++)
+            {
+                jsonObjects.Add(matches[i].Groups["Data"].Captures[0].Value);
+            }
+
+            return jsonObjects;
         }
 
         /// <summary>
@@ -746,6 +806,14 @@ namespace GLTFast {
             return null;
         }
 
+        public UnityEngine.Mesh GetMesh(int index = 0)
+        {            
+            if(primitives!=null && index >= 0 && index < materials.Length ) {
+                return primitives[index].mesh;
+            }
+            return null;
+        }
+
         void LoadBuffer( int index, Uri url ) {
             Profiler.BeginSample("LoadBuffer");
             if(downloadTasks==null) {
@@ -831,11 +899,16 @@ namespace GLTFast {
         /// <param name="bytes">byte array containing glTF-binary</param>
         /// <param name="uri">Base URI for relative paths of external buffers or images</param>
         /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null) {
+        public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null, bool disposeData = true) {
             var success = await LoadGltfBinaryBuffer(bytes,uri);
             if(success) await LoadContent();
             success = success && await Prepare();
-            DisposeVolatileData();
+
+            if (disposeData)
+            {
+                DisposeVolatileData();                
+            }
+
             loadingError = !success;
             loadingDone = true;
             return success;
@@ -1091,7 +1164,7 @@ namespace GLTFast {
         /// <summary>
         /// Free up volatile loading resources
         /// </summary>
-        void DisposeVolatileData() {
+        public void DisposeVolatileData() {
 
             if (vertexAttributes != null) {
                 foreach (var vac in vertexAttributes.Values) {
@@ -1947,7 +2020,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        VertexInputData GetAccessorParams(Root gltf, int accessorIndex) {
+        public VertexInputData GetAccessorParams(Root gltf, int accessorIndex) {
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
             var bufferIndex = bufferView.buffer;
@@ -1959,6 +2032,7 @@ namespace GLTFast {
             };
             return result;
         }
+
  /*
         unsafe int GetVector3sJob(Root gltf, int accessorIndex, out JobHandle? jobHandle, out NativeArray<Vector3> result) {
             Profiler.BeginSample("PrepareGetVector3sJob");
