@@ -172,7 +172,7 @@ namespace GLTFast {
         /// </summary>
 
         /// Main glTF data structure
-        public Root gltfRoot;
+        internal Root gltfRoot;
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
 
@@ -439,7 +439,8 @@ namespace GLTFast {
             }
             
             // Step Four:
-            // Deserialize attributes, including custom attributes
+            // Deserialize all attributes into a string int dictionary
+            Profiler.BeginSample("JSON attributes");
             var meshPrimitiveAttributes = GetGltfMeshPrimitiveAttributes(json);
             int numPrimitives = 0;
 
@@ -450,7 +451,10 @@ namespace GLTFast {
 
             if (numPrimitives != meshPrimitiveAttributes.Count)
             {
-                Debug.LogError("The number of mesh primitive attributes does not match the number of mesh primitives");
+                Debug.LogError(
+                    $"The number of mesh primitive attributes does not match the number of mesh primitives.\n" +
+                    $"Primitives: {numPrimitives}\n" +
+                    $"Attributes: {meshPrimitiveAttributes.Count}");
                 return null;
             }
 
@@ -467,6 +471,7 @@ namespace GLTFast {
                     primitiveIndex++;
                 }
             }
+            Profiler.EndSample();
             
 #if MEASURE_TIMINGS
             stopWatch.Stop();
@@ -2021,6 +2026,11 @@ namespace GLTFast {
         }
 
         public VertexInputData GetAccessorParams(Root gltf, int accessorIndex) {
+            if (buffers == null)
+            {
+                throw new Exception("Buffer not found, is volatile data already disposed?");
+            }
+            
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
             var bufferIndex = bufferView.buffer;

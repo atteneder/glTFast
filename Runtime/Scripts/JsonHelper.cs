@@ -12,7 +12,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="json">JSON string</param>
         /// <returns>A dictionary with the key value pairs found in the json</returns>
-        private static Dictionary<string, int> StringIntDictionaryFromJson(string json)
+        public static Dictionary<string, int> StringIntDictionaryFromJson(string json)
         {
             string reformatted = JsonDictionaryToArray(json);
             StringIntKeyValueArray loadedData = JsonUtility.FromJson<StringIntKeyValueArray>(reformatted);
@@ -32,7 +32,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="json">JSON string in the format `{"key": $value}`</param>
         /// <returns>Returns a reformatted JSON string</returns>
-        private static string JsonDictionaryToArray(string json)
+        public static string JsonDictionaryToArray(string json)
         {
             string reformatted = "{\"items\": [";
             string pattern = @"""(\w+)"":\s?(""?\w+""?)";
@@ -51,14 +51,14 @@ namespace GLTFast
         }
 
         [Serializable]
-        private class StringKeyValue
+        public class StringKeyValue
         {
             public string key = string.Empty;
             public int value = 0;
         }
 
         [Serializable]
-        private class StringIntKeyValueArray
+        public class StringIntKeyValueArray
         {
             public StringKeyValue[] items = Array.Empty<StringKeyValue>();
         }

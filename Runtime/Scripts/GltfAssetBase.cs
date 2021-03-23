@@ -15,7 +15,7 @@
 
 using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Events;
+using Mesh = GLTFast.Schema.Mesh;
 
 namespace GLTFast
 {
@@ -38,9 +38,10 @@ namespace GLTFast
         /// <param name="downloadProvider">Download Provider for custom loading (e.g. caching or HTTP authorization)</param>
         /// <param name="deferAgent">Defer Agent takes care of interrupting the
         /// loading procedure in order to keep the frame rate responsive.</param>
-        public virtual async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
+        /// <param name="disposeData">If true, volatile data will be disposed automatically after loading.</param>
+        public virtual async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null, bool disposeData=true ) {
             gLTFastInstance = new GLTFast(downloadProvider,deferAgent, materialGenerator);
-            return await gLTFastInstance.Load(url);
+            return await gLTFastInstance.Load(url, disposeData);
         }
 
         /// <summary>
@@ -60,6 +61,43 @@ namespace GLTFast
         /// <returns>glTF material if it was loaded successfully and index is correct, null otherwise.</returns>
         public UnityEngine.Material GetMaterial( int index = 0 ) {
             return gLTFastInstance?.GetMaterial(index);
+        }
+        
+        /// <summary>
+        /// Get an Accessor given it's index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public VertexInputData GetAccessor(int index)
+        {
+            return gLTFastInstance.GetAccessorParams(gLTFastInstance.gltfRoot, index);
+        }
+
+        /// <summary>
+        /// Get a list of the gltfRoot's meshes
+        /// </summary>
+        /// <returns></returns>
+        public Mesh[] GetGltfMeshes()
+        {
+            return gLTFastInstance.gltfRoot.meshes;
+        }
+
+        /// <summary>
+        /// Get the UnityMesh given the glTF mesh's index
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public UnityEngine.Mesh GetUnityMesh(int index)
+        {
+            return gLTFastInstance.GetMesh(index);
+        }
+
+        /// <summary>
+        /// Dispose volatile data in gltFastInstance.
+        /// </summary>
+        public void DisposeData()
+        {
+            gLTFastInstance.DisposeVolatileData();
         }
 
         protected virtual void OnDestroy()

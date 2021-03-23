@@ -13,77 +13,165 @@
 // limitations under the License.
 //
 
+using GLTFast.Schema;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace GLTFast.Tests
 {
     public class JsonParsingTests
     {
-        [Test]
-        public void ParseGltfJson() {
-            var gltf = GLTFast.ParseJson(@"
+        private Root gltf;
+        
+        [SetUp]
+        public void SetUp()
+        {
+            gltf = GLTFast.ParseJson(@"
 {
-    ""materials"" : [
+    ""materials"":[
         {
-            ""name"" : ""noExtension""
+            ""name"":""noExtension""
         },
         {
-            ""name"" : ""emptyExtension"",
-            ""extensions"": {
-                ""dummy"": ""value""
+            ""name"":""emptyExtension"",
+            ""extensions"":{
+                ""dummy"":""value""
             }
         },
         {
-            ""name"" : ""unlit"",
-            ""extensions"": {
-                ""KHR_materials_unlit"": {}
+            ""name"":""unlit"",
+            ""extensions"":{
+                ""KHR_materials_unlit"":{
+                    
+                }
             }
         },
         {
-            ""name"" : ""specularGlossiness"",
-            ""extensions"": {
-                ""KHR_materials_pbrSpecularGlossiness"": {
-                    ""diffuseTexture"": {
-                        ""index"": 5
+            ""name"":""specularGlossiness"",
+            ""extensions"":{
+                ""KHR_materials_pbrSpecularGlossiness"":{
+                    ""diffuseTexture"":{
+                        ""index"":5
                     }
                 }
             }
         },
         {
-            ""name"" : ""transmission"",
-            ""extensions"": {
-                ""KHR_materials_transmission"": {}
+            ""name"":""transmission"",
+            ""extensions"":{
+                ""KHR_materials_transmission"":{
+                    
+                }
             }
         },
         {
-            ""name"" : ""clearcoat"",
-            ""extensions"": {
-                ""KHR_materials_clearcoat"": {}
+            ""name"":""clearcoat"",
+            ""extensions"":{
+                ""KHR_materials_clearcoat"":{
+                    
+                }
             }
         },
         {
-            ""name"" : ""sheen"",
-            ""extensions"": {
-                ""KHR_materials_sheen"": {}
+            ""name"":""sheen"",
+            ""extensions"":{
+                ""KHR_materials_sheen"":{
+                    
+                }
             }
         },
         {
-            ""name"" : ""all"",
-            ""extensions"": {
-                ""KHR_materials_unlit"": {},
-                ""KHR_materials_pbrSpecularGlossiness"": {},
-                ""KHR_materials_transmission"": {},
-                ""KHR_materials_clearcoat"": {},
-                ""KHR_materials_sheen"": {}
+            ""name"":""all"",
+            ""extensions"":{
+                ""KHR_materials_unlit"":{
+                    
+                },
+                ""KHR_materials_pbrSpecularGlossiness"":{
+                    
+                },
+                ""KHR_materials_transmission"":{
+                    
+                },
+                ""KHR_materials_clearcoat"":{
+                    
+                },
+                ""KHR_materials_sheen"":{
+                    
+                }
             }
         }
+    ],
+    ""accessors"":[
+        {
+            ""bufferView"":0,
+            ""componentType"":5125,
+            ""count"":36,
+            ""max"":[
+                7
+            ],
+            ""min"":[
+                0
+            ],
+            ""type"":""SCALAR""
+        },
+        {
+            ""bufferView"":1,
+            ""componentType"":5126,
+            ""count"":8,
+            ""type"":""VEC3"",
+            ""byteOffset"":0,
+            ""max"":[
+                0.5,
+                0.5,
+                0.5
+            ],
+            ""min"":[
+                -0.5,
+                -0.5,
+                -0.5
+            ]
+        },
+        {
+            ""bufferView"":3,
+            ""count"":8,
+            ""componentType"":5126,
+            ""type"":""SCALAR"",
+            ""byteOffset"":0,
+            ""max"":[
+                10
+            ],
+            ""min"":[
+                10
+            ]
+        }
+    ],
+    ""meshes"":[
+        {
+            ""name"":""geometry_0"",
+            ""primitives"":[
+                {
+                    ""attributes"":{
+                        ""POSITION"":1,
+                        ""_CUSTOM_ATTR"":2
+                    },
+                    ""indices"":0,
+                    ""mode"":4,
+                    ""material"":0
+                }
+            ]
+        }
     ]
-}
-"
-            );
-            
+}");
+        }
+
+        [Test]
+        public void ParseJson()
+        {
             Assert.NotNull(gltf);
+        }
+        
+        [Test]
+        public void ParseMaterials()
+        {
             Assert.NotNull(gltf.materials,"No materials");
             Assert.AreEqual(8, gltf.materials.Length, "Invalid material quantity");
 
@@ -161,6 +249,19 @@ namespace GLTFast.Tests
             Assert.NotNull(all.extensions.KHR_materials_clearcoat);
             Assert.NotNull(all.extensions.KHR_materials_sheen);
             Assert.NotNull(all.extensions.KHR_materials_transmission);
+        }
+
+        [Test]
+        public void ParseAttributes()
+        {
+            var attributes = gltf.meshes[0].primitives[0].attributes;
+            Assert.NotNull(attributes);
+
+            var position = attributes.POSITION;
+            Assert.AreEqual(1, position);
+
+            attributes.TryGetValue("_CUSTOM_ATTR", out var customAttr);
+            Assert.AreEqual(2, customAttr);
         }
     }
 }

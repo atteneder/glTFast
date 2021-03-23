@@ -28,7 +28,7 @@ namespace GLTFast
         [NonSerialized]
         public Bounds bounds;
 
-        public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
+        public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null, bool disposeData=true ) {
             var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator);
             if(success) {
                 var insta = new GameObjectBoundsInstantiator(transform);
