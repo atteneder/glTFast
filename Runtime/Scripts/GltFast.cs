@@ -1359,17 +1359,26 @@ namespace GLTFast {
             return txt;
         }
 
+        private void SafeDestroy(UnityEngine.Object obj) {
+            if (Application.isPlaying) {
+                UnityEngine.Object.Destroy(obj);
+            }
+            else {
+                UnityEngine.Object.DestroyImmediate(obj);
+            }
+        }
+        
         public void Destroy() {
             if(materials!=null) {
                 foreach( var material in materials ) {
-                    UnityEngine.Object.Destroy(material);
+                    SafeDestroy(material);
                 }
                 materials = null;
             }
 
             if(resources!=null) {
                 foreach( var resource in resources ) {
-                    UnityEngine.Object.Destroy(resource);
+                    SafeDestroy(resource);
                 }
                 resources = null;
             }
