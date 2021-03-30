@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2021 Andreas Atteneder
+// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -2193,8 +2193,9 @@ namespace GLTFast {
             }
         }
 
- ImageFormat GetImageFormatFromPath(string path) {
-            if(path.EndsWith(".png",StringComparison.OrdinalIgnoreCase) || path.IndexOf(".png", StringComparison.OrdinalIgnoreCase) >= 0) return ImageFormat.PNG;
+        ImageFormat GetImageFormatFromPath(string path) {
+            if(path.EndsWith(".png",StringComparison.OrdinalIgnoreCase)
+                || path.IndexOf(".png", StringComparison.OrdinalIgnoreCase) >= 0) return ImageFormat.PNG;
             if(path.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase) 
                 || path.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase) || path.IndexOf(".jpeg", StringComparison.OrdinalIgnoreCase) >= 0
                 || path.IndexOf(".jpg", StringComparison.OrdinalIgnoreCase) >= 0) return ImageFormat.Jpeg;
