@@ -2193,12 +2193,15 @@ namespace GLTFast {
             }
         }
 
-        ImageFormat GetImageFormatFromPath(string path) {
-            if(path.EndsWith(".png",StringComparison.OrdinalIgnoreCase)) return ImageFormat.PNG;
-            if(path.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase)) return ImageFormat.Jpeg;
+ ImageFormat GetImageFormatFromPath(string path) {
+            if(path.EndsWith(".png",StringComparison.OrdinalIgnoreCase) || path.IndexOf(".png", StringComparison.OrdinalIgnoreCase) >= 0) return ImageFormat.PNG;
+            if(path.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase) 
+                || path.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase) || path.IndexOf(".jpeg", StringComparison.OrdinalIgnoreCase) >= 0
+                || path.IndexOf(".jpg", StringComparison.OrdinalIgnoreCase) >= 0) return ImageFormat.Jpeg;
             if(path.EndsWith(".ktx",StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(".ktx2",StringComparison.OrdinalIgnoreCase)) return ImageFormat.KTX;
+                || path.EndsWith(".ktx2",StringComparison.OrdinalIgnoreCase)
+                || path.IndexOf(".ktx", StringComparison.OrdinalIgnoreCase) >= 0
+                || path.IndexOf(".ktx2", StringComparison.OrdinalIgnoreCase) >= 0) return ImageFormat.KTX;
             return ImageFormat.Unknown;
         }
 
