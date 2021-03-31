@@ -2204,7 +2204,6 @@ namespace GLTFast {
                 || path.IndexOf(".jpeg", StringComparison.OrdinalIgnoreCase) >= 0) return ImageFormat.Jpeg;
             if(path.IndexOf(".ktx", StringComparison.OrdinalIgnoreCase) >= 0
                 || path.IndexOf(".ktx2", StringComparison.OrdinalIgnoreCase) >= 0) return ImageFormat.KTX;
-            
             return ImageFormat.Unknown;
         }
 
