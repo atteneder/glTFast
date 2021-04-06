@@ -61,6 +61,13 @@ namespace GLTFast.Materials {
             AlphaBlend = 1<<1,
             DoubleSided = 1<<2
         }
+        
+        [Flags]
+        protected enum UnlitShaderFeatures {
+            Default = 0,
+            AlphaBlend = 1<<1,
+            DoubleSided = 1<<2
+        }
 
         const string SHADER_UNLIT = "Shader Graphs/glTF-unlit";
         const string SHADER_SPECULAR = "Shader Graphs/glTF-specular";
@@ -78,7 +85,7 @@ namespace GLTFast.Materials {
 
         static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
         static Dictionary<SpecularShaderFeatures,Shader> specularShaders = new Dictionary<SpecularShaderFeatures,Shader>();
-        static Shader[] unlitShaders = new Shader[2]; // single- and double-sided
+        static Dictionary<UnlitShaderFeatures,Shader> unlitShaders = new Dictionary<UnlitShaderFeatures,Shader>();
 
         public override Material GetDefaultMaterial() {
             return GetMetallicMaterial(MetallicShaderFeatures.Default);
@@ -117,19 +124,24 @@ namespace GLTFast.Materials {
 
         static Material GetUnlitMaterial(Schema.Material gltfMaterial)
         {
-            int index = gltfMaterial.doubleSided ? 0 : 1;
-            if(unlitShaders[index]==null) {
-                var mode = gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE ? ShaderMode.Blend : ShaderMode.Opaque;
-                var shaderName = string.Format("{0}-{1}{2}",
+            var features = GetUnlitShaderFeatures(gltfMaterial);
+            bool doubleSided = (features & UnlitShaderFeatures.DoubleSided) != 0;
+            Shader shader = null;
+            if(!unlitShaders.TryGetValue(features, out shader)) {
+                bool alphaBlend = (features & UnlitShaderFeatures.AlphaBlend) != 0;
+                var shaderName = string.Format(
+                    "{0}{1}{2}",
                     SHADER_UNLIT,
-                    mode,
-                    gltfMaterial.doubleSided ? "-double" : "");
-                unlitShaders[index] = FindShader(shaderName);
+                    alphaBlend ? "-Blend" : "-Opaque",
+                    doubleSided ? "-double" : ""
+                );
+                shader = FindShader(shaderName);
+                unlitShaders[features] = shader;
             }
-            if(unlitShaders[index]==null) {
+            if(shader==null) {
                 return null;
             }
-            var mat = new Material(unlitShaders[index]);
+            var mat = new Material(shader);
 #if UNITY_EDITOR
             mat.doubleSidedGI = gltfMaterial.doubleSided;
 #endif
@@ -371,6 +383,17 @@ namespace GLTFast.Materials {
 
             if (gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE) {
                 feature |= SpecularShaderFeatures.AlphaBlend;
+            }
+            return feature;
+        }
+        
+        static UnlitShaderFeatures GetUnlitShaderFeatures(Schema.Material gltfMaterial) {
+
+            var feature = UnlitShaderFeatures.Default;
+            if (gltfMaterial.doubleSided) feature |= UnlitShaderFeatures.DoubleSided;
+
+            if (gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE) {
+                feature |= UnlitShaderFeatures.AlphaBlend;
             }
             return feature;
         }
