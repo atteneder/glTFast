@@ -139,7 +139,7 @@ You can solve this by using a common "defer agent". It decides if work should co
 Usage example
 
 ```C#
-async void CustomDeferAgent() {
+async Task CustomDeferAgent() {
     // Recommended: Use a common defer agent across multiple GLTFast instances!
     // For a stable frame rate:
     IDeferAgent deferAgent = gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
@@ -150,11 +150,14 @@ async void CustomDeferAgent() {
     
     foreach( var url in manyUrls) {
         var gltf = new GLTFast.GLTFast(null,deferAgent);
-        var task = gltf.Load(url).ContinueWith(t => {
-            if (t.Result) {
-                gltf.InstantiateGltf(transform);
-            }
-        });
+        var task = gltf.Load(url).ContinueWith(
+            t => {
+                if (t.Result) {
+                    gltf.InstantiateGltf(transform);
+                }
+            },
+            TaskScheduler.FromCurrentSynchronizationContext()
+            );
         tasks.Add(task);
     }
 
