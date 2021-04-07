@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2021 Andreas Atteneder
+// Copyright 2020-2021 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -2194,11 +2194,14 @@ namespace GLTFast {
         }
 
         ImageFormat GetImageFormatFromPath(string path) {
-            if(path.EndsWith(".png",StringComparison.OrdinalIgnoreCase)) return ImageFormat.PNG;
-            if(path.EndsWith(".jpg",StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(".jpeg",StringComparison.OrdinalIgnoreCase)) return ImageFormat.Jpeg;
-            if(path.EndsWith(".ktx",StringComparison.OrdinalIgnoreCase)
-                || path.EndsWith(".ktx2",StringComparison.OrdinalIgnoreCase)) return ImageFormat.KTX;
+            var queryStartIndex = path.LastIndexOf('?'); // Get start of query string.
+            if (queryStartIndex == -1) queryStartIndex = path.Length; // if no query exists string, set to end of the string.
+            var formatStartIndex = path.LastIndexOf('.', queryStartIndex); // we assume that the first period before the query string is the file format period.
+            if (formatStartIndex == -1) return ImageFormat.Unknown; // if we can't find a period, we don't know the file format.
+            var pathFormat = path.Substring(formatStartIndex, queryStartIndex - formatStartIndex); // extract the file ending
+            if (pathFormat.Equals(".png", StringComparison.OrdinalIgnoreCase)) return ImageFormat.PNG;
+            if (pathFormat.Equals(".jpg", StringComparison.OrdinalIgnoreCase) || pathFormat.Equals(".jpeg", StringComparison.OrdinalIgnoreCase)) return ImageFormat.Jpeg;
+            if (pathFormat.Equals(".ktx", StringComparison.OrdinalIgnoreCase) || pathFormat.Equals(".ktx2", StringComparison.OrdinalIgnoreCase)) return ImageFormat.KTX;
             return ImageFormat.Unknown;
         }
 
