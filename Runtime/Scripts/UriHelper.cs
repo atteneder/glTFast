@@ -61,6 +61,24 @@ namespace GLTFast {
             return null;
         }
 
+        /// <summary>
+        /// Detect image format from URI string
+        /// </summary>
+        /// <param name="uri">Input URI string</param>
+        /// <returns>ImageFormat if detected correctly, ImageFormat.Unkonwn otherwise</returns>
+        internal static ImageFormat GetImageFormatFromUri(string uri) {
+            if (string.IsNullOrEmpty(uri)) return ImageFormat.Unknown;
+            var queryStartIndex = uri.LastIndexOf('?');
+            if (queryStartIndex < 0) queryStartIndex = uri.Length;
+            var extStartIndex = uri.LastIndexOf('.', queryStartIndex-1,Mathf.Min(5,queryStartIndex)); // we assume that the first period before the query string is the file format period.
+            if (extStartIndex < 0) return ImageFormat.Unknown; // if we can't find a period, we don't know the file format.
+            var fileExtension = uri.Substring(extStartIndex+1, queryStartIndex - extStartIndex - 1); // extract the file ending
+            if (fileExtension.Equals("png", StringComparison.OrdinalIgnoreCase)) return ImageFormat.PNG;
+            if (fileExtension.Equals("jpg", StringComparison.OrdinalIgnoreCase) || fileExtension.Equals("jpeg", StringComparison.OrdinalIgnoreCase)) return ImageFormat.Jpeg;
+            if (fileExtension.Equals("ktx", StringComparison.OrdinalIgnoreCase) || fileExtension.Equals("ktx2", StringComparison.OrdinalIgnoreCase)) return ImageFormat.KTX;
+            return ImageFormat.Unknown;
+        }
+        
         /// string-based IsGltfBinary alternative
         /// Profiling result: Faster/less memory, but for .glb/.gltf just barely better (uknown ~2x)
         /// Downside: less convenient

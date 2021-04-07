@@ -108,5 +108,37 @@ namespace GLTFast.Tests
             }
             Profiler.EndSample();
         }
+
+        [Test]
+        public void GetImageFormatFromUriTest() {
+            Assert.AreEqual(ImageFormat.Unknown, UriHelper.GetImageFormatFromUri(null)); // shortest path
+            Assert.AreEqual(ImageFormat.Unknown, UriHelper.GetImageFormatFromUri("")); // shortest path
+            Assert.AreEqual(ImageFormat.Unknown, UriHelper.GetImageFormatFromUri("f")); // shortest path
+            
+            Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("f.jpg")); // shortest path
+            Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.jpg"));
+            Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.jpg"));
+            Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.jpg?key=value.with.dots&otherkey=val&arrval[]=x"));
+            
+            Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("f.jpeg")); // shortest path
+            Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.jpeg"));
+            Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.jpeg"));
+            Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.jpeg?key=value.with.dots&otherkey=val&arrval[]=x"));
+            
+            Assert.AreEqual(ImageFormat.PNG, UriHelper.GetImageFormatFromUri("f.png")); // shortest path
+            Assert.AreEqual(ImageFormat.PNG, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.png"));
+            Assert.AreEqual(ImageFormat.PNG, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.png"));
+            Assert.AreEqual(ImageFormat.PNG, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.png?key=value.with.dots&otherkey=val&arrval[]=x"));
+            
+            Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("f.ktx")); // shortest path
+            Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.ktx"));
+            Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.ktx"));
+            Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.ktx?key=value.with.dots&otherkey=val&arrval[]=x"));
+            
+            Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("f.ktx2")); // shortest path
+            Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.ktx2"));
+            Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.ktx2"));
+            Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.ktx2?key=value.with.dots&otherkey=val&arrval[]=x"));
+        }
     }
 }

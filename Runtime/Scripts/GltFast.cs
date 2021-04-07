@@ -105,13 +105,6 @@ namespace GLTFast {
             BIN = 0x004e4942
         }
 
-        enum ImageFormat {
-            Unknown,
-            PNG,
-            Jpeg,
-            KTX
-        }
-        
         static IDeferAgent defaultDeferAgent;
         
         IDownloadProvider downloadProvider;
@@ -598,7 +591,7 @@ namespace GLTFast {
                         ImageFormat imgFormat;
                         if(imageFormats[i]==ImageFormat.Unknown) {
                             if(string.IsNullOrEmpty(img.mimeType)) {
-                                imgFormat = GetImageFormatFromPath(img.uri);
+                                imgFormat = UriHelper.GetImageFormatFromUri(img.uri);
                             } else {
                                 imgFormat = GetImageFormatFromMimeType(img.mimeType);
                             }
@@ -1287,7 +1280,7 @@ namespace GLTFast {
                     if(string.IsNullOrEmpty(img.mimeType)) {
                         // Image is missing mime type
                         // try to determine type by file extension
-                        imgFormat = GetImageFormatFromPath(img.uri);
+                        imgFormat = UriHelper.GetImageFormatFromUri(img.uri);
                     } else {
                         imgFormat = GetImageFormatFromMimeType(img.mimeType);
                     }
@@ -2174,7 +2167,7 @@ namespace GLTFast {
         }
         
         bool IsKnownImageFileExtension(string path) {
-            return GetImageFormatFromPath(path) != ImageFormat.Unknown;
+            return UriHelper.GetImageFormatFromUri(path) != ImageFormat.Unknown;
         }
 
         ImageFormat GetImageFormatFromMimeType(string mimeType) {
@@ -2191,18 +2184,6 @@ namespace GLTFast {
                 default:
                     return ImageFormat.Unknown;
             }
-        }
-
-        ImageFormat GetImageFormatFromPath(string path) {
-            var queryStartIndex = path.LastIndexOf('?'); // Get start of query string.
-            if (queryStartIndex == -1) queryStartIndex = path.Length; // if no query exists string, set to end of the string.
-            var formatStartIndex = path.LastIndexOf('.', queryStartIndex); // we assume that the first period before the query string is the file format period.
-            if (formatStartIndex == -1) return ImageFormat.Unknown; // if we can't find a period, we don't know the file format.
-            var pathFormat = path.Substring(formatStartIndex, queryStartIndex - formatStartIndex); // extract the file ending
-            if (pathFormat.Equals(".png", StringComparison.OrdinalIgnoreCase)) return ImageFormat.PNG;
-            if (pathFormat.Equals(".jpg", StringComparison.OrdinalIgnoreCase) || pathFormat.Equals(".jpeg", StringComparison.OrdinalIgnoreCase)) return ImageFormat.Jpeg;
-            if (pathFormat.Equals(".ktx", StringComparison.OrdinalIgnoreCase) || pathFormat.Equals(".ktx2", StringComparison.OrdinalIgnoreCase)) return ImageFormat.KTX;
-            return ImageFormat.Unknown;
         }
 
 #if DEBUG
