@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Image format is properly detected from URIs with HTTP queries (thanks [JonathanB-Vobling](https://github.com/JonathanB-Vobling) for #160; fixes #158)
 - Unlit shaders are now correctly assigned for double-sided variants (thanks [@hybridherbst](https://github.com/hybridherbst) for #163)
 - Sample code for custom defer agent is now thread safe (fixes #161)
+- Meshes with two UV sets and vertex colors now work (fixes #162)
 
 ## [3.1.0] - 2020-03-16
 ### Added

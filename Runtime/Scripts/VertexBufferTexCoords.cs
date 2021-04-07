@@ -28,7 +28,7 @@ namespace GLTFast {
     abstract class VertexBufferTexCoordsBase {
         public int uvSetCount { get; protected set; }
         public abstract unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles);
-        public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
+        public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, ref int offset, int stream);
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
     }
@@ -69,13 +69,14 @@ namespace GLTFast {
             return true;
         }
 
-        public override void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream) {
+        public override void AddDescriptors(VertexAttributeDescriptor[] dst, ref int offset, int stream) {
             VertexAttribute vatt = VertexAttribute.TexCoord0;
             for (int i = 0; i < uvSetCount; i++) {
                 if (i == 1) {
                     vatt = VertexAttribute.TexCoord1;
                 }
-                dst[offset+i] = new VertexAttributeDescriptor(vatt, VertexAttributeFormat.Float32, 2, stream);
+                dst[offset] = new VertexAttributeDescriptor(vatt, VertexAttributeFormat.Float32, 2, stream);
+                offset++;
             }
         }
 
