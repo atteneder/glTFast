@@ -13,8 +13,12 @@
 // limitations under the License.
 //
 
-using System.Collections.Generic;
+using System;
 using UnityEngine;
+#if UNITY_ANIMATION
+// TODO: Break dependency from Editor
+using UnityEditor.Animations;
+#endif
 
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
@@ -53,7 +57,7 @@ namespace GLTFast {
         }
 
         public void SetNodeName(uint nodeIndex, string name) {
-            nodes[nodeIndex].name = name ?? "Node";
+            nodes[nodeIndex].name = name ?? $"Node-{nodeIndex}";
         }
 
         public virtual void AddPrimitive(
@@ -84,7 +88,7 @@ namespace GLTFast {
             } else {
                 var smr = meshGo.AddComponent<SkinnedMeshRenderer>();
                 var bones = new Transform[joints.Length];
-                for (int j = 0; j < bones.Length; j++)
+                for (var j = 0; j < bones.Length; j++)
                 {
                     var jointIndex = joints[j];
                     bones[j] = nodes[jointIndex].transform;
@@ -98,12 +102,44 @@ namespace GLTFast {
         }
 
         public void AddScene(string name, uint[] nodeIndices) {
+            AddScene(name, nodeIndices, null);
+        }
+
+        public void AddScene(string name, uint[] nodeIndices, AnimationClip[] animationClips) {
             var go = new GameObject(name ?? "Scene");
             go.transform.SetParent( parent, false);
 
             foreach(var nodeIndex in nodeIndices) {
                 if (nodes[nodeIndex] != null) {
                     nodes[nodeIndex].transform.SetParent( go.transform, false );
+                }
+            }
+
+            if (animationClips != null) {
+                var animator = go.AddComponent<Animator>();
+                var controller = new AnimatorController();
+                
+                for (var index = 0; index < animationClips.Length; index++) {
+                    var clip = animationClips[index];
+                    controller.AddLayer(clip.name);
+                    // controller.layers[index].defaultWeight = 1;
+                    var stateMachine = controller.layers[index].stateMachine;
+                    AnimatorState entryState = null;
+                    var state = stateMachine.AddState(clip.name);
+                    state.motion = clip;
+                    var loopTransition = state.AddTransition(state);
+                    loopTransition.hasExitTime = true;
+                    loopTransition.duration = 0;
+                    loopTransition.exitTime = 0;
+                    entryState = state;
+                    stateMachine.AddEntryTransition(entryState);
+                }
+
+                animator.runtimeAnimatorController = controller;
+                
+                for (var index = 0; index < animationClips.Length; index++) {
+                    controller.layers[index].blendingMode = AnimatorLayerBlendingMode.Additive;
+                    animator.SetLayerWeight(index,1);
                 }
             }
         }

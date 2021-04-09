@@ -79,5 +79,9 @@ namespace GLTFast {
         /// <param name="name">Name of the scene</param>
         /// <param name="nodeIndices">Indices of root level nodes in scene</param>
         void AddScene(string name, uint[] nodeIndices);
+        
+#if UNITY_ANIMATION
+        void AddScene(string name, uint[] nodeIndices, AnimationClip[] animationClips);
+#endif
     }
 }

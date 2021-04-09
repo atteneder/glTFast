@@ -637,8 +637,8 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i) {
             result[i*4] = -input[i*4];
-            result[i*4+1] = input[i*4+1];
-            result[i*4+2] = -input[i*4+2];
+            result[i*4+1] = -input[i*4+1];
+            result[i*4+2] = input[i*4+2];
             result[i*4+3] = input[i*4+3];
         }
     }

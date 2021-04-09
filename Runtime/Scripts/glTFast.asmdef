@@ -42,6 +42,11 @@
             "name": "com.unity.modules.physics",
             "expression": "1.0.0",
             "define": "UNITY_PHYSICS"
+        },
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "1.0.0",
+            "define": "UNITY_ANIMATION"
         }
     ],
     "noEngineReferences": false

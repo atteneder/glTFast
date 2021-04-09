@@ -29,7 +29,10 @@ namespace GLTFast
         Tangent,
         UV,
         Color,
-        InverseBindMatrix
+        InverseBindMatrix,
+        AnimationTimes,
+        AnimationValues,
+        AnimationValuesFlipped
     }
 
     abstract class AccessorDataBase {

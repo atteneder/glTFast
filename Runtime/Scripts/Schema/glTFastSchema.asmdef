@@ -19,6 +19,11 @@
             "name": "com.atteneder.ktx",
             "expression": "1.0.0",
             "define": "KTX_UNITY"
+        },
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "1.0.0",
+            "define": "UNITY_ANIMATION"
         }
     ],
     "noEngineReferences": false

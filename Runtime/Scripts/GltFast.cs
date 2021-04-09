@@ -35,6 +35,7 @@ using Unity.Mathematics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
+using Unity.Collections.LowLevel.Unsafe;
 using Debug = UnityEngine.Debug;
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
@@ -153,6 +154,15 @@ namespace GLTFast {
         /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
         GlbBinChunk? glbBinChunk;
 
+#if UNITY_ANIMATION
+        /// <summary>
+        /// Unity's animation system addresses target GameObjects by hierarchical name.
+        /// To make sure names are consistent and have no conflicts they are precalculated
+        /// and stored in this array.
+        /// </summary>
+        string[] nodeNames;
+#endif
+        
 #endregion VolatileData
 
 #region VolatileDataInstantiation
@@ -171,6 +181,9 @@ namespace GLTFast {
         Primitive[] primitives;
         int[] meshPrimitiveIndex;
         Matrix4x4[][] skinsInverseBindMatrices;
+#if UNITY_ANIMATION
+        AnimationClip[] animationClips;
+#endif
 
 #endregion VolatileDataInstantiation
 
@@ -1074,6 +1087,104 @@ namespace GLTFast {
                 }
             }
 
+#if UNITY_ANIMATION
+            if (gltfRoot.hasAnimation) {
+                
+                string GetUniqueNodeName(uint index, HashSet<string> excludeNames) {
+                    if (gltfRoot.nodes == null || index >= gltfRoot.nodes.Length) return null;
+                    var name = gltfRoot.nodes[index].name;
+                    if (string.IsNullOrWhiteSpace(name)) {
+                        var meshIndex = gltfRoot.nodes[index].mesh;
+                        if (meshIndex >= 0) {
+                            name = gltfRoot.meshes[meshIndex].name;
+                        }
+                    }
+                    if (string.IsNullOrWhiteSpace(name)) {
+                        name = $"Node-{index}";
+                    }
+                    if(excludeNames!=null && excludeNames.Contains(name)) {
+                        var i = 0;
+                        string extName;
+                        do {
+                            extName = $"{name}_{i++}";
+                        } while (excludeNames.Contains(extName));
+                        return extName;
+                    }
+                    return name;
+                }
+                
+                nodeNames = new string[gltfRoot.nodes.Length];
+                var parentIndex = new int[gltfRoot.nodes.Length];
+
+                for (var nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
+                    parentIndex[nodeIndex] = -1;
+                }
+
+                for (var nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
+                    var node = gltfRoot.nodes[nodeIndex];
+                    if (node.children != null) {
+                        var childNames = new HashSet<string>();
+                        foreach (var child in node.children) {
+                            parentIndex[child] = nodeIndex;
+                            nodeNames[child] = GetUniqueNodeName(child,childNames);
+                        }
+                    }
+                }
+                
+                for (uint nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
+                    if (parentIndex[nodeIndex] < 0) {
+                        nodeNames[nodeIndex] = GetUniqueNodeName(nodeIndex,null);
+                    }
+                }
+
+                animationClips = new AnimationClip[gltfRoot.animations.Length];
+                for (var i = 0; i < gltfRoot.animations.Length; i++) {
+                    var animation = gltfRoot.animations[i];
+                    animationClips[i] = new AnimationClip();
+                    animationClips[i].name = animation.name ?? $"Clip_{i}";
+
+                    for (int j = 0; j < animation.channels.Length; j++) {
+                        var channel = animation.channels[j];
+                        if (channel.sampler < 0 || channel.sampler >= animation.samplers.Length) {
+                            Debug.LogError("Animation channel has invalid sampler id");
+                            continue;
+                        }
+                        var sampler = animation.samplers[channel.sampler];
+                        if (channel.target.node < 0 || channel.target.node >= gltfRoot.nodes.Length) {
+                            Debug.LogError("Animation channel has invalid node id");
+                            continue;
+                        }
+                        
+                        string path = AnimationUtils.CreateAnimationPath(channel.target.node,nodeNames,parentIndex);
+                        
+                        var times = ((AccessorNativeData<float>) accessorData[sampler.input]).data;
+                        
+                        switch (channel.target.pathEnum) {
+                            case AnimationChannel.Path.translation: {
+                                var values= ((AccessorNativeData<Vector3>) accessorData[sampler.output]).data;
+                                AnimationUtils.AddTranslationCurves(animationClips[i], path, times, values, sampler.interpolationEnum);
+                                break;
+                            }
+                            case AnimationChannel.Path.rotation: {
+                                var values= ((AccessorNativeData<Vector4>) accessorData[sampler.output]).data;
+                                AnimationUtils.AddRotationCurves(animationClips[i], path, times, values, sampler.interpolationEnum);
+                                break;
+                            }
+                            case AnimationChannel.Path.scale: {
+                                var values= ((AccessorNativeData<Vector3>) accessorData[sampler.output]).data;
+                                AnimationUtils.AddScaleCurves(animationClips[i], path, times, values, sampler.interpolationEnum);
+                                break;
+                            }
+                            // case AnimationChannel.Path.weights:
+                            default:
+                                Debug.LogError($"Unsupported animation target path {channel.target.pathEnum}");
+                                break;
+                        }
+                    }
+                }
+            }
+#endif
+
             foreach(var ad in accessorData) {
                 ad?.Dispose();
             }
@@ -1205,7 +1316,7 @@ namespace GLTFast {
             for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
                 var node = gltf.nodes[nodeIndex];
 
-                var goName = node.name;
+                var goName = nodeNames==null ? node.name : nodeNames[nodeIndex];
 
                 if(node.mesh>=0) {
                     int end = meshPrimitiveIndex[node.mesh+1];
@@ -1257,7 +1368,11 @@ namespace GLTFast {
             }
 
             foreach(var scene in gltf.scenes) {
+#if UNITY_ANIMATION
+                instantiator.AddScene(scene.name,scene.nodes,animationClips);
+#else
                 instantiator.AddScene(scene.name,scene.nodes);
+#endif
             }
 
             Profiler.EndSample();
@@ -1570,6 +1685,30 @@ namespace GLTFast {
                 return false;
             }
             
+#if UNITY_ANIMATION
+            if (gltf.hasAnimation) {
+                for (int i = 0; i < gltf.animations.Length; i++) {
+                    var animation = gltf.animations[i];
+                    foreach (var sampler in animation.samplers) {
+                        accessorUsage[sampler.input] = AccessorUsage.AnimationTimes;
+                    }
+
+                    foreach (var channel in animation.channels) {
+                        var accessorIndex = animation.samplers[channel.sampler].output;
+                        switch (channel.target.pathEnum) {
+                            case AnimationChannel.Path.translation:
+                            case AnimationChannel.Path.rotation:
+                                accessorUsage[accessorIndex] = AccessorUsage.AnimationValuesFlipped;
+                                break;
+                            default:
+                                accessorUsage[accessorIndex] = AccessorUsage.AnimationValues;
+                                break;
+                        }
+                    }
+                }
+            }
+#endif
+
             /// Retrieve indices data jobified
             accessorData = new AccessorDataBase[gltf.accessors.Length];
 
@@ -1582,27 +1721,68 @@ namespace GLTFast {
                     // the accessor only holds meta information
                     continue;
                 }
-                if (acc.typeEnum==GLTFAccessorAttributeType.SCALAR
-                    &&( accessorUsage[i]==AccessorUsage.IndexFlipped ||
-                        accessorUsage[i]==AccessorUsage.Index )
-                    )
-                {
-                    JobHandle? jh;
-                    var ads = new  AccessorData<int>();
-                    GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle, accessorUsage[i]==AccessorUsage.IndexFlipped);
-                    tmpList.Add(jh.Value);
-                    accessorData[i] = ads;
-                }
-                else if (acc.typeEnum==GLTFAccessorAttributeType.MAT4
-                    && accessorUsage[i]==AccessorUsage.InverseBindMatrix
-                    )
-                {
-                    JobHandle? jh;
-                    // TODO: Maybe use AccessorData, since Mesh.bindposes only accepts C# arrays.
-                    var ads = new  AccessorNativeData<Matrix4x4>();
-                    GetMatricesJob(gltf,i,out ads.data, out jh);
-                    tmpList.Add(jh.Value);
-                    accessorData[i] = ads;
+                switch (acc.typeEnum) {
+                    case GLTFAccessorAttributeType.SCALAR when accessorUsage[i]==AccessorUsage.IndexFlipped ||
+                        accessorUsage[i]==AccessorUsage.Index:
+                    {
+                        JobHandle? jh;
+                        var ads = new  AccessorData<int>();
+                        GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle, accessorUsage[i]==AccessorUsage.IndexFlipped);
+                        tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+                    case GLTFAccessorAttributeType.MAT4 when accessorUsage[i]==AccessorUsage.InverseBindMatrix: {
+                        JobHandle? jh;
+                        // TODO: Maybe use AccessorData, since Mesh.bindposes only accepts C# arrays.
+                        var ads = new  AccessorNativeData<Matrix4x4>();
+                        GetMatricesJob(gltf,i,out ads.data, out jh);
+                        tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+#if UNITY_ANIMATION
+                    case GLTFAccessorAttributeType.SCALAR when accessorUsage[i]==AccessorUsage.AnimationTimes:
+                    {
+                        // JobHandle? jh;
+                        var ads = new  AccessorNativeData<float>();
+                        // GetMatricesJob(gltf,i,out ads.data, out jh);
+                        GetAnimationTimes(gltf, i, out var times);
+                        if (times.HasValue) {
+                            ads.data = times.Value;
+                        }
+                        // tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+                    case GLTFAccessorAttributeType.VEC3 when accessorUsage[i]==AccessorUsage.AnimationValues:
+                    {
+                        JobHandle? jh;
+                        var ads = new AccessorNativeData<Vector3>();
+                        GetVector3Job(gltf,i,out ads.data, out jh, false);
+                        tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+                    case GLTFAccessorAttributeType.VEC3 when accessorUsage[i]==AccessorUsage.AnimationValuesFlipped:
+                    {
+                        JobHandle? jh;
+                        var ads = new AccessorNativeData<Vector3>();
+                        GetVector3Job(gltf,i,out ads.data, out jh, true);
+                        tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+                    case GLTFAccessorAttributeType.VEC4 when accessorUsage[i] == AccessorUsage.AnimationValuesFlipped:
+                    {
+                        JobHandle? jh;
+                        var ads = new AccessorNativeData<Vector4>();
+                        GetVector4Job(gltf,i,out ads.data, out jh);
+                        tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+#endif
                 }
                 Profiler.EndSample();
                 await deferAgent.BreakPoint();
@@ -1944,6 +2124,121 @@ namespace GLTFast {
                 Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
                 jobHandle = null;
                 break;
+            }
+            Profiler.EndSample();
+            Profiler.EndSample();
+        }
+        
+        unsafe void GetVector3Job(Root gltf, int accessorIndex, out NativeArray<Vector3> vectors, out JobHandle? jobHandle, bool flip) {
+            Profiler.BeginSample("GetVector3Job");
+            // index
+            var accessor = gltf.accessors[accessorIndex];
+            var bufferView = gltf.bufferViews[accessor.bufferView];
+            var bufferIndex = bufferView.buffer;
+            var buffer = GetBuffer(bufferIndex);
+
+            Profiler.BeginSample("Alloc");
+            vectors = new NativeArray<Vector3>(accessor.count,Allocator.Persistent);
+            Profiler.EndSample();
+            
+            var chunk = binChunks[bufferIndex];
+            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC3);
+            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+
+            Profiler.BeginSample("CreateJob");
+            switch( accessor.componentType ) {
+            case GLTFComponentType.Float when flip: {
+                var job = new GetVector3sJob { result = (float*)vectors.GetUnsafePtr() };
+                fixed( void* src = &(buffer[start]) ) {
+                    job.input = (float*) src;
+                }
+                jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                break;
+            }
+            case GLTFComponentType.Float when !flip: {
+                var job = new MemCopyJob {
+                    bufferSize = accessor.count * 12,
+                    result = (float*)vectors.GetUnsafePtr()
+                };
+                fixed( void* src = &(buffer[start]) ) {
+                    job.input = (float*) src;
+                }
+                jobHandle = job.Schedule();
+                break;
+            }
+            default:
+                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                jobHandle = null;
+                break;
+            }
+            Profiler.EndSample();
+            Profiler.EndSample();
+        }
+        
+        unsafe void GetVector4Job(Root gltf, int accessorIndex, out NativeArray<Vector4> vectors, out JobHandle? jobHandle) {
+            Profiler.BeginSample("GetVector4Job");
+            // index
+            var accessor = gltf.accessors[accessorIndex];
+            var bufferView = gltf.bufferViews[accessor.bufferView];
+            var bufferIndex = bufferView.buffer;
+            var buffer = GetBuffer(bufferIndex);
+
+            Profiler.BeginSample("Alloc");
+            vectors = new NativeArray<Vector4>(accessor.count,Allocator.Persistent);
+            Profiler.EndSample();
+            
+            var chunk = binChunks[bufferIndex];
+            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC4);
+            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+
+            Profiler.BeginSample("CreateJob");
+            switch( accessor.componentType ) {
+            case GLTFComponentType.Float:
+                var job32 = new Jobs.GetVector4sJob();
+                job32.result = (float*) vectors.GetUnsafePtr();
+                fixed( void* src = &(buffer[start]) ) {
+                    job32.input = (float*) src;
+                }
+                jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
+                break;
+            default:
+                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                jobHandle = null;
+                break;
+            }
+            Profiler.EndSample();
+            Profiler.EndSample();
+        }
+        
+        unsafe void GetAnimationTimes(Root gltf, int accessorIndex, out NativeArray<float>? times) {
+            Profiler.BeginSample("GetAnimationTimes");
+            times = null;
+            var accessor = gltf.accessors[accessorIndex];
+            var bufferView = gltf.bufferViews[accessor.bufferView];
+            var bufferIndex = bufferView.buffer;
+            var buffer = GetBuffer(bufferIndex);
+        
+            var chunk = binChunks[bufferIndex];
+            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
+            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
+        
+            Profiler.BeginSample("CreateJob");
+            switch( accessor.componentType ) {
+                case GLTFComponentType.Float:
+                    fixed( void* src = &(buffer[start]) ) {
+                        var tmp = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float>(src, accessor.count, Allocator.None);
+                        var safetyHandle = AtomicSafetyHandle.Create();
+                        NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tmp, safetyHandle);
+                        
+                        Profiler.BeginSample("Alloc");
+                        times = new NativeArray<float>(tmp, Allocator.Persistent);
+                        Profiler.EndSample();
+                        AtomicSafetyHandle.Release(safetyHandle);
+                    }
+                    break;
+                default:
+                    Debug.LogErrorFormat( "Invalid animation format {0}", accessor.componentType );
+                    break;
             }
             Profiler.EndSample();
             Profiler.EndSample();
