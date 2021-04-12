@@ -1320,7 +1320,12 @@ namespace GLTFast {
             for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
                 var node = gltf.nodes[nodeIndex];
 
-                var goName = nodeNames==null ? node.name : nodeNames[nodeIndex];
+                var goName = 
+#if ANIMATION
+                    nodeNames==null ? node.name : nodeNames[nodeIndex];
+#else
+                    node.name;
+#endif
 
                 if(node.mesh>=0) {
                     int end = meshPrimitiveIndex[node.mesh+1];

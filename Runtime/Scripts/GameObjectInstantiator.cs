@@ -100,11 +100,14 @@ namespace GLTFast {
             renderer.sharedMaterials = materials;
         }
 
-        public void AddScene(string name, uint[] nodeIndices) {
-            AddScene(name, nodeIndices, null);
-        }
-
-        public void AddScene(string name, uint[] nodeIndices, AnimationClip[] animationClips) {
+        public void AddScene(
+            string name,
+            uint[] nodeIndices
+#if UNITY_ANIMATION
+            ,AnimationClip[] animationClips
+#endif // UNITY_ANIMATION
+            )
+        {
             var go = new GameObject(name ?? "Scene");
             go.transform.SetParent( parent, false);
 
