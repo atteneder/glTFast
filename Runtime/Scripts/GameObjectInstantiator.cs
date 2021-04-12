@@ -15,10 +15,9 @@
 
 using System;
 using UnityEngine;
-#if UNITY_ANIMATION
-// TODO: Break dependency from Editor
-using UnityEditor.Animations;
-#endif
+// #if UNITY_EDITOR && UNITY_ANIMATION
+// using UnityEditor.Animations;
+// #endif
 
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
@@ -115,33 +114,52 @@ namespace GLTFast {
                 }
             }
 
+#if UNITY_ANIMATION
             if (animationClips != null) {
-                var animator = go.AddComponent<Animator>();
-                var controller = new AnimatorController();
+                
+// #if UNITY_EDITOR
+//                 // This variant creates a Mecanim Animator and AnimationController
+//                 // which does not work at runtime. It's kept for potential Editor import usage
+//
+//                 var animator = go.AddComponent<Animator>();
+//                 var controller = new AnimatorController();
+//                 
+//                 for (var index = 0; index < animationClips.Length; index++) {
+//                     var clip = animationClips[index];
+//                     controller.AddLayer(clip.name);
+//                     // controller.layers[index].defaultWeight = 1;
+//                     var stateMachine = controller.layers[index].stateMachine;
+//                     AnimatorState entryState = null;
+//                     var state = stateMachine.AddState(clip.name);
+//                     state.motion = clip;
+//                     var loopTransition = state.AddTransition(state);
+//                     loopTransition.hasExitTime = true;
+//                     loopTransition.duration = 0;
+//                     loopTransition.exitTime = 0;
+//                     entryState = state;
+//                     stateMachine.AddEntryTransition(entryState);
+//                 }
+//                 
+//                 animator.runtimeAnimatorController = controller;
+//                 
+//                 for (var index = 0; index < animationClips.Length; index++) {
+//                     controller.layers[index].blendingMode = AnimatorLayerBlendingMode.Additive;
+//                     animator.SetLayerWeight(index,1);
+//                 }
+// #endif // UNITY_EDITOR
+
+                var animation = go.AddComponent<Animation>();
                 
                 for (var index = 0; index < animationClips.Length; index++) {
                     var clip = animationClips[index];
-                    controller.AddLayer(clip.name);
-                    // controller.layers[index].defaultWeight = 1;
-                    var stateMachine = controller.layers[index].stateMachine;
-                    AnimatorState entryState = null;
-                    var state = stateMachine.AddState(clip.name);
-                    state.motion = clip;
-                    var loopTransition = state.AddTransition(state);
-                    loopTransition.hasExitTime = true;
-                    loopTransition.duration = 0;
-                    loopTransition.exitTime = 0;
-                    entryState = state;
-                    stateMachine.AddEntryTransition(entryState);
+                    animation.AddClip(clip,clip.name);
+                    if (index < 1) {
+                        animation.clip = clip;
+                    }
                 }
-
-                animator.runtimeAnimatorController = controller;
-                
-                for (var index = 0; index < animationClips.Length; index++) {
-                    controller.layers[index].blendingMode = AnimatorLayerBlendingMode.Additive;
-                    animator.SetLayerWeight(index,1);
-                }
+                animation.Play();
             }
+#endif // UNITY_ANIMATION
         }
     }
 }

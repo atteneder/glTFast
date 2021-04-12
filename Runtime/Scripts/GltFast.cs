@@ -1142,6 +1142,10 @@ namespace GLTFast {
                     var animation = gltfRoot.animations[i];
                     animationClips[i] = new AnimationClip();
                     animationClips[i].name = animation.name ?? $"Clip_{i}";
+                    
+                    // Legacy Animation requirement
+                    animationClips[i].legacy = true;
+                    animationClips[i].wrapMode = WrapMode.Loop;
 
                     for (int j = 0; j < animation.channels.Length; j++) {
                         var channel = animation.channels[j];
@@ -2128,7 +2132,8 @@ namespace GLTFast {
             Profiler.EndSample();
             Profiler.EndSample();
         }
-        
+
+#if UNITY_ANIMATION
         unsafe void GetVector3Job(Root gltf, int accessorIndex, out NativeArray<Vector3> vectors, out JobHandle? jobHandle, bool flip) {
             Profiler.BeginSample("GetVector3Job");
             // index
@@ -2227,13 +2232,16 @@ namespace GLTFast {
                 case GLTFComponentType.Float:
                     fixed( void* src = &(buffer[start]) ) {
                         var tmp = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float>(src, accessor.count, Allocator.None);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
                         var safetyHandle = AtomicSafetyHandle.Create();
                         NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tmp, safetyHandle);
-                        
+#endif                        
                         Profiler.BeginSample("Alloc");
                         times = new NativeArray<float>(tmp, Allocator.Persistent);
                         Profiler.EndSample();
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
                         AtomicSafetyHandle.Release(safetyHandle);
+#endif
                     }
                     break;
                 default:
@@ -2243,6 +2251,8 @@ namespace GLTFast {
             Profiler.EndSample();
             Profiler.EndSample();
         }
+
+#endif // UNITY_ANIMATION
 
         VertexInputData GetAccessorParams(Root gltf, int accessorIndex) {
             var accessor = gltf.accessors[accessorIndex];
