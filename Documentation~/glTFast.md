@@ -92,7 +92,7 @@ async void Start() {
         var material = gltf.GetMaterial();
         Debug.LogFormat("The first material is called {0}", material.name);
 
-        // Instantiate the scenes multiple times
+        // Instantiate the entire glTF multiple times
         gltf.InstantiateGltf( new GameObject("Instance 1").transform );
         gltf.InstantiateGltf( new GameObject("Instance 2").transform );
         gltf.InstantiateGltf( new GameObject("Instance 3").transform );
