@@ -47,12 +47,15 @@
   - [x] Joints (up to 4 per vertex)
   - [x] Weights (up to 4 per vertex)
 - [x] Texture sampler
-  - [x] Filtering (see ([limitations](#knownissues)))
+  - [x] Filtering (see ([limitations](#Known-issues)))
   - [x] Wrap modes
 - [ ] Morph targets ([issue][MorphTargets])
   - [ ] Sparse accessors
 - [x] [Skins][Skins] (sponsored by [Embibe](https://www.embibe.com))
-- [ ] Animation ([issue][Animation])
+- [x] Animation
+  - [x] via legacy Animation System
+  - [ ] via Playable API ([issue][AnimationPlayables])
+  - [ ] via Mecanim ([issue][AnimationMecanim])
 
 <sup>1</sup>: Untested due to lack of demo files.
 
@@ -141,7 +144,7 @@ Legend:
 - ℹ Planned (click for issue)
 - ❌ No plan to support (click to create issue)
 
-## <a name="knownissues">Known issues
+## Known issues
 
 - <sup>1</sup>Vertex accessors (positions, normals, etc.) that are used across meshes are duplicated and result in higher memory usage and slower loading (see [this comment](https://github.com/atteneder/glTFast/issues/52#issuecomment-583837852))
 - <sup>1</sup>When using more than one samplers on an image, that image is duplicated and results in higher memory usage
@@ -152,7 +155,8 @@ Legend:
 
 <sup>1</sup>: A Unity API limitation.
 
-[Animation]: https://github.com/atteneder/glTFast/issues/124
+[AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
+[AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166  
 [URP]: https://unity.com/srp/universal-render-pipeline
 [HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [newIssue]: https://github.com/atteneder/glTFast/issues/new

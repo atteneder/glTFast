@@ -1,6 +1,6 @@
 # glTFast Documentation
 
-*glTFast* enables loading [glTF 3D](https://www.khronos.org/gltf) asset files in [Unity](https://unity.com).
+*glTFast* enables loading [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
 
 It focuses on speed, memory efficiency and a small build footprint.
 
@@ -20,13 +20,7 @@ It supports large parts of the glTF 2.0 specification plus many extensions and r
 - Linux
 - Universal Windows Platform
 
-It is planned to become feature complete. Most notable missing features are:
-
-- No animations
-- No morph targets
-- Unity's built-in render pipeline only (URP and HDRP are planned)
-
-See the [list of features/extensions](./features.md) for details and limitations.
+It is planned to become feature complete. See the [list of features/extensions](./features.md) for details and limitations.
 
 ## Usage
 
@@ -201,4 +195,7 @@ Motivations for this might be using meshes as physics colliders amongst [other c
 
 It also uses fast low-level memory copy methods, [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html) and the [Advanced Mesh API](https://docs.unity3d.com/ScriptReference/Mesh.html).
 
+[unity]: https://unity.com
+[gltf]: https://www.khronos.org/gltf
 [gltfast-web-demo]: https://gltf.pixel.engineer
+[gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"

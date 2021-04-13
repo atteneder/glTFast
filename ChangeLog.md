@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.2.0] - 2020-04-13
+### Added
+- Support for animations via Unity's legacy animation system (`Animation` component; #124)
 ### Fixed
 - Image format is properly detected from URIs with HTTP queries (thanks [JonathanB-Vobling](https://github.com/JonathanB-Vobling) for #160; fixes #158)
 - Unlit shaders are now correctly assigned for double-sided variants (thanks [@hybridherbst](https://github.com/hybridherbst) for #163)

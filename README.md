@@ -28,12 +28,7 @@ It supports large parts of the glTF 2.0 specification plus many extensions and r
 - Linux
 - Universal Windows Platform
 
-It is [planned](#goals) to become feature complete. Most notable missing features are:
-
-- No animations
-- No morph targets
-
-See the [list of features/extensions](./Documentation~/features.md) for details and limitations.
+It is [planned](#goals) to become feature complete. See the [list of features/extensions](./Documentation~/features.md) for details and limitations.
 
 ## Installing
 
