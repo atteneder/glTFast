@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- ScriptedImporter for .glb (glTF-binary) files for design-time/Editor import 
+- `ImportSettings` can be provided to `GLTFast.Load` (optional) to customize the loading behaviour
+- `ImportSettings.nodeNameMethod` to allow customizing Node/GameObject naming convention
 ### Changed
+- Nodes' names are made unique (within their hierarchical position) by supplementing a continuous number. This is required for correct animation target lookup and import continuity. 
 - `IInstantiator.AddPrimitive` extended parameter `first` (`bool`; true for the first primitive) to primitiveNumeration (`int`; counting upwards from zero). This allows for creating unique GameObject names.
 
 ## [3.2.1] - 2021-05-05

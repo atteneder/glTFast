@@ -112,6 +112,8 @@ namespace GLTFast {
         IMaterialGenerator materialGenerator;
         IDeferAgent deferAgent;
 
+        ImportSettings settings;
+
 #region VolatileData
 
         /// <summary>
@@ -225,8 +227,9 @@ namespace GLTFast {
         /// The URL can be a file path (using the "file://" scheme) or a web adress.
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
-        public async Task<bool> Load( string url ) {
-            return await Load(new Uri(url,UriKind.RelativeOrAbsolute));
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        public async Task<bool> Load( string url, ImportSettings importSettings = null ) {
+            return await Load(new Uri(url,UriKind.RelativeOrAbsolute), importSettings);
         }
         
         /// <summary>
@@ -234,7 +237,9 @@ namespace GLTFast {
         /// The URL can be a file path (using the "file://" scheme) or a web adress.
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
-        public async Task<bool> Load( Uri url ) {
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        public async Task<bool> Load( Uri url, ImportSettings importSettings = null) {
+            settings = importSettings ?? new ImportSettings();
             return await LoadRoutine(url);
         }
         
@@ -280,6 +285,13 @@ namespace GLTFast {
                 animationClips = null;
             }
 
+            if(images!=null) {
+                foreach( var image in images ) {
+                    SafeDestroy(image);
+                }
+                images = null;
+            }
+            
             if(resources!=null) {
                 foreach( var resource in resources ) {
                     SafeDestroy(resource);
@@ -289,6 +301,7 @@ namespace GLTFast {
         }
 
         public int materialCount => materials?.Length ?? 0;
+        public int textureCount => images?.Length ?? 0;
 
         public UnityEngine.Material GetMaterial( int index = 0 ) {
             if(materials!=null && index >= 0 && index < materials.Length ) {
@@ -297,6 +310,14 @@ namespace GLTFast {
             return null;
         }
 
+        public Texture2D GetTexture( int index = 0 ) {
+            if(images!=null && index >= 0 && index < images.Length ) {
+                return images[index];
+            }
+            return null;
+        }
+        
+        
 #endregion Public
 
         async Task<bool> LoadRoutine( Uri url ) {
@@ -1102,54 +1123,22 @@ namespace GLTFast {
 
 #if UNITY_ANIMATION
             if (gltfRoot.hasAnimation) {
-                
-                string GetUniqueNodeName(uint index, HashSet<string> excludeNames) {
-                    if (gltfRoot.nodes == null || index >= gltfRoot.nodes.Length) return null;
-                    var name = gltfRoot.nodes[index].name;
-                    if (string.IsNullOrWhiteSpace(name)) {
-                        var meshIndex = gltfRoot.nodes[index].mesh;
-                        if (meshIndex >= 0) {
-                            name = gltfRoot.meshes[meshIndex].name;
-                        }
-                    }
-                    if (string.IsNullOrWhiteSpace(name)) {
-                        name = $"Node-{index}";
-                    }
-                    if(excludeNames!=null && excludeNames.Contains(name)) {
-                        var i = 0;
-                        string extName;
-                        do {
-                            extName = $"{name}_{i++}";
-                        } while (excludeNames.Contains(extName));
-                        return extName;
-                    }
-                    return name;
+                if (settings.nodeNameMethod != ImportSettings.NameImportMethod.OriginalUnique) {
+                    Debug.Log("Overriding naming method to be OriginalUnique (animation requirement)");
+                    settings.nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique;
                 }
-                
-                nodeNames = new string[gltfRoot.nodes.Length];
-                var parentIndex = new int[gltfRoot.nodes.Length];
+            }
+#endif
 
-                for (var nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
-                    parentIndex[nodeIndex] = -1;
-                }
+            int[] parentIndex = null;
 
-                for (var nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
-                    var node = gltfRoot.nodes[nodeIndex];
-                    if (node.children != null) {
-                        var childNames = new HashSet<string>();
-                        foreach (var child in node.children) {
-                            parentIndex[child] = nodeIndex;
-                            nodeNames[child] = GetUniqueNodeName(child,childNames);
-                        }
-                    }
-                }
+            if (settings.nodeNameMethod == ImportSettings.NameImportMethod.OriginalUnique) {
+                parentIndex = CreateUniqueNames();
+            }
+
+#if UNITY_ANIMATION
+            if (gltfRoot.hasAnimation) {
                 
-                for (uint nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
-                    if (parentIndex[nodeIndex] < 0) {
-                        nodeNames[nodeIndex] = GetUniqueNodeName(nodeIndex,null);
-                    }
-                }
-
                 animationClips = new AnimationClip[gltfRoot.animations.Length];
                 for (var i = 0; i < gltfRoot.animations.Length; i++) {
                     var animation = gltfRoot.animations[i];
@@ -1172,7 +1161,7 @@ namespace GLTFast {
                             continue;
                         }
                         
-                        string path = AnimationUtils.CreateAnimationPath(channel.target.node,nodeNames,parentIndex);
+                        var path = AnimationUtils.CreateAnimationPath(channel.target.node,nodeNames,parentIndex);
                         
                         var times = ((AccessorNativeData<float>) accessorData[sampler.input]).data;
                         
@@ -1207,6 +1196,75 @@ namespace GLTFast {
             }
             accessorData = null;
             return success;
+        }
+
+        /// <summary>
+        /// glTF nodes have no requirement to be named or have specific names.
+        /// Some Unity systems like animation and importers require unique
+        /// names for Nodes with the same parent. This method makes creates
+        /// names for all nodes that:
+        /// - Are not empty
+        /// - Unique amongst nodes with identical parent node
+        /// </summary>
+        /// <returns>Array containing each node's parent node index (or -1 for root nodes)</returns>
+        int[] CreateUniqueNames() {
+            nodeNames = new string[gltfRoot.nodes.Length];
+            var parentIndex = new int[gltfRoot.nodes.Length];
+
+            for (var nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
+                parentIndex[nodeIndex] = -1;
+            }
+
+            var childNames = new HashSet<string>();
+
+            for (var nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
+                var node = gltfRoot.nodes[nodeIndex];
+                if (node.children != null) {
+                    childNames.Clear();
+                    foreach (var child in node.children) {
+                        parentIndex[child] = nodeIndex;
+                        nodeNames[child] = GetUniqueNodeName(gltfRoot, child, childNames);
+                    }
+                }
+            }
+
+            childNames.Clear();
+            for (uint nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
+                if (parentIndex[nodeIndex] < 0) {
+                    nodeNames[nodeIndex] = GetUniqueNodeName(gltfRoot, nodeIndex, childNames);
+                }
+            }
+
+            return parentIndex;
+        }
+
+        static string GetUniqueNodeName(Root gltf, uint index, ICollection<string> excludeNames) {
+            if (gltf.nodes == null || index >= gltf.nodes.Length) return null;
+            var name = gltf.nodes[index].name;
+            if (string.IsNullOrWhiteSpace(name)) {
+                var meshIndex = gltf.nodes[index].mesh;
+                if (meshIndex >= 0) {
+                    name = gltf.meshes[meshIndex].name;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(name)) {
+                name = $"Node-{index}";
+            }
+
+            if (excludeNames != null) {
+                if (excludeNames.Contains(name)) {
+                    var i = 0;
+                    string extName;
+                    do {
+                        extName = $"{name}_{i++}";
+                    } while (excludeNames.Contains(extName));
+                    excludeNames.Add(extName);
+                    return extName;
+                }
+                excludeNames.Add(name);
+            }
+            return name;
         }
 
         /// <summary>
