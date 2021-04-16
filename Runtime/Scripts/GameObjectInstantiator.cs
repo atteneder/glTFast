@@ -65,15 +65,15 @@ namespace GLTFast {
             UnityEngine.Mesh mesh,
             UnityEngine.Material[] materials,
             int[] joints = null,
-            bool first = true
+            int primitiveNumeration = 0
         ) {
 
             GameObject meshGo;
-            if(first) {
+            if(primitiveNumeration==0) {
                 // Use Node GameObject for first Primitive
                 meshGo = nodes[nodeIndex];
             } else {
-                meshGo = new GameObject( meshName ?? "Primitive" );
+                meshGo = new GameObject( $"{meshName ?? "Primitive"}_{primitiveNumeration}" );
                 meshGo.transform.SetParent(nodes[nodeIndex].transform,false);
             }
 

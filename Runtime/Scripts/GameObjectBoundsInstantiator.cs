@@ -34,7 +34,7 @@ namespace GLTFast {
             Mesh mesh,
             Material[] materials,
             int[] joints = null,
-            bool first = true
+            int primitiveNumeration = 0
         ) {
             base.AddPrimitive(
                 nodeIndex,
@@ -42,7 +42,7 @@ namespace GLTFast {
                 mesh,
                 materials,
                 joints,
-                first
+                primitiveNumeration
                 );
 
             if (nodeBounds!=null) {

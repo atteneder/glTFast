@@ -63,14 +63,14 @@ namespace GLTFast {
         /// <param name="mesh">The actual Mesh</param>
         /// <param name="materials">The materials</param>
         /// <param name="joints">If a skin was attached, the joint indices. Null otherwise</param>
-        /// <param name="first">A bool indicating if this is the first Primitive added to this Node</param>
+        /// <param name="primitiveNumeration">Primitves are numerated per Node, starting with 0</param>
         void AddPrimitive(
             uint nodeIndex,
             string meshName,
             UnityEngine.Mesh mesh,
             UnityEngine.Material[] materials,
             int[] joints = null,
-            bool first = true
+            int primitiveNumeration = 0
         );
 
         /// <summary>

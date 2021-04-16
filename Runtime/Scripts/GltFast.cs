@@ -1313,7 +1313,7 @@ namespace GLTFast {
 
                 if(node.mesh>=0) {
                     int end = meshPrimitiveIndex[node.mesh+1];
-                    bool firstPrimitive = true;
+                    int primitiveCount = 0;
                     for( int i=meshPrimitiveIndex[node.mesh]; i<end; i++ ) {
                         var mesh = primitives[i].mesh;
                         var meshName = string.IsNullOrEmpty(mesh.name) ? null : mesh.name;
@@ -1350,10 +1350,10 @@ namespace GLTFast {
                             mesh,
                             primMaterials,
                             joints,
-                            firstPrimitive
+                            primitiveCount
                             );
 
-                        firstPrimitive = false;
+                        primitiveCount++;
                     }
                 }
 
