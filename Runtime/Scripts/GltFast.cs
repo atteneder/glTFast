@@ -218,6 +218,8 @@ namespace GLTFast {
             this.materialGenerator = materialGenerator ?? Materials.MaterialGenerator.GetDefaultMaterialGenerator();
         }
 
+#region Public
+
         /// <summary>
         /// Load a glTF file (JSON or binary)
         /// The URL can be a file path (using the "file://" scheme) or a web adress.
@@ -235,6 +237,67 @@ namespace GLTFast {
         public async Task<bool> Load( Uri url ) {
             return await LoadRoutine(url);
         }
+        
+        /// <summary>
+        /// Load a glTF-binary asset from a byte array.
+        /// </summary>
+        /// <param name="bytes">byte array containing glTF-binary</param>
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null) {
+            var success = await LoadGltfBinaryBuffer(bytes,uri);
+            if(success) await LoadContent();
+            success = success && await Prepare();
+            DisposeVolatileData();
+            loadingError = !success;
+            loadingDone = true;
+            return success;
+        }
+
+        public bool InstantiateGltf( Transform parent ) {
+            return InstantiateGltf( new GameObjectInstantiator(parent) );
+        }
+
+        public bool InstantiateGltf( IInstantiator instantiator ) {
+            // TODO: Make instantiation preemptive (via deferAgent) as well!
+            if (!loadingDone || loadingError) return false;
+            CreateGameObjects( gltfRoot, instantiator );
+            return true;
+        }
+        
+        public void Destroy() {
+            if(materials!=null) {
+                foreach( var material in materials ) {
+                    SafeDestroy(material);
+                }
+                materials = null;
+            }
+            
+            if (animationClips != null) {
+                foreach( var clip in animationClips ) {
+                    SafeDestroy(clip);
+                }
+                animationClips = null;
+            }
+
+            if(resources!=null) {
+                foreach( var resource in resources ) {
+                    SafeDestroy(resource);
+                }
+                resources = null;
+            }
+        }
+
+        public int materialCount => materials?.Length ?? 0;
+
+        public UnityEngine.Material GetMaterial( int index = 0 ) {
+            if(materials!=null && index >= 0 && index < materials.Length ) {
+                return materials[index];
+            }
+            return null;
+        }
+
+#endregion Public
 
         async Task<bool> LoadRoutine( Uri url ) {
 
@@ -718,24 +781,6 @@ namespace GLTFast {
         }
 #endif // KTX_UNITY
 
-        public bool InstantiateGltf( Transform parent ) {
-            return InstantiateGltf( new GameObjectInstantiator(parent) );
-        }
-
-        public bool InstantiateGltf( IInstantiator instantiator ) {
-            // TODO: Make instantiation preemptive (via deferAgent) as well!
-            if (!loadingDone || loadingError) return false;
-            CreateGameObjects( gltfRoot, instantiator );
-            return true;
-        }
-
-        public UnityEngine.Material GetMaterial( int index = 0 ) {
-            if(materials!=null && index >= 0 && index < materials.Length ) {
-                return materials[index];
-            }
-            return null;
-        }
-
         void LoadBuffer( int index, Uri url ) {
             Profiler.BeginSample("LoadBuffer");
             if(downloadTasks==null) {
@@ -815,22 +860,6 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        /// <summary>
-        /// Load a glTF-binary asset from a byte array.
-        /// </summary>
-        /// <param name="bytes">byte array containing glTF-binary</param>
-        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
-        /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null) {
-            var success = await LoadGltfBinaryBuffer(bytes,uri);
-            if(success) await LoadContent();
-            success = success && await Prepare();
-            DisposeVolatileData();
-            loadingError = !success;
-            loadingDone = true;
-            return success;
-        }
-        
         async Task<bool> LoadGltfBinaryBuffer( byte[] bytes, Uri uri = null ) {
             Profiler.BeginSample("LoadGltfBinary.Phase1");
             uint magic = BitConverter.ToUInt32( bytes, 0 );
@@ -1469,29 +1498,6 @@ namespace GLTFast {
             }
         }
         
-        public void Destroy() {
-            if(materials!=null) {
-                foreach( var material in materials ) {
-                    SafeDestroy(material);
-                }
-                materials = null;
-            }
-            
-            if (animationClips != null) {
-                foreach( var clip in animationClips ) {
-                    SafeDestroy(clip);
-                }
-                animationClips = null;
-            }
-
-            if(resources!=null) {
-                foreach( var resource in resources ) {
-                    SafeDestroy(resource);
-                }
-                resources = null;
-            }
-        }
-
         async Task<bool> LoadAccessorData( Root gltf ) {
 
             Profiler.BeginSample("LoadAccessorData.Init");
