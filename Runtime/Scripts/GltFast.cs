@@ -168,7 +168,7 @@ namespace GLTFast {
 #region VolatileDataInstantiation
 
         /// <summary>
-        /// These members are only used during loading and instatiation phase.
+        /// These members are only used during loading and instantiation phase.
         /// TODO: Provide dispose method to free up memory after all instantiations
         /// happened. Maybe a plain Destroy/OnDestroy.
         /// </summary>
@@ -1491,6 +1491,13 @@ namespace GLTFast {
                     SafeDestroy(material);
                 }
                 materials = null;
+            }
+            
+            if (animationClips != null) {
+                foreach( var clip in animationClips ) {
+                    SafeDestroy(clip);
+                }
+                animationClips = null;
             }
 
             if(resources!=null) {
