@@ -269,8 +269,17 @@ namespace GLTFast {
             CreateGameObjects( gltfRoot, instantiator );
             return true;
         }
-        
+
+        [Obsolete("Use Dispose instead")]
         public void Destroy() {
+            Dispose();
+        }
+
+        /// <summary>
+        /// Frees up memory by disposing all sub assets.
+        /// There can be no instantiation or other element access afterwards.
+        /// </summary>
+        public void Dispose() {
             if(materials!=null) {
                 foreach( var material in materials ) {
                     SafeDestroy(material);

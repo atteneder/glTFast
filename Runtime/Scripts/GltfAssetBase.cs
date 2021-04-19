@@ -65,7 +65,7 @@ namespace GLTFast
         protected virtual void OnDestroy()
         {
             if(gLTFastInstance!=null) {
-                gLTFastInstance.Destroy();
+                gLTFastInstance.Dispose();
                 gLTFastInstance=null;
             }
         }
