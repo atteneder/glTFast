@@ -22,7 +22,7 @@ namespace GLTFast.Tests
     {
         [Test]
         public void ParseGltfJson() {
-            var gltf = GLTFast.ParseJson(@"
+            var gltf = GltfImport.ParseJson(@"
 {
     ""materials"" : [
         {

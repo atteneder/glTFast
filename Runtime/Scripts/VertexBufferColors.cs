@@ -99,7 +99,7 @@ namespace GLTFast {
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 3,
                                 result = output
                             };
-                            jobHandle = job.Schedule(output.Length,GLTFast.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
                         break;
                     case GLTFComponentType.Float:
@@ -109,7 +109,7 @@ namespace GLTFast {
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 12,
                                 result = output
                             };
-                            jobHandle = job.Schedule(output.Length,GLTFast.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
                         break;
                     case GLTFComponentType.UnsignedShort:
@@ -119,11 +119,11 @@ namespace GLTFast {
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 6,
                                 result = output
                             };
-                            jobHandle = job.Schedule(output.Length,GLTFast.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
                         break;
                     default:
-                        Debug.LogErrorFormat(GLTFast.ErrorUnsupportedColorFormat, attributeType);
+                        Debug.LogErrorFormat(GltfImport.ErrorUnsupportedColorFormat, attributeType);
                         break;
                 }
             }
@@ -138,7 +138,7 @@ namespace GLTFast {
                                 inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
                                 result = output
                             };
-                            jobHandle = job.Schedule(output.Length,GLTFast.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
                         break;
                     case GLTFComponentType.Float:
@@ -157,15 +157,15 @@ namespace GLTFast {
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 8,
                                 result = output
                             };
-                            jobHandle = job.Schedule(output.Length,GLTFast.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
                         break;
                     default:
-                        Debug.LogErrorFormat(GLTFast.ErrorUnsupportedColorFormat, attributeType);
+                        Debug.LogErrorFormat(GltfImport.ErrorUnsupportedColorFormat, attributeType);
                         break;
                 }
             } else {
-                Debug.LogErrorFormat(GLTFast.ErrorUnsupportedType, "color accessor", inputType);
+                Debug.LogErrorFormat(GltfImport.ErrorUnsupportedType, "color accessor", inputType);
             }
             Profiler.EndSample();
             return jobHandle;

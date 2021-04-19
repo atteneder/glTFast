@@ -114,7 +114,7 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = jobUv.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
                 }
                 break;
             case GLTFComponentType.UnsignedByte:
@@ -125,7 +125,7 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = jobUv.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
                     var jobUv = new Jobs.GetUVsUInt8InterleavedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 2,
@@ -133,7 +133,7 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = jobUv.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
                 }
                 break;
             case GLTFComponentType.UnsignedShort:
@@ -144,7 +144,7 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = jobUv.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
                     var jobUv = new Jobs.GetUVsUInt16InterleavedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 4,
@@ -152,7 +152,7 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = jobUv.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
                 }
                 break;
             case GLTFComponentType.Short:
@@ -163,7 +163,7 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
                     var job = new Jobs.GetUVsInt16InterleavedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
@@ -171,7 +171,7 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = job.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 }
                 break;
             case GLTFComponentType.Byte:
@@ -183,7 +183,7 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = jobInt8.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jobInt8.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
                     var jobInt8 = new Jobs.GetUVsInt8InterleavedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 2,
@@ -191,11 +191,11 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
-                    jobHandle = jobInt8.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jobInt8.Schedule(count,GltfImport.DefaultBatchCount);
                 }
                 break;
             default:
-                Debug.LogErrorFormat( GLTFast.ErrorUnsupportedType, "UV", inputType);
+                Debug.LogErrorFormat( GltfImport.ErrorUnsupportedType, "UV", inputType);
                 break;
             }
             Profiler.EndSample();

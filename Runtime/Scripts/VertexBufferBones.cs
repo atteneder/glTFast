@@ -125,7 +125,7 @@ namespace GLTFast {
                     jobTangentI.input = (byte*)input;
                     jobTangentI.outputByteStride = outputByteStride;
                     jobTangentI.result = output;
-                    jobHandle = jobTangentI.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jobTangentI.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
                 // TODO: Complete those cases
                 // case GLTFComponentType.UnsignedShort:
@@ -133,7 +133,7 @@ namespace GLTFast {
                 // case GLTFComponentType.UnsignedByte:
                 //     break;
                 default:
-                    Debug.LogErrorFormat( GLTFast.ErrorUnsupportedType, "Weights", inputType);
+                    Debug.LogErrorFormat( GltfImport.ErrorUnsupportedType, "Weights", inputType);
                     jobHandle = null;
                     break;
             }
@@ -160,7 +160,7 @@ namespace GLTFast {
                     jointsUInt8Job.input = (byte*)input;
                     jointsUInt8Job.outputByteStride = outputByteStride;
                     jointsUInt8Job.result = output;
-                    jobHandle = jointsUInt8Job.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jointsUInt8Job.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
                 case GLTFComponentType.UnsignedShort:
                     var jointsUInt16Job = new Jobs.GetJointsUInt16Job();
@@ -168,10 +168,10 @@ namespace GLTFast {
                     jointsUInt16Job.input = (byte*)input;
                     jointsUInt16Job.outputByteStride = outputByteStride;
                     jointsUInt16Job.result = output;
-                    jobHandle = jointsUInt16Job.Schedule(count,GLTFast.DefaultBatchCount);
+                    jobHandle = jointsUInt16Job.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
                 default:
-                    Debug.LogErrorFormat( GLTFast.ErrorUnsupportedType, "Joints", inputType);
+                    Debug.LogErrorFormat( GltfImport.ErrorUnsupportedType, "Joints", inputType);
                     jobHandle = null;
                     break;
             }

@@ -140,7 +140,7 @@ namespace GLTFast.Tests {
             var data = File.ReadAllBytes(testCase.path);
             var go = new GameObject();
             var deferAgent = new UninterruptedDeferAgent();
-            var gltf = new GLTFast();
+            var gltf = new GltfImport();
             var task = gltf.LoadGltfBinary(data, new Uri(testCase.path));
             yield return WaitForTask(task);
             var success = task.Result;

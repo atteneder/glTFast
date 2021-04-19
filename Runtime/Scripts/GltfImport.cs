@@ -48,7 +48,7 @@ namespace GLTFast {
     using Schema;
     using Loading;
 
-    public class GLTFast {
+    public class GltfImport {
 
         /// <summary>
         /// JSON parse speed in bytes per second
@@ -201,7 +201,7 @@ namespace GLTFast {
         /// </summary>
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
 
-        public GLTFast(
+        public GltfImport(
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null

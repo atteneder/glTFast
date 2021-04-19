@@ -10,7 +10,7 @@ namespace GLTFast.Editor {
     [ScriptedImporter(1,"glb")] // new [] {"gltf","glb"}
     public class GltfImporter : ScriptedImporter {
 
-        GLTFast m_Gltf;
+        GltfImport m_Gltf;
 
         HashSet<string> m_ImportedNames;
         HashSet<Object> m_ImportedObjects;
@@ -28,7 +28,7 @@ namespace GLTFast.Editor {
 
             var absPath = Path.Combine(Path.GetDirectoryName(Application.dataPath) ?? throw new InvalidOperationException(), ctx.assetPath);
 
-            m_Gltf = new GLTFast(null, new UninterruptedDeferAgent() );
+            m_Gltf = new GltfImport(null, new UninterruptedDeferAgent() );
 
             var settings = new ImportSettings {
                 nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique

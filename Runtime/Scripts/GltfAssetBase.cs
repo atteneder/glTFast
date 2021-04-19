@@ -23,7 +23,7 @@ namespace GLTFast
 
     public class GltfAssetBase : MonoBehaviour
     {
-        protected GLTFast gLTFastInstance;
+        protected GltfImport gLTFastInstance;
         
         /// <summary>
         /// Indicates wheter the glTF was loaded (no matter if successfully or not)
@@ -39,7 +39,7 @@ namespace GLTFast
         /// <param name="deferAgent">Defer Agent takes care of interrupting the
         /// loading procedure in order to keep the frame rate responsive.</param>
         public virtual async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
-            gLTFastInstance = new GLTFast(downloadProvider,deferAgent, materialGenerator);
+            gLTFastInstance = new GltfImport(downloadProvider,deferAgent, materialGenerator);
             return await gLTFastInstance.Load(url);
         }
 
