@@ -352,6 +352,22 @@ namespace GLTFast {
             return null;
         }
         
+#if UNITY_ANIMATION
+        public AnimationClip[] GetAnimationClips() {
+            return animationClips;
+        }
+#endif
+
+        public UnityEngine.Mesh[] GetMeshes() {
+            if (primitives == null || primitives.Length < 1) return null;
+            var result = new UnityEngine.Mesh[primitives.Length];
+            for (var index = 0; index < primitives.Length; index++) {
+                var primitive = primitives[index];
+                result[index] = primitive.mesh;
+            }
+            return result;
+        }
+
         public Material GetSourceMaterial(int index = 0) {
             if (gltfRoot?.materials != null && index >= 0 && index < gltfRoot.materials.Length) {
                 return gltfRoot.materials[index];

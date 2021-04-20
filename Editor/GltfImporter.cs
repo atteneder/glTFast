@@ -43,24 +43,42 @@ namespace GLTFast.Editor {
                 var go = new GameObject("root");
                 m_Gltf.InstantiateGltf(go.transform);
 
+                var sceneIndex = 0;
                 foreach (Transform sceneTransform in go.transform) {
                     var sceneGo = sceneTransform.gameObject;
-                    var identifier = AddObjectToAsset(ctx,$"scenes/{sceneGo.name}", sceneGo);
-                    AddHierarchy(sceneTransform,ctx,identifier);
+                    AddObjectToAsset(ctx,$"scenes/{sceneGo.name}", sceneGo);
+                    if (sceneIndex == 0) {
+                        ctx.SetMainObject(sceneGo);
+                    }
+                    sceneIndex++;
                 }
-
+                
+                for (var i = 0; i < m_Gltf.textureCount; i++) {
+                    var texture = m_Gltf.GetTexture(i);
+                    if (texture != null) {
+                        AddObjectToAsset(ctx, $"textures/{texture.name}", texture);
+                    }
+                }
+                
                 for (var i = 0; i < m_Gltf.materialCount; i++) {
                     var mat = m_Gltf.GetMaterial(i);
                     AddObjectToAsset(ctx, $"materials/{mat.name}", mat);
                 }
                 
-                for (var i = 0; i < m_Gltf.imageCount; i++) {
-                    var texture = m_Gltf.GetImage(i);
-                    if (texture != null) {
-                        AddObjectToAsset(ctx, $"textures/{texture.name}", texture);
+                var meshes = m_Gltf.GetMeshes();
+                if (meshes != null) {
+                    foreach (var mesh in meshes) {
+                        AddObjectToAsset(ctx, $"meshes/{mesh.name}", mesh);
                     }
                 }
-
+                
+                var clips = m_Gltf.GetAnimationClips();
+                if (clips != null) {
+                    foreach (var animationClip in clips) {
+                        AddObjectToAsset(ctx, $"animations/{animationClip.name}", animationClip);
+                    }
+                }
+                
                 m_ImportedNames = null;
                 m_ImportedObjects = null;
             }
@@ -71,31 +89,12 @@ namespace GLTFast.Editor {
                 return null;
             }
             var uniqueAssetName = GetUniqueAssetName(originalName);
-            // obj.name = uniqueAssetName;
             ctx.AddObjectToAsset(uniqueAssetName, obj);
             m_ImportedNames.Add(uniqueAssetName);
             m_ImportedObjects.Add(obj);
             return uniqueAssetName;
         }
 
-        void AddHierarchy(Transform root, AssetImportContext ctx, string prefix) {
-
-            var mfs = root.GetComponents<MeshFilter>();
-            foreach (var meshFilter in mfs) {
-                var mesh = meshFilter.sharedMesh;
-                if (mesh != null) {
-                    AddObjectToAsset(ctx,$"meshes/{mesh.name}",mesh);
-                }
-            }
-            
-            foreach (Transform child in root) {
-                var identifier = $"{prefix}/{child.name}";
-                // identifier = AddObjectToAsset(ctx,identifier, child.gameObject);
-                // identifier = GetUniqueAssetName(identifier);
-                AddHierarchy(child,ctx,identifier);
-            }
-        }
-        
         string GetUniqueAssetName(string originalName) {
             if (string.IsNullOrWhiteSpace(originalName)) {
                 originalName = "Asset";
