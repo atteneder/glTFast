@@ -1490,18 +1490,11 @@ namespace GLTFast {
                             }
                         }
 
-                        var materialIndices = new int[primitives[i].materialIndices.Length];
-                        for (int m = 0; m < primitives[i].materialIndices.Length; m++)
-                        {
-                            var materialIndex = primitives[i].materialIndices[m];
-                            materialIndices[m] = materialIndex;
-                        }
-
                         instantiator.AddPrimitive(
                             nodeIndex,
                             meshName,
                             mesh,
-                            materialIndices,
+                            primitives[i].materialIndices,
                             joints,
                             primitiveCount
                             );
