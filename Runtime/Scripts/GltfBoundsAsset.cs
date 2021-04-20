@@ -31,7 +31,7 @@ namespace GLTFast
         public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
             var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator);
             if(success) {
-                var insta = new GameObjectBoundsInstantiator(transform);
+                var insta = new GameObjectBoundsInstantiator(gLTFastInstance,transform);
                 // Auto-Instantiate
                 gLTFastInstance.InstantiateGltf(insta);
 

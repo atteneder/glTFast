@@ -54,8 +54,8 @@ namespace GLTFast.Editor {
                     AddObjectToAsset(ctx, $"materials/{mat.name}", mat);
                 }
                 
-                for (var i = 0; i < m_Gltf.textureCount; i++) {
-                    var texture = m_Gltf.GetTexture(i);
+                for (var i = 0; i < m_Gltf.imageCount; i++) {
+                    var texture = m_Gltf.GetImage(i);
                     if (texture != null) {
                         AddObjectToAsset(ctx, $"textures/{texture.name}", texture);
                     }

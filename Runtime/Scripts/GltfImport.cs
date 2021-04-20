@@ -48,7 +48,7 @@ namespace GLTFast {
     using Schema;
     using Loading;
 
-    public class GltfImport {
+    public class GltfImport : IGltfReadable {
 
         /// <summary>
         /// JSON parse speed in bytes per second
@@ -147,7 +147,21 @@ namespace GLTFast {
         List<KtxLoadContextBase> ktxLoadContextsBuffer;
 #endif // KTX_UNITY
 
-        Texture2D[] images = null;
+        
+        /// <summary>
+        /// Loaded glTF images (Raw texture without sampler settings)
+        /// <seealso cref="textures"/>
+        /// </summary>
+        Texture2D[] images;
+        
+        /// <summary>
+        /// In glTF a texture is an image with a certain sampler setting applied.
+        /// So any `images` member is also in `textures`, but not necessary the
+        /// other way around.
+        /// /// <seealso cref="images"/>
+        /// </summary>
+        Texture2D[] textures;
+        
         ImageFormat[] imageFormats;
         bool[] imageReadable;
         bool[] imageGamma;
@@ -260,7 +274,7 @@ namespace GLTFast {
         }
 
         public bool InstantiateGltf( Transform parent ) {
-            return InstantiateGltf( new GameObjectInstantiator(parent) );
+            return InstantiateGltf( new GameObjectInstantiator(this,parent) );
         }
 
         public bool InstantiateGltf( IInstantiator instantiator ) {
@@ -294,11 +308,11 @@ namespace GLTFast {
                 animationClips = null;
             }
 
-            if(images!=null) {
-                foreach( var image in images ) {
-                    SafeDestroy(image);
+            if(textures!=null) {
+                foreach( var texture in textures ) {
+                    SafeDestroy(texture);
                 }
-                images = null;
+                textures = null;
             }
             
             if(resources!=null) {
@@ -310,8 +324,9 @@ namespace GLTFast {
         }
 
         public int materialCount => materials?.Length ?? 0;
-        public int textureCount => images?.Length ?? 0;
-
+        public int imageCount => images?.Length ?? 0;
+        public int textureCount => textures?.Length ?? 0;
+        
         public UnityEngine.Material GetMaterial( int index = 0 ) {
             if(materials!=null && index >= 0 && index < materials.Length ) {
                 return materials[index];
@@ -319,13 +334,44 @@ namespace GLTFast {
             return null;
         }
 
-        public Texture2D GetTexture( int index = 0 ) {
+        public UnityEngine.Material GetDefaultMaterial() {
+            return materialGenerator.GetDefaultMaterial();
+        }
+        
+        public Texture2D GetImage( int index = 0 ) {
             if(images!=null && index >= 0 && index < images.Length ) {
                 return images[index];
             }
             return null;
         }
+
+        public Texture2D GetTexture( int index = 0 ) {
+            if(textures!=null && index >= 0 && index < textures.Length ) {
+                return textures[index];
+            }
+            return null;
+        }
         
+        public Material GetSourceMaterial(int index = 0) {
+            if (gltfRoot?.materials != null && index >= 0 && index < gltfRoot.materials.Length) {
+                return gltfRoot.materials[index];
+            }
+            return null;
+        }
+
+        public Texture GetSourceTexture(int index = 0) {
+            if (gltfRoot?.textures != null && index >= 0 && index < gltfRoot.textures.Length) {
+                return gltfRoot.textures[index];
+            }
+            return null;
+        }
+
+        public Image GetSourceImage(int index = 0) {
+            if (gltfRoot?.images != null && index >= 0 && index < gltfRoot.images.Length) {
+                return gltfRoot.images[index];
+            }
+            return null;
+        }
         
 #endregion Public
 
@@ -652,7 +698,6 @@ namespace GLTFast {
                 var imageVariants = new HashSet<int>[images.Length];
                 foreach (var txt in gltfRoot.textures) {
                     var imageIndex = txt.GetImageIndex();
-                    var img = images[imageIndex];
                     if(imageVariants[imageIndex]==null) {
                         imageVariants[imageIndex] = new HashSet<int>();
                     }
@@ -1054,9 +1099,9 @@ namespace GLTFast {
                 imageCreateContexts = null;
             }
 
-            Dictionary<int,Texture2D>[] imageVariants = null;
             if(images!=null && gltfRoot.textures!=null) {
-                imageVariants = new Dictionary<int,Texture2D>[images.Length];
+                textures = new Texture2D[gltfRoot.textures.Length];
+                var imageVariants = new Dictionary<int,Texture2D>[images.Length];
                 for (int textureIndex = 0; textureIndex < gltfRoot.textures.Length; textureIndex++)
                 {
                     var txt = gltfRoot.textures[textureIndex];
@@ -1068,18 +1113,24 @@ namespace GLTFast {
                         }
                         imageVariants[imageIndex] = new Dictionary<int, Texture2D>();
                         imageVariants[imageIndex][txt.sampler] = img;
-                    } else 
-                    if(!imageVariants[imageIndex].ContainsKey(txt.sampler)) {
-                        var newImg = Texture2D.Instantiate(img);
-                        resources.Add(newImg);
+                        textures[textureIndex] = img;
+                    } else {
+                        if (imageVariants[imageIndex].TryGetValue(txt.sampler, out var imgVariant)) {
+                            textures[textureIndex] = imgVariant;
+                        } else {
+                            var newImg = Texture2D.Instantiate(img);
+                            resources.Add(newImg);
 #if DEBUG
-                        newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
-                        Debug.LogWarningFormat("Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory.", imageIndex);
+                            newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
+                            Debug.LogWarningFormat("Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory.", imageIndex);
 #endif
-                        if(txt.sampler>=0) {
-                            gltfRoot.samplers[txt.sampler].Apply(newImg);
+                            if(txt.sampler>=0) {
+                                gltfRoot.samplers[txt.sampler].Apply(newImg);
+                            }
+                            imageVariants[imageIndex][txt.sampler] = newImg;
+                            textures[textureIndex] = newImg;
                         }
-                        imageVariants[imageIndex][txt.sampler] = newImg;
+                        
                     }
                 }
             }
@@ -1089,12 +1140,7 @@ namespace GLTFast {
                 for(int i=0;i<materials.Length;i++) {
                     await deferAgent.BreakPoint(.0001f);
                     Profiler.BeginSample("GenerateMaterial");
-                    materials[i] = materialGenerator.GenerateMaterial(
-                        gltfRoot.materials[i],
-                        ref gltfRoot.textures,
-                        ref gltfRoot.images,
-                        ref imageVariants
-                        );
+                    materials[i] = materialGenerator.GenerateMaterial(gltfRoot.materials[i],this);
                     Profiler.EndSample();
                 }
             }
@@ -1428,23 +1474,18 @@ namespace GLTFast {
                             }
                         }
 
-                        var primMaterials = new UnityEngine.Material[primitives[i].materialIndices.Length];
+                        var materialIndices = new int[primitives[i].materialIndices.Length];
                         for (int m = 0; m < primitives[i].materialIndices.Length; m++)
                         {
                             var materialIndex = primitives[i].materialIndices[m];
-                            if( materials!=null && materialIndex>=0 && materialIndex<materials.Length ) {
-                                primMaterials[m] = materials[materialIndex];
-                            } else {
-                                // No valid material found -> Fall back to default material.
-                                primMaterials[m] = materialGenerator.GetDefaultMaterial();
-                            }
+                            materialIndices[m] = materialIndex;
                         }
 
                         instantiator.AddPrimitive(
                             nodeIndex,
                             meshName,
                             mesh,
-                            primMaterials,
+                            materialIndices,
                             joints,
                             primitiveCount
                             );

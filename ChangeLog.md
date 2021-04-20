@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - ScriptedImporter for .glb (glTF-binary) files for design-time/Editor import 
-- `ImportSettings` can be provided to `GLTFast.Load` (optional) to customize the loading behaviour
+- `ImportSettings` can be provided to `GltfImporter.Load` (optional) to customize the loading behaviour
 - `ImportSettings.nodeNameMethod` to allow customizing Node/GameObject naming convention
+- `IGltfReadable` interface for `GltfImporter`
 ### Changed
 - Nodes' names are made unique (within their hierarchical position) by supplementing a continuous number. This is required for correct animation target lookup and import continuity. 
 - `IInstantiator.AddPrimitive` extended parameter `first` (`bool`; true for the first primitive) to primitiveNumeration (`int`; counting upwards from zero). This allows for creating unique GameObject names.
 - Renamed the main class `GltFast` to `GltfImporter` to properly reflect its purpose. There is a fallback `GltFast` class for backwards compatibility
 - Renamed `GltfImporter.Destroy` to `GltfImporter.Dispose` to have more consistent naming similar to native containers
+- `IMaterialGenerator` overhaul that allows more flexible generation of materials (ahead of time)
+  - `GenerateMaterial` instead of passing on all require data (like full texture arrays), data has to be fetched from the `GltfImporter`/`IGltfReadable`.
+- `IInstantiator.AddPrimitive`: Instead of `Material` the IDs/indices of materials are provided and the materials themselves have to be fetched from the `IGltfReadable`/`GltfImporter` (allowing more flexible usage)
 
 ## [3.2.1] - 2021-05-05
 ### Fixed

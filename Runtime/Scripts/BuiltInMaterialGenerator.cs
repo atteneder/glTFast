@@ -144,9 +144,7 @@ namespace GLTFast.Materials {
 
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
-            ref Schema.Texture[] textures,
-            ref Schema.Image[] schemaImages,
-            ref Dictionary<int,Texture2D>[] imageVariants
+            IGltfReadable gltf
         ) {
             Material material;
             
@@ -182,9 +180,9 @@ namespace GLTFast.Materials {
                     material.SetVector(specColorPropId, specGloss.specularColor);
                     material.SetFloat(glossinessPropId,specGloss.glossinessFactor);
 
-                    TrySetTexture(specGloss.diffuseTexture,material,mainTexPropId,ref textures,ref schemaImages, ref imageVariants);
+                    TrySetTexture(specGloss.diffuseTexture,material,mainTexPropId,gltf);
 
-                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,specGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,specGlossMapPropId,gltf)) {
                         material.EnableKeyword(KW_SPEC_GLOSS_MAP);
                     }
                 }
@@ -195,31 +193,24 @@ namespace GLTFast.Materials {
                 material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                 material.SetFloat(roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
-                TrySetTexture(
-                    gltfMaterial.pbrMetallicRoughness.baseColorTexture,
-                    material,
-                    mainTexPropId,
-                    ref textures,
-                    ref schemaImages,
-                    ref imageVariants
-                    );
+                TrySetTexture(gltfMaterial.pbrMetallicRoughness.baseColorTexture,material,mainTexPropId,gltf);
                 
-                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicGlossMapPropId,gltf)) {
                     material.EnableKeyword(KW_METALLIC_ROUGNESS_MAP);
                 }
             }
 
-            if(TrySetTexture(gltfMaterial.normalTexture,material,bumpMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.normalTexture,material,bumpMapPropId,gltf)) {
                 material.EnableKeyword(KW_NORMALMAP);
                 material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
             }
 
-            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionMapPropId,gltf)) {
                 material.EnableKeyword(KW_OCCLUSION);
                 material.SetFloat(occlusionStrengthPropId,gltfMaterial.occlusionTexture.strength);
             }
 
-            if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissionMapPropId,gltf)) {
                 material.EnableKeyword(KW_EMISSION);
             }
 

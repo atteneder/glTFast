@@ -92,12 +92,7 @@ namespace GLTFast.Materials {
 
         public abstract UnityEngine.Material GetDefaultMaterial();
 
-        public abstract UnityEngine.Material GenerateMaterial(
-            Schema.Material gltfMaterial,
-            ref Schema.Texture[] textures,
-            ref Schema.Image[] schemaImages,
-            ref Dictionary<int,Texture2D>[] imageVariants
-        );
+        public abstract UnityEngine.Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf);
 
         protected static Shader FindShader(string shaderName) {
             var shader = Shader.Find(shaderName);
@@ -111,46 +106,33 @@ namespace GLTFast.Materials {
         }
 
         protected static bool TrySetTexture(
-            Schema.TextureInfo textureInfo,
+            TextureInfo textureInfo,
             UnityEngine.Material material,
             int propertyId,
-            ref Schema.Texture[] textures,
-            ref Schema.Image[] schemaImages,
-            ref Dictionary<int,Texture2D>[] imageVariants
+            IGltfReadable gltf
             )
         {
             if (textureInfo != null && textureInfo.index >= 0)
             {
-                int bcTextureIndex = textureInfo.index;
-                if (textures != null && textures.Length > bcTextureIndex)
+                int textureIndex = textureInfo.index;
+                var srcTexture = gltf.GetSourceTexture(textureIndex);
+                if (srcTexture != null)
                 {
-                    var txt = textures[bcTextureIndex];
-                    var imageIndex = txt.GetImageIndex();
-
-                    Texture2D img = null;
-                    if( imageVariants!=null
-                        && imageIndex >= 0
-                        && imageVariants.Length > imageIndex
-                        && imageVariants[imageIndex]!=null
-                        && imageVariants[imageIndex].TryGetValue(txt.sampler,out img)
-                        )
-                    {
+                    var texture = gltf.GetTexture(textureIndex);
+                    if(texture != null) {
                         if(textureInfo.texCoord!=0) {
                             Debug.LogError(ERROR_MULTI_UVS);
                         }
-                        material.SetTexture(propertyId,img);
-                        var isKtx = txt.isKtx;
+                        material.SetTexture(propertyId,texture);
+                        var isKtx = srcTexture.isKtx;
                         TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
                         return true;
                     }
-                    else
-                    {
-                        Debug.LogErrorFormat("Image #{0} not found", imageIndex);
-                    }
+                    Debug.LogErrorFormat("Texture #{0} not loaded", textureIndex);
                 }
                 else
                 {
-                    Debug.LogErrorFormat("Texture #{0} not found", bcTextureIndex);
+                    Debug.LogErrorFormat("Texture #{0} not found", textureIndex);
                 }
             }
             return false;

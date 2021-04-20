@@ -67,8 +67,8 @@ namespace GLTFast {
         void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            UnityEngine.Mesh mesh,
-            UnityEngine.Material[] materials,
+            Mesh mesh,
+            int[] materialIndices,
             int[] joints = null,
             int primitiveNumeration = 0
         );

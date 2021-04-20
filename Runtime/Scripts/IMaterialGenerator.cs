@@ -25,11 +25,6 @@ namespace GLTFast {
         /// <returns>fallback material</returns>
         UnityEngine.Material GetDefaultMaterial();
 
-        UnityEngine.Material GenerateMaterial(
-            Material gltfMaterial,
-            ref Schema.Texture[] textures,
-            ref Schema.Image[] schemaImages,
-            ref Dictionary<int,UnityEngine.Texture2D>[] imageVariants
-            );
+        UnityEngine.Material GenerateMaterial(Material gltfMaterial, IGltfReadable gltf);
     }
 }

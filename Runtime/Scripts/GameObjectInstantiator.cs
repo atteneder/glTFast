@@ -22,11 +22,14 @@ using UnityEngine;
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
 
+        protected IGltfReadable gltf;
+        
         protected Transform parent;
 
         protected GameObject[] nodes;
 
-        public GameObjectInstantiator(Transform parent) {
+        public GameObjectInstantiator(IGltfReadable gltf, Transform parent) {
+            this.gltf = gltf;
             this.parent = parent;
         }
 
@@ -62,8 +65,8 @@ namespace GLTFast {
         public virtual void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            UnityEngine.Mesh mesh,
-            UnityEngine.Material[] materials,
+            Mesh mesh,
+            int[] materialIndices,
             int[] joints = null,
             int primitiveNumeration = 0
         ) {
@@ -95,6 +98,12 @@ namespace GLTFast {
                 smr.bones = bones;
                 smr.sharedMesh = mesh;
                 renderer = smr;
+            }
+
+            var materials = new Material[materialIndices.Length];
+            for (var index = 0; index < materials.Length; index++) {
+                 var material = gltf.GetMaterial(materialIndices[index]) ?? gltf.GetDefaultMaterial();
+                 materials[index] = material;
             }
 
             renderer.sharedMaterials = materials;

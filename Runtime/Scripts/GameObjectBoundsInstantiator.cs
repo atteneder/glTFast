@@ -21,7 +21,7 @@ namespace GLTFast {
 
         Bounds?[] nodeBounds;
 
-        public GameObjectBoundsInstantiator(Transform parent) : base(parent) {}
+        public GameObjectBoundsInstantiator(IGltfReadable gltf, Transform parent) : base(gltf,parent) {}
         
         public override void Init(int nodeCount) {
             base.Init(nodeCount);
@@ -32,7 +32,7 @@ namespace GLTFast {
             uint nodeIndex,
             string meshName,
             Mesh mesh,
-            Material[] materials,
+            int[] materialIndices,
             int[] joints = null,
             int primitiveNumeration = 0
         ) {
@@ -40,7 +40,7 @@ namespace GLTFast {
                 nodeIndex,
                 meshName,
                 mesh,
-                materials,
+                materialIndices,
                 joints,
                 primitiveNumeration
                 );
