@@ -7,7 +7,7 @@ using Object = UnityEngine.Object;
 
 namespace GLTFast.Editor {
 
-    [ScriptedImporter(1,"glb")] // new [] {"gltf","glb"}
+    [ScriptedImporter(1,new [] {"gltf","glb"})] 
     public class GltfImporter : ScriptedImporter {
 
         GltfImport m_Gltf;
