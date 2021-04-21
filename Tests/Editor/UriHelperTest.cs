@@ -72,6 +72,11 @@ namespace GLTFast.Tests
             // special char `+`
             Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"),UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file+test.gltf")));
             Assert.AreEqual(new Uri("file:///dir/sub/"),UriHelper.GetBaseUri(new Uri("file:///dir/sub/file+test.gltf")));
+            
+            
+            // relative paths
+            var uri = new Uri("Assets/Some/Path/asset.glb", UriKind.Relative);
+            Assert.AreEqual(new Uri("Assets/Some/Path",UriKind.Relative),UriHelper.GetBaseUri(uri));
         }
 
         [Test]
@@ -82,6 +87,10 @@ namespace GLTFast.Tests
             Assert.AreEqual( new Uri("file+test.gltf",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("file+test.gltf",null));
             Assert.AreEqual( new Uri("http://www.server.com/dir/sub/file+test.gltf",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("file+test.gltf",baseUri));
             Assert.AreEqual( new Uri("http://www.server.com/dir/sub/sub2/sub3/file+test.gltf",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("sub2/sub3/file+test.gltf",baseUri));
+
+            var relBaseUri = new Uri("Assets/Some/Path", UriKind.Relative);
+            Assert.AreEqual( new Uri("http://www.server.com/dir/sub/asset.glb",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("asset.glb",baseUri));
+            Assert.AreEqual( new Uri("Assets/Some/Path/asset.glb",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("asset.glb",relBaseUri));
         }
 
         [Test]

@@ -14,6 +14,7 @@
 //
 
 using System;
+using System.IO;
 using UnityEngine;
 
 namespace GLTFast {
@@ -25,6 +26,9 @@ namespace GLTFast {
 
         public static Uri GetBaseUri( Uri uri ) {
             if(uri==null) return null;
+            if (!uri.IsAbsoluteUri) {
+                return new Uri(Path.GetDirectoryName(uri.OriginalString), UriKind.Relative);
+            }
             return new Uri(uri, ".");
         }
 
@@ -39,7 +43,12 @@ namespace GLTFast {
             if(Uri.TryCreate(uri, UriKind.Absolute, out var result)){
                 return result;
             }
-            if(baseUri!=null) return new Uri(baseUri,uri);
+
+            if (baseUri != null) {
+                return baseUri.IsAbsoluteUri
+                    ? new Uri(baseUri,uri)
+                    : new Uri(Path.Combine(baseUri.OriginalString, uri), UriKind.Relative);
+            }
             return new Uri(uri,UriKind.RelativeOrAbsolute);
         }
 
