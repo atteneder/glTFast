@@ -26,15 +26,16 @@ namespace GLTFast.Editor {
         
         public override void OnImportAsset(AssetImportContext ctx) {
 
-            var absPath = Path.Combine(Path.GetDirectoryName(Application.dataPath) ?? throw new InvalidOperationException(), ctx.assetPath);
-
-            m_Gltf = new GltfImport(null, new UninterruptedDeferAgent() );
+            m_Gltf = new GltfImport(
+                new EditorDownloadProvider(),
+                new UninterruptedDeferAgent()
+                );
 
             var settings = new ImportSettings {
                 nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique
             };
 
-            var success = AsyncHelpers.RunSync<bool>(() => m_Gltf.Load(absPath,settings));
+            var success = AsyncHelpers.RunSync<bool>(() => m_Gltf.Load(ctx.assetPath,settings));
             
             if (success) {
                 m_ImportedNames = new HashSet<string>();
