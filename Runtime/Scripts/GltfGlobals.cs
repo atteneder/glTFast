@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using System;
+
 namespace GLTFast {
     
     enum ImageFormat {
@@ -22,4 +24,13 @@ namespace GLTFast {
         KTX
     }
 
+    public static class GltfGlobals {
+        
+        public const uint GLB_MAGIC = 0x46546c67; // represents glTF in ASCII
+        
+        public static bool IsGltfBinary(byte[] data) {
+            var magic = BitConverter.ToUInt32( data, 0 );
+            return magic == GLB_MAGIC;
+        }
+    }
 }

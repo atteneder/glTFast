@@ -75,8 +75,6 @@ namespace GLTFast {
         
         public const int DefaultBatchCount = 50000;
 
-        const uint GLB_MAGIC = 0x46546c67;
-
         public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
         public const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
         const string ErrorUnsupportedPrimitiveMode = "Primitive mode {0} is untested!";
@@ -953,9 +951,8 @@ namespace GLTFast {
 
         async Task<bool> LoadGltfBinaryBuffer( byte[] bytes, Uri uri = null ) {
             Profiler.BeginSample("LoadGltfBinary.Phase1");
-            uint magic = BitConverter.ToUInt32( bytes, 0 );
-
-            if (magic != GLB_MAGIC) {
+            
+            if (!GltfGlobals.IsGltfBinary(bytes)) {
                 Debug.LogError("Not a glTF-binary file");
                 Profiler.EndSample();
                 return false;
