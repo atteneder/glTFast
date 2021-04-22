@@ -1,6 +1,21 @@
-﻿using System;
+﻿// Copyright 2020-2021 Andreas Atteneder
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+using System;
 using System.Collections.Generic;
-using System.IO;
+using UnityEditor;
 using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -10,6 +25,10 @@ namespace GLTFast.Editor {
     [ScriptedImporter(1,new [] {"gltf","glb"})] 
     public class GltfImporter : ScriptedImporter {
 
+        [SerializeField]
+        [HideInInspector]
+        GltfAssetDependency[] assetDependencies;
+        
         GltfImport m_Gltf;
 
         HashSet<string> m_ImportedNames;
@@ -26,8 +45,10 @@ namespace GLTFast.Editor {
         
         public override void OnImportAsset(AssetImportContext ctx) {
 
+            var downloadProvider = new EditorDownloadProvider();
+            
             m_Gltf = new GltfImport(
-                new EditorDownloadProvider(),
+                downloadProvider,
                 new UninterruptedDeferAgent()
                 );
 
@@ -83,6 +104,25 @@ namespace GLTFast.Editor {
                 m_ImportedNames = null;
                 m_ImportedObjects = null;
             }
+
+            var deps = new List<GltfAssetDependency>();
+            for (var index = 0; index < downloadProvider.assetDependencies.Count; index++) {
+                var dependency = downloadProvider.assetDependencies[index];
+                if (ctx.assetPath == dependency.originalUri) {
+                    // Skip original gltf/glb file
+                    continue;
+                }
+
+                var guid = AssetDatabase.AssetPathToGUID(dependency.originalUri);
+                if (!string.IsNullOrEmpty(guid)) {
+                    dependency.assetPath = dependency.originalUri;
+                    ctx.DependsOnSourceAsset(dependency.assetPath);
+                }
+
+                deps.Add(dependency);
+            }
+
+            assetDependencies = deps.ToArray();
         }
 
         string AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj) {
@@ -109,29 +149,6 @@ namespace GLTFast.Editor {
                 return extName;
             }
             return originalName;
-        }
-    }
-
-    [ScriptedImporter(1, "testy")]
-    public class TestImporter : ScriptedImporter {
-
-        public override void OnImportAsset(AssetImportContext ctx) {
-            var root = new GameObject("root");
-
-            var n1 = new GameObject("node");
-            var n2 = new GameObject("node2");
-            var n3 = new GameObject("node");
-            
-            n1.transform.SetParent(root.transform,false);
-            n2.transform.SetParent(root.transform,false);
-            n3.transform.SetParent(n2.transform,false);
-            
-            ctx.AddObjectToAsset("root/n1", n1);
-            ctx.AddObjectToAsset("root/n2", n2);
-            ctx.AddObjectToAsset("root/n3", n3);
-            ctx.AddObjectToAsset("root", root);
-            
-            ctx.SetMainObject(root);
         }
     }
 }

@@ -14,24 +14,34 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Networking;
 
 namespace GLTFast.Editor {
     
     using Loading;
-    
+
     public class EditorDownloadProvider : IDownloadProvider {
+
+        public List<GltfAssetDependency> assetDependencies = new List<GltfAssetDependency>();
+        
 #pragma warning disable 1998
         public async  Task<IDownload> Request(Uri url) {
+            var dependency = new GltfAssetDependency();
+            dependency.originalUri = url.OriginalString;
+            assetDependencies.Add(dependency);
             var req = new SyncFileLoader(url);
             return req;
         }
 
         public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+            var dependency = new GltfAssetDependency();
+            dependency.originalUri = url.OriginalString;
+            dependency.type = GltfAssetDependency.Type.Texture;
+            assetDependencies.Add(dependency);
             var req = new SyncTextureLoader(url,nonReadable);
             return req;
         }
@@ -78,8 +88,6 @@ namespace GLTFast.Editor {
         
         public SyncTextureLoader(Uri url, bool nonReadable)
             : base(url) {
-            // TODO: inspect texture importer settings
-            // warn about misconfigurations and offer to fix them
             texture = AssetDatabase.LoadAssetAtPath<Texture2D>(url.OriginalString);
         }
     }
