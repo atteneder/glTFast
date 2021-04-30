@@ -164,6 +164,11 @@ namespace GLTFast {
             
             // Apply the changes so Undo/Redo is working
             serializedObject.ApplyModifiedProperties();
+
+            // This is a workaround to avoid this stupid error
+            // "GltfImporterEditor.OnInspectorGUI must call ApplyRevertGUI to avoid unexpected behaviour."
+            var applyButton = root.Query<Button>(name: "Apply").First();
+            applyButton.clickable.clicked += ApplyAndImport;
             
             return root;
         }

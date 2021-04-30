@@ -13,7 +13,11 @@
 // limitations under the License.
 //
 
+using System;
+
 namespace GLTFast {
+    
+    [Serializable]
     public class ImportSettings {
         
         /// <summary>
@@ -36,8 +40,5 @@ namespace GLTFast {
         }
 
         public NameImportMethod nodeNameMethod = NameImportMethod.Original;
-
-        
-        public bool autoDispose = true;
     }
 }

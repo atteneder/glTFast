@@ -30,7 +30,9 @@ namespace GLTFast.Editor {
     public class GltfImporter : ScriptedImporter {
 
         [SerializeField]
-        [HideInInspector]
+        ImportSettings importSettings;
+        
+        [SerializeField]
         GltfAssetDependency[] assetDependencies;
         
         [SerializeField]
@@ -59,11 +61,15 @@ namespace GLTFast.Editor {
                 new UninterruptedDeferAgent()
                 );
 
-            var settings = new ImportSettings {
-                nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique
-            };
-
-            var success = AsyncHelpers.RunSync<bool>(() => m_Gltf.Load(ctx.assetPath,settings));
+            if (importSettings == null) {
+                // Design-time import specific settings
+                importSettings = new ImportSettings {
+                    // Avoid naming conflicts by default
+                    nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique
+                };
+            }
+            
+            var success = AsyncHelpers.RunSync<bool>(() => m_Gltf.Load(ctx.assetPath,importSettings));
             
             if (success) {
                 m_ImportedNames = new HashSet<string>();
