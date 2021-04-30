@@ -94,10 +94,10 @@ Read the section *Materials and Shader Variants* in the [Documentation](./Docume
 
 The loading behavior can be highly customized:
 
-- React to loading events by [adding event listeners](./Documentation~/glTFast.md#custom-loading-event-listeners)
+- React to loading events by [adding event listeners](./Documentation~/glTFast.md#custom-post-loading-behaviour)
 - Customize [instantiation](./Documentation~/glTFast.md#instantiation)
-- Load glTF once and instantiate it many times (see [example](./Documentation~/glTFast.md#custom-loading-event-listeners))
-- Access data of glTF scene (for example get material; see [example](./Documentation~/glTFast.md#custom-loading-event-listeners))
+- Load glTF once and instantiate it many times (see [example](./Documentation~/glTFast.md#custom-post-loading-behaviour))
+- Access data of glTF scene (for example get material; see [example](./Documentation~/glTFast.md#custom-post-loading-behaviour))
 - Load [reports](./Documentation~/glTFast.md#report) allow reacting and communicating incidents during loading and instantiation
 - Tweak and optimize loading performance
 
