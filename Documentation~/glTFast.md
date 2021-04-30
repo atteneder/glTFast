@@ -48,7 +48,7 @@ In case you want to handle download/file loading yourself, you can load glTF bin
 ```csharp
 async void LoadGltfBinaryFromMemory() {
     byte[] data = File.ReadAllBytes("/path/to/file.glb");
-    var gltf = new GLTFast();
+    var gltf = new GltfImport();
     bool success = await gltf.LoadGltfBinary(data, new Uri(m_Path));
     if (success) {
         success = gltf.InstantiateGltf(transform);
@@ -77,7 +77,7 @@ The async `Load` method can be awaited and followed up by custom behaviour.
 ```C#
 async void Start() {
     // First step: load glTF
-    var gltf = new GLTFast.GLTFast();
+    var gltf = new GLTFast.GltfImport();
     var success = await gltf.Load("file:///path/to/file.gltf");
 
     if (success) {
@@ -147,7 +147,7 @@ Usage example
 
 ```C#
 async Task CustomDeferAgent() {
-    // Recommended: Use a common defer agent across multiple GLTFast instances!
+    // Recommended: Use a common defer agent across multiple GltfImport instances!
     // For a stable frame rate:
     IDeferAgent deferAgent = gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
     // Or for faster loading:
@@ -156,7 +156,7 @@ async Task CustomDeferAgent() {
     var tasks = new List<Task>();
     
     foreach( var url in manyUrls) {
-        var gltf = new GLTFast.GLTFast(null,deferAgent);
+        var gltf = new GLTFast.GltfImport(null,deferAgent);
         var task = gltf.Load(url).ContinueWith(
             t => {
                 if (t.Result) {

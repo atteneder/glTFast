@@ -17,5 +17,5 @@ using System;
 
 namespace GLTFast {
     [Obsolete("Was renamed to GltfImport")]
-    public class GltFast : GltfImport { }
+    public class GLTFast : GltfImport { }
 }

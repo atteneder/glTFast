@@ -24,7 +24,7 @@ namespace GLTFast {
     /// </summary>
     public interface IDeferAgent {
         /// <summary>
-        /// This will be called by GltFast at various points in the loading procedure.
+        /// This will be called by GltfImport at various points in the loading procedure.
         /// </summary>
         /// <returns>True if the remaining work of the loading procedure should
         /// be deferred to the next frame/Update loop invocation. False if
