@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+#if UNITY_PHYSICS
+
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -58,3 +60,4 @@ namespace GLTFast.Tests {
         }
     }
 }
+#endif
