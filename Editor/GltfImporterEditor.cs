@@ -13,12 +13,20 @@
 // limitations under the License.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using GLTFast.Editor;
 using UnityEditor;
+
+#if UNITY_2020_2_OR_NEWER
+using UnityEditor.AssetImporters;
+#else
 using UnityEditor.Experimental.AssetImporters;
+#endif
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace GLTFast {
 
@@ -26,28 +34,81 @@ namespace GLTFast {
     // [CanEditMultipleObjects]
     public class GltfImporterEditor : ScriptedImporterEditor
     {
-        // Stored SerializedProperty to draw in OnInspectorGUI.
         SerializedProperty m_AssetDependencies;
-
-        // protected override bool needsApplyRevert => false;
+        SerializedProperty m_ReportItems;
+        
+        protected override bool needsApplyRevert => false;
         
         public override void OnEnable()
         {
             base.OnEnable();
-            // Once in OnEnable, retrieve the serializedObject property and store it.
             m_AssetDependencies = serializedObject.FindProperty("assetDependencies");
+            m_ReportItems = serializedObject.FindProperty("reportItems");
         }
-
-        public override void OnInspectorGUI()
-        {
+        
+        public override VisualElement CreateInspectorGUI() {
+            
             // Update the serializedObject in case it has been changed outside the Inspector.
             serializedObject.Update();
 
-            DrawDefaultInspector();
-
+            const string mainMarkup = "GltfImporter";
+            const string reportItemMarkup = "ReportItem";
+            const string dependencyMarkup = "Dependency";
+            var root = new VisualElement();
+            
+            var visualTree = Resources.Load(mainMarkup) as VisualTreeAsset;
+            visualTree.CloneTree(root);
+            
             var numDeps = m_AssetDependencies.arraySize;
             
-            var malicousTextureImporters = new List<TextureImporter>();
+            var maliciousTextureImporters = new List<TextureImporter>();
+            
+            var reportItemCount = m_ReportItems.arraySize;
+
+            var reportRoot = root.Query<VisualElement>(name: "Report").First();
+            
+            if (reportItemCount > 0) {
+                // var reportList = new List<ReportItem>
+                var reportItemTree = Resources.Load(reportItemMarkup) as VisualTreeAsset;
+                var reportList = reportRoot.Query<ListView>().First();
+                // reportList.bindingPath = nameof(m_ReportItems);
+                reportList.makeItem = () => reportItemTree.CloneTree();
+                reportList.bindItem = (element, i) => {
+                    if (i >= reportItemCount) {
+                        element.style.display = DisplayStyle.None;
+                        return;
+                    }
+                    var msg = element.Q<Label>("Message");
+                    var item = m_ReportItems.GetArrayElementAtIndex(i);
+                    
+                    var typeProp = item.FindPropertyRelative("type");
+                    var codeProp = item.FindPropertyRelative("code");
+                    var messagesProp = item.FindPropertyRelative("messages");
+
+                    var type = (LogType)typeProp.intValue;
+                    var code = (ReportCode) codeProp.intValue;
+
+                    var icon = element.Q<VisualElement>("Icon");
+                    switch (type) {
+                        case LogType.Error:
+                        case LogType.Assert:
+                        case LogType.Exception:
+                            icon.RemoveFromClassList("info");
+                            icon.AddToClassList("error");
+                            break;
+                        case LogType.Warning:
+                            icon.RemoveFromClassList("info");
+                            icon.AddToClassList("warning");
+                            break;
+                    }
+
+                    var messages = GetStringValues(messagesProp);
+                    var ritem = new ReportItem(type, code, messages);
+                    msg.text = ritem.ToString();
+                };
+            } else {
+                reportRoot.style.display = DisplayStyle.None;
+            }
             
             for (int i = 0; i < numDeps; i++) {
                 var x = m_AssetDependencies.GetArrayElementAtIndex(i);
@@ -59,38 +120,61 @@ namespace GLTFast {
                     var importer = AssetImporter.GetAtPath(assetPathProp.stringValue) as TextureImporter;
                     if (importer!=null) {
                         if (importer.textureShape != TextureImporterShape.Texture2D) {
-                            malicousTextureImporters.Add(importer);
-                            var nameWithoutExtension = Path.GetFileNameWithoutExtension(assetPathProp.stringValue);
-                            EditorGUILayout.BeginHorizontal();
-                            EditorGUILayout.LabelField($"Texture {nameWithoutExtension}");
-                            if (GUILayout.Button("Fix Texture Type")) {
-                                importer.textureShape = TextureImporterShape.Texture2D;
-                                importer.SaveAndReimport();
-                            }
-                            EditorGUILayout.EndHorizontal();
+                            maliciousTextureImporters.Add(importer);
                         }
                     }
                 }
             }
+            
+            if (maliciousTextureImporters.Count>0) {
+                var dependencyTree = Resources.Load(dependencyMarkup) as VisualTreeAsset;
 
-            if (malicousTextureImporters.Count>0) {
-                EditorGUILayout.HelpBox("Some textures couldn't be assigned since they were not 2D textures! To resolve this press the fix button",MessageType.Error);
-                if (GUILayout.Button("Fix All")) {
-                    foreach (var malicousTextureImporter in malicousTextureImporters) {
-                        malicousTextureImporter.textureShape = TextureImporterShape.Texture2D;
+                root.Query<Button>("fixall").First().clickable.clicked += () => {
+                    foreach (var maliciousTextureImporter in maliciousTextureImporters) {
+                        maliciousTextureImporter.textureShape = TextureImporterShape.Texture2D;
                     }
-                    foreach (var malicousTextureImporter in malicousTextureImporters) {
-                        malicousTextureImporter.SaveAndReimport();
+                    
+                    foreach (var maliciousTextureImporter in maliciousTextureImporters) {
+                        maliciousTextureImporter.SaveAndReimport();
                     }
-                    AssetDatabase.Refresh();
+                };
+
+                var foldout = root.Query<Foldout>().First();
+                // var row = root.Query<VisualElement>(className: "fix-texture-row").First();
+                foreach (var maliciousTextureImporter in maliciousTextureImporters) {
+                    var row = dependencyTree.CloneTree();
+                    var icon = row.Query<VisualElement>("Icon").First();
+                    icon.AddToClassList("warning");
+                    foldout.Add(row);
+                    // textureRowTree.CloneTree(foldout);
+                    var path = AssetDatabase.GetAssetPath(maliciousTextureImporter);
+                    row.Query<Label>().First().text = Path.GetFileName(path);
+                    row.Query<Button>().First().clickable.clicked += () => {
+                        maliciousTextureImporter.textureShape = TextureImporterShape.Texture2D;
+                        maliciousTextureImporter.SaveAndReimport();
+                        row.style.display = DisplayStyle.None;
+                    };
                 }
+            } else {
+                var depRoot = root.Query<VisualElement>("Dependencies").First();
+                depRoot.style.display = DisplayStyle.None;
             }
-
+            
+            root.Bind(serializedObject);
+            
             // Apply the changes so Undo/Redo is working
             serializedObject.ApplyModifiedProperties();
+            
+            return root;
+        }
 
-            // Call ApplyRevertGUI to show Apply and Revert buttons.
-            ApplyRevertGUI();
+        static string[] GetStringValues(SerializedProperty property) {
+            if (!property.isArray || property.arraySize < 1) return null;
+            var result = new string[property.arraySize];
+            for (var i = 0; i < property.arraySize; i++) {
+                result[i] = property.GetArrayElementAtIndex(i).stringValue;
+            }
+            return result;
         }
     }
 }

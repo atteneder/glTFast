@@ -1,0 +1,8 @@
+.dependency {
+    flex-direction: row;
+    align-items: center;
+}
+
+.fix-button {
+    margin-left: auto;
+}

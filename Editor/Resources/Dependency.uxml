@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement class="dependency">
+        <Style src="Dependency-style.uss" />
+        <ui:Label text="Dependency Name" name="Name" />
+        <ui:Button name="FixButton" text="Fix Type" class="fix-button" />
+    </ui:VisualElement>
+</ui:UXML>

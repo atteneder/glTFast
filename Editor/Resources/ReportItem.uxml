@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement name="ReportItem" class="report-item">
+        <Style src="ReportItem-style.uss" />
+        <ui:VisualElement name="Icon" class="icon info" />
+        <ui:Label text="Message" name="Message" />
+    </ui:VisualElement>
+</ui:UXML>
