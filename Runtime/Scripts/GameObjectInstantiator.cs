@@ -22,6 +22,8 @@ using UnityEngine;
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
 
+        public Report report;
+        
         protected IGltfReadable gltf;
         
         protected Transform parent;
@@ -35,6 +37,7 @@ namespace GLTFast {
 
         public virtual void Init(int nodeCount) {
             nodes = new GameObject[nodeCount];
+            report = new Report();
         }
 
         public void CreateNode(
@@ -51,8 +54,8 @@ namespace GLTFast {
         }
 
         public void SetParent(uint nodeIndex, uint parentIndex) {
-            if(nodes[nodeIndex]==null || nodes[parentIndex]==null ) {
-                Debug.LogError("Invalid hierarchy");
+            if(nodes[nodeIndex]==null || nodes[parentIndex]==null ) {
+                report.Error(ReportCode.HierarchyInvalid);
                 return;
             }
             nodes[nodeIndex].transform.SetParent(nodes[parentIndex].transform,false);

@@ -98,6 +98,7 @@ The loading behavior can be highly customized:
 - Customize [instantiation](./Documentation~/glTFast.md#instantiation)
 - Load glTF once and instantiate it many times (see [example](./Documentation~/glTFast.md#custom-loading-event-listeners))
 - Access data of glTF scene (for example get material; see [example](./Documentation~/glTFast.md#custom-loading-event-listeners))
+- Load [reports](./Documentation~/glTFast.md#report) allow reacting and communicating incidents during loading and instantiation
 - Tweak and optimize loading performance
 
 See the [Documentation](./Documentation~/glTFast.md) for details.

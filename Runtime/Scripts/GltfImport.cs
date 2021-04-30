@@ -75,12 +75,6 @@ namespace GLTFast {
         
         public const int DefaultBatchCount = 50000;
 
-        public const string ErrorUnsupportedType = "Unsupported {0} type {1}";
-        public const string ErrorUnsupportedColorFormat = "Unsupported Color format {0}";
-        const string ErrorUnsupportedPrimitiveMode = "Primitive mode {0} is untested!";
-        const string ErrorMissingImageURL = "Image URL missing";
-        const string ErrorPackageMissing = "{0} package needs to be installed in order to support glTF extension {1}!\nSee https://github.com/atteneder/glTFast#installing for instructions";
-
         const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
         const string ExtTextureBasisu = "KHR_texture_basisu";
 
@@ -213,6 +207,8 @@ namespace GLTFast {
         /// </summary>
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
 
+        public Report report;
+        
         public GltfImport(
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
@@ -230,6 +226,8 @@ namespace GLTFast {
                 this.deferAgent = deferAgent; 
             }
             this.materialGenerator = materialGenerator ?? Materials.MaterialGenerator.GetDefaultMaterialGenerator();
+
+            report = new Report();
         }
 
 #region Public
@@ -272,7 +270,10 @@ namespace GLTFast {
         }
 
         public bool InstantiateGltf( Transform parent ) {
-            return InstantiateGltf( new GameObjectInstantiator(this,parent) );
+            var instantiator = new GameObjectInstantiator(this, parent);
+            var success = InstantiateGltf(instantiator);
+            instantiator.report?.LogAll();
+            return success;
         }
 
         public bool InstantiateGltf( IInstantiator instantiator ) {
@@ -410,7 +411,7 @@ namespace GLTFast {
                 if(success) await LoadContent();
                 success = success && await Prepare();
             } else {
-                Debug.LogErrorFormat("{0} {1}",download.error,url);
+                report.Error(ReportCode.Download,download.error,url.ToString());
             }
 
             DisposeVolatileData();
@@ -476,7 +477,7 @@ namespace GLTFast {
                             );
                         buffers[i] = decodedBuffer.Item1;
                         if(buffers[i]==null) {
-                            Debug.LogError("Error loading embed buffer!");
+                            report.Error(ReportCode.EmbedBufferLoadFailed);
                             return false;
                         }
                     } else {
@@ -613,16 +614,16 @@ namespace GLTFast {
                     if(!supported) {
 #if !DRACO_UNITY
                         if(ext==ExtDracoMeshCompression) {
-                            Debug.LogErrorFormat(ErrorPackageMissing,"DracoUnity",ext);
+                            report.Error(ReportCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
                         if(ext==ExtTextureBasisu) {
-                            Debug.LogErrorFormat(ErrorPackageMissing,"KtxUnity",ext);
+                            report.Error(ReportCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
                         {
-                            Debug.LogErrorFormat("Required glTF extension {0} is not supported!",ext);
+                            report.Error(ReportCode.ExtensionUnsupported,ext);
                         }
                         return false;
                     }
@@ -634,16 +635,16 @@ namespace GLTFast {
                     if(!supported) {
 #if !DRACO_UNITY
                         if(ext==ExtDracoMeshCompression) {
-                            Debug.LogWarningFormat(ErrorPackageMissing,"DracoUnity",ext);
+                            report.Warning(ReportCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
                         if(ext==ExtTextureBasisu) {
-                            Debug.LogWarningFormat(ErrorPackageMissing,"KtxUnity",ext);
+                            report.Warning(ReportCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
                         {
-                            Debug.LogWarningFormat("glTF extension {0} is not supported!",ext);
+                            report.Warning(ReportCode.ExtensionUnsupported,ext);
                         }
                     }
                 }
@@ -755,11 +756,11 @@ namespace GLTFast {
                                 if(!string.IsNullOrEmpty(img.uri)) {
                                     LoadTexture(i,UriHelper.GetUriString(img.uri,baseUri), !imageReadable[i], imgFormat==ImageFormat.KTX);
                                 } else {
-                                    Debug.LogError(ErrorMissingImageURL);
+                                    report.Error(ReportCode.MissingImageURL);
                                 }
                             } 
                         } else {
-                            Debug.LogErrorFormat("Unknown image format (image {0};uri:{1})",i,img.uri);
+                            report.Error(ReportCode.ImageFormatUnknown,i.ToString(),img.uri);
                         }
                     }
                 }
@@ -778,18 +779,18 @@ namespace GLTFast {
             string mimeType = decodedBuffer.Item2;
             var imgFormat = GetImageFormatFromMimeType(mimeType);
             if (data == null || imgFormat == ImageFormat.Unknown) {
-                Debug.LogError("Loading embedded image failed");
+                report.Error(ReportCode.EmbedImageLoadFailed);
                 return;
             }
 
             if (imageFormats[imageIndex] != ImageFormat.Unknown && imageFormats[imageIndex] != imgFormat) {
-                Debug.LogErrorFormat("Inconsistent embed image type {0}!={1}", imageFormats[imageIndex], imgFormat);
+                report.Error(ReportCode.EmbedImageInconsistentType, imageFormats[imageIndex].ToString(), imgFormat.ToString());
             }
 
             imageFormats[imageIndex] = imgFormat;
             if (imageFormats[imageIndex] != ImageFormat.Jpeg && imageFormats[imageIndex] != ImageFormat.PNG) {
                 // TODO: support embed KTX textures
-                Debug.LogErrorFormat("Unsupported embed image format {0}", imageFormats[imageIndex]);
+                report.Error(ReportCode.EmbedImageUnsupportedType, imageFormats[imageIndex].ToString());
             }
 
             // TODO: Investigate alternative: native texture creation in worker thread
@@ -809,7 +810,7 @@ namespace GLTFast {
                         buffers[downloadPair.Key] = download.data;
                         Profiler.EndSample();
                     } else {
-                        Debug.LogError(download.error);
+                        report.Error(ReportCode.BufferLoadFailed,download.error,downloadPair.Key.ToString());
                     }
                 }
             }
@@ -848,7 +849,7 @@ namespace GLTFast {
                     images[imageIndex] = txt;
                     await deferAgent.BreakPoint();
                 } else {
-                    Debug.LogError(www.error);
+                    report.Error(ReportCode.TextureLoadFailed,www.error,dl.Key.ToString());
                 }
             }
         }
@@ -864,7 +865,7 @@ namespace GLTFast {
                     var textureResult = await ktxContext.LoadKtx(forceSampleLinear);
                     images[ktxContext.imageIndex] = textureResult.texture;
                 } else {
-                    Debug.LogError(www.error);
+                    report.Error(ReportCode.TextureLoadFailed,www.error,dl.Key.ToString());
                 }
             }
         }
@@ -886,11 +887,12 @@ namespace GLTFast {
             stopWatch.Start();
 #elif GLTFAST_THREADS
             if (!timeCritical || deferAgent.ShouldDefer(predictedTime)) {
-                return await Task.Run(() => DecodeEmbedBuffer(encodedBytes));
+                // TODO: Not sure if thread safe? Maybe create a dedicated Report for the thread and merge them afterwards? 
+                return await Task.Run(() => DecodeEmbedBuffer(encodedBytes,report));
             }
 #endif
             await deferAgent.BreakPoint(predictedTime);
-            var decodedBuffer = DecodeEmbedBuffer(encodedBytes);
+            var decodedBuffer = DecodeEmbedBuffer(encodedBytes,report);
 #if MEASURE_TIMINGS
             stopWatch.Stop();
             var elapsedSeconds = stopWatch.ElapsedMilliseconds / 1000f;
@@ -904,9 +906,9 @@ namespace GLTFast {
             return decodedBuffer;
         }
 
-        static Tuple<byte[],string> DecodeEmbedBuffer(string encodedBytes) {
+        static Tuple<byte[],string> DecodeEmbedBuffer(string encodedBytes,Report report) {
             Profiler.BeginSample("DecodeEmbedBuffer");
-            Debug.LogWarning("JSON embed buffers are slow! consider using glTF binary");
+            report.Warning(ReportCode.EmbedSlow);
             var mediaTypeEnd = encodedBytes.IndexOf(';',5,Math.Min(encodedBytes.Length-5,1000) );
             if(mediaTypeEnd<0) {
                 Profiler.EndSample();
@@ -935,7 +937,7 @@ namespace GLTFast {
                 }
                 ktxDownloadTasks.Add(index, downloadTask);
 #else
-                Debug.LogErrorFormat(ErrorPackageMissing,"KtxUnity",ExtTextureBasisu);
+                report.Error(ReportCode.PackageMissing,"KtxUnity",ExtTextureBasisu);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
@@ -953,7 +955,7 @@ namespace GLTFast {
             Profiler.BeginSample("LoadGltfBinary.Phase1");
             
             if (!GltfGlobals.IsGltfBinary(bytes)) {
-                Debug.LogError("Not a glTF-binary file");
+                report.Error(ReportCode.GltfNotBinary);
                 Profiler.EndSample();
                 return false;
             }
@@ -962,7 +964,7 @@ namespace GLTFast {
             //uint length = BitConverter.ToUInt32( bytes, 8 );
             
             if (version != 2) {
-                Debug.LogErrorFormat("Unsupported glTF version {0}",version);
+                report.Error(ReportCode.GltfUnsupportedVersion,version.ToString());
                 Profiler.EndSample();
                 return false;
             }
@@ -979,10 +981,7 @@ namespace GLTFast {
                 uint chType = BitConverter.ToUInt32( bytes, index );
                 index += 4;
 
-                //Debug.Log( string.Format("chunk: {0:X}; length: {1}", chType, chLength) );
-
                 if (chType == (uint)ChunkFormat.BIN) {
-                    //Debug.Log( string.Format("chunk: BIN; length: {0}", chLength) );
                     Assert.IsFalse(glbBinChunk.HasValue); // There can only be one binary chunk
                     glbBinChunk = new GlbBinChunk( index, chLength);
                 }
@@ -991,7 +990,6 @@ namespace GLTFast {
 
                     Profiler.BeginSample("GetJSON");
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength );
-                    //Debug.Log( string.Format("chunk: JSON; length: {0}", json ) );
                     Profiler.EndSample();
                     
                     var success = await ParseJsonAndLoadBuffers(json,baseUri);
@@ -1003,14 +1001,12 @@ namespace GLTFast {
  
                 index += (int) chLength;
             }
-
-            //Debug.Log(index);
+            
             if(gltfRoot==null) {
-                Debug.LogError("Invalid JSON chunk");
+                report.Error(ReportCode.ChunkJsonInvalid);
                 return false;
             }
             
-            //Debug.Log(gltf);
             if(glbBinChunk.HasValue) {
                 binChunks[0] = glbBinChunk.Value;
                 buffers[0] = bytes;
@@ -1135,7 +1131,7 @@ namespace GLTFast {
                             resources.Add(newImg);
 #if DEBUG
                             newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
-                            Debug.LogWarningFormat("Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory.", imageIndex);
+                            report.Warning(ReportCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
                             if(txt.sampler>=0) {
                                 gltfRoot.samplers[txt.sampler].Apply(newImg);
@@ -1192,7 +1188,7 @@ namespace GLTFast {
 #if UNITY_ANIMATION
             if (gltfRoot.hasAnimation) {
                 if (settings.nodeNameMethod != ImportSettings.NameImportMethod.OriginalUnique) {
-                    Debug.Log("Overriding naming method to be OriginalUnique (animation requirement)");
+                    report.Info(ReportCode.NamingOverride);
                     settings.nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique;
                 }
             }
@@ -1220,12 +1216,12 @@ namespace GLTFast {
                     for (int j = 0; j < animation.channels.Length; j++) {
                         var channel = animation.channels[j];
                         if (channel.sampler < 0 || channel.sampler >= animation.samplers.Length) {
-                            Debug.LogError("Animation channel has invalid sampler id");
+                            report.Error(ReportCode.AnimationChannelSamplerInvalid, j.ToString());
                             continue;
                         }
                         var sampler = animation.samplers[channel.sampler];
                         if (channel.target.node < 0 || channel.target.node >= gltfRoot.nodes.Length) {
-                            Debug.LogError("Animation channel has invalid node id");
+                            report.Error(ReportCode.AnimationChannelNodeInvalid, j.ToString());
                             continue;
                         }
                         
@@ -1251,7 +1247,7 @@ namespace GLTFast {
                             }
                             // case AnimationChannel.Path.weights:
                             default:
-                                Debug.LogError($"Unsupported animation target path {channel.target.pathEnum}");
+                                report.Error(ReportCode.AnimationTargetPathUnsupported,channel.target.pathEnum.ToString());
                                 break;
                         }
                     }
@@ -1483,7 +1479,7 @@ namespace GLTFast {
                                 mesh.bindposes = skinsInverseBindMatrices[node.skin];
                                 joints = skin.joints;
                             } else {
-                                Debug.LogWarning("Missing skinning");
+                                report.Warning(ReportCode.SkinMissing);
                             }
                         }
 
@@ -1553,7 +1549,7 @@ namespace GLTFast {
                             Profiler.EndSample();
                             await deferAgent.BreakPoint();
 #else
-                            Debug.LogErrorFormat(ErrorPackageMissing,"KtxUnity",ExtTextureBasisu);
+                            report.Error(ReportCode.PackageMissing,"KtxUnity",ExtTextureBasisu);
 #endif // KTX_UNITY
                         } else {
                             Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBuffer");
@@ -1705,9 +1701,7 @@ namespace GLTFast {
 #if DEBUG
             foreach (var perAttributeMeshes in perAttributeMeshCollection) {
                 if(perAttributeMeshes.Value.Count>1) {
-                    Debug.LogWarning(@"glTF file uses certain vertex attributes/accessors across multiple meshes!
-                    This may result in low performance and high memory usage. Try optimizing the glTF file.
-                    See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52");
+                    report.Warning(ReportCode.AccessorsShared);
                     break;
                 }
             }
@@ -1761,18 +1755,16 @@ namespace GLTFast {
                 VertexBufferConfigBase config;
                 switch (mainBufferType.Value) {
                     case MainBufferType.Position:
-                        config = new VertexBufferConfig<Vertex.VPos>();
+                        config = new VertexBufferConfig<Vertex.VPos>(report);
                         break;
                     case MainBufferType.PosNorm:
-                        config = new VertexBufferConfig<Vertex.VPosNorm>();
+                        config = new VertexBufferConfig<Vertex.VPosNorm>(report);
                         break;
                     case MainBufferType.PosNormTan:
-                        config = new VertexBufferConfig<Vertex.VPosNormTan>();
+                        config = new VertexBufferConfig<Vertex.VPosNormTan>(report);
                         break;
                     default:
-                        #if DEBUG
-                        Debug.LogErrorFormat("Invalid mainBufferType {0}",mainBufferType);
-                        #endif
+                        report.Error(ReportCode.BufferMainInvalidType,mainBufferType.ToString());
                         return false;
                 }
                 config.calculateNormals = !hasNormals && (mainBufferType.Value & MainBufferType.Normal) > 0;
@@ -1961,9 +1953,9 @@ namespace GLTFast {
         }
 
         void SetAccessorUsage(int index, AccessorUsage newUsage) {
-#if UNITY_EDITOR
+#if DEBUG
             if(accessorUsage[index]!=AccessorUsage.Unknown && newUsage!=accessorUsage[index]) {
-                Debug.LogErrorFormat("Inconsistent accessor usage {0} != {1}", accessorUsage[index], newUsage);
+                report.Error(ReportCode.AccessorInconsistentUsage, accessorUsage[index].ToString(), newUsage.ToString());
             }
 #endif
             accessorUsage[index] = newUsage;
@@ -2045,15 +2037,15 @@ namespace GLTFast {
                 c.topology = MeshTopology.Triangles;
                 break;
             case DrawMode.Points:
-                Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                report.Error(ReportCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Points;
                 break;
             case DrawMode.Lines:
-                Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                report.Error(ReportCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Lines;
                 break;
             case DrawMode.LineLoop:
-                Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                report.Error(ReportCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.LineStrip;
                 break;
             case DrawMode.LineStrip:
@@ -2062,7 +2054,7 @@ namespace GLTFast {
             case DrawMode.TriangleStrip:
             case DrawMode.TriangleFan:
             default:
-                Debug.LogErrorFormat(ErrorUnsupportedPrimitiveMode,primitive.mode);
+                report.Error(ReportCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Triangles;
                 break;
             }
@@ -2099,10 +2091,6 @@ namespace GLTFast {
             c.jobHandle = job.Schedule();
         }
 #endif
-
-        void OnMeshesLoaded( Mesh mesh ) {
-            Debug.Log("draco is ready");
-        }
 
         unsafe void CalculateIndicesJob(Root gltf, MeshPrimitive primitive, int vertexCount, MeshTopology topology, out int[] indices, out JobHandle? jobHandle, out GCHandle resultHandle ) {
             Profiler.BeginSample("CalculateIndicesJob");
@@ -2205,7 +2193,7 @@ namespace GLTFast {
                 }
                 break;
             default:
-                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;
                 break;
             }
@@ -2241,7 +2229,7 @@ namespace GLTFast {
                 jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
                 break;
             default:
-                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;
                 break;
             }
@@ -2288,7 +2276,7 @@ namespace GLTFast {
                 break;
             }
             default:
-                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;
                 break;
             }
@@ -2323,7 +2311,7 @@ namespace GLTFast {
                 jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
                 break;
             default:
-                Debug.LogErrorFormat( "Invalid index format {0}", accessor.componentType );
+                report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;
                 break;
             }
@@ -2361,7 +2349,7 @@ namespace GLTFast {
                     }
                     break;
                 default:
-                    Debug.LogErrorFormat( "Invalid animation format {0}", accessor.componentType );
+                    report.Error(ReportCode.AnimationFormatInvalid, accessor.componentType.ToString());
                     break;
             }
             Profiler.EndSample();
@@ -2382,196 +2370,6 @@ namespace GLTFast {
             };
             return result;
         }
- /*
-        unsafe int GetVector3sJob(Root gltf, int accessorIndex, out JobHandle? jobHandle, out NativeArray<Vector3> result) {
-            Profiler.BeginSample("PrepareGetVector3sJob");
-            Assert.IsTrue(accessorIndex>=0);
-            #if DEBUG
-            Assert.AreEqual( GetAccessorTye(gltf.accessors[accessorIndex].typeEnum), typeof(Vector3) );
-            #endif
-
-            var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var buffer = GetBuffer(bufferView.buffer);
-            var chunk = binChunks[bufferView.buffer];
-            int count = accessor.count;
-            Profiler.BeginSample("Alloc");
-            result = new NativeArray<Vector3>(count,Allocator.Persistent);
-            Profiler.EndSample();
-            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
-            if (gltf.IsAccessorInterleaved(accessorIndex)) {
-                if(accessor.componentType == GLTFComponentType.Float) {
-                    var job = new Jobs.GetVector3sInterleavedJob();
-                    job.byteStride = bufferView.byteStride;
-                    fixed( void* src = &(buffer[start]) ) {
-                        job.input = (byte*)src;
-                        job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                    }
-                    jobHandle = job.Schedule(count,DefaultBatchCount);
-                } else
-                if(accessor.componentType == GLTFComponentType.UnsignedShort) {
-                    if (accessor.normalized) {
-                        var job = new Jobs.GetUInt16PositionsInterleavedNormalizedJob();
-                        job.byteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start])) {
-                            job.input = (byte*)src;
-                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    } else {
-                        var job = new Jobs.GetUInt16PositionsInterleavedJob();
-                        job.inputByteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start])) {
-                            job.input = (byte*)src;
-                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    }
-                } else
-                if(accessor.componentType == GLTFComponentType.Short) {
-                    // TODO: test. did not have test files
-                    if (accessor.normalized) {
-                        var job = new Jobs.GetVector3FromInt16InterleavedNormalizedJob();
-                        job.byteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.input = (byte*)src;
-                            job.result = (Vector3*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    } else {
-                        var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                        job.inputByteStride = bufferView.byteStride;
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.input = (byte*)src;
-                            job.result = (Vector3*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    }
-                } else
-                if(accessor.componentType == GLTFComponentType.Byte) {
-                    // TODO: test positions. did not have test files
-                    if (accessor.normalized) {
-                        var job = new Jobs.GetVector3FromSByteInterleavedNormalizedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.Setup(bufferView.byteStride,(sbyte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    } else {
-                        var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                        fixed( void* src = &(buffer[start])) {
-                            job.Setup(bufferView.byteStride,(sbyte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    }
-                } else
-                if(accessor.componentType == GLTFComponentType.UnsignedByte) {
-                    // TODO: test. did not have test files
-                    if (accessor.normalized) {
-                        var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.Setup(bufferView.byteStride,(byte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    } else {
-                        var job = new Jobs.GetVector3FromByteInterleavedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.Setup(bufferView.byteStride,(byte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    }
-                } else {
-                    Debug.LogError("Unknown componentType");
-                    jobHandle = null;
-                }
-            } else {
-                if(accessor.componentType == GLTFComponentType.Float) {
-                    var job = new Jobs.GetVector3sJob();
-                    fixed( void* src = &(buffer[start])) {
-                        job.input = (float*)src;
-                        job.result = (float*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                    }
-                    jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
-                } else
-                if(accessor.componentType == GLTFComponentType.UnsignedShort) {
-                    if (accessor.normalized) {
-                        var job = new Jobs.GetUInt16PositionsNormalizedJob();
-                        fixed( void* src = &(buffer[start])) {
-                            job.input = (ushort*)src;
-                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
-                    } else {
-                        var job = new Jobs.GetUInt16PositionsJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.input = (ushort*)src;
-                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
-                    }
-                } else
-                if(accessor.componentType == GLTFComponentType.Short) {
-                    // TODO: test. did not have test files
-                    // TODO: is a non-interleaved variant faster?
-                    if (accessor.normalized) {
-                        var job = new Jobs.GetVector3FromInt16InterleavedNormalizedJob();
-                        job.byteStride = 6; // 2 bytes * 3
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.input = (byte*)src;
-                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    } else {
-                        var job = new Jobs.GetVector3FromInt16InterleavedJob();
-                        job.inputByteStride = 6; // 2 bytes * 3
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.input = (byte*)src;
-                            job.result = (Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result);
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    }
-                } else
-                if(accessor.componentType == GLTFComponentType.Byte) {
-                    // TODO: test. did not have test files
-                    // TODO: is a non-interleaved variant faster?
-                    if(accessor.normalized) {
-                        var job = new Jobs.GetVector3FromSByteInterleavedNormalizedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.Setup(3,(sbyte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    } else {
-                        var job = new Jobs.GetVector3FromSByteInterleavedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.Setup(3,(sbyte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    }
-                } else
-                if(accessor.componentType == GLTFComponentType.UnsignedByte) {
-                    // TODO: test. did not have test files
-                    // TODO: is a non-interleaved variant faster?
-                    if (accessor.normalized) {
-                        var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.Setup(3,(byte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    } else {
-                        var job = new Jobs.GetVector3FromByteInterleavedJob();
-                        fixed( void* src = &(buffer[start]) ) {
-                            job.Setup(3,(byte*)src,(Vector3*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(result));
-                        }
-                        jobHandle = job.Schedule(count,DefaultBatchCount);
-                    }
-                } else {
-                    Debug.LogError("Unknown componentType");
-                    jobHandle = null;
-                }
-            }
-            Profiler.EndSample();
-            return count;
-        }
-*/
  
         /// <summary>
         /// Determines whether color accessor data can be retrieved as Color[] (floats) or Color32[] (unsigned bytes)
@@ -2606,49 +2404,5 @@ namespace GLTFast {
                     return ImageFormat.Unknown;
             }
         }
-
-#if DEBUG
-        static Type GetAccessorTye( GLTFAccessorAttributeType accessorAttributeType ) {
-            switch (accessorAttributeType)
-            {
-                case GLTFAccessorAttributeType.SCALAR:
-                    return typeof(float);
-                case GLTFAccessorAttributeType.VEC2:
-                    return typeof(Vector2);
-                case GLTFAccessorAttributeType.VEC3:
-                    return typeof(Vector3);
-                case GLTFAccessorAttributeType.VEC4:
-                case GLTFAccessorAttributeType.MAT2:
-                    return typeof(Vector4);
-                case GLTFAccessorAttributeType.MAT3:
-                    return typeof(Matrix4x4);
-                case GLTFAccessorAttributeType.MAT4:
-                default:
-                    Debug.LogError("Unknown/Unsupported GLTFAccessorAttributeType");
-                    return typeof(float);
-            }
-        }
-
-        static Type GetAccessorComponentType( GLTFComponentType componentType ) {
-            switch (componentType)
-            {
-                case GLTFComponentType.Byte:
-                    return typeof(byte);
-                case GLTFComponentType.Float:
-                    return typeof(float);
-                case GLTFComponentType.Short:
-                    return typeof(short);
-                case GLTFComponentType.UnsignedByte:
-                    return typeof(byte);
-                case GLTFComponentType.UnsignedInt:
-                    return typeof(int);
-                case GLTFComponentType.UnsignedShort:
-                    return typeof(ushort);
-                default:
-                    Debug.LogError("Unknown GLTFComponentType");
-                    return null;
-            }
-        }
-#endif // DEBUG
     }
 }

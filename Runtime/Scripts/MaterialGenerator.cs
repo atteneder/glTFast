@@ -79,8 +79,7 @@ namespace GLTFast.Materials {
                     return defaultMaterialGenerator;
                 }
 #endif
-                // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-                Debug.LogError("glTFast: Unknown Render Pipeline");
+                throw new System.Exception("glTFast: Unknown Render Pipeline");
             }
 #if GLTFAST_BUILTIN_RP || UNITY_EDITOR
             defaultMaterialGenerator = new BuiltInMaterialGenerator();

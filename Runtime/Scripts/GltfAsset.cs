@@ -31,6 +31,8 @@ namespace GLTFast
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
+        public LogType logLevel = LogType.Assert;
+        
         public string FullUrl => streamingAsset
             ? Path.Combine(Application.streamingAssetsPath, url)
             : url;
@@ -44,6 +46,7 @@ namespace GLTFast
 
         public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
             var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator);
+            gLTFastInstance.report.LogAll();
             if(success) {
                 if (deferAgent != null) await deferAgent.BreakPoint();
                 // Auto-Instantiate

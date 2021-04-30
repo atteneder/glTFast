@@ -27,6 +27,13 @@ namespace GLTFast {
     using Schema;
 
     abstract class VertexBufferBonesBase {
+        
+        protected Report report;
+
+        public VertexBufferBonesBase(Report report) {
+            this.report = report;
+        }
+
         public abstract unsafe bool ScheduleVertexBonesJob(
             VertexInputData weightsInput,
             VertexInputData jointsInput,
@@ -40,6 +47,8 @@ namespace GLTFast {
     class VertexBufferBones : VertexBufferBonesBase {
         NativeArray<VBones> vData;
 
+        public VertexBufferBones(Report report) : base(report) {}
+        
         public override unsafe bool ScheduleVertexBonesJob(
             VertexInputData weightsInput,
             VertexInputData jointsInput,
@@ -76,7 +85,8 @@ namespace GLTFast {
                     jointsInput.type,
                     jointsInput.byteStride,
                     (uint*)(vDataPtr+16),
-                    32
+                    32,
+                    report
                 );
                 if (h.HasValue) {
                     handles[1] = h.Value;
@@ -133,7 +143,7 @@ namespace GLTFast {
                 // case GLTFComponentType.UnsignedByte:
                 //     break;
                 default:
-                    Debug.LogErrorFormat( GltfImport.ErrorUnsupportedType, "Weights", inputType);
+                    report.Error(ReportCode.TypeUnsupported,"Weights",inputType.ToString());
                     jobHandle = null;
                     break;
             }
@@ -148,7 +158,8 @@ namespace GLTFast {
             GLTFComponentType inputType,
             int inputByteStride,
             uint* output,
-            int outputByteStride
+            int outputByteStride,
+            Report report
         )
         {
             Profiler.BeginSample("GetJointsJob");
@@ -171,7 +182,7 @@ namespace GLTFast {
                     jobHandle = jointsUInt16Job.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
                 default:
-                    Debug.LogErrorFormat( GltfImport.ErrorUnsupportedType, "Joints", inputType);
+                    report.Error(ReportCode.TypeUnsupported, "Joints", inputType.ToString());
                     jobHandle = null;
                     break;
             }

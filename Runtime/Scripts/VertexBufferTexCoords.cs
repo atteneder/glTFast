@@ -26,6 +26,13 @@ namespace GLTFast {
     using Schema;
 
     abstract class VertexBufferTexCoordsBase {
+        
+        protected Report report;
+
+        public VertexBufferTexCoordsBase(Report report) {
+            this.report = report;
+        }
+        
         public int uvSetCount { get; protected set; }
         public abstract unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles);
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, ref int offset, int stream);
@@ -36,6 +43,8 @@ namespace GLTFast {
     class VertexBufferTexCoords<T> : VertexBufferTexCoordsBase where T : struct {
         NativeArray<T> vData;
 
+        public VertexBufferTexCoords(Report report) : base(report) {}
+        
         public override unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexUVJobs");
             Profiler.BeginSample("AllocateNativeArray");
@@ -195,7 +204,7 @@ namespace GLTFast {
                 }
                 break;
             default:
-                Debug.LogErrorFormat( GltfImport.ErrorUnsupportedType, "UV", inputType);
+                report.Error(ReportCode.TypeUnsupported, "UV", inputType.ToString());
                 break;
             }
             Profiler.EndSample();

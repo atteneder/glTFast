@@ -65,8 +65,9 @@ Loading via script allows you to:
 - Custom download or file loading behaviour (see [`IDownloadProvider`](../Runtime/Scripts/IDownload.cs))
 - Custom material generation (see [`IMaterialGenerator`](../Runtime/Scripts/IMaterialGenerator.cs))
 - Customize [instantiation](#Instantiation)
-- Load glTF once and instantiate it many times (see example [below](#custom-post-loading-Script))
-- Access data of glTF scene (for example get material; see example [below](#custom-post-loading-Script))
+- Load glTF once and instantiate it many times (see example [below](#custom-post-loading-script))
+- Access data of glTF scene (for example get material; see example [below](#custom-post-loading-script))
+- Load [reports](#report) allow reacting and communicating incidents during loading and instantiation
 - Tweak and optimize loading performance
 
 #### Custom Post-Loading Script
@@ -113,6 +114,16 @@ public class YourCustomInstantiator : GLTFast.IInstantiator {
   // In your custom post-loading script, use it like this
   gltfAsset.InstantiateGltf( new YourCustomInstantiator() );
 ```
+
+#### Report
+
+When loading a glTF file, glTFast creates a report containing messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those report messages. Examples:
+
+- Log to console in readable form
+- Feed the information into an analytics framework
+- Display details to the users
+
+The provded component `GltfAsset` logs all of those messages to the console by default.  
 
 #### Tune loading performance
 

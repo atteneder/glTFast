@@ -29,6 +29,9 @@ namespace GLTFast.Editor {
         [HideInInspector]
         GltfAssetDependency[] assetDependencies;
         
+        [SerializeField]
+        ReportItem[] reportItems;
+        
         GltfImport m_Gltf;
 
         HashSet<string> m_ImportedNames;
@@ -123,6 +126,8 @@ namespace GLTFast.Editor {
             }
 
             assetDependencies = deps.ToArray();
+
+            reportItems = m_Gltf.report.items.ToArray();
         }
 
         string AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj) {

@@ -56,6 +56,8 @@ namespace GLTFast
             }
         }
 
+        public VertexBufferConfig(Report report) : base(report) {}
+
         public override unsafe JobHandle? ScheduleVertexJobs(
             VertexInputData posInput,
             VertexInputData? nrmInput = null,
@@ -91,10 +93,10 @@ namespace GLTFast
                 jobCount += uvInputs.Length;
                 switch (uvInputs.Length) {
                     case 1:
-                        texCoords = new VertexBufferTexCoords<VTexCoord1>();
+                        texCoords = new VertexBufferTexCoords<VTexCoord1>(report);
                         break;
                     default:
-                        texCoords = new VertexBufferTexCoords<VTexCoord2>();
+                        texCoords = new VertexBufferTexCoords<VTexCoord2>(report);
                         break;
                 }
             }
@@ -108,7 +110,7 @@ namespace GLTFast
             hasBones = weightsInput.HasValue && jointsInput.HasValue;
             if(hasBones) {
                 jobCount+=2;
-                bones = new VertexBufferBones();
+                bones = new VertexBufferBones(report);
             }
 
             NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, defaultAllocator);

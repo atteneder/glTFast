@@ -30,6 +30,8 @@ namespace GLTFast {
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
+
+        protected Report report;
     }
 
     class VertexBufferColors : VertexBufferColorsBase {
@@ -123,7 +125,7 @@ namespace GLTFast {
                         }
                         break;
                     default:
-                        Debug.LogErrorFormat(GltfImport.ErrorUnsupportedColorFormat, attributeType);
+                        report.Error(ReportCode.ColorFormatUnsupported,attributeType.ToString());
                         break;
                 }
             }
@@ -161,11 +163,11 @@ namespace GLTFast {
                         }
                         break;
                     default:
-                        Debug.LogErrorFormat(GltfImport.ErrorUnsupportedColorFormat, attributeType);
+                        report.Error(ReportCode.ColorFormatUnsupported, attributeType.ToString());
                         break;
                 }
             } else {
-                Debug.LogErrorFormat(GltfImport.ErrorUnsupportedType, "color accessor", inputType);
+                report.Error(ReportCode.TypeUnsupported, "color accessor", inputType.ToString());
             }
             Profiler.EndSample();
             return jobHandle;
