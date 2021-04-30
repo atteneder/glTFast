@@ -99,6 +99,13 @@ namespace GLTFast.Editor {
                     var mat = m_Gltf.GetMaterial(i);
                     AddObjectToAsset(ctx, $"materials/{mat.name}", mat);
                 }
+
+                if (m_Gltf.defaultMaterial != null) {
+                    // If a default/fallback material was created, import it as well'
+                    // to avoid (pink) objects without materials
+                    var mat = m_Gltf.defaultMaterial;
+                    AddObjectToAsset(ctx, $"materials/{mat.name}", mat);
+                }
                 
                 var meshes = m_Gltf.GetMeshes();
                 if (meshes != null) {

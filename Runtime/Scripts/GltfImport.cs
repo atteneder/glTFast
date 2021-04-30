@@ -193,6 +193,13 @@ namespace GLTFast {
         AnimationClip[] animationClips;
 #endif
 
+#if UNITY_EDITOR
+        /// <summary>
+        /// Required for Editor import only to preserve default/fallback materials
+        /// </summary>
+        public UnityEngine.Material defaultMaterial;
+#endif
+        
 #endregion VolatileDataInstantiation
 
         bool loadingDone = false;
@@ -334,7 +341,14 @@ namespace GLTFast {
         }
 
         public UnityEngine.Material GetDefaultMaterial() {
+#if UNITY_EDITOR
+            if (defaultMaterial == null) {
+                defaultMaterial = materialGenerator.GetDefaultMaterial();
+            }
+            return defaultMaterial;
+#else
             return materialGenerator.GetDefaultMaterial();
+#endif
         }
         
         public Texture2D GetImage( int index = 0 ) {
