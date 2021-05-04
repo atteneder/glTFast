@@ -45,9 +45,7 @@ namespace GLTFast.Materials {
         
         protected override RenderQueue? ApplyTransmission(
             ref Color baseColorLinear,
-            ref Texture[] textures,
-            ref Image[] schemaImages,
-            ref Dictionary<int, Texture2D>[] imageVariants,
+            IGltfReadable gltf,
             Transmission transmission,
             Material material,
             RenderQueue? renderQueue
@@ -57,16 +55,14 @@ namespace GLTFast.Materials {
                     material.EnableKeyword("TRANSMISSION");
                     material.SetFloat(transmissionFactorPropId, transmission.transmissionFactor);
                     renderQueue = RenderQueue.Transparent;
-                    if (TrySetTexture(transmission.transmissionTexture, material, transmissionTexturePropId, ref textures, ref schemaImages, ref imageVariants)) { }
+                    if (TrySetTexture(transmission.transmissionTexture, material, transmissionTexturePropId, gltf)) { }
                 }
                 return renderQueue;
             }
 
             return base.ApplyTransmission(
                 ref baseColorLinear,
-                ref textures,
-                ref schemaImages,
-                ref imageVariants,
+                gltf,
                 transmission,
                 material,
                 renderQueue

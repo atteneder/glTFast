@@ -172,12 +172,8 @@ namespace GLTFast.Materials {
             return mat;
         }
 
-        public override Material GenerateMaterial(
-            Schema.Material gltfMaterial,
-            ref Schema.Texture[] textures,
-            ref Schema.Image[] schemaImages,
-            ref Dictionary<int,Texture2D>[] imageVariants
-        ) {
+        public override Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf) {
+
             Material material;
 
             MaterialType? materialType = null;
@@ -220,9 +216,9 @@ namespace GLTFast.Materials {
                     material.SetVector(specColorPropId, specGloss.specularColor);
                     material.SetFloat(smoothnessPropId, specGloss.glossinessFactor);
 
-                    TrySetTexture(specGloss.diffuseTexture,material,baseMapPropId,ref textures,ref schemaImages, ref imageVariants);
+                    TrySetTexture(specGloss.diffuseTexture,material,baseMapPropId,gltf);
 
-                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,specGlossMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,specGlossMapPropId,gltf)) {
                         // material.EnableKeyword();
                     }
                 }
@@ -233,14 +229,7 @@ namespace GLTFast.Materials {
 
                 if (materialType != MaterialType.SpecularGlossiness) {
                     // baseColorTexture can be used by both MetallicRoughness AND Unlit materials
-                    TrySetTexture(
-                        gltfMaterial.pbrMetallicRoughness.baseColorTexture,
-                        material,
-                        baseMapPropId,
-                        ref textures,
-                        ref schemaImages,
-                        ref imageVariants
-                        );
+                    TrySetTexture(gltfMaterial.pbrMetallicRoughness.baseColorTexture,material,baseMapPropId,gltf);
                 }
 
                 if (materialType==MaterialType.MetallicRoughness)
@@ -248,7 +237,7 @@ namespace GLTFast.Materials {
                     material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                     material.SetFloat(smoothnessPropId, 1-gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
-                    if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicRoughnessTexturePropId,ref textures,ref schemaImages, ref imageVariants)) {
+                    if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicRoughnessTexturePropId,gltf)) {
                         // material.EnableKeyword(KW_METALLIC_ROUGHNESS_MAP);
                     }
 
@@ -259,17 +248,17 @@ namespace GLTFast.Materials {
                 }
             }
 
-            if(TrySetTexture(gltfMaterial.normalTexture,material,bumpMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.normalTexture,material,bumpMapPropId,gltf)) {
                 // material.EnableKeyword(KW_NORMALMAP);
                 material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
             }
             
-            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionMapPropId,gltf)) {
                 material.EnableKeyword(KW_OCCLUSION);
                 material.SetFloat(occlusionStrengthPropId,gltfMaterial.occlusionTexture.strength);
             }
 
-            if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissionMapPropId,ref textures,ref schemaImages, ref imageVariants)) {
+            if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissionMapPropId,gltf)) {
                 material.EnableKeyword(KW_EMISSION);
             }
             
@@ -278,7 +267,7 @@ namespace GLTFast.Materials {
                 // Transmission - Approximation
                 var transmission = gltfMaterial.extensions.KHR_materials_transmission;
                 if (transmission != null) {
-                    renderQueue = ApplyTransmission(ref baseColorLinear, ref textures, ref schemaImages, ref imageVariants, transmission, material, renderQueue);
+                    renderQueue = ApplyTransmission(ref baseColorLinear, gltf, transmission, material, renderQueue);
                 }
             }
 
@@ -314,9 +303,7 @@ namespace GLTFast.Materials {
 
         protected virtual RenderQueue? ApplyTransmission(
             ref Color baseColorLinear,
-            ref Texture[] textures,
-            ref Image[] schemaImages,
-            ref Dictionary<int, Texture2D>[] imageVariants,
+            IGltfReadable gltf,
             Transmission transmission,
             Material material,
             RenderQueue? renderQueue
