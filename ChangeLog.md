@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IMaterialGenerator` overhaul that allows more flexible generation of materials (ahead of time)
   - `GenerateMaterial` instead of passing on all require data (like full texture arrays), data has to be fetched from the `GltfImporter`/`IGltfReadable`.
 - `IInstantiator.AddPrimitive`: Instead of `Material` the IDs/indices of materials are provided and the materials themselves have to be fetched from the `IGltfReadable`/`GltfImporter` (allowing more flexible usage)
+### Removed
+- Runtime tests. They were moved into a [dedicated test package](https://github.com/atteneder/gltf-test-framework).
 
 ## [3.2.1] - 2021-05-05
 ### Fixed
