@@ -115,19 +115,15 @@ namespace GLTFast.Materials {
             {
                 int textureIndex = textureInfo.index;
                 var srcTexture = gltf.GetSourceTexture(textureIndex);
-                if (srcTexture != null)
-                {
-                    var texture = gltf.GetTexture(textureIndex);
-                    if(texture != null) {
-                        if(textureInfo.texCoord!=0) {
-                            Debug.LogError(ERROR_MULTI_UVS);
-                        }
-                        material.SetTexture(propertyId,texture);
-                        var isKtx = srcTexture.isKtx;
-                        TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
-                        return true;
+                if (srcTexture != null) {
+                    gltf.AssignTexture(textureIndex, new TextureAssigner(material, propertyId));
+                    if(textureInfo.texCoord!=0) {
+                        Debug.LogError(ERROR_MULTI_UVS);
                     }
-                    Debug.LogErrorFormat("Texture #{0} not loaded", textureIndex);
+                    var isKtx = srcTexture.isKtx;
+                    TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
+                    return true;
+                    // Debug.LogErrorFormat("Texture #{0} not loaded", textureIndex);
                 }
                 else
                 {

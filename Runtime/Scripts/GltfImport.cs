@@ -158,6 +158,8 @@ namespace GLTFast {
         bool[] imageReadable;
         bool[] imageGamma;
 
+        List<ITextureAssigner>[] textureAssignments;
+
         /// optional glTF-binary buffer
         /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
         GlbBinChunk? glbBinChunk;
@@ -273,6 +275,7 @@ namespace GLTFast {
             DisposeVolatileData();
             loadingError = !success;
             loadingDone = true;
+            WaitForAndApplyTextures();
             return success;
         }
 
@@ -364,7 +367,31 @@ namespace GLTFast {
             }
             return null;
         }
-        
+
+        public bool AssignTexture(int index, ITextureAssigner assigner) {
+            if (gltfRoot?.textures == null || index < 0 || index >= gltfRoot.textures.Length) {
+                assigner.Error();
+                return true;
+            }
+
+            var texture = textures?[index];
+            if (texture == null) {
+                if (textureAssignments == null) {
+                    textureAssignments = new List<ITextureAssigner>[gltfRoot.textures.Length];
+                }
+
+                if (textureAssignments[index] == null) {
+                    textureAssignments[index] = new List<ITextureAssigner>();
+                }
+
+                textureAssignments[index].Add(assigner);
+                return false;
+            }
+
+            assigner.Assign(texture);
+            return true;
+        }
+
 #if UNITY_ANIMATION
         public AnimationClip[] GetAnimationClips() {
             return animationClips;
@@ -422,7 +449,12 @@ namespace GLTFast {
                 } else {
                     success = await LoadGltf(download.text,url);
                 }
-                if(success) await LoadContent();
+
+                if (success) {
+                    await CreateMaterials();
+                    await LoadContent();
+                }
+
                 success = success && await Prepare();
             } else {
                 report.Error(ReportCode.Download,download.error,url.ToString());
@@ -431,25 +463,40 @@ namespace GLTFast {
             DisposeVolatileData();
             loadingError = !success;
             loadingDone = true;
+            WaitForAndApplyTextures();
             return success;
         }
 
-        async Task LoadContent() {
+        async Task CreateMaterials() {
+            if (gltfRoot.materials != null) {
+                materials = new UnityEngine.Material[gltfRoot.materials.Length];
+                for (int i = 0; i < materials.Length; i++) {
+                    await deferAgent.BreakPoint(.0001f);
+                    Profiler.BeginSample("GenerateMaterial");
+                    materials[i] = materialGenerator.GenerateMaterial(gltfRoot.materials[i], this);
+                    Profiler.EndSample();
+                }
+            }
 
+            await deferAgent.BreakPoint();
+        }
+
+        async Task LoadContent() {
             await WaitForBufferDownloads();
             downloadTasks?.Clear();
+        }
 
+        async Task WaitForTextures() {
             if (textureDownloadTasks != null) {
                 await WaitForTextureDownloads();
                 textureDownloadTasks.Clear();
             }
-            
+
 #if KTX_UNITY
             if (ktxDownloadTasks != null) {
                 await WaitForKtxDownloads();
                 ktxDownloadTasks.Clear();
             }
-
 #endif // KTX_UNITY
         }
 
@@ -1033,6 +1080,15 @@ namespace GLTFast {
             return buffers[index];
         }
 
+        void SetTexture(int index, Texture2D texture) {
+            textures[index] = texture;
+            if (textureAssignments?[index] != null) {
+                foreach (var assigner in textureAssignments[index]) {
+                    assigner.Assign(texture);
+                }
+            }
+        }
+
         NativeSlice<byte> GetBufferView(BufferView bufferView) {
             int bufferIndex = bufferView.buffer;
             if(!nativeBuffers[bufferIndex].IsCreated) {
@@ -1121,53 +1177,6 @@ namespace GLTFast {
                 }
                 imageCreateContexts = null;
             }
-
-            if(images!=null && gltfRoot.textures!=null) {
-                textures = new Texture2D[gltfRoot.textures.Length];
-                var imageVariants = new Dictionary<int,Texture2D>[images.Length];
-                for (int textureIndex = 0; textureIndex < gltfRoot.textures.Length; textureIndex++)
-                {
-                    var txt = gltfRoot.textures[textureIndex];
-                    var imageIndex = txt.GetImageIndex();
-                    var img = images[imageIndex];
-                    if(imageVariants[imageIndex]==null) {
-                        if(txt.sampler>=0) {
-                            gltfRoot.samplers[txt.sampler].Apply(img);
-                        }
-                        imageVariants[imageIndex] = new Dictionary<int, Texture2D>();
-                        imageVariants[imageIndex][txt.sampler] = img;
-                        textures[textureIndex] = img;
-                    } else {
-                        if (imageVariants[imageIndex].TryGetValue(txt.sampler, out var imgVariant)) {
-                            textures[textureIndex] = imgVariant;
-                        } else {
-                            var newImg = Texture2D.Instantiate(img);
-                            resources.Add(newImg);
-#if DEBUG
-                            newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
-                            report.Warning(ReportCode.ImageMultipleSamplers,imageIndex.ToString());
-#endif
-                            if(txt.sampler>=0) {
-                                gltfRoot.samplers[txt.sampler].Apply(newImg);
-                            }
-                            imageVariants[imageIndex][txt.sampler] = newImg;
-                            textures[textureIndex] = newImg;
-                        }
-                        
-                    }
-                }
-            }
-
-            if(gltfRoot.materials!=null) {
-                materials = new UnityEngine.Material[gltfRoot.materials.Length];
-                for(int i=0;i<materials.Length;i++) {
-                    await deferAgent.BreakPoint(.0001f);
-                    Profiler.BeginSample("GenerateMaterial");
-                    materials[i] = materialGenerator.GenerateMaterial(gltfRoot.materials[i],this);
-                    Profiler.EndSample();
-                }
-            }
-            await deferAgent.BreakPoint();
 
             if(primitiveContexts!=null) {
                 for(int i=0;i<primitiveContexts.Length;i++) {
@@ -1276,6 +1285,48 @@ namespace GLTFast {
             return success;
         }
 
+        async Task WaitForAndApplyTextures() {
+            await WaitForTextures();
+
+            if (images != null && gltfRoot.textures != null) {
+                textures = new Texture2D[gltfRoot.textures.Length];
+                var imageVariants = new Dictionary<int, Texture2D>[images.Length];
+                for (int textureIndex = 0; textureIndex < gltfRoot.textures.Length; textureIndex++) {
+                    var txt = gltfRoot.textures[textureIndex];
+                    var imageIndex = txt.GetImageIndex();
+                    var img = images[imageIndex];
+                    if (imageVariants[imageIndex] == null) {
+                        if (txt.sampler >= 0) {
+                            gltfRoot.samplers[txt.sampler].Apply(img);
+                        }
+
+                        imageVariants[imageIndex] = new Dictionary<int, Texture2D>();
+                        imageVariants[imageIndex][txt.sampler] = img;
+                        SetTexture(textureIndex, img);
+                    }
+                    else {
+                        if (imageVariants[imageIndex].TryGetValue(txt.sampler, out var imgVariant)) {
+                            SetTexture(textureIndex, imgVariant);
+                        }
+                        else {
+                            var newImg = Texture2D.Instantiate(img);
+                            resources.Add(newImg);
+#if DEBUG
+                            newImg.name = string.Format("{0}_sampler{1}", img.name, txt.sampler);
+                            report.Warning(ReportCode.ImageMultipleSamplers, imageIndex.ToString());
+#endif
+                            if (txt.sampler >= 0) {
+                                gltfRoot.samplers[txt.sampler].Apply(newImg);
+                            }
+
+                            imageVariants[imageIndex][txt.sampler] = newImg;
+                            SetTexture(textureIndex, newImg);
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// glTF nodes have no requirement to be named or have specific names.
         /// Some Unity systems like animation and importers require unique
@@ -1372,14 +1423,14 @@ namespace GLTFast {
             binChunks = null;
 
             downloadTasks = null;
-            textureDownloadTasks = null;
+            // textureDownloadTasks = null;
             
             accessorData = null;
             accessorUsage = null;
             primitiveContexts = null;
             meshPrimitiveCluster = null;
             imageCreateContexts = null;
-            images = null;
+            // images = null;
             imageFormats = null;
             imageReadable = null;
             imageGamma = null;
