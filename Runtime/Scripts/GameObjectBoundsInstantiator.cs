@@ -46,7 +46,14 @@ namespace GLTFast {
                 );
 
             if (nodeBounds!=null) {
-                nodeBounds[nodeIndex] = GetTransformedBounds(mesh.bounds, nodes[nodeIndex].transform.localToWorldMatrix);
+                var meshBounds = GetTransformedBounds(mesh.bounds, nodes[nodeIndex].transform.localToWorldMatrix);
+                if (nodeBounds[nodeIndex].HasValue) {
+                    meshBounds.Encapsulate(nodeBounds[nodeIndex].Value);
+                    nodeBounds[nodeIndex] = meshBounds;
+                }
+                else {
+                    nodeBounds[nodeIndex] = meshBounds;
+                }
             }
         }
 
