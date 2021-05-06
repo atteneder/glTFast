@@ -1503,16 +1503,33 @@ namespace GLTFast {
         }
 
         void InstantiateSceneInternal( Root gltf, IInstantiator instantiator, int sceneId ) {
+            
             // TODO: Make instantiation preemptive (via deferAgent) as well!
-            void IterateNodes(uint nodeIndex, uint? parentIndex) {
+
+            void IterateNodes(uint nodeIndex, uint? parentIndex, Action<uint,uint?> callback) {
+                var node = gltfRoot.nodes[nodeIndex];
+                callback(nodeIndex,parentIndex);
+                if (node.children != null) {
+                    foreach (var child in node.children) {
+                        IterateNodes(child,nodeIndex,callback);
+                    }
+                }
+            }
+
+            void CreateHierarchy(uint nodeIndex, uint? parentIndex) {
                 var node = gltfRoot.nodes[nodeIndex];
                 node.GetTransform(out var position, out var rotation, out var scale);
-                
-                instantiator.CreateNode(nodeIndex,position,rotation,scale);
-                
+
+                instantiator.CreateNode(nodeIndex, position, rotation, scale);
+
                 if (parentIndex.HasValue) {
-                    instantiator.SetParent(nodeIndex,parentIndex.Value);
+                    instantiator.SetParent(nodeIndex, parentIndex.Value);
                 }
+            }
+
+            void PopulateHierarchy(uint nodeIndex, uint? parentIndex) {
+                
+                var node = gltfRoot.nodes[nodeIndex];
                 
                 var goName = 
 #if UNITY_ANIMATION
@@ -1556,12 +1573,6 @@ namespace GLTFast {
                 }
 
                 instantiator.SetNodeName(nodeIndex,goName);
-                
-                if (node.children != null) {
-                    foreach (var child in node.children) {
-                        IterateNodes(child,nodeIndex);
-                    }
-                }
             }
             
             Profiler.BeginSample("CreateGameObjects");
@@ -1570,7 +1581,11 @@ namespace GLTFast {
             instantiator.Init();
             
             foreach (var nodeId in scene.nodes) {
-                IterateNodes(nodeId,null);
+                IterateNodes(nodeId,null,CreateHierarchy);
+            }
+            
+            foreach (var nodeId in scene.nodes) {
+                IterateNodes(nodeId,null,PopulateHierarchy);
             }
 
 #if UNITY_ANIMATION
