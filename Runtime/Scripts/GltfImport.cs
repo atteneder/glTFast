@@ -112,6 +112,15 @@ namespace GLTFast {
         /// These members are only used during loading phase.
         /// </summary>
         byte[][] buffers;
+
+        /// <summary>
+        /// GCHandles for pinned managed arrays <see cref="buffers"/>
+        /// </summary>
+        GCHandle?[] bufferHandles;
+
+        /// <summary>
+        /// NativeArray views into <see cref="buffers"/>
+        /// </summary>
         NativeArray<byte>[] nativeBuffers;
 
         GlbBinChunk[] binChunks;
@@ -557,6 +566,7 @@ namespace GLTFast {
             var bufferCount = gltfRoot.buffers.Length;
             if(bufferCount>0) {
                 buffers = new byte[bufferCount][];
+                bufferHandles = new GCHandle?[bufferCount];
                 nativeBuffers = new NativeArray<byte>[bufferCount];
                 binChunks = new GlbBinChunk[bufferCount];
             }
@@ -1113,10 +1123,20 @@ namespace GLTFast {
             return buffers[index];
         }
 
-        NativeSlice<byte> GetBufferView(BufferView bufferView) {
+        unsafe NativeSlice<byte> GetBufferView(BufferView bufferView) {
             int bufferIndex = bufferView.buffer;
             if(!nativeBuffers[bufferIndex].IsCreated) {
-                nativeBuffers[bufferIndex] = new NativeArray<byte>(GetBuffer(bufferIndex),Allocator.Persistent);
+                Profiler.BeginSample("ConvertToNativeArray");
+                var buffer = GetBuffer(bufferIndex);
+                bufferHandles[bufferIndex] = GCHandle.Alloc(buffer,GCHandleType.Pinned);
+                fixed (void* bufferAddress = &(buffer[0])) {
+                    nativeBuffers[bufferIndex] = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(bufferAddress,buffer.Length,Allocator.None);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+                    var safetyHandle = AtomicSafetyHandle.Create();
+                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(array: ref nativeBuffers[bufferIndex], safetyHandle);
+#endif
+                }
+                Profiler.EndSample();
             }
             var chunk = binChunks[bufferIndex];
             return new NativeSlice<byte>(nativeBuffers[bufferIndex],chunk.start+bufferView.byteOffset,bufferView.byteLength);
@@ -1442,16 +1462,29 @@ namespace GLTFast {
             
             primitiveContexts = null;
 
+            // Unpin managed buffer arrays
+            if (bufferHandles != null) {
+                foreach (var t in bufferHandles) {
+                    t?.Free();
+                }
+            }
+            bufferHandles = null;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
             if(nativeBuffers!=null) {
                 foreach (var nativeBuffer in nativeBuffers)
                 {
                     if(nativeBuffer.IsCreated) {
-                        nativeBuffer.Dispose();
+                        var safetyHandle = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(nativeBuffer);
+                        AtomicSafetyHandle.Release(safetyHandle);
                     }
                 }
             }
+#endif
             nativeBuffers = null;
+
             buffers = null;
+            
             binChunks = null;
 
             downloadTasks = null;
