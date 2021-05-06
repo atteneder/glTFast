@@ -19,6 +19,6 @@ namespace GLTFast.Schema {
     public class Skin : RootChild {
         public int inverseBindMatrices;
         public int skeleton;
-        public int[] joints;
+        public uint[] joints;
     }
 }

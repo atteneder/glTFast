@@ -14,6 +14,8 @@
 //
 
 using System;
+using System.Collections.Generic;
+using Unity.Collections;
 using UnityEngine;
 // #if UNITY_EDITOR && UNITY_ANIMATION
 // using UnityEditor.Animations;
@@ -28,15 +30,15 @@ namespace GLTFast {
         
         protected Transform parent;
 
-        protected GameObject[] nodes;
+        protected Dictionary<uint,GameObject> nodes;
 
         public GameObjectInstantiator(IGltfReadable gltf, Transform parent) {
             this.gltf = gltf;
             this.parent = parent;
         }
 
-        public virtual void Init(int nodeCount) {
-            nodes = new GameObject[nodeCount];
+        public virtual void Init() {
+            nodes = new Dictionary<uint, GameObject>();
             report = new Report();
         }
 
@@ -70,7 +72,7 @@ namespace GLTFast {
             string meshName,
             Mesh mesh,
             int[] materialIndices,
-            int[] joints = null,
+            uint[] joints = null,
             int primitiveNumeration = 0
         ) {
 

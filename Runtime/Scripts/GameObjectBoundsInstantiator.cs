@@ -13,19 +13,20 @@
 // limitations under the License.
 //
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace GLTFast {
 
     public class GameObjectBoundsInstantiator : GameObjectInstantiator {
 
-        Bounds?[] nodeBounds;
+        Dictionary<uint, Bounds> nodeBounds;
 
         public GameObjectBoundsInstantiator(IGltfReadable gltf, Transform parent) : base(gltf,parent) {}
         
-        public override void Init(int nodeCount) {
-            base.Init(nodeCount);
-            nodeBounds = new Bounds?[nodeCount];
+        public override void Init() {
+            base.Init();
+            nodeBounds = new Dictionary<uint, Bounds>();
         }
 
         public override void AddPrimitive(
@@ -33,7 +34,7 @@ namespace GLTFast {
             string meshName,
             Mesh mesh,
             int[] materialIndices,
-            int[] joints = null,
+            uint[] joints = null,
             int primitiveNumeration = 0
         ) {
             base.AddPrimitive(
@@ -43,12 +44,12 @@ namespace GLTFast {
                 materialIndices,
                 joints,
                 primitiveNumeration
-                );
+            );
 
             if (nodeBounds!=null) {
                 var meshBounds = GetTransformedBounds(mesh.bounds, nodes[nodeIndex].transform.localToWorldMatrix);
-                if (nodeBounds[nodeIndex].HasValue) {
-                    meshBounds.Encapsulate(nodeBounds[nodeIndex].Value);
+                if (nodeBounds.TryGetValue(nodeIndex,out var prevBounds)) {
+                    meshBounds.Encapsulate(prevBounds);
                     nodeBounds[nodeIndex] = meshBounds;
                 }
                 else {
@@ -59,20 +60,15 @@ namespace GLTFast {
 
         public Bounds? CalculateBounds() {
 
-            bool sceneBoundsSet = false;
-            Bounds sceneBounds = new Bounds();
+            var sceneBoundsSet = false;
+            var sceneBounds = new Bounds();
 
-            var nodesLength = nodes.Length;
-            for (int nodeIndex = 0; nodeIndex < nodesLength; nodeIndex++)
-            {
-                if (nodes[nodeIndex] == null
-                    || nodeBounds == null
-                    || !nodeBounds[nodeIndex].HasValue) continue;
-
+            var nodesLength = nodes?.Count ?? 0;
+            foreach (var nodeBound in nodeBounds.Values) {
                 if (sceneBoundsSet) {
-                    sceneBounds.Encapsulate(nodeBounds[nodeIndex].Value);
+                    sceneBounds.Encapsulate(nodeBound);
                 } else {
-                    sceneBounds = nodeBounds[nodeIndex].Value;
+                    sceneBounds = nodeBound;
                     sceneBoundsSet = true;
                 }
             }

@@ -30,7 +30,9 @@ namespace GLTFast
         /// </summary>
         /// <value>True when loading routine ended, false otherwise.</value>
         public bool isDone => gLTFastInstance!=null && gLTFastInstance.LoadingDone;
-
+        
+        public int? currentSceneId { get; protected set; }
+        
         /// <summary>
         /// Method for manual loading with custom <see cref="IDownloadProvider"/> and <see cref="IDeferAgent"/>.
         /// </summary>
@@ -44,12 +46,35 @@ namespace GLTFast
         }
 
         /// <summary>
-        /// Creates an instance of a glTF file underneath the provided Transform's GameObject.
+        /// Creates an instance of the main scene
         /// </summary>
-        /// <param name="transform">Transform that will become the parent of the new instance.</param>
-        /// <returns>True if instatiation was successful.</returns>
-        public bool Instantiate( Transform transform ) {
-            return gLTFastInstance != null && gLTFastInstance.InstantiateGltf(transform);
+        /// <returns>True if instantiation was successful.</returns>
+        public bool Instantiate() {
+            if (gLTFastInstance == null) return false;
+            var success = gLTFastInstance.InstantiateMainScene(transform);
+            currentSceneId = success ? gLTFastInstance.defaultSceneIndex : (int?)null;
+            return success;
+        }
+
+        /// <summary>
+        /// Creates an instance of the scene specified by the scene index.
+        /// </summary>
+        /// <param name="sceneIndex">Index of the scene to be instantiated</param>
+        /// <returns>True if instantiation was successful.</returns>
+        public bool InstantiateScene(int sceneIndex) {
+            if (gLTFastInstance == null) return false;
+            var success = gLTFastInstance.InstantiateScene(transform,sceneIndex);
+            currentSceneId = success ? sceneIndex : (int?)null;
+            return success;
+        }
+
+        /// <summary>
+        /// Removes previously instantiated scene(s)
+        /// </summary>
+        public void ClearScenes() {
+            foreach (Transform child in transform) {
+                Destroy(child.gameObject);
+            }
         }
 
         /// <summary>
@@ -60,6 +85,27 @@ namespace GLTFast
         /// <returns>glTF material if it was loaded successfully and index is correct, null otherwise.</returns>
         public UnityEngine.Material GetMaterial( int index = 0 ) {
             return gLTFastInstance?.GetMaterial(index);
+        }
+
+        /// <summary>
+        /// Number of scenes loaded
+        /// </summary>
+        public int sceneCount => gLTFastInstance?.sceneCount ?? 0;
+
+        /// <summary>
+        /// Array of scenes' names (entries can be null, if not specified)
+        /// </summary>
+        public string[] sceneNames {
+            get {
+                if (gLTFastInstance != null && gLTFastInstance.sceneCount > 0) {
+                    var names = new string[gLTFastInstance.sceneCount];
+                    for (int i = 0; i < names.Length; i++) {
+                        names[i] = gLTFastInstance.GetSceneName(i);
+                    }
+                    return names;
+                }
+                return null;
+            }
         }
 
         protected virtual void OnDestroy()

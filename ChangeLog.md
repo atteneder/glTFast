@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ImportSettings.nodeNameMethod` to allow customizing Node/GameObject naming convention
 - `IGltfReadable` interface for `GltfImporter`
 - Import and instantiation reports. Allows users to analyze the report and opt out of logging all messages to the console (which is still done by default).
+- Scene support. glTF can contain multiple scenes and now it is possible to instantiate them selectively 
+  - `GltfImport.InstantiateMainScene` to create an instance of the main scene (or nothing if the `scene` is not set; following the glTF 2.0 specification)
+  - `GltfImport.InstantiateScene` to create an instance of a specific scene 
+  - Instantiation of single scenes via  and  
 ### Changed
 - Nodes' names are made unique (within their hierarchical position) by supplementing a continuous number. This is required for correct animation target lookup and import continuity. 
 - `IInstantiator.AddPrimitive` extended parameter `first` (`bool`; true for the first primitive) to primitiveNumeration (`int`; counting upwards from zero). This allows for creating unique GameObject names.
@@ -20,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IMaterialGenerator` overhaul that allows more flexible generation of materials (ahead of time)
   - `GenerateMaterial` instead of passing on all require data (like full texture arrays), data has to be fetched from the `GltfImporter`/`IGltfReadable`.
 - `IInstantiator.AddPrimitive`: Instead of `Material` the IDs/indices of materials are provided and the materials themselves have to be fetched from the `IGltfReadable`/`GltfImporter` (allowing more flexible usage)
+- `GltfImport.InstantiateGltf` (instantiates all scenes at once) is marked obsolete in favour of `InstantiateMainScene` and `InstantiateScene`
 ### Removed
 - Runtime tests. They were moved into a [dedicated test package](https://github.com/atteneder/gltf-test-framework).
 

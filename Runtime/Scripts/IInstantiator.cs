@@ -22,7 +22,7 @@ namespace GLTFast {
         /// Used to initialize Instantiators. Always called first.
         /// </summary>
         /// <param name="nodeCount">Quantity of nodes in the glTF file</param>
-        void Init(int nodeCount);
+        void Init();
 
         /// <summary>
         /// Called for every Node in the glTF file
@@ -69,7 +69,7 @@ namespace GLTFast {
             string meshName,
             Mesh mesh,
             int[] materialIndices,
-            int[] joints = null,
+            uint[] joints = null,
             int primitiveNumeration = 0
         );
 

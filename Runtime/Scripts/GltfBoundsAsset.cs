@@ -29,23 +29,27 @@ namespace GLTFast
         public Bounds bounds;
 
         public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
-            var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator);
+            gLTFastInstance = new GltfImport(downloadProvider,deferAgent, materialGenerator);
+            var success = await gLTFastInstance.Load(url);
             if(success) {
                 var insta = new GameObjectBoundsInstantiator(gLTFastInstance,transform);
                 // Auto-Instantiate
-                gLTFastInstance.InstantiateGltf(insta);
-
-                var sceneBounds = insta.CalculateBounds();
-                if (sceneBounds.HasValue) {
-                    bounds = sceneBounds.Value;
-                    if (createBoxCollider) {
-#if UNITY_PHYSICS
-                        var boxCollider = gameObject.AddComponent<BoxCollider>();
-                        boxCollider.center = bounds.center;
-                        boxCollider.size = bounds.size;
-#else
-                        Debug.LogError("GltfBoundsAsset requires the built-in Physics package to be enabled (in the Package Manager)");
-#endif
+                success = gLTFastInstance.InstantiateMainScene(insta);
+            
+                if(success) {
+                    currentSceneId = gLTFastInstance.defaultSceneIndex;
+                    var sceneBounds = insta.CalculateBounds();
+                    if (sceneBounds.HasValue) {
+                        bounds = sceneBounds.Value;
+                        if (createBoxCollider) {
+    #if UNITY_PHYSICS
+                            var boxCollider = gameObject.AddComponent<BoxCollider>();
+                            boxCollider.center = bounds.center;
+                            boxCollider.size = bounds.size;
+    #else
+                            Debug.LogError("GltfBoundsAsset requires the built-in Physics package to be enabled (in the Package Manager)");
+    #endif
+                        }
                     }
                 }
             }

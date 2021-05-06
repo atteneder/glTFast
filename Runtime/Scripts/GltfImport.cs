@@ -276,17 +276,91 @@ namespace GLTFast {
             return success;
         }
 
-        public bool InstantiateGltf( Transform parent ) {
+        /// <summary>
+        /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="defaultSceneIndex"/>)
+        /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
+        /// </summary>
+        /// <param name="parent">Transform that the scene will get parented to</param>
+        /// <returns></returns>
+        public bool InstantiateMainScene( Transform parent ) {
+            var instantiator = new GameObjectInstantiator(this, parent);
+            var success = InstantiateMainScene(instantiator);
+            instantiator.report?.LogAll();
+            return success;
+        }
+
+        /// <summary>
+        /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="defaultSceneIndex"/>)
+        /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
+        /// </summary>
+        /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
+        /// <returns></returns>
+        public bool InstantiateMainScene(IInstantiator instantiator) {
+            if (!loadingDone || loadingError) return false;
+            // According to glTF specification, loading nothing is
+            // the correct behavior
+            if (gltfRoot.scene < 0) return true;
+            return InstantiateScene(instantiator, gltfRoot.scene);
+        }
+
+        /// <summary>
+        /// Creates an instance of the scene specified by the scene index.
+        /// <seealso cref="sceneCount"/>
+        /// <seealso cref="GetSceneName"/>
+        /// </summary>
+        /// <param name="parent">Transform that the scene will get parented to</param>
+        /// <param name="sceneIndex">Index of the scene to be instantiated</param>
+        /// <returns></returns>
+        public bool InstantiateScene( Transform parent, int sceneIndex = 0) {
+            if (!loadingDone || loadingError) return false;
+            if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
+            var instantiator = new GameObjectInstantiator(this, parent);
+            var success = InstantiateScene(instantiator,sceneIndex);
+            instantiator.report?.LogAll();
+            return success;
+        }
+
+        /// <summary>
+        /// Creates an instance of the scene specified by the scene index.
+        /// <seealso cref="sceneCount"/>
+        /// <seealso cref="GetSceneName"/>
+        /// </summary>
+        /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
+        /// <param name="sceneIndex">Index of the scene to be instantiated</param>
+        /// <returns></returns>
+        public bool InstantiateScene( IInstantiator instantiator, int sceneIndex = 0 ) {
+            if (!loadingDone || loadingError) return false;
+            if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
+            InstantiateSceneInternal( gltfRoot, instantiator, sceneIndex );
+            return true;
+        }
+        
+        /// <summary>
+        /// Creates an instance of the entire glTF (all scenes).
+        /// Please prefer to instantiate the main scene or selected scenes instead.
+        /// </summary>
+        /// <param name="parent">Transform that the scenes will get parented to</param>
+        /// <returns></returns>
+        [Obsolete("Replace with InstantiateMainScene or InstantiateScene")]
+        public bool InstantiateGltf(Transform parent) {
             var instantiator = new GameObjectInstantiator(this, parent);
             var success = InstantiateGltf(instantiator);
             instantiator.report?.LogAll();
             return success;
         }
 
-        public bool InstantiateGltf( IInstantiator instantiator ) {
-            // TODO: Make instantiation preemptive (via deferAgent) as well!
+        /// <summary>
+        /// Instantiates the entire glTF (all scenes).
+        /// Please prefer to instantiate the main scene or selected scenes instead.
+        /// </summary>
+        /// <param name="instantiator">Instantiator implementation; Receives and processes the scenes' data</param>
+        /// <returns></returns>
+        [Obsolete("Replace with InstantiateMainScene or InstantiateScene")]
+        public bool InstantiateGltf(IInstantiator instantiator) {
             if (!loadingDone || loadingError) return false;
-            CreateGameObjects( gltfRoot, instantiator );
+            for (int sceneIndex = 0; sceneIndex < sceneCount; sceneIndex++) {
+                InstantiateScene(instantiator, sceneIndex);
+            }
             return true;
         }
 
@@ -332,6 +406,12 @@ namespace GLTFast {
         public int materialCount => materials?.Length ?? 0;
         public int imageCount => images?.Length ?? 0;
         public int textureCount => textures?.Length ?? 0;
+        public int? defaultSceneIndex => gltfRoot != null && gltfRoot.scene >= 0 ? gltfRoot.scene : (int?) null; 
+        public int sceneCount => gltfRoot?.scenes?.Length ?? 0;
+
+        public string GetSceneName(int sceneIndex) {
+            return gltfRoot?.scenes?[sceneIndex]?.name;
+        }
         
         public UnityEngine.Material GetMaterial( int index = 0 ) {
             if(materials!=null && index >= 0 && index < materials.Length ) {
@@ -1306,10 +1386,13 @@ namespace GLTFast {
                 }
             }
 
-            childNames.Clear();
-            for (uint nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
-                if (parentIndex[nodeIndex] < 0) {
-                    nodeNames[nodeIndex] = GetUniqueNodeName(gltfRoot, nodeIndex, childNames);
+            for (int sceneId = 0; sceneId < gltfRoot.scenes.Length; sceneId++) {
+                childNames.Clear();
+                var scene = gltfRoot.scenes[sceneId];
+                if (scene.nodes != null) {
+                    foreach (var nodeIndex in scene.nodes) {
+                        nodeNames[nodeIndex] = GetUniqueNodeName(gltfRoot, nodeIndex, childNames);
+                    }
                 }
             }
 
@@ -1386,89 +1469,18 @@ namespace GLTFast {
             glbBinChunk = null;
         }
 
-        void CreateGameObjects( Root gltf, IInstantiator instantiator ) {
-
-            Profiler.BeginSample("CreateGameObjects");
-
-            instantiator.Init(gltf.nodes.Length);
-
-            var relations = new Dictionary<uint,uint>();
-
-            for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
-                var node = gltf.nodes[nodeIndex];
-
-                Vector3 position = Vector3.zero;
-                Quaternion rotation = Quaternion.identity;
-                Vector3 scale = Vector3.one;
-
-                if(node.children!=null) {
-                    foreach( var child in node.children ) {
-                        relations[child] = nodeIndex;
-                    }
-                }
-
-                if(node.matrix!=null) {
-                    Matrix4x4 m = new Matrix4x4();
-                    m.m00 = node.matrix[0];
-                    m.m10 = node.matrix[1];
-                    m.m20 = -node.matrix[2];
-                    m.m30 = node.matrix[3];
-                    m.m01 = node.matrix[4];
-                    m.m11 = node.matrix[5];
-                    m.m21 = -node.matrix[6];
-                    m.m31 = node.matrix[7];
-                    m.m02 = -node.matrix[8];
-                    m.m12 = -node.matrix[9];
-                    m.m22 = node.matrix[10];
-                    m.m32 = node.matrix[11];
-                    m.m03 = node.matrix[12];
-                    m.m13 = node.matrix[13];
-                    m.m23 = -node.matrix[14];
-                    m.m33 = node.matrix[15];
-                    
-                    m.Decompose(out var t, out var r, out var s);
-                    position = t;
-                    rotation = r;
-                    scale = s;
-
-                } else {
-                    if(node.translation!=null) {
-                        Assert.AreEqual( node.translation.Length, 3 );
-                        position = new Vector3(
-                            node.translation[0],
-                            node.translation[1],
-                            -node.translation[2]
-                        );
-                    }
-                    if(node.rotation!=null) {
-                        Assert.AreEqual( node.rotation.Length, 4 );
-                        rotation = new Quaternion(
-                            -node.rotation[0],
-                            -node.rotation[1],
-                            node.rotation[2],
-                            node.rotation[3]
-                        );
-                    }
-                    if(node.scale!=null) {
-                        Assert.AreEqual( node.scale.Length, 3 );
-                        scale = new Vector3(
-                            node.scale[0],
-                            node.scale[1],
-                            node.scale[2]
-                        );
-                    }
-                }
-
+        void InstantiateSceneInternal( Root gltf, IInstantiator instantiator, int sceneId ) {
+            // TODO: Make instantiation preemptive (via deferAgent) as well!
+            void IterateNodes(uint nodeIndex, uint? parentIndex) {
+                var node = gltfRoot.nodes[nodeIndex];
+                node.GetTransform(out var position, out var rotation, out var scale);
+                
                 instantiator.CreateNode(nodeIndex,position,rotation,scale);
-            }
-
-            foreach( var rel in relations ) {
-                instantiator.SetParent(rel.Key,rel.Value);
-            }
-
-            for( uint nodeIndex = 0; nodeIndex < gltf.nodes.Length; nodeIndex++ ) {
-                var node = gltf.nodes[nodeIndex];
-
+                
+                if (parentIndex.HasValue) {
+                    instantiator.SetParent(nodeIndex,parentIndex.Value);
+                }
+                
                 var goName = 
 #if UNITY_ANIMATION
                     nodeNames==null ? node.name : nodeNames[nodeIndex];
@@ -1477,14 +1489,14 @@ namespace GLTFast {
 #endif
 
                 if(node.mesh>=0) {
-                    int end = meshPrimitiveIndex[node.mesh+1];
-                    int primitiveCount = 0;
-                    for( int i=meshPrimitiveIndex[node.mesh]; i<end; i++ ) {
+                    var end = meshPrimitiveIndex[node.mesh+1];
+                    var primitiveCount = 0;
+                    for( var i=meshPrimitiveIndex[node.mesh]; i<end; i++ ) {
                         var mesh = primitives[i].mesh;
                         var meshName = string.IsNullOrEmpty(mesh.name) ? null : mesh.name;
                         // Fallback name for Node is first valid Mesh name
                         goName = goName ?? meshName;
-                        int[] joints = null;
+                        uint[] joints = null;
 
                         if( mesh.HasVertexAttribute(UnityEngine.Rendering.VertexAttribute.BlendWeight) ) {
                             if(node.skin>=0) {
@@ -1511,15 +1523,28 @@ namespace GLTFast {
                 }
 
                 instantiator.SetNodeName(nodeIndex,goName);
+                
+                if (node.children != null) {
+                    foreach (var child in node.children) {
+                        IterateNodes(child,nodeIndex);
+                    }
+                }
+            }
+            
+            Profiler.BeginSample("CreateGameObjects");
+
+            var scene = gltfRoot.scenes[sceneId];
+            instantiator.Init();
+            
+            foreach (var nodeId in scene.nodes) {
+                IterateNodes(nodeId,null);
             }
 
-            foreach(var scene in gltf.scenes) {
 #if UNITY_ANIMATION
-                instantiator.AddScene(scene.name,scene.nodes,animationClips);
+            instantiator.AddScene(scene.name,scene.nodes,animationClips);
 #else
-                instantiator.AddScene(scene.name,scene.nodes);
+            instantiator.AddScene(scene.name,scene.nodes);
 #endif
-            }
 
             Profiler.EndSample();
         }

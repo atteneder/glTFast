@@ -93,7 +93,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The index of the default scene.
         /// </summary>
-        //public SceneId Scene;
+        public int scene = -1;
 
         /// <summary>
         /// An array of scenes.

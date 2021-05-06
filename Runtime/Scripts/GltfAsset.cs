@@ -28,6 +28,9 @@ namespace GLTFast
         [Tooltip("Automatically load at start.")]
         public bool loadOnStartup = true;
         
+        [Tooltip("Override scene to load (-1 loads glTFs default scene)")]
+        public int sceneId = -1;
+        
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
@@ -50,7 +53,11 @@ namespace GLTFast
             if(success) {
                 if (deferAgent != null) await deferAgent.BreakPoint();
                 // Auto-Instantiate
-                gLTFastInstance.InstantiateGltf(transform);
+                if (sceneId>=0) {
+                    InstantiateScene(sceneId);
+                } else {
+                    Instantiate();
+                }
             }
             return success;
         }

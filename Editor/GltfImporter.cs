@@ -70,22 +70,24 @@ namespace GLTFast.Editor {
             }
             
             var success = AsyncHelpers.RunSync<bool>(() => m_Gltf.Load(ctx.assetPath,importSettings));
-            
+
+            GameObjectInstantiator instantiator = null;
+
             if (success) {
                 m_ImportedNames = new HashSet<string>();
                 m_ImportedObjects = new HashSet<Object>();
                 
                 var go = new GameObject("root");
-                m_Gltf.InstantiateGltf(go.transform);
-
-                var sceneIndex = 0;
-                foreach (Transform sceneTransform in go.transform) {
+                instantiator = new GameObjectInstantiator(m_Gltf, go.transform);
+                for (var sceneIndex = 0; sceneIndex < m_Gltf.sceneCount; sceneIndex++) {
+                    success = m_Gltf.InstantiateScene(instantiator,sceneIndex);
+                    if (!success) break;
+                    var sceneTransform = go.transform.GetChild(sceneIndex);
                     var sceneGo = sceneTransform.gameObject;
                     AddObjectToAsset(ctx,$"scenes/{sceneGo.name}", sceneGo);
-                    if (sceneIndex == 0) {
+                    if (sceneIndex == m_Gltf.defaultSceneIndex) {
                         ctx.SetMainObject(sceneGo);
                     }
-                    sceneIndex++;
                 }
                 
                 for (var i = 0; i < m_Gltf.textureCount; i++) {
@@ -144,18 +146,22 @@ namespace GLTFast.Editor {
 
             assetDependencies = deps.ToArray();
 
-            reportItems = m_Gltf.report.items.ToArray();
+            var reportItemList = new List<ReportItem>();
+            reportItemList.AddRange(m_Gltf.report.items);
+            if (instantiator?.report?.items != null) {
+                reportItemList.AddRange(instantiator.report.items);
+            }
+            reportItems = reportItemList.ToArray();
         }
 
-        string AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj) {
+        void AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj) {
             if (m_ImportedObjects.Contains(obj)) {
-                return null;
+                return;
             }
             var uniqueAssetName = GetUniqueAssetName(originalName);
             ctx.AddObjectToAsset(uniqueAssetName, obj);
             m_ImportedNames.Add(uniqueAssetName);
             m_ImportedObjects.Add(obj);
-            return uniqueAssetName;
         }
 
         string GetUniqueAssetName(string originalName) {
