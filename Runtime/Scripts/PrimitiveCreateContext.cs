@@ -13,14 +13,9 @@
 // limitations under the License.
 //
 
-#if !UNITY_2019_3_OR_NEWER
-#define LEGACY_MESH
-#endif
-
 using UnityEngine;
 using UnityEngine.Rendering;
 using Unity.Jobs;
-using Unity.Collections;
 using System.Runtime.InteropServices;
 using UnityEngine.Profiling;
 
