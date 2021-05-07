@@ -1350,7 +1350,7 @@ namespace GLTFast {
                                 break;
                             }
                             case AnimationChannel.Path.rotation: {
-                                var values= ((AccessorNativeData<Vector4>) accessorData[sampler.output]).data;
+                                var values= ((AccessorNativeData<Quaternion>) accessorData[sampler.output]).data;
                                 AnimationUtils.AddRotationCurves(animationClips[i], path, times, values, sampler.interpolationEnum);
                                 break;
                             }
@@ -2396,7 +2396,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
         
-        unsafe void GetVector4Job(Root gltf, int accessorIndex, out NativeArray<Vector4> vectors, out JobHandle? jobHandle) {
+        unsafe void GetVector4Job(Root gltf, int accessorIndex, out NativeArray<Quaternion> vectors, out JobHandle? jobHandle) {
             Profiler.BeginSample("GetVector4Job");
             // index
             var accessor = gltf.accessors[accessorIndex];
@@ -2405,7 +2405,7 @@ namespace GLTFast {
             var buffer = GetBuffer(bufferIndex);
 
             Profiler.BeginSample("Alloc");
-            vectors = new NativeArray<Vector4>(accessor.count,Allocator.Persistent);
+            vectors = new NativeArray<Quaternion>(accessor.count,Allocator.Persistent);
             Profiler.EndSample();
             
             var chunk = binChunks[bufferIndex];

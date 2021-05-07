@@ -48,7 +48,7 @@ namespace GLTFast {
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}z", curveZ);
         }
 
-        public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector4> quaternions, InterpolationType interpolationType) {
+        public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Quaternion> quaternions, InterpolationType interpolationType) {
             var rotX = new AnimationCurve();
             var rotY = new AnimationCurve();
             var rotZ = new AnimationCurve();
