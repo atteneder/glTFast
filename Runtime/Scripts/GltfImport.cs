@@ -1597,6 +1597,32 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
+        /// <summary>
+        /// Reinterprets a NativeSlice<byte> to another type of NativeArray.
+        /// TODO: Remove once Unity.Collections supports this for NativeSlice (NativeArray only atm)
+        /// </summary>
+        /// <param name="slice"></param>
+        /// <param name="count">Target type element count</param>
+        /// <typeparam name="T">Target type</typeparam>
+        /// <returns></returns>
+        static unsafe NativeArray<T> Reinterpret<T>(NativeSlice<byte> slice, int count) where T : struct {
+            var address = slice.GetUnsafeReadOnlyPtr();
+            var result = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(address, count, Allocator.None);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            var safetyHandle = AtomicSafetyHandle.Create();
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(array: ref result, safetyHandle);
+#endif
+            return result;
+        }
+
+        [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+        static void ReleaseReinterpret<T>(NativeArray<T> array) where T : struct {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            var safetyHandle = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(array);
+            AtomicSafetyHandle.Release(safetyHandle);
+#endif
+        }
+
 #if KTX_UNITY
         async Task
 #else
@@ -1945,7 +1971,6 @@ namespace GLTFast {
                     {
                         // JobHandle? jh;
                         var ads = new  AccessorNativeData<float>();
-                        // GetMatricesJob(gltf,i,out ads.data, out jh);
                         GetAnimationTimes(gltf, i, out var times);
                         if (times.HasValue) {
                             ads.data = times.Value;
@@ -2406,34 +2431,26 @@ namespace GLTFast {
             Profiler.EndSample();
         }
         
-        unsafe void GetAnimationTimes(Root gltf, int accessorIndex, out NativeArray<float>? times) {
+        void GetAnimationTimes(Root gltf, int accessorIndex, out NativeArray<float>? times) {
+            // TODO: For long animations with lots of times, threading this just like everything else maybe makes sense.
             Profiler.BeginSample("GetAnimationTimes");
             times = null;
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
             var bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
-        
+            var buffer = GetBufferView(bufferView);
+
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
         
-            Profiler.BeginSample("CreateJob");
+            Profiler.BeginSample("CopyAnimationTimes");
             switch( accessor.componentType ) {
                 case GLTFComponentType.Float:
-                    fixed( void* src = &(buffer[start]) ) {
-                        var tmp = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float>(src, accessor.count, Allocator.None);
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-                        var safetyHandle = AtomicSafetyHandle.Create();
-                        NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tmp, safetyHandle);
-#endif                        
-                        Profiler.BeginSample("Alloc");
-                        times = new NativeArray<float>(tmp, Allocator.Persistent);
-                        Profiler.EndSample();
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-                        AtomicSafetyHandle.Release(safetyHandle);
-#endif
-                    }
+                    var bufferTimes = Reinterpret<float>(buffer, accessor.count);
+                    // Copy values
+                    times = new NativeArray<float>(bufferTimes, Allocator.Persistent);
+                    ReleaseReinterpret(bufferTimes);
                     break;
                 default:
                     report.Error(ReportCode.AnimationFormatInvalid, accessor.componentType.ToString());
