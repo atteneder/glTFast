@@ -1801,7 +1801,7 @@ namespace GLTFast {
             if(gltf.skins!=null) {
                 skinsInverseBindMatrices = new Matrix4x4[gltf.skins.Length][];
                 foreach(var skin in gltf.skins) {
-                    accessorUsage[skin.inverseBindMatrices] = AccessorUsage.InverseBindMatrix;
+                    SetAccessorUsage(skin.inverseBindMatrices,AccessorUsage.InverseBindMatrix);
                 }
             }
 
@@ -1915,7 +1915,7 @@ namespace GLTFast {
                 for (int i = 0; i < gltf.animations.Length; i++) {
                     var animation = gltf.animations[i];
                     foreach (var sampler in animation.samplers) {
-                        accessorUsage[sampler.input] = AccessorUsage.AnimationTimes;
+                        SetAccessorUsage(sampler.input,AccessorUsage.AnimationTimes);
                     }
 
                     foreach (var channel in animation.channels) {
@@ -1923,10 +1923,10 @@ namespace GLTFast {
                         switch (channel.target.pathEnum) {
                             case AnimationChannel.Path.translation:
                             case AnimationChannel.Path.rotation:
-                                accessorUsage[accessorIndex] = AccessorUsage.AnimationValuesFlipped;
+                                SetAccessorUsage(accessorIndex,AccessorUsage.AnimationValuesFlipped);
                                 break;
                             default:
-                                accessorUsage[accessorIndex] = AccessorUsage.AnimationValues;
+                                SetAccessorUsage(accessorIndex,AccessorUsage.AnimationValues);
                                 break;
                         }
                     }
