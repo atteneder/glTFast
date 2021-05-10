@@ -14,8 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Import and instantiation reports. Allows users to analyze the report and opt out of logging all messages to the console (which is still done by default).
 - Scene support. glTF can contain multiple scenes and now it is possible to instantiate them selectively 
   - `GltfImport.InstantiateMainScene` to create an instance of the main scene (or nothing if the `scene` is not set; following the glTF 2.0 specification)
-  - `GltfImport.InstantiateScene` to create an instance of a specific scene 
-  - Instantiation of single scenes via  and  
+  - `GltfImport.InstantiateScene` to create an instance of a specific scene
 - GPU instancing via [`EXT_mesh_gpu_instancing` glTF extension](https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Vendor/EXT_mesh_gpu_instancing/README.md) (#107).
 ### Changed
 - Nodes' names are made unique (within their hierarchical position) by supplementing a continuous number. This is required for correct animation target lookup and import continuity. 
