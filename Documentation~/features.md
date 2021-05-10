@@ -88,9 +88,11 @@ Will not be supported:
 
 ### Vendor extensions
 
-- [ ] EXT_mesh_gpu_instancing ([issue][GPUinstancing])
+- [x] <sup>1</sup>EXT_mesh_gpu_instancing
 - [ ] EXT_meshopt_compression ([issue][MeshOpt])
 - [ ] EXT_lights_image_based ([issue][IBL])
+
+<sup>1</sup>: Without support for custom vertex attributes (e.g. `_ID`)
 
 Not investigated yet:
 
@@ -169,7 +171,6 @@ Legend:
 [Sheen]: https://github.com/atteneder/glTFast/issues/110
 [Transmission]: https://github.com/atteneder/glTFast/issues/111
 [Variants]: https://github.com/atteneder/glTFast/issues/112
-[GPUinstancing]: https://github.com/atteneder/glTFast/issues/107
 [MeshOpt]: https://github.com/atteneder/glTFast/issues/106
 [IBL]: https://github.com/atteneder/glTFast/issues/108
 [SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
