@@ -772,35 +772,6 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct GetVector4sInt16NormalizedInterleavedJob : IJobParallelFor {
-
-        [ReadOnly]
-        public int inputByteStride;
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public short* input;
-
-        [ReadOnly]
-        public int outputByteStride;
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public Vector4* result;
-
-        public void Execute(int i) {
-            Vector4* resultV = (Vector4*) (((byte*)result) + (i*outputByteStride));
-            short* off = (short*) (((byte*)input) + (i*inputByteStride));
-
-            Vector4 tmp;
-            tmp.x = Mathf.Max( *off / (float) short.MaxValue, -1f );
-            tmp.y = Mathf.Max( *(off+1) / (float) short.MaxValue, -1f );
-            tmp.z = Mathf.Max( *(off+2) / (float) short.MaxValue, -1f );
-            tmp.w = Mathf.Max( *(off+3) / (float) short.MaxValue, -1f );
-            *resultV = tmp;
-        }
-    }
-
     /// Untested!
     public unsafe struct GetVector4sInt8NormalizedInterleavedJob : IJobParallelFor {
 
