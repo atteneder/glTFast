@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using Unity.Collections;
 using UnityEngine;
 
 namespace GLTFast {
@@ -61,9 +62,9 @@ namespace GLTFast {
         /// <param name="nodeIndex">Index of the node</param>
         /// <param name="meshName">Mesh's name</param>
         /// <param name="mesh">The actual Mesh</param>
-        /// <param name="materials">The materials</param>
+        /// <param name="materialIndices">Material indices. Should be used to query the material</param>
         /// <param name="joints">If a skin was attached, the joint indices. Null otherwise</param>
-        /// <param name="primitiveNumeration">Primitves are numerated per Node, starting with 0</param>
+        /// <param name="primitiveNumeration">Primitives are numerated per Node, starting with 0</param>
         void AddPrimitive(
             uint nodeIndex,
             string meshName,
@@ -73,6 +74,32 @@ namespace GLTFast {
             int primitiveNumeration = 0
         );
 
+        /// <summary>
+        /// Called for adding a Primitive/Mesh to a Node that uses
+        /// GPU instancing (EXT_mesh_gpu_instancing) to render the same mesh/material combination many times.
+        /// Similar to/called instead of <seealso cref="AddPrimitive"/>, without joints/skin support.
+        /// </summary>
+        /// <param name="nodeIndex">Index of the node</param>
+        /// <param name="meshName">Mesh's name</param>
+        /// <param name="mesh">The actual Mesh</param>
+        /// <param name="materialIndices">Material indices. Should be used to query the material</param>
+        /// <param name="instanceCount">Number of instances</param>
+        /// <param name="positions">Instance positions</param>
+        /// <param name="rotations">Instance rotations</param>
+        /// <param name="scales">Instance scales</param>
+        /// <param name="primitiveNumeration">Primitives are numerated per Node, starting with 0</param>
+        void AddPrimitiveInstanced(
+            uint nodeIndex,
+            string meshName,
+            Mesh mesh,
+            int[] materialIndices,
+            uint instanceCount,
+            NativeArray<Vector3>? positions,
+            NativeArray<Quaternion>? rotations,
+            NativeArray<Vector3>? scales,
+            int primitiveNumeration = 0
+        );
+        
         /// <summary>
         /// Called for adding a glTF scene.
         /// </summary>

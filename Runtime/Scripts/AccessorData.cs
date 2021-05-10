@@ -13,26 +13,30 @@
 // limitations under the License.
 //
 
+using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using Unity.Collections;
 
 namespace GLTFast
 {
+    [Flags]
     enum AccessorUsage {
-        Unknown,
-        Ignore,
-        Index,
-        IndexFlipped,
-        Position,
-        Normal,
-        Tangent,
-        UV,
-        Color,
-        InverseBindMatrix,
-        AnimationTimes,
-        AnimationValues,
-        AnimationValuesFlipped
+        Unknown = 0,
+        Ignore = 0x1,
+        Index = 0x2,
+        IndexFlipped = 0x4,
+        Position = 0x8,
+        Normal = 0x10,
+        Tangent = 0x20,
+        UV = 0x40,
+        Color = 0x80,
+        InverseBindMatrix = 0x100,
+        AnimationTimes = 0x200,
+        Translation = 0x400,
+        Rotation = 0x800,
+        Scale = 0x1000,
+        RequiredForInstantiation = 0x2000
     }
 
     abstract class AccessorDataBase {

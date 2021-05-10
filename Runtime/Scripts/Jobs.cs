@@ -625,7 +625,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct GetVector4sJob : IJobParallelFor {
+    public unsafe struct GetRotationsFloatJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -640,6 +640,46 @@ namespace GLTFast.Jobs {
             result[i*4+1] = -input[i*4+1];
             result[i*4+2] = input[i*4+2];
             result[i*4+3] = input[i*4+3];
+        }
+    }
+    
+    public unsafe struct GetRotationsInt16Job : IJobParallelFor {
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public short* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float* result;
+
+        public void Execute(int i) {
+            result[i*4] = -Mathf.Max( input[i*4] / (float) short.MaxValue, -1f );
+            result[i*4+1] = -Mathf.Max( input[i*4+1] / (float) short.MaxValue, -1f );
+            result[i*4+2] = Mathf.Max( input[i*4+2] / (float) short.MaxValue, -1f );
+            result[i*4+3] = Mathf.Max( input[i*4+3] / (float) short.MaxValue, -1f );
+        }
+    }
+
+    /// <summary>
+    /// Untested! Converts an array of glTF space quaternions (normalized, signed bytes) to
+    /// Quaternions in Unity space (floats). 
+    /// </summary>
+    public unsafe struct GetRotationsInt8Job : IJobParallelFor {
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float* result;
+
+        public void Execute(int i) {
+            result[i*4] = -Mathf.Max( input[i*4] / (float) short.MaxValue, -1f );
+            result[i*4+1] = -Mathf.Max( input[i*4+1] / (float) short.MaxValue, -1f );
+            result[i*4+2] = Mathf.Max( input[i*4+2] / (float) short.MaxValue, -1f );
+            result[i*4+3] = Mathf.Max( input[i*4+3] / (float) short.MaxValue, -1f );
         }
     }
 

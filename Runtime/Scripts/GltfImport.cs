@@ -90,6 +90,7 @@ namespace GLTFast {
             "KHR_texture_transform",
             "KHR_mesh_quantization",
             "KHR_materials_transmission",
+            "EXT_mesh_gpu_instancing",
         };
 
         enum ChunkFormat : uint
@@ -403,6 +404,11 @@ namespace GLTFast {
                 }
                 textures = null;
             }
+            
+            foreach (var ad in accessorData) {
+                ad?.Dispose();
+            }
+            accessorData = null;
             
             if(resources!=null) {
                 foreach( var resource in resources ) {
@@ -1174,9 +1180,7 @@ namespace GLTFast {
                 }
                 accessorJobsHandle.Complete();
                 foreach(var ad in accessorData) {
-                    if(ad!=null) {
-                        ad.Unpin();
-                    }
+                    ad?.Unpin();
                 }
             }
             if (!success) return success;
@@ -1369,10 +1373,13 @@ namespace GLTFast {
             }
 #endif
 
-            foreach(var ad in accessorData) {
-                ad?.Dispose();
+            // Dispose all accessor data buffers, except the ones needed for instantiation
+            for (var index = 0; index < accessorData.Length; index++) {
+                if ((accessorUsage[index] & AccessorUsage.RequiredForInstantiation) == 0) {
+                    accessorData[index]?.Dispose();
+                    accessorData[index] = null;
+                }
             }
-            accessorData = null;
             return success;
         }
 
@@ -1490,7 +1497,6 @@ namespace GLTFast {
             downloadTasks = null;
             textureDownloadTasks = null;
             
-            accessorData = null;
             accessorUsage = null;
             primitiveContexts = null;
             meshPrimitiveCluster = null;
@@ -1558,16 +1564,57 @@ namespace GLTFast {
                                 report.Warning(ReportCode.SkinMissing);
                             }
                         }
+                        
+                        var meshInstancing = node.extensions?.EXT_mesh_gpu_instancing;
 
-                        instantiator.AddPrimitive(
-                            nodeIndex,
-                            meshName,
-                            mesh,
-                            primitives[i].materialIndices,
-                            joints,
-                            primitiveCount
+                        if (meshInstancing == null) {
+                            instantiator.AddPrimitive(
+                                nodeIndex,
+                                meshName,
+                                mesh,
+                                primitives[i].materialIndices,
+                                joints,
+                                primitiveCount
                             );
+                        } else {
 
+                            var hasTranslations = meshInstancing.attributes.TRANSLATION > -1;
+                            var hasRotations = meshInstancing.attributes.ROTATION > -1;
+                            var hasScales = meshInstancing.attributes.SCALE > -1;
+
+                            NativeArray<Vector3>? positions = null;
+                            NativeArray<Quaternion>? rotations = null;
+                            NativeArray<Vector3>? scales = null;
+                            uint instanceCount = 0;
+                            
+                            if (hasTranslations) {
+                                positions = ((AccessorNativeData<Vector3>) accessorData[meshInstancing.attributes.TRANSLATION]).data;
+                                instanceCount = (uint)positions.Value.Length;
+                            }
+
+                            if (hasRotations) {
+                                rotations = ((AccessorNativeData<Quaternion>) accessorData[meshInstancing.attributes.ROTATION]).data;
+                                instanceCount = (uint)rotations.Value.Length;
+                            }
+
+                            if (hasScales) {
+                                scales = ((AccessorNativeData<Vector3>) accessorData[meshInstancing.attributes.SCALE]).data;
+                                instanceCount = (uint)scales.Value.Length;
+                            }
+
+                            instantiator.AddPrimitiveInstanced(
+                                nodeIndex,
+                                meshName,
+                                mesh,
+                                primitives[i].materialIndices,
+                                instanceCount,
+                                positions,
+                                rotations,
+                                scales,
+                                primitiveCount
+                            );
+                        }
+                        
                         primitiveCount++;
                     }
                 }
@@ -1805,6 +1852,21 @@ namespace GLTFast {
                 }
             }
 
+            foreach (var node in gltf.nodes) {
+                var attr = node.extensions?.EXT_mesh_gpu_instancing?.attributes;
+                if ( attr != null) {
+                    if (attr.TRANSLATION >= 0) {
+                        SetAccessorUsage(attr.TRANSLATION,AccessorUsage.Translation | AccessorUsage.RequiredForInstantiation);
+                    }
+                    if (attr.ROTATION >= 0) {
+                        SetAccessorUsage(attr.ROTATION,AccessorUsage.Rotation | AccessorUsage.RequiredForInstantiation);
+                    }
+                    if (attr.SCALE >= 0) {
+                        SetAccessorUsage(attr.SCALE,AccessorUsage.Scale | AccessorUsage.RequiredForInstantiation);
+                    }
+                }
+            }
+
             meshPrimitiveIndex[gltf.meshes.Length] = totalPrimitives;
             primitives = new Primitive[totalPrimitives];
             primitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
@@ -1922,11 +1984,13 @@ namespace GLTFast {
                         var accessorIndex = animation.samplers[channel.sampler].output;
                         switch (channel.target.pathEnum) {
                             case AnimationChannel.Path.translation:
-                            case AnimationChannel.Path.rotation:
-                                SetAccessorUsage(accessorIndex,AccessorUsage.AnimationValuesFlipped);
+                                SetAccessorUsage(accessorIndex,AccessorUsage.Translation);
                                 break;
-                            default:
-                                SetAccessorUsage(accessorIndex,AccessorUsage.AnimationValues);
+                            case AnimationChannel.Path.rotation:
+                                SetAccessorUsage(accessorIndex,AccessorUsage.Rotation);
+                                break;
+                            case AnimationChannel.Path.scale:
+                                SetAccessorUsage(accessorIndex,AccessorUsage.Scale);
                                 break;
                         }
                     }
@@ -1950,18 +2014,40 @@ namespace GLTFast {
                     case GLTFAccessorAttributeType.SCALAR when accessorUsage[i]==AccessorUsage.IndexFlipped ||
                         accessorUsage[i]==AccessorUsage.Index:
                     {
-                        JobHandle? jh;
                         var ads = new  AccessorData<int>();
-                        GetIndicesJob(gltf,i,out ads.data, out jh, out ads.gcHandle, accessorUsage[i]==AccessorUsage.IndexFlipped);
+                        GetIndicesJob(gltf,i,out ads.data, out var jh, out ads.gcHandle, accessorUsage[i]==AccessorUsage.IndexFlipped);
                         tmpList.Add(jh.Value);
                         accessorData[i] = ads;
                         break;
                     }
                     case GLTFAccessorAttributeType.MAT4 when accessorUsage[i]==AccessorUsage.InverseBindMatrix: {
-                        JobHandle? jh;
                         // TODO: Maybe use AccessorData, since Mesh.bindposes only accepts C# arrays.
                         var ads = new  AccessorNativeData<Matrix4x4>();
-                        GetMatricesJob(gltf,i,out ads.data, out jh);
+                        GetMatricesJob(gltf,i,out ads.data, out var jh);
+                        tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+                    case GLTFAccessorAttributeType.VEC3 when (accessorUsage[i]&AccessorUsage.Translation)!=0:
+                    {
+                        var ads = new AccessorNativeData<Vector3>();
+                        GetVector3Job(gltf,i,out ads.data, out var jh, true);
+                        tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+                    case GLTFAccessorAttributeType.VEC4 when (accessorUsage[i]&AccessorUsage.Rotation)!=0:
+                    {
+                        var ads = new AccessorNativeData<Quaternion>();
+                        GetVector4Job(gltf,i,out ads.data, out var jh);
+                        tmpList.Add(jh.Value);
+                        accessorData[i] = ads;
+                        break;
+                    }
+                    case GLTFAccessorAttributeType.VEC3 when (accessorUsage[i]&AccessorUsage.Scale)!=0:
+                    {
+                        var ads = new AccessorNativeData<Vector3>();
+                        GetVector3Job(gltf,i,out ads.data, out var jh, false);
                         tmpList.Add(jh.Value);
                         accessorData[i] = ads;
                         break;
@@ -1976,33 +2062,6 @@ namespace GLTFast {
                             ads.data = times.Value;
                         }
                         // tmpList.Add(jh.Value);
-                        accessorData[i] = ads;
-                        break;
-                    }
-                    case GLTFAccessorAttributeType.VEC3 when accessorUsage[i]==AccessorUsage.AnimationValues:
-                    {
-                        JobHandle? jh;
-                        var ads = new AccessorNativeData<Vector3>();
-                        GetVector3Job(gltf,i,out ads.data, out jh, false);
-                        tmpList.Add(jh.Value);
-                        accessorData[i] = ads;
-                        break;
-                    }
-                    case GLTFAccessorAttributeType.VEC3 when accessorUsage[i]==AccessorUsage.AnimationValuesFlipped:
-                    {
-                        JobHandle? jh;
-                        var ads = new AccessorNativeData<Vector3>();
-                        GetVector3Job(gltf,i,out ads.data, out jh, true);
-                        tmpList.Add(jh.Value);
-                        accessorData[i] = ads;
-                        break;
-                    }
-                    case GLTFAccessorAttributeType.VEC4 when accessorUsage[i] == AccessorUsage.AnimationValuesFlipped:
-                    {
-                        JobHandle? jh;
-                        var ads = new AccessorNativeData<Vector4>();
-                        GetVector4Job(gltf,i,out ads.data, out jh);
-                        tmpList.Add(jh.Value);
                         accessorData[i] = ads;
                         break;
                     }
@@ -2352,7 +2411,6 @@ namespace GLTFast {
 #if UNITY_ANIMATION
         unsafe void GetVector3Job(Root gltf, int accessorIndex, out NativeArray<Vector3> vectors, out JobHandle? jobHandle, bool flip) {
             Profiler.BeginSample("GetVector3Job");
-            // index
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
             var bufferIndex = bufferView.buffer;
@@ -2414,14 +2472,36 @@ namespace GLTFast {
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
-            case GLTFComponentType.Float:
-                var job32 = new Jobs.GetVector4sJob();
-                job32.result = (float*) vectors.GetUnsafePtr();
+            case GLTFComponentType.Float: {
+                var job = new GetRotationsFloatJob {
+                    result = (float*)vectors.GetUnsafePtr()
+                };
                 fixed( void* src = &(buffer[start]) ) {
-                    job32.input = (float*) src;
+                    job.input = (float*) src;
                 }
-                jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
+                jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
+            }
+            case GLTFComponentType.Short: {
+                var job = new GetRotationsInt16Job {
+                    result = (float*)vectors.GetUnsafePtr()
+                };
+                fixed( void* src = &(buffer[start]) ) {
+                    job.input = (short*) src;
+                }
+                jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                break;
+            }
+            case GLTFComponentType.Byte: {
+                var job = new GetRotationsInt8Job {
+                    result = (float*)vectors.GetUnsafePtr()
+                };
+                fixed( void* src = &(buffer[start]) ) {
+                    job.input = (byte*) src;
+                }
+                jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                break;
+            }
             default:
                 report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;

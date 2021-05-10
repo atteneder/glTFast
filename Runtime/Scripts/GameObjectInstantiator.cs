@@ -114,6 +114,39 @@ namespace GLTFast {
             renderer.sharedMaterials = materials;
         }
 
+        public void AddPrimitiveInstanced(
+            uint nodeIndex,
+            string meshName,
+            Mesh mesh,
+            int[] materialIndices,
+            uint instanceCount,
+            NativeArray<Vector3>? positions,
+            NativeArray<Quaternion>? rotations,
+            NativeArray<Vector3>? scales,
+            int primitiveNumeration = 0
+        ) {
+            var materials = new Material[materialIndices.Length];
+            for (var index = 0; index < materials.Length; index++) {
+                var material = gltf.GetMaterial(materialIndices[index]) ?? gltf.GetDefaultMaterial();
+                material.enableInstancing = true;
+                materials[index] = material;
+            }
+
+            for (var i = 0; i < instanceCount; i++) {
+                var meshGo = new GameObject( $"{meshName ?? "Primitive"}_p{primitiveNumeration}_i{i}" );
+                var t = meshGo.transform;
+                t.SetParent(nodes[nodeIndex].transform,false);
+                t.localPosition = positions?[i] ?? Vector3.zero;
+                t.localRotation = rotations?[i] ?? Quaternion.identity;
+                t.localScale = scales?[i] ?? Vector3.one;
+                
+                var mf = meshGo.AddComponent<MeshFilter>();
+                mf.mesh = mesh;
+                Renderer renderer = meshGo.AddComponent<MeshRenderer>();
+                renderer.sharedMaterials = materials;
+            }
+        }
+
         public void AddScene(
             string name,
             uint[] nodeIndices
