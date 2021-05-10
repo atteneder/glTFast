@@ -32,6 +32,8 @@ namespace GLTFast {
 
         protected Dictionary<uint,GameObject> nodes;
 
+        public List<Camera> cameras { get; protected set; }
+        
         public GameObjectInstantiator(IGltfReadable gltf, Transform parent) {
             this.gltf = gltf;
             this.parent = parent;
@@ -146,6 +148,92 @@ namespace GLTFast {
                 renderer.sharedMaterials = materials;
             }
         }
+
+        public void AddCameraPerspective(
+            uint nodeIndex,
+            float verticalFieldOfView,
+            float nearClipPlane,
+            float farClipPlane,
+            float? aspectRatio
+        ) {
+            var cam = CreateCamera(nodeIndex);
+
+            cam.orthographic = false;
+
+            cam.fieldOfView = verticalFieldOfView * Mathf.Rad2Deg;
+            cam.nearClipPlane = nearClipPlane;
+            cam.farClipPlane = farClipPlane;
+
+            // // If the aspect ratio is given and does not match the
+            // // screen's aspect ratio, the viewport rect is reduced
+            // // to match the glTFs aspect ratio (box fit)
+            // if (aspectRatio.HasValue) {
+            //     cam.rect = GetLimitedViewPort(aspectRatio.Value);
+            // }
+        }
+
+        public void AddCameraOrthographic(
+            uint nodeIndex,
+            float nearClipPlane,
+            float? farClipPlane,
+            float horizontal,
+            float vertical
+        ) {
+            var cam = CreateCamera(nodeIndex);
+            
+            var farValue = farClipPlane ?? float.MaxValue;
+
+            cam.orthographic = true;
+            cam.nearClipPlane = nearClipPlane;
+            cam.farClipPlane = farValue;
+            cam.orthographicSize = vertical; // Note: Ignores `horizontal`
+
+            // Custom projection matrix
+            // Ignores screen's aspect ratio
+            cam.projectionMatrix = Matrix4x4.Ortho(
+                -horizontal,
+                horizontal, 
+                -vertical,
+                vertical,
+                nearClipPlane,
+                farValue
+            );
+
+            // // If the aspect ratio does not match the
+            // // screen's aspect ratio, the viewport rect is reduced
+            // // to match the glTFs aspect ratio (box fit)
+            // var aspectRatio = horizontal / vertical;
+            // cam.rect = GetLimitedViewPort(aspectRatio);
+        }
+
+        Camera CreateCamera(uint nodeIndex) {
+            var cam = nodes[nodeIndex].AddComponent<Camera>();
+
+            // By default, imported cameras are not enabled by default
+            cam.enabled = false;
+
+            if (cameras == null) {
+                cameras = new List<Camera>();
+            }
+
+            cameras.Add(cam);
+            return cam;
+        }
+
+        // static Rect GetLimitedViewPort(float aspectRatio) {
+        //     var screenAspect = Screen.width / (float)Screen.height;
+        //     if (Mathf.Abs(1 - (screenAspect / aspectRatio)) <= math.EPSILON) {
+        //         // Identical aspect ratios
+        //         return new Rect(0,0,1,1);
+        //     }
+        //     if (aspectRatio < screenAspect) {
+        //         var w = aspectRatio / screenAspect;
+        //         return new Rect((1 - w) / 2, 0, w, 1f);
+        //     } else {
+        //         var h = screenAspect / aspectRatio;
+        //         return new Rect(0, (1 - h) / 2, 1f, h);
+        //     }
+        // }
 
         public void AddScene(
             string name,

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `GltfImport.InstantiateMainScene` to create an instance of the main scene (or nothing if the `scene` is not set; following the glTF 2.0 specification)
   - `GltfImport.InstantiateScene` to create an instance of a specific scene
 - GPU instancing via [`EXT_mesh_gpu_instancing` glTF extension](https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Vendor/EXT_mesh_gpu_instancing/README.md) (#107).
+- Camera support (via `IInstantiator.AddCameraPerspective` and `IInstantiator.AddCameraOrthographic`; #12)
 ### Changed
 - Nodes' names are made unique (within their hierarchical position) by supplementing a continuous number. This is required for correct animation target lookup and import continuity. 
 - `IInstantiator.AddPrimitive` extended parameter `first` (`bool`; true for the first primitive) to primitiveNumeration (`int`; counting upwards from zero). This allows for creating unique GameObject names.

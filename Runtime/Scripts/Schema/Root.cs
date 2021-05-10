@@ -63,7 +63,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// An array of cameras. A camera defines a projection matrix.
         /// </summary>
-        //public List<Camera> Cameras;
+        public Camera[] cameras;
 
         /// <summary>
         /// An array of images. An image defines data used to create a texture.

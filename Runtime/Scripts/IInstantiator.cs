@@ -99,7 +99,23 @@ namespace GLTFast {
             NativeArray<Vector3>? scales,
             int primitiveNumeration = 0
         );
-        
+
+        void AddCameraPerspective(
+            uint nodeIndex,
+            float verticalFieldOfView,
+            float nearClipPlane,
+            float farClipPlane,
+            float? aspectRatio
+        );
+
+        void AddCameraOrthographic(
+            uint nodeIndex,
+            float nearClipPlane,
+            float? farClipPlane,
+            float horizontal,
+            float vertical
+        );
+
         /// <summary>
         /// Called for adding a glTF scene.
         /// </summary>

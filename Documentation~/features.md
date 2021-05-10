@@ -13,7 +13,7 @@
 
 - [x] Scene
   - [x] Node hierarchy
-  - [ ] Camera ([issue][Cameras])
+  - [x] Camera
 - [x] Buffers
   - [x] External URIs
   - [x] glTF binary main buffer
@@ -162,7 +162,6 @@ Legend:
 [URP]: https://unity.com/srp/universal-render-pipeline
 [HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [newIssue]: https://github.com/atteneder/glTFast/issues/new
-[Cameras]: https://github.com/atteneder/glTFast/issues/12
 [MorphTargets]: https://github.com/atteneder/glTFast/issues/8
 [PointLights]: https://github.com/atteneder/glTFast/issues/17
 [Skins]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins

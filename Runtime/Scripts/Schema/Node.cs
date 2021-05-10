@@ -59,6 +59,11 @@ namespace GLTFast.Schema {
         /// </summary>
         public int skin = -1;
 
+        /// <summary>
+        /// Camera index
+        /// </summary>
+        public int camera = -1;
+
         public NodeExtensions extensions;
     }
     

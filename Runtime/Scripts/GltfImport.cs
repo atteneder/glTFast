@@ -1619,6 +1619,35 @@ namespace GLTFast {
                     }
                 }
 
+                if (node.camera >= 0
+                    && gltf.cameras!=null
+                    && node.camera < gltf.cameras.Length
+                    )
+                {
+                    var camera = gltf.cameras[node.camera];
+                    switch (camera.typeEnum) {
+                    case Camera.Type.Orthographic:
+                        var o = camera.orthographic;
+                        instantiator.AddCameraOrthographic(
+                            nodeIndex,
+                            o.znear,
+                            o.zfar >=0 ? o.zfar : (float?) null,
+                            o.xmag,
+                            o.ymag );
+                        break;
+                    case Camera.Type.Perspective:
+                        var p = camera.perspective;
+                        instantiator.AddCameraPerspective(
+                            nodeIndex,
+                            p.yfov,
+                            p.znear,
+                            p.zfar,
+                            p.aspectRatio>0 ? p.aspectRatio : (float?)null
+                            );
+                        break;
+                    }
+                }
+
                 instantiator.SetNodeName(nodeIndex,goName);
             }
             
