@@ -3,7 +3,7 @@
 - [x] Runtime import
 - [x] Fast and small footprint JSON parsing
 - [x] Multi-threading via C# job system
-- [ ] Editor import
+- [x] Editor import
 - [ ] Export
 
 ## Core glTF features
