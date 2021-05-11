@@ -65,7 +65,7 @@ namespace GLTFast.Editor {
         
         public virtual bool success => data!=null;
 
-        public string error => null;
+        public string error { get; protected set; }
         public byte[] data { get; }
 
         public string text => System.Text.Encoding.UTF8.GetString(data);
@@ -89,6 +89,9 @@ namespace GLTFast.Editor {
         public SyncTextureLoader(Uri url, bool nonReadable)
             : base(url) {
             texture = AssetDatabase.LoadAssetAtPath<Texture2D>(url.OriginalString);
+            if (texture == null) {
+                error = $"Couldn't load texture at {url.OriginalString}";
+            }
         }
     }
 }

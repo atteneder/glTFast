@@ -102,7 +102,9 @@ namespace GLTFast {
 
                     var messages = GetStringValues(messagesProp);
                     var ritem = new ReportItem(type, code, messages);
-                    msg.text = ritem.ToString();
+                    var reportItemText = ritem.ToString();
+                    msg.text = reportItemText;
+                    element.tooltip = reportItemText;
                 };
             } else {
                 reportRoot.style.display = DisplayStyle.None;
