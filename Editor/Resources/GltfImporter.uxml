@@ -1,16 +1,21 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:VisualElement name="ImportSettings">
+    <ui:VisualElement name="ImportSettings" class="section">
+        <Style src="GltfImporter-style.uss" />
+        <ui:Label text="glTF Import Settings" class="h1" />
         <uie:EnumField label="Node Name Method" value="OriginalUnique" binding-path="importSettings.nodeNameMethod" type="GLTFast.ImportSettings+NameImportMethod, glTFast" />
     </ui:VisualElement>
-    <ui:VisualElement name="Dependencies" class="dependencies" style="border-left-color: rgb(197, 0, 0); border-right-color: rgb(197, 0, 0); border-top-color: rgb(197, 0, 0); border-bottom-color: rgb(197, 0, 0);">
+    <ui:VisualElement name="Dependencies" class="dependencies section">
         <Style src="GltfImporter-style.uss" />
-        <ui:Label text="Some dependencies couldn&apos;t be resolved&#10;" />
+        <ui:VisualElement name="DepsHeader" style="flex-direction: row; align-items: center;">
+            <ui:VisualElement name="Icon" class="icon error" />
+            <ui:Label text="Some dependencies couldn&apos;t be resolved&#10;" style="-unity-font-style: bold;" />
+        </ui:VisualElement>
+        <ui:Foldout text="Show Corrupt Dependencies" value="false" name="DepsFoldout" class="deps-foldout" />
         <ui:Button name="fixall" text="Fix All Errors" />
-        <ui:Foldout text="Show All" value="true" />
     </ui:VisualElement>
-    <ui:VisualElement name="Report" class="report">
+    <ui:VisualElement name="Report" class="report section">
         <Style src="GltfImporter-style.uss" />
-        <ui:Label text="Import Report" name="Headline" />
+        <ui:Label text="Import Report" name="Headline" class="h1" />
         <ui:ListView focusable="true" binding-path="reportItems" item-height="20" class="report-list" />
     </ui:VisualElement>
 </ui:UXML>

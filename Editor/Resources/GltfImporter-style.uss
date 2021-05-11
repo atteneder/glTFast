@@ -12,3 +12,26 @@
     min-height: 60px;
     background-color: rgb(32, 32, 32);
 }
+
+.icon {
+    width: 24px;
+    height: 24px;
+    margin: 2px 4px;
+}
+
+.error {
+    background-image: resource('Icons/d_console.erroricon.png');
+}
+
+.deps-foldout {
+    margin-left: 15px;
+}
+
+.h1 {
+    margin: 1px 3px 3px 3px;
+    -unity-font-style: bold;
+}
+
+.section {
+    margin-bottom: 10px;
+}
