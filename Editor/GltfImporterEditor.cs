@@ -141,8 +141,6 @@ namespace GLTFast {
                 // var row = root.Query<VisualElement>(className: "fix-texture-row").First();
                 foreach (var maliciousTextureImporter in maliciousTextureImporters) {
                     var row = dependencyTree.CloneTree();
-                    var icon = row.Query<VisualElement>("Icon").First();
-                    icon.AddToClassList("warning");
                     foldout.Add(row);
                     // textureRowTree.CloneTree(foldout);
                     var path = AssetDatabase.GetAssetPath(maliciousTextureImporter);
