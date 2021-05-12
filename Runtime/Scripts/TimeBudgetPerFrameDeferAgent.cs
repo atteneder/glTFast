@@ -35,7 +35,7 @@ namespace GLTFast {
             float targetFrameRate = Application.targetFrameRate;
             if(targetFrameRate<0) targetFrameRate = 30;
             timeBudget = frameBudget/targetFrameRate;
-            Reset();
+            ResetLastTime();
         }
 
         void Awake() {
@@ -43,10 +43,10 @@ namespace GLTFast {
         }
 
         void Update() {
-            Reset();
+            ResetLastTime();
         }
 
-        void Reset()
+        void ResetLastTime()
         {
             lastTime = Time.realtimeSinceStartup;
         }
