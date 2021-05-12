@@ -220,7 +220,7 @@ namespace GLTFast.Materials {
                 var transmission = gltfMaterial.extensions.KHR_materials_transmission;
                 if (transmission != null) {
 #if UNITY_EDITOR
-                    Debug.LogWarning("Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!");
+                    logger?.Warning(LogCode.MaterialTransmissionApprox);
 #endif
                     // Correct transmission is not supported in Built-In renderer
                     // This is an approximation for some corner cases

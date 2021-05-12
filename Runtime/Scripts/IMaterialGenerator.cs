@@ -13,8 +13,6 @@
 // limitations under the License.
 //
 
-using System.Collections.Generic;
-
 namespace GLTFast {
     using Schema;
     public interface IMaterialGenerator {
@@ -26,5 +24,7 @@ namespace GLTFast {
         UnityEngine.Material GetDefaultMaterial();
 
         UnityEngine.Material GenerateMaterial(Material gltfMaterial, IGltfReadable gltf);
+
+        void SetLogger(ILogger logger);
     }
 }

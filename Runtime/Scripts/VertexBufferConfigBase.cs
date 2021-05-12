@@ -87,12 +87,12 @@ namespace GLTFast
         public bool calculateTangents = false;
 
         protected VertexAttributeDescriptor[] vad;
-        protected Report report;
+        protected ILogger logger;
 
         public Bounds? bounds { get; protected set; }
 
-        public VertexBufferConfigBase(Report report) {
-            this.report = report;
+        public VertexBufferConfigBase(ILogger logger) {
+            this.logger = logger;
         }
         
         public abstract unsafe JobHandle? ScheduleVertexJobs(
@@ -234,7 +234,7 @@ namespace GLTFast
                     jobHandle = jobTangentByte.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
                 default:
-                    report.Error(ReportCode.TypeUnsupported, "Tangent", inputType.ToString());
+                    logger?.Error(LogCode.TypeUnsupported, "Tangent", inputType.ToString());
                     jobHandle = null;
                     break;
             }

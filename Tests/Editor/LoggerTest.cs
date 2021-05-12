@@ -15,23 +15,26 @@
 
 using System;
 using NUnit.Framework;
-using UnityEditor.Build;
 using UnityEngine;
-using UnityEngine.Profiling;
 using UnityEngine.TestTools;
 
 namespace GLTFast.Tests
 {
-    public class ReportTest
+    public class LoggerTest
     {
         [Test]
-        public static void LogTest() {
-            var r = new Report();
+        public static void CollectingLoggerTest() {
+            var r = new CollectingLogger();
+            r.Error(LogCode.Download,"404", "https://something.com/nowherfound.glb");
             
-            r.Error(ReportCode.Download,"404", "https://something.com/nowherfound.glb");
-            
-            r.LogAll();
-            
+            Assert.AreEqual(1,r.items.Count);
+            Assert.AreEqual("Download URL https://something.com/nowherfound.glb failed: 404", r.items[0].ToString());
+        }
+        
+        [Test]
+        public static void ConsoleLoggerTest() {
+            var r = new ConsoleLogger();
+            r.Error(LogCode.Download,"404", "https://something.com/nowherfound.glb");
             LogAssert.Expect(LogType.Error, "Download URL https://something.com/nowherfound.glb failed: 404");
         }
     }

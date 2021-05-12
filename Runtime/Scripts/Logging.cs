@@ -1,0 +1,199 @@
+﻿// Copyright 2020-2021 Andreas Atteneder
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+#if DEBUG
+#define GLTFAST_REPORT
+#endif
+
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+#if !GLTFAST_REPORT
+using System.Text;
+#endif
+
+namespace GLTFast {
+
+    public interface ILogger {
+        void Error(LogCode code, params string[] messages);
+        void Warning(LogCode code, params string[] messages);
+        void Info(LogCode code, params string[] messages);
+    }
+
+    public enum LogCode : uint {
+        AccessorAttributeTypeUnknown,
+        AccessorInconsistentUsage,
+        AccessorsShared,
+        AnimationChannelNodeInvalid,
+        AnimationChannelSamplerInvalid,
+        AnimationFormatInvalid,
+        AnimationTargetPathUnsupported,
+        BufferLoadFailed,
+        BufferMainInvalidType,
+        ChunkJsonInvalid,
+        ColorFormatUnsupported,
+        Download,
+        EmbedBufferLoadFailed,
+        EmbedImageInconsistentType,
+        EmbedImageLoadFailed,
+        EmbedImageUnsupportedType,
+        EmbedSlow,
+        ExtensionUnsupported,
+        GltfNotBinary,
+        GltfUnsupportedVersion,
+        HierarchyInvalid,
+        ImageFormatUnknown,
+        ImageMultipleSamplers ,
+        IndexFormatInvalid,
+        MaterialTransmissionApprox,
+        MissingImageURL,
+        NamingOverride,
+        PackageMissing,
+        PrimitiveModeUnsupported,
+        ShaderMissing,
+        SkinMissing,
+        TextureDownloadFailed,
+        TextureLoadFailed,
+        TextureNotFound,
+        TypeUnsupported,
+        UVMulti,
+    }
+    
+    public static class LogMessages {
+#if GLTFAST_REPORT
+        public static readonly Dictionary<LogCode, string> fullMessages = new Dictionary<LogCode, string>() {
+            { LogCode.AccessorAttributeTypeUnknown, "Unknown GLTFAccessorAttributeType" },
+            { LogCode.AccessorInconsistentUsage, "Inconsistent accessor usage {0} != {1}" },
+            { LogCode.AccessorsShared, @"glTF file uses certain vertex attributes/accessors across multiple meshes!
+                    This may result in low performance and high memory usage. Try optimizing the glTF file.
+                    See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52" },
+            { LogCode.AnimationChannelNodeInvalid, "Animation channel {0} has invalid node id" },
+            { LogCode.AnimationChannelSamplerInvalid, "Animation channel {0} has invalid sampler id" },
+            { LogCode.AnimationFormatInvalid, "Invalid animation format {0}" },
+            { LogCode.AnimationTargetPathUnsupported, "Unsupported animation target path {0}" },
+            { LogCode.BufferLoadFailed, "Download buffer {1} failed: {0}" },
+            { LogCode.BufferMainInvalidType, "Invalid mainBufferType {0}" },
+            { LogCode.ChunkJsonInvalid, "Invalid JSON chunk" },
+            { LogCode.ColorFormatUnsupported, "Unsupported color format {0}" },
+            { LogCode.Download, "Download URL {1} failed: {0}" },
+            { LogCode.EmbedBufferLoadFailed, "Loading embed buffer failed" },
+            { LogCode.EmbedImageInconsistentType, "Inconsistent embed image type {0}!={1}" },
+            { LogCode.EmbedImageLoadFailed, "Loading embedded image failed" },
+            { LogCode.EmbedImageUnsupportedType, "Unsupported embed image format {0}" },
+            { LogCode.EmbedSlow, "JSON embed buffers are slow! consider using glTF binary" },
+            { LogCode.ExtensionUnsupported, "glTF extension {0} is not supported" },
+            { LogCode.GltfNotBinary, "Not a glTF-binary file" },
+            { LogCode.GltfUnsupportedVersion, "Unsupported glTF version {0}" },
+            { LogCode.HierarchyInvalid, "Invalid hierarchy" },
+            { LogCode.ImageFormatUnknown, "Unknown image format (image {0};uri:{1})" },
+            { LogCode.ImageMultipleSamplers, "Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory." },
+            { LogCode.IndexFormatInvalid, "Invalid index format {0}" },
+            { LogCode.MaterialTransmissionApprox, "Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!" },
+            { LogCode.MissingImageURL, "Image URL missing" },
+            { LogCode.NamingOverride, "Overriding naming method to be OriginalUnique (animation requirement)" },
+            { LogCode.PackageMissing, "{0} package needs to be installed in order to support glTF extension {1}!\nSee https://github.com/atteneder/glTFast#installing for instructions" },
+            { LogCode.PrimitiveModeUnsupported, "Primitive mode {0} is untested" },
+            { LogCode.ShaderMissing, "Shader \"{0}\" is missing. Make sure to include it in the build (see https://github.com/atteneder/glTFast/blob/main/Documentation%7E/glTFast.md#materials-and-shader-variants )" },
+            { LogCode.SkinMissing, "Skin missing" },
+            { LogCode.TextureDownloadFailed, "Download texture {1} failed: {0}" },
+            { LogCode.TextureLoadFailed, "Texture #{0} not loaded" },
+            { LogCode.TextureNotFound, "Texture #{0} not found" },
+            { LogCode.TypeUnsupported, "Unsupported {0} type {1}" },
+            { LogCode.UVMulti, "Multiple UV sets are not supported!" },
+        };
+#endif
+
+        public static string GetFullMessage(LogCode code, params string[] messages) {
+#if GLTFAST_REPORT
+            return messages != null
+                ? string.Format(fullMessages[code], messages)
+                : fullMessages[code];
+#else
+            if (messages == null) {
+                return code.ToString();
+            } else {
+                var sb = new StringBuilder(code.ToString());
+                foreach (var message in messages) {
+                    sb.Append(";");
+                    sb.Append(message);
+                }
+                return sb.ToString();
+            }
+#endif
+        }
+    }
+
+    public class ConsoleLogger : ILogger {
+
+        public void Error(LogCode code, params string[] messages) {
+            Debug.LogError(LogMessages.GetFullMessage(code,messages));
+        }
+        
+        public void Warning(LogCode code, params string[] messages) {
+            Debug.LogWarning(LogMessages.GetFullMessage(code,messages));
+        }
+        
+        public void Info(LogCode code, params string[] messages) {
+            Debug.Log(LogMessages.GetFullMessage(code,messages));
+        }
+    }
+
+    [Serializable]
+    public class LogItem {
+
+        public LogType type = LogType.Error;
+        public LogCode code;
+        public string[] messages;
+
+        public LogItem(LogType type, LogCode code, params string[] messages) {
+            this.type = type;
+            this.code = code;
+            this.messages = messages;
+        }
+
+        public void Log() {
+            Debug.LogFormat(type, LogOption.NoStacktrace,null,LogMessages.GetFullMessage(code,messages));
+        }
+
+        public override string ToString() {
+            return LogMessages.GetFullMessage(code, messages);
+        }
+    }
+
+    [Serializable]
+    public class CollectingLogger : ILogger {
+
+        public List<LogItem> items = new List<LogItem>();
+
+        public void Error(LogCode code, params string[] messages) {
+            items.Add(new LogItem(LogType.Error, code, messages));
+        }
+        
+        public void Warning(LogCode code, params string[] messages) {
+            items.Add(new LogItem(LogType.Warning, code, messages));
+        }
+        
+        public void Info(LogCode code, params string[] messages) {
+            items.Add(new LogItem(LogType.Log, code, messages));
+        }
+        
+        public void LogAll() {
+            foreach (var item in items) {
+                item.Log();
+            }
+        }
+    }
+}
+

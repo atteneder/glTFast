@@ -72,19 +72,20 @@ namespace GLTFast {
                 // reportList.bindingPath = nameof(m_ReportItems);
                 reportList.makeItem = () => reportItemTree.CloneTree();
                 reportList.bindItem = (element, i) => {
-                    if (i >= reportItemCount) {
+                    if (i >= reportItemCount || i >= m_ReportItems.arraySize) {
                         element.style.display = DisplayStyle.None;
                         return;
                     }
                     var msg = element.Q<Label>("Message");
-                    var item = m_ReportItems.GetArrayElementAtIndex(i);
                     
+                    var item = m_ReportItems.GetArrayElementAtIndex(i);
+
                     var typeProp = item.FindPropertyRelative("type");
                     var codeProp = item.FindPropertyRelative("code");
                     var messagesProp = item.FindPropertyRelative("messages");
 
                     var type = (LogType)typeProp.intValue;
-                    var code = (ReportCode) codeProp.intValue;
+                    var code = (LogCode) codeProp.intValue;
 
                     var icon = element.Q<VisualElement>("Icon");
                     switch (type) {
@@ -101,7 +102,7 @@ namespace GLTFast {
                     }
 
                     var messages = GetStringValues(messagesProp);
-                    var ritem = new ReportItem(type, code, messages);
+                    var ritem = new LogItem(type, code, messages);
                     var reportItemText = ritem.ToString();
                     msg.text = reportItemText;
                     element.tooltip = reportItemText;
@@ -130,13 +131,12 @@ namespace GLTFast {
                 var dependencyTree = Resources.Load(dependencyMarkup) as VisualTreeAsset;
 
                 root.Query<Button>("fixall").First().clickable.clicked += () => {
+                    AssetDatabase.StartAssetEditing();
                     foreach (var maliciousTextureImporter in maliciousTextureImporters) {
-                        maliciousTextureImporter.textureShape = TextureImporterShape.Texture2D;
+                        FixTextureImportSettings(maliciousTextureImporter);
                     }
-                    
-                    foreach (var maliciousTextureImporter in maliciousTextureImporters) {
-                        maliciousTextureImporter.SaveAndReimport();
-                    }
+                    AssetDatabase.StopAssetEditing();
+                    Repaint();
                 };
 
                 var foldout = root.Query<Foldout>().First();
@@ -148,8 +148,7 @@ namespace GLTFast {
                     var path = AssetDatabase.GetAssetPath(maliciousTextureImporter);
                     row.Query<Label>().First().text = Path.GetFileName(path);
                     row.Query<Button>().First().clickable.clicked += () => {
-                        maliciousTextureImporter.textureShape = TextureImporterShape.Texture2D;
-                        maliciousTextureImporter.SaveAndReimport();
+                        FixTextureImportSettings(maliciousTextureImporter);
                         row.style.display = DisplayStyle.None;
                     };
                 }
@@ -166,6 +165,11 @@ namespace GLTFast {
             root.Add(new IMGUIContainer(ApplyRevertGUI));
             
             return root;
+        }
+
+        static void FixTextureImportSettings(TextureImporter maliciousTextureImporter) {
+            maliciousTextureImporter.textureShape = TextureImporterShape.Texture2D;
+            maliciousTextureImporter.SaveAndReimport();
         }
 
         static string[] GetStringValues(SerializedProperty property) {

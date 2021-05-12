@@ -57,8 +57,6 @@ namespace GLTFast.Materials {
         public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
         public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
 
-        const string ERROR_MULTI_UVS = "Multiple UV sets are not supported!";
-        
         static IMaterialGenerator defaultMaterialGenerator;
         
         public static IMaterialGenerator GetDefaultMaterialGenerator() {
@@ -89,22 +87,24 @@ namespace GLTFast.Materials {
 #endif
         }
 
+        protected ILogger logger;
+
         public abstract UnityEngine.Material GetDefaultMaterial();
 
-        public abstract UnityEngine.Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf);
-
-        protected static Shader FindShader(string shaderName) {
+        protected Shader FindShader(string shaderName) {
             var shader = Shader.Find(shaderName);
             if(shader==null) {
-                Debug.LogErrorFormat(
-                    "Shader \"{0}\" is missing. Make sure to include it in the build (see https://github.com/atteneder/glTFast/blob/main/Documentation%7E/glTFast.md#materials-and-shader-variants )",
-                    shaderName
-                    );
+                logger?.Error(LogCode.ShaderMissing, shaderName);
             }
             return shader;
         }
+        public abstract UnityEngine.Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf);
 
-        protected static bool TrySetTexture(
+        public void SetLogger(ILogger logger) {
+            this.logger = logger;
+        }
+
+        protected bool TrySetTexture(
             TextureInfo textureInfo,
             UnityEngine.Material material,
             int propertyId,
@@ -120,18 +120,16 @@ namespace GLTFast.Materials {
                     var texture = gltf.GetTexture(textureIndex);
                     if(texture != null) {
                         if(textureInfo.texCoord!=0) {
-                            Debug.LogError(ERROR_MULTI_UVS);
+                            logger?.Error(LogCode.UVMulti);
                         }
                         material.SetTexture(propertyId,texture);
                         var isKtx = srcTexture.isKtx;
                         TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
                         return true;
                     }
-                    Debug.LogErrorFormat("Texture #{0} not loaded", textureIndex);
-                }
-                else
-                {
-                    Debug.LogErrorFormat("Texture #{0} not found", textureIndex);
+                    logger?.Error(LogCode.TextureLoadFailed,textureIndex.ToString());
+                } else {
+                    logger?.Error(LogCode.TextureNotFound,textureIndex.ToString());
                 }
             }
             return false;
@@ -141,7 +139,7 @@ namespace GLTFast.Materials {
             return a != null && b != null && a.index>=0 && b.index>=0 && a.index != b.index;
         }
 
-        private static void TrySetTextureTransform(
+        void TrySetTextureTransform(
             Schema.TextureInfo textureInfo,
             UnityEngine.Material material,
             int propertyId,
@@ -157,7 +155,7 @@ namespace GLTFast.Materials {
             if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
                 var tt = textureInfo.extensions.KHR_texture_transform;
                 if(tt.texCoord!=0) {
-                    Debug.LogError(ERROR_MULTI_UVS);
+                    logger?.Error(LogCode.UVMulti);
                 }
 
                 float cos = 1;

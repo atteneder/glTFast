@@ -22,7 +22,6 @@ namespace GLTFast {
         /// <summary>
         /// Used to initialize Instantiators. Always called first.
         /// </summary>
-        /// <param name="nodeCount">Quantity of nodes in the glTF file</param>
         void Init();
 
         /// <summary>

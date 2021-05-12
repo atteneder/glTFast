@@ -47,9 +47,15 @@ namespace GLTFast
             }
         }
 
-        public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
-            var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator);
-            gLTFastInstance.report.LogAll();
+        public override async Task<bool> Load(
+            string url,
+            IDownloadProvider downloadProvider=null,
+            IDeferAgent deferAgent=null,
+            IMaterialGenerator materialGenerator=null,
+            ILogger logger = null
+            )
+        {
+            var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator, logger);
             if(success) {
                 if (deferAgent != null) await deferAgent.BreakPoint();
                 // Auto-Instantiate

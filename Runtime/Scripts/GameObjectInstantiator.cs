@@ -24,7 +24,7 @@ using UnityEngine;
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
 
-        public Report report;
+        protected ILogger logger;
         
         protected IGltfReadable gltf;
         
@@ -34,14 +34,14 @@ namespace GLTFast {
 
         public List<Camera> cameras { get; protected set; }
         
-        public GameObjectInstantiator(IGltfReadable gltf, Transform parent) {
+        public GameObjectInstantiator(IGltfReadable gltf, Transform parent, ILogger logger = null) {
             this.gltf = gltf;
             this.parent = parent;
+            this.logger = logger;
         }
 
         public virtual void Init() {
             nodes = new Dictionary<uint, GameObject>();
-            report = new Report();
         }
 
         public void CreateNode(
@@ -59,7 +59,7 @@ namespace GLTFast {
 
         public void SetParent(uint nodeIndex, uint parentIndex) {
             if(nodes[nodeIndex]==null || nodes[parentIndex]==null ) {
-                report.Error(ReportCode.HierarchyInvalid);
+                logger?.Error(LogCode.HierarchyInvalid);
                 return;
             }
             nodes[nodeIndex].transform.SetParent(nodes[parentIndex].transform,false);

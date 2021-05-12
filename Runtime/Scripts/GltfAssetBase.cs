@@ -40,8 +40,17 @@ namespace GLTFast
         /// <param name="downloadProvider">Download Provider for custom loading (e.g. caching or HTTP authorization)</param>
         /// <param name="deferAgent">Defer Agent takes care of interrupting the
         /// loading procedure in order to keep the frame rate responsive.</param>
-        public virtual async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
-            gLTFastInstance = new GltfImport(downloadProvider,deferAgent, materialGenerator);
+        /// <param name="materialGenerator">Used to convert glTF materials to <see cref="Material"/> instances</param>
+        /// <param name="logger">Used for message reporting</param>
+        public virtual async Task<bool> Load(
+            string url,
+            IDownloadProvider downloadProvider=null,
+            IDeferAgent deferAgent=null,
+            IMaterialGenerator materialGenerator=null,
+            ILogger logger = null
+            )
+        {
+            gLTFastInstance = new GltfImport(downloadProvider,deferAgent, materialGenerator, logger);
             return await gLTFastInstance.Load(url);
         }
 

@@ -28,7 +28,14 @@ namespace GLTFast
         [NonSerialized]
         public Bounds bounds;
 
-        public override async Task<bool> Load( string url, IDownloadProvider downloadProvider=null, IDeferAgent deferAgent=null, IMaterialGenerator materialGenerator=null ) {
+        public override async Task<bool> Load(
+            string url,
+            IDownloadProvider downloadProvider=null,
+            IDeferAgent deferAgent=null,
+            IMaterialGenerator materialGenerator=null,
+            ILogger logger = null
+            )
+        {
             gLTFastInstance = new GltfImport(downloadProvider,deferAgent, materialGenerator);
             var success = await gLTFastInstance.Load(url);
             if(success) {

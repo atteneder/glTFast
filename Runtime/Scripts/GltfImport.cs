@@ -224,12 +224,13 @@ namespace GLTFast {
         /// </summary>
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
 
-        public Report report;
+        ILogger logger;
         
         public GltfImport(
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
-            IMaterialGenerator materialGenerator=null
+            IMaterialGenerator materialGenerator=null,
+            ILogger logger = null
             )
         {
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
@@ -244,7 +245,7 @@ namespace GLTFast {
             }
             this.materialGenerator = materialGenerator ?? Materials.MaterialGenerator.GetDefaultMaterialGenerator();
 
-            report = new Report();
+            this.logger = logger;
         }
 
 #region Public
@@ -295,7 +296,6 @@ namespace GLTFast {
         public bool InstantiateMainScene( Transform parent ) {
             var instantiator = new GameObjectInstantiator(this, parent);
             var success = InstantiateMainScene(instantiator);
-            instantiator.report?.LogAll();
             return success;
         }
 
@@ -326,7 +326,6 @@ namespace GLTFast {
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
             var instantiator = new GameObjectInstantiator(this, parent);
             var success = InstantiateScene(instantiator,sceneIndex);
-            instantiator.report?.LogAll();
             return success;
         }
 
@@ -353,9 +352,8 @@ namespace GLTFast {
         /// <returns></returns>
         [Obsolete("Replace with InstantiateMainScene or InstantiateScene")]
         public bool InstantiateGltf(Transform parent) {
-            var instantiator = new GameObjectInstantiator(this, parent);
+            var instantiator = new GameObjectInstantiator(this, parent, new ConsoleLogger());
             var success = InstantiateGltf(instantiator);
-            instantiator.report?.LogAll();
             return success;
         }
 
@@ -520,7 +518,7 @@ namespace GLTFast {
                 if(success) await LoadContent();
                 success = success && await Prepare();
             } else {
-                report.Error(ReportCode.Download,download.error,url.ToString());
+                logger?.Error(LogCode.Download,download.error,url.ToString());
             }
 
             DisposeVolatileData();
@@ -587,7 +585,7 @@ namespace GLTFast {
                             );
                         buffers[i] = decodedBuffer.Item1;
                         if(buffers[i]==null) {
-                            report.Error(ReportCode.EmbedBufferLoadFailed);
+                            logger?.Error(LogCode.EmbedBufferLoadFailed);
                             return false;
                         }
                     } else {
@@ -733,7 +731,7 @@ namespace GLTFast {
                         } else
 #endif
                         {
-                            report.Error(ReportCode.ExtensionUnsupported,ext);
+                            logger?.Error(LogCode.ExtensionUnsupported,ext);
                         }
                         return false;
                     }
@@ -754,7 +752,7 @@ namespace GLTFast {
                         } else
 #endif
                         {
-                            report.Warning(ReportCode.ExtensionUnsupported,ext);
+                            logger?.Warning(LogCode.ExtensionUnsupported,ext);
                         }
                     }
                 }
@@ -866,11 +864,11 @@ namespace GLTFast {
                                 if(!string.IsNullOrEmpty(img.uri)) {
                                     LoadTexture(i,UriHelper.GetUriString(img.uri,baseUri), !imageReadable[i], imgFormat==ImageFormat.KTX);
                                 } else {
-                                    report.Error(ReportCode.MissingImageURL);
+                                    logger?.Error(LogCode.MissingImageURL);
                                 }
                             } 
                         } else {
-                            report.Error(ReportCode.ImageFormatUnknown,i.ToString(),img.uri);
+                            logger?.Error(LogCode.ImageFormatUnknown,i.ToString(),img.uri);
                         }
                     }
                 }
@@ -889,18 +887,18 @@ namespace GLTFast {
             string mimeType = decodedBuffer.Item2;
             var imgFormat = GetImageFormatFromMimeType(mimeType);
             if (data == null || imgFormat == ImageFormat.Unknown) {
-                report.Error(ReportCode.EmbedImageLoadFailed);
+                logger?.Error(LogCode.EmbedImageLoadFailed);
                 return;
             }
 
             if (imageFormats[imageIndex] != ImageFormat.Unknown && imageFormats[imageIndex] != imgFormat) {
-                report.Error(ReportCode.EmbedImageInconsistentType, imageFormats[imageIndex].ToString(), imgFormat.ToString());
+                logger?.Error(LogCode.EmbedImageInconsistentType, imageFormats[imageIndex].ToString(), imgFormat.ToString());
             }
 
             imageFormats[imageIndex] = imgFormat;
             if (imageFormats[imageIndex] != ImageFormat.Jpeg && imageFormats[imageIndex] != ImageFormat.PNG) {
                 // TODO: support embed KTX textures
-                report.Error(ReportCode.EmbedImageUnsupportedType, imageFormats[imageIndex].ToString());
+                logger?.Error(LogCode.EmbedImageUnsupportedType, imageFormats[imageIndex].ToString());
             }
 
             // TODO: Investigate alternative: native texture creation in worker thread
@@ -920,7 +918,7 @@ namespace GLTFast {
                         buffers[downloadPair.Key] = download.data;
                         Profiler.EndSample();
                     } else {
-                        report.Error(ReportCode.BufferLoadFailed,download.error,downloadPair.Key.ToString());
+                        logger?.Error(LogCode.BufferLoadFailed,download.error,downloadPair.Key.ToString());
                     }
                 }
             }
@@ -959,7 +957,7 @@ namespace GLTFast {
                     images[imageIndex] = txt;
                     await deferAgent.BreakPoint();
                 } else {
-                    report.Error(ReportCode.TextureLoadFailed,www.error,dl.Key.ToString());
+                    logger?.Error(LogCode.TextureDownloadFailed,www.error,dl.Key.ToString());
                 }
             }
         }
@@ -975,7 +973,7 @@ namespace GLTFast {
                     var textureResult = await ktxContext.LoadKtx(forceSampleLinear);
                     images[ktxContext.imageIndex] = textureResult.texture;
                 } else {
-                    report.Error(ReportCode.TextureLoadFailed,www.error,dl.Key.ToString());
+                    logger?.Error(LogCode.TextureDownloadFailed,www.error,dl.Key.ToString());
                 }
             }
         }
@@ -998,11 +996,11 @@ namespace GLTFast {
 #elif GLTFAST_THREADS
             if (!timeCritical || deferAgent.ShouldDefer(predictedTime)) {
                 // TODO: Not sure if thread safe? Maybe create a dedicated Report for the thread and merge them afterwards? 
-                return await Task.Run(() => DecodeEmbedBuffer(encodedBytes,report));
+                return await Task.Run(() => DecodeEmbedBuffer(encodedBytes,logger));
             }
 #endif
             await deferAgent.BreakPoint(predictedTime);
-            var decodedBuffer = DecodeEmbedBuffer(encodedBytes,report);
+            var decodedBuffer = DecodeEmbedBuffer(encodedBytes,logger);
 #if MEASURE_TIMINGS
             stopWatch.Stop();
             var elapsedSeconds = stopWatch.ElapsedMilliseconds / 1000f;
@@ -1016,9 +1014,9 @@ namespace GLTFast {
             return decodedBuffer;
         }
 
-        static Tuple<byte[],string> DecodeEmbedBuffer(string encodedBytes,Report report) {
+        static Tuple<byte[],string> DecodeEmbedBuffer(string encodedBytes,ILogger logger) {
             Profiler.BeginSample("DecodeEmbedBuffer");
-            report.Warning(ReportCode.EmbedSlow);
+            logger?.Warning(LogCode.EmbedSlow);
             var mediaTypeEnd = encodedBytes.IndexOf(';',5,Math.Min(encodedBytes.Length-5,1000) );
             if(mediaTypeEnd<0) {
                 Profiler.EndSample();
@@ -1065,7 +1063,7 @@ namespace GLTFast {
             Profiler.BeginSample("LoadGltfBinary.Phase1");
             
             if (!GltfGlobals.IsGltfBinary(bytes)) {
-                report.Error(ReportCode.GltfNotBinary);
+                logger?.Error(LogCode.GltfNotBinary);
                 Profiler.EndSample();
                 return false;
             }
@@ -1074,7 +1072,7 @@ namespace GLTFast {
             //uint length = BitConverter.ToUInt32( bytes, 8 );
             
             if (version != 2) {
-                report.Error(ReportCode.GltfUnsupportedVersion,version.ToString());
+                logger?.Error(LogCode.GltfUnsupportedVersion,version.ToString());
                 Profiler.EndSample();
                 return false;
             }
@@ -1113,7 +1111,7 @@ namespace GLTFast {
             }
             
             if(gltfRoot==null) {
-                report.Error(ReportCode.ChunkJsonInvalid);
+                logger?.Error(LogCode.ChunkJsonInvalid);
                 return false;
             }
             
@@ -1249,7 +1247,7 @@ namespace GLTFast {
                             resources.Add(newImg);
 #if DEBUG
                             newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
-                            report.Warning(ReportCode.ImageMultipleSamplers,imageIndex.ToString());
+                            logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
                             if(txt.sampler>=0) {
                                 gltfRoot.samplers[txt.sampler].Apply(newImg);
@@ -1267,7 +1265,9 @@ namespace GLTFast {
                 for(int i=0;i<materials.Length;i++) {
                     await deferAgent.BreakPoint(.0001f);
                     Profiler.BeginSample("GenerateMaterial");
+                    materialGenerator.SetLogger(logger);
                     materials[i] = materialGenerator.GenerateMaterial(gltfRoot.materials[i],this);
+                    materialGenerator.SetLogger(null);
                     Profiler.EndSample();
                 }
             }
@@ -1306,7 +1306,7 @@ namespace GLTFast {
 #if UNITY_ANIMATION
             if (gltfRoot.hasAnimation) {
                 if (settings.nodeNameMethod != ImportSettings.NameImportMethod.OriginalUnique) {
-                    report.Info(ReportCode.NamingOverride);
+                    logger?.Info(LogCode.NamingOverride);
                     settings.nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique;
                 }
             }
@@ -1334,12 +1334,12 @@ namespace GLTFast {
                     for (int j = 0; j < animation.channels.Length; j++) {
                         var channel = animation.channels[j];
                         if (channel.sampler < 0 || channel.sampler >= animation.samplers.Length) {
-                            report.Error(ReportCode.AnimationChannelSamplerInvalid, j.ToString());
+                            logger?.Error(LogCode.AnimationChannelSamplerInvalid, j.ToString());
                             continue;
                         }
                         var sampler = animation.samplers[channel.sampler];
                         if (channel.target.node < 0 || channel.target.node >= gltfRoot.nodes.Length) {
-                            report.Error(ReportCode.AnimationChannelNodeInvalid, j.ToString());
+                            logger?.Error(LogCode.AnimationChannelNodeInvalid, j.ToString());
                             continue;
                         }
                         
@@ -1365,7 +1365,7 @@ namespace GLTFast {
                             }
                             // case AnimationChannel.Path.weights:
                             default:
-                                report.Error(ReportCode.AnimationTargetPathUnsupported,channel.target.pathEnum.ToString());
+                                logger?.Error(LogCode.AnimationTargetPathUnsupported,channel.target.pathEnum.ToString());
                                 break;
                         }
                     }
@@ -1561,7 +1561,7 @@ namespace GLTFast {
                                 mesh.bindposes = skinsInverseBindMatrices[node.skin];
                                 joints = skin.joints;
                             } else {
-                                report.Warning(ReportCode.SkinMissing);
+                                logger?.Warning(LogCode.SkinMissing);
                             }
                         }
                         
@@ -1905,7 +1905,7 @@ namespace GLTFast {
 #if DEBUG
             foreach (var perAttributeMeshes in perAttributeMeshCollection) {
                 if(perAttributeMeshes.Value.Count>1) {
-                    report.Warning(ReportCode.AccessorsShared);
+                    logger?.Warning(LogCode.AccessorsShared);
                     break;
                 }
             }
@@ -1959,16 +1959,16 @@ namespace GLTFast {
                 VertexBufferConfigBase config;
                 switch (mainBufferType.Value) {
                     case MainBufferType.Position:
-                        config = new VertexBufferConfig<Vertex.VPos>(report);
+                        config = new VertexBufferConfig<Vertex.VPos>(logger);
                         break;
                     case MainBufferType.PosNorm:
-                        config = new VertexBufferConfig<Vertex.VPosNorm>(report);
+                        config = new VertexBufferConfig<Vertex.VPosNorm>(logger);
                         break;
                     case MainBufferType.PosNormTan:
-                        config = new VertexBufferConfig<Vertex.VPosNormTan>(report);
+                        config = new VertexBufferConfig<Vertex.VPosNormTan>(logger);
                         break;
                     default:
-                        report.Error(ReportCode.BufferMainInvalidType,mainBufferType.ToString());
+                        logger?.Error(LogCode.BufferMainInvalidType,mainBufferType.ToString());
                         return false;
                 }
                 config.calculateNormals = !hasNormals && (mainBufferType.Value & MainBufferType.Normal) > 0;
@@ -2155,7 +2155,7 @@ namespace GLTFast {
         void SetAccessorUsage(int index, AccessorUsage newUsage) {
 #if DEBUG
             if(accessorUsage[index]!=AccessorUsage.Unknown && newUsage!=accessorUsage[index]) {
-                report.Error(ReportCode.AccessorInconsistentUsage, accessorUsage[index].ToString(), newUsage.ToString());
+                logger?.Error(LogCode.AccessorInconsistentUsage, accessorUsage[index].ToString(), newUsage.ToString());
             }
 #endif
             accessorUsage[index] = newUsage;
@@ -2237,15 +2237,15 @@ namespace GLTFast {
                 c.topology = MeshTopology.Triangles;
                 break;
             case DrawMode.Points:
-                report.Error(ReportCode.PrimitiveModeUnsupported,primitive.mode.ToString());
+                logger?.Error(LogCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Points;
                 break;
             case DrawMode.Lines:
-                report.Error(ReportCode.PrimitiveModeUnsupported,primitive.mode.ToString());
+                logger?.Error(LogCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Lines;
                 break;
             case DrawMode.LineLoop:
-                report.Error(ReportCode.PrimitiveModeUnsupported,primitive.mode.ToString());
+                logger?.Error(LogCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.LineStrip;
                 break;
             case DrawMode.LineStrip:
@@ -2254,7 +2254,7 @@ namespace GLTFast {
             case DrawMode.TriangleStrip:
             case DrawMode.TriangleFan:
             default:
-                report.Error(ReportCode.PrimitiveModeUnsupported,primitive.mode.ToString());
+                logger?.Error(LogCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Triangles;
                 break;
             }
@@ -2393,7 +2393,7 @@ namespace GLTFast {
                 }
                 break;
             default:
-                report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
+                logger?.Error(LogCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;
                 break;
             }
@@ -2429,7 +2429,7 @@ namespace GLTFast {
                 jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
                 break;
             default:
-                report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
+                logger?.Error(LogCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;
                 break;
             }
@@ -2475,7 +2475,7 @@ namespace GLTFast {
                 break;
             }
             default:
-                report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
+                logger?.Error(LogCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;
                 break;
             }
@@ -2532,7 +2532,7 @@ namespace GLTFast {
                 break;
             }
             default:
-                report.Error(ReportCode.IndexFormatInvalid, accessor.componentType.ToString());
+                logger?.Error(LogCode.IndexFormatInvalid, accessor.componentType.ToString());
                 jobHandle = null;
                 break;
             }
@@ -2562,7 +2562,7 @@ namespace GLTFast {
                     ReleaseReinterpret(bufferTimes);
                     break;
                 default:
-                    report.Error(ReportCode.AnimationFormatInvalid, accessor.componentType.ToString());
+                    logger?.Error(LogCode.AnimationFormatInvalid, accessor.componentType.ToString());
                     break;
             }
             Profiler.EndSample();

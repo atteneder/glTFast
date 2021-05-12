@@ -28,10 +28,10 @@ namespace GLTFast {
 
     abstract class VertexBufferBonesBase {
         
-        protected Report report;
+        protected ILogger logger;
 
-        public VertexBufferBonesBase(Report report) {
-            this.report = report;
+        public VertexBufferBonesBase(ILogger logger) {
+            this.logger = logger;
         }
 
         public abstract unsafe bool ScheduleVertexBonesJob(
@@ -47,7 +47,7 @@ namespace GLTFast {
     class VertexBufferBones : VertexBufferBonesBase {
         NativeArray<VBones> vData;
 
-        public VertexBufferBones(Report report) : base(report) {}
+        public VertexBufferBones(ILogger logger) : base(logger) {}
         
         public override unsafe bool ScheduleVertexBonesJob(
             VertexInputData weightsInput,
@@ -86,7 +86,7 @@ namespace GLTFast {
                     jointsInput.byteStride,
                     (uint*)(vDataPtr+16),
                     32,
-                    report
+                    logger
                 );
                 if (h.HasValue) {
                     handles[1] = h.Value;
@@ -143,7 +143,7 @@ namespace GLTFast {
                 // case GLTFComponentType.UnsignedByte:
                 //     break;
                 default:
-                    report.Error(ReportCode.TypeUnsupported,"Weights",inputType.ToString());
+                    logger?.Error(LogCode.TypeUnsupported,"Weights",inputType.ToString());
                     jobHandle = null;
                     break;
             }
@@ -159,7 +159,7 @@ namespace GLTFast {
             int inputByteStride,
             uint* output,
             int outputByteStride,
-            Report report
+            ILogger logger
         )
         {
             Profiler.BeginSample("GetJointsJob");
@@ -182,7 +182,7 @@ namespace GLTFast {
                     jobHandle = jointsUInt16Job.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
                 default:
-                    report.Error(ReportCode.TypeUnsupported, "Joints", inputType.ToString());
+                    logger?.Error(LogCode.TypeUnsupported, "Joints", inputType.ToString());
                     jobHandle = null;
                     break;
             }

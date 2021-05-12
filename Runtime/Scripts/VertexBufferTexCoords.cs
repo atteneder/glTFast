@@ -27,10 +27,10 @@ namespace GLTFast {
 
     abstract class VertexBufferTexCoordsBase {
         
-        protected Report report;
+        protected ILogger logger;
 
-        public VertexBufferTexCoordsBase(Report report) {
-            this.report = report;
+        public VertexBufferTexCoordsBase(ILogger logger) {
+            this.logger = logger;
         }
         
         public int uvSetCount { get; protected set; }
@@ -43,7 +43,7 @@ namespace GLTFast {
     class VertexBufferTexCoords<T> : VertexBufferTexCoordsBase where T : struct {
         NativeArray<T> vData;
 
-        public VertexBufferTexCoords(Report report) : base(report) {}
+        public VertexBufferTexCoords(ILogger logger) : base(logger) {}
         
         public override unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexUVJobs");
@@ -204,7 +204,7 @@ namespace GLTFast {
                 }
                 break;
             default:
-                report.Error(ReportCode.TypeUnsupported, "UV", inputType.ToString());
+                logger?.Error(LogCode.TypeUnsupported, "UV", inputType.ToString());
                 break;
             }
             Profiler.EndSample();

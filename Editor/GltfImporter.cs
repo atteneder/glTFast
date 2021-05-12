@@ -36,7 +36,7 @@ namespace GLTFast.Editor {
         GltfAssetDependency[] assetDependencies;
         
         [SerializeField]
-        ReportItem[] reportItems;
+        LogItem[] reportItems;
         
         GltfImport m_Gltf;
 
@@ -54,11 +54,16 @@ namespace GLTFast.Editor {
         
         public override void OnImportAsset(AssetImportContext ctx) {
 
+            reportItems = null;
+
             var downloadProvider = new EditorDownloadProvider();
+            var logger = new CollectingLogger();
             
             m_Gltf = new GltfImport(
                 downloadProvider,
-                new UninterruptedDeferAgent()
+                new UninterruptedDeferAgent(),
+                null,
+                logger
                 );
 
             if (importSettings == null) {
@@ -72,13 +77,14 @@ namespace GLTFast.Editor {
             var success = AsyncHelpers.RunSync<bool>(() => m_Gltf.Load(ctx.assetPath,importSettings));
 
             GameObjectInstantiator instantiator = null;
-
+            CollectingLogger instantiationLogger = null;
             if (success) {
                 m_ImportedNames = new HashSet<string>();
                 m_ImportedObjects = new HashSet<Object>();
                 
                 var go = new GameObject("root");
-                instantiator = new GameObjectInstantiator(m_Gltf, go.transform);
+                instantiationLogger = new CollectingLogger();
+                instantiator = new GameObjectInstantiator(m_Gltf, go.transform, instantiationLogger);
                 for (var sceneIndex = 0; sceneIndex < m_Gltf.sceneCount; sceneIndex++) {
                     success = m_Gltf.InstantiateScene(instantiator,sceneIndex);
                     if (!success) break;
@@ -146,10 +152,10 @@ namespace GLTFast.Editor {
 
             assetDependencies = deps.ToArray();
 
-            var reportItemList = new List<ReportItem>();
-            reportItemList.AddRange(m_Gltf.report.items);
-            if (instantiator?.report?.items != null) {
-                reportItemList.AddRange(instantiator.report.items);
+            var reportItemList = new List<LogItem>();
+            reportItemList.AddRange(logger.items);
+            if (instantiationLogger?.items != null) {
+                reportItemList.AddRange(instantiationLogger.items);
             }
             reportItems = reportItemList.ToArray();
         }
