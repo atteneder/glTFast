@@ -58,6 +58,7 @@ namespace GLTFast {
         ImageMultipleSamplers ,
         IndexFormatInvalid,
         MaterialTransmissionApprox,
+        MaterialTransmissionApproxURP,
         MissingImageURL,
         NamingOverride,
         PackageMissing,
@@ -101,6 +102,8 @@ namespace GLTFast {
             { LogCode.ImageMultipleSamplers, "Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory." },
             { LogCode.IndexFormatInvalid, "Invalid index format {0}" },
             { LogCode.MaterialTransmissionApprox, "Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!" },
+            { LogCode.MaterialTransmissionApproxURP, "Chance of incorrect materials! glTF transmission"
+                + " is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             { LogCode.MissingImageURL, "Image URL missing" },
             { LogCode.NamingOverride, "Overriding naming method to be OriginalUnique (animation requirement)" },
             { LogCode.PackageMissing, "{0} package needs to be installed in order to support glTF extension {1}!\nSee https://github.com/atteneder/glTFast#installing for instructions" },

@@ -727,7 +727,7 @@ namespace GLTFast {
 #endif
 #if !KTX_UNITY
                         if(ext==ExtTextureBasisu) {
-                            report.Error(ReportCode.PackageMissing,"KtxUnity",ext);
+                            logger?.Error(LogCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
                         {
@@ -748,7 +748,7 @@ namespace GLTFast {
 #endif
 #if !KTX_UNITY
                         if(ext==ExtTextureBasisu) {
-                            report.Warning(ReportCode.PackageMissing,"KtxUnity",ext);
+                            logger?.Warning(LogCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
                         {
@@ -1045,7 +1045,7 @@ namespace GLTFast {
                 }
                 ktxDownloadTasks.Add(index, downloadTask);
 #else
-                report.Error(ReportCode.PackageMissing,"KtxUnity",ExtTextureBasisu);
+                logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtTextureBasisu);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
@@ -1738,7 +1738,7 @@ namespace GLTFast {
                             Profiler.EndSample();
                             await deferAgent.BreakPoint();
 #else
-                            report.Error(ReportCode.PackageMissing,"KtxUnity",ExtTextureBasisu);
+                            logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtTextureBasisu);
 #endif // KTX_UNITY
                         } else {
                             Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBuffer");

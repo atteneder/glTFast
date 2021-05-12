@@ -122,7 +122,7 @@ namespace GLTFast.Materials {
             return mat;
         }
 
-        static Material GetUnlitMaterial(Schema.Material gltfMaterial)
+        Material GetUnlitMaterial(Schema.Material gltfMaterial)
         {
             var features = GetUnlitShaderFeatures(gltfMaterial);
             bool doubleSided = (features & UnlitShaderFeatures.DoubleSided) != 0;
@@ -148,7 +148,7 @@ namespace GLTFast.Materials {
             return mat;
         }
         
-        static Material GetSpecularMaterial(SpecularShaderFeatures features) {
+        Material GetSpecularMaterial(SpecularShaderFeatures features) {
             bool doubleSided = (features & SpecularShaderFeatures.DoubleSided) != 0;
             Shader shader = null;
             if(!specularShaders.TryGetValue(features,out shader)) {
@@ -311,10 +311,7 @@ namespace GLTFast.Materials {
         {
 #if UNITY_EDITOR
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-            Debug.LogWarning(
-                "Chance of incorrect materials! glTF transmission"
-                + " is approximated. Enable Opaque Texture access in Universal Render Pipeline!"
-                );
+            logger.Warning(LogCode.MaterialTransmissionApproxURP);
 #endif
             // Correct transmission is not supported in Built-In renderer
             // This is an approximation for some corner cases
