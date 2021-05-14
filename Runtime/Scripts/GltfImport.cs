@@ -722,7 +722,7 @@ namespace GLTFast {
                     if(!supported) {
 #if !DRACO_UNITY
                         if(ext==ExtDracoMeshCompression) {
-                            report.Error(ReportCode.PackageMissing,"DracoUnity",ext);
+                            logger?.Error(LogCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
@@ -743,7 +743,7 @@ namespace GLTFast {
                     if(!supported) {
 #if !DRACO_UNITY
                         if(ext==ExtDracoMeshCompression) {
-                            report.Warning(ReportCode.PackageMissing,"DracoUnity",ext);
+                            logger?.Warning(LogCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
