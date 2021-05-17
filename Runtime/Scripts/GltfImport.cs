@@ -1554,7 +1554,7 @@ namespace GLTFast {
                         goName = goName ?? meshName;
                         uint[] joints = null;
 
-                        if( mesh.HasVertexAttribute(UnityEngine.Rendering.VertexAttribute.BlendWeight) ) {
+                        if( mesh.HasVertexAttribute(UnityEngine.Rendering.VertexAttribute.BlendIndices) ) {
                             if(node.skin>=0) {
                                 var skin = gltf.skins[node.skin];
                                 // TODO: see if this can be moved to mesh creation phase / before instantiation
