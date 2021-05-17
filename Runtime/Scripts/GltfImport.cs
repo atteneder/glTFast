@@ -2277,18 +2277,7 @@ namespace GLTFast {
             var bufferView = gltf.bufferViews[draco_ext.bufferView];
             var buffer = GetBufferView(bufferView);
 
-            var job = new DracoMeshLoader.DracoJob();
-
-            c.dracoResult = new NativeArray<int>(1,DracoMeshLoader.defaultAllocator);
-            c.dracoPtr = new NativeArray<IntPtr>(1,DracoMeshLoader.defaultAllocator);
-
-            job.data = buffer;
-            job.result = c.dracoResult;
-            job.outMesh = c.dracoPtr;
-            job.weightsId = draco_ext.attributes.WEIGHTS_0;
-		    job.jointsId = draco_ext.attributes.JOINTS_0;
-
-            c.jobHandle = job.Schedule();
+            c.StartDecode(buffer, draco_ext.attributes.WEIGHTS_0, draco_ext.attributes.JOINTS_0);
         }
 #endif
 

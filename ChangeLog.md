@@ -26,7 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `GenerateMaterial` instead of passing on all require data (like full texture arrays), data has to be fetched from the `GltfImporter`/`IGltfReadable`.
 - `IInstantiator.AddPrimitive`: Instead of `Material` the IDs/indices of materials are provided and the materials themselves have to be fetched from the `IGltfReadable`/`GltfImporter` (allowing more flexible usage)
 - `GltfImport.InstantiateGltf` (instantiates all scenes at once) is marked obsolete in favour of `InstantiateMainScene` and `InstantiateScene`
-- Performance improvement: `NativeArray` buffers are not created copying memory. Instead they are created from pinned managed byte arrays. This should have some positive effect on binary glTFs with Draco meshes and KTX textures.   
+- Performance improvement: `NativeArray` buffers are not created copying memory. Instead they are created from pinned managed byte arrays. This should have some positive effect on binary glTFs with Draco meshes and KTX textures.
+- Update to [DracoUnity 2.0.0](https://github.com/atteneder/DracoUnity/releases/tag/v2.0.0)
 ### Removed
 - Runtime tests. They were moved into a [dedicated test package](https://github.com/atteneder/gltf-test-framework).
 
