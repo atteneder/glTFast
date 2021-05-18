@@ -202,6 +202,22 @@ By default glTFast discards mesh data after it was uploaded to the GPU to free u
 
 Motivations for this might be using meshes as physics colliders amongst [other cases](https://docs.unity3d.com/ScriptReference/Mesh-isReadable.html).
 
+## Upgrade Guides
+
+### Upgrade to 4.x
+
+When upgrading from an older version to 4.x or newer the most notable difference is the imported models' orentation. They will appear 180° rotated around the up-axis (Y).
+
+![GltfAsset component][gltfast3to4]
+
+To counter-act this in applications that used older versions of *glTFast* before, make sure you rotate the parent `Transform` by 180° around the Y-axis, which brings the model back to where it should be.
+
+This change was implemented to conform more closely to the [glTF specification](https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#coordinate-system-and-units), which says:
+
+> The front of a glTF asset faces +Z.
+
+In Unity, the positive Z axis is also defined as forward, so it makes sense to align those and so the coordinate space conversion from glTF's right-handed to Unity's left-handed system is performed by inverting the X-axis (before the Z-axis was inverted).
+
 ## Implementation details
 
 *glTFast* uses [Unity's JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) for parsing, which has little overhead, is fast and memory-efficient (See <https://docs.unity3d.com/Manual/JSONSerialization.html>).
@@ -212,3 +228,4 @@ It also uses fast low-level memory copy methods, [Unity's Job system](https://do
 [gltf]: https://www.khronos.org/gltf
 [gltfast-web-demo]: https://gltf.pixel.engineer
 [gltfasset_component]: ./img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
+[gltfast3to4]: ./img/gltfast3to4.png  "3D scene view showing BoomBoxWithAxes model twice. One with the legacy axis conversion and one with the new orientation"
