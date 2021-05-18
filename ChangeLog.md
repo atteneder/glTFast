@@ -6,9 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- ScriptedImporter for .glb (glTF-binary) files for design-time/Editor import
+- Import glTF files at design-time in the Editor
 - Custom inspector for imported glTF files, featuring import log messages
-- `ImportSettings` can be provided to `GltfImporter.Load` (optional) to customize the loading behaviour
+- `ImportSettings` can be provided to `GltfImporter.Load` (optionally) to customize the loading behaviour
   - `ImportSettings.nodeNameMethod` to allow customizing Node/GameObject naming convention
 - `IGltfReadable` interface for `GltfImporter`
 - Import and instantiation logging customization (see `ILogger`). Allows users to analyze log messages and/or opt out of logging all messages to the console (which is still done by default).

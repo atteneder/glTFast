@@ -211,4 +211,4 @@ It also uses fast low-level memory copy methods, [Unity's Job system](https://do
 [unity]: https://unity.com
 [gltf]: https://www.khronos.org/gltf
 [gltfast-web-demo]: https://gltf.pixel.engineer
-[gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
+[gltfasset_component]: ./img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
