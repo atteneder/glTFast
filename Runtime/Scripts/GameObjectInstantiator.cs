@@ -207,7 +207,12 @@ namespace GLTFast {
         }
 
         Camera CreateCamera(uint nodeIndex) {
-            var cam = nodes[nodeIndex].AddComponent<Camera>();
+            var camGo = new GameObject("Camera");
+            var camTrans = camGo.transform;
+            camTrans.SetParent(nodes[nodeIndex].transform,false);
+            var tmp =Quaternion.Euler(0, 180, 0);
+            camTrans.localRotation= tmp;
+            var cam = camGo.AddComponent<Camera>();
 
             // By default, imported cameras are not enabled by default
             cam.enabled = false;

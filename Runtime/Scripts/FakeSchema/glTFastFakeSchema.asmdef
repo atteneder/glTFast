@@ -12,7 +12,7 @@
     "versionDefines": [
         {
             "name": "com.atteneder.draco",
-            "expression": "2.0.0",
+            "expression": "3.0.0",
             "define": "DRACO_UNITY"
         }
     ],

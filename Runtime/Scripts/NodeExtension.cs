@@ -31,20 +31,20 @@ namespace GLTFast {
             if(node.matrix!=null) {
                 Matrix4x4 m = new Matrix4x4();
                 m.m00 = node.matrix[0];
-                m.m10 = node.matrix[1];
+                m.m10 = -node.matrix[1];
                 m.m20 = -node.matrix[2];
                 m.m30 = node.matrix[3];
-                m.m01 = node.matrix[4];
+                m.m01 = -node.matrix[4];
                 m.m11 = node.matrix[5];
-                m.m21 = -node.matrix[6];
+                m.m21 = node.matrix[6];
                 m.m31 = node.matrix[7];
                 m.m02 = -node.matrix[8];
-                m.m12 = -node.matrix[9];
+                m.m12 = node.matrix[9];
                 m.m22 = node.matrix[10];
                 m.m32 = node.matrix[11];
-                m.m03 = node.matrix[12];
+                m.m03 = -node.matrix[12];
                 m.m13 = node.matrix[13];
-                m.m23 = -node.matrix[14];
+                m.m23 = node.matrix[14];
                 m.m33 = node.matrix[15];
                 
                 m.Decompose(out var t, out var r, out var s);
@@ -56,17 +56,17 @@ namespace GLTFast {
                 if(node.translation!=null) {
                     Assert.AreEqual( node.translation.Length, 3 );
                     position = new Vector3(
-                        node.translation[0],
+                        -node.translation[0],
                         node.translation[1],
-                        -node.translation[2]
+                        node.translation[2]
                     );
                 }
                 if(node.rotation!=null) {
                     Assert.AreEqual( node.rotation.Length, 4 );
                     rotation = new Quaternion(
-                        -node.rotation[0],
+                        node.rotation[0],
                         -node.rotation[1],
-                        node.rotation[2],
+                        -node.rotation[2],
                         node.rotation[3]
                     );
                 }
