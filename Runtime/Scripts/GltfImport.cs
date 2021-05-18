@@ -1681,9 +1681,9 @@ namespace GLTFast {
         /// <param name="count">Target type element count</param>
         /// <typeparam name="T">Target type</typeparam>
         /// <returns></returns>
-        static unsafe NativeArray<T> Reinterpret<T>(NativeSlice<byte> slice, int count) where T : struct {
-            var address = slice.GetUnsafeReadOnlyPtr();
-            var result = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(address, count, Allocator.None);
+        static unsafe NativeArray<T> Reinterpret<T>(NativeSlice<byte> slice, int count, int offset = 0 ) where T : struct {
+            var address = (byte*) slice.GetUnsafeReadOnlyPtr();
+            var result = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(address+offset, count, Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             var safetyHandle = AtomicSafetyHandle.Create();
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(array: ref result, safetyHandle);
@@ -2540,12 +2540,11 @@ namespace GLTFast {
 
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
-            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
         
             Profiler.BeginSample("CopyAnimationTimes");
             switch( accessor.componentType ) {
                 case GLTFComponentType.Float:
-                    var bufferTimes = Reinterpret<float>(buffer, accessor.count);
+                    var bufferTimes = Reinterpret<float>(buffer, accessor.count, accessor.byteOffset);
                     // Copy values
                     times = new NativeArray<float>(bufferTimes, Allocator.Persistent);
                     ReleaseReinterpret(bufferTimes);
