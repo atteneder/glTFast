@@ -252,6 +252,9 @@ namespace GLTFast {
                 if (gltfBinary ?? false) {
                     success = await LoadGltfBinaryBuffer(download.data,url);
                 } else {
+                    if (gltfBinary == null) {
+                        Debug.LogWarning("Failed to detect the file format, falling back to .gltf");
+                    }
                     success = await LoadGltf(download.text,url);
                 }
                 if(success) await LoadContent();
