@@ -22,6 +22,8 @@ namespace GLTFast {
     {
         const string GLB_EXT = ".glb";
         const string GLTF_EXT = ".gltf";
+        const string GLB_START_CHARS = "glTF";
+        const string GLTF_START_CHARS = "{\"";
 
         public static Uri GetBaseUri( Uri uri ) {
             if(uri==null) return null;
@@ -44,11 +46,20 @@ namespace GLTFast {
         }
 
         /// <summary>
-        /// Detect glTF type from URI
+        /// Detect glTF type from URI and/or data stream.
         /// </summary>
         /// <param name="uri">Input URI</param>
+        /// <param name="data">Downloaded data stream</param>
         /// <returns>True if glTF-binary, False if glTF (JSON), null if not sure.</returns>
-        public static bool? IsGltfBinary( Uri uri ) {
+        public static bool? IsGltfBinary( Uri uri, byte[] data )
+        {
+            var isUriGltfBinary = IsUriGltfBinary(uri);
+            if(isUriGltfBinary != null) return isUriGltfBinary;
+            return IsDataGltfBinary(data);
+        }
+
+        private static bool? IsUriGltfBinary( Uri uri )
+        {
             string path = uri.IsAbsoluteUri ? uri.LocalPath : uri.OriginalString;
             var index = path.LastIndexOf('.',path.Length-1, Mathf.Min(5,path.Length) );
             if(index<0) return null;
@@ -56,6 +67,18 @@ namespace GLTFast {
                 return true;
             }
             if(path.EndsWith(GLTF_EXT, StringComparison.OrdinalIgnoreCase)) {
+                return false;
+            }
+            return null;
+        }
+
+        private static bool? IsDataGltfBinary( byte[] data ) {
+            var firstFourChars = System.Text.Encoding.UTF8.GetString(data, 0, 4);
+            if (firstFourChars.Equals(GLB_START_CHARS, StringComparison.CurrentCultureIgnoreCase)) {
+                return true;
+            }
+            var firstTwoChars = System.Text.Encoding.UTF8.GetString(data, 0, 2);
+            if (firstTwoChars.Equals(GLTF_START_CHARS, StringComparison.CurrentCultureIgnoreCase)) {
                 return false;
             }
             return null;
@@ -78,7 +101,7 @@ namespace GLTFast {
             if (fileExtension.Equals("ktx", StringComparison.OrdinalIgnoreCase) || fileExtension.Equals("ktx2", StringComparison.OrdinalIgnoreCase)) return ImageFormat.KTX;
             return ImageFormat.Unknown;
         }
-        
+
         /// string-based IsGltfBinary alternative
         /// Profiling result: Faster/less memory, but for .glb/.gltf just barely better (uknown ~2x)
         /// Downside: less convenient

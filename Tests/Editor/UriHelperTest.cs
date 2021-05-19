@@ -14,6 +14,7 @@
 //
 
 using System;
+using System.Text;
 using NUnit.Framework;
 using UnityEngine.Profiling;
 
@@ -42,6 +43,10 @@ namespace GLTFast.Tests
             new Uri("http://www.server.com/dir/sub/f",UriKind.RelativeOrAbsolute),
             new Uri("http://www.server.com/dir/sub/f?a=123&b=234)",UriKind.RelativeOrAbsolute),
         };
+
+        private static byte[] glbBytes = Encoding.UTF8.GetBytes("glTF   ¤Ö @  JSON{\"asset\":{");
+        private static byte[] gltfBytes = Encoding.UTF8.GetBytes("{\"accessors\" : [{\"bufferView\" : 0, \"byteOffset\" ");
+        private static byte[] unknownBytes = Encoding.UTF8.GetBytes("Lorem ipsum dolor sit amet, consectetur");
 
         [Test]
         public void GetBaseUriTest()
@@ -91,18 +96,50 @@ namespace GLTFast.Tests
             for (int i = 0; i < 1000; i++)
             {
                 for (int j = 0; j < glb.Length; j++) {
-                    Profiler.BeginSample("IsGltfBinaryUriTrue");
-                    Assert.IsTrue(UriHelper.IsGltfBinary(glb[j]));
+                    Profiler.BeginSample("IsGltfBinaryUriTrueGlbBytes");
+                    Assert.IsTrue(UriHelper.IsGltfBinary(glb[j], glbBytes));
                     Profiler.EndSample();
                 }
                 for (int j = 0; j < gltf.Length; j++) {
-                    Profiler.BeginSample("IsGltfBinaryUriFalse");
-                    Assert.IsFalse(UriHelper.IsGltfBinary(gltf[j]));
+                    Profiler.BeginSample("IsGltfBinaryUriFalseGlbBytes");
+                    Assert.IsFalse(UriHelper.IsGltfBinary(gltf[j], glbBytes));
                     Profiler.EndSample();
                 }
                 for (int j = 0; j < unknown.Length; j++) {
-                    Profiler.BeginSample("IsGltfBinaryUriUnknown");
-                    Assert.IsNull(UriHelper.IsGltfBinary(unknown[j]));
+                    Profiler.BeginSample("IsGltfBinaryUriUnknownGlbBytes");
+                    Assert.IsTrue(UriHelper.IsGltfBinary(unknown[j], glbBytes));
+                    Profiler.EndSample();
+                }
+
+                for (int j = 0; j < glb.Length; j++) {
+                    Profiler.BeginSample("IsGltfBinaryUriTrueGltfBytes");
+                    Assert.IsTrue(UriHelper.IsGltfBinary(glb[j], gltfBytes));
+                    Profiler.EndSample();
+                }
+                for (int j = 0; j < gltf.Length; j++) {
+                    Profiler.BeginSample("IsGltfBinaryUriFalseGltfBytes");
+                    Assert.IsFalse(UriHelper.IsGltfBinary(gltf[j], gltfBytes));
+                    Profiler.EndSample();
+                }
+                for (int j = 0; j < unknown.Length; j++) {
+                    Profiler.BeginSample("IsGltfBinaryUriUnknownGltfBytes");
+                    Assert.IsFalse(UriHelper.IsGltfBinary(unknown[j], gltfBytes));
+                    Profiler.EndSample();
+                }
+
+                for (int j = 0; j < glb.Length; j++) {
+                    Profiler.BeginSample("IsGltfBinaryUriTrueUnknownBytes");
+                    Assert.IsTrue(UriHelper.IsGltfBinary(glb[j], unknownBytes));
+                    Profiler.EndSample();
+                }
+                for (int j = 0; j < gltf.Length; j++) {
+                    Profiler.BeginSample("IsGltfBinaryUriFalseUnknownBytes");
+                    Assert.IsFalse(UriHelper.IsGltfBinary(gltf[j], unknownBytes));
+                    Profiler.EndSample();
+                }
+                for (int j = 0; j < unknown.Length; j++) {
+                    Profiler.BeginSample("IsGltfBinaryUriUnknownUnknownBytes");
+                    Assert.IsNull(UriHelper.IsGltfBinary(unknown[j], unknownBytes));
                     Profiler.EndSample();
                 }
             }
@@ -114,27 +151,27 @@ namespace GLTFast.Tests
             Assert.AreEqual(ImageFormat.Unknown, UriHelper.GetImageFormatFromUri(null)); // shortest path
             Assert.AreEqual(ImageFormat.Unknown, UriHelper.GetImageFormatFromUri("")); // shortest path
             Assert.AreEqual(ImageFormat.Unknown, UriHelper.GetImageFormatFromUri("f")); // shortest path
-            
+
             Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("f.jpg")); // shortest path
             Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.jpg"));
             Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.jpg"));
             Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.jpg?key=value.with.dots&otherkey=val&arrval[]=x"));
-            
+
             Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("f.jpeg")); // shortest path
             Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.jpeg"));
             Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.jpeg"));
             Assert.AreEqual(ImageFormat.Jpeg, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.jpeg?key=value.with.dots&otherkey=val&arrval[]=x"));
-            
+
             Assert.AreEqual(ImageFormat.PNG, UriHelper.GetImageFormatFromUri("f.png")); // shortest path
             Assert.AreEqual(ImageFormat.PNG, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.png"));
             Assert.AreEqual(ImageFormat.PNG, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.png"));
             Assert.AreEqual(ImageFormat.PNG, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.png?key=value.with.dots&otherkey=val&arrval[]=x"));
-            
+
             Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("f.ktx")); // shortest path
             Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.ktx"));
             Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.ktx"));
             Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("https://server.com/some.Path/file.ktx?key=value.with.dots&otherkey=val&arrval[]=x"));
-            
+
             Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("f.ktx2")); // shortest path
             Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("file:///Some/Path/file.ktx2"));
             Assert.AreEqual(ImageFormat.KTX, UriHelper.GetImageFormatFromUri("http://server.com/some.Path/file.ktx2"));
