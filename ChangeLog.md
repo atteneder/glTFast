@@ -32,6 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Runtime tests. They were moved into a [dedicated test package](https://github.com/atteneder/gltf-test-framework).
 
+## [3.3.0] - 2021-05-19
+### Added
+- Support for alpha modes `BLEND` and `MASK` on unlit materials (thanks [Sehyun av Kim](https://github.com/avseoul) for #181; fixes #180)
+### Fixed
+- Ignore / don't show errors when newer DracoUnity versions with incompatible API are installed
+
 ## [3.2.1] - 2021-05-05
 ### Fixed
 - Properly freeing up memory of animation clips
