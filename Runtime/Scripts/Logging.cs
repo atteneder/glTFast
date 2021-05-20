@@ -59,6 +59,7 @@ namespace GLTFast {
         IndexFormatInvalid,
         MaterialTransmissionApprox,
         MaterialTransmissionApproxURP,
+        MeshBoundsMissing,
         MissingImageURL,
         NamingOverride,
         PackageMissing,
@@ -104,6 +105,7 @@ namespace GLTFast {
             { LogCode.MaterialTransmissionApprox, "Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!" },
             { LogCode.MaterialTransmissionApproxURP, "Chance of incorrect materials! glTF transmission"
                 + " is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
+            { LogCode.MeshBoundsMissing, "No bounds for mesh {0} => calculating them." },
             { LogCode.MissingImageURL, "Image URL missing" },
             { LogCode.NamingOverride, "Overriding naming method to be OriginalUnique (animation requirement)" },
             { LogCode.PackageMissing, "{0} package needs to be installed in order to support glTF extension {1}!\nSee https://github.com/atteneder/glTFast#installing for instructions" },

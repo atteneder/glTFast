@@ -2100,7 +2100,17 @@ namespace GLTFast {
                         var primitive = cluster[primIndex];
 #if DRACO_UNITY
                         if (primitive.isDracoCompressed) {
-                            context = new PrimitiveDracoCreateContext();
+                            Bounds? bounds = null;
+                            var posAccessorIndex = primitive?.attributes.POSITION ?? -1;
+                            if (posAccessorIndex >= 0 && posAccessorIndex < gltf.accessors.Length) {
+                                var posAccessor = gltf.accessors[posAccessorIndex];
+                                bounds = posAccessor.TryGetBounds();
+                            }
+
+                            if (!bounds.HasValue) {
+                                logger.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
+                            }
+                            context = new PrimitiveDracoCreateContext(bounds);
                             context.materials = new int[1];
                         }
                         else

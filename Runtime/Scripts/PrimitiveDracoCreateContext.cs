@@ -27,8 +27,13 @@ namespace GLTFast {
 
         DracoMeshLoader draco;
         Task<Mesh> dracoTask;
+        Bounds? bounds;
 
         public override bool IsCompleted => dracoTask!=null && dracoTask.IsCompleted;
+
+        public PrimitiveDracoCreateContext(Bounds? bounds) {
+            this.bounds = bounds;
+        }
 
         public void StartDecode(NativeSlice<byte> data, int weightsAttributeId, int jointsAttributeId) {
             draco = new DracoMeshLoader();
@@ -42,6 +47,12 @@ namespace GLTFast {
 
             if (mesh == null) {
                 return null;
+            }
+
+            if (bounds.HasValue) {
+                mesh.bounds = bounds.Value;
+            } else {
+                mesh.RecalculateBounds();
             }
 
 #if GLTFAST_KEEP_MESH_DATA
