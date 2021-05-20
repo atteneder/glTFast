@@ -62,10 +62,11 @@ namespace GLTFast
         /// <summary>
         /// Creates an instance of the main scene
         /// </summary>
+        /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
-        public bool Instantiate() {
+        public bool Instantiate(ILogger logger = null) {
             if (importer == null) return false;
-            var instantiator = new GameObjectInstantiator(importer, transform);
+            var instantiator = new GameObjectInstantiator(importer, transform, logger);
             var success = importer.InstantiateMainScene(instantiator);
             sceneInstance = instantiator.sceneInstance;
             currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
@@ -76,10 +77,11 @@ namespace GLTFast
         /// Creates an instance of the scene specified by the scene index.
         /// </summary>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
+        /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
-        public bool InstantiateScene(int sceneIndex) {
+        public bool InstantiateScene(int sceneIndex, ILogger logger = null) {
             if (importer == null) return false;
-            var instantiator = new GameObjectInstantiator(importer, transform);
+            var instantiator = new GameObjectInstantiator(importer, transform, logger);
             var success = importer.InstantiateScene(instantiator,sceneIndex);
             sceneInstance = instantiator.sceneInstance;
             currentSceneId = success ? sceneIndex : (int?)null;
