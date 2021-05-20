@@ -99,22 +99,16 @@ namespace GLTFast {
             int primitiveNumeration = 0
         );
 
-        void AddCameraPerspective(
+        /// <summary>
+        /// Called when a node has a camera assigned
+        /// </summary>
+        /// <param name="nodeIndex">Index of the node</param>
+        /// <param name="cameraIndex">Index of the assigned camera</param>
+        void AddCamera(
             uint nodeIndex,
-            float verticalFieldOfView,
-            float nearClipPlane,
-            float farClipPlane,
-            float? aspectRatio
+            uint cameraIndex
         );
-
-        void AddCameraOrthographic(
-            uint nodeIndex,
-            float nearClipPlane,
-            float? farClipPlane,
-            float horizontal,
-            float vertical
-        );
-
+        
         /// <summary>
         /// Called for adding a glTF scene.
         /// </summary>

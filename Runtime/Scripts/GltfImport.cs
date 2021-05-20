@@ -474,6 +474,13 @@ namespace GLTFast {
             return result;
         }
 
+        public Camera GetSourceCamera(uint index) {
+            if (gltfRoot?.cameras != null && index < gltfRoot.cameras.Length) {
+                return gltfRoot.cameras[index];
+            }
+            return null;
+        }
+        
         public Material GetSourceMaterial(int index = 0) {
             if (gltfRoot?.materials != null && index >= 0 && index < gltfRoot.materials.Length) {
                 return gltfRoot.materials[index];
@@ -1618,37 +1625,16 @@ namespace GLTFast {
                         primitiveCount++;
                     }
                 }
+                
+                instantiator.SetNodeName(nodeIndex,goName);
 
                 if (node.camera >= 0
                     && gltf.cameras!=null
                     && node.camera < gltf.cameras.Length
                     )
                 {
-                    var camera = gltf.cameras[node.camera];
-                    switch (camera.typeEnum) {
-                    case Camera.Type.Orthographic:
-                        var o = camera.orthographic;
-                        instantiator.AddCameraOrthographic(
-                            nodeIndex,
-                            o.znear,
-                            o.zfar >=0 ? o.zfar : (float?) null,
-                            o.xmag,
-                            o.ymag );
-                        break;
-                    case Camera.Type.Perspective:
-                        var p = camera.perspective;
-                        instantiator.AddCameraPerspective(
-                            nodeIndex,
-                            p.yfov,
-                            p.znear,
-                            p.zfar,
-                            p.aspectRatio>0 ? p.aspectRatio : (float?)null
-                            );
-                        break;
-                    }
+                    instantiator.AddCamera(nodeIndex,(uint)node.camera);
                 }
-
-                instantiator.SetNodeName(nodeIndex,goName);
             }
             
             Profiler.BeginSample("CreateGameObjects");

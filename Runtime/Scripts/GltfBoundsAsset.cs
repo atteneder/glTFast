@@ -36,15 +36,15 @@ namespace GLTFast
             ILogger logger = null
             )
         {
-            gLTFastInstance = new GltfImport(downloadProvider,deferAgent, materialGenerator);
-            var success = await gLTFastInstance.Load(url);
+            importer = new GltfImport(downloadProvider,deferAgent, materialGenerator);
+            var success = await importer.Load(url);
             if(success) {
-                var insta = new GameObjectBoundsInstantiator(gLTFastInstance,transform);
+                var insta = new GameObjectBoundsInstantiator(importer,transform);
                 // Auto-Instantiate
-                success = gLTFastInstance.InstantiateMainScene(insta);
+                success = importer.InstantiateMainScene(insta);
             
                 if(success) {
-                    currentSceneId = gLTFastInstance.defaultSceneIndex;
+                    currentSceneId = importer.defaultSceneIndex;
                     var sceneBounds = insta.CalculateBounds();
                     if (sceneBounds.HasValue) {
                         bounds = sceneBounds.Value;

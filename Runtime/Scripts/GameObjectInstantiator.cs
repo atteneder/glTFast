@@ -24,6 +24,17 @@ using UnityEngine;
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
 
+        public class SceneInstance {
+            public List<Camera> cameras { get; private set; }
+
+            public void AddCamera(Camera camera) {
+                if (cameras == null) {
+                    cameras = new List<Camera>();
+                }
+                cameras.Add(camera);
+            }
+        }
+        
         protected ILogger logger;
         
         protected IGltfReadable gltf;
@@ -32,7 +43,10 @@ namespace GLTFast {
 
         protected Dictionary<uint,GameObject> nodes;
 
-        public List<Camera> cameras { get; protected set; }
+        /// <summary>
+        /// Contains information about the latest instance of a glTF scene
+        /// </summary>
+        public SceneInstance sceneInstance { get; protected set; }
         
         public GameObjectInstantiator(IGltfReadable gltf, Transform parent, ILogger logger = null) {
             this.gltf = gltf;
@@ -42,6 +56,7 @@ namespace GLTFast {
 
         public virtual void Init() {
             nodes = new Dictionary<uint, GameObject>();
+            sceneInstance = new SceneInstance();
         }
 
         public void CreateNode(
@@ -149,14 +164,43 @@ namespace GLTFast {
             }
         }
 
-        public void AddCameraPerspective(
+        public void AddCamera(uint nodeIndex, uint cameraIndex) {
+            var camera = gltf.GetSourceCamera(cameraIndex);
+            switch (camera.typeEnum) {
+            case Schema.Camera.Type.Orthographic:
+                var o = camera.orthographic;
+                AddCameraOrthographic(
+                    nodeIndex,
+                    o.znear,
+                    o.zfar >=0 ? o.zfar : (float?) null,
+                    o.xmag,
+                    o.ymag,
+                    camera.name
+                );
+                break;
+            case Schema.Camera.Type.Perspective:
+                var p = camera.perspective;
+                AddCameraPerspective(
+                    nodeIndex,
+                    p.yfov,
+                    p.znear,
+                    p.zfar,
+                    p.aspectRatio>0 ? p.aspectRatio : (float?)null,
+                    camera.name
+                );
+                break;
+            }
+        }
+
+        void AddCameraPerspective(
             uint nodeIndex,
             float verticalFieldOfView,
             float nearClipPlane,
             float farClipPlane,
-            float? aspectRatio
+            float? aspectRatio,
+            string cameraName
         ) {
-            var cam = CreateCamera(nodeIndex);
+            var cam = CreateCamera(nodeIndex,cameraName);
 
             cam.orthographic = false;
 
@@ -172,14 +216,15 @@ namespace GLTFast {
             // }
         }
 
-        public void AddCameraOrthographic(
+        void AddCameraOrthographic(
             uint nodeIndex,
             float nearClipPlane,
             float? farClipPlane,
             float horizontal,
-            float vertical
+            float vertical,
+            string cameraName
         ) {
-            var cam = CreateCamera(nodeIndex);
+            var cam = CreateCamera(nodeIndex,cameraName);
             
             var farValue = farClipPlane ?? float.MaxValue;
 
@@ -206,10 +251,11 @@ namespace GLTFast {
             // cam.rect = GetLimitedViewPort(aspectRatio);
         }
 
-        Camera CreateCamera(uint nodeIndex) {
-            var camGo = new GameObject("Camera");
+        Camera CreateCamera(uint nodeIndex,string cameraName) {
+            var cameraParent = nodes[nodeIndex];
+            var camGo = new GameObject(cameraName ?? $"{cameraParent.name}-Camera" ?? $"Camera-{nodeIndex}");
             var camTrans = camGo.transform;
-            camTrans.SetParent(nodes[nodeIndex].transform,false);
+            camTrans.SetParent(cameraParent.transform,false);
             var tmp =Quaternion.Euler(0, 180, 0);
             camTrans.localRotation= tmp;
             var cam = camGo.AddComponent<Camera>();
@@ -217,11 +263,7 @@ namespace GLTFast {
             // By default, imported cameras are not enabled by default
             cam.enabled = false;
 
-            if (cameras == null) {
-                cameras = new List<Camera>();
-            }
-
-            cameras.Add(cam);
+            sceneInstance.AddCamera(cam);
             return cam;
         }
 

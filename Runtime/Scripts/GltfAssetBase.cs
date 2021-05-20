@@ -23,15 +23,20 @@ namespace GLTFast
 
     public class GltfAssetBase : MonoBehaviour
     {
-        protected GltfImport gLTFastInstance;
+        protected GltfImport importer;
         
         /// <summary>
         /// Indicates wheter the glTF was loaded (no matter if successfully or not)
         /// </summary>
         /// <value>True when loading routine ended, false otherwise.</value>
-        public bool isDone => gLTFastInstance!=null && gLTFastInstance.LoadingDone;
+        public bool isDone => importer!=null && importer.LoadingDone;
         
         public int? currentSceneId { get; protected set; }
+        
+        /// <summary>
+        /// Latest scene's instance.  
+        /// </summary>
+        public GameObjectInstantiator.SceneInstance sceneInstance { get; protected set; }
         
         /// <summary>
         /// Method for manual loading with custom <see cref="IDownloadProvider"/> and <see cref="IDeferAgent"/>.
@@ -50,8 +55,8 @@ namespace GLTFast
             ILogger logger = null
             )
         {
-            gLTFastInstance = new GltfImport(downloadProvider,deferAgent, materialGenerator, logger);
-            return await gLTFastInstance.Load(url);
+            importer = new GltfImport(downloadProvider,deferAgent, materialGenerator, logger);
+            return await importer.Load(url);
         }
 
         /// <summary>
@@ -59,9 +64,11 @@ namespace GLTFast
         /// </summary>
         /// <returns>True if instantiation was successful.</returns>
         public bool Instantiate() {
-            if (gLTFastInstance == null) return false;
-            var success = gLTFastInstance.InstantiateMainScene(transform);
-            currentSceneId = success ? gLTFastInstance.defaultSceneIndex : (int?)null;
+            if (importer == null) return false;
+            var instantiator = new GameObjectInstantiator(importer, transform);
+            var success = importer.InstantiateMainScene(instantiator);
+            sceneInstance = instantiator.sceneInstance;
+            currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
             return success;
         }
 
@@ -71,8 +78,10 @@ namespace GLTFast
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <returns>True if instantiation was successful.</returns>
         public bool InstantiateScene(int sceneIndex) {
-            if (gLTFastInstance == null) return false;
-            var success = gLTFastInstance.InstantiateScene(transform,sceneIndex);
+            if (importer == null) return false;
+            var instantiator = new GameObjectInstantiator(importer, transform);
+            var success = importer.InstantiateScene(instantiator,sceneIndex);
+            sceneInstance = instantiator.sceneInstance;
             currentSceneId = success ? sceneIndex : (int?)null;
             return success;
         }
@@ -84,6 +93,7 @@ namespace GLTFast
             foreach (Transform child in transform) {
                 Destroy(child.gameObject);
             }
+            sceneInstance = null;
         }
 
         /// <summary>
@@ -93,23 +103,23 @@ namespace GLTFast
         /// <param name="index">Index of material in glTF file.</param>
         /// <returns>glTF material if it was loaded successfully and index is correct, null otherwise.</returns>
         public UnityEngine.Material GetMaterial( int index = 0 ) {
-            return gLTFastInstance?.GetMaterial(index);
+            return importer?.GetMaterial(index);
         }
 
         /// <summary>
         /// Number of scenes loaded
         /// </summary>
-        public int sceneCount => gLTFastInstance?.sceneCount ?? 0;
+        public int sceneCount => importer?.sceneCount ?? 0;
 
         /// <summary>
         /// Array of scenes' names (entries can be null, if not specified)
         /// </summary>
         public string[] sceneNames {
             get {
-                if (gLTFastInstance != null && gLTFastInstance.sceneCount > 0) {
-                    var names = new string[gLTFastInstance.sceneCount];
+                if (importer != null && importer.sceneCount > 0) {
+                    var names = new string[importer.sceneCount];
                     for (int i = 0; i < names.Length; i++) {
-                        names[i] = gLTFastInstance.GetSceneName(i);
+                        names[i] = importer.GetSceneName(i);
                     }
                     return names;
                 }
@@ -119,9 +129,9 @@ namespace GLTFast
 
         protected virtual void OnDestroy()
         {
-            if(gLTFastInstance!=null) {
-                gLTFastInstance.Dispose();
-                gLTFastInstance=null;
+            if(importer!=null) {
+                importer.Dispose();
+                importer=null;
             }
         }
     }

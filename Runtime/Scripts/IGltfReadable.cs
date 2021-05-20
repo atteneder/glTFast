@@ -29,6 +29,7 @@ namespace GLTFast {
         Texture2D GetImage(int index = 0);
         Texture2D GetTexture(int index = 0);
 
+        Schema.Camera GetSourceCamera(uint index);
         Schema.Material GetSourceMaterial(int index = 0);
         Schema.Texture GetSourceTexture(int index = 0);
         Schema.Image GetSourceImage(int index = 0);
