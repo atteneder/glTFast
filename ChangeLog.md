@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ImportSettings` can be provided to `GltfImporter.Load` (optionally) to customize the loading behaviour
   - `ImportSettings.nodeNameMethod` to allow customizing Node/GameObject naming convention
 - `IGltfReadable` interface for `GltfImporter`
-- Import and instantiation logging customization (see `ILogger`). Allows users to analyze log messages and/or opt out of logging all messages to the console (which is still done by default).
+- Import and instantiation logging customization (see `ILogger`). Allows users to analyze log messages and/or opt out of logging all messages to the console (which is still done by default if you're using `GltfAsset`).
 - Scene support. glTF can contain multiple scenes and now it is possible to instantiate them selectively 
   - `GltfImport.InstantiateMainScene` to create an instance of the main scene (or nothing if the `scene` is not set; following the glTF 2.0 specification)
   - `GltfImport.InstantiateScene` to create an instance of a specific scene
