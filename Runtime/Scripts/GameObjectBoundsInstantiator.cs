@@ -62,8 +62,7 @@ namespace GLTFast {
 
             var sceneBoundsSet = false;
             var sceneBounds = new Bounds();
-
-            var nodesLength = nodes?.Count ?? 0;
+            
             foreach (var nodeBound in nodeBounds.Values) {
                 if (sceneBoundsSet) {
                     sceneBounds.Encapsulate(nodeBound);
