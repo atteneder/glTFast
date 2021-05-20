@@ -195,8 +195,8 @@ namespace GLTFast.Schema {
             Assert.AreEqual(GLTFAccessorAttributeType.VEC3 ,typeEnum);
             if (min != null && min.Length > 2 && max != null && max.Length > 2) {
                 return new Bounds {
-                    max = new Vector3(max[0], max[1], -min[2]),
-                    min = new Vector3(min[0], min[1], -max[2])
+                    max = new Vector3(-max[0], max[1], min[2]),
+                    min = new Vector3(-min[0], min[1], max[2])
                 };
             }
             return null;
