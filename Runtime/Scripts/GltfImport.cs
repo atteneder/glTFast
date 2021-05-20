@@ -276,8 +276,10 @@ namespace GLTFast {
         /// </summary>
         /// <param name="bytes">byte array containing glTF-binary</param>
         /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
         /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null) {
+        public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null, ImportSettings importSettings = null) {
+            settings = importSettings ?? new ImportSettings();
             var success = await LoadGltfBinaryBuffer(bytes,uri);
             if(success) await LoadContent();
             success = success && await Prepare();
