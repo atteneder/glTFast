@@ -32,6 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Runtime tests. They were moved into a [dedicated test package](https://github.com/atteneder/gltf-test-framework).
 
+## [3.3.1] - 2021-05-21
+### Fixed
+- `GltfBoundsAsset` create just one instances (was two before; fixes #182)
+
+
 ## [3.3.0] - 2021-05-19
 ### Added
 - Support for alpha modes `BLEND` and `MASK` on unlit materials (thanks [Sehyun av Kim](https://github.com/avseoul) for #181; fixes #180)
