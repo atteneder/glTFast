@@ -200,13 +200,13 @@ namespace GLTFast {
             float? aspectRatio,
             string cameraName
         ) {
-            var cam = CreateCamera(nodeIndex,cameraName);
+            var cam = CreateCamera(nodeIndex,cameraName,out var localScale);
 
             cam.orthographic = false;
 
             cam.fieldOfView = verticalFieldOfView * Mathf.Rad2Deg;
-            cam.nearClipPlane = nearClipPlane;
-            cam.farClipPlane = farClipPlane;
+            cam.nearClipPlane = nearClipPlane * localScale;
+            cam.farClipPlane = farClipPlane * localScale;
 
             // // If the aspect ratio is given and does not match the
             // // screen's aspect ratio, the viewport rect is reduced
@@ -224,13 +224,13 @@ namespace GLTFast {
             float vertical,
             string cameraName
         ) {
-            var cam = CreateCamera(nodeIndex,cameraName);
+            var cam = CreateCamera(nodeIndex,cameraName,out var localScale);
             
             var farValue = farClipPlane ?? float.MaxValue;
 
             cam.orthographic = true;
-            cam.nearClipPlane = nearClipPlane;
-            cam.farClipPlane = farValue;
+            cam.nearClipPlane = nearClipPlane * localScale;
+            cam.farClipPlane = farValue * localScale;
             cam.orthographicSize = vertical; // Note: Ignores `horizontal`
 
             // Custom projection matrix
@@ -251,11 +251,21 @@ namespace GLTFast {
             // cam.rect = GetLimitedViewPort(aspectRatio);
         }
 
-        Camera CreateCamera(uint nodeIndex,string cameraName) {
+        /// <summary>
+        /// Creates a camera component on the given node and returns an approximated
+        /// local-to-world scale factor, required to counter-act that Unity scales
+        /// near- and far-clipping-planes via Transform.
+        /// </summary>
+        /// <param name="nodeIndex">Node's index</param>
+        /// <param name="cameraName">Camera's name</param>
+        /// <param name="localScale">Approximated local-to-world scale factor</param>
+        /// <returns>The newly created Camera component</returns>
+        Camera CreateCamera(uint nodeIndex,string cameraName, out float localScale) {
             var cameraParent = nodes[nodeIndex];
             var camGo = new GameObject(cameraName ?? $"{cameraParent.name}-Camera" ?? $"Camera-{nodeIndex}");
             var camTrans = camGo.transform;
-            camTrans.SetParent(cameraParent.transform,false);
+            var parentTransform = cameraParent.transform;
+            camTrans.SetParent(parentTransform,false);
             var tmp =Quaternion.Euler(0, 180, 0);
             camTrans.localRotation= tmp;
             var cam = camGo.AddComponent<Camera>();
@@ -264,6 +274,10 @@ namespace GLTFast {
             cam.enabled = false;
 
             sceneInstance.AddCamera(cam);
+
+            var parentScale = parentTransform.localToWorldMatrix.lossyScale;
+            localScale = (parentScale.x + parentScale.y + parentScale.y) / 3; 
+            
             return cam;
         }
 
