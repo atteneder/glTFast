@@ -60,6 +60,8 @@ namespace GLTFast {
 
         public Bounds? CalculateBounds() {
 
+            if (nodeBounds == null) { return null; }
+
             var sceneBoundsSet = false;
             var sceneBounds = new Bounds();
             

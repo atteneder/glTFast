@@ -39,28 +39,50 @@ namespace GLTFast
             importer = new GltfImport(downloadProvider,deferAgent, materialGenerator);
             var success = await importer.Load(url);
             if(success) {
-                var insta = new GameObjectBoundsInstantiator(importer,transform);
+                var insta = (GameObjectBoundsInstantiator) GetDefaultInstantiator(logger);
                 // Auto-Instantiate
-                success = importer.InstantiateMainScene(insta);
-            
+                if (sceneId>=0) {
+                    success = importer.InstantiateScene(insta, sceneId);
+                } else {
+                    success = importer.InstantiateMainScene(insta);
+                }
+
                 if(success) {
-                    currentSceneId = importer.defaultSceneIndex;
-                    var sceneBounds = insta.CalculateBounds();
-                    if (sceneBounds.HasValue) {
-                        bounds = sceneBounds.Value;
-                        if (createBoxCollider) {
-    #if UNITY_PHYSICS
-                            var boxCollider = gameObject.AddComponent<BoxCollider>();
-                            boxCollider.center = bounds.center;
-                            boxCollider.size = bounds.size;
-    #else
-                            Debug.LogError("GltfBoundsAsset requires the built-in Physics package to be enabled (in the Package Manager)");
-    #endif
-                        }
-                    }
+                    SetBounds(insta);
                 }
             }
             return success;
+        }
+
+        public override bool InstantiateScene(int sceneIndex, ILogger logger = null) {
+            base.InstantiateScene(sceneIndex, logger);
+            var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
+            var success = base.InstantiateScene(sceneIndex, instantiator);
+            currentSceneId = success ? sceneIndex : (int?)null;
+            if (success) {
+                SetBounds(instantiator);
+            }
+            return success;
+        }
+
+        protected override GameObjectInstantiator GetDefaultInstantiator(ILogger logger) {
+            return new GameObjectBoundsInstantiator(importer, transform, logger);
+        }
+        
+        void SetBounds(GameObjectBoundsInstantiator insta) {
+            var sceneBounds = insta.sceneInstance!=null ? insta.CalculateBounds() : null;
+            if (sceneBounds.HasValue) {
+                bounds = sceneBounds.Value;
+                if (createBoxCollider) {
+#if UNITY_PHYSICS
+                    var boxCollider = gameObject.AddComponent<BoxCollider>();
+                    boxCollider.center = bounds.center;
+                    boxCollider.size = bounds.size;
+#else
+                    Debug.LogError("GltfBoundsAsset requires the built-in Physics package to be enabled (in the Package Manager)");
+#endif
+                }
+            }
         }
     }
 }

@@ -66,7 +66,7 @@ namespace GLTFast
         /// <returns>True if instantiation was successful.</returns>
         public bool Instantiate(ILogger logger = null) {
             if (importer == null) return false;
-            var instantiator = new GameObjectInstantiator(importer, transform, logger);
+            var instantiator = GetDefaultInstantiator(logger);
             var success = importer.InstantiateMainScene(instantiator);
             sceneInstance = instantiator.sceneInstance;
             currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
@@ -79,9 +79,23 @@ namespace GLTFast
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
-        public bool InstantiateScene(int sceneIndex, ILogger logger = null) {
+        public virtual bool InstantiateScene(int sceneIndex, ILogger logger = null) {
             if (importer == null) return false;
-            var instantiator = new GameObjectInstantiator(importer, transform, logger);
+            var instantiator = GetDefaultInstantiator(logger);
+            var success = importer.InstantiateScene(instantiator,sceneIndex);
+            sceneInstance = instantiator.sceneInstance;
+            currentSceneId = success ? sceneIndex : (int?)null;
+            return success;
+        }
+
+        /// <summary>
+        /// Creates an instance of the scene specified by the scene index.
+        /// </summary>
+        /// <param name="sceneIndex">Index of the scene to be instantiated</param>
+        /// <param name="instantiator">Receives scene construction calls</param>
+        /// <returns>True if instantiation was successful.</returns>
+        protected bool InstantiateScene(int sceneIndex, GameObjectInstantiator instantiator) {
+            if (importer == null) return false;
             var success = importer.InstantiateScene(instantiator,sceneIndex);
             sceneInstance = instantiator.sceneInstance;
             currentSceneId = success ? sceneIndex : (int?)null;
@@ -127,6 +141,10 @@ namespace GLTFast
                 }
                 return null;
             }
+        }
+        
+        protected virtual GameObjectInstantiator GetDefaultInstantiator(ILogger logger) {
+            return new GameObjectInstantiator(importer, transform, logger);
         }
 
         protected virtual void OnDestroy()
