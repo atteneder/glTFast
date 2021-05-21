@@ -4,13 +4,16 @@
 
 It focuses on speed, memory efficiency and a small build footprint.
 
+Two workflows are supported
+
+- Load glTF assets fast and efficient at runtime
+- Import glTF assets as prefabs into the asset database at design-time in the Unity Editor
+
 Try the [WebGL Demo][gltfast-web-demo] and check out the [demo project](https://github.com/atteneder/glTFastDemo).
 
 ## Features
 
-*glTFast* supports runtime loading of glTF 2.0 files.
-
-It supports large parts of the glTF 2.0 specification plus many extensions and runs on following platforms:
+*glTFast* supports large parts of the glTF 2.0 specification plus many extensions, works with URP, HDRP, the Built-In render pipe and runs on following platforms:
 
 - WebGL
 - iOS
@@ -20,7 +23,8 @@ It supports large parts of the glTF 2.0 specification plus many extensions and r
 - Linux
 - Universal Windows Platform
 
-It is planned to become feature complete. See the [list of features/extensions](./features.md) for details and limitations.
+
+Get more details from the [list of features/extensions](./features.md).
 
 ## Usage
 
@@ -28,13 +32,13 @@ You can load a glTF asset from an URL or a file path.
 
 > Note: glTFs are loaded via [UnityWebRequests](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest.html). File paths have to be prefixed with `file://` in the Unity Editor and on certain platforms (e.g. iOS).
 
-### Load via Component
+### Runtime Loading via Component
 
 Add a `GltfAsset` component to a GameObject.
 
 ![GltfAsset component][gltfasset_component]
 
-### Load via Script
+### Runtime Loading via Script
 
 ```C#
 var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
@@ -51,7 +55,7 @@ async void LoadGltfBinaryFromMemory() {
     var gltf = new GltfImport();
     bool success = await gltf.LoadGltfBinary(data, new Uri(m_Path));
     if (success) {
-        success = gltf.InstantiateGltf(transform);
+        success = gltf.InstantiateMainScene(transform);
     }
 }
 ```
@@ -65,7 +69,7 @@ Loading via script allows you to:
 - Custom download or file loading behaviour (see [`IDownloadProvider`](../Runtime/Scripts/IDownload.cs))
 - Custom material generation (see [`IMaterialGenerator`](../Runtime/Scripts/IMaterialGenerator.cs))
 - Customize [instantiation](#Instantiation)
-- Load glTF once and instantiate it many times (see example [below](#custom-post-loading-behaviour))
+- Load glTF once and instantiate its scenes many times (see example [below](#custom-post-loading-behaviour))
 - Access data of glTF scene (for example get material; see example [below](#custom-post-loading-behaviour))
 - Load [reports](#report) allow reacting and communicating incidents during loading and instantiation
 - Tweak and optimize loading performance
@@ -87,10 +91,15 @@ async void Start() {
         var material = gltf.GetMaterial();
         Debug.LogFormat("The first material is called {0}", material.name);
 
-        // Instantiate the entire glTF multiple times
-        gltf.InstantiateGltf( new GameObject("Instance 1").transform );
-        gltf.InstantiateGltf( new GameObject("Instance 2").transform );
-        gltf.InstantiateGltf( new GameObject("Instance 3").transform );
+        // Instantiate the glTF's main scene
+        gltf.InstantiateMainScene( new GameObject("Instance 1").transform );
+        // Instantiate the glTF's main scene
+        gltf.InstantiateMainScene( new GameObject("Instance 2").transform );
+
+        // Instantiate each of the glTF's scenes
+        for (int sceneId = 0; sceneId < gltf.sceneCount; sceneId++) {
+            gltf.InstantiateScene(transform, sceneId);
+        }
     } else {
         Debug.LogError("Loading glTF failed!");
     }
@@ -112,7 +121,7 @@ public class YourCustomInstantiator : GLTFast.IInstantiator {
 …
 
   // In your custom post-loading script, use it like this
-  gltfAsset.InstantiateGltf( new YourCustomInstantiator() );
+  gltfAsset.InstantiateMainScene( new YourCustomInstantiator() );
 ```
 
 #### Report
@@ -160,7 +169,7 @@ async Task CustomDeferAgent() {
         var task = gltf.Load(url).ContinueWith(
             t => {
                 if (t.Result) {
-                    gltf.InstantiateGltf(transform);
+                    gltf.InstantiateMainScene(transform);
                 }
             },
             TaskScheduler.FromCurrentSynchronizationContext()
@@ -175,6 +184,10 @@ async Task CustomDeferAgent() {
 > Note 1: Depending on your glTF scene, using the `UninterruptedDeferAgent` may block the main thread for up to multiple seconds. Be sure to not do this during critical game play action.
 
 > Note2 : Using the `TimeBudgetPerFrameDeferAgent` does **not** guarantee a stutter free frame rate. This is because some sub tasks of the loading routine (like uploading a texture to the GPU) may take too long, cannot be interrupted and **have** to be done on the main thread.
+
+### Editor Import
+
+To convert your glTF asset into a native Unity prefab, just move/copy it and all its companioning buffer and texture files into the *Assets* folder of your Unity project. It'll get imported into the Asset Database automatically. Select it in the Project view to see detailed settings and import reports in the Inspector. Expand it in the Project View to see the components (Scenes, Meshes, Materials, AnimationClips and Textures) that were imported.
 
 ## Project Setup
 

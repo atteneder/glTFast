@@ -12,13 +12,16 @@
 
 It focuses on speed, memory efficiency and a small build footprint.
 
+Two workflows are supported
+
+- Load glTF assets fast and efficient at runtime
+- Import glTF assets as prefabs into the asset database at design-time in the Unity Editor
+
 Try the [WebGL Demo][gltfast-web-demo] and check out the [demo project](https://github.com/atteneder/glTFastDemo).
 
 ## Features
 
-*glTFast* supports runtime loading of glTF 2.0 files.
-
-It supports large parts of the glTF 2.0 specification plus many extensions and runs on following platforms:
+*glTFast* supports large parts of the glTF 2.0 specification plus many extensions, works with URP, HDRP, the Built-In render pipe and runs on following platforms:
 
 - WebGL
 - iOS
@@ -28,7 +31,7 @@ It supports large parts of the glTF 2.0 specification plus many extensions and r
 - Linux
 - Universal Windows Platform
 
-It is [planned](#goals) to become feature complete. See the [list of features/extensions](./Documentation~/features.md) for details and limitations.
+Get more details from the [list of features/extensions](./Documentation~/features.md).
 
 ## Installing
 
@@ -67,13 +70,13 @@ To add support for Draco mesh compression, repeat the last step and also add the
 
 You can load a glTF asset from an URL or a file path.
 
-### Load via Component
+### Runtime Loading via Component
 
 Add a `GltfAsset` component to a GameObject.
 
 ![GltfAsset component][gltfasset_component]
 
-### Load via Script
+### Runtime Loading via Script
 
 ```C#
 var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
@@ -82,15 +85,7 @@ gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/ma
 
 See [Load via Script](./Documentation~/glTFast.md#load-via-script) in the detailed documentation for instructions how to customize the loading behaviour via script.
 
-### Materials and Shader Variants
-
-❗ IMPORTANT ❗
-
-*glTFast* uses custom shaders that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
-
-Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/glTFast.md#materials-and-shader-variants) for details.
-
-### Advanced
+#### Customizing Runtime Loading Behavior
 
 The loading behavior can be highly customized:
 
@@ -102,6 +97,20 @@ The loading behavior can be highly customized:
 
 See the [Documentation](./Documentation~/glTFast.md) for details.
 
+### Editor Import
+
+To convert your glTF asset into a native Unity prefab, just move/copy it and all its companioning buffer and texture files into the *Assets* folder of your Unity project. It'll get imported into the Asset Database automatically. Select it in the Project view to see detailed settings and import reports in the Inspector. Expand it in the Project View to see the components (Scenes, Meshes, Materials, AnimationClips and Textures) that were imported.
+
+## Project Setup
+
+### Materials and Shader Variants
+
+❗ IMPORTANT ❗
+
+*glTFast* uses custom shaders that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
+
+Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/glTFast.md#materials-and-shader-variants) for details.
+
 ## Roadmap
 
 Find plans for upcoming changes at the [milestones](https://github.com/atteneder/glTFast/milestones).
@@ -111,7 +120,7 @@ Find plans for upcoming changes at the [milestones](https://github.com/atteneder
 ### Goals
 
 - Stay fast, memory efficient and small
-- Become feature complete
+- Feature completeness
   - Support 100% of the glTF 2.0 specification
   - Support all official Khronos extensions
   - Support selected vendor extension
@@ -123,20 +132,8 @@ Find plans for upcoming changes at the [milestones](https://github.com/atteneder
 
 ### Extended goals
 
-- glTF Import (create prefab from glTF in the Editor)
 - glTF Authoring (create optimized glTFs from prefabs)
 - glTF Runtime Export
-
-### Non-goals
-
-- glTF 1.0 backwards compatibility
-
-### Out of scope
-
-Ideas worth pursuing, but not within this package:
-
-- Asset lifetime management
-- Download management with asset caching
 
 ## Get involved
 
