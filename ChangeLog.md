@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Import glTF files at design-time in the Editor
 - Custom inspector for imported glTF files, featuring import log messages
-- `ImportSettings` can be provided to `GltfImporter.Load` (optionally) to customize the loading behaviour
+- `ImportSettings` can be provided to `GltfImporter.Load` (optionally) to customize the loading behaviour (quite limited at the moment, but gives room to grow)
   - `ImportSettings.nodeNameMethod` to allow customizing Node/GameObject naming convention
 - `IGltfReadable` interface for `GltfImporter`
 - Import and instantiation logging customization (see `ILogger`). Allows users to analyze log messages and/or opt out of logging all messages to the console (which is still done by default if you're using `GltfAsset`).
@@ -16,10 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `GltfImport.InstantiateMainScene` to create an instance of the main scene (or nothing if the `scene` is not set; following the glTF 2.0 specification)
   - `GltfImport.InstantiateScene` to create an instance of a specific scene
 - GPU instancing via [`EXT_mesh_gpu_instancing` glTF extension](https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Vendor/EXT_mesh_gpu_instancing/README.md) (#107).
-- Camera support (via `IInstantiator.AddCameraPerspective` and `IInstantiator.AddCameraOrthographic`; #12)
+- Camera support (via `IInstantiator.AddCamera`; #12)
 ### Changed
 - Coordinate space conversion from glTF's right-handed to Unity's left-handed system changed. Please see the [upgrade guide](./Documentation~/glTFast.md#upgrade-to-4.x) for details and the motivation behind it.
-- Nodes' names are made unique (within their hierarchical position) by supplementing a continuous number. This is required for correct animation target lookup and import continuity. 
+- Nodes' names are made unique (within their hierarchical position) by supplementing a continuous number. This is required for correct animation target lookup and import continuity.
 - `IInstantiator.AddPrimitive` extended parameter `first` (`bool`; true for the first primitive) to primitiveNumeration (`int`; counting upwards from zero). This allows for creating unique GameObject names.
 - Renamed the main class `GltFast` to `GltfImporter` to properly reflect its purpose. There is a fallback `GltFast` class for backwards compatibility
 - Renamed `GltfImporter.Destroy` to `GltfImporter.Dispose` to have more consistent naming similar to native containers
