@@ -180,9 +180,24 @@ namespace GLTFast.Materials {
                     material.SetVector(specColorPropId, specGloss.specularColor);
                     material.SetFloat(glossinessPropId,specGloss.glossinessFactor);
 
-                    TrySetTexture(specGloss.diffuseTexture,material,mainTexPropId,gltf);
+                    TrySetTexture(
+                        specGloss.diffuseTexture,
+                        material,
+                        gltf,
+                        mainTexPropId,
+                        mainTexScaleTransform,
+                        mainTexRotation
+                        );
 
-                    if (TrySetTexture(specGloss.specularGlossinessTexture,material,specGlossMapPropId,gltf)) {
+                    if (TrySetTexture(
+                        specGloss.specularGlossinessTexture,
+                        material,
+                        gltf,
+                        specGlossMapPropId,
+                        // TODO: Built-in only supports main texture TRS
+                        mainTexScaleTransform,
+                        mainTexRotation
+                        )) {
                         material.EnableKeyword(KW_SPEC_GLOSS_MAP);
                     }
                 }
@@ -193,24 +208,63 @@ namespace GLTFast.Materials {
                 material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                 material.SetFloat(roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
-                TrySetTexture(gltfMaterial.pbrMetallicRoughness.baseColorTexture,material,mainTexPropId,gltf);
+                TrySetTexture(
+                    gltfMaterial.pbrMetallicRoughness.baseColorTexture,
+                    material,
+                    gltf,
+                    mainTexPropId,
+                    mainTexScaleTransform,
+                    mainTexRotation
+                    );
                 
-                if(TrySetTexture(gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,material,metallicGlossMapPropId,gltf)) {
+                if(TrySetTexture(
+                    gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,
+                    material,
+                    gltf,
+                    metallicGlossMapPropId,
+                    // TODO: Built-in only supports main texture TRS
+                    mainTexScaleTransform,
+                    mainTexRotation
+                    )) {
                     material.EnableKeyword(KW_METALLIC_ROUGNESS_MAP);
                 }
             }
 
-            if(TrySetTexture(gltfMaterial.normalTexture,material,bumpMapPropId,gltf)) {
+            if(TrySetTexture(
+                gltfMaterial.normalTexture,
+                material,
+                gltf,
+                bumpMapPropId,
+                // TODO: Built-in only supports main texture TRS
+                mainTexScaleTransform,
+                mainTexRotation
+                )) {
                 material.EnableKeyword(KW_NORMALMAP);
                 material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
             }
 
-            if(TrySetTexture(gltfMaterial.occlusionTexture,material,occlusionMapPropId,gltf)) {
+            if(TrySetTexture(
+                gltfMaterial.occlusionTexture,
+                material,
+                gltf,
+                occlusionMapPropId,
+                // TODO: Built-in only supports main texture TRS
+                mainTexScaleTransform,
+                mainTexRotation
+                )) {
                 material.EnableKeyword(KW_OCCLUSION);
                 material.SetFloat(occlusionStrengthPropId,gltfMaterial.occlusionTexture.strength);
             }
 
-            if(TrySetTexture(gltfMaterial.emissiveTexture,material,emissionMapPropId,gltf)) {
+            if(TrySetTexture(
+                gltfMaterial.emissiveTexture,
+                material,
+                gltf,
+                emissionMapPropId,
+                // TODO: Built-in only supports main texture TRS
+                mainTexScaleTransform,
+                mainTexRotation
+                )) {
                 material.EnableKeyword(KW_EMISSION);
             }
 

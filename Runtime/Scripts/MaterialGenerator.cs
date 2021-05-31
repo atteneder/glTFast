@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using GLTFast.Schema;
 using UnityEngine;
 using Unity.Mathematics;
+using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 #if USING_URP
 using UnityEngine.Rendering.Universal;
@@ -42,20 +43,33 @@ namespace GLTFast.Materials {
         }
         
         public const string KW_UV_ROTATION = "_UV_ROTATION";
+        public const string KW_UV_CHANNEL_SELECT = "_UV_CHANNEL_SELECT";
         
         public static readonly int bumpMapPropId = Shader.PropertyToID("_BumpMap");
+        public static readonly int bumpMapRotationPropId = Shader.PropertyToID("_BumpMapRotation");
+        public static readonly int bumpMapScaleTransformPropId = Shader.PropertyToID("_BumpMap_ST");
+        public static readonly int bumpMapUVChannelPropId = Shader.PropertyToID("_BumpMapUVChannel");
         public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
         public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
         public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
         public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
+        public static readonly int emissionMapRotationPropId = Shader.PropertyToID("_EmissionMapRotation");
+        public static readonly int emissionMapScaleTransformPropId = Shader.PropertyToID("_EmissionMap_ST");
+        public static readonly int emissionMapUVChannelPropId = Shader.PropertyToID("_EmissionMapUVChannel");
         public static readonly int mainTexPropId = Shader.PropertyToID("_MainTex");
         public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
         public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
         public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
         public static readonly int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
         public static readonly int occlusionStrengthPropId = Shader.PropertyToID("_OcclusionStrength");
+        public static readonly int occlusionMapRotationPropId = Shader.PropertyToID("_OcclusionMapRotation");
+        public static readonly int occlusionMapScaleTransformPropId = Shader.PropertyToID("_OcclusionMap_ST");
+        public static readonly int occlusionMapUVChannelPropId = Shader.PropertyToID("_OcclusionMapUVChannel");
         public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
         public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
+        public static readonly int specGlossScaleTransformMapPropId = Shader.PropertyToID("_SpecGlossMap_ST"); // TODO: Support in shader!
+        public static readonly int specGlossMapRotationPropId = Shader.PropertyToID("_SpecGlossMapRotation"); // TODO: Support in shader!
+        public static readonly int specGlossMapUVChannelPropId = Shader.PropertyToID("_SpecGlossMapUVChannel"); // TODO: Support in shader!
 
         static IMaterialGenerator defaultMaterialGenerator;
         
@@ -107,8 +121,11 @@ namespace GLTFast.Materials {
         protected bool TrySetTexture(
             TextureInfo textureInfo,
             UnityEngine.Material material,
-            int propertyId,
-            IGltfReadable gltf
+            IGltfReadable gltf,
+            int texturePropertyId,
+            int scaleTransformPropertyId = -1,
+            int rotationPropertyId = -1,
+            int uvChannelPropertyId = -1
             )
         {
             if (textureInfo != null && textureInfo.index >= 0)
@@ -119,12 +136,17 @@ namespace GLTFast.Materials {
                 {
                     var texture = gltf.GetTexture(textureIndex);
                     if(texture != null) {
-                        if(textureInfo.texCoord!=0) {
-                            logger?.Error(LogCode.UVMulti);
-                        }
-                        material.SetTexture(propertyId,texture);
+                        material.SetTexture(texturePropertyId,texture);
                         var isKtx = srcTexture.isKtx;
-                        TrySetTextureTransform(textureInfo,material,propertyId,isKtx);
+                        TrySetTextureTransform(
+                            textureInfo,
+                            material,
+                            texturePropertyId,
+                            scaleTransformPropertyId,
+                            rotationPropertyId,
+                            uvChannelPropertyId,
+                            isKtx
+                            );
                         return true;
                     }
                     logger?.Error(LogCode.TextureLoadFailed,textureIndex.ToString());
@@ -142,7 +164,10 @@ namespace GLTFast.Materials {
         void TrySetTextureTransform(
             Schema.TextureInfo textureInfo,
             UnityEngine.Material material,
-            int propertyId,
+            int texturePropertyId,
+            int scaleTransformPropertyId = -1,
+            int rotationPropertyId = -1,
+            int uvChannelPropertyId = -1,
             bool flipY = false
             )
         {
@@ -152,12 +177,14 @@ namespace GLTFast.Materials {
                 0,0 // transform
                 );
 
+            var texCoord = textureInfo.texCoord;
+
             if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
                 var tt = textureInfo.extensions.KHR_texture_transform;
-                if(tt.texCoord!=0) {
-                    logger?.Error(LogCode.UVMulti);
+                if (tt.texCoord >= 0) {
+                    texCoord = tt.texCoord;
                 }
-
+                
                 float cos = 1;
                 float sin = 0;
 
@@ -174,7 +201,10 @@ namespace GLTFast.Materials {
                     sin = math.sin(tt.rotation);
 
                     var newRot = new Vector2(textureST.x * sin, textureST.y * -sin );
-                    material.SetVector(mainTexRotation, newRot);
+                    
+                    Assert.IsTrue(rotationPropertyId >= 0,"Texture rotation property invalid!");
+                    material.SetVector(rotationPropertyId, newRot);
+                    
                     textureST.x *= cos;
                     textureST.y *= cos;
 
@@ -185,18 +215,24 @@ namespace GLTFast.Materials {
                 textureST.w -= textureST.y * cos; // move offset to move flip axis point (vertically)
             }
 
+            if(texCoord!=0) {
+                if (uvChannelPropertyId >= 0 && texCoord < 2f) {
+                    material.EnableKeyword(KW_UV_CHANNEL_SELECT);
+                    material.SetFloat(uvChannelPropertyId,texCoord);
+                } else {
+                    logger?.Error(LogCode.UVMulti,texCoord.ToString());
+                }
+            }
+            
             if(flipY) {
                 textureST.w = 1-textureST.w; // flip offset in Y
                 textureST.y = -textureST.y; // flip scale in Y
             }
-            
-            if(material.HasProperty(mainTexPropId)) {
-                material.SetTextureOffset(mainTexPropId, textureST.zw);
-                material.SetTextureScale(mainTexPropId, textureST.xy);
-            }
-            material.SetTextureOffset(propertyId, textureST.zw);
-            material.SetTextureScale(propertyId, textureST.xy);
-            material.SetVector(mainTexScaleTransform, textureST);
+
+            material.SetTextureOffset(texturePropertyId, textureST.zw);
+            material.SetTextureScale(texturePropertyId, textureST.xy);
+            Assert.IsTrue(scaleTransformPropertyId >= 0,"Texture scale/transform property invalid!");
+            material.SetVector(scaleTransformPropertyId,textureST);
         }
         
         /// <summary>
