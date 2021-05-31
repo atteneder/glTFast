@@ -55,7 +55,15 @@ namespace GLTFast.Materials {
                     material.EnableKeyword("TRANSMISSION");
                     material.SetFloat(transmissionFactorPropId, transmission.transmissionFactor);
                     renderQueue = RenderQueue.Transparent;
-                    if (TrySetTexture(transmission.transmissionTexture, material, transmissionTexturePropId, gltf)) { }
+                    if (TrySetTexture(
+                        transmission.transmissionTexture,
+                        material,
+                        gltf,
+                        transmissionTexturePropId,
+                        transmissionTextureScaleTransformPropId, // TODO: add support in shader
+                        transmissionTextureRotationPropId, // TODO: add support in shader
+                        transmissionTextureUVChannelPropId // TODO: add support in shader
+                    )) { }
                 }
                 return renderQueue;
             }

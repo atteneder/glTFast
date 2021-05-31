@@ -36,6 +36,6 @@ namespace GLTFast.Schema {
         /// <summary>
         /// Overrides the textureInfo texCoord value if supplied, and if this extension is supported.
         /// </summary>
-        public int texCoord = 0;
+        public int texCoord = -1;
     }
 }

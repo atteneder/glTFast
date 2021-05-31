@@ -110,7 +110,7 @@ namespace GLTFast {
             { LogCode.TextureLoadFailed, "Texture #{0} not loaded" },
             { LogCode.TextureNotFound, "Texture #{0} not found" },
             { LogCode.TypeUnsupported, "Unsupported {0} type {1}" },
-            { LogCode.UVMulti, "Multiple UV sets are not supported!" },
+            { LogCode.UVMulti, "Multiple UV sets are not supported in current render pipeline!" },
         };
 #endif
 
