@@ -192,12 +192,6 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.ShaderKeyword"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"fb477813-97e4-4afa-a3f8-b0497177ef9f\"\n    },\n    \"m_Name\": \"GAMMA\",\n    \"m_DefaultReferenceName\": \"BOOLEAN_7C8248FB_ON\",\n    \"m_OverrideReferenceName\": \"GAMMA\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_KeywordType\": 0,\n    \"m_KeywordDefinition\": 1,\n    \"m_KeywordScope\": 1,\n    \"m_Entries\": [],\n    \"m_Value\": 0,\n    \"m_IsEditable\": true,\n    \"m_IsExposable\": true\n}"
-        },
-        {
-            "typeInfo": {
-                "fullName": "UnityEditor.ShaderGraph.ShaderKeyword"
-            },
             "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"108fbca7-4236-4cd0-91b0-91284d981583\"\n    },\n    \"m_Name\": \"_UV_ROTATION\",\n    \"m_DefaultReferenceName\": \"BOOLEAN_B94C4E3A_ON\",\n    \"m_OverrideReferenceName\": \"_UV_ROTATION\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_KeywordType\": 0,\n    \"m_KeywordDefinition\": 0,\n    \"m_KeywordScope\": 0,\n    \"m_Entries\": [],\n    \"m_Value\": 0,\n    \"m_IsEditable\": true,\n    \"m_IsExposable\": true\n}"
         },
         {
