@@ -404,11 +404,13 @@ namespace GLTFast {
                 }
                 textures = null;
             }
-            
-            foreach (var ad in accessorData) {
-                ad?.Dispose();
+
+            if (accessorData != null) {
+                foreach (var ad in accessorData) {
+                    ad?.Dispose();
+                }
+                accessorData = null;
             }
-            accessorData = null;
             
             if(resources!=null) {
                 foreach( var resource in resources ) {
