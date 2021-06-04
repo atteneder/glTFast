@@ -239,7 +239,7 @@ glTFast 4.0 introduces scene-based instantiation. While most glTF assets contain
 
 The old behaviour was, that all of the glTF's content was loaded. The new interface allows you to load the default scene or any scene of choice. If none of the scenes was declared the default scene (by setting the `scene` property), no objects are instantiated (as defined in the glTF specification).
 
-`GltfImport` provides the following properties and methods for scene instantiation:
+[`GltfImport`][GltfImport] (formerly named `GLTFast`) provides the following properties and methods for scene instantiation:
 
 ```csharp
 // To get the number of scenes
@@ -253,7 +253,25 @@ public bool InstantiateScene( Transform parent, int sceneIndex = 0);
 public bool InstantiateScene( IInstantiator instantiator, int sceneIndex = 0 );
 ```
 
-Please look at `GltfAsset` for a reference implementation and look at the properties'/methods' XML documentation comments in the source code for details.
+Please look at [`GltfAsset`][GltfAsset] for a reference implementation and look at the properties'/methods' XML documentation comments in the source code for details.
+
+#### Custom material generation
+
+Creating a custom `IMaterialGenerator` was mainly about implementing the following method:
+
+```csharp
+Material GenerateMaterial(Schema.Material gltfMaterial, ref Schema.Texture[] textures, ref Schema.Image[] schemaImages, ref Dictionary<int, Texture2D>[] imageVariants);
+```
+
+You'd receive all textures/images/image variants to pick from. This was changed to:
+
+```csharp
+Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf);
+```
+
+[`IGltfReadable`][IGltfReadable] is an interface that allows you to query all loaded textures and much more, allowing more flexible implementations. Please look at the source code.
+
+In the future materials can be created before textures are available/downloaded to speed up the loading.
 
 ## Implementation details
 
@@ -266,3 +284,6 @@ It also uses fast low-level memory copy methods, [Unity's Job system](https://do
 [gltfast-web-demo]: https://gltf.pixel.engineer
 [gltfasset_component]: ./img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
 [gltfast3to4]: ./img/gltfast3to4.png  "3D scene view showing BoomBoxWithAxes model twice. One with the legacy axis conversion and one with the new orientation"
+[GltfAsset]: ../Runtime/Scripts/GltfAsset.cs
+[GltfImport]: ../Runtime/Scripts/GltfImport.cs
+[IGltfReadable]: ../Runtime/Scripts/IGltfReadable.cs
