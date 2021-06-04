@@ -219,6 +219,8 @@ Motivations for this might be using meshes as physics colliders amongst [other c
 
 ### Upgrade to 4.x
 
+#### Coordinate system conversion change
+
 When upgrading from an older version to 4.x or newer the most notable difference is the imported models' orentation. They will appear 180° rotated around the up-axis (Y).
 
 ![GltfAsset component][gltfast3to4]
@@ -230,6 +232,28 @@ This change was implemented to conform more closely to the [glTF specification](
 > The front of a glTF asset faces +Z.
 
 In Unity, the positive Z axis is also defined as forward, so it makes sense to align those and so the coordinate space conversion from glTF's right-handed to Unity's left-handed system is performed by inverting the X-axis (before the Z-axis was inverted).
+
+#### Scene based instantiation
+
+glTFast 4.0 introduces scene-based instantiation. While most glTF assets contain only one scene they could consist of multiple scenes and optionally have one of declared the default scene.
+
+The old behaviour was, that all of the glTF's content was loaded. The new interface allows you to load the default scene or any scene of choice. If none of the scenes was declared the default scene (by setting the `scene` property), no objects are instantiated (as defined in the glTF specification).
+
+`GltfImport` provides the following properties and methods for scene instantiation:
+
+```csharp
+// To get the number of scenes
+public int sceneCount;
+// Returns the default scene's index
+public int? defaultSceneIndex;
+// Methods for instantiation
+public bool InstantiateMainScene( Transform parent );
+public bool InstantiateMainScene(IInstantiator instantiator);
+public bool InstantiateScene( Transform parent, int sceneIndex = 0);
+public bool InstantiateScene( IInstantiator instantiator, int sceneIndex = 0 );
+```
+
+Please look at `GltfAsset` for a reference implementation and look at the properties'/methods' XML documentation comments in the source code for details.
 
 ## Implementation details
 
