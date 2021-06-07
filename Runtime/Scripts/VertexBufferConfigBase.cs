@@ -87,11 +87,11 @@ namespace GLTFast
         public bool calculateTangents = false;
 
         protected VertexAttributeDescriptor[] vad;
-        protected ILogger logger;
+        protected ICodeLogger logger;
 
         public Bounds? bounds { get; protected set; }
 
-        public VertexBufferConfigBase(ILogger logger) {
+        public VertexBufferConfigBase(ICodeLogger logger) {
             this.logger = logger;
         }
         

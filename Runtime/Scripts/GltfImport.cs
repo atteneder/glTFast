@@ -224,13 +224,13 @@ namespace GLTFast {
         /// </summary>
         public bool LoadingError { get { return loadingError; } private set { this.loadingError = value; } }
 
-        ILogger logger;
+        ICodeLogger logger;
         
         public GltfImport(
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null,
-            ILogger logger = null
+            ICodeLogger logger = null
             )
         {
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
@@ -1025,7 +1025,7 @@ namespace GLTFast {
             return decodedBuffer;
         }
 
-        static Tuple<byte[],string> DecodeEmbedBuffer(string encodedBytes,ILogger logger) {
+        static Tuple<byte[],string> DecodeEmbedBuffer(string encodedBytes,ICodeLogger logger) {
             Profiler.BeginSample("DecodeEmbedBuffer");
             logger?.Warning(LogCode.EmbedSlow);
             var mediaTypeEnd = encodedBytes.IndexOf(';',5,Math.Min(encodedBytes.Length-5,1000) );

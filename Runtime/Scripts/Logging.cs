@@ -26,7 +26,7 @@ using System.Text;
 
 namespace GLTFast {
 
-    public interface ILogger {
+    public interface ICodeLogger {
         void Error(LogCode code, params string[] messages);
         void Warning(LogCode code, params string[] messages);
         void Info(LogCode code, params string[] messages);
@@ -140,7 +140,7 @@ namespace GLTFast {
         }
     }
 
-    public class ConsoleLogger : ILogger {
+    public class ConsoleLogger : ICodeLogger {
 
         public void Error(LogCode code, params string[] messages) {
             Debug.LogError(LogMessages.GetFullMessage(code,messages));
@@ -178,7 +178,7 @@ namespace GLTFast {
     }
 
     [Serializable]
-    public class CollectingLogger : ILogger {
+    public class CollectingLogger : ICodeLogger {
 
         public List<LogItem> items = new List<LogItem>();
 

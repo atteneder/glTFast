@@ -35,7 +35,7 @@ namespace GLTFast {
             }
         }
         
-        protected ILogger logger;
+        protected ICodeLogger logger;
         
         protected IGltfReadable gltf;
         
@@ -48,7 +48,7 @@ namespace GLTFast {
         /// </summary>
         public SceneInstance sceneInstance { get; protected set; }
         
-        public GameObjectInstantiator(IGltfReadable gltf, Transform parent, ILogger logger = null) {
+        public GameObjectInstantiator(IGltfReadable gltf, Transform parent, ICodeLogger logger = null) {
             this.gltf = gltf;
             this.parent = parent;
             this.logger = logger;

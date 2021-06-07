@@ -22,7 +22,7 @@ namespace GLTFast {
 
         Dictionary<uint, Bounds> nodeBounds;
 
-        public GameObjectBoundsInstantiator(IGltfReadable gltf, Transform parent, ILogger logger = null) : base(gltf,parent,logger) {}
+        public GameObjectBoundsInstantiator(IGltfReadable gltf, Transform parent, ICodeLogger logger = null) : base(gltf,parent,logger) {}
         
         public override void Init() {
             base.Init();

@@ -33,7 +33,7 @@ namespace GLTFast
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null,
-            ILogger logger = null
+            ICodeLogger logger = null
             )
         {
             importer = new GltfImport(downloadProvider,deferAgent, materialGenerator);
@@ -54,7 +54,7 @@ namespace GLTFast
             return success;
         }
 
-        public override bool InstantiateScene(int sceneIndex, ILogger logger = null) {
+        public override bool InstantiateScene(int sceneIndex, ICodeLogger logger = null) {
             base.InstantiateScene(sceneIndex, logger);
             var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
             var success = base.InstantiateScene(sceneIndex, instantiator);
@@ -65,7 +65,7 @@ namespace GLTFast
             return success;
         }
 
-        protected override GameObjectInstantiator GetDefaultInstantiator(ILogger logger) {
+        protected override GameObjectInstantiator GetDefaultInstantiator(ICodeLogger logger) {
             return new GameObjectBoundsInstantiator(importer, transform, logger);
         }
         

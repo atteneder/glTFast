@@ -56,7 +56,7 @@ namespace GLTFast
             }
         }
 
-        public VertexBufferConfig(ILogger logger) : base(logger) {}
+        public VertexBufferConfig(ICodeLogger logger) : base(logger) {}
 
         public override unsafe JobHandle? ScheduleVertexJobs(
             VertexInputData posInput,

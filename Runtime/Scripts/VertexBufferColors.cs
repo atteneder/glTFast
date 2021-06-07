@@ -31,7 +31,7 @@ namespace GLTFast {
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
 
-        protected ILogger logger;
+        protected ICodeLogger logger;
     }
 
     class VertexBufferColors : VertexBufferColorsBase {

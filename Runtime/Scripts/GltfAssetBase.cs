@@ -52,7 +52,7 @@ namespace GLTFast
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null,
-            ILogger logger = null
+            ICodeLogger logger = null
             )
         {
             importer = new GltfImport(downloadProvider,deferAgent, materialGenerator, logger);
@@ -64,7 +64,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
-        public bool Instantiate(ILogger logger = null) {
+        public bool Instantiate(ICodeLogger logger = null) {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
             var success = importer.InstantiateMainScene(instantiator);
@@ -79,7 +79,7 @@ namespace GLTFast
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
-        public virtual bool InstantiateScene(int sceneIndex, ILogger logger = null) {
+        public virtual bool InstantiateScene(int sceneIndex, ICodeLogger logger = null) {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
             var success = importer.InstantiateScene(instantiator,sceneIndex);
@@ -143,7 +143,7 @@ namespace GLTFast
             }
         }
         
-        protected virtual GameObjectInstantiator GetDefaultInstantiator(ILogger logger) {
+        protected virtual GameObjectInstantiator GetDefaultInstantiator(ICodeLogger logger) {
             return new GameObjectInstantiator(importer, transform, logger);
         }
 

@@ -27,9 +27,9 @@ namespace GLTFast {
 
     abstract class VertexBufferTexCoordsBase {
         
-        protected ILogger logger;
+        protected ICodeLogger logger;
 
-        public VertexBufferTexCoordsBase(ILogger logger) {
+        public VertexBufferTexCoordsBase(ICodeLogger logger) {
             this.logger = logger;
         }
         
@@ -43,7 +43,7 @@ namespace GLTFast {
     class VertexBufferTexCoords<T> : VertexBufferTexCoordsBase where T : struct {
         NativeArray<T> vData;
 
-        public VertexBufferTexCoords(ILogger logger) : base(logger) {}
+        public VertexBufferTexCoords(ICodeLogger logger) : base(logger) {}
         
         public override unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexUVJobs");

@@ -50,7 +50,7 @@ namespace GLTFast
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null,
-            ILogger logger = null
+            ICodeLogger logger = null
             )
         {
             logger = logger ?? new ConsoleLogger();

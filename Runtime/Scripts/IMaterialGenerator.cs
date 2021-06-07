@@ -38,6 +38,6 @@ namespace GLTFast {
         /// during material generation.
         /// </summary>
         /// <param name="logger"></param>
-        void SetLogger(ILogger logger);
+        void SetLogger(ICodeLogger logger);
     }
 }

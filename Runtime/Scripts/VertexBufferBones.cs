@@ -28,9 +28,9 @@ namespace GLTFast {
 
     abstract class VertexBufferBonesBase {
         
-        protected ILogger logger;
+        protected ICodeLogger logger;
 
-        public VertexBufferBonesBase(ILogger logger) {
+        public VertexBufferBonesBase(ICodeLogger logger) {
             this.logger = logger;
         }
 
@@ -47,7 +47,7 @@ namespace GLTFast {
     class VertexBufferBones : VertexBufferBonesBase {
         NativeArray<VBones> vData;
 
-        public VertexBufferBones(ILogger logger) : base(logger) {}
+        public VertexBufferBones(ICodeLogger logger) : base(logger) {}
         
         public override unsafe bool ScheduleVertexBonesJob(
             VertexInputData weightsInput,
@@ -159,7 +159,7 @@ namespace GLTFast {
             int inputByteStride,
             uint* output,
             int outputByteStride,
-            ILogger logger
+            ICodeLogger logger
         )
         {
             Profiler.BeginSample("GetJointsJob");

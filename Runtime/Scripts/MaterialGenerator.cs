@@ -87,7 +87,7 @@ namespace GLTFast.Materials {
 #endif
         }
 
-        protected ILogger logger;
+        protected ICodeLogger logger;
 
         public abstract UnityEngine.Material GetDefaultMaterial();
 
@@ -100,7 +100,7 @@ namespace GLTFast.Materials {
         }
         public abstract UnityEngine.Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf);
 
-        public void SetLogger(ILogger logger) {
+        public void SetLogger(ICodeLogger logger) {
             this.logger = logger;
         }
 
