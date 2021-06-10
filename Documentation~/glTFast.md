@@ -124,9 +124,9 @@ public class YourCustomInstantiator : GLTFast.IInstantiator {
   gltfAsset.InstantiateMainScene( new YourCustomInstantiator() );
 ```
 
-#### Report
+#### Logging
 
-When loading a glTF file, glTFast creates a report containing messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those report messages. Examples:
+When loading a glTF file, glTFast logs messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those log messages. Examples:
 
 - Log to console in readable form
 - Feed the information into an analytics framework
@@ -134,7 +134,11 @@ When loading a glTF file, glTFast creates a report containing messages of varyin
 
 The provided component `GltfAsset` logs all of those messages to the console by default.  
 
-Look into [`Report`](./Runtime/Scripts/ReportItem.cs) for details.
+You can customize logging by providing an implementation of `ICodeLogger` to methods like `GltfImport.Load` or `GltfImport.InstanciateMainScene`.
+
+There are two common implementations bundled. The `ConsoleLogger`, which logs straight to console (the default) and `CollectingLogger`, which stores messages in a list for users to process.
+
+Look into [`ICodeLogger`](./Runtime/Scripts/Logging/ICodeLogger.cs) and [`LogMessages`](./Runtime/Scripts/Logging/LogMessages.cs) for details.
 
 #### Tune loading performance
 
@@ -232,6 +236,15 @@ This change was implemented to conform more closely to the [glTF specification](
 > The front of a glTF asset faces +Z.
 
 In Unity, the positive Z axis is also defined as forward, so it makes sense to align those and so the coordinate space conversion from glTF's right-handed to Unity's left-handed system is performed by inverting the X-axis (before the Z-axis was inverted).
+
+#### New Logging
+
+During loading and instantiation, glTFast used to log messages (infos, warnings and errors) directly to Unity's console. The new logging solution allows you to:
+
+- Omit glTFast logging completely to avoid clogging the message log
+- Retrieve the logs to process them (e.g. reporting analytics or inform the user properly)
+
+See [Logging](#logging) above.
 
 #### Scene based instantiation
 
