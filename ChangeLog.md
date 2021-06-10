@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `GLTFast.ILogger` to `GLTFast.ICodeLogger` to avoid confusion with `UnityEngine.ILogger` 
 ### Fixed
 - Null pointer dereference exception on `accessorData` (thanks [@hybridherbst](https://github.com/hybridherbst))
+- Corrected flipped texture transform for KTX texture (#176)
 
 ## [4.0.0] - 2021-05-21
 ### Added

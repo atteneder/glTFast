@@ -186,7 +186,7 @@ namespace GLTFast.Materials {
             }
 
             if(flipY) {
-                textureST.z = 1-textureST.z; // flip offset in Y
+                textureST.w = 1-textureST.w; // flip offset in Y
                 textureST.y = -textureST.y; // flip scale in Y
             }
             
