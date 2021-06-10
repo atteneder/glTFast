@@ -26,12 +26,6 @@ using System.Text;
 
 namespace GLTFast {
 
-    public interface ICodeLogger {
-        void Error(LogCode code, params string[] messages);
-        void Warning(LogCode code, params string[] messages);
-        void Info(LogCode code, params string[] messages);
-    }
-
     public enum LogCode : uint {
         AccessorAttributeTypeUnknown,
         AccessorInconsistentUsage,
@@ -137,67 +131,6 @@ namespace GLTFast {
                 return sb.ToString();
             }
 #endif
-        }
-    }
-
-    public class ConsoleLogger : ICodeLogger {
-
-        public void Error(LogCode code, params string[] messages) {
-            Debug.LogError(LogMessages.GetFullMessage(code,messages));
-        }
-        
-        public void Warning(LogCode code, params string[] messages) {
-            Debug.LogWarning(LogMessages.GetFullMessage(code,messages));
-        }
-        
-        public void Info(LogCode code, params string[] messages) {
-            Debug.Log(LogMessages.GetFullMessage(code,messages));
-        }
-    }
-
-    [Serializable]
-    public class LogItem {
-
-        public LogType type = LogType.Error;
-        public LogCode code;
-        public string[] messages;
-
-        public LogItem(LogType type, LogCode code, params string[] messages) {
-            this.type = type;
-            this.code = code;
-            this.messages = messages;
-        }
-
-        public void Log() {
-            Debug.LogFormat(type, LogOption.NoStacktrace,null,LogMessages.GetFullMessage(code,messages));
-        }
-
-        public override string ToString() {
-            return LogMessages.GetFullMessage(code, messages);
-        }
-    }
-
-    [Serializable]
-    public class CollectingLogger : ICodeLogger {
-
-        public List<LogItem> items = new List<LogItem>();
-
-        public void Error(LogCode code, params string[] messages) {
-            items.Add(new LogItem(LogType.Error, code, messages));
-        }
-        
-        public void Warning(LogCode code, params string[] messages) {
-            items.Add(new LogItem(LogType.Warning, code, messages));
-        }
-        
-        public void Info(LogCode code, params string[] messages) {
-            items.Add(new LogItem(LogType.Log, code, messages));
-        }
-        
-        public void LogAll() {
-            foreach (var item in items) {
-                item.Log();
-            }
         }
     }
 }
