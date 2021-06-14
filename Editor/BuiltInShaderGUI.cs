@@ -37,7 +37,7 @@ namespace GLTFast.Editor
         }
 
         private UvTransform? uvTransform;
-
+        
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
             if (materialEditor.target is Material material)
@@ -86,6 +86,21 @@ namespace GLTFast.Editor
                 if (GUI.changed) {
                     EditorUtility.SetDirty(material);
                 }
+
+                void EnsureKeywordForMap(string textureProperty, string keyword)
+                {
+                    if (material.HasProperty(textureProperty))
+                    {
+                        if(material.GetTexture(textureProperty) && !material.IsKeywordEnabled(keyword))
+                            material.EnableKeyword(keyword);
+                        
+                        if(!material.GetTexture(textureProperty) && material.IsKeywordEnabled(keyword))
+                            material.DisableKeyword(keyword);
+                    }
+                }
+
+                EnsureKeywordForMap("_MetallicGlossMap", "_METALLICGLOSSMAP");
+                EnsureKeywordForMap("_OcclusionMap", "_OCCLUSION");
             }
 
             base.OnGUI(materialEditor, properties);
