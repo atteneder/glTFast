@@ -43,7 +43,7 @@ namespace GLTFast {
         {
             None,
             Legacy,
-            Default
+            Mecanim
         }
 
         public NameImportMethod nodeNameMethod = NameImportMethod.Original;
