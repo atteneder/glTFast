@@ -128,6 +128,24 @@ namespace GLTFast.Editor {
                         AddObjectToAsset(ctx, $"animations/{animationClip.name}", animationClip);
                     }
                 }
+
+                // TODO seems the states don't properly connect to the Animator here
+                // (would need to be saved as SubAssets of the AnimatorController)
+                // var animators = go.GetComponentsInChildren<Animator>();
+                // foreach (var animator in animators)
+                // {
+                //     var controller = animator.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
+                //     if (controller != null) {
+                //         AddObjectToAsset(ctx, $"animatorControllers/{animator.name}", controller);
+                //         foreach (var layer in controller.layers)
+                //         {
+                //             var stateMachine = layer.stateMachine;
+                //             stateMachine.hideFlags = HideFlags.HideInHierarchy;
+                //             if(stateMachine)
+                //                 AddObjectToAsset(ctx, $"animatorControllers/{animator.name}/{stateMachine.name}", stateMachine);
+                //         }
+                //     }
+                // }
                 
                 m_ImportedNames = null;
                 m_ImportedObjects = null;
