@@ -315,6 +315,8 @@ namespace GLTFast {
 
 #if UNITY_ANIMATION
             if (animationClips != null) {
+                // we want to create an Animator for non-legacy clips, and an Animation component for legacy clips.
+                var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
                 
 // #if UNITY_EDITOR
 //                 // This variant creates a Mecanim Animator and AnimationController
@@ -347,16 +349,18 @@ namespace GLTFast {
 //                 }
 // #endif // UNITY_EDITOR
 
-                var animation = go.AddComponent<Animation>();
-                
-                for (var index = 0; index < animationClips.Length; index++) {
-                    var clip = animationClips[index];
-                    animation.AddClip(clip,clip.name);
-                    if (index < 1) {
-                        animation.clip = clip;
+                if(isLegacyAnimation) {
+                    var animation = go.AddComponent<Animation>();
+                    
+                    for (var index = 0; index < animationClips.Length; index++) {
+                        var clip = animationClips[index];
+                        animation.AddClip(clip,clip.name);
+                        if (index < 1) {
+                            animation.clip = clip;
+                        }
                     }
+                    animation.Play();
                 }
-                animation.Play();
             }
 #endif // UNITY_ANIMATION
         }

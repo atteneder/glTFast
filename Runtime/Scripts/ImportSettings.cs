@@ -39,6 +39,14 @@ namespace GLTFast {
             OriginalUnique
         }
 
+        public enum AnimationMethod
+        {
+            None,
+            Legacy,
+            Default
+        }
+
         public NameImportMethod nodeNameMethod = NameImportMethod.Original;
+        public AnimationMethod animationMethod = AnimationMethod.Legacy;
     }
 }
