@@ -41,6 +41,7 @@ half        _Cutoff;
 sampler2D   _MainTex;
 float4      _MainTex_ST;
 float2      _MainTexRotation;
+half        _MainTexUVChannel;
 
 sampler2D   _DetailAlbedoMap;
 float4      _DetailAlbedoMap_ST;
@@ -48,6 +49,7 @@ float4      _DetailAlbedoMap_ST;
 sampler2D   _BumpMap;
 float4      _BumpMap_ST;
 float2      _BumpMapRotation;
+half        _BumpMapUVChannel;
 half        _BumpScale;
 
 sampler2D   _DetailMask;
@@ -57,10 +59,12 @@ half        _DetailNormalMapScale;
 sampler2D   _SpecGlossMap;
 float4      _SpecGlossMap_ST;
 float2      _SpecGlossMapRotation;
+half        _SpecGlossMapUVChannel;
 
 sampler2D   _MetallicGlossMap;
 float4      _MetallicGlossMap_ST;
 float2      _MetallicGlossMapRotation;
+half        _MetallicGlossMapUVChannel;
 half        _Metallic;
 float       _Glossiness;
 float       _Roughness;
@@ -68,6 +72,7 @@ float       _Roughness;
 sampler2D   _OcclusionMap;
 float4      _OcclusionMap_ST;
 float2      _OcclusionMapRotation;
+half        _OcclusionMapUVChannel;
 half        _OcclusionStrength;
 
 sampler2D   _ParallaxMap;
@@ -78,6 +83,7 @@ half4       _EmissionColor;
 sampler2D   _EmissionMap;
 float4      _EmissionMap_ST;
 float2      _EmissionMapRotation;
+half        _EmissionMapUVChannel;
 
 //-------------------------------------------------------------------------------------
 // Input functions

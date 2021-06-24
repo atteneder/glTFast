@@ -59,6 +59,7 @@ namespace GLTFast.Materials {
         public static readonly int mainTexPropId = Shader.PropertyToID("_MainTex");
         public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
         public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
+        public static readonly int mainTexUVChannelPropId = Shader.PropertyToID("_MainTexUVChannel");
         public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
         public static readonly int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
         public static readonly int occlusionStrengthPropId = Shader.PropertyToID("_OcclusionStrength");

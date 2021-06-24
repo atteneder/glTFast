@@ -147,8 +147,13 @@ FragmentCommonData FragmentSetupSimple(VertexOutputBaseSimple i)
         clip (alpha - _Cutoff);
     #endif
 
+    
+#ifdef _METALLICGLOSSMAP
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.texORM.zw,i.color);
-
+#else
+    FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.color);
+#endif
+    
     // NOTE: shader relies on pre-multiply alpha-blend (_SrcBlend = One, _DstBlend = OneMinusSrcAlpha)
     s.diffColor = PreMultiplyAlpha (s.diffColor, alpha, s.oneMinusReflectivity, /*out*/ s.alpha);
 
@@ -231,7 +236,12 @@ half4 fragForwardBaseSimpleInternal (VertexOutputBaseSimple i)
     half realtimeShadowAttenuation = SHADOW_ATTENUATION(i);
     half atten = UnityMixRealtimeAndBakedShadows(realtimeShadowAttenuation, shadowMaskAttenuation, 0);
 
-    half occlusion = Occlusion(i.tex.xy);
+    half occlusion =
+#ifdef _OCCLUSION
+        Occlusion(i.texORM.xy);
+#else
+        1;
+#endif
     half rl = dot(REFLECTVEC_FOR_SPECULAR(i, s), LightDirForSpecular(i, mainLight));
 
     UnityGI gi = FragmentGI (s, occlusion, i.ambientOrLightmapUV, atten, mainLight);
@@ -273,9 +283,12 @@ struct VertexOutputForwardAddSimple
     half3 normalWorld                   : TEXCOORD4;
 #endif
 
+#ifdef _OCCLUSION || _METALLICGLOSSMAP
     float4 texORM                       : TEXCOORD7;
+#endif
+#ifdef _EMISSION
     float2 texEmission                  : TEXCOORD8;
-
+#endif
     half4 color                         : COLOR;
 
     UNITY_LIGHTING_COORDS(5, 6)
@@ -334,8 +347,12 @@ FragmentCommonData FragmentSetupSimpleAdd(VertexOutputForwardAddSimple i)
     #if defined(_ALPHATEST_ON)
         clip (alpha - _Cutoff);
     #endif
-
+   
+#ifdef _METALLICGLOSSMAP
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.texORM.zw,i.color);
+#else
+    FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.color);
+#endif
 
     // NOTE: shader relies on pre-multiply alpha-blend (_SrcBlend = One, _DstBlend = OneMinusSrcAlpha)
     s.diffColor = PreMultiplyAlpha (s.diffColor, alpha, s.oneMinusReflectivity, /*out*/ s.alpha);

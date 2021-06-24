@@ -175,11 +175,21 @@ float3 PerPixelWorldNormal(float2 i_tex, float4 tangentToWorld[3])
 
 #define IN_LIGHTDIR_FWDADD(i) half3(i.tangentToWorldAndLightDir[0].w, i.tangentToWorldAndLightDir[1].w, i.tangentToWorldAndLightDir[2].w)
 
+#ifdef _METALLICGLOSSMAP
 #define FRAGMENT_SETUP(x) FragmentCommonData x = \
     FragmentSetup(i.tex, i.texORM, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i),i.color);
+#else
+#define FRAGMENT_SETUP(x) FragmentCommonData x = \
+    FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i),i.color);
+#endif
 
+#ifdef _METALLICGLOSSMAP
 #define FRAGMENT_SETUP_FWDADD(x) FragmentCommonData x = \
     FragmentSetup(i.tex, i.texORM, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX_FWDADD(i), i.tangentToWorldAndLightDir, IN_WORLDPOS_FWDADD(i), i.color);
+#else
+#define FRAGMENT_SETUP_FWDADD(x) FragmentCommonData x = \
+    FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX_FWDADD(i), i.tangentToWorldAndLightDir, IN_WORLDPOS_FWDADD(i), i.color);
+#endif
 
 struct FragmentCommonData
 {
@@ -240,9 +250,20 @@ inline FragmentCommonData RoughnessSetup(float4 i_tex, half3 v_color)
     return o;
 }
 
-inline FragmentCommonData MetallicSetup (float2 i_tex, float2 i_texMetallicGloss, half3 v_color)
+inline FragmentCommonData MetallicSetup (
+    float2 i_tex,
+#ifdef _METALLICGLOSSMAP
+    float2 i_texMetallicGloss,
+#endif
+    half3 v_color
+    )
 {
+#ifdef _METALLICGLOSSMAP
     half2 metallicGloss = MetallicGloss(i_texMetallicGloss);
+#else
+    half2 metallicGloss = MetallicGloss(i_tex);
+#endif
+
     half metallic = metallicGloss.x;
     half smoothness = metallicGloss.y; // this is 1 minus the square root of real roughness m.
 
@@ -259,7 +280,17 @@ inline FragmentCommonData MetallicSetup (float2 i_tex, float2 i_texMetallicGloss
 }
 
 // parallax transformed texcoord is used to sample occlusion
-inline FragmentCommonData FragmentSetup (inout float4 i_tex, inout float4 i_texORM, float3 i_eyeVec, half3 i_viewDirForParallax, float4 tangentToWorld[3], float3 i_posWorld, half3 v_color)
+inline FragmentCommonData FragmentSetup (
+    inout float4 i_tex,
+#ifdef _METALLICGLOSSMAP
+    inout float4 i_texORM,
+#endif
+    float3 i_eyeVec,
+    half3 i_viewDirForParallax,
+    float4 tangentToWorld[3],
+    float3 i_posWorld,
+    half3 v_color
+    )
 {
     i_tex = Parallax(i_tex, i_viewDirForParallax);
 
@@ -268,7 +299,12 @@ inline FragmentCommonData FragmentSetup (inout float4 i_tex, inout float4 i_texO
         clip (alpha - _Cutoff);
     #endif
 
+#ifdef _METALLICGLOSSMAP
     FragmentCommonData o = UNITY_SETUP_BRDF_INPUT (i_tex.xy,i_texORM.zw,v_color);
+#else
+    FragmentCommonData o = UNITY_SETUP_BRDF_INPUT (i_tex.xy,v_color);
+#endif
+
     o.normalWorld = PerPixelWorldNormal(i_tex.zw, tangentToWorld);
     o.eyeVec = NormalizePerPixelNormal(i_eyeVec);
     o.posWorld = i_posWorld;
@@ -383,8 +419,12 @@ struct VertexOutputForwardBase
     float3 posWorld                     : TEXCOORD8;
 #endif
 
+#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP)
     float4 texORM                       : TEXCOORD9;
+#endif
+#ifdef _EMISSION
     float2 texEmission                  : TEXCOORD10;
+#endif
     
     half4 color                         : COLOR;
     UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -411,11 +451,19 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     #endif
     o.pos = UnityObjectToClipPos(v.vertex);
 
-    o.tex.xy = TexCoordsSingle(v.uv0,_MainTex);
-    o.tex.zw = TexCoordsSingle(v.uv0,_BumpMap);
-    o.texORM.xy = TexCoordsSingle(v.uv0,_OcclusionMap);
-    o.texORM.zw = TexCoordsSingle(v.uv0,_MetallicGlossMap);
-    o.texEmission = TexCoordsSingle(v.uv0,_EmissionMap);
+    o.tex.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);
+    #ifdef _NORMALMAP
+    o.tex.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+    #endif
+    #ifdef _OCCLUSION
+    o.texORM.xy = TexCoordsSingle((_OcclusionMapUVChannel==0)?v.uv0:v.uv1,_OcclusionMap);
+    #endif
+    #ifdef _METALLICGLOSSMAP
+    o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    #endif
+    #ifdef _EMISSION
+    o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
+    #endif
 
     o.eyeVec.xyz = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
     float3 normalWorld = UnityObjectToWorldNormal(v.normal);
@@ -462,11 +510,19 @@ half4 fragForwardBaseInternal (VertexOutputForwardBase i)
     UnityLight mainLight = MainLight ();
     UNITY_LIGHT_ATTENUATION(atten, i, s.posWorld);
 
-    half occlusion = Occlusion(i.texORM.xy);
+    half occlusion = 
+#ifdef _OCCLUSION
+        Occlusion(i.texORM.xy);
+#else
+        1;
+#endif
+
     UnityGI gi = FragmentGI (s, occlusion, i.ambientOrLightmapUV, atten, mainLight);
 
     half4 c = UNITY_BRDF_PBS (s.diffColor, s.specColor, s.oneMinusReflectivity, s.smoothness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
+#ifdef _EMISSION
     c.rgb += Emission(i.texEmission);
+#endif
 
     UNITY_EXTRACT_FOG_FROM_EYE_VEC(i);
     UNITY_APPLY_FOG(_unity_fogCoord, c.rgb);
@@ -495,8 +551,12 @@ struct VertexOutputForwardAdd
     half3 viewDirForParallax            : TEXCOORD8;
 #endif
 
+#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP)
     float4 texORM                       : TEXCOORD9;
+#endif
+#ifdef _EMISSION
     float2 texEmission                  : TEXCOORD10;
+#endif
     
     half4 color                         : COLOR;
 
@@ -513,7 +573,20 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     float4 posWorld = mul(unity_ObjectToWorld, v.vertex);
     o.pos = UnityObjectToClipPos(v.vertex);
 
-    o.tex = TexCoords(v);
+    o.tex.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);
+    #ifdef _NORMALMAP
+    o.tex.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+    #endif
+    #ifdef _OCCLUSION
+    o.texORM.xy = TexCoordsSingle((_OcclusionMapUVChannel==0)?v.uv0:v.uv1,_OcclusionMap);
+    #endif
+    #ifdef _METALLICGLOSSMAP
+    o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    #endif
+    #ifdef _EMISSION
+    o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
+    #endif
+
     o.eyeVec.xyz = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
     o.posWorld = posWorld.xyz;
     float3 normalWorld = UnityObjectToWorldNormal(v.normal);
@@ -590,8 +663,12 @@ struct VertexOutputDeferred
     #endif
     half4 color                             : COLOR;
 
+#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP)
     float4 texORM                       : TEXCOORD9;
+#endif
+#ifdef _EMISSION
     float2 texEmission                  : TEXCOORD10;
+#endif
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
@@ -618,7 +695,21 @@ VertexOutputDeferred vertDeferred (VertexInput v)
     #endif
     o.pos = UnityObjectToClipPos(v.vertex);
 
-    o.tex = TexCoords(v);
+    
+    o.tex.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);
+    #ifdef _NORMALMAP
+    o.tex.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+    #endif
+    #ifdef _OCCLUSION
+    o.texORM.xy = TexCoordsSingle((_OcclusionMapUVChannel==0)?v.uv0:v.uv1,_OcclusionMap);
+    #endif
+    #ifdef _METALLICGLOSSMAP
+    o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    #endif
+    #ifdef _EMISSION
+    o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
+    #endif
+
     o.eyeVec = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
     float3 normalWorld = UnityObjectToWorldNormal(v.normal);
     #ifdef _TANGENT_TO_WORLD
@@ -689,7 +780,12 @@ void fragDeferred (
     half atten = 1;
 
     // only GI
-    half occlusion = Occlusion(i.texORM.xy);
+    half occlusion =
+#ifdef _OCCLUSION
+        Occlusion(i.texORM.xy);
+#else
+       1;
+#endif
 #if UNITY_ENABLE_REFLECTION_BUFFERS
     bool sampleReflectionsInDeferred = false;
 #else
