@@ -127,7 +127,7 @@ half3 WorldNormal(half4 tan2world[3])
     }
 #endif
 
-float3 PerPixelWorldNormal(float4 i_tex, float4 tangentToWorld[3])
+float3 PerPixelWorldNormal(float2 i_tex, float4 tangentToWorld[3])
 {
 #ifdef _NORMALMAP
     half3 tangent = tangentToWorld[0].xyz;
@@ -176,10 +176,10 @@ float3 PerPixelWorldNormal(float4 i_tex, float4 tangentToWorld[3])
 #define IN_LIGHTDIR_FWDADD(i) half3(i.tangentToWorldAndLightDir[0].w, i.tangentToWorldAndLightDir[1].w, i.tangentToWorldAndLightDir[2].w)
 
 #define FRAGMENT_SETUP(x) FragmentCommonData x = \
-    FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i),i.color);
+    FragmentSetup(i.tex, i.texORM, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i),i.color);
 
 #define FRAGMENT_SETUP_FWDADD(x) FragmentCommonData x = \
-    FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX_FWDADD(i), i.tangentToWorldAndLightDir, IN_WORLDPOS_FWDADD(i), i.color);
+    FragmentSetup(i.tex, i.texORM, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX_FWDADD(i), i.tangentToWorldAndLightDir, IN_WORLDPOS_FWDADD(i), i.color);
 
 struct FragmentCommonData
 {
@@ -240,9 +240,9 @@ inline FragmentCommonData RoughnessSetup(float4 i_tex, half3 v_color)
     return o;
 }
 
-inline FragmentCommonData MetallicSetup (float4 i_tex, half3 v_color)
+inline FragmentCommonData MetallicSetup (float2 i_tex, float2 i_texMetallicGloss, half3 v_color)
 {
-    half2 metallicGloss = MetallicGloss(i_tex.xy);
+    half2 metallicGloss = MetallicGloss(i_texMetallicGloss);
     half metallic = metallicGloss.x;
     half smoothness = metallicGloss.y; // this is 1 minus the square root of real roughness m.
 
@@ -259,7 +259,7 @@ inline FragmentCommonData MetallicSetup (float4 i_tex, half3 v_color)
 }
 
 // parallax transformed texcoord is used to sample occlusion
-inline FragmentCommonData FragmentSetup (inout float4 i_tex, float3 i_eyeVec, half3 i_viewDirForParallax, float4 tangentToWorld[3], float3 i_posWorld, half3 v_color)
+inline FragmentCommonData FragmentSetup (inout float4 i_tex, inout float4 i_texORM, float3 i_eyeVec, half3 i_viewDirForParallax, float4 tangentToWorld[3], float3 i_posWorld, half3 v_color)
 {
     i_tex = Parallax(i_tex, i_viewDirForParallax);
 
@@ -268,8 +268,8 @@ inline FragmentCommonData FragmentSetup (inout float4 i_tex, float3 i_eyeVec, ha
         clip (alpha - _Cutoff);
     #endif
 
-    FragmentCommonData o = UNITY_SETUP_BRDF_INPUT (i_tex,v_color);
-    o.normalWorld = PerPixelWorldNormal(i_tex, tangentToWorld);
+    FragmentCommonData o = UNITY_SETUP_BRDF_INPUT (i_tex.xy,i_texORM.zw,v_color);
+    o.normalWorld = PerPixelWorldNormal(i_tex.zw, tangentToWorld);
     o.eyeVec = NormalizePerPixelNormal(i_eyeVec);
     o.posWorld = i_posWorld;
 
@@ -382,6 +382,10 @@ struct VertexOutputForwardBase
 #if UNITY_REQUIRE_FRAG_WORLDPOS && !UNITY_PACK_WORLDPOS_WITH_TANGENT
     float3 posWorld                     : TEXCOORD8;
 #endif
+
+    float4 texORM                       : TEXCOORD9;
+    float2 texEmission                  : TEXCOORD10;
+    
     half4 color                         : COLOR;
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
@@ -407,7 +411,12 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     #endif
     o.pos = UnityObjectToClipPos(v.vertex);
 
-    o.tex = TexCoords(v);
+    o.tex.xy = TexCoordsSingle(v.uv0,_MainTex);
+    o.tex.zw = TexCoordsSingle(v.uv0,_BumpMap);
+    o.texORM.xy = TexCoordsSingle(v.uv0,_OcclusionMap);
+    o.texORM.zw = TexCoordsSingle(v.uv0,_MetallicGlossMap);
+    o.texEmission = TexCoordsSingle(v.uv0,_EmissionMap);
+
     o.eyeVec.xyz = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
     float3 normalWorld = UnityObjectToWorldNormal(v.normal);
     #ifdef _TANGENT_TO_WORLD
@@ -453,11 +462,11 @@ half4 fragForwardBaseInternal (VertexOutputForwardBase i)
     UnityLight mainLight = MainLight ();
     UNITY_LIGHT_ATTENUATION(atten, i, s.posWorld);
 
-    half occlusion = Occlusion(i.tex.xy);
+    half occlusion = Occlusion(i.texORM.xy);
     UnityGI gi = FragmentGI (s, occlusion, i.ambientOrLightmapUV, atten, mainLight);
 
     half4 c = UNITY_BRDF_PBS (s.diffColor, s.specColor, s.oneMinusReflectivity, s.smoothness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect);
-    c.rgb += Emission(i.tex.xy);
+    c.rgb += Emission(i.texEmission);
 
     UNITY_EXTRACT_FOG_FROM_EYE_VEC(i);
     UNITY_APPLY_FOG(_unity_fogCoord, c.rgb);
@@ -485,6 +494,10 @@ struct VertexOutputForwardAdd
 #if defined(_PARALLAXMAP)
     half3 viewDirForParallax            : TEXCOORD8;
 #endif
+
+    float4 texORM                       : TEXCOORD9;
+    float2 texEmission                  : TEXCOORD10;
+    
     half4 color                         : COLOR;
 
     UNITY_VERTEX_OUTPUT_STEREO
@@ -576,6 +589,9 @@ struct VertexOutputDeferred
         float3 posWorld                     : TEXCOORD6;
     #endif
     half4 color                             : COLOR;
+
+    float4 texORM                       : TEXCOORD9;
+    float2 texEmission                  : TEXCOORD10;
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
@@ -673,7 +689,7 @@ void fragDeferred (
     half atten = 1;
 
     // only GI
-    half occlusion = Occlusion(i.tex.xy);
+    half occlusion = Occlusion(i.texORM.xy);
 #if UNITY_ENABLE_REFLECTION_BUFFERS
     bool sampleReflectionsInDeferred = false;
 #else
@@ -685,7 +701,7 @@ void fragDeferred (
     half3 emissiveColor = UNITY_BRDF_PBS (s.diffColor, s.specColor, s.oneMinusReflectivity, s.smoothness, s.normalWorld, -s.eyeVec, gi.light, gi.indirect).rgb;
 
     #ifdef _EMISSION
-        emissiveColor += Emission (i.tex.xy);
+        emissiveColor += Emission (i.texEmission);
     #endif
 
     #ifndef UNITY_HDR_ON

@@ -46,6 +46,8 @@ sampler2D   _DetailAlbedoMap;
 float4      _DetailAlbedoMap_ST;
 
 sampler2D   _BumpMap;
+float4      _BumpMap_ST;
+float2      _BumpMapRotation;
 half        _BumpScale;
 
 sampler2D   _DetailMask;
@@ -53,12 +55,19 @@ sampler2D   _DetailNormalMap;
 half        _DetailNormalMapScale;
 
 sampler2D   _SpecGlossMap;
+float4      _SpecGlossMap_ST;
+float2      _SpecGlossMapRotation;
+
 sampler2D   _MetallicGlossMap;
+float4      _MetallicGlossMap_ST;
+float2      _MetallicGlossMapRotation;
 half        _Metallic;
 float       _Glossiness;
 float       _Roughness;
 
 sampler2D   _OcclusionMap;
+float4      _OcclusionMap_ST;
+float2      _OcclusionMapRotation;
 half        _OcclusionStrength;
 
 sampler2D   _ParallaxMap;
@@ -67,6 +76,8 @@ half        _UVSec;
 
 half4       _EmissionColor;
 sampler2D   _EmissionMap;
+float4      _EmissionMap_ST;
+float2      _EmissionMapRotation;
 
 //-------------------------------------------------------------------------------------
 // Input functions
@@ -107,33 +118,32 @@ float4 TexCoords(VertexInput v)
     return texcoord;
 }
 
+#ifdef _UV_ROTATION
+#define TexCoordsSingle(uv,map) TexCoordsSingleIntern(uv,map##_ST,map##Rotation);
+#else
+#define TexCoordsSingle(uv,map) TRANSFORM_TEX(uv, map);
+#endif
+
+float2 TexCoordsSingleIntern(float2 uv, float4 st, float2 rotation)
+{
+    float2 texcoord;
+    // Scale and Rotation: 2x2 matrix multiplication
+    float2 sr;
+    sr.x = uv.x * st.x + uv.y * rotation.y;
+    sr.y = uv.x * rotation.x + uv.y * st.y;
+    // Transform/Offset
+    texcoord.xy = sr + st.zw;
+    return texcoord;
+}
+
 half DetailMask(float2 uv)
 {
     return tex2D (_DetailMask, uv).a;
 }
 
-half3 Albedo(float4 texcoords)
+half3 Albedo(float2 texcoords)
 {
-    half3 albedo = _Color.rgb * tex2D (_MainTex, texcoords.xy).rgb;
-#if _DETAIL
-    #if (SHADER_TARGET < 30)
-        // SM20: instruction count limitation
-        // SM20: no detail mask
-        half mask = 1;
-    #else
-        half mask = DetailMask(texcoords.xy);
-    #endif
-    half3 detailAlbedo = tex2D (_DetailAlbedoMap, texcoords.zw).rgb;
-    #if _DETAIL_MULX2
-        albedo *= LerpWhiteTo (detailAlbedo * unity_ColorSpaceDouble.rgb, mask);
-    #elif _DETAIL_MUL
-        albedo *= LerpWhiteTo (detailAlbedo, mask);
-    #elif _DETAIL_ADD
-        albedo += detailAlbedo * mask;
-    #elif _DETAIL_LERP
-        albedo = lerp (albedo, detailAlbedo, mask);
-    #endif
-#endif
+    half3 albedo = _Color.rgb * tex2D (_MainTex, texcoords).rgb;
     return albedo;
 }
 
@@ -214,26 +224,9 @@ half3 Emission(float2 uv)
 }
 
 #ifdef _NORMALMAP
-half3 NormalInTangentSpace(float4 texcoords)
+half3 NormalInTangentSpace(float2 texcoords)
 {
-    half3 normalTangent = UnpackScaleNormal(tex2D (_BumpMap, texcoords.xy), _BumpScale);
-
-#if _DETAIL && defined(UNITY_ENABLE_DETAIL_NORMALMAP)
-    half mask = DetailMask(texcoords.xy);
-    half3 detailNormalTangent = UnpackScaleNormal(tex2D (_DetailNormalMap, texcoords.zw), _DetailNormalMapScale);
-    #if _DETAIL_LERP
-        normalTangent = lerp(
-            normalTangent,
-            detailNormalTangent,
-            mask);
-    #else
-        normalTangent = lerp(
-            normalTangent,
-            BlendNormals(normalTangent, detailNormalTangent),
-            mask);
-    #endif
-#endif
-
+    half3 normalTangent = UnpackScaleNormal(tex2D (_BumpMap, texcoords), _BumpScale);
     return normalTangent;
 }
 #endif
