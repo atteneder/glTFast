@@ -99,7 +99,10 @@ namespace GLTFast.Editor {
                 for (var i = 0; i < m_Gltf.textureCount; i++) {
                     var texture = m_Gltf.GetTexture(i);
                     if (texture != null) {
-                        AddObjectToAsset(ctx, $"textures/{texture.name}", texture);
+                        var assetPath = AssetDatabase.GetAssetPath(texture);
+                        if (string.IsNullOrEmpty(assetPath)) {
+                            AddObjectToAsset(ctx, $"textures/{texture.name}", texture);
+                        }
                     }
                 }
                 
