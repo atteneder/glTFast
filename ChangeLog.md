@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Support for two texture coordinate sets in materials (URP and HDRP)
 - Support for individual texture transform per texture type (URP, HDRP and Built-in)
 ### Fixed
 - Editor import: Separate textures are only referenced in AssetDatabase (not re-added)
