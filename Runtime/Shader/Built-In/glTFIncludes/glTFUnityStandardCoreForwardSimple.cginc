@@ -148,7 +148,7 @@ FragmentCommonData FragmentSetupSimple(VertexOutputBaseSimple i)
     #endif
 
     
-#ifdef _METALLICGLOSSMAP
+#if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.texORM.zw,i.color);
 #else
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.color);
@@ -283,7 +283,7 @@ struct VertexOutputForwardAddSimple
     half3 normalWorld                   : TEXCOORD4;
 #endif
 
-#ifdef _OCCLUSION || _METALLICGLOSSMAP
+#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     float4 texORM                       : TEXCOORD7;
 #endif
 #ifdef _EMISSION
@@ -348,7 +348,7 @@ FragmentCommonData FragmentSetupSimpleAdd(VertexOutputForwardAddSimple i)
         clip (alpha - _Cutoff);
     #endif
    
-#ifdef _METALLICGLOSSMAP
+#if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.texORM.zw,i.color);
 #else
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.color);

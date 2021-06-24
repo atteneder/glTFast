@@ -175,7 +175,7 @@ float3 PerPixelWorldNormal(float2 i_tex, float4 tangentToWorld[3])
 
 #define IN_LIGHTDIR_FWDADD(i) half3(i.tangentToWorldAndLightDir[0].w, i.tangentToWorldAndLightDir[1].w, i.tangentToWorldAndLightDir[2].w)
 
-#ifdef _METALLICGLOSSMAP
+#if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
 #define FRAGMENT_SETUP(x) FragmentCommonData x = \
     FragmentSetup(i.tex, i.texORM, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i),i.color);
 #else
@@ -183,7 +183,7 @@ float3 PerPixelWorldNormal(float2 i_tex, float4 tangentToWorld[3])
     FragmentSetup(i.tex, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX(i), i.tangentToWorldAndPackedData, IN_WORLDPOS(i),i.color);
 #endif
 
-#ifdef _METALLICGLOSSMAP
+#if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
 #define FRAGMENT_SETUP_FWDADD(x) FragmentCommonData x = \
     FragmentSetup(i.tex, i.texORM, i.eyeVec.xyz, IN_VIEWDIR4PARALLAX_FWDADD(i), i.tangentToWorldAndLightDir, IN_WORLDPOS_FWDADD(i), i.color);
 #else
@@ -217,13 +217,18 @@ struct FragmentCommonData
 
 inline FragmentCommonData SpecularSetup (
     float2 i_tex,
-#ifdef _METALLICGLOSSMAP
-    float2 i_texMetallicGloss,
+#ifdef _SPECGLOSSMAP
+    float2 i_texSpecGloss,
 #endif
     half3 v_color
     )
 {
+#ifdef _SPECGLOSSMAP
+    half4 specGloss = SpecularGloss(i_texSpecGloss);
+#else
     half4 specGloss = SpecularGloss(i_tex);
+#endif
+    
     half3 specColor = specGloss.rgb;
     half smoothness = specGloss.a;
 
@@ -259,13 +264,13 @@ inline FragmentCommonData RoughnessSetup(float4 i_tex, half3 v_color)
 inline FragmentCommonData MetallicSetup (
     float2 i_tex,
 #ifdef _METALLICGLOSSMAP
-    float2 i_texMetallicGloss,
+    float2 i_texMetallicRough,
 #endif
     half3 v_color
     )
 {
 #ifdef _METALLICGLOSSMAP
-    half2 metallicGloss = MetallicGloss(i_texMetallicGloss);
+    half2 metallicGloss = MetallicGloss(i_texMetallicRough);
 #else
     half2 metallicGloss = MetallicGloss(i_tex);
 #endif
@@ -288,7 +293,7 @@ inline FragmentCommonData MetallicSetup (
 // parallax transformed texcoord is used to sample occlusion
 inline FragmentCommonData FragmentSetup (
     inout float4 i_tex,
-#ifdef _METALLICGLOSSMAP
+#if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     inout float4 i_texORM,
 #endif
     float3 i_eyeVec,
@@ -305,7 +310,7 @@ inline FragmentCommonData FragmentSetup (
         clip (alpha - _Cutoff);
     #endif
 
-#ifdef _METALLICGLOSSMAP
+#if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     FragmentCommonData o = UNITY_SETUP_BRDF_INPUT (i_tex.xy,i_texORM.zw,v_color);
 #else
     FragmentCommonData o = UNITY_SETUP_BRDF_INPUT (i_tex.xy,v_color);
@@ -425,7 +430,7 @@ struct VertexOutputForwardBase
     float3 posWorld                     : TEXCOORD8;
 #endif
 
-#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP)
+#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     float4 texORM                       : TEXCOORD9;
 #endif
 #ifdef _EMISSION
@@ -466,6 +471,8 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     #endif
     #ifdef _METALLICGLOSSMAP
     o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    #elif defined(_SPECGLOSSMAP)
+    o.texORM.zw = TexCoordsSingle((_SpecGlossMapUVChannel==0)?v.uv0:v.uv1,_SpecGlossMap);    
     #endif
     #ifdef _EMISSION
     o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
@@ -588,6 +595,8 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     #endif
     #ifdef _METALLICGLOSSMAP
     o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    #elif defined(_SPECGLOSSMAP)
+    o.texORM.zw = TexCoordsSingle((_SpecGlossMapUVChannel==0)?v.uv0:v.uv1,_SpecGlossMap);    
     #endif
     #ifdef _EMISSION
     o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
@@ -711,6 +720,8 @@ VertexOutputDeferred vertDeferred (VertexInput v)
     #endif
     #ifdef _METALLICGLOSSMAP
     o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    #elif defined(_SPECGLOSSMAP)
+    o.texORM.zw = TexCoordsSingle((_SpecGlossMapUVChannel==0)?v.uv0:v.uv1,_SpecGlossMap);
     #endif
     #ifdef _EMISSION
     o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
