@@ -22,6 +22,7 @@ Shader "glTF/PbrSpecularGlossiness"
         _Color("Color", Color) = (1,1,1,1)
         _MainTex("Albedo", 2D) = "white" {}
         _MainTexRotation ("Texture rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] _MainTexUVChannel ("Base Color Map UV Set", Float) = 0
 
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
@@ -36,16 +37,22 @@ Shader "glTF/PbrSpecularGlossiness"
 
         _BumpScale("Scale", Float) = 1.0
         [Normal] _BumpMap("Normal Map", 2D) = "bump" {}
+        _BumpMapRotation ("Normal Map Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] _BumpMapUVChannel ("Normal Map UV Set", Float) = 0
 
         // _Parallax ("Height Scale", Range (0.005, 0.08)) = 0.02
         // _ParallaxMap ("Height Map", 2D) = "black" {}
 
-        _OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
+        _OcclusionStrength("Occlusion Strength", Range(0.0, 1.0)) = 1.0
         _OcclusionMap("Occlusion", 2D) = "white" {}
+        _OcclusionMapRotation ("Occlusion Map Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] _OcclusionMapUVChannel ("Occlusion Map UV Set", Float) = 0
 
         _EmissionColor("Color", Color) = (0,0,0)
         _EmissionMap("Emission", 2D) = "white" {}
-
+        _EmissionMapRotation ("Emission Map Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] _EmissionMapUVChannel ("Emission Map UV Set", Float) = 0
+        
         // _DetailMask("Detail Mask", 2D) = "white" {}
 
         // _DetailAlbedoMap("Detail Albedo x2", 2D) = "grey" {}
@@ -94,6 +101,7 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma shader_feature _EMISSION
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _DETAIL_MULX2
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
@@ -134,6 +142,7 @@ Shader "glTF/PbrSpecularGlossiness"
 
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
@@ -167,6 +176,7 @@ Shader "glTF/PbrSpecularGlossiness"
 
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _PARALLAXMAP
@@ -201,6 +211,7 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma shader_feature _EMISSION
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
@@ -237,6 +248,7 @@ Shader "glTF/PbrSpecularGlossiness"
 
             #pragma shader_feature _EMISSION
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _DETAIL_MULX2
@@ -270,6 +282,7 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma shader_feature _EMISSION
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
@@ -306,6 +319,7 @@ Shader "glTF/PbrSpecularGlossiness"
             #pragma shader_feature _NORMALMAP
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _SPECULARHIGHLIGHTS_OFF
@@ -336,6 +350,7 @@ Shader "glTF/PbrSpecularGlossiness"
 
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma skip_variants SHADOWS_SOFT
@@ -364,6 +379,7 @@ Shader "glTF/PbrSpecularGlossiness"
 
             #pragma shader_feature _EMISSION
             #pragma shader_feature_local _SPECGLOSSMAP
+            #pragma shader_feature_local _OCCLUSION
             #pragma shader_feature_local _UV_ROTATION
             // #pragma shader_feature_local _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             // #pragma shader_feature_local _DETAIL_MULX2

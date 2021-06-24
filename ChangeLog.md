@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Import setting to create non-legacy animation clips (thanks [@hybridherbst][hybridherbst] for #196)
 - Support for two texture coordinate sets in materials (URP, HDRP and Built-in)
 - Support for individual texture transform per texture type (URP, HDRP and Built-in)
+- Support for occlusion maps on specular-glossiness materials (extension KHR_materials_pbrSpecularGlossiness) 
 ### Fixed
 - Editor import: Separate textures are only referenced in AssetDatabase (not re-added)
 - Warnings due to conflicting script file names `Animation.cs` and `Camera.cs` (#198)
