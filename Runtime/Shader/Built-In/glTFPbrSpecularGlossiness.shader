@@ -31,7 +31,9 @@ Shader "glTF/PbrSpecularGlossiness"
         // [Enum(Specular Alpha,0,Albedo Alpha,1)] _SmoothnessTextureChannel ("Smoothness texture channel", Float) = 0
 
         _SpecColor("Specular", Color) = (1,1,1)
-        _SpecGlossMap("Specular", 2D) = "white" {}
+        _SpecGlossMap("Specular/Glossiness Map", 2D) = "white" {}
+        _SpecGlossMapRotation ("Specular/Glossiness Map Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] _SpecGlossMapUVChannel ("Specular/Glossiness Map UV Set", Float) = 0
         // [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
         // [ToggleOff] _GlossyReflections("Glossy Reflections", Float) = 1.0
 
