@@ -215,9 +215,15 @@ struct FragmentCommonData
     #define UNITY_SETUP_BRDF_INPUT SpecularSetup
 #endif
 
-inline FragmentCommonData SpecularSetup (float4 i_tex, half3 v_color)
+inline FragmentCommonData SpecularSetup (
+    float2 i_tex,
+#ifdef _METALLICGLOSSMAP
+    float2 i_texMetallicGloss,
+#endif
+    half3 v_color
+    )
 {
-    half4 specGloss = SpecularGloss(i_tex.xy);
+    half4 specGloss = SpecularGloss(i_tex);
     half3 specColor = specGloss.rgb;
     half smoothness = specGloss.a;
 

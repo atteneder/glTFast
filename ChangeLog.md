@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support for two texture coordinate sets in materials (URP, HDRP and Built-in)
 - Support for individual texture transform per texture type (URP, HDRP and Built-in)
+- Support for occlusion maps on specular-glossiness materials (extension KHR_materials_pbrSpecularGlossiness) 
 ### Fixed
 - Editor import: Separate textures are only referenced in AssetDatabase (not re-added)
 
