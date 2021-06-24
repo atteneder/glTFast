@@ -61,6 +61,9 @@ namespace GLTFast.Materials {
         public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
         public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
 
+        static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("_MetallicGlossMap_ST");
+        static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("_MetallicGlossMapRotation");
+        // static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("_MetallicGlossMapUVChannel");
         static readonly int modePropId = Shader.PropertyToID("_Mode");
 
         const string SHADER_PBR_METALLIC_ROUGHNESS = "glTF/PbrMetallicRoughness";
@@ -194,9 +197,9 @@ namespace GLTFast.Materials {
                         material,
                         gltf,
                         specGlossMapPropId,
-                        // TODO: Built-in only supports main texture TRS
-                        mainTexScaleTransform,
-                        mainTexRotation
+                        specGlossScaleTransformMapPropId,
+                        specGlossMapRotationPropId
+                        //,specGlossMapUVChannelPropId
                         )) {
                         material.EnableKeyword(KW_SPEC_GLOSS_MAP);
                     }
@@ -222,9 +225,9 @@ namespace GLTFast.Materials {
                     material,
                     gltf,
                     metallicGlossMapPropId,
-                    // TODO: Built-in only supports main texture TRS
-                    mainTexScaleTransform,
-                    mainTexRotation
+                    metallicRoughnessMapScaleTransformPropId,
+                    metallicRoughnessMapRotationPropId
+                    // ,metallicRoughnessMapUVChannelPropId
                     )) {
                     material.EnableKeyword(KW_METALLIC_ROUGNESS_MAP);
                 }
@@ -235,10 +238,10 @@ namespace GLTFast.Materials {
                 material,
                 gltf,
                 bumpMapPropId,
-                // TODO: Built-in only supports main texture TRS
-                mainTexScaleTransform,
-                mainTexRotation
-                )) {
+                bumpMapRotationPropId,
+                bumpMapScaleTransformPropId
+                //,bumpMapUVChannelPropId
+            )) {
                 material.EnableKeyword(KW_NORMALMAP);
                 material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
             }
@@ -248,9 +251,9 @@ namespace GLTFast.Materials {
                 material,
                 gltf,
                 occlusionMapPropId,
-                // TODO: Built-in only supports main texture TRS
-                mainTexScaleTransform,
-                mainTexRotation
+                occlusionMapScaleTransformPropId,
+                occlusionMapRotationPropId
+                //,occlusionMapUVChannelPropId
                 )) {
                 material.EnableKeyword(KW_OCCLUSION);
                 material.SetFloat(occlusionStrengthPropId,gltfMaterial.occlusionTexture.strength);
@@ -261,9 +264,9 @@ namespace GLTFast.Materials {
                 material,
                 gltf,
                 emissionMapPropId,
-                // TODO: Built-in only supports main texture TRS
-                mainTexScaleTransform,
-                mainTexRotation
+                emissionMapScaleTransformPropId,
+                emissionMapRotationPropId
+                //,emissionMapUVChannelPropId
                 )) {
                 material.EnableKeyword(KW_EMISSION);
             }

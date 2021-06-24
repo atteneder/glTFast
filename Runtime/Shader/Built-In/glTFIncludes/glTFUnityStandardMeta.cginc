@@ -73,7 +73,7 @@ float4 frag_meta (v2f_meta i) : SV_Target
 {
     // we're interested in diffuse & specular colors,
     // and surface roughness to produce final albedo.
-    FragmentCommonData data = UNITY_SETUP_BRDF_INPUT (i.uv,i.color);
+    FragmentCommonData data = UNITY_SETUP_BRDF_INPUT (i.uv,i.uv,i.color);
 
     UnityMetaInput o;
     UNITY_INITIALIZE_OUTPUT(UnityMetaInput, o);

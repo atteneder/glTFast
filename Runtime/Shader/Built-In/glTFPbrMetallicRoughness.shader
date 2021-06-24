@@ -31,21 +31,25 @@ Shader "glTF/PbrMetallicRoughness"
 
         [Gamma] _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
         _MetallicGlossMap("Metallic", 2D) = "white" {}
+        _MetallicGlossMapRotation ("Metallic Texture Rotation", Vector) = (0,0,0,0)
 
         // [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
         // [ToggleOff] _GlossyReflections("Glossy Reflections", Float) = 1.0
 
         _BumpScale("Scale", Float) = 1.0
         [Normal] _BumpMap("Normal Map", 2D) = "bump" {}
+        _BumpMapRotation ("Normal Map Rotation", Vector) = (0,0,0,0)
 
         // _Parallax ("Height Scale", Range (0.005, 0.08)) = 0.02
         // _ParallaxMap ("Height Map", 2D) = "black" {}
 
         _OcclusionStrength("Strength", Range(0.0, 1.0)) = 1.0
-        _OcclusionMap("Occlusion", 2D) = "white" {}
+        _OcclusionMap("Occlusion Map", 2D) = "white" {}
+        _OcclusionMapRotation ("Occlusion Map Rotation", Vector) = (0,0,0,0)
 
         _EmissionColor("Color", Color) = (0,0,0)
-        _EmissionMap("Emission", 2D) = "white" {}
+        _EmissionMap("Emission Map", 2D) = "white" {}
+        _EmissionMapRotation ("Emission Map Rotation", Vector) = (0,0,0,0)
 
         // _DetailMask("Detail Mask", 2D) = "white" {}
 
