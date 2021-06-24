@@ -6,8 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Import setting to create non-legacy animation clips (thanks [@hybridherbst][hybridherbst] for #196) 
-- Support for two texture coordinate sets in materials (URP and HDRP)
+- Import setting to create non-legacy animation clips (thanks [@hybridherbst][hybridherbst] for #196)
+- Support for two texture coordinate sets in materials (URP, HDRP and Built-in)
 - Support for individual texture transform per texture type (URP, HDRP and Built-in)
 ### Fixed
 - Editor import: Separate textures are only referenced in AssetDatabase (not re-added)
