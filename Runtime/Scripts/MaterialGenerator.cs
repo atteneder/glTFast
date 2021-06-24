@@ -210,6 +210,10 @@ namespace GLTFast.Materials {
 
                     material.EnableKeyword(KW_UV_ROTATION);
                     textureST.z -= newRot.y; // move offset to move rotation point (horizontally) 
+                } else {
+                    // In case _UV_ROTATION keyword is set (because another texture is rotated),
+                    // make sure the rotation is properly nulled
+                    material.SetVector(rotationPropertyId, Vector4.zero);
                 }
 
                 textureST.w -= textureST.y * cos; // move offset to move flip axis point (vertically)
