@@ -46,7 +46,9 @@ v2f_meta vert_meta (VertexInput v)
 
     o.uv.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);
 #ifdef _NORMALMAP
-    o.tex.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+    o.uv.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+#else
+    o.uv.zw = float2(0,0);
 #endif
     
 #ifdef EDITOR_VISUALIZATION
