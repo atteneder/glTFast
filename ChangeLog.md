@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - Editor import: Separate textures are only referenced in AssetDatabase (not re-added)
+- Warnings due to conflicting script file names `Animation.cs` and `Camera.cs` (#198)
 
 ## [4.0.1] - 2021-06-10
 ### Changed
