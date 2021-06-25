@@ -21,7 +21,7 @@ Shader "glTF/PbrMetallicRoughness"
     {
         _Color("Color", Color) = (1,1,1,1)
         _MainTex("Base Color Map", 2D) = "white" {}
-        _MainTexRotation ("Texture rotation", Vector) = (0,0,0,0)
+        _MainTexRotation ("Base Color Map Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] _MainTexUVChannel ("Base Color Map UV Set", Float) = 0
         
         _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
