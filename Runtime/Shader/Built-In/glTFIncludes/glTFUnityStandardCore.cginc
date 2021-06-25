@@ -564,7 +564,7 @@ struct VertexOutputForwardAdd
     half3 viewDirForParallax            : TEXCOORD8;
 #endif
 
-#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP)
+#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     float4 texORM                       : TEXCOORD9;
 #endif
 #ifdef _EMISSION
@@ -678,7 +678,7 @@ struct VertexOutputDeferred
     #endif
     half4 color                             : COLOR;
 
-#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP)
+#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     float4 texORM                       : TEXCOORD9;
 #endif
 #ifdef _EMISSION

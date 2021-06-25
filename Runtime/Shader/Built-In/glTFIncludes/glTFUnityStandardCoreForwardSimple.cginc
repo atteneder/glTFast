@@ -49,6 +49,14 @@ struct VertexOutputBaseSimple
 #if UNITY_REQUIRE_FRAG_WORLDPOS
     float3 posWorld                     : TEXCOORD8;
 #endif
+
+#if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
+    float4 texORM                       : TEXCOORD9;
+#endif
+#ifdef _EMISSION
+    float2 texEmission                  : TEXCOORD10;
+#endif
+
     half4 color                         : COLOR;
     UNITY_VERTEX_OUTPUT_STEREO
 };
