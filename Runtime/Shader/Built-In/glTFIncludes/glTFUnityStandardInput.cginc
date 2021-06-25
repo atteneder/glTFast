@@ -127,8 +127,13 @@ float4 TexCoords(VertexInput v)
 #ifdef _UV_ROTATION
 #define TexCoordsSingle(uv,map) TexCoordsSingleIntern(uv,map##_ST,map##Rotation);
 #else
-#define TexCoordsSingle(uv,map) TRANSFORM_TEX(uv, map);
+#define TexCoordsSingle(uv,map) TexCoordsSingleSimple(uv,map##_ST);
 #endif
+
+float2 TexCoordsSingleSimple(float2 uv, float4 st)
+{
+    return uv * st.xy + st.zw;
+}
 
 float2 TexCoordsSingleIntern(float2 uv, float4 st, float2 rotation)
 {
