@@ -125,12 +125,14 @@ namespace GLTFast.Editor {
                     }
                 }
                 
+#if UNITY_ANIMATION
                 var clips = m_Gltf.GetAnimationClips();
                 if (clips != null) {
                     foreach (var animationClip in clips) {
                         AddObjectToAsset(ctx, $"animations/{animationClip.name}", animationClip);
                     }
                 }
+#endif
                 
                 m_ImportedNames = null;
                 m_ImportedObjects = null;
