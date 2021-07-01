@@ -391,12 +391,14 @@ namespace GLTFast {
                 materials = null;
             }
             
+#if UNITY_ANIMATION
             if (animationClips != null) {
                 foreach( var clip in animationClips ) {
                     SafeDestroy(clip);
                 }
                 animationClips = null;
             }
+#endif
 
             if(textures!=null) {
                 foreach( var texture in textures ) {
@@ -1404,7 +1406,9 @@ namespace GLTFast {
         /// </summary>
         /// <returns>Array containing each node's parent node index (or -1 for root nodes)</returns>
         int[] CreateUniqueNames() {
+#if UNITY_ANIMATION
             nodeNames = new string[gltfRoot.nodes.Length];
+#endif
             var parentIndex = new int[gltfRoot.nodes.Length];
 
             for (var nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
@@ -1419,11 +1423,14 @@ namespace GLTFast {
                     childNames.Clear();
                     foreach (var child in node.children) {
                         parentIndex[child] = nodeIndex;
+#if UNITY_ANIMATION
                         nodeNames[child] = GetUniqueNodeName(gltfRoot, child, childNames);
+#endif
                     }
                 }
             }
 
+#if UNITY_ANIMATION
             for (int sceneId = 0; sceneId < gltfRoot.scenes.Length; sceneId++) {
                 childNames.Clear();
                 var scene = gltfRoot.scenes[sceneId];
@@ -1433,6 +1440,7 @@ namespace GLTFast {
                     }
                 }
             }
+#endif
 
             return parentIndex;
         }
@@ -2047,6 +2055,7 @@ namespace GLTFast {
                         accessorData[i] = ads;
                         break;
                     }
+#if UNITY_ANIMATION
                     case GLTFAccessorAttributeType.VEC3 when (accessorUsage[i]&AccessorUsage.Translation)!=0:
                     {
                         var ads = new AccessorNativeData<Vector3>();
@@ -2071,7 +2080,6 @@ namespace GLTFast {
                         accessorData[i] = ads;
                         break;
                     }
-#if UNITY_ANIMATION
                     case GLTFAccessorAttributeType.SCALAR when accessorUsage[i]==AccessorUsage.AnimationTimes:
                     {
                         // JobHandle? jh;
