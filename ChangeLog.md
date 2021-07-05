@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Import setting to create non-legacy animation clips (thanks [@hybridherbst][hybridherbst] for #196) 
 ### Fixed
 - Editor import: Separate textures are only referenced in AssetDatabase (not re-added)
 - Warnings due to conflicting script file names `Animation.cs` and `Camera.cs` (#198)
