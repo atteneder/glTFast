@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Renamed `GLTFast.ILogger` to `GLTFast.ICodeLogger` to avoid confusion with `UnityEngine.ILogger` 
 ### Fixed
-- Null pointer dereference exception on `accessorData` (thanks [@hybridherbst](https://github.com/hybridherbst))
+- Null pointer dereference exception on `accessorData` (thanks [@hybridherbst][hybridherbst])
 - Corrected flipped texture transform for KTX texture (#176)
 
 ## [4.0.0] - 2021-05-21
@@ -66,22 +66,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for animations via Unity's legacy animation system (`Animation` component; #124)
 ### Fixed
 - Image format is properly detected from URIs with HTTP queries (thanks [JonathanB-Vobling](https://github.com/JonathanB-Vobling) for #160; fixes #158)
-- Unlit shaders are now correctly assigned for double-sided variants (thanks [@hybridherbst](https://github.com/hybridherbst) for #163)
+- Unlit shaders are now correctly assigned for double-sided variants (thanks [@hybridherbst][hybridherbst] for #163)
 - Sample code for custom defer agent is now thread safe (fixes #161)
 - Meshes with two UV sets and vertex colors now work (fixes #162)
 
 ## [3.1.0] - 2020-03-16
 ### Added
-- Unlit alpha blended ShaderGraph variants (thanks [@hybridherbst](https://github.com/hybridherbst) for #144)
+- Unlit alpha blended ShaderGraph variants (thanks [@hybridherbst][hybridherbst] for #144)
 - Support for unsigned byte joint indices
 ### Changed
 - Accelerated loading meshes by obtaining and setting bounds from accessors min/max values instead of recalculating them  
 - Improved log message when DracoUnity/KtxUnity packages are missing
 - Restored/simplified `GLTFast.LoadGltfBinary`, allowing users to load glTF binary files from byte arrays directly (also added documentation; fixes #148)
 ### Fixed
-- Texture offset/tiling values don't get lost when switching shaders (thanks [@hybridherbst](https://github.com/hybridherbst) for #140)
+- Texture offset/tiling values don't get lost when switching shaders (thanks [@hybridherbst][hybridherbst] for #140)
 - Correct vertex colors for RGB/unsigned short, RGBA/unsigned short and RGBA/unsigned byte. (thanks [@camogram](https://github.com/camogram) for #139)
-- Error when trying to set texture offset/scale but material doesn't have _MainTex property (thanks [@hybridherbst](https://github.com/hybridherbst) for #142)
+- Error when trying to set texture offset/scale but material doesn't have _MainTex property (thanks [@hybridherbst][hybridherbst] for #142)
 - Crash when trying to combine meshes created by glTFast by setting proper submesh vertex count (fixes #100)
 
 ## [3.0.2] - 2020-02-07
@@ -374,3 +374,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.3.0]: https://github.com/atteneder/glTFast/compare/v0.3.0...v0.2.0
 [0.2.0]: https://github.com/atteneder/glTFast/compare/v0.2.0...v0.1.0
+[hybridherbst]: https://github.com/hybridherbst
