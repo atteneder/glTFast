@@ -1397,9 +1397,9 @@ namespace GLTFast {
         /// <summary>
         /// glTF nodes have no requirement to be named or have specific names.
         /// Some Unity systems like animation and importers require unique
-        /// names for Nodes with the same parent. This method makes creates
-        /// names for all nodes that:
-        /// - Are not empty
+        /// names for Nodes with the same parent. For each node this method creates
+        /// names that are:
+        /// - Not empty
         /// - Unique amongst nodes with identical parent node
         /// </summary>
         /// <returns>Array containing each node's parent node index (or -1 for root nodes)</returns>
