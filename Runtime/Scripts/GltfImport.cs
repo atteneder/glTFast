@@ -1330,7 +1330,7 @@ namespace GLTFast {
             }
 
 #if UNITY_ANIMATION
-            if (gltfRoot.hasAnimation) {
+            if (gltfRoot.hasAnimation && settings.animationMethod != ImportSettings.AnimationMethod.None) {
                 
                 animationClips = new AnimationClip[gltfRoot.animations.Length];
                 for (var i = 0; i < gltfRoot.animations.Length; i++) {
@@ -1339,7 +1339,7 @@ namespace GLTFast {
                     animationClips[i].name = animation.name ?? $"Clip_{i}";
                     
                     // Legacy Animation requirement
-                    animationClips[i].legacy = true;
+                    animationClips[i].legacy = settings.animationMethod == ImportSettings.AnimationMethod.Legacy;
                     animationClips[i].wrapMode = WrapMode.Loop;
 
                     for (int j = 0; j < animation.channels.Length; j++) {

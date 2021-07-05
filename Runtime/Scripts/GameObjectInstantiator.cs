@@ -315,48 +315,57 @@ namespace GLTFast {
 
 #if UNITY_ANIMATION
             if (animationClips != null) {
-                
+                // we want to create an Animator for non-legacy clips, and an Animation component for legacy clips.
+                var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
 // #if UNITY_EDITOR
 //                 // This variant creates a Mecanim Animator and AnimationController
 //                 // which does not work at runtime. It's kept for potential Editor import usage
-//
-//                 var animator = go.AddComponent<Animator>();
-//                 var controller = new AnimatorController();
-//                 
-//                 for (var index = 0; index < animationClips.Length; index++) {
-//                     var clip = animationClips[index];
-//                     controller.AddLayer(clip.name);
-//                     // controller.layers[index].defaultWeight = 1;
-//                     var stateMachine = controller.layers[index].stateMachine;
-//                     AnimatorState entryState = null;
-//                     var state = stateMachine.AddState(clip.name);
-//                     state.motion = clip;
-//                     var loopTransition = state.AddTransition(state);
-//                     loopTransition.hasExitTime = true;
-//                     loopTransition.duration = 0;
-//                     loopTransition.exitTime = 0;
-//                     entryState = state;
-//                     stateMachine.AddEntryTransition(entryState);
-//                 }
-//                 
-//                 animator.runtimeAnimatorController = controller;
-//                 
-//                 for (var index = 0; index < animationClips.Length; index++) {
-//                     controller.layers[index].blendingMode = AnimatorLayerBlendingMode.Additive;
-//                     animator.SetLayerWeight(index,1);
+//                 if(!isLegacyAnimation) {
+//                     var animator = go.AddComponent<Animator>();
+//                     var controller = new UnityEditor.Animations.AnimatorController();
+//                     controller.name = animator.name;
+//                     controller.AddLayer("Default");
+//                     controller.layers[0].defaultWeight = 1;
+//                     for (var index = 0; index < animationClips.Length; index++) {
+//                         var clip = animationClips[index];
+//                         // controller.AddLayer(clip.name);
+//                         // controller.layers[index].defaultWeight = 1;
+//                         var state = controller.AddMotion(clip, 0);
+//                         controller.AddParameter("Test", AnimatorControllerParameterType.Bool);
+//                         // var stateMachine = controller.layers[0].stateMachine;
+//                         // UnityEditor.Animations.AnimatorState entryState = null;
+//                         // var state = stateMachine.AddState(clip.name);
+//                         // state.motion = clip;
+//                         // var loopTransition = state.AddTransition(state);
+//                         // loopTransition.hasExitTime = true;
+//                         // loopTransition.duration = 0;
+//                         // loopTransition.exitTime = 0;
+//                         // entryState = state;
+//                         // stateMachine.AddEntryTransition(entryState);
+//                         // UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath
+//                     }
+//                     
+//                     animator.runtimeAnimatorController = controller;
+//                     
+//                     // for (var index = 0; index < animationClips.Length; index++) {
+//                     //     controller.layers[index].blendingMode = UnityEditor.Animations.AnimatorLayerBlendingMode.Additive;
+//                     //     animator.SetLayerWeight(index,1);
+//                     // }
 //                 }
 // #endif // UNITY_EDITOR
 
-                var animation = go.AddComponent<Animation>();
-                
-                for (var index = 0; index < animationClips.Length; index++) {
-                    var clip = animationClips[index];
-                    animation.AddClip(clip,clip.name);
-                    if (index < 1) {
-                        animation.clip = clip;
+                if(isLegacyAnimation) {
+                    var animation = go.AddComponent<Animation>();
+                    
+                    for (var index = 0; index < animationClips.Length; index++) {
+                        var clip = animationClips[index];
+                        animation.AddClip(clip,clip.name);
+                        if (index < 1) {
+                            animation.clip = clip;
+                        }
                     }
+                    animation.Play();
                 }
-                animation.Play();
             }
 #endif // UNITY_ANIMATION
         }
