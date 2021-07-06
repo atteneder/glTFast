@@ -77,6 +77,9 @@
 - [ ] KHR_materials_sheen ([issue][Sheen])
 - [ ] KHR_materials_transmission ([issue][Transmission])
 - [ ] KHR_materials_variants ([issue][Variants])
+- [ ] KHR_materials_ior ([issue][IOR])
+- [ ] KHR_materials_specular ([issue][Specular])
+- [ ] KHR_materials_volume ([issue][Volume])
 - [ ] KHR_xmp
 
 Will not be supported:
@@ -127,6 +130,9 @@ Will not be supported:
 | Sheen                         | [ℹ][Sheen] | [ℹ][Sheen] | [❌][Sheen] |
 | Transmission                  | [✓][Transmission]<sup>3</sup> | [✓][Transmission]<sup>4</sup> | [✓][Transmission]<sup>4</sup> |
 | Variants                      | [ℹ][Variants] | [ℹ][Variants] | [ℹ][Variants] |
+| IOR                           | [ℹ][IOR]      | [ℹ][IOR]      | [❌][IOR]      |
+| Specular                      | [ℹ][Specular] | [ℹ][Specular] | [❌][Specular] |
+| Volume                        | [ℹ][Volume]   | [ℹ][Volume]   | [❌][Volume]   |
 
 <sup>1</sup>: Physically-Based Rendering (PBR) material model
 
@@ -155,17 +161,20 @@ Legend:
 
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
 [AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166  
-[URP]: https://unity.com/srp/universal-render-pipeline
-[HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
-[newIssue]: https://github.com/atteneder/glTFast/issues/new
-[MorphTargets]: https://github.com/atteneder/glTFast/issues/8
-[PointLights]: https://github.com/atteneder/glTFast/issues/17
-[Skins]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins
-[UVsets]: https://github.com/atteneder/glTFast/issues/206
 [ClearCoat]: https://github.com/atteneder/glTFast/issues/68
-[Sheen]: https://github.com/atteneder/glTFast/issues/110
-[Transmission]: https://github.com/atteneder/glTFast/issues/111
-[Variants]: https://github.com/atteneder/glTFast/issues/112
-[MeshOpt]: https://github.com/atteneder/glTFast/issues/106
+[HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [IBL]: https://github.com/atteneder/glTFast/issues/108
+[IOR]: https://github.com/atteneder/glTFast/issues/207
+[MeshOpt]: https://github.com/atteneder/glTFast/issues/106
+[MorphTargets]: https://github.com/atteneder/glTFast/issues/8
+[newIssue]: https://github.com/atteneder/glTFast/issues/new
+[PointLights]: https://github.com/atteneder/glTFast/issues/17
 [SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
+[Sheen]: https://github.com/atteneder/glTFast/issues/110
+[Skins]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins
+[Specular]: https://github.com/atteneder/glTFast/issues/208
+[Transmission]: https://github.com/atteneder/glTFast/issues/111
+[URP]: https://unity.com/srp/universal-render-pipeline
+[UVsets]: https://github.com/atteneder/glTFast/issues/206
+[Variants]: https://github.com/atteneder/glTFast/issues/112
+[Volume]: https://github.com/atteneder/glTFast/issues/209
