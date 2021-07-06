@@ -108,7 +108,7 @@ namespace GLTFast
         public abstract int vertexCount { get; }
         public abstract void Dispose();
 
-        protected unsafe JobHandle? GetVector3sJob(
+        public static unsafe JobHandle? GetVector3sJob(
             void* input,
             int count,
             GLTFComponentType inputType,

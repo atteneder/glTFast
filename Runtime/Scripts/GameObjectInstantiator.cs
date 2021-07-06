@@ -104,20 +104,22 @@ namespace GLTFast {
 
             Renderer renderer;
 
-            if(joints==null) {
+            if(joints==null && mesh.blendShapeCount < 1) {
                 var mf = meshGo.AddComponent<MeshFilter>();
                 mf.mesh = mesh;
                 var mr = meshGo.AddComponent<MeshRenderer>();
                 renderer = mr;
             } else {
                 var smr = meshGo.AddComponent<SkinnedMeshRenderer>();
-                var bones = new Transform[joints.Length];
-                for (var j = 0; j < bones.Length; j++)
-                {
-                    var jointIndex = joints[j];
-                    bones[j] = nodes[jointIndex].transform;
+                if (joints != null) {
+                    var bones = new Transform[joints.Length];
+                    for (var j = 0; j < bones.Length; j++)
+                    {
+                        var jointIndex = joints[j];
+                        bones[j] = nodes[jointIndex].transform;
+                    }
+                    smr.bones = bones;
                 }
-                smr.bones = bones;
                 smr.sharedMesh = mesh;
                 renderer = smr;
             }

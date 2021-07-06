@@ -121,6 +121,10 @@ namespace GLTFast {
             // Profiler.EndSample();
 #endif
 
+            if (morphTargetsContext != null) {
+                morphTargetsContext.ApplyOnMeshAndDispose(msh);
+            }
+
             Profiler.BeginSample("Dispose");
             Dispose();
             Profiler.EndSample();
