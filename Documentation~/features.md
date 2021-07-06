@@ -43,7 +43,8 @@
   - [x] Draco mesh compression (via [Draco 3D Data Compression Unity Package](https://github.com/atteneder/DracoUnity))
   - [x] Implicit (no) indices
   - [x] Per primitive material
-  - [ ] Multiple texture coordinates / UV sets ([issue][UVsets])
+  - [x] Two texture coordinates / UV sets
+    - [ ] Three or more texture coordinates / UV sets ([issue][UVsets])
   - [x] Joints (up to 4 per vertex)
   - [x] Weights (up to 4 per vertex)
 - [x] Texture sampler
@@ -68,19 +69,15 @@
 - [x] KHR_draco_mesh_compression
 - [x] KHR_materials_pbrSpecularGlossiness
 - [x] KHR_materials_unlit
-- [x] <sup>1</sup>KHR_texture_transform
+- [x] KHR_texture_transform
 - [x] KHR_mesh_quantization
-- [x] <sup>2</sup>KHR_texture_basisu
+- [x] KHR_texture_basisu
 - [ ] KHR_lights_punctual ([issue][PointLights])
 - [ ] KHR_materials_clearcoat ([issue][ClearCoat])
 - [ ] KHR_materials_sheen ([issue][Sheen])
 - [ ] KHR_materials_transmission ([issue][Transmission])
 - [ ] KHR_materials_variants ([issue][Variants])
 - [ ] KHR_xmp
-
-<sup>1</sup>: See [Materials](#materials) for limitations
-
-<sup>2</sup>: Beta
 
 Will not be supported:
 
@@ -124,8 +121,8 @@ Will not be supported:
 | Alpha modes OPAQUE/MASK/BLEND | ✅  | ✅   | ✅       |
 | Double sided / Two sided      | ✅  | ✅   | ✅       |
 | Vertex colors                 | ✅  | ✅   | ✅       |
-| Multiple UV sets              | [ℹ][UVsets] | [ℹ][UVsets] | [❌][newIssue] |
-| Texture Transform             | ✓<sup>2</sup>  | ✓<sup>2</sup>   | ✓<sup>2</sup>       |
+| Multiple UV sets              | ✅<sup>2</sup>  | ✅<sup>2</sup>   | ✅<sup>2</sup>       |
+| Texture Transform             | ✅  | ✅   | ✅       |
 | Clear coat                    | [ℹ][ClearCoat] | [ℹ][ClearCoat] | [❌][ClearCoat] |
 | Sheen                         | [ℹ][Sheen] | [ℹ][Sheen] | [❌][Sheen] |
 | Transmission                  | [✓][Transmission]<sup>3</sup> | [✓][Transmission]<sup>4</sup> | [✓][Transmission]<sup>4</sup> |
@@ -133,7 +130,7 @@ Will not be supported:
 
 <sup>1</sup>: Physically-Based Rendering (PBR) material model
 
-<sup>2</sup>: The texture transform of baseColorTexture (or diffuseTexture for Specular-Glossiness) is re-used for all other textures. If you need different texture transforms for different texture types, [create an issue][newIssue].
+<sup>2</sup>: Two sets of texture coordinates (as required by the glTF 2.0 specification) are supported, but not three or more ([issue][UVSets])
 
 <sup>3</sup>: There are two approximation implementations for transmission in Universal render pipeline. If the Opaque Texture is enabled (in the Universal RP Asset settings), it is sampled to provide proper transmissive filtering. The downside of this approach is transparent objects are not rendered on top of each other. If the opaque texture is not available, the common approximation (see <sup>4</sup> below) is used.
 
@@ -153,7 +150,6 @@ Legend:
 - Texture sampler minification/magnification filter limitations (see [issue][SamplerFilter]):
   - <sup>1</sup>There's no differentiation between `minFilter` and `magFilter`. `minFilter` settings are prioritized.
   - <sup>1</sup>`minFilter` mode `NEAREST_MIPMAP_LINEAR` is not supported and will result in `NEAREST`.
-- When building for WebGL with Unity 2018.1 you have to enable explicitly thrown exceptions (reason unknown - to be investigated)
 
 <sup>1</sup>: A Unity API limitation.
 
@@ -165,7 +161,7 @@ Legend:
 [MorphTargets]: https://github.com/atteneder/glTFast/issues/8
 [PointLights]: https://github.com/atteneder/glTFast/issues/17
 [Skins]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins
-[UVsets]: https://github.com/atteneder/glTFast/issues/34
+[UVsets]: https://github.com/atteneder/glTFast/issues/206
 [ClearCoat]: https://github.com/atteneder/glTFast/issues/68
 [Sheen]: https://github.com/atteneder/glTFast/issues/110
 [Transmission]: https://github.com/atteneder/glTFast/issues/111
