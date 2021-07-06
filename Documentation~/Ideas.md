@@ -8,11 +8,9 @@ Ideas to improve this project
 
 Missing:
 
-- Animation
 - Morph targets
   - Sparse accessors
-- Cameras
-- Multiple texture coordinates sets
+  - Animated
 - Primitive types
   - TRIANGLE_STRIP
   - TRIANGLE_FAN
@@ -32,7 +30,6 @@ Missing:
 
 Interesting:
 
-- EXT_mesh_gpu_instancing
 - EXT_meshopt_compression
 - EXT_lights_image_based
 
@@ -78,10 +75,6 @@ Many glTF entities like nodes can have custom data in form of an `extras` dictio
 
 ## Technical Improvements
 
-### Async instead of Coroutine
-
-Probably needed for DOTS anyways (have to check)
-
 ## Quality of Life improvements
 
 ### Shader GUI
@@ -90,17 +83,17 @@ Like Standard Shader inspector, but for glTF shaders
 
 ### Unit Tests
 
-- Import sample set
-- Measure speed and detect regressions
-- Render image and compare for changes
-- Check key indicators like node/mesh/vertex count etc
+- [x] Import sample set
+- [x] Measure speed and detect regressions
+- [x] Render image and compare for changes
+- [ ] Check key indicators like node/mesh/vertex count etc
 
 ## Optimization
 
 - Investigate [Mesh API 2020.1 improvements](https://docs.google.com/document/d/1QC7NV7JQcvibeelORJvsaTReTyszllOlxdfEsaVL2oA/edit#heading=h.3lwfbowmy03j)
 - Use Mesh.AllocateWritableMeshData
 - Move as much as possible to threads
-  - Parsing JSON
+  - [x] Parsing JSON
 
 ### Minimize Requirements
 
@@ -136,15 +129,6 @@ Start import during download
 
 Move GPU texture upload off of main thread into native lib.
 No need to reverse mipmap order.
-
-### Draco decode
-
-Could be optimized by splitting monolithic function up:
-
-1. Load meta data only
-2. Allocate buffers (NativeArrays) accordingly
-3. Decode directly into bufferes
-4. Profit
 
 ### Memcopy
 
@@ -198,10 +182,6 @@ Give Feedback whenever assets are not optimal and ideally offer solutions (like 
 - Embed buffers
 - Shared vertex attribute buffers (see #52)
 - Jpeg/PNG textures (instead of KTX)
-
-### Editor Import
-
-Create prefabs in editor at import time. Not investigated, but probably not that hard.
 
 ### Editor Export
 
