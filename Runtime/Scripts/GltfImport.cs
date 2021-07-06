@@ -1554,7 +1554,8 @@ namespace GLTFast {
                     var end = meshPrimitiveIndex[node.mesh+1];
                     var primitiveCount = 0;
                     for( var i=meshPrimitiveIndex[node.mesh]; i<end; i++ ) {
-                        var mesh = primitives[i].mesh;
+                        var primitive = primitives[i];
+                        var mesh = primitive.mesh;
                         var meshName = string.IsNullOrEmpty(mesh.name) ? null : mesh.name;
                         // Fallback name for Node is first valid Mesh name
                         goName = goName ?? meshName;
@@ -1578,8 +1579,9 @@ namespace GLTFast {
                                 nodeIndex,
                                 meshName,
                                 mesh,
-                                primitives[i].materialIndices,
+                                primitive.materialIndices,
                                 joints,
+                                gltf.meshes[node.mesh].weights,
                                 primitiveCount
                             );
                         } else {

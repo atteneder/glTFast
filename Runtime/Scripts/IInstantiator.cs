@@ -70,6 +70,7 @@ namespace GLTFast {
             Mesh mesh,
             int[] materialIndices,
             uint[] joints = null,
+            float[] morphTargetWeights = null,
             int primitiveNumeration = 0
         );
 

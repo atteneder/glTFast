@@ -90,6 +90,7 @@ namespace GLTFast {
             Mesh mesh,
             int[] materialIndices,
             uint[] joints = null,
+            float[] morphTargetWeights = null,
             int primitiveNumeration = 0
         ) {
 
@@ -104,7 +105,8 @@ namespace GLTFast {
 
             Renderer renderer;
 
-            if(joints==null && mesh.blendShapeCount < 1) {
+            var hasMorphTargets = mesh.blendShapeCount > 0;
+            if(joints==null && !hasMorphTargets) {
                 var mf = meshGo.AddComponent<MeshFilter>();
                 mf.mesh = mesh;
                 var mr = meshGo.AddComponent<MeshRenderer>();
@@ -121,6 +123,12 @@ namespace GLTFast {
                     smr.bones = bones;
                 }
                 smr.sharedMesh = mesh;
+                if (morphTargetWeights!=null) {
+                    for (var i = 0; i < morphTargetWeights.Length; i++) {
+                        var weight = morphTargetWeights[i];
+                        smr.SetBlendShapeWeight(i, weight);
+                    }
+                }
                 renderer = smr;
             }
 
