@@ -1797,7 +1797,7 @@ namespace GLTFast {
             var perAttributeMeshCollection = new Dictionary<Attributes,HashSet<int>>();
 #endif
             
-            /// Iterate over all primitive vertex attributes and remember the accessors usage.
+            /// Iterate all primitive vertex attributes and remember the accessors usage.
             accessorUsage = new AccessorUsage[gltf.accessors.Length];
             int totalPrimitives = 0;
             for (int meshIndex = 0; meshIndex < gltf.meshes.Length; meshIndex++)
@@ -2091,7 +2091,7 @@ namespace GLTFast {
             }
 
             Profiler.BeginSample("LoadAccessorData.PrimitiveCreateContexts");
-            int primitiveIndes=0;
+            int primitiveIndex=0;
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
                 foreach( var cluster in meshPrimitiveCluster[meshIndex].Values) {
@@ -2129,15 +2129,15 @@ namespace GLTFast {
                             // PreparePrimitiveIndices(gltf,mesh,primitive,ref c,primIndex);
                             context = c;
                         }
-                        context.primtiveIndex = primitiveIndes;
+                        context.primtiveIndex = primitiveIndex;
                         context.materials[primIndex] = primitive.material;
 
                         context.needsNormals |= primitive.material<0 || gltf.materials[primitive.material].requiresNormals;
                         context.needsTangents |= primitive.material>=0 && gltf.materials[primitive.material].requiresTangents;
                     }
 
-                    primitiveContexts[primitiveIndes] = context;
-                    primitiveIndes++;
+                    primitiveContexts[primitiveIndex] = context;
+                    primitiveIndex++;
                 }
             }
             Profiler.EndSample();
