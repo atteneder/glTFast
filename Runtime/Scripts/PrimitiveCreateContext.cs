@@ -35,11 +35,7 @@ namespace GLTFast {
 
         public MeshTopology topology;
 
-        public override bool IsCompleted {
-            get {
-                return jobHandle.IsCompleted;
-            }  
-        }
+        public override bool IsCompleted => jobHandle.IsCompleted;
 
         public override Primitive? CreatePrimitive() {
             Profiler.BeginSample("CreatePrimitive");
