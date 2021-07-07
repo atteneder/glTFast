@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using GLTFast.Schema;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -21,8 +22,8 @@ namespace GLTFast.Tests
     public class JsonParsingTests
     {
         [Test]
-        public void ParseGltfJson() {
-            var gltf = GltfImport.ParseJson(@"
+        public void MaterialExtensions() {
+            var gltf = JsonParser.ParseJson(@"
 {
     ""materials"" : [
         {
