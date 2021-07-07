@@ -49,34 +49,14 @@ namespace GLTFast
         public BufferView bufferView;
         public int chunkStart;
         public byte[] buffer;
-
-        public int startOffset {
-            get { return accessor.byteOffset + bufferView.byteOffset + chunkStart; }
-        }
-
-        public int count {
-            get { return accessor.count; }
-        }
-
-        public int byteStride {
-            get { return bufferView.byteStride; }
-        }
-
-        public GLTFComponentType type {
-            get { return accessor.componentType; }
-        }
-
-        public GLTFAccessorAttributeType attributeType {
-            get { return accessor.typeEnum; }
-        }
         
-        public Bounds? bounds {
-            get { return accessor.TryGetBounds(); }
-        }
-
-        public bool normalize {
-            get { return accessor.normalized; }
-        }
+        public int startOffset => accessor.byteOffset + bufferView.byteOffset + chunkStart;
+        public int count => accessor.count;
+        public int byteStride => bufferView.byteStride;
+        public GLTFComponentType type => accessor.componentType;
+        public GLTFAccessorAttributeType attributeType => accessor.typeEnum;
+        public Bounds? bounds => accessor.TryGetBounds();
+        public bool normalize => accessor.normalized;
     }
 
     abstract class VertexBufferConfigBase {
