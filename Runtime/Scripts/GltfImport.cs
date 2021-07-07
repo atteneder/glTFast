@@ -1996,7 +1996,7 @@ namespace GLTFast {
                             morphTarget.TANGENT>=0 ? GetAccessorParams(gltf,morphTarget.TANGENT) : (VertexInputData?)null
                             );
                         if (!success) {
-                            // TODO: error reporting
+                            logger.Error(LogCode.MorphTargetContextFail);
                             break;
                         }
                     }
