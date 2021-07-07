@@ -14,7 +14,6 @@
 //
 
 using System.Runtime.InteropServices;
-using GLTFast.Vertex;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
