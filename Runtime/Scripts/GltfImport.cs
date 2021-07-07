@@ -2042,7 +2042,6 @@ namespace GLTFast {
                         accessorData[i] = ads;
                         break;
                     }
-#if UNITY_ANIMATION
                     case GLTFAccessorAttributeType.VEC3 when (accessorUsage[i]&AccessorUsage.Translation)!=0:
                     {
                         var ads = new AccessorNativeData<Vector3>();
@@ -2067,6 +2066,7 @@ namespace GLTFast {
                         accessorData[i] = ads;
                         break;
                     }
+#if UNITY_ANIMATION
                     case GLTFAccessorAttributeType.SCALAR when accessorUsage[i]==AccessorUsage.AnimationTimes:
                     {
                         // JobHandle? jh;
@@ -2421,7 +2421,6 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-#if UNITY_ANIMATION
         unsafe void GetVector3Job(Root gltf, int accessorIndex, out NativeArray<Vector3> vectors, out JobHandle? jobHandle, bool flip) {
             Profiler.BeginSample("GetVector3Job");
             var accessor = gltf.accessors[accessorIndex];
@@ -2524,6 +2523,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
         
+#if UNITY_ANIMATION
         void GetAnimationTimes(Root gltf, int accessorIndex, out NativeArray<float>? times) {
             // TODO: For long animations with lots of times, threading this just like everything else maybe makes sense.
             Profiler.BeginSample("GetAnimationTimes");
