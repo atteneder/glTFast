@@ -48,7 +48,7 @@ namespace GLTFast {
     using Schema;
     using Loading;
 
-    public class GltfImport : IGltfReadable {
+    public class GltfImport : IGltfReadable, IGltfBuffers {
 
         /// <summary>
         /// JSON parse speed in bytes per second
@@ -1794,41 +1794,19 @@ namespace GLTFast {
 
                 var primitive = mainBufferType.Key;
                 var att = primitive.attributes;
-
-                var posInput = GetAccessorParams(gltf,att.POSITION);
+                
                 bool hasNormals = att.NORMAL >= 0;
                 bool hasTangents = att.TANGENT >= 0;
-                VertexInputData? nrmInput = null;
-                VertexInputData? tanInput = null;
-                if (hasNormals) {
-                    nrmInput = GetAccessorParams(gltf,att.NORMAL);
-                }
-                if (hasTangents) {
-                    tanInput = GetAccessorParams(gltf,att.TANGENT);
-                }
 
-                VertexInputData[] uvInputs = null;
+                int[] uvInputs = null;
                 if (att.TEXCOORD_0 >= 0) {
                     int uvCount = 1;
                     if (att.TEXCOORD_1 >= 0) uvCount++;
-                    uvInputs = new VertexInputData[uvCount];
-                    uvInputs[0] = GetAccessorParams(gltf, att.TEXCOORD_0);
+                    uvInputs = new int[uvCount];
+                    uvInputs[0] = att.TEXCOORD_0;
                     if (att.TEXCOORD_1 >= 0) {
-                        uvInputs[1] = GetAccessorParams(gltf, att.TEXCOORD_1);
+                        uvInputs[1] = att.TEXCOORD_1;
                     }
-                }
-                VertexInputData? colorInput = null;
-                if (att.COLOR_0 >= 0) {
-                    colorInput = GetAccessorParams(gltf, att.COLOR_0);
-                }
-
-                VertexInputData? weightsInput = null;
-                if (att.WEIGHTS_0 >= 0) {
-                    weightsInput = GetAccessorParams(gltf, att.WEIGHTS_0);
-                }
-                VertexInputData? jointsInput = null;
-                if (att.JOINTS_0 >= 0) {
-                    jointsInput = GetAccessorParams(gltf, att.JOINTS_0);
                 }
 
                 VertexBufferConfigBase config;
@@ -1851,14 +1829,15 @@ namespace GLTFast {
                 vertexAttributes[primitive] = config;
                 
                 var jh = config.ScheduleVertexJobs(
-                    posInput,
-                    nrmInput,
-                    tanInput,
+                    this,
+                    att.POSITION,
+                    att.NORMAL,
+                    att.TANGENT,
                     uvInputs,
-                    colorInput,
-                    weightsInput,
-                    jointsInput
-                    );
+                    att.COLOR_0,
+                    att.WEIGHTS_0,
+                    att.JOINTS_0
+                );
 
                 if (jh.HasValue) {
                     tmpList.Add(jh.Value);
@@ -1878,10 +1857,11 @@ namespace GLTFast {
                     var morphTargetsContext = new MorphTargetsContext(primitive.targets.Length);
                     foreach (var morphTarget in primitive.targets) {
                         success = morphTargetsContext.AddMorphTarget(
-                            GetAccessorParams(gltf,morphTarget.POSITION),
-                            morphTarget.NORMAL>=0 ? GetAccessorParams(gltf,morphTarget.NORMAL) : (VertexInputData?)null,
-                            morphTarget.TANGENT>=0 ? GetAccessorParams(gltf,morphTarget.TANGENT) : (VertexInputData?)null
-                            );
+                            this,
+                            morphTarget.POSITION,
+                            morphTarget.NORMAL,
+                            morphTarget.TANGENT
+                        );
                         if (!success) {
                             logger.Error(LogCode.MorphTargetContextFail);
                             break;
@@ -2474,19 +2454,23 @@ namespace GLTFast {
 
 #endif // UNITY_ANIMATION
 
-        VertexInputData GetAccessorParams(Root gltf, int accessorIndex) {
-            var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
+#region IGltfBuffers
+        public unsafe void GetAccessor(int index, out Accessor accessor, out void* data, out int byteStride) {
+            accessor = gltfRoot.accessors[index];
+            var bufferView = gltfRoot.bufferViews[accessor.bufferView];
+            byteStride = bufferView.byteStride;
             var bufferIndex = bufferView.buffer;
-            var result = new VertexInputData {
-                accessor = accessor,
-                buffer = GetBuffer(bufferIndex),
-                bufferView = bufferView,
-                chunkStart = binChunks[bufferIndex].start
-            };
-            return result;
+            var buffer = GetBuffer(bufferIndex);
+            fixed(void* src = &(buffer[accessor.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
+                data = src;
+            }
+            
+            // // Alternative that uses NativeArray/Slice
+            // var bufferViewData = GetBufferView(bufferView);
+            // data =  (byte*)bufferViewData.GetUnsafeReadOnlyPtr() + accessor.byteOffset;
         }
- 
+#endregion IGltfBuffers
+
         /// <summary>
         /// Determines whether color accessor data can be retrieved as Color[] (floats) or Color32[] (unsigned bytes)
         /// </summary>

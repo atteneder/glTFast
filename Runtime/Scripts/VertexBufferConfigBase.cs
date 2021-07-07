@@ -43,22 +43,6 @@ namespace GLTFast
         PosNormTan = 0x7,
     }
 
-    struct VertexInputData {
-
-        public Accessor accessor;
-        public BufferView bufferView;
-        public int chunkStart;
-        public byte[] buffer;
-        
-        public int startOffset => accessor.byteOffset + bufferView.byteOffset + chunkStart;
-        public int count => accessor.count;
-        public int byteStride => bufferView.byteStride;
-        public GLTFComponentType type => accessor.componentType;
-        public GLTFAccessorAttributeType attributeType => accessor.typeEnum;
-        public Bounds? bounds => accessor.TryGetBounds();
-        public bool normalize => accessor.normalized;
-    }
-
     abstract class VertexBufferConfigBase {
 
         public const Allocator defaultAllocator = Allocator.Persistent;
@@ -76,13 +60,14 @@ namespace GLTFast
         }
         
         public abstract unsafe JobHandle? ScheduleVertexJobs(
-            VertexInputData posInput,
-            VertexInputData? nrmInput = null,
-            VertexInputData? tanInput = null,
-            VertexInputData[] uvInputs = null,
-            VertexInputData? colorInput = null,
-            VertexInputData? weightsInput = null,
-            VertexInputData? jointsInput = null
+            IGltfBuffers buffers,
+            int positionAccessorIndex,
+            int normalAccessorIndex,
+            int tangentAccessorIndex,
+            int[] uvAccessorIndices,
+            int colorAccessorIndex,
+            int weightsAccessorIndex,
+            int jointsAccessorIndex
             );
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract int vertexCount { get; }

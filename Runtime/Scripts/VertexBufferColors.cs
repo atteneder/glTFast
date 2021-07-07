@@ -26,7 +26,7 @@ namespace GLTFast {
     using Schema;
 
     abstract class VertexBufferColorsBase {
-        public abstract unsafe bool ScheduleVertexColorJob(VertexInputData colorInput, NativeSlice<JobHandle> handles);
+        public abstract bool ScheduleVertexColorJob(IGltfBuffers buffers, int colorAccessorIndex, NativeSlice<JobHandle> handles);
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
@@ -37,27 +37,26 @@ namespace GLTFast {
     class VertexBufferColors : VertexBufferColorsBase {
         NativeArray<Color> vData;
 
-        public override unsafe bool ScheduleVertexColorJob(VertexInputData colorInput, NativeSlice<JobHandle> handles) {
+        public override unsafe bool ScheduleVertexColorJob(IGltfBuffers buffers, int colorAccessorIndex, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexColorJob");
             Profiler.BeginSample("AllocateNativeArray");
-            vData = new NativeArray<Color>(colorInput.count, VertexBufferConfigBase.defaultAllocator);
+            buffers.GetAccessor(colorAccessorIndex, out var colorAcc, out var data, out var byteStride);
+            vData = new NativeArray<Color>(colorAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();
-
-            fixed( void* input = &(colorInput.buffer[colorInput.startOffset])) {
-                var h = GetColors32Job(
-                    input,
-                    colorInput.type,
-                    colorInput.attributeType,
-                    colorInput.byteStride,
-                    vData
-                );
-                if (h.HasValue) {
-                    handles[0] = h.Value;
-                } else {
-                    Profiler.EndSample();
-                    return false;
-                }
+            
+            var h = GetColors32Job(
+                data,
+                colorAcc.componentType,
+                colorAcc.typeEnum,
+                byteStride,
+                vData
+            );
+            if (h.HasValue) {
+                handles[0] = h.Value;
+            } else {
+                Profiler.EndSample();
+                return false;
             }
             Profiler.EndSample();
             return true;

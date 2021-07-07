@@ -14,10 +14,12 @@
 //
 
 using System.Runtime.InteropServices;
+using GLTFast.Schema;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Profiling;
+using Mesh = UnityEngine.Mesh;
 
 namespace GLTFast {
 
@@ -33,13 +35,19 @@ namespace GLTFast {
         }
         
         public bool AddMorphTarget(
-            VertexInputData posInput,
-            VertexInputData? nrmInput = null,
-            VertexInputData? tanInput = null
+            IGltfBuffers buffers,
+            int positionAccessorIndex,
+            int normalAccessorIndex,
+            int tangentAccessorIndex
             )
         {
             var newMorphTarget = new MorphTargetContext();
-            var jobHandle = newMorphTarget.ScheduleMorphTargetJobs(posInput, nrmInput, tanInput);
+            var jobHandle = newMorphTarget.ScheduleMorphTargetJobs(
+                buffers,
+                positionAccessorIndex,
+                normalAccessorIndex,
+                tangentAccessorIndex
+                );
             if (jobHandle.HasValue) {
                 handles[currentIndex] = jobHandle.Value;
                 contexts[currentIndex] = newMorphTarget;
@@ -78,24 +86,27 @@ namespace GLTFast {
         GCHandle tangentsHandle;
 
         public unsafe JobHandle? ScheduleMorphTargetJobs(
-            VertexInputData posInput,
-            VertexInputData? nrmInput = null,
-            VertexInputData? tanInput = null
+            IGltfBuffers buffers,
+            int positionAccessorIndex,
+            int normalAccessorIndex,
+            int tangentAccessorIndex
         ) {
             Profiler.BeginSample("ScheduleMorphTargetJobs");
             
-            positions = new Vector3[posInput.count];
+            buffers.GetAccessor(positionAccessorIndex, out var posAcc, out var posData, out var posByteStride);
+
+            positions = new Vector3[posAcc.count];
             positionsHandle = GCHandle.Alloc(positions,GCHandleType.Pinned);
             
             var jobCount = 1;
-            if (nrmInput.HasValue) {
-                normals = new Vector3[nrmInput.Value.count];
+            if (normalAccessorIndex >= 0) {
+                normals = new Vector3[posAcc.count];
                 normalsHandle = GCHandle.Alloc(normals,GCHandleType.Pinned);
                 jobCount++;
             }
 
-            if (tanInput.HasValue) {
-                tangents = new Vector3[tanInput.Value.count];
+            if (tangentAccessorIndex >= 0) {
+                tangents = new Vector3[posAcc.count];
                 tangentsHandle = GCHandle.Alloc(tangents, GCHandleType.Pinned);
                 jobCount++;
             }
@@ -103,15 +114,15 @@ namespace GLTFast {
             NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, VertexBufferConfigBase.defaultAllocator);
             var handleIndex = 0;
             
-            fixed( void* input = &(posInput.buffer[posInput.startOffset]), dest = &(positions[0])) {
+            fixed( void* dest = &(positions[0])) {
                 var h = VertexBufferConfigBase.GetVector3sJob(
-                    input,
-                    posInput.count,
-                    posInput.type,
-                    posInput.byteStride,
+                    posData,
+                    posAcc.count,
+                    posAcc.componentType,
+                    posByteStride,
                     (Vector3*) dest,
                     12,
-                    posInput.normalize
+                    posAcc.normalized
                 );
                 if (h.HasValue) {
                     handles[handleIndex] = h.Value;
@@ -122,16 +133,17 @@ namespace GLTFast {
                 }
             }
 
-            if (nrmInput.HasValue) {
-                fixed( void* input = &(nrmInput.Value.buffer[nrmInput.Value.startOffset]), dest = &(normals[0])) {
+            if (normalAccessorIndex >= 0) {
+                buffers.GetAccessor(normalAccessorIndex, out var nrmAcc, out var input, out var inputByteStride);
+                fixed( void* dest = &(normals[0])) {
                     var h = VertexBufferConfigBase.GetVector3sJob(
                         input,
-                        nrmInput.Value.count,
-                        nrmInput.Value.type,
-                        nrmInput.Value.byteStride,
+                        nrmAcc.count,
+                        nrmAcc.componentType,
+                        inputByteStride,
                         (Vector3*) dest,
                         12,
-                        nrmInput.Value.normalize
+                        nrmAcc.normalized
                     );
                     if (h.HasValue) {
                         handles[handleIndex] = h.Value;
@@ -143,16 +155,17 @@ namespace GLTFast {
                 }
             }
             
-            if (tanInput.HasValue) {
-                fixed( void* input = &(tanInput.Value.buffer[tanInput.Value.startOffset]), dest = &(tangents[0])) {
+            if (tangentAccessorIndex >= 0) {
+                buffers.GetAccessor(tangentAccessorIndex, out var tanAcc, out var input, out var inputByteStride);
+                fixed( void* dest = &(tangents[0])) {
                     var h = VertexBufferConfigBase.GetVector3sJob(
                         input,
-                        tanInput.Value.count,
-                        tanInput.Value.type,
-                        tanInput.Value.byteStride,
+                        tanAcc.count,
+                        tanAcc.componentType,
+                        inputByteStride,
                         (Vector3*) dest,
                         12,
-                        tanInput.Value.normalize
+                        tanAcc.normalized
                     );
                     if (h.HasValue) {
                         handles[handleIndex] = h.Value;

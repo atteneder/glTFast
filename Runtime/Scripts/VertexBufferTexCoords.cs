@@ -34,7 +34,7 @@ namespace GLTFast {
         }
         
         public int uvSetCount { get; protected set; }
-        public abstract unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles);
+        public abstract bool ScheduleVertexUVJobs(IGltfBuffers buffers, int[] uvAccessorIndices, int vertexCount, NativeSlice<JobHandle> handles);
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, ref int offset, int stream);
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
@@ -45,33 +45,32 @@ namespace GLTFast {
 
         public VertexBufferTexCoords(ICodeLogger logger) : base(logger) {}
         
-        public override unsafe bool ScheduleVertexUVJobs(VertexInputData[] uvInputs, NativeSlice<JobHandle> handles) {
+        public override unsafe bool ScheduleVertexUVJobs(IGltfBuffers buffers, int[] uvAccessorIndices, int vertexCount, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexUVJobs");
             Profiler.BeginSample("AllocateNativeArray");
-            vData = new NativeArray<T>(uvInputs[0].count, VertexBufferConfigBase.defaultAllocator);
+            vData = new NativeArray<T>( vertexCount, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();
-            uvSetCount = uvInputs.Length;
-            int outputByteStride = uvInputs.Length * 8;
+            uvSetCount = uvAccessorIndices.Length;
+            int outputByteStride = uvAccessorIndices.Length * 8;
 
-            for (int i=0; i<uvInputs.Length; i++) {
-                var uvInput = uvInputs[i];
-                fixed( void* input = &(uvInput.buffer[uvInput.startOffset])) {
-                    var h = GetUvsJob(
-                        input,
-                        uvInput.count,
-                        uvInput.type,
-                        uvInput.byteStride,
-                        (Vector2*) (vDataPtr+(i*8)),
-                        outputByteStride,
-                        uvInput.normalize
-                    );
-                    if (h.HasValue) {
-                        handles[i] = h.Value;
-                    } else {
-                        Profiler.EndSample();
-                        return false;
-                    }
+            for (int i=0; i<uvAccessorIndices.Length; i++) {
+                var accIndex = uvAccessorIndices[i];
+                buffers.GetAccessor(accIndex, out var uvAcc, out var data, out var byteStride);
+                var h = GetUvsJob(
+                    data,
+                    uvAcc.count,
+                    uvAcc.componentType,
+                    byteStride,
+                    (Vector2*) (vDataPtr+(i*8)),
+                    outputByteStride,
+                    uvAcc.normalized
+                );
+                if (h.HasValue) {
+                    handles[i] = h.Value;
+                } else {
+                    Profiler.EndSample();
+                    return false;
                 }
             }
             Profiler.EndSample();
