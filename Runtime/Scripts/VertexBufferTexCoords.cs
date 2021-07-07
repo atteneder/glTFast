@@ -17,6 +17,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -57,6 +58,7 @@ namespace GLTFast {
             for (int i=0; i<uvAccessorIndices.Length; i++) {
                 var accIndex = uvAccessorIndices[i];
                 buffers.GetAccessor(accIndex, out var uvAcc, out var data, out var byteStride);
+                Assert.IsFalse(uvAcc.isSparse,"Sparse Accessor is not supported for UVs");
                 var h = GetUvsJob(
                     data,
                     uvAcc.count,

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support for morph targets / blend shapes (#8)
 - Support for animated morph targets / blend shapes
+- Support for sparse accessors
+- Safe build option for more robust loading (`GLTFAST_SAFE` scripting define)
 ### Changed
 - Minor primitive GameObject name change. `GltfImport` is now fully responsible for `GameObject` names in order to ensure consistency between animation paths and model hierarchy.
 - glTF importer inspector

@@ -18,6 +18,7 @@ using GLTFast.Schema;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Mesh = UnityEngine.Mesh;
 
@@ -94,6 +95,7 @@ namespace GLTFast {
             Profiler.BeginSample("ScheduleMorphTargetJobs");
             
             buffers.GetAccessor(positionAccessorIndex, out var posAcc, out var posData, out var posByteStride);
+            Assert.IsFalse(posAcc.isSparse,"Sparse Accessor is not supported");
 
             positions = new Vector3[posAcc.count];
             positionsHandle = GCHandle.Alloc(positions,GCHandleType.Pinned);
@@ -135,6 +137,7 @@ namespace GLTFast {
 
             if (normalAccessorIndex >= 0) {
                 buffers.GetAccessor(normalAccessorIndex, out var nrmAcc, out var input, out var inputByteStride);
+                Assert.IsFalse(nrmAcc.isSparse,"Sparse Accessor is not supported");
                 fixed( void* dest = &(normals[0])) {
                     var h = VertexBufferConfigBase.GetVector3sJob(
                         input,
@@ -157,6 +160,7 @@ namespace GLTFast {
             
             if (tangentAccessorIndex >= 0) {
                 buffers.GetAccessor(tangentAccessorIndex, out var tanAcc, out var input, out var inputByteStride);
+                Assert.IsFalse(tanAcc.isSparse,"Sparse Accessor is not supported");
                 fixed( void* dest = &(tangents[0])) {
                     var h = VertexBufferConfigBase.GetVector3sJob(
                         input,

@@ -53,6 +53,25 @@ namespace GLTFast {
                     }
                 }
             }
+            if(root.accessors != null) {
+                for (int i = 0; i < root.accessors.Length; i++) {
+                    var accessor = root.accessors[i];
+                    if (accessor.sparse.indices == null || accessor.sparse.values == null) {
+                        // If indices and values members are null, `sparse` is likely
+                        // an auto-instance by the JsonUtility and not present in JSON.
+                        // Therefore we remove it:
+                        accessor.sparse = null;
+                    }
+#if GLTFAST_SAFE
+                    else {
+                        // This is very likely a valid sparse accessor.
+                        // However, an empty sparse property ( "sparse": {} ) would break
+                        // glTFast, so better do a thorough follow-up check
+                        check = true;
+                    }
+#endif // GLTFAST_SAFE
+                }
+            }
 #if DRACO_UNITY
             if(!check && root.meshes!=null) {
                 foreach (var mesh in root.meshes) {
@@ -103,6 +122,17 @@ namespace GLTFast {
                         }
                     }
                 }
+
+#if GLTFAST_SAFE
+                if (root.accessors != null) {
+                    for (var i = 0; i < root.accessors.Length; i++) {
+                        var sparse = fakeRoot.accessors[i].sparse;
+                        if (sparse?.indices == null || sparse.values == null) {
+                            root.accessors[i].sparse = null;
+                        }
+                    }
+                }
+#endif
 
 #if DRACO_UNITY
                 if (root.meshes != null) {

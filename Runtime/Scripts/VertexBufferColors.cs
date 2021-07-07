@@ -17,6 +17,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -41,6 +42,7 @@ namespace GLTFast {
             Profiler.BeginSample("ScheduleVertexColorJob");
             Profiler.BeginSample("AllocateNativeArray");
             buffers.GetAccessor(colorAccessorIndex, out var colorAcc, out var data, out var byteStride);
+            Assert.IsFalse(colorAcc.isSparse,"Sparse Accessor is not supported for colors");
             vData = new NativeArray<Color>(colorAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();

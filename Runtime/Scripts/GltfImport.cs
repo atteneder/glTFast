@@ -2288,6 +2288,7 @@ namespace GLTFast {
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
+            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for indices");
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
@@ -2367,6 +2368,7 @@ namespace GLTFast {
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.MAT4);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
+            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for matrices");
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
@@ -2401,6 +2403,7 @@ namespace GLTFast {
             
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC3);
+            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for Vector3s");
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
@@ -2447,6 +2450,7 @@ namespace GLTFast {
             
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC4);
+            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for Vector4s");
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
@@ -2500,7 +2504,8 @@ namespace GLTFast {
             var buffer = GetBufferView(bufferView);
 
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
-
+            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for animation times");
+            
             if (accessor.componentType == GLTFComponentType.Float) {
                 Profiler.BeginSample("CopyAnimationTimes");
                 // TODO: For long animations with lots of times, threading this just like everything else maybe makes sense.

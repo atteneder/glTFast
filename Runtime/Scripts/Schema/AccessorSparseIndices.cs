@@ -21,13 +21,13 @@ namespace GLTFast.Schema {
         /// The index of the bufferView with sparse indices.
         /// Referenced bufferView can't have ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER target.
         /// </summary>
-        public uint BufferView;
+        public uint bufferView;
 
         /// <summary>
         /// The offset relative to the start of the bufferView in bytes. Must be aligned.
         /// <minimum>0</minimum>
         /// </summary>
-        public int ByteOffset;
+        public int byteOffset;
 
         /// <summary>
         /// The indices data type. Valid values correspond to WebGL enums:
@@ -35,6 +35,6 @@ namespace GLTFast.Schema {
         /// `5123` (UNSIGNED_SHORT)
         /// `5125` (UNSIGNED_INT)
         /// </summary>
-        public GLTFComponentType ComponentType;
+        public GLTFComponentType componentType;
     }
 }

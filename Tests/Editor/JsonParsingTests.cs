@@ -163,5 +163,81 @@ namespace GLTFast.Tests
             Assert.NotNull(all.extensions.KHR_materials_sheen);
             Assert.NotNull(all.extensions.KHR_materials_transmission);
         }
+        
+        [Test]
+        public void SparseAccessors() {
+            var gltf = JsonParser.ParseJson(@"
+{
+    ""accessors"" : [ {
+        ""bufferView"" : 0,
+        ""byteOffset"" : 0,
+        ""componentType"" : 5123,
+        ""count"" : 36,
+        ""type"" : ""SCALAR"",
+        ""max"" : [ 13 ],
+        ""min"" : [ 0 ]
+      }, {
+        ""bufferView"" : 1,
+        ""byteOffset"" : 0,
+        ""componentType"" : 5126,
+        ""count"" : 14,
+        ""type"" : ""VEC3"",
+        ""max"" : [ 6.0, 4.0, 0.0 ],
+        ""min"" : [ 0.0, 0.0, 0.0 ],
+        ""sparse"" : {
+          ""count"" : 3,
+          ""indices"" : {
+            ""bufferView"" : 2,
+            ""byteOffset"" : 0,
+            ""componentType"" : 5123
+          },
+          ""values"" : {
+            ""bufferView"" : 3,
+            ""byteOffset"" : 0
+          }
+        }
+        }, {
+        ""bufferView"" : 1,
+        ""byteOffset"" : 0,
+        ""componentType"" : 5126,
+        ""count"" : 14,
+        ""type"" : ""VEC3"",
+        ""max"" : [ 6.0, 4.0, 0.0 ],
+        ""min"" : [ 0.0, 0.0, 0.0 ],
+        ""sparse"" : {}
+        } ]
+}
+"
+            );
+            
+            Assert.NotNull(gltf);
+            Assert.NotNull(gltf.accessors,"No accessors");
+            Assert.AreEqual(3, gltf.accessors.Length, "Invalid accessor quantity");
+
+            var regular = gltf.accessors[0];
+            Assert.NotNull(regular);
+            Assert.IsNull(regular.sparse);
+            
+            var sparse = gltf.accessors[1];
+            Assert.NotNull(sparse);
+            Assert.AreEqual(14,sparse.count);
+            Assert.NotNull(sparse.sparse);
+            Assert.AreEqual(3,sparse.sparse.count);
+            Assert.NotNull(sparse.sparse.indices);
+            Assert.AreEqual(2,sparse.sparse.indices.bufferView);
+            Assert.AreEqual(0,sparse.sparse.indices.byteOffset);
+            Assert.AreEqual(GLTFComponentType.UnsignedShort,sparse.sparse.indices.componentType);
+            Assert.NotNull(sparse.sparse.values);
+            Assert.AreEqual(3,sparse.sparse.values.bufferView);
+            Assert.AreEqual(0,sparse.sparse.values.byteOffset);
+            
+#if GLTFAST_SAFE
+            var invalid = gltf.accessors[2];
+            Assert.NotNull(invalid);
+            Assert.IsNull(invalid.sparse);
+#else
+            Debug.LogWarning("Invalid Sparse Accessors will break glTFast");
+#endif
+        }
     }
 }

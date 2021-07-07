@@ -22,6 +22,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -69,6 +70,7 @@ namespace GLTFast
             int jointsAccessorIndex
         ) {
             buffers.GetAccessor(positionAccessorIndex, out var posAcc, out var posData, out var posByteStride);
+            Assert.IsFalse(posAcc.isSparse,"Sparse Accessor is not supported for positions");
 
             Profiler.BeginSample("ScheduleVertexJobs");
             Profiler.BeginSample("AllocateNativeArray");
@@ -146,6 +148,7 @@ namespace GLTFast
 
             if (normalAccessorIndex>=0) {
                 buffers.GetAccessor(normalAccessorIndex, out var nrmAcc, out var input, out var inputByteStride);
+                Assert.IsFalse(nrmAcc.isSparse,"Sparse Accessor is not supported for normals");
                 var h = GetVector3sJob(
                     input,
                     nrmAcc.count,
@@ -166,6 +169,7 @@ namespace GLTFast
             
             if (tangentAccessorIndex>=0) {
                 buffers.GetAccessor(tangentAccessorIndex, out var tanAcc, out var input, out var inputByteStride);
+                Assert.IsFalse(tanAcc.isSparse,"Sparse Accessor is not supported for tangents");
                 var h = GetTangentsJob(
                     input,
                     tanAcc.count,

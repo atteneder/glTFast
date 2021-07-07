@@ -18,6 +18,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -61,6 +62,7 @@ namespace GLTFast {
             Profiler.BeginSample("AllocateNativeArray");
             
             buffers.GetAccessor(weightsAccessorIndex, out var weightsAcc, out var weightsData, out var weightsByteStride);
+            Assert.IsFalse(weightsAcc.isSparse,"Sparse Accessor is not supported for bone weights");
             vData = new NativeArray<VBones>(weightsAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();
@@ -85,6 +87,7 @@ namespace GLTFast {
 
             {
                 buffers.GetAccessor(jointsAccessorIndex, out var jointsAcc, out var jointsData, out var jointsByteStride);
+                Assert.IsFalse(jointsAcc.isSparse,"Sparse Accessor is not supported for bone joints");
                 var h = GetJointsJob(
                     jointsData,
                     jointsAcc.count,

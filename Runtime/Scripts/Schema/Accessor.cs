@@ -147,7 +147,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public AccessorSparse sparse;
 
-            public static int GetAccessorComponentTypeLength( GLTFComponentType componentType ) {
+        public static int GetAccessorComponentTypeLength( GLTFComponentType componentType ) {
             switch (componentType)
             {
                 case GLTFComponentType.Byte:
@@ -201,5 +201,7 @@ namespace GLTFast.Schema {
             }
             return null;
         }
+
+        public bool isSparse => sparse != null;
     }
 }
