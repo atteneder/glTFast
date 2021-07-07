@@ -140,8 +140,8 @@ namespace GLTFast {
         /// <summary>
         /// Array of dictionaries, indexed by mesh ID
         /// The dictionary contains all the mesh's primitives, clustered
-        /// by Vertex Attribute usage (Primitives with identical vertex
-        /// data will be clustered).
+        /// by Vertex Attribute and Morph Target usage (Primitives with identical vertex
+        /// data will be clustered; see MeshPrimitive.Equals).
         /// </summary>
         Dictionary<MeshPrimitive,List<MeshPrimitive>>[] meshPrimitiveCluster;
         List<ImageCreateContext> imageCreateContexts;
