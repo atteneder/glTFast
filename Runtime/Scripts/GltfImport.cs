@@ -172,14 +172,12 @@ namespace GLTFast {
         /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
         GlbBinChunk? glbBinChunk;
 
-#if UNITY_ANIMATION
         /// <summary>
         /// Unity's animation system addresses target GameObjects by hierarchical name.
         /// To make sure names are consistent and have no conflicts they are precalculated
         /// and stored in this array.
         /// </summary>
         string[] nodeNames;
-#endif
         
 #endregion VolatileData
 
@@ -1406,9 +1404,7 @@ namespace GLTFast {
         /// </summary>
         /// <returns>Array containing each node's parent node index (or -1 for root nodes)</returns>
         int[] CreateUniqueNames() {
-#if UNITY_ANIMATION
             nodeNames = new string[gltfRoot.nodes.Length];
-#endif
             var parentIndex = new int[gltfRoot.nodes.Length];
 
             for (var nodeIndex = 0; nodeIndex < gltfRoot.nodes.Length; nodeIndex++) {
@@ -1423,14 +1419,11 @@ namespace GLTFast {
                     childNames.Clear();
                     foreach (var child in node.children) {
                         parentIndex[child] = nodeIndex;
-#if UNITY_ANIMATION
                         nodeNames[child] = GetUniqueNodeName(gltfRoot, child, childNames);
-#endif
                     }
                 }
             }
 
-#if UNITY_ANIMATION
             for (int sceneId = 0; sceneId < gltfRoot.scenes.Length; sceneId++) {
                 childNames.Clear();
                 var scene = gltfRoot.scenes[sceneId];
@@ -1440,7 +1433,6 @@ namespace GLTFast {
                     }
                 }
             }
-#endif
 
             return parentIndex;
         }
@@ -1556,12 +1548,7 @@ namespace GLTFast {
                 
                 var node = gltfRoot.nodes[nodeIndex];
                 
-                var goName = 
-#if UNITY_ANIMATION
-                    nodeNames==null ? node.name : nodeNames[nodeIndex];
-#else
-                    node.name;
-#endif
+                var goName = nodeNames==null ? node.name : nodeNames[nodeIndex];
 
                 if(node.mesh>=0) {
                     var end = meshPrimitiveIndex[node.mesh+1];
