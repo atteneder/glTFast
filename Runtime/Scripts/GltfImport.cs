@@ -1331,7 +1331,7 @@ namespace GLTFast {
 
 #if UNITY_ANIMATION
             if (gltfRoot.hasAnimation && settings.animationMethod != ImportSettings.AnimationMethod.None) {
-                
+                Debug.Log("Installing "+gltfRoot.animations.Length+" animations in "+this);
                 animationClips = new AnimationClip[gltfRoot.animations.Length];
                 for (var i = 0; i < gltfRoot.animations.Length; i++) {
                     var animation = gltfRoot.animations[i];

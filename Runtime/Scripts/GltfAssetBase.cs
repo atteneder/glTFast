@@ -123,6 +123,16 @@ namespace GLTFast
         }
 
         /// <summary>
+        /// Returns an imported glTF's animation clips.
+        /// Note: Asset has to have finished loading before!
+        /// </summary>
+        /// <returns>glTF animation array if it was loaded successfully, null otherwise.</returns>
+        public UnityEngine.AnimationClip[] GetAnimationClips() {
+        	Debug.Log("Importer "+importer);
+            return importer?.GetAnimationClips();
+        }
+
+        /// <summary>
         /// Number of scenes loaded
         /// </summary>
         public int sceneCount => importer?.sceneCount ?? 0;
