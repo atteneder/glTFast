@@ -68,7 +68,7 @@ namespace GLTFast {
         public void ApplyOnMeshAndDispose(Mesh mesh) {
             for (var index = 0; index < contexts.Length; index++) {
                 var context = contexts[index];
-                context.AddToMesh(mesh,$"Shape{index}");
+                context.AddToMesh(mesh,index.ToString());
                 context.Dispose();
             }
             contexts = null;

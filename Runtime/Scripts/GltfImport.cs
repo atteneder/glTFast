@@ -1261,7 +1261,18 @@ namespace GLTFast {
                                 AnimationUtils.AddScaleCurves(animationClips[i], path, times, values, sampler.interpolationEnum);
                                 break;
                             }
-                            // case AnimationChannel.Path.weights:
+                            case AnimationChannel.Path.weights: {
+                                var values= ((AccessorNativeData<float>) accessorData[sampler.output]).data;
+                                AnimationUtils.AddMorphTargetWeightCurves(
+                                    animationClips[i],
+                                    path,
+                                    times,
+                                    values,
+                                    sampler.interpolationEnum
+                                    // TODO: Add morph targets names
+                                    );
+                                break;
+                            }
                             default:
                                 logger?.Error(LogCode.AnimationTargetPathUnsupported,channel.target.pathEnum.ToString());
                                 break;
@@ -1901,6 +1912,9 @@ namespace GLTFast {
                             case AnimationChannel.Path.scale:
                                 SetAccessorUsage(accessorIndex,AccessorUsage.Scale);
                                 break;
+                            case AnimationChannel.Path.weights:
+                                SetAccessorUsage(accessorIndex,AccessorUsage.Weight);
+                                break;
                         }
                     }
                 }
@@ -1962,7 +1976,7 @@ namespace GLTFast {
                         break;
                     }
 #if UNITY_ANIMATION
-                    case GLTFAccessorAttributeType.SCALAR when accessorUsage[i]==AccessorUsage.AnimationTimes:
+                    case GLTFAccessorAttributeType.SCALAR when accessorUsage[i]==AccessorUsage.AnimationTimes || accessorUsage[i]==AccessorUsage.Weight:
                     {
                         // JobHandle? jh;
                         var ads = new  AccessorNativeData<float>();
