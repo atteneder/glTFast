@@ -1282,10 +1282,13 @@ namespace GLTFast {
                                 // https://github.com/atteneder/glTFast/issues/153
                                 var node = gltfRoot.nodes[channel.target.node];
                                 var primitiveCount = meshPrimitiveIndex[node.mesh + 1] - meshPrimitiveIndex[node.mesh];
+                                var mesh = gltfRoot.meshes[node.mesh];
+                                var meshName = string.IsNullOrEmpty(mesh.name) ? PrimitiveName : mesh.name;
                                 for (var k = 1; k < primitiveCount; k++) {
+                                    var primitiveName = $"{meshName}_{k}";
                                     AnimationUtils.AddMorphTargetWeightCurves(
                                         animationClips[i],
-                                        path+"/Plane_1",
+                                        $"{path}/{primitiveName}",
                                         times,
                                         values,
                                         sampler.interpolationEnum
