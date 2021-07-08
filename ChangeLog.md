@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for morph targets / blend shapes (#8)
 - Support for animated morph targets / blend shapes
 ### Changed
+- Minor primitive GameObject name change. `GltfImport` is now fully responsible for `GameObject` names in order to ensure consistency between animation paths and model hierarchy.
 - glTF importer inspector
   - Removed "Node Name Method" option from glTF importer inspector. It still an option at run-time, but is always `OriginalUnique` at design-time imports.
   - `Animation` setting is disabled if built-in package animation is disabled

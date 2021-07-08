@@ -99,7 +99,7 @@ namespace GLTFast {
                 // Use Node GameObject for first Primitive
                 meshGo = nodes[nodeIndex];
             } else {
-                meshGo = new GameObject( $"{meshName ?? "Primitive"}_{primitiveNumeration}" );
+                meshGo = new GameObject(meshName);
                 meshGo.transform.SetParent(nodes[nodeIndex].transform,false);
             }
 
@@ -160,7 +160,7 @@ namespace GLTFast {
             }
 
             for (var i = 0; i < instanceCount; i++) {
-                var meshGo = new GameObject( $"{meshName ?? "Primitive"}_p{primitiveNumeration}_i{i}" );
+                var meshGo = new GameObject( $"{meshName}_i{i}" );
                 var t = meshGo.transform;
                 t.SetParent(nodes[nodeIndex].transform,false);
                 t.localPosition = positions?[i] ?? Vector3.zero;

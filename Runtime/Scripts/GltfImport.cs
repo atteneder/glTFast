@@ -77,6 +77,7 @@ namespace GLTFast {
 
         const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
         const string ExtTextureBasisu = "KHR_texture_basisu";
+        const string PrimitiveName = "Primitive";
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
 #if DRACO_UNITY
@@ -1271,6 +1272,27 @@ namespace GLTFast {
                                     sampler.interpolationEnum
                                     // TODO: Add morph targets names
                                     );
+                                
+                                // HACK BEGIN:
+                                // Since meshes with multiple primitives that are not using
+                                // identical vertex buffers are split up into separate Unity
+                                // Meshes. Because of this, we have to duplicate the animation
+                                // curves, so that all primitives are animated.
+                                // TODO: Refactor primitive sub-meshing and remove this hack
+                                // https://github.com/atteneder/glTFast/issues/153
+                                var node = gltfRoot.nodes[channel.target.node];
+                                var primitiveCount = meshPrimitiveIndex[node.mesh + 1] - meshPrimitiveIndex[node.mesh];
+                                for (var k = 1; k < primitiveCount; k++) {
+                                    AnimationUtils.AddMorphTargetWeightCurves(
+                                        animationClips[i],
+                                        path+"/Plane_1",
+                                        times,
+                                        values,
+                                        sampler.interpolationEnum
+                                        // TODO: Add morph targets names
+                                    );                                    
+                                }
+                                // HACK END
                                 break;
                             }
                             default:
@@ -1472,10 +1494,15 @@ namespace GLTFast {
                         
                         var meshInstancing = node.extensions?.EXT_mesh_gpu_instancing;
 
+                        var primitiveName =
+                            primitiveCount > 0
+                                ? $"{meshName ?? PrimitiveName}_{primitiveCount}"
+                                : meshName ?? PrimitiveName;
+
                         if (meshInstancing == null) {
                             instantiator.AddPrimitive(
                                 nodeIndex,
-                                meshName,
+                                primitiveName,
                                 mesh,
                                 primitive.materialIndices,
                                 joints,
@@ -1510,7 +1537,7 @@ namespace GLTFast {
 
                             instantiator.AddPrimitiveInstanced(
                                 nodeIndex,
-                                meshName,
+                                primitiveName,
                                 mesh,
                                 primitives[i].materialIndices,
                                 instanceCount,
