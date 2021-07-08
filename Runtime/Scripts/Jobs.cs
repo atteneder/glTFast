@@ -1183,4 +1183,56 @@ namespace GLTFast.Jobs {
             );
         }
     }
+
+    public unsafe struct GetScalarInt8NormalizedJob : IJobParallelFor {
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public sbyte* input;
+
+        [WriteOnly]
+        public NativeArray<float> result;
+
+        public void Execute(int i) {
+            result[i] = Mathf.Max( input[i] / 127f, -1.0f);
+        }
+    }
+
+    public unsafe struct GetScalarUInt8NormalizedJob : IJobParallelFor {
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [WriteOnly]
+        public NativeArray<float> result;
+
+        public void Execute(int i) {
+            result[i] = input[i]/255f;
+        }
+    }
+    
+    public unsafe struct GetScalarInt16NormalizedJob : IJobParallelFor {
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public short* input;
+
+        [WriteOnly]
+        public NativeArray<float> result;
+
+        public void Execute(int i) {
+            result[i] = Mathf.Max( input[i] / (float) short.MaxValue, -1.0f);
+        }
+    }
+
+    public unsafe struct GetScalarUInt16NormalizedJob : IJobParallelFor {
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public ushort* input;
+
+        [WriteOnly]
+        public NativeArray<float> result;
+
+        public void Execute(int i) {
+            result[i] = input[i] / (float) ushort.MaxValue;
+        }
+    }
 }

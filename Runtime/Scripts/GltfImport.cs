@@ -2007,11 +2007,13 @@ namespace GLTFast {
                     {
                         // JobHandle? jh;
                         var ads = new  AccessorNativeData<float>();
-                        GetAnimationTimes(gltf, i, out var times);
+                        GetScalarJob(gltf, i, out var times, out var jh);
                         if (times.HasValue) {
                             ads.data = times.Value;
                         }
-                        // tmpList.Add(jh.Value);
+                        if (jh.HasValue) {
+                            tmpList.Add(jh.Value);
+                        }
                         accessorData[i] = ads;
                         break;
                     }
@@ -2465,31 +2467,71 @@ namespace GLTFast {
         }
         
 #if UNITY_ANIMATION
-        void GetAnimationTimes(Root gltf, int accessorIndex, out NativeArray<float>? times) {
-            // TODO: For long animations with lots of times, threading this just like everything else maybe makes sense.
-            Profiler.BeginSample("GetAnimationTimes");
-            times = null;
+        unsafe void GetScalarJob(Root gltf, int accessorIndex, out NativeArray<float>? scalars, out JobHandle? jobHandle) {
+            Profiler.BeginSample("GetScalarJob");
+            scalars = null;
+            jobHandle = null;
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = gltf.bufferViews[accessor.bufferView];
-            var bufferIndex = bufferView.buffer;
             var buffer = GetBufferView(bufferView);
 
-            var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
-        
-            Profiler.BeginSample("CopyAnimationTimes");
-            switch( accessor.componentType ) {
-                case GLTFComponentType.Float:
-                    var bufferTimes = Reinterpret<float>(buffer, accessor.count, accessor.byteOffset);
-                    // Copy values
-                    times = new NativeArray<float>(bufferTimes, Allocator.Persistent);
-                    ReleaseReinterpret(bufferTimes);
-                    break;
-                default:
-                    logger?.Error(LogCode.AnimationFormatInvalid, accessor.componentType.ToString());
-                    break;
+
+            if (accessor.componentType == GLTFComponentType.Float) {
+                Profiler.BeginSample("CopyAnimationTimes");
+                // TODO: For long animations with lots of times, threading this just like everything else maybe makes sense.
+                var bufferTimes = Reinterpret<float>(buffer, accessor.count, accessor.byteOffset);
+                // Copy values
+                scalars = new NativeArray<float>(bufferTimes, Allocator.Persistent);
+                ReleaseReinterpret(bufferTimes);
+                Profiler.EndSample();
+            } else
+            if( accessor.normalized ) {
+                Profiler.BeginSample("Alloc");
+                scalars = new NativeArray<float>(accessor.count,Allocator.Persistent);
+                Profiler.EndSample();
+                
+                switch( accessor.componentType ) {
+                    case GLTFComponentType.Byte: {
+                        var job = new GetScalarInt8NormalizedJob {
+                            input = (sbyte*)buffer.GetUnsafeReadOnlyPtr() + accessor.byteOffset,
+                            result = scalars.Value
+                        };
+                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                        break;
+                    }
+                    case GLTFComponentType.UnsignedByte: {
+                        var job = new GetScalarUInt8NormalizedJob {
+                            input = (byte*)buffer.GetUnsafeReadOnlyPtr() + accessor.byteOffset,
+                            result = scalars.Value
+                        };
+                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                        break;
+                    }
+                    case GLTFComponentType.Short: {
+                        var job = new GetScalarInt16NormalizedJob {
+                            input = (short*) ((byte*)buffer.GetUnsafeReadOnlyPtr() + accessor.byteOffset),
+                            result = scalars.Value
+                        };
+                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                        break;
+                    }
+                    case GLTFComponentType.UnsignedShort: {
+                        var job = new GetScalarUInt16NormalizedJob {
+                            input = (ushort*) ((byte*)buffer.GetUnsafeReadOnlyPtr() + accessor.byteOffset),
+                            result = scalars.Value
+                        };
+                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                        break;
+                    }
+                    default:
+                        logger?.Error(LogCode.AnimationFormatInvalid, accessor.componentType.ToString());
+                        break;
+                }
+            } else {
+                // Non-normalized
+                logger?.Error(LogCode.AnimationFormatInvalid, accessor.componentType.ToString());
             }
-            Profiler.EndSample();
             Profiler.EndSample();
         }
 
