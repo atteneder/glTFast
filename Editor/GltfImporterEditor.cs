@@ -63,6 +63,11 @@ namespace GLTFast {
             
             var reportItemCount = m_ReportItems.arraySize;
 
+#if !UNITY_ANIMATION 
+            var animRoot = root.Query<VisualElement>(name: "Animation").First();
+            animRoot.SetEnabled(false);
+#endif
+
             var reportRoot = root.Query<VisualElement>(name: "Report").First();
             
             if (reportItemCount > 0) {

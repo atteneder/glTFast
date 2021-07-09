@@ -172,14 +172,12 @@ namespace GLTFast {
         /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
         GlbBinChunk? glbBinChunk;
 
-#if UNITY_ANIMATION
         /// <summary>
         /// Unity's animation system addresses target GameObjects by hierarchical name.
         /// To make sure names are consistent and have no conflicts they are precalculated
         /// and stored in this array.
         /// </summary>
         string[] nodeNames;
-#endif
         
 #endregion VolatileData
 
@@ -391,12 +389,14 @@ namespace GLTFast {
                 materials = null;
             }
             
+#if UNITY_ANIMATION
             if (animationClips != null) {
                 foreach( var clip in animationClips ) {
                     SafeDestroy(clip);
                 }
                 animationClips = null;
             }
+#endif
 
             if(textures!=null) {
                 foreach( var texture in textures ) {
@@ -1548,12 +1548,7 @@ namespace GLTFast {
                 
                 var node = gltfRoot.nodes[nodeIndex];
                 
-                var goName = 
-#if UNITY_ANIMATION
-                    nodeNames==null ? node.name : nodeNames[nodeIndex];
-#else
-                    node.name;
-#endif
+                var goName = nodeNames==null ? node.name : nodeNames[nodeIndex];
 
                 if(node.mesh>=0) {
                     var end = meshPrimitiveIndex[node.mesh+1];
@@ -2426,7 +2421,6 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-#if UNITY_ANIMATION
         unsafe void GetVector3Job(Root gltf, int accessorIndex, out NativeArray<Vector3> vectors, out JobHandle? jobHandle, bool flip) {
             Profiler.BeginSample("GetVector3Job");
             var accessor = gltf.accessors[accessorIndex];
@@ -2529,6 +2523,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
         
+#if UNITY_ANIMATION
         void GetAnimationTimes(Root gltf, int accessorIndex, out NativeArray<float>? times) {
             // TODO: For long animations with lots of times, threading this just like everything else maybe makes sense.
             Profiler.BeginSample("GetAnimationTimes");
