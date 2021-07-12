@@ -732,6 +732,32 @@ namespace GLTFast.Jobs {
         }
     }
 
+    public unsafe struct GetVector3sUInt16IndexFloatValueSparseJob : IJobParallelFor {
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public ushort* indexBuffer;
+        
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector3* input;
+        
+        [ReadOnly]
+        public int outputByteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public Vector3* result;
+
+        public void Execute(int i) {
+            var index = indexBuffer[i];
+            var resultV = (float*) (((byte*)result) + (index*outputByteStride));
+            var off = (float*) (input+i);
+            *(resultV) = -*off;
+            *((Vector2*)(resultV+1)) = *((Vector2*)(off+1));
+        }
+    }
+
     /// Untested!
     public unsafe struct GetTangentsInterleavedJob : IJobParallelFor {
 

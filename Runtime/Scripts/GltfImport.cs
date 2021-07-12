@@ -2581,6 +2581,24 @@ namespace GLTFast {
             // var bufferViewData = GetBufferView(bufferView);
             // data =  (byte*)bufferViewData.GetUnsafeReadOnlyPtr() + accessor.byteOffset;
         }
+        
+        public unsafe void GetAccessorSparseIndices(AccessorSparseIndices sparseIndices, out void* data) {
+            var bufferView = gltfRoot.bufferViews[sparseIndices.bufferView];
+            var bufferIndex = bufferView.buffer;
+            var buffer = GetBuffer(bufferIndex);
+            fixed (void* src = &(buffer[sparseIndices.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
+                data = src;
+            }
+        }
+
+        public unsafe void GetAccessorSparseValues(AccessorSparseValues sparseValues, out void* data) {
+            var bufferView = gltfRoot.bufferViews[sparseValues.bufferView];
+            var bufferIndex = bufferView.buffer;
+            var buffer = GetBuffer(bufferIndex);
+            fixed (void* src = &(buffer[sparseValues.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
+                data = src;
+            }
+        }
 #endregion IGltfBuffers
 
         /// <summary>

@@ -70,8 +70,7 @@ namespace GLTFast
             int jointsAccessorIndex
         ) {
             buffers.GetAccessor(positionAccessorIndex, out var posAcc, out var posData, out var posByteStride);
-            Assert.IsFalse(posAcc.isSparse,"Sparse Accessor is not supported for positions");
-
+            
             Profiler.BeginSample("ScheduleVertexJobs");
             Profiler.BeginSample("AllocateNativeArray");
             vData = new NativeArray<VType>(posAcc.count,defaultAllocator);
@@ -82,6 +81,9 @@ namespace GLTFast
             
             int jobCount = 1;
             int outputByteStride = 12; // sizeof Vector3
+            if (posAcc.isSparse && posAcc.bufferView>=0) {
+                jobCount++;
+            }
             if (normalAccessorIndex>=0) {
                 jobCount++;
                 hasNormals = true;
@@ -128,15 +130,42 @@ namespace GLTFast
             int handleIndex = 0;
             
             {
-                var h = GetVector3sJob(
-                    posData,
-                    posAcc.count,
-                    posAcc.componentType,
-                    posByteStride,
-                    (Vector3*) vDataPtr,
-                    outputByteStride,
-                    posAcc.normalized
-                );
+                JobHandle? h = null;
+                JobHandle? sparseJobHandle = null;
+                if(posAcc.bufferView>=0) {
+                    h = GetVector3sJob(
+                        posData,
+                        posAcc.count,
+                        posAcc.componentType,
+                        posByteStride,
+                        (Vector3*) vDataPtr,
+                        outputByteStride,
+                        posAcc.normalized
+                    );
+                }
+                if (posAcc.isSparse) {
+                    buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
+                    buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
+                    sparseJobHandle = GetVector3sSparseJob(
+                        posIndexData,
+                        posValueData,
+                        posAcc.count,
+                        posAcc.sparse.count,
+                        posAcc.sparse.indices.componentType,
+                        posAcc.componentType,
+                        (Vector3*) vDataPtr,
+                        outputByteStride,
+                        dependsOn: ref h,
+                        posAcc.normalized
+                    );
+                    if (sparseJobHandle.HasValue) {
+                        handles[handleIndex] = sparseJobHandle.Value;
+                        handleIndex++;
+                    } else {
+                        Profiler.EndSample();
+                        return null;
+                    }
+                }
                 if (h.HasValue) {
                     handles[handleIndex] = h.Value;
                     handleIndex++;
