@@ -1718,6 +1718,7 @@ namespace GLTFast {
 
             var mainBufferTypes = new Dictionary<MeshPrimitive,MainBufferType>();
             meshPrimitiveCluster = new Dictionary<MeshPrimitive,List<MeshPrimitive>>[gltf.meshes.Length];
+            Dictionary<MeshPrimitive, MorphTargetsContext> morphTargetsContexts = null;
 #if DEBUG
             var perAttributeMeshCollection = new Dictionary<Attributes,HashSet<int>>();
 #endif
@@ -1739,7 +1740,19 @@ namespace GLTFast {
                     cluster[primitive].Add(primitive);
 #if DRACO_UNITY
                     var isDraco = primitive.isDracoCompressed;
-                    if(isDraco) continue;
+                    if (isDraco) {
+                        if (primitive.targets != null) {
+                            if (morphTargetsContexts == null) {
+                                morphTargetsContexts = new Dictionary<MeshPrimitive, MorphTargetsContext>();
+                            } else if (morphTargetsContexts.ContainsKey(primitive)) {
+                                continue;
+                            }
+                            
+                            var morphTargetsContext = CreateMorphTargetsContext(primitive);
+                            morphTargetsContexts[primitive] = morphTargetsContext;
+                        }
+                        continue;
+                    }
 #else
                     var isDraco = false;
 #endif
@@ -1816,7 +1829,6 @@ namespace GLTFast {
             primitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
             var tmpList = new List<JobHandle>(mainBufferTypes.Count);
             vertexAttributes = new Dictionary<MeshPrimitive,VertexBufferConfigBase>(mainBufferTypes.Count);
-            Dictionary<MeshPrimitive,MorphTargetsContext> morphTargetsContexts = null;
 #if DEBUG
             foreach (var perAttributeMeshes in perAttributeMeshCollection) {
                 if(perAttributeMeshes.Value.Count>1) {
@@ -1895,24 +1907,8 @@ namespace GLTFast {
                     } else if (morphTargetsContexts.ContainsKey(primitive)) {
                         continue;
                     }
-                    var morphTargetsContext = new MorphTargetsContext(primitive.targets.Length);
-                    foreach (var morphTarget in primitive.targets) {
-                        success = morphTargetsContext.AddMorphTarget(
-                            this,
-                            morphTarget.POSITION,
-                            morphTarget.NORMAL,
-                            morphTarget.TANGENT
-                        );
-                        if (!success) {
-                            logger.Error(LogCode.MorphTargetContextFail);
-                            break;
-                        }
-                    }
-                    if (success) {
-                        var jobHandle = morphTargetsContext.GetJobHandle();
-                        tmpList.Add(jobHandle);
-                        morphTargetsContexts[primitive] = morphTargetsContext;
-                    }
+                    var morphTargetsContext = CreateMorphTargetsContext(primitive);
+                    morphTargetsContexts[primitive] = morphTargetsContext;
                 }
                 
                 await deferAgent.BreakPoint();
@@ -1921,7 +1917,14 @@ namespace GLTFast {
             if (!success) {
                 return false;
             }
-            
+
+            if (morphTargetsContexts != null) {
+                foreach (var morphTargetsContext in morphTargetsContexts) {
+                    var jobHandle = morphTargetsContext.Value.GetJobHandle();
+                    tmpList.Add(jobHandle);
+                }
+            }
+
 #if UNITY_ANIMATION
             if (gltf.hasAnimation) {
                 for (int i = 0; i < gltf.animations.Length; i++) {
@@ -2091,6 +2094,24 @@ namespace GLTFast {
 
             Profiler.EndSample();
             return success;
+        }
+
+        MorphTargetsContext CreateMorphTargetsContext(MeshPrimitive primitive) {
+            var morphTargetsContext = new MorphTargetsContext(primitive.targets.Length);
+            foreach (var morphTarget in primitive.targets) {
+                var success = morphTargetsContext.AddMorphTarget(
+                    this,
+                    morphTarget.POSITION,
+                    morphTarget.NORMAL,
+                    morphTarget.TANGENT
+                );
+                if (!success) {
+                    logger.Error(LogCode.MorphTargetContextFail);
+                    break;
+                }
+            }
+
+            return morphTargetsContext;
         }
 
         void SetAccessorUsage(int index, AccessorUsage newUsage) {
