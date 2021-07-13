@@ -208,11 +208,10 @@ namespace GLTFast
             Profiler.EndSample();
             return jobHandle;
         }
-        
-        public static unsafe JobHandle? GetVector3sSparseJob(
+
+        protected static unsafe JobHandle? GetVector3sSparseJob(
             void* indexBuffer,
             void* valueBuffer,
-            int count,
             int sparseCount,
             GLTFComponentType indexType,
             GLTFComponentType valueType,
@@ -224,82 +223,25 @@ namespace GLTFast
             JobHandle? jobHandle;
 
             Profiler.BeginSample("GetVector3sSparseJob");
-            if(valueType == GLTFComponentType.Float) {
-                var job = new Jobs.GetVector3sFloatValueSparseJob {
-                    indexBuffer = (ushort*)indexBuffer,
-                    indexValueConverter = CachedFunction.GetIndexConverter(indexType),
-                    input = (Vector3*)valueBuffer,
-                    outputByteStride = outputByteStride,
-                    result = output,
-                };
-                jobHandle = job.Schedule(
-                    sparseCount,
-                    GltfImport.DefaultBatchCount,
-                    dependsOn: dependsOn.HasValue ? dependsOn.Value : default(JobHandle)
-                    );
-            // } else
-            // if(inputType == GLTFComponentType.UnsignedShort) {
-            //     if (normalized) {
-            //         var job = new Jobs.GetUInt16PositionsInterleavedNormalizedJob();
-            //         job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
-            //         job.input = (byte*)input;
-            //         job.outputByteStride = outputByteStride;
-            //         job.result = output;
-            //         jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
-            //     } else {
-            //         var job = new Jobs.GetUInt16PositionsInterleavedJob();
-            //         job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
-            //         job.input = (byte*)input;
-            //         job.outputByteStride = outputByteStride;
-            //         job.result = output;
-            //         jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
-            //     }
-            // } else
-            // if(inputType == GLTFComponentType.Short) {
-            //     // TODO: test. did not have test files
-            //     if (normalized) {
-            //         var job = new Jobs.GetVector3FromInt16InterleavedNormalizedJob();
-            //         job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
-            //         job.input = (byte*)input;
-            //         job.outputByteStride = outputByteStride;
-            //         job.result = output;
-            //         jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
-            //     } else {
-            //         var job = new Jobs.GetVector3FromInt16InterleavedJob();
-            //         job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
-            //         job.input = (byte*)input;
-            //         job.outputByteStride = outputByteStride;
-            //         job.result = output;
-            //         jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
-            //     }
-            // } else
-            // if(inputType == GLTFComponentType.Byte) {
-            //     // TODO: test positions. did not have test files
-            //     if (normalized) {
-            //         var job = new Jobs.GetVector3FromSByteInterleavedNormalizedJob();
-            //         job.Setup((inputByteStride>0) ? inputByteStride : 3, (sbyte*)input,outputByteStride,output);
-            //         jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
-            //     } else {
-            //         var job = new Jobs.GetVector3FromSByteInterleavedJob();
-            //         job.Setup((inputByteStride>0) ? inputByteStride : 3,(sbyte*)input,outputByteStride,output);
-            //         jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
-            //     }
-            // } else
-            // if(inputType == GLTFComponentType.UnsignedByte) {
-            //     // TODO: test. did not have test files
-            //     if (normalized) {
-            //         var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
-            //         job.Setup((inputByteStride>0) ? inputByteStride : 3,(byte*)input,outputByteStride,output);
-            //         jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
-            //     } else {
-            //         var job = new Jobs.GetVector3FromByteInterleavedJob();
-            //         job.Setup((inputByteStride>0) ? inputByteStride : 3,(byte*)input,outputByteStride,output);
-            //         jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
-            //     }
-            } else{
-                Debug.LogError("Unknown componentType");
-                jobHandle = null;
-            }
+            var job = new GetPositionsSparseJob {
+                indexBuffer = (ushort*)indexBuffer,
+                indexConverter = CachedFunction.GetIndexConverter(indexType),
+                inputByteStride = 3*Accessor.GetComponentTypeSize(valueType),
+                input = valueBuffer,
+                valueConverter = CachedFunction.GetPositionConverter(
+                    valueType
+                    // TODO: implement normalized positions
+                    //, normalized
+                    ),
+                outputByteStride = outputByteStride,
+                result = output,
+            };
+            
+            jobHandle = job.Schedule(
+                sparseCount,
+                GltfImport.DefaultBatchCount,
+                dependsOn: dependsOn.HasValue ? dependsOn.Value : default(JobHandle)
+                );
             Profiler.EndSample();
             return jobHandle;
         }

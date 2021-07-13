@@ -144,26 +144,29 @@ namespace GLTFast
                     );
                 }
                 if (posAcc.isSparse) {
-                    buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
-                    buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
-                    sparseJobHandle = GetVector3sSparseJob(
-                        posIndexData,
-                        posValueData,
-                        posAcc.count,
-                        posAcc.sparse.count,
-                        posAcc.sparse.indices.componentType,
-                        posAcc.componentType,
-                        (Vector3*) vDataPtr,
-                        outputByteStride,
-                        dependsOn: ref h,
-                        posAcc.normalized
-                    );
-                    if (sparseJobHandle.HasValue) {
-                        handles[handleIndex] = sparseJobHandle.Value;
-                        handleIndex++;
+                    if (posAcc.normalized) {
+                        logger.Error(LogCode.SparseAccessor,"normalized pos");
                     } else {
-                        Profiler.EndSample();
-                        return null;
+                        buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
+                        buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
+                        sparseJobHandle = GetVector3sSparseJob(
+                            posIndexData,
+                            posValueData,
+                            posAcc.sparse.count,
+                            posAcc.sparse.indices.componentType,
+                            posAcc.componentType,
+                            (Vector3*) vDataPtr,
+                            outputByteStride,
+                            dependsOn: ref h,
+                            posAcc.normalized
+                        );
+                        if (sparseJobHandle.HasValue) {
+                            handles[handleIndex] = sparseJobHandle.Value;
+                            handleIndex++;
+                        } else {
+                            Profiler.EndSample();
+                            return null;
+                        }
                     }
                 }
                 if (h.HasValue) {

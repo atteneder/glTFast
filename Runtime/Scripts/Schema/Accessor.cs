@@ -166,6 +166,25 @@ namespace GLTFast.Schema {
             }
         }
 
+        public static int GetComponentTypeSize(GLTFComponentType type) {
+            switch (type) {
+                case GLTFComponentType.Byte:
+                    return 1;
+                case GLTFComponentType.UnsignedByte:
+                    return 1;
+                case GLTFComponentType.Short:
+                    return 2;
+                case GLTFComponentType.UnsignedShort:
+                    return 2;
+                case GLTFComponentType.UnsignedInt:
+                    return 4;
+                case GLTFComponentType.Float:
+                    return 4;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+
         public static int GetAccessorAttributeTypeLength( GLTFAccessorAttributeType type ) {
             switch (type)
             {

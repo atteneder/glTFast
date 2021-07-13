@@ -1,6 +1,6 @@
 {
   "name": "com.atteneder.gltfast",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "displayName": "glTFast",
   "description": "Load glTF 3D files fast at runtime or import them into the asset database in the Editor",
   "unity": "2019.3",

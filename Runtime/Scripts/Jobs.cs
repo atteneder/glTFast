@@ -20,6 +20,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Burst;
 using Unity.Jobs;
+using Unity.Mathematics;
 
 namespace GLTFast.Jobs {
     
@@ -29,6 +30,7 @@ namespace GLTFast.Jobs {
     static unsafe class CachedFunction {
     
         public delegate int GetIndexDelegate(void* baseAddress, int index);
+        public delegate void GetFloat3Delegate(float3* destination, void* src);
         
         // Cached function pointers
         static FunctionPointer<GetIndexDelegate> GetIndexValueInt8Method;
@@ -36,7 +38,15 @@ namespace GLTFast.Jobs {
         static FunctionPointer<GetIndexDelegate> GetIndexValueInt16Method;
         static FunctionPointer<GetIndexDelegate> GetIndexValueUInt16Method;
         static FunctionPointer<GetIndexDelegate> GetIndexValueUInt32Method;
-
+        
+        
+        static FunctionPointer<GetFloat3Delegate> GetFloat3FloatMethod;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3Int8Method;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt8Method;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3Int16Method;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt16Method;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt32Method;
+        
         /// <summary>
         /// Returns Burst compatible function that retrieves an index value
         /// </summary>
@@ -74,6 +84,47 @@ namespace GLTFast.Jobs {
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
         }
+        
+        public static FunctionPointer<GetFloat3Delegate> GetPositionConverter(
+            GLTFComponentType format
+            // TODO: implement normalized positions
+            //, normalized
+            ) {
+            switch (format) {
+                case GLTFComponentType.Float:
+                    if (!GetFloat3FloatMethod.IsCreated) {
+                        GetFloat3FloatMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Float);
+                    }
+                    return GetFloat3FloatMethod;
+                case GLTFComponentType.Byte:
+                    if (!GetFloat3Int8Method.IsCreated) {
+                        GetFloat3Int8Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int8);
+                    }
+                    return GetFloat3Int8Method;
+                case GLTFComponentType.UnsignedByte:
+                    if (!GetFloat3UInt8Method.IsCreated) {
+                        GetFloat3UInt8Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt8);
+                    }
+                    return GetFloat3UInt8Method;
+                case GLTFComponentType.Short:
+                    if (!GetFloat3Int16Method.IsCreated) {
+                        GetFloat3Int16Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int16);
+                    }
+                    return GetFloat3Int16Method;
+                case GLTFComponentType.UnsignedShort:
+                    if (!GetFloat3UInt16Method.IsCreated) {
+                        GetFloat3UInt16Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt16);
+                    }
+                    return GetFloat3UInt16Method;
+                case GLTFComponentType.UnsignedInt:
+                    if (!GetFloat3UInt32Method.IsCreated) {
+                        GetFloat3UInt32Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt32);
+                    }
+                    return GetFloat3UInt32Method;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, null);
+            }
+        }
 
         [BurstCompile]
         [MonoPInvokeCallback(typeof(GetIndexDelegate))]
@@ -103,6 +154,54 @@ namespace GLTFast.Jobs {
         [MonoPInvokeCallback(typeof(GetIndexDelegate))]
         static int GetIndexValueUInt32(void* baseAddress, int index) {
             return (int) *(((uint*)baseAddress)+index);
+        }
+
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3Float(float3* destination, void* src) {
+            destination->x = -*(float*)src;
+            destination->y = *((float*)src+1);
+            destination->z = *((float*)src+2);
+        }
+
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3Int8(float3* destination, void* src) {
+            destination->x = -*(sbyte*)src;
+            destination->y = *((sbyte*)src+1);
+            destination->z = *((sbyte*)src+2);
+        }
+        
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3UInt8(float3* destination, void* src) {
+            destination->x = -*(byte*)src;
+            destination->y = *((byte*)src+1);
+            destination->z = *((byte*)src+2);
+        }
+        
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3Int16(float3* destination, void* src) {
+            destination->x = -*(short*)src;
+            destination->y = *((short*)src+1);
+            destination->z = *((short*)src+2);
+        }
+        
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3UInt16(float3* destination, void* src) {
+            destination->x = -*(ushort*)src;
+            destination->y = *((ushort*)src+1);
+            destination->z = *((ushort*)src+2);
+        }
+        
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3UInt32(float3* destination, void* src) {
+            destination->x = -*(uint*)src;
+            destination->y = *((uint*)src+1);
+            destination->z = *((uint*)src+2);
         }
     }
 
@@ -818,17 +917,22 @@ namespace GLTFast.Jobs {
         }
     }
 
-    unsafe struct GetVector3sFloatValueSparseJob : IJobParallelFor {
+    unsafe struct GetPositionsSparseJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public void* indexBuffer;
         
-        public FunctionPointer<CachedFunction.GetIndexDelegate> indexValueConverter;
+        public FunctionPointer<CachedFunction.GetIndexDelegate> indexConverter;
 
         [ReadOnly]
+        public int inputByteStride;
+        
+        [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* input;
+        public void* input;
+        
+        public FunctionPointer<CachedFunction.GetFloat3Delegate> valueConverter;
         
         [ReadOnly]
         public int outputByteStride;
@@ -838,11 +942,9 @@ namespace GLTFast.Jobs {
         public Vector3* result;
 
         public void Execute(int i) {
-            var index = indexValueConverter.Invoke(indexBuffer,i);
-            var resultV = (float*) (((byte*)result) + (index*outputByteStride));
-            var off = (float*) (input+i);
-            *(resultV) = -*off;
-            *((Vector2*)(resultV+1)) = *((Vector2*)(off+1));
+            var index = indexConverter.Invoke(indexBuffer,i);
+            var resultV = (float3*) (((byte*)result) + (index*outputByteStride));
+            valueConverter.Invoke(resultV, (byte*)input + i*inputByteStride);
         }
     }
 
