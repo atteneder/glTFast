@@ -165,7 +165,7 @@ namespace GLTFast.Schema {
             }
         }
 
-        public static int GetAccessorAttriuteTypeLength( GLTFAccessorAttributeType type ) {
+        public static int GetAccessorAttributeTypeLength( GLTFAccessorAttributeType type ) {
             switch (type)
             {
                 case GLTFAccessorAttributeType.SCALAR:
