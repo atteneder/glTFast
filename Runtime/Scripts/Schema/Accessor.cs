@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -182,8 +183,7 @@ namespace GLTFast.Schema {
                 case GLTFAccessorAttributeType.MAT4:
                     return 16;
                 default:
-                    Debug.LogError("Unknown GLTFAccessorAttributeType");
-                    return 0;
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 
