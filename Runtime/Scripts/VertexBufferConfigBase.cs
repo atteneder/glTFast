@@ -30,6 +30,7 @@ namespace GLTFast
 #if BURST
     using Unity.Mathematics;
 #endif
+    using Jobs;
     using Schema;
 
     [System.Flags]
@@ -224,8 +225,9 @@ namespace GLTFast
 
             Profiler.BeginSample("GetVector3sSparseJob");
             if(valueType == GLTFComponentType.Float) {
-                var job = new Jobs.GetVector3sUInt16IndexFloatValueSparseJob {
+                var job = new Jobs.GetVector3sFloatValueSparseJob {
                     indexBuffer = (ushort*)indexBuffer,
+                    indexValueConverter = CachedFunction.GetIndexConverter(indexType),
                     input = (Vector3*)valueBuffer,
                     outputByteStride = outputByteStride,
                     result = output,

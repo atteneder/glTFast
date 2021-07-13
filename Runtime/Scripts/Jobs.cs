@@ -13,12 +13,98 @@
 // limitations under the License.
 //
 
+using System;
+using AOT;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Burst;
 using Unity.Jobs;
 
 namespace GLTFast.Jobs {
+    
+    using Schema;
+
+    [BurstCompile]
+    static unsafe class CachedFunction {
+    
+        public delegate int GetIndexDelegate(void* baseAddress, int index);
+        
+        // Cached function pointers
+        static FunctionPointer<GetIndexDelegate> GetIndexValueInt8Method;
+        static FunctionPointer<GetIndexDelegate> GetIndexValueUInt8Method;
+        static FunctionPointer<GetIndexDelegate> GetIndexValueInt16Method;
+        static FunctionPointer<GetIndexDelegate> GetIndexValueUInt16Method;
+        static FunctionPointer<GetIndexDelegate> GetIndexValueUInt32Method;
+
+        /// <summary>
+        /// Returns Burst compatible function that retrieves an index value
+        /// </summary>
+        /// <param name="format">Data type of index</param>
+        /// <returns>Burst Function Pointer to correct conversion function</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static FunctionPointer<GetIndexDelegate> GetIndexConverter(GLTFComponentType format) {
+            switch (format) {
+                case GLTFComponentType.UnsignedByte:
+                    if (!GetIndexValueUInt8Method.IsCreated) {
+                        GetIndexValueUInt8Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt8);
+                    }
+                    return GetIndexValueUInt8Method;
+                case GLTFComponentType.Byte:
+                    if (!GetIndexValueInt8Method.IsCreated) {
+                        GetIndexValueInt8Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueInt8);
+                    }
+                    return GetIndexValueInt8Method;
+                case GLTFComponentType.UnsignedShort:
+                    if (!GetIndexValueUInt16Method.IsCreated) {
+                        GetIndexValueUInt16Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt16);
+                    }
+                    return GetIndexValueUInt16Method;
+                case GLTFComponentType.Short:
+                    if (!GetIndexValueInt16Method.IsCreated) {
+                        GetIndexValueInt16Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueInt16);
+                    }
+                    return GetIndexValueInt16Method;
+                case GLTFComponentType.UnsignedInt:
+                    if (!GetIndexValueUInt32Method.IsCreated) {
+                        GetIndexValueUInt32Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt32);
+                    }
+                    return GetIndexValueUInt32Method;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, null);
+            }
+        }
+
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        static int GetIndexValueUInt8(void* baseAddress, int index) {
+            return *((byte*)baseAddress+index);
+        }
+            
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        static int GetIndexValueInt8(void* baseAddress, int index) {
+            return *(((sbyte*)baseAddress)+index);
+        }
+            
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        static int GetIndexValueUInt16(void* baseAddress, int index) {
+            return *(((ushort*)baseAddress)+index);
+        }
+            
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        static int GetIndexValueInt16(void* baseAddress, int index) {
+            return *(((short*)baseAddress)+index);
+        }
+            
+        [BurstCompile]
+        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        static int GetIndexValueUInt32(void* baseAddress, int index) {
+            return (int) *(((uint*)baseAddress)+index);
+        }
+    }
 
     public unsafe struct CreateIndicesJob : IJobParallelFor  {
 
@@ -732,12 +818,14 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct GetVector3sUInt16IndexFloatValueSparseJob : IJobParallelFor {
+    unsafe struct GetVector3sFloatValueSparseJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public ushort* indexBuffer;
+        public void* indexBuffer;
         
+        public FunctionPointer<CachedFunction.GetIndexDelegate> indexValueConverter;
+
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public Vector3* input;
@@ -750,7 +838,7 @@ namespace GLTFast.Jobs {
         public Vector3* result;
 
         public void Execute(int i) {
-            var index = indexBuffer[i];
+            var index = indexValueConverter.Invoke(indexBuffer,i);
             var resultV = (float*) (((byte*)result) + (index*outputByteStride));
             var off = (float*) (input+i);
             *(resultV) = -*off;

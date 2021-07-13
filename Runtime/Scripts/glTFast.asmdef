@@ -1,12 +1,12 @@
 {
     "name": "glTFast",
-    "rootNamespace": "",
     "references": [
         "Draco",
         "glTFastSchema",
         "glTFastFakeSchema",
         "Ktx",
         "Unity.Mathematics",
+        "Unity.Burst",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
