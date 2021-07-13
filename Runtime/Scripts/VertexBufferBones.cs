@@ -62,7 +62,9 @@ namespace GLTFast {
             Profiler.BeginSample("AllocateNativeArray");
             
             buffers.GetAccessor(weightsAccessorIndex, out var weightsAcc, out var weightsData, out var weightsByteStride);
-            Assert.IsFalse(weightsAcc.isSparse,"Sparse Accessor is not supported for bone weights");
+            if (weightsAcc.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"bone weights");
+            }
             vData = new NativeArray<VBones>(weightsAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();
@@ -87,7 +89,9 @@ namespace GLTFast {
 
             {
                 buffers.GetAccessor(jointsAccessorIndex, out var jointsAcc, out var jointsData, out var jointsByteStride);
-                Assert.IsFalse(jointsAcc.isSparse,"Sparse Accessor is not supported for bone joints");
+                if (jointsAcc.isSparse) {
+                    logger.Error(LogCode.SparseAccessor,"bone joints");
+                }
                 var h = GetJointsJob(
                     jointsData,
                     jointsAcc.count,

@@ -2103,7 +2103,8 @@ namespace GLTFast {
                     this,
                     morphTarget.POSITION,
                     morphTarget.NORMAL,
-                    morphTarget.TANGENT
+                    morphTarget.TANGENT,
+                    logger
                 );
                 if (!success) {
                     logger.Error(LogCode.MorphTargetContextFail);
@@ -2288,7 +2289,9 @@ namespace GLTFast {
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
-            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for indices");
+            if (accessor.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"indices");
+            }
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
@@ -2368,7 +2371,9 @@ namespace GLTFast {
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.MAT4);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
-            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for matrices");
+            if (accessor.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"Matrix");
+            }
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
@@ -2403,7 +2408,9 @@ namespace GLTFast {
             
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC3);
-            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for Vector3s");
+            if (accessor.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"Vector3");
+            }
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
@@ -2450,7 +2457,9 @@ namespace GLTFast {
             
             var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC4);
-            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for Vector4s");
+            if (accessor.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"Vector4");
+            }
             var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
@@ -2504,7 +2513,9 @@ namespace GLTFast {
             var buffer = GetBufferView(bufferView);
 
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
-            Assert.IsNull(accessor.sparse,"Sparse Accessor is not supported for animation times");
+            if (accessor.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"scalars");
+            }
             
             if (accessor.componentType == GLTFComponentType.Float) {
                 Profiler.BeginSample("CopyAnimationTimes");

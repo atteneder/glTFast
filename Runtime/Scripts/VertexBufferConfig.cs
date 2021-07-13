@@ -144,26 +144,30 @@ namespace GLTFast
                     );
                 }
                 if (posAcc.isSparse) {
-                    buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
-                    buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
-                    sparseJobHandle = GetVector3sSparseJob(
-                        posIndexData,
-                        posValueData,
-                        posAcc.count,
-                        posAcc.sparse.count,
-                        posAcc.sparse.indices.componentType,
-                        posAcc.componentType,
-                        (Vector3*) vDataPtr,
-                        outputByteStride,
-                        dependsOn: ref h,
-                        posAcc.normalized
-                    );
-                    if (sparseJobHandle.HasValue) {
-                        handles[handleIndex] = sparseJobHandle.Value;
-                        handleIndex++;
+                    if (posAcc.sparse.indices.componentType != GLTFComponentType.UnsignedShort) {
+                        logger.Error(LogCode.SparseAccessor,"non ushort index");
                     } else {
-                        Profiler.EndSample();
-                        return null;
+                        buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
+                        buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
+                        sparseJobHandle = GetVector3sSparseJob(
+                            posIndexData,
+                            posValueData,
+                            posAcc.count,
+                            posAcc.sparse.count,
+                            posAcc.sparse.indices.componentType,
+                            posAcc.componentType,
+                            (Vector3*) vDataPtr,
+                            outputByteStride,
+                            dependsOn: ref h,
+                            posAcc.normalized
+                        );
+                        if (sparseJobHandle.HasValue) {
+                            handles[handleIndex] = sparseJobHandle.Value;
+                            handleIndex++;
+                        } else {
+                            Profiler.EndSample();
+                            return null;
+                        }
                     }
                 }
                 if (h.HasValue) {
@@ -177,7 +181,9 @@ namespace GLTFast
 
             if (normalAccessorIndex>=0) {
                 buffers.GetAccessor(normalAccessorIndex, out var nrmAcc, out var input, out var inputByteStride);
-                Assert.IsFalse(nrmAcc.isSparse,"Sparse Accessor is not supported for normals");
+                if (nrmAcc.isSparse) {
+                    logger.Error(LogCode.SparseAccessor,"normals");
+                }
                 var h = GetVector3sJob(
                     input,
                     nrmAcc.count,
@@ -198,7 +204,9 @@ namespace GLTFast
             
             if (tangentAccessorIndex>=0) {
                 buffers.GetAccessor(tangentAccessorIndex, out var tanAcc, out var input, out var inputByteStride);
-                Assert.IsFalse(tanAcc.isSparse,"Sparse Accessor is not supported for tangents");
+                if (tanAcc.isSparse) {
+                    logger.Error(LogCode.SparseAccessor,"tangents");
+                }
                 var h = GetTangentsJob(
                     input,
                     tanAcc.count,

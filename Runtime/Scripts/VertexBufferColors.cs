@@ -42,7 +42,9 @@ namespace GLTFast {
             Profiler.BeginSample("ScheduleVertexColorJob");
             Profiler.BeginSample("AllocateNativeArray");
             buffers.GetAccessor(colorAccessorIndex, out var colorAcc, out var data, out var byteStride);
-            Assert.IsFalse(colorAcc.isSparse,"Sparse Accessor is not supported for colors");
+            if (colorAcc.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"color");
+            }
             vData = new NativeArray<Color>(colorAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();

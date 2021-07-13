@@ -39,7 +39,8 @@ namespace GLTFast {
             IGltfBuffers buffers,
             int positionAccessorIndex,
             int normalAccessorIndex,
-            int tangentAccessorIndex
+            int tangentAccessorIndex,
+            ICodeLogger logger
             )
         {
             var newMorphTarget = new MorphTargetContext();
@@ -47,7 +48,8 @@ namespace GLTFast {
                 buffers,
                 positionAccessorIndex,
                 normalAccessorIndex,
-                tangentAccessorIndex
+                tangentAccessorIndex,
+                logger
                 );
             if (jobHandle.HasValue) {
                 handles[currentIndex] = jobHandle.Value;
@@ -90,12 +92,15 @@ namespace GLTFast {
             IGltfBuffers buffers,
             int positionAccessorIndex,
             int normalAccessorIndex,
-            int tangentAccessorIndex
+            int tangentAccessorIndex,
+            ICodeLogger logger
         ) {
             Profiler.BeginSample("ScheduleMorphTargetJobs");
             
             buffers.GetAccessor(positionAccessorIndex, out var posAcc, out var posData, out var posByteStride);
-            Assert.IsFalse(posAcc.isSparse,"Sparse Accessor is not supported");
+            if (posAcc.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"morph pos");
+            }
 
             positions = new Vector3[posAcc.count];
             positionsHandle = GCHandle.Alloc(positions,GCHandleType.Pinned);
@@ -137,7 +142,9 @@ namespace GLTFast {
 
             if (normalAccessorIndex >= 0) {
                 buffers.GetAccessor(normalAccessorIndex, out var nrmAcc, out var input, out var inputByteStride);
-                Assert.IsFalse(nrmAcc.isSparse,"Sparse Accessor is not supported");
+                if (nrmAcc.isSparse) {
+                    logger.Error(LogCode.SparseAccessor,"morph normal");
+                }
                 fixed( void* dest = &(normals[0])) {
                     var h = VertexBufferConfigBase.GetVector3sJob(
                         input,
@@ -160,7 +167,9 @@ namespace GLTFast {
             
             if (tangentAccessorIndex >= 0) {
                 buffers.GetAccessor(tangentAccessorIndex, out var tanAcc, out var input, out var inputByteStride);
-                Assert.IsFalse(tanAcc.isSparse,"Sparse Accessor is not supported");
+                if (tanAcc.isSparse) {
+                    logger.Error(LogCode.SparseAccessor,"morph tangent");
+                }
                 fixed( void* dest = &(tangents[0])) {
                     var h = VertexBufferConfigBase.GetVector3sJob(
                         input,
