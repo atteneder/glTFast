@@ -21,6 +21,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Burst;
 using Unity.Jobs;
 using Unity.Mathematics;
+using static Unity.Mathematics.math;
 
 namespace GLTFast.Jobs {
     
@@ -46,6 +47,11 @@ namespace GLTFast.Jobs {
         static FunctionPointer<GetFloat3Delegate> GetFloat3Int16Method;
         static FunctionPointer<GetFloat3Delegate> GetFloat3UInt16Method;
         static FunctionPointer<GetFloat3Delegate> GetFloat3UInt32Method;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3Int8NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt8NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3Int16NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt16NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt32NormalizedMethod;
         
         /// <summary>
         /// Returns Burst compatible function that retrieves an index value
@@ -86,10 +92,43 @@ namespace GLTFast.Jobs {
         }
         
         public static FunctionPointer<GetFloat3Delegate> GetPositionConverter(
-            GLTFComponentType format
-            // TODO: implement normalized positions
-            //, normalized
-            ) {
+            GLTFComponentType format,
+            bool normalized
+            )
+        {
+            if (normalized) {
+                switch (format) {
+                    case GLTFComponentType.Float:
+                        // Floats cannot be normalized.
+                        // Fall back to non-normalized below
+                        break;
+                    case GLTFComponentType.Byte:
+                        if (!GetFloat3Int8NormalizedMethod.IsCreated) {
+                            GetFloat3Int8NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int8Normalized);
+                        }
+                        return GetFloat3Int8NormalizedMethod;
+                    case GLTFComponentType.UnsignedByte:
+                        if (!GetFloat3UInt8NormalizedMethod.IsCreated) {
+                            GetFloat3UInt8NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt8Normalized);
+                        }
+                        return GetFloat3UInt8NormalizedMethod;
+                    case GLTFComponentType.Short:
+                        if (!GetFloat3Int16NormalizedMethod.IsCreated) {
+                            GetFloat3Int16NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int16Normalized);
+                        }
+                        return GetFloat3Int16NormalizedMethod;
+                    case GLTFComponentType.UnsignedShort:
+                        if (!GetFloat3UInt16NormalizedMethod.IsCreated) {
+                            GetFloat3UInt16NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt16Normalized);
+                        }
+                        return GetFloat3UInt16NormalizedMethod;
+                    case GLTFComponentType.UnsignedInt:
+                        if (!GetFloat3UInt32NormalizedMethod.IsCreated) {
+                            GetFloat3UInt32NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt32Normalized);
+                        }
+                        return GetFloat3UInt32NormalizedMethod;
+                }
+            }
             switch (format) {
                 case GLTFComponentType.Float:
                     if (!GetFloat3FloatMethod.IsCreated) {
@@ -121,9 +160,8 @@ namespace GLTFast.Jobs {
                         GetFloat3UInt32Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt32);
                     }
                     return GetFloat3UInt32Method;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
+            throw new ArgumentOutOfRangeException(nameof(format), format, null);
         }
 
         [BurstCompile,MonoPInvokeCallback(typeof(GetIndexDelegate))]
@@ -191,6 +229,41 @@ namespace GLTFast.Jobs {
             destination->x = -*(uint*)src;
             destination->y = *((uint*)src+1);
             destination->z = *((uint*)src+2);
+        }
+        
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3Int8Normalized(float3* destination, void* src) {
+            destination->x = -max(*(sbyte*)src/127f,-1);
+            destination->y = max(*((sbyte*)src+1)/127f,-1);
+            destination->z = max(*((sbyte*)src+2)/127f,-1);
+        }
+        
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3UInt8Normalized(float3* destination, void* src) {
+            destination->x = -*(byte*)src / 255f;
+            destination->y = *((byte*)src+1) / 255f;
+            destination->z = *((byte*)src+2) / 255f;
+        }
+        
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3Int16Normalized(float3* destination, void* src) {
+            destination->x = -max( *(short*)src / (float) short.MaxValue, -1f);
+            destination->y = max( *((short*)src+1) / (float) short.MaxValue, -1f);
+            destination->z = max( *((short*)src+2) / (float) short.MaxValue, -1f);
+        }
+        
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3UInt16Normalized(float3* destination, void* src) {
+            destination->x = -*(ushort*)src / (float) ushort.MaxValue;
+            destination->y = *((ushort*)src+1) / (float) ushort.MaxValue;
+            destination->z = *((ushort*)src+2) / (float) ushort.MaxValue;
+        }
+        
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        static void GetFloat3UInt32Normalized(float3* destination, void* src) {
+            destination->x = -*(uint*)src / (float) uint.MaxValue;
+            destination->y = *((uint*)src+1) / (float) uint.MaxValue;
+            destination->z = *((uint*)src+2) / (float) uint.MaxValue;
         }
     }
 

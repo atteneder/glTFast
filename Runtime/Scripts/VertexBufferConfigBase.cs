@@ -228,11 +228,7 @@ namespace GLTFast
                 indexConverter = CachedFunction.GetIndexConverter(indexType),
                 inputByteStride = 3*Accessor.GetComponentTypeSize(valueType),
                 input = valueBuffer,
-                valueConverter = CachedFunction.GetPositionConverter(
-                    valueType
-                    // TODO: implement normalized positions
-                    //, normalized
-                    ),
+                valueConverter = CachedFunction.GetPositionConverter(valueType,normalized),
                 outputByteStride = outputByteStride,
                 result = output,
             };
