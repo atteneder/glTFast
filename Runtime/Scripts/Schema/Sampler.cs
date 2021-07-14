@@ -60,12 +60,12 @@ namespace GLTFast.Schema
         /// Magnification filter.
         /// Valid values correspond to WebGL enums: `9728` (NEAREST) and `9729` (LINEAR).
         /// </summary>
-        public int magFilter = (int) MagFilterMode.Linear;
+        public int magFilter = (int) MagFilterMode.None;
 
         /// <summary>
         /// Minification filter. All valid values correspond to WebGL enums.
         /// </summary>
-        public int minFilter = (int) MinFilterMode.NearestMipmapLinear;
+        public int minFilter = (int) MinFilterMode.None;
 
         /// <summary>
         /// s wrapping mode.  All valid values correspond to WebGL enums.
@@ -121,10 +121,22 @@ namespace GLTFast.Schema
             }
         }
 
-        public void Apply(Texture2D image) {
+        public void Apply(Texture2D image, 
+                          int defaultMinFilter=(int)MinFilterMode.NearestMipmapLinear, 
+                          int defaultMagFilter=(int)MagFilterMode.Linear) {
             if (image == null) return;
             image.wrapModeU = wrapU;
             image.wrapModeV = wrapV;
+
+            // Use the default filtering mode for textures that have no such specification in data
+            if (minFilter == (int)MagFilterMode.None)
+            {
+                minFilter = defaultMinFilter;
+            }
+            if (magFilter == (int)MagFilterMode.None)
+            {
+                magFilter = defaultMagFilter;
+            }
             image.filterMode = filterMode;
         }
     }
