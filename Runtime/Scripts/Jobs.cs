@@ -126,78 +126,67 @@ namespace GLTFast.Jobs {
             }
         }
 
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetIndexDelegate))]
         static int GetIndexValueUInt8(void* baseAddress, int index) {
             return *((byte*)baseAddress+index);
         }
             
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetIndexDelegate))]
         static int GetIndexValueInt8(void* baseAddress, int index) {
             return *(((sbyte*)baseAddress)+index);
         }
             
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetIndexDelegate))]
         static int GetIndexValueUInt16(void* baseAddress, int index) {
             return *(((ushort*)baseAddress)+index);
         }
             
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetIndexDelegate))]
         static int GetIndexValueInt16(void* baseAddress, int index) {
             return *(((short*)baseAddress)+index);
         }
             
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetIndexDelegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetIndexDelegate))]
         static int GetIndexValueUInt32(void* baseAddress, int index) {
             return (int) *(((uint*)baseAddress)+index);
         }
 
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
         static void GetFloat3Float(float3* destination, void* src) {
             destination->x = -*(float*)src;
             destination->y = *((float*)src+1);
             destination->z = *((float*)src+2);
         }
 
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
         static void GetFloat3Int8(float3* destination, void* src) {
             destination->x = -*(sbyte*)src;
             destination->y = *((sbyte*)src+1);
             destination->z = *((sbyte*)src+2);
         }
         
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
         static void GetFloat3UInt8(float3* destination, void* src) {
             destination->x = -*(byte*)src;
             destination->y = *((byte*)src+1);
             destination->z = *((byte*)src+2);
         }
         
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
         static void GetFloat3Int16(float3* destination, void* src) {
             destination->x = -*(short*)src;
             destination->y = *((short*)src+1);
             destination->z = *((short*)src+2);
         }
         
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
         static void GetFloat3UInt16(float3* destination, void* src) {
             destination->x = -*(ushort*)src;
             destination->y = *((ushort*)src+1);
             destination->z = *((ushort*)src+2);
         }
         
-        [BurstCompile]
-        [MonoPInvokeCallback(typeof(GetFloat3Delegate))]
+        [BurstCompile,MonoPInvokeCallback(typeof(GetFloat3Delegate))]
         static void GetFloat3UInt32(float3* destination, void* src) {
             destination->x = -*(uint*)src;
             destination->y = *((uint*)src+1);
