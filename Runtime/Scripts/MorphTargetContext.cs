@@ -98,65 +98,85 @@ namespace GLTFast {
             Profiler.BeginSample("ScheduleMorphTargetJobs");
             
             buffers.GetAccessor(positionAccessorIndex, out var posAcc, out var posData, out var posByteStride);
-            if (posAcc.isSparse) {
-                logger.Error(LogCode.SparseAccessor,"morph pos");
-            }
-
+            
             positions = new Vector3[posAcc.count];
             positionsHandle = GCHandle.Alloc(positions,GCHandleType.Pinned);
             
             var jobCount = 1;
-            if (normalAccessorIndex >= 0) {
-                normals = new Vector3[posAcc.count];
-                normalsHandle = GCHandle.Alloc(normals,GCHandleType.Pinned);
+            if (posAcc.isSparse && posAcc.bufferView>=0) {
                 jobCount++;
             }
 
+            Accessor nrmAcc = null;
+            void* nrmInput = null;
+            int nrmInputByteStride = 0;
+            
+            if (normalAccessorIndex >= 0) {
+                normals = new Vector3[posAcc.count];
+                normalsHandle = GCHandle.Alloc(normals,GCHandleType.Pinned);
+                buffers.GetAccessor(normalAccessorIndex, out nrmAcc, out nrmInput, out nrmInputByteStride);
+                if (nrmAcc.isSparse && nrmAcc.bufferView>=0) {
+                    jobCount+=2;
+                } else {
+                    jobCount++;
+                }
+            }
+
+            Accessor tanAcc = null;
+            void* tanInput = null;
+            int tanInputByteStride = 0;
+            
             if (tangentAccessorIndex >= 0) {
                 tangents = new Vector3[posAcc.count];
                 tangentsHandle = GCHandle.Alloc(tangents, GCHandleType.Pinned);
-                jobCount++;
+                buffers.GetAccessor(normalAccessorIndex, out tanAcc, out tanInput, out tanInputByteStride);
+                if (tanAcc.isSparse && tanAcc.bufferView>=0) {
+                    jobCount+=2;
+                } else {
+                    jobCount++;
+                }
             }
             
             NativeArray<JobHandle> handles = new NativeArray<JobHandle>(jobCount, VertexBufferConfigBase.defaultAllocator);
             var handleIndex = 0;
             
-            fixed( void* dest = &(positions[0])) {
-                var h = VertexBufferConfigBase.GetVector3sJob(
-                    posData,
-                    posAcc.count,
-                    posAcc.componentType,
-                    posByteStride,
-                    (Vector3*) dest,
-                    12,
-                    posAcc.normalized
-                );
-                if (h.HasValue) {
-                    handles[handleIndex] = h.Value;
-                    handleIndex++;
-                } else {
-                    Profiler.EndSample();
-                    return null;
-                }
-            }
-
-            if (normalAccessorIndex >= 0) {
-                buffers.GetAccessor(normalAccessorIndex, out var nrmAcc, out var input, out var inputByteStride);
-                if (nrmAcc.isSparse) {
-                    logger.Error(LogCode.SparseAccessor,"morph normal");
-                }
-                fixed( void* dest = &(normals[0])) {
-                    var h = VertexBufferConfigBase.GetVector3sJob(
-                        input,
-                        nrmAcc.count,
-                        nrmAcc.componentType,
-                        inputByteStride,
-                        (Vector3*) dest,
+            fixed (void* dest = &(positions[0])) {
+                JobHandle? h = null;
+                if (posData!=null) {
+                    h = VertexBufferConfigBase.GetVector3sJob(
+                        posData,
+                        posAcc.count,
+                        posAcc.componentType,
+                        posByteStride,
+                        (Vector3*)dest,
                         12,
-                        nrmAcc.normalized
+                        posAcc.normalized
                     );
                     if (h.HasValue) {
                         handles[handleIndex] = h.Value;
+                        handleIndex++;
+                    }
+                    else {
+                        Profiler.EndSample();
+                        return null;
+                    }
+                }
+                if (posAcc.isSparse) {
+                    buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
+                    buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
+                    var sparseJobHandle = VertexBufferConfigBase.GetVector3sSparseJob(
+                        posIndexData,
+                        posValueData,
+                        posAcc.sparse.count,
+                        posAcc.sparse.indices.componentType,
+                        posAcc.componentType,
+                        (Vector3*) dest,
+                        12,
+                        dependsOn: ref h,
+                        posAcc.normalized
+                    );
+                    if (sparseJobHandle.HasValue) {
+                        handles[handleIndex] = sparseJobHandle.Value;
                         handleIndex++;
                     } else {
                         Profiler.EndSample();
@@ -164,28 +184,97 @@ namespace GLTFast {
                     }
                 }
             }
-            
-            if (tangentAccessorIndex >= 0) {
-                buffers.GetAccessor(tangentAccessorIndex, out var tanAcc, out var input, out var inputByteStride);
-                if (tanAcc.isSparse) {
-                    logger.Error(LogCode.SparseAccessor,"morph tangent");
+
+            if (nrmAcc!=null) {
+                fixed( void* dest = &(normals[0])) {
+                    JobHandle? h = null;
+                    if (nrmAcc.bufferView >= 0) {
+                        h = VertexBufferConfigBase.GetVector3sJob(
+                            nrmInput,
+                            nrmAcc.count,
+                            nrmAcc.componentType,
+                            nrmInputByteStride,
+                            (Vector3*)dest,
+                            12,
+                            nrmAcc.normalized
+                        );
+                        if (h.HasValue) {
+                            handles[handleIndex] = h.Value;
+                            handleIndex++;
+                        }
+                        else {
+                            Profiler.EndSample();
+                            return null;
+                        }
+                    }
+                    if (nrmAcc.isSparse) {
+                        buffers.GetAccessorSparseIndices(nrmAcc.sparse.indices, out var indexData);
+                        buffers.GetAccessorSparseValues(nrmAcc.sparse.values, out var valueData);
+                        var sparseJobHandle = VertexBufferConfigBase.GetVector3sSparseJob(
+                            indexData,
+                            valueData,
+                            nrmAcc.sparse.count,
+                            nrmAcc.sparse.indices.componentType,
+                            nrmAcc.componentType,
+                            (Vector3*) dest,
+                            12,
+                            dependsOn: ref h,
+                            nrmAcc.normalized
+                        );
+                        if (sparseJobHandle.HasValue) {
+                            handles[handleIndex] = sparseJobHandle.Value;
+                            handleIndex++;
+                        } else {
+                            Profiler.EndSample();
+                            return null;
+                        }
+                    }
                 }
+            }
+            
+            if (tanAcc!=null) {
                 fixed( void* dest = &(tangents[0])) {
-                    var h = VertexBufferConfigBase.GetVector3sJob(
-                        input,
-                        tanAcc.count,
-                        tanAcc.componentType,
-                        inputByteStride,
-                        (Vector3*) dest,
-                        12,
-                        tanAcc.normalized
-                    );
-                    if (h.HasValue) {
-                        handles[handleIndex] = h.Value;
-                        handleIndex++;
-                    } else {
-                        Profiler.EndSample();
-                        return null;
+                    JobHandle? h = null;
+                    if (tanAcc.bufferView >= 0) {
+                        h = VertexBufferConfigBase.GetVector3sJob(
+                            tanInput,
+                            tanAcc.count,
+                            tanAcc.componentType,
+                            tanInputByteStride,
+                            (Vector3*)dest,
+                            12,
+                            tanAcc.normalized
+                        );
+                        if (h.HasValue) {
+                            handles[handleIndex] = h.Value;
+                            handleIndex++;
+                        }
+                        else {
+                            Profiler.EndSample();
+                            return null;
+                        }
+                    }
+                    if (tanAcc.isSparse) {
+                        buffers.GetAccessorSparseIndices(tanAcc.sparse.indices, out var indexData);
+                        buffers.GetAccessorSparseValues(tanAcc.sparse.values, out var valueData);
+                        var sparseJobHandle = VertexBufferConfigBase.GetVector3sSparseJob(
+                            indexData,
+                            valueData,
+                            tanAcc.sparse.count,
+                            tanAcc.sparse.indices.componentType,
+                            tanAcc.componentType,
+                            (Vector3*) dest,
+                            12,
+                            dependsOn: ref h,
+                            tanAcc.normalized
+                        );
+                        if (sparseJobHandle.HasValue) {
+                            handles[handleIndex] = sparseJobHandle.Value;
+                            handleIndex++;
+                        } else {
+                            Profiler.EndSample();
+                            return null;
+                        }
                     }
                 }
             }

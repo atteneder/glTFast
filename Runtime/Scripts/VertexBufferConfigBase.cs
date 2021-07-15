@@ -209,7 +209,7 @@ namespace GLTFast
             return jobHandle;
         }
 
-        protected static unsafe JobHandle? GetVector3sSparseJob(
+        public static unsafe JobHandle? GetVector3sSparseJob(
             void* indexBuffer,
             void* valueBuffer,
             int sparseCount,

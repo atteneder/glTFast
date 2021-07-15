@@ -47,7 +47,7 @@ namespace GLTFast.Schema {
         /// The index of the bufferView.
         /// If this is undefined, look in the sparse object for the index and value buffer views.
         /// </summary>
-        public int bufferView;
+        public int bufferView = -1;
 
         /// <summary>
         /// The offset relative to the start of the bufferView in bytes.

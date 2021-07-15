@@ -131,7 +131,6 @@ namespace GLTFast
             
             {
                 JobHandle? h = null;
-                JobHandle? sparseJobHandle = null;
                 if(posAcc.bufferView>=0) {
                     h = GetVector3sJob(
                         posData,
@@ -146,7 +145,7 @@ namespace GLTFast
                 if (posAcc.isSparse) {
                     buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
                     buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
-                    sparseJobHandle = GetVector3sSparseJob(
+                    var sparseJobHandle = GetVector3sSparseJob(
                         posIndexData,
                         posValueData,
                         posAcc.sparse.count,

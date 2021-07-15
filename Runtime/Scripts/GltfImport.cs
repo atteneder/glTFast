@@ -2580,6 +2580,11 @@ namespace GLTFast {
 #region IGltfBuffers
         public unsafe void GetAccessor(int index, out Accessor accessor, out void* data, out int byteStride) {
             accessor = gltfRoot.accessors[index];
+            if (accessor.bufferView < 0 || accessor.bufferView >= gltfRoot.bufferViews.Length) {
+                data = null;
+                byteStride = 0;
+                return;
+            }
             var bufferView = gltfRoot.bufferViews[accessor.bufferView];
             byteStride = bufferView.byteStride;
             var bufferIndex = bufferView.buffer;
