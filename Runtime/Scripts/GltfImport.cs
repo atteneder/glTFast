@@ -1264,13 +1264,15 @@ namespace GLTFast {
                             }
                             case AnimationChannel.Path.weights: {
                                 var values= ((AccessorNativeData<float>) accessorData[sampler.output]).data;
+                                var node = gltfRoot.nodes[channel.target.node];
+                                var mesh = gltfRoot.meshes[node.mesh];
                                 AnimationUtils.AddMorphTargetWeightCurves(
                                     animationClips[i],
                                     path,
                                     times,
                                     values,
-                                    sampler.interpolationEnum
-                                    // TODO: Add morph targets names
+                                    sampler.interpolationEnum,
+                                    mesh.extras?.targetNames
                                     );
                                 
                                 // HACK BEGIN:
@@ -1280,10 +1282,8 @@ namespace GLTFast {
                                 // curves, so that all primitives are animated.
                                 // TODO: Refactor primitive sub-meshing and remove this hack
                                 // https://github.com/atteneder/glTFast/issues/153
-                                var node = gltfRoot.nodes[channel.target.node];
-                                var primitiveCount = meshPrimitiveIndex[node.mesh + 1] - meshPrimitiveIndex[node.mesh];
-                                var mesh = gltfRoot.meshes[node.mesh];
                                 var meshName = string.IsNullOrEmpty(mesh.name) ? PrimitiveName : mesh.name;
+                                var primitiveCount = meshPrimitiveIndex[node.mesh + 1] - meshPrimitiveIndex[node.mesh];
                                 for (var k = 1; k < primitiveCount; k++) {
                                     var primitiveName = $"{meshName}_{k}";
                                     AnimationUtils.AddMorphTargetWeightCurves(
@@ -1291,8 +1291,8 @@ namespace GLTFast {
                                         $"{path}/{primitiveName}",
                                         times,
                                         values,
-                                        sampler.interpolationEnum
-                                        // TODO: Add morph targets names
+                                        sampler.interpolationEnum,
+                                        mesh.extras?.targetNames
                                     );                                    
                                 }
                                 // HACK END
@@ -1738,19 +1738,20 @@ namespace GLTFast {
                         cluster[primitive] = new List<MeshPrimitive>();
                     }
                     cluster[primitive].Add(primitive);
+                    
+                    if (primitive.targets != null) {
+                        if (morphTargetsContexts == null) {
+                            morphTargetsContexts = new Dictionary<MeshPrimitive, MorphTargetsContext>();
+                        } else if (morphTargetsContexts.ContainsKey(primitive)) {
+                            continue;
+                        }
+                            
+                        var morphTargetsContext = CreateMorphTargetsContext(primitive,mesh.extras?.targetNames);
+                        morphTargetsContexts[primitive] = morphTargetsContext;
+                    }
 #if DRACO_UNITY
                     var isDraco = primitive.isDracoCompressed;
                     if (isDraco) {
-                        if (primitive.targets != null) {
-                            if (morphTargetsContexts == null) {
-                                morphTargetsContexts = new Dictionary<MeshPrimitive, MorphTargetsContext>();
-                            } else if (morphTargetsContexts.ContainsKey(primitive)) {
-                                continue;
-                            }
-                            
-                            var morphTargetsContext = CreateMorphTargetsContext(primitive);
-                            morphTargetsContexts[primitive] = morphTargetsContext;
-                        }
                         continue;
                     }
 #else
@@ -1901,16 +1902,6 @@ namespace GLTFast {
 
                 Profiler.EndSample();
 
-                if (success && primitive.targets != null) {
-                    if (morphTargetsContexts == null) {
-                        morphTargetsContexts = new Dictionary<MeshPrimitive, MorphTargetsContext>();
-                    } else if (morphTargetsContexts.ContainsKey(primitive)) {
-                        continue;
-                    }
-                    var morphTargetsContext = CreateMorphTargetsContext(primitive);
-                    morphTargetsContexts[primitive] = morphTargetsContext;
-                }
-                
                 await deferAgent.BreakPoint();
             }
 
@@ -2096,8 +2087,8 @@ namespace GLTFast {
             return success;
         }
 
-        MorphTargetsContext CreateMorphTargetsContext(MeshPrimitive primitive) {
-            var morphTargetsContext = new MorphTargetsContext(primitive.targets.Length);
+        MorphTargetsContext CreateMorphTargetsContext(MeshPrimitive primitive,string[] meshTargetNames) {
+            var morphTargetsContext = new MorphTargetsContext(primitive.targets.Length,meshTargetNames);
             foreach (var morphTarget in primitive.targets) {
                 var success = morphTargetsContext.AddMorphTarget(
                     this,

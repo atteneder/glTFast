@@ -239,5 +239,46 @@ namespace GLTFast.Tests
             Debug.LogWarning("Invalid Sparse Accessors will break glTFast");
 #endif
         }
+        
+        [Test]
+        public void MeshTargetNames() {
+            var gltf = JsonParser.ParseJson(@"
+{
+    ""meshes"": [
+        {
+            ""extras"": {
+                ""targetNames"": [
+                    ""Key 1"",""Key 2""
+                ]
+            }
+        },
+        {
+            ""extras"": {
+                ""different"": ""content""
+            }
+        }
+    ]
+}
+"
+            );
+            
+            Assert.NotNull(gltf);
+            Assert.NotNull(gltf.meshes,"No materials");
+            Assert.AreEqual(2, gltf.meshes.Length, "Invalid materials quantity");
+
+            var mat = gltf.meshes[0];
+            Assert.NotNull(mat);
+            Assert.NotNull(mat.extras);
+            Assert.NotNull(mat.extras.targetNames);
+            Assert.NotNull(mat.extras.targetNames);
+            Assert.AreEqual(2, mat.extras.targetNames.Length, "Invalid targetNames quantity");
+            Assert.AreEqual("Key 1", mat.extras.targetNames[0]);
+            Assert.AreEqual("Key 2", mat.extras.targetNames[1]);
+            
+            mat = gltf.meshes[1];
+            Assert.NotNull(mat);
+            Assert.NotNull(mat.extras);
+            Assert.IsNull(mat.extras.targetNames);
+        }
     }
 }

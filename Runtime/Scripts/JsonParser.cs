@@ -75,10 +75,12 @@ namespace GLTFast {
 #if DRACO_UNITY
             if(!check && root.meshes!=null) {
                 foreach (var mesh in root.meshes) {
-                    foreach (var primitive in mesh.primitives) {
-                        if (primitive.extensions?.KHR_draco_mesh_compression != null) {
-                            check = true;
-                            break;
+                    if (mesh.primitives != null) {
+                        foreach (var primitive in mesh.primitives) {
+                            if (primitive.extensions?.KHR_draco_mesh_compression != null) {
+                                check = true;
+                                break;
+                            }
                         }
                     }
                 }

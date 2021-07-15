@@ -30,5 +30,12 @@ namespace GLTFast.Schema {
         /// <minItems>0</minItems>
         /// </summary>
         public float[] weights;
+
+        public MeshExtras extras;
+    }
+
+    [System.Serializable]
+    public class MeshExtras {
+        public string[] targetNames;
     }
 }

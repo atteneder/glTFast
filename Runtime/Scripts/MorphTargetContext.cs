@@ -28,11 +28,13 @@ namespace GLTFast {
         MorphTargetContext[] contexts;
         NativeArray<JobHandle> handles;
         int currentIndex;
+        string[] meshTargetNames;
 
-        public MorphTargetsContext(int morphTargetCount) {
+        public MorphTargetsContext(int morphTargetCount, string[] meshTargetNames) {
             contexts = new MorphTargetContext[morphTargetCount];
             handles = new NativeArray<JobHandle>(morphTargetCount, VertexBufferConfigBase.defaultAllocator);
             currentIndex = 0;
+            this.meshTargetNames = meshTargetNames;
         }
         
         public bool AddMorphTarget(
@@ -71,7 +73,7 @@ namespace GLTFast {
         public void ApplyOnMeshAndDispose(Mesh mesh) {
             for (var index = 0; index < contexts.Length; index++) {
                 var context = contexts[index];
-                context.AddToMesh(mesh,index.ToString());
+                context.AddToMesh(mesh, meshTargetNames?[index] ?? index.ToString());
                 context.Dispose();
             }
             contexts = null;
