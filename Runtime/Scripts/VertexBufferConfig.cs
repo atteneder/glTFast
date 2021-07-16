@@ -287,15 +287,15 @@ namespace GLTFast
                 vadCount++;
             }
             stream++;
-            
-            if (texCoords != null) {
-                texCoords.AddDescriptors(vad,ref vadCount,stream);
-                stream++;
-            }
 
             if (colors != null) {
                 colors.AddDescriptors(vad,vadCount,stream);
                 vadCount++;
+                stream++;
+            }
+            
+            if (texCoords != null) {
+                texCoords.AddDescriptors(vad,ref vadCount,stream);
                 stream++;
             }
 
@@ -323,16 +323,16 @@ namespace GLTFast
             stream++;
             Profiler.EndSample();
 
+            if (colors != null) {
+                colors.ApplyOnMesh(msh,stream,flags);
+                stream++;
+            }
+            
             if (texCoords != null) {
                 texCoords.ApplyOnMesh(msh,stream,flags);
                 stream++;
             }
             
-            if (colors != null) {
-                colors.ApplyOnMesh(msh,stream,flags);
-                stream++;
-            }
-
             if (bones != null) {
                 bones.ApplyOnMesh(msh,stream,flags);
                 stream++;
@@ -346,12 +346,12 @@ namespace GLTFast
                 vData.Dispose();
             }
 
-            if (texCoords != null) {
-                texCoords.Dispose();
-            }
-
             if (colors != null) {
                 colors.Dispose();
+            }
+
+            if (texCoords != null) {
+                texCoords.Dispose();
             }
 
             if (bones != null) {
