@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed "Node Name Method" option from glTF importer inspector. It still an option at run-time, but is always `OriginalUnique` at design-time imports.
   - `Animation` setting is disabled if built-in package animation is disabled
 - For better clarity, changed type of `Sampler` properties `minFilter`, `magFilter`, `wrapS` and `wrapT` from into to enum types and added tests
+- Optional dependencies
+  - [KtxUnity][KtxUnity]: raised required version to 1.1.0
+  - [DracoUnity][DracoUnity]: raised required version to 3.1.0
 ### Fixed
 - Works again with built-in package animation disabled (thanks [@Bersaelor][Bersaelor] for #204)
 - Resolve dot segments ("." and "..") in URIs according to RFC 3986, section 5.2.4 (fixes #213)
@@ -398,5 +401,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.3.0]: https://github.com/atteneder/glTFast/compare/v0.3.0...v0.2.0
 [0.2.0]: https://github.com/atteneder/glTFast/compare/v0.2.0...v0.1.0
+[KtxUnity]: https://github.com/atteneder/KtxUnity
+[DracoUnity]: https://github.com/atteneder/DracoUnity
 [hybridherbst]: https://github.com/hybridherbst
 [Bersaelor]: https://github.com/Bersaelor
