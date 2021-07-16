@@ -1265,6 +1265,9 @@ namespace GLTFast {
                             case AnimationChannel.Path.weights: {
                                 var values= ((AccessorNativeData<float>) accessorData[sampler.output]).data;
                                 var node = gltfRoot.nodes[channel.target.node];
+                                if (node.mesh < 0 || node.mesh >= gltfRoot.meshes.Length) {
+                                    break;
+                                }
                                 var mesh = gltfRoot.meshes[node.mesh];
                                 AnimationUtils.AddMorphTargetWeightCurves(
                                     animationClips[i],

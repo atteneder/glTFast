@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Works again with built-in package animation disabled (thanks [@Bersaelor][Bersaelor] for #204)
 - Resolve dot segments ("." and "..") in URIs according to RFC 3986, section 5.2.4 (fixes #213)
+- Added some sanity checks
 
 ## [4.1.0] - 2021-07-06
 ### Added
