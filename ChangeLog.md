@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support for morph targets / blend shapes (#8)
 - Support for animated morph targets / blend shapes
-- Limited support for sparse accessors (morph targets and vertex positions only for now)
+- Support for sparse accessors (morph targets and vertex positions only for now)
 - Safe build option for more robust loading (`GLTFAST_SAFE` scripting define)
 - Burst as dependency
 ### Changed
