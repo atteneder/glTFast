@@ -30,17 +30,19 @@ namespace GLTFast.Editor {
         
 #pragma warning disable 1998
         public async  Task<IDownload> Request(Uri url) {
-            var dependency = new GltfAssetDependency();
-            dependency.originalUri = url.OriginalString;
+            var dependency = new GltfAssetDependency {
+                originalUri = url.OriginalString
+            };
             assetDependencies.Add(dependency);
             var req = new SyncFileLoader(url);
             return req;
         }
 
         public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
-            var dependency = new GltfAssetDependency();
-            dependency.originalUri = url.OriginalString;
-            dependency.type = GltfAssetDependency.Type.Texture;
+            var dependency = new GltfAssetDependency {
+                originalUri = url.OriginalString,
+                type = GltfAssetDependency.Type.Texture
+            };
             assetDependencies.Add(dependency);
             var req = new SyncTextureLoader(url,nonReadable);
             return req;
