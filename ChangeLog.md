@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - For better clarity, changed type of `Sampler` properties `minFilter`, `magFilter`, `wrapS` and `wrapT` from into to enum types and added tests
 ### Fixed
 - Works again with built-in package animation disabled (thanks [@Bersaelor][Bersaelor] for #204)
+- Resolve dot segments ("." and "..") in URIs according to RFC 3986, section 5.2.4 (fixes #213)
 
 ## [4.1.0] - 2021-07-06
 ### Added
