@@ -90,6 +90,7 @@ namespace GLTFast {
             Mesh mesh,
             int[] materialIndices,
             uint[] joints = null,
+            float[] morphTargetWeights = null,
             int primitiveNumeration = 0
         ) {
 
@@ -98,27 +99,36 @@ namespace GLTFast {
                 // Use Node GameObject for first Primitive
                 meshGo = nodes[nodeIndex];
             } else {
-                meshGo = new GameObject( $"{meshName ?? "Primitive"}_{primitiveNumeration}" );
+                meshGo = new GameObject(meshName);
                 meshGo.transform.SetParent(nodes[nodeIndex].transform,false);
             }
 
             Renderer renderer;
 
-            if(joints==null) {
+            var hasMorphTargets = mesh.blendShapeCount > 0;
+            if(joints==null && !hasMorphTargets) {
                 var mf = meshGo.AddComponent<MeshFilter>();
                 mf.mesh = mesh;
                 var mr = meshGo.AddComponent<MeshRenderer>();
                 renderer = mr;
             } else {
                 var smr = meshGo.AddComponent<SkinnedMeshRenderer>();
-                var bones = new Transform[joints.Length];
-                for (var j = 0; j < bones.Length; j++)
-                {
-                    var jointIndex = joints[j];
-                    bones[j] = nodes[jointIndex].transform;
+                if (joints != null) {
+                    var bones = new Transform[joints.Length];
+                    for (var j = 0; j < bones.Length; j++)
+                    {
+                        var jointIndex = joints[j];
+                        bones[j] = nodes[jointIndex].transform;
+                    }
+                    smr.bones = bones;
                 }
-                smr.bones = bones;
                 smr.sharedMesh = mesh;
+                if (morphTargetWeights!=null) {
+                    for (var i = 0; i < morphTargetWeights.Length; i++) {
+                        var weight = morphTargetWeights[i];
+                        smr.SetBlendShapeWeight(i, weight);
+                    }
+                }
                 renderer = smr;
             }
 
@@ -150,7 +160,7 @@ namespace GLTFast {
             }
 
             for (var i = 0; i < instanceCount; i++) {
-                var meshGo = new GameObject( $"{meshName ?? "Primitive"}_p{primitiveNumeration}_i{i}" );
+                var meshGo = new GameObject( $"{meshName}_i{i}" );
                 var t = meshGo.transform;
                 t.SetParent(nodes[nodeIndex].transform,false);
                 t.localPosition = positions?[i] ?? Vector3.zero;

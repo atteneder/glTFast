@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2021-07-16
+### Added
+- Support for morph targets / blend shapes (#8)
+- Support for animated morph targets / blend shapes
+- Support for sparse accessors (morph targets and vertex positions only for now)
+- Safe build option for more robust loading (`GLTFAST_SAFE` scripting define)
+- Burst as dependency
+### Changed
+- Minor primitive GameObject name change. `GltfImport` is now fully responsible for `GameObject` names in order to ensure consistency between animation paths and model hierarchy.
+- glTF importer inspector
+  - Removed "Node Name Method" option from glTF importer inspector. It still an option at run-time, but is always `OriginalUnique` at design-time imports.
+  - `Animation` setting is disabled if built-in package animation is disabled
+- For better clarity, changed type of `Sampler` properties `minFilter`, `magFilter`, `wrapS` and `wrapT` from into to enum types and added tests
+- Optional dependencies
+  - [KtxUnity][KtxUnity]: raised required version to 1.1.0
+  - [DracoUnity][DracoUnity]: raised required version to 3.1.0
+### Fixed
+- Works again with built-in package animation disabled (thanks [@Bersaelor][Bersaelor] for #204)
+- Resolve dot segments ("." and "..") in URIs according to RFC 3986, section 5.2.4 (fixes #213)
+- Corrected vertex attribute order when loading meshes with both texture coordinates and vertex colors
+- Added some sanity checks
+
 ## [4.1.0] - 2021-07-06
 ### Added
 - Import setting to create non-legacy animation clips (thanks [@hybridherbst][hybridherbst] for #196)
@@ -379,4 +401,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [0.3.0]: https://github.com/atteneder/glTFast/compare/v0.3.0...v0.2.0
 [0.2.0]: https://github.com/atteneder/glTFast/compare/v0.2.0...v0.1.0
+[KtxUnity]: https://github.com/atteneder/KtxUnity
+[DracoUnity]: https://github.com/atteneder/DracoUnity
 [hybridherbst]: https://github.com/hybridherbst
+[Bersaelor]: https://github.com/Bersaelor

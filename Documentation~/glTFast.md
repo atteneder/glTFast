@@ -219,6 +219,14 @@ By default glTFast discards mesh data after it was uploaded to the GPU to free u
 
 Motivations for this might be using meshes as physics colliders amongst [other cases](https://docs.unity3d.com/ScriptReference/Mesh-isReadable.html).
 
+### Safe Mode
+
+Arbitrary (and potentially broken) input data is a challenge to software's robustness and safety. Some measurments to make glTFast more robust have a negative impact on its performance though.
+
+For this reason some pedantic safety checks in glTFast are not performed by default. You can enable safe-mode by adding the scripting define `GLTFAST_SAFE` to your project.
+
+Enable safe-mode if you are not in control over what content your application may end up loading and you cannot test up front.
+
 ## Upgrade Guides
 
 ### Upgrade to 4.x

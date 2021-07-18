@@ -29,6 +29,13 @@ namespace GLTFast.Schema {
         /// Array of weights to be applied to the Morph Targets.
         /// <minItems>0</minItems>
         /// </summary>
-        //public List<double> Weights;
+        public float[] weights;
+
+        public MeshExtras extras;
+    }
+
+    [System.Serializable]
+    public class MeshExtras {
+        public string[] targetNames;
     }
 }

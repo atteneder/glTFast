@@ -36,7 +36,8 @@ namespace GLTFast
         Translation = 0x400,
         Rotation = 0x800,
         Scale = 0x1000,
-        RequiredForInstantiation = 0x2000
+        Weight = 0x2000,
+        RequiredForInstantiation = 0x4000
     }
 
     abstract class AccessorDataBase {

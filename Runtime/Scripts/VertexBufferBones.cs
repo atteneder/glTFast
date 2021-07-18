@@ -18,6 +18,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -34,9 +35,10 @@ namespace GLTFast {
             this.logger = logger;
         }
 
-        public abstract unsafe bool ScheduleVertexBonesJob(
-            VertexInputData weightsInput,
-            VertexInputData jointsInput,
+        public abstract bool ScheduleVertexBonesJob(
+            IGltfBuffers buffers,
+            int weightsAccessorIndex,
+            int jointsAccessorIndex,
             NativeSlice<JobHandle> handles
             );
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
@@ -50,25 +52,32 @@ namespace GLTFast {
         public VertexBufferBones(ICodeLogger logger) : base(logger) {}
         
         public override unsafe bool ScheduleVertexBonesJob(
-            VertexInputData weightsInput,
-            VertexInputData jointsInput,
+            IGltfBuffers buffers,
+            int weightsAccessorIndex,
+            int jointsAccessorIndex,
             NativeSlice<JobHandle> handles
-            ) {
+            )
+        {
             Profiler.BeginSample("ScheduleVertexBonesJob");
             Profiler.BeginSample("AllocateNativeArray");
-            vData = new NativeArray<VBones>(weightsInput.count, VertexBufferConfigBase.defaultAllocator);
+            
+            buffers.GetAccessor(weightsAccessorIndex, out var weightsAcc, out var weightsData, out var weightsByteStride);
+            if (weightsAcc.isSparse) {
+                logger.Error(LogCode.SparseAccessor,"bone weights");
+            }
+            vData = new NativeArray<VBones>(weightsAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();
-
-            fixed( void* input = &(weightsInput.buffer[weightsInput.startOffset])) {
+            
+            {
                 var h = GetWeightsJob(
-                    input,
-                    weightsInput.count,
-                    weightsInput.type,
-                    weightsInput.byteStride,
+                    weightsData,
+                    weightsAcc.count,
+                    weightsAcc.componentType,
+                    weightsByteStride,
                     (Vector4*)vDataPtr,
                     32,
-                    weightsInput.normalize
+                    weightsAcc.normalized
                 );
                 if (h.HasValue) {
                     handles[0] = h.Value;
@@ -78,12 +87,16 @@ namespace GLTFast {
                 }
             }
 
-            fixed( void* input = &(jointsInput.buffer[jointsInput.startOffset])) {
+            {
+                buffers.GetAccessor(jointsAccessorIndex, out var jointsAcc, out var jointsData, out var jointsByteStride);
+                if (jointsAcc.isSparse) {
+                    logger.Error(LogCode.SparseAccessor,"bone joints");
+                }
                 var h = GetJointsJob(
-                    input,
-                    jointsInput.count,
-                    jointsInput.type,
-                    jointsInput.byteStride,
+                    jointsData,
+                    jointsAcc.count,
+                    jointsAcc.componentType,
+                    jointsByteStride,
                     (uint*)(vDataPtr+16),
                     32,
                     logger

@@ -1,9 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
     <ui:VisualElement name="ImportSettings" class="section">
         <Style src="GltfImporter-style.uss" />
-        <ui:Label text="glTF Import Settings" class="h1" />
-        <uie:EnumField label="Node Name Method" value="OriginalUnique" binding-path="importSettings.nodeNameMethod" type="GLTFast.ImportSettings+NameImportMethod, glTFast" />
-        <uie:EnumField label="Animation" value="Legacy" binding-path="importSettings.animationMethod" type="GLTFast.ImportSettings+AnimationMethod, glTFast" />
+        <ui:Label text="glTF Import Settings" name="Headline" class="h1" />
+        <uie:EnumField label="Animation" value="Legacy" binding-path="importSettings.animationMethod" type="GLTFast.ImportSettings+AnimationMethod, glTFast" name="Animation" focusable="true" />
     </ui:VisualElement>
     <ui:VisualElement name="Dependencies" class="dependencies section">
         <Style src="GltfImporter-style.uss" />

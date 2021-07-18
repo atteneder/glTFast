@@ -21,7 +21,7 @@ Try the [WebGL Demo][gltfast-web-demo] and check out the [demo project](https://
 
 ## Features
 
-*glTFast* supports large parts of the glTF 2.0 specification plus many extensions, works with URP, HDRP, the Built-In render pipe and runs on following platforms:
+*glTFast* supports the glTF 2.0 specification plus many extensions, works with URP, HDRP, the Built-In render pipe and runs on following platforms:
 
 - WebGL
 - iOS
@@ -147,7 +147,7 @@ Thanks to [Embibe][embibe] for sponsoring the development of skin support! ‚ù§Ô∏
 
 ## License
 
-Copyright (c) 2020 Andreas Atteneder, All Rights Reserved.
+Copyright (c) 2020-2021 Andreas Atteneder, All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use files in this repository except in compliance with the License.

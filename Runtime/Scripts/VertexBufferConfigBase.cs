@@ -30,6 +30,7 @@ namespace GLTFast
 #if BURST
     using Unity.Mathematics;
 #endif
+    using Jobs;
     using Schema;
 
     [System.Flags]
@@ -41,42 +42,6 @@ namespace GLTFast
         
         PosNorm = 0x3,
         PosNormTan = 0x7,
-    }
-
-    struct VertexInputData {
-
-        public Accessor accessor;
-        public BufferView bufferView;
-        public int chunkStart;
-        public byte[] buffer;
-
-        public int startOffset {
-            get { return accessor.byteOffset + bufferView.byteOffset + chunkStart; }
-        }
-
-        public int count {
-            get { return accessor.count; }
-        }
-
-        public int byteStride {
-            get { return bufferView.byteStride; }
-        }
-
-        public GLTFComponentType type {
-            get { return accessor.componentType; }
-        }
-
-        public GLTFAccessorAttributeType attributeType {
-            get { return accessor.typeEnum; }
-        }
-        
-        public Bounds? bounds {
-            get { return accessor.TryGetBounds(); }
-        }
-
-        public bool normalize {
-            get { return accessor.normalized; }
-        }
     }
 
     abstract class VertexBufferConfigBase {
@@ -96,19 +61,20 @@ namespace GLTFast
         }
         
         public abstract unsafe JobHandle? ScheduleVertexJobs(
-            VertexInputData posInput,
-            VertexInputData? nrmInput = null,
-            VertexInputData? tanInput = null,
-            VertexInputData[] uvInputs = null,
-            VertexInputData? colorInput = null,
-            VertexInputData? weightsInput = null,
-            VertexInputData? jointsInput = null
+            IGltfBuffers buffers,
+            int positionAccessorIndex,
+            int normalAccessorIndex,
+            int tangentAccessorIndex,
+            int[] uvAccessorIndices,
+            int colorAccessorIndex,
+            int weightsAccessorIndex,
+            int jointsAccessorIndex
             );
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract int vertexCount { get; }
         public abstract void Dispose();
 
-        protected unsafe JobHandle? GetVector3sJob(
+        public static unsafe JobHandle? GetVector3sJob(
             void* input,
             int count,
             GLTFComponentType inputType,
@@ -239,6 +205,39 @@ namespace GLTFast
                     break;
             }
 
+            Profiler.EndSample();
+            return jobHandle;
+        }
+
+        public static unsafe JobHandle? GetVector3sSparseJob(
+            void* indexBuffer,
+            void* valueBuffer,
+            int sparseCount,
+            GLTFComponentType indexType,
+            GLTFComponentType valueType,
+            Vector3* output,
+            int outputByteStride,
+            ref JobHandle? dependsOn,
+            bool normalized = false
+        ) {
+            JobHandle? jobHandle;
+
+            Profiler.BeginSample("GetVector3sSparseJob");
+            var job = new GetPositionsSparseJob {
+                indexBuffer = (ushort*)indexBuffer,
+                indexConverter = CachedFunction.GetIndexConverter(indexType),
+                inputByteStride = 3*Accessor.GetComponentTypeSize(valueType),
+                input = valueBuffer,
+                valueConverter = CachedFunction.GetPositionConverter(valueType,normalized),
+                outputByteStride = outputByteStride,
+                result = output,
+            };
+            
+            jobHandle = job.Schedule(
+                sparseCount,
+                GltfImport.DefaultBatchCount,
+                dependsOn: dependsOn.HasValue ? dependsOn.Value : default(JobHandle)
+                );
             Profiler.EndSample();
             return jobHandle;
         }

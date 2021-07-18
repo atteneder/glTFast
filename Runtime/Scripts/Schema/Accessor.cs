@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -46,7 +47,7 @@ namespace GLTFast.Schema {
         /// The index of the bufferView.
         /// If this is undefined, look in the sparse object for the index and value buffer views.
         /// </summary>
-        public int bufferView;
+        public int bufferView = -1;
 
         /// <summary>
         /// The offset relative to the start of the bufferView in bytes.
@@ -147,7 +148,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public AccessorSparse sparse;
 
-            public static int GetAccessorComponentTypeLength( GLTFComponentType componentType ) {
+        public static int GetAccessorComponentTypeLength( GLTFComponentType componentType ) {
             switch (componentType)
             {
                 case GLTFComponentType.Byte:
@@ -165,7 +166,26 @@ namespace GLTFast.Schema {
             }
         }
 
-        public static int GetAccessorAttriuteTypeLength( GLTFAccessorAttributeType type ) {
+        public static int GetComponentTypeSize(GLTFComponentType type) {
+            switch (type) {
+                case GLTFComponentType.Byte:
+                    return 1;
+                case GLTFComponentType.UnsignedByte:
+                    return 1;
+                case GLTFComponentType.Short:
+                    return 2;
+                case GLTFComponentType.UnsignedShort:
+                    return 2;
+                case GLTFComponentType.UnsignedInt:
+                    return 4;
+                case GLTFComponentType.Float:
+                    return 4;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+
+        public static int GetAccessorAttributeTypeLength( GLTFAccessorAttributeType type ) {
             switch (type)
             {
                 case GLTFAccessorAttributeType.SCALAR:
@@ -182,8 +202,7 @@ namespace GLTFast.Schema {
                 case GLTFAccessorAttributeType.MAT4:
                     return 16;
                 default:
-                    Debug.LogError("Unknown GLTFAccessorAttributeType");
-                    return 0;
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 
@@ -201,5 +220,7 @@ namespace GLTFast.Schema {
             }
             return null;
         }
+
+        public bool isSparse => sparse != null;
     }
 }

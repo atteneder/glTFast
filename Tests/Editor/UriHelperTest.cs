@@ -14,6 +14,7 @@
 //
 
 using System;
+using System.IO;
 using NUnit.Framework;
 using UnityEngine.Profiling;
 
@@ -83,14 +84,93 @@ namespace GLTFast.Tests
         public void GetUriStringTest()
         {
             var baseUri = new Uri("http://www.server.com/dir/sub/");
-
-            Assert.AreEqual( new Uri("file+test.gltf",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("file+test.gltf",null));
-            Assert.AreEqual( new Uri("http://www.server.com/dir/sub/file+test.gltf",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("file+test.gltf",baseUri));
-            Assert.AreEqual( new Uri("http://www.server.com/dir/sub/sub2/sub3/file+test.gltf",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("sub2/sub3/file+test.gltf",baseUri));
-
+            
+            Assert.AreEqual(
+                "file+test.gltf",
+                UriHelper.GetUriString("file+test.gltf",null).ToString()
+                );
+            Assert.AreEqual(
+                "http://www.server.com/dir/sub/file+test.gltf",
+                UriHelper.GetUriString("file+test.gltf",baseUri).ToString()
+                );
+            Assert.AreEqual(
+                "http://www.server.com/dir/sub/sub2/sub3/file+test.gltf",
+                UriHelper.GetUriString("sub2/sub3/file+test.gltf",baseUri).ToString()
+                );
+            Assert.AreEqual(
+                "http://www.server.com/dir/sub/file.gltf",
+                UriHelper.GetUriString("./file.gltf",baseUri).ToString()
+                );
+            Assert.AreEqual(
+                "http://www.server.com/dir/file.gltf",
+                UriHelper.GetUriString("../file.gltf",baseUri).ToString()
+                );
+            Assert.AreEqual(
+                "http://www.server.com/dir/x/file.gltf",
+                UriHelper.GetUriString("../x/file.gltf",baseUri).ToString()
+                );
+            Assert.AreEqual(
+                "http://www.server.com/dir/other_folder/texture.png",
+                UriHelper.GetUriString("../other_folder/texture.png",baseUri).ToString()
+                );
+            Assert.AreEqual(
+                "http://www.server.com/dir/sub/asset.glb",
+                UriHelper.GetUriString("asset.glb",baseUri).ToString()
+                );
+            Assert.AreEqual(
+                "http://www.server.com/other_folder/texture.png",
+                UriHelper.GetUriString("../../../../other_folder/texture.png",baseUri).ToString()
+            );
+            Assert.AreEqual("http://www.server.com/dir/sub/", baseUri.ToString());
+            
             var relBaseUri = new Uri("Assets/Some/Path", UriKind.Relative);
-            Assert.AreEqual( new Uri("http://www.server.com/dir/sub/asset.glb",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("asset.glb",baseUri));
-            Assert.AreEqual( new Uri("Assets/Some/Path/asset.glb",UriKind.RelativeOrAbsolute), UriHelper.GetUriString("asset.glb",relBaseUri));
+            Assert.AreEqual(
+                "Assets/Some/Path/asset.glb",
+                UriHelper.GetUriString("asset.glb",relBaseUri).ToString()
+                );
+            Assert.AreEqual(
+                "Assets/Some/other_folder/texture.png",
+                UriHelper.GetUriString("../other_folder/texture.png",relBaseUri).ToString()
+                );
+            Assert.AreEqual(
+                "other_folder/texture.png",
+                UriHelper.GetUriString("../../../other_folder/texture.png",relBaseUri).ToString()
+                );
+            Assert.AreEqual(
+                "other_folder/texture.png",
+                UriHelper.GetUriString("../../../../other_folder/texture.png",relBaseUri).ToString()
+                );
+            Assert.AreEqual(
+                new Uri("Assets/Some/Path", UriKind.Relative),
+                relBaseUri
+                );
+        }
+
+        [Test]
+        public void RemoveDotSegments() {
+            var s = UriHelper.RemoveDotSegments("file.txt", out var parentLevels);
+            Assert.AreEqual("file.txt",s);
+            Assert.AreEqual(0,parentLevels);
+            
+            s = UriHelper.RemoveDotSegments("../other_folder/file.txt", out parentLevels);
+            Assert.AreEqual("other_folder/file.txt",s);
+            Assert.AreEqual(1,parentLevels);
+            
+            s = UriHelper.RemoveDotSegments("other_folder/../file.txt", out parentLevels);
+            Assert.AreEqual("file.txt",s);
+            Assert.AreEqual(0,parentLevels);
+            
+            s = UriHelper.RemoveDotSegments("other_folder/./file.txt", out parentLevels);
+            Assert.AreEqual("other_folder/file.txt",s);
+            Assert.AreEqual(0,parentLevels);
+            
+            s = UriHelper.RemoveDotSegments("other_folder/./../x/../file.txt", out parentLevels);
+            Assert.AreEqual("file.txt",s);
+            Assert.AreEqual(0,parentLevels);
+            
+            s = UriHelper.RemoveDotSegments("../other_folder/../x/../file.txt", out parentLevels);
+            Assert.AreEqual("file.txt",s);
+            Assert.AreEqual(1,parentLevels);
         }
 
         [Test]

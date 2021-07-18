@@ -1,12 +1,12 @@
 {
     "name": "glTFast",
-    "rootNamespace": "",
     "references": [
         "Draco",
         "glTFastSchema",
         "glTFastFakeSchema",
         "Ktx",
         "Unity.Mathematics",
+        "Unity.Burst",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
@@ -20,12 +20,12 @@
     "versionDefines": [
         {
             "name": "com.atteneder.draco",
-            "expression": "3.0.0",
+            "expression": "3.1.0",
             "define": "DRACO_UNITY"
         },
         {
             "name": "com.atteneder.ktx",
-            "expression": "1.0.0",
+            "expression": "1.1.0",
             "define": "KTX_UNITY"
         },
         {

@@ -60,12 +60,11 @@ namespace GLTFast.Schema {
 
         /// <summary>
         /// An array of Morph Targets, each  Morph Target is a dictionary mapping
-        /// attributes (only "POSITION" and "NORMAL" supported) to their deviations
+        /// attributes to their deviations
         /// in the Morph Target (index of the accessor containing the attribute
         /// displacements' data).
         /// </summary>
-        /// TODO: Make dictionary key enums?
-        //public List<Dictionary<string, AccessorId>> Targets;
+        public MorphTarget[] targets;
 
         public MeshPrimitiveExtensions extensions;
 
@@ -76,6 +75,33 @@ namespace GLTFast.Schema {
             }
         }
 #endif
+        
+        /// <summary>
+        /// Primitives are considered equal if their attributes and morph targets (if existing)
+        /// are equal. This is practical when clustering primitives of a mesh together,
+        /// that end up in a single Unity Mesh.
+        /// </summary>
+        /// <param name="obj">Object to compare against</param>
+        /// <returns>True if attributes and morph targets are equal, false otherwise</returns>
+        public override bool Equals(object obj)
+        {
+            //Check for null and compare run-time types.
+            if ((obj == null) || ! this.GetType().Equals(obj.GetType())) {
+                return false;
+            }
+            var b = (MeshPrimitive) obj; 
+            return attributes.Equals(b.attributes) && targets==null || targets.Equals(b.targets);
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 13;
+            hash = hash * 7 + attributes.GetHashCode();
+            if (targets != null) {
+                hash = hash * 7 + targets.GetHashCode();
+            }
+            return hash;
+        }
     }
 
     [System.Serializable]
@@ -133,4 +159,33 @@ namespace GLTFast.Schema {
         public Attributes attributes;
     }
 #endif
+
+    [System.Serializable]
+    public class MorphTarget {
+        public int POSITION = -1;
+        public int NORMAL = -1;
+        public int TANGENT = -1;
+        
+        public override bool Equals(object obj)
+        {
+            //Check for null and compare run-time types.
+            if ((obj == null) || ! this.GetType().Equals(obj.GetType())) {
+                return false;
+            }
+            var b = (Attributes) obj; 
+            return POSITION==b.POSITION
+                && NORMAL==b.NORMAL
+                && TANGENT==b.TANGENT
+                ;
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 13;
+            hash = hash * 7 + POSITION.GetHashCode();
+            hash = hash * 7 + NORMAL.GetHashCode();
+            hash = hash * 7 + TANGENT.GetHashCode();
+            return hash;
+        }
+    }
 }

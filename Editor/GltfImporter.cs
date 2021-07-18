@@ -125,6 +125,7 @@ namespace GLTFast.Editor {
                     }
                 }
                 
+#if UNITY_ANIMATION
                 var clips = m_Gltf.GetAnimationClips();
                 if (clips != null) {
                     foreach (var animationClip in clips) {
@@ -149,6 +150,7 @@ namespace GLTFast.Editor {
                 //         }
                 //     }
                 // }
+#endif
                 
                 m_ImportedNames = null;
                 m_ImportedObjects = null;

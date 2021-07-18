@@ -14,7 +14,9 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 namespace GLTFast {
@@ -45,11 +47,73 @@ namespace GLTFast {
             }
 
             if (baseUri != null) {
-                return baseUri.IsAbsoluteUri
-                    ? new Uri(baseUri,uri)
-                    : new Uri(Path.Combine(baseUri.OriginalString, uri), UriKind.Relative);
+                uri = RemoveDotSegments(uri, out var parentLevels);
+                if (baseUri.IsAbsoluteUri) {
+                    for (int i = 0; i < parentLevels; i++) {
+                        baseUri = new Uri(baseUri, "..");
+                    }
+                    return new Uri(baseUri, uri);
+                }
+
+                var parentPath = baseUri.OriginalString;
+                for (int i = 0; i < parentLevels; i++) {
+                    parentPath = Path.GetDirectoryName(parentPath);
+                    if (string.IsNullOrEmpty(parentPath)) {
+                        baseUri = new Uri("",UriKind.Relative);
+                        break;
+                    }
+                    baseUri = new Uri(parentPath, UriKind.Relative);
+                }
+                return new Uri(Path.Combine(baseUri.OriginalString, uri), UriKind.Relative);
             }
             return new Uri(uri,UriKind.RelativeOrAbsolute);
+        }
+
+        /// <summary>
+        /// Removes relative dot segments "." and ".." and resolves them.
+        /// See https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4
+        /// </summary>
+        /// <param name="uri">relative input path</param>
+        /// <param name="parentLevels">Number of levels going beyond this paths hierarchy (due to "..")</param>
+        /// <returns>Resolved/compressed nput path without dot segments</returns>
+        public static string RemoveDotSegments(string uri, out int parentLevels) {
+            var segments = new List<string>();
+            var start = 0;
+            parentLevels = 0;
+            while(true) {
+                var i = uri.IndexOf('/',start);
+                var found = i >= 0;
+                var len = found ? (i - start) : uri.Length-start;
+                    if (len > 0) {
+                        var segment = uri.Substring(start, len);
+                        
+                        if (segment == "..") {
+                            if (segments.Count > 0) {
+                                segments.RemoveAt(segments.Count-1);
+                            } else {
+                                parentLevels++;
+                            }
+                        }
+                        else if(segment != ".") {
+                            segments.Add(segment);
+                        }
+                    }
+                if (!found) {
+                    break;
+                }
+                start = i+1;
+            }
+
+            var sb = new StringBuilder();
+            var first = true;
+            foreach (var segment in segments) {
+                if (!first) {
+                    sb.Append('/');
+                }
+                sb.Append(segment);
+                first = false;
+            }
+            return sb.ToString();
         }
 
         /// <summary>

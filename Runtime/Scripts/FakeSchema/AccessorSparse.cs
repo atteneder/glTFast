@@ -13,22 +13,13 @@
 // limitations under the License.
 //
 
-namespace GLTFast.FakeSchema {
-    
-    [System.Serializable]
-    public class Root
-    {
-        /// <summary>
-        /// An array of materials. A material defines the appearance of a primitive.
-        /// </summary>
-        public Material[] materials;
-
 #if GLTFAST_SAFE
-        public Accessor[] accessors;
-#endif
+namespace GLTFast.FakeSchema {
 
-#if DRACO_UNITY
-        public Mesh[] meshes;
-#endif
+    [System.Serializable]
+    public class AccessorSparse {
+        public string indices;
+        public string values;
     }
 }
+#endif

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using GLTFast.Schema;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -21,8 +22,8 @@ namespace GLTFast.Tests
     public class JsonParsingTests
     {
         [Test]
-        public void ParseGltfJson() {
-            var gltf = GltfImport.ParseJson(@"
+        public void MaterialExtensions() {
+            var gltf = JsonParser.ParseJson(@"
 {
     ""materials"" : [
         {
@@ -161,6 +162,198 @@ namespace GLTFast.Tests
             Assert.NotNull(all.extensions.KHR_materials_clearcoat);
             Assert.NotNull(all.extensions.KHR_materials_sheen);
             Assert.NotNull(all.extensions.KHR_materials_transmission);
+        }
+        
+        [Test]
+        public void SparseAccessors() {
+            var gltf = JsonParser.ParseJson(@"
+{
+    ""accessors"" : [ {
+        ""bufferView"" : 0,
+        ""byteOffset"" : 0,
+        ""componentType"" : 5123,
+        ""count"" : 36,
+        ""type"" : ""SCALAR"",
+        ""max"" : [ 13 ],
+        ""min"" : [ 0 ]
+      }, {
+        ""bufferView"" : 1,
+        ""byteOffset"" : 0,
+        ""componentType"" : 5126,
+        ""count"" : 14,
+        ""type"" : ""VEC3"",
+        ""max"" : [ 6.0, 4.0, 0.0 ],
+        ""min"" : [ 0.0, 0.0, 0.0 ],
+        ""sparse"" : {
+          ""count"" : 3,
+          ""indices"" : {
+            ""bufferView"" : 2,
+            ""byteOffset"" : 0,
+            ""componentType"" : 5123
+          },
+          ""values"" : {
+            ""bufferView"" : 3,
+            ""byteOffset"" : 0
+          }
+        }
+        }, {
+        ""bufferView"" : 1,
+        ""byteOffset"" : 0,
+        ""componentType"" : 5126,
+        ""count"" : 14,
+        ""type"" : ""VEC3"",
+        ""max"" : [ 6.0, 4.0, 0.0 ],
+        ""min"" : [ 0.0, 0.0, 0.0 ],
+        ""sparse"" : {}
+        } ]
+}
+"
+            );
+            
+            Assert.NotNull(gltf);
+            Assert.NotNull(gltf.accessors,"No accessors");
+            Assert.AreEqual(3, gltf.accessors.Length, "Invalid accessor quantity");
+
+            var regular = gltf.accessors[0];
+            Assert.NotNull(regular);
+            Assert.IsNull(regular.sparse);
+            
+            var sparse = gltf.accessors[1];
+            Assert.NotNull(sparse);
+            Assert.AreEqual(14,sparse.count);
+            Assert.NotNull(sparse.sparse);
+            Assert.AreEqual(3,sparse.sparse.count);
+            Assert.NotNull(sparse.sparse.indices);
+            Assert.AreEqual(2,sparse.sparse.indices.bufferView);
+            Assert.AreEqual(0,sparse.sparse.indices.byteOffset);
+            Assert.AreEqual(GLTFComponentType.UnsignedShort,sparse.sparse.indices.componentType);
+            Assert.NotNull(sparse.sparse.values);
+            Assert.AreEqual(3,sparse.sparse.values.bufferView);
+            Assert.AreEqual(0,sparse.sparse.values.byteOffset);
+            
+#if GLTFAST_SAFE
+            var invalid = gltf.accessors[2];
+            Assert.NotNull(invalid);
+            Assert.IsNull(invalid.sparse);
+#else
+            Debug.LogWarning("Invalid Sparse Accessors will break glTFast");
+#endif
+        }
+        
+        [Test]
+        public void MeshTargetNames() {
+            var gltf = JsonParser.ParseJson(@"
+{
+    ""meshes"": [
+        {
+            ""extras"": {
+                ""targetNames"": [
+                    ""Key 1"",""Key 2""
+                ]
+            }
+        },
+        {
+            ""extras"": {
+                ""different"": ""content""
+            }
+        }
+    ]
+}
+"
+            );
+            
+            Assert.NotNull(gltf);
+            Assert.NotNull(gltf.meshes,"No materials");
+            Assert.AreEqual(2, gltf.meshes.Length, "Invalid materials quantity");
+
+            var mat = gltf.meshes[0];
+            Assert.NotNull(mat);
+            Assert.NotNull(mat.extras);
+            Assert.NotNull(mat.extras.targetNames);
+            Assert.NotNull(mat.extras.targetNames);
+            Assert.AreEqual(2, mat.extras.targetNames.Length, "Invalid targetNames quantity");
+            Assert.AreEqual("Key 1", mat.extras.targetNames[0]);
+            Assert.AreEqual("Key 2", mat.extras.targetNames[1]);
+            
+            mat = gltf.meshes[1];
+            Assert.NotNull(mat);
+            Assert.NotNull(mat.extras);
+            Assert.IsNull(mat.extras.targetNames);
+        }
+        
+        [Test]
+        public void MinMagFilter() {
+            var gltf = JsonParser.ParseJson(@"
+{
+    ""samplers"": [{ 
+        },{
+        ""magFilter"": 100,
+        ""minFilter"": 100
+        },{
+        ""magFilter"": 9728,
+        ""minFilter"": 9728
+        },{
+        ""magFilter"": 9729,
+        ""minFilter"": 9729
+        },{
+        ""minFilter"": 9984
+        },{
+        ""minFilter"": 9985
+        },{
+        ""minFilter"": 9986
+        },{
+        ""minFilter"": 9987
+        }
+    ]
+}
+"
+
+            );
+            
+            Assert.NotNull(gltf);
+            Assert.NotNull(gltf.samplers,"No samplers");
+            Assert.AreEqual(8, gltf.samplers.Length, "Invalid samplers quantity");
+
+            var sampler0 = gltf.samplers[0];
+            Assert.NotNull(sampler0);
+            Assert.AreEqual(Sampler.MagFilterMode.Linear,sampler0.magFilter);
+            Assert.AreEqual(Sampler.MinFilterMode.NearestMipmapLinear,sampler0.minFilter);
+            
+            var sampler1 = gltf.samplers[1];
+            Assert.NotNull(sampler1);
+            Assert.AreEqual((Sampler.MagFilterMode) 100,sampler1.magFilter);
+            Assert.AreEqual((Sampler.MinFilterMode) 100,sampler1.minFilter);
+            
+            var sampler2 = gltf.samplers[2];
+            Assert.NotNull(sampler2);
+            Assert.AreEqual(Sampler.MagFilterMode.Nearest,sampler2.magFilter);
+            Assert.AreEqual(Sampler.MinFilterMode.Nearest,sampler2.minFilter);
+            
+            var sampler3 = gltf.samplers[3];
+            Assert.NotNull(sampler3);
+            Assert.AreEqual(Sampler.MagFilterMode.Linear,sampler3.magFilter);
+            Assert.AreEqual(Sampler.MinFilterMode.Linear,sampler3.minFilter);
+            
+            var sampler4 = gltf.samplers[4];
+            Assert.NotNull(sampler4);
+            Assert.AreEqual(Sampler.MagFilterMode.Linear,sampler4.magFilter);
+            Assert.AreEqual(Sampler.MinFilterMode.NearestMipmapNearest,sampler4.minFilter);
+            
+            var sampler5 = gltf.samplers[5];
+            Assert.NotNull(sampler5);
+            Assert.AreEqual(Sampler.MagFilterMode.Linear,sampler5.magFilter);
+            Assert.AreEqual(Sampler.MinFilterMode.LinearMipmapNearest,sampler5.minFilter);
+
+            var sampler6 = gltf.samplers[6];
+            Assert.NotNull(sampler6);
+            Assert.AreEqual(Sampler.MagFilterMode.Linear,sampler6.magFilter);
+            Assert.AreEqual(Sampler.MinFilterMode.NearestMipmapLinear,sampler6.minFilter);
+
+            var sampler7 = gltf.samplers[7];
+            Assert.NotNull(sampler7);
+            Assert.AreEqual(Sampler.MagFilterMode.Linear,sampler7.magFilter);
+            Assert.AreEqual(Sampler.MinFilterMode.LinearMipmapLinear,sampler7.minFilter);
+
         }
     }
 }
