@@ -65,7 +65,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// Minification filter. All valid values correspond to WebGL enums.
         /// </summary>
-        public MinFilterMode minFilter = MinFilterMode.NearestMipmapLinear;
+        public MinFilterMode minFilter = MinFilterMode.Linear;
 
         /// <summary>
         /// s wrapping mode.  All valid values correspond to WebGL enums.

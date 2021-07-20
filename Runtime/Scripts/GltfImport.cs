@@ -843,16 +843,11 @@ namespace GLTFast {
                 if(www.success) {
                     var imageIndex = dl.Key;
                     bool forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
-                    Texture2D txt;
                     // TODO: Loading Jpeg/PNG textures like this creates major frame stalls. Main thread is waiting
                     // on Render thread, which is occupied by Gfx.UploadTextureData for 19 ms for a 2k by 2k texture
-                    if(forceSampleLinear) {
-                        txt = CreateEmptyTexture(gltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
-                        // TODO: Investigate for NativeArray variant to avoid `www.data`
-                        txt.LoadImage(www.data,!imageReadable[imageIndex]);
-                    } else {
-                        txt = www.texture;
-                    }
+                    Texture2D txt = CreateEmptyTexture(gltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
+                    // TODO: Investigate for NativeArray variant to avoid `www.data`
+                    txt.LoadImage(www.data,!imageReadable[imageIndex]);
                     images[imageIndex] = txt;
                     await deferAgent.BreakPoint();
                 } else {
@@ -1700,7 +1695,7 @@ namespace GLTFast {
             if(forceSampleLinear) {
                 txt = new Texture2D(4,4,GraphicsFormat.R8G8B8A8_UNorm,TextureCreationFlags.MipChain);
             } else {
-                txt = new UnityEngine.Texture2D(4, 4);
+                txt = new Texture2D(4, 4);
             }
             txt.name = string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
             return txt;
