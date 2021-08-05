@@ -73,6 +73,11 @@ namespace GLTFast
             return success;
         }
 
+        public bool Instantiate(Transform opt)
+        {
+            importer.InstantiateMainScene(opt);
+            return true;
+        }
         /// <summary>
         /// Creates an instance of the scene specified by the scene index.
         /// </summary>
