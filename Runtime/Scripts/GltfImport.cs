@@ -547,13 +547,13 @@ namespace GLTFast {
             downloadTasks?.Clear();
 
             if (textureDownloadTasks != null) {
-                success = success &&await WaitForTextureDownloads();
+                success = success && await WaitForTextureDownloads();
                 textureDownloadTasks.Clear();
             }
             
 #if KTX_UNITY
             if (ktxDownloadTasks != null) {
-                success = success &&await WaitForKtxDownloads();
+                success = success && await WaitForKtxDownloads();
                 ktxDownloadTasks.Clear();
             }
 #endif // KTX_UNITY
