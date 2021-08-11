@@ -527,7 +527,9 @@ namespace GLTFast {
                 } else {
                     success = await LoadGltf(download.text,url);
                 }
-                if(success) await LoadContent();
+                if(success) {
+                    success = await LoadContent();
+                }
                 success = success && await Prepare();
             } else {
                 logger?.Error(LogCode.Download,download.error,url.ToString());
@@ -539,23 +541,24 @@ namespace GLTFast {
             return success;
         }
 
-        async Task LoadContent() {
+        async Task<bool> LoadContent() {
 
-            await WaitForBufferDownloads();
+            var success = await WaitForBufferDownloads();
             downloadTasks?.Clear();
 
             if (textureDownloadTasks != null) {
-                await WaitForTextureDownloads();
+                success = success &&await WaitForTextureDownloads();
                 textureDownloadTasks.Clear();
             }
             
 #if KTX_UNITY
             if (ktxDownloadTasks != null) {
-                await WaitForKtxDownloads();
+                success = success &&await WaitForKtxDownloads();
                 ktxDownloadTasks.Clear();
             }
-
 #endif // KTX_UNITY
+
+            return success;
         }
 
         async Task<bool> ParseJsonAndLoadBuffers( string json, Uri baseUri ) {
@@ -808,7 +811,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        async Task WaitForBufferDownloads() {
+        async Task<bool> WaitForBufferDownloads() {
             if(downloadTasks!=null) {
                 foreach( var downloadPair in downloadTasks ) {
                     var download = await downloadPair.Value;
@@ -818,6 +821,7 @@ namespace GLTFast {
                         Profiler.EndSample();
                     } else {
                         logger?.Error(LogCode.BufferLoadFailed,download.error,downloadPair.Key.ToString());
+                        return false;
                     }
                 }
             }
@@ -834,9 +838,10 @@ namespace GLTFast {
                 }
                 Profiler.EndSample();
             }
+            return true;
         }
 
-        async Task WaitForTextureDownloads() {
+        async Task<bool> WaitForTextureDownloads() {
             foreach( var dl in textureDownloadTasks ) {
                 var www = await dl.Value;
                 
@@ -857,13 +862,15 @@ namespace GLTFast {
                     await deferAgent.BreakPoint();
                 } else {
                     logger?.Error(LogCode.TextureDownloadFailed,www.error,dl.Key.ToString());
+                    return false;
                 }
             }
+            return true;
         }
 
 
 #if KTX_UNITY
-        async Task WaitForKtxDownloads() {
+        async Task<bool> WaitForKtxDownloads() {
             foreach( var dl in ktxDownloadTasks ) {
                 var www = await dl.Value;
                 if(www.success) {
@@ -873,8 +880,10 @@ namespace GLTFast {
                     images[ktxContext.imageIndex] = textureResult.texture;
                 } else {
                     logger?.Error(LogCode.TextureDownloadFailed,www.error,dl.Key.ToString());
+                    return false;
                 }
             }
+            return true;
         }
 #endif // KTX_UNITY
 
