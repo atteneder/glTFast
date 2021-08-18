@@ -74,6 +74,20 @@ namespace GLTFast
         }
 
         /// <summary>
+        /// Creates an instance of the main scene
+        /// </summary>
+        /// <param name="opt">Parent GameObject.Tranform for new instance</param>
+        /// <returns>True if instantiation was successful.</returns>
+        public bool Instantiate(Transform opt)
+        {
+            if (importer == null) return false;
+            var success = importer.InstantiateMainScene(opt);
+            sceneInstance = instantiator.sceneInstance;
+            currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
+            return success;
+        }
+
+        /// <summary>
         /// Creates an instance of the scene specified by the scene index.
         /// </summary>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
@@ -123,6 +137,15 @@ namespace GLTFast
         }
 
         /// <summary>
+        /// Returns an imported glTF's animation clips.
+        /// Note: Asset has to have finished loading before!
+        /// </summary>
+        /// <returns>glTF animation array if it was loaded successfully, null otherwise.</returns>
+        public UnityEngine.AnimationClip[] GetAnimationClips() {
+            return importer?.GetAnimationClips();
+        }
+
+        /// <summary>
         /// Number of scenes loaded
         /// </summary>
         public int sceneCount => importer?.sceneCount ?? 0;
@@ -142,7 +165,7 @@ namespace GLTFast
                 return null;
             }
         }
-        
+
         protected virtual GameObjectInstantiator GetDefaultInstantiator(ICodeLogger logger) {
             return new GameObjectInstantiator(importer, transform, logger);
         }
