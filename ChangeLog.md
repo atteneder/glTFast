@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 
+### Fixed
+- Improved handling corrupted glTF files (thanks [@zharry][zharry] for #230)
+
 ## [4.2.0] - 2021-07-16
 ### Added
 - Support for morph targets / blend shapes (#8)
@@ -405,3 +409,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [DracoUnity]: https://github.com/atteneder/DracoUnity
 [hybridherbst]: https://github.com/hybridherbst
 [Bersaelor]: https://github.com/Bersaelor
+[zharry]: https://github.com/zharry
