@@ -158,6 +158,19 @@ namespace GLTFast {
 #endif
                 Profiler.EndSample();
             }
+            
+            // Step four:
+            // Further null checks on nodes' extensions
+            if (root.nodes != null) {
+                for (int i = 0; i < root.nodes.Length; i++) {
+                    var e = root.nodes[i].extensions;
+                    if (e != null) {
+                        if (e.EXT_mesh_gpu_instancing?.attributes == null) {
+                            root.nodes[i].extensions = null;
+                        }
+                    }
+                }
+            }
 #if MEASURE_TIMINGS
             stopWatch.Stop();
             var elapsedSeconds = stopWatch.ElapsedMilliseconds / 1000f;

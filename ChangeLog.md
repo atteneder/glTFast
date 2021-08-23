@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 
 ### Fixed
 - Improved handling corrupted glTF files (thanks [@zharry][zharry] for #230)
+- Loading [Ready Player Me][ReadyPlayerMe] avatars with unsupported node extension (`MOZ_hubs_components`) 
 
 ## [4.2.0] - 2021-07-16
 ### Added
@@ -410,3 +411,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [hybridherbst]: https://github.com/hybridherbst
 [Bersaelor]: https://github.com/Bersaelor
 [zharry]: https://github.com/zharry
+[ReadyPlayerMe]: https://readyplayer.me

@@ -70,5 +70,8 @@ namespace GLTFast.Schema {
     [System.Serializable]
     public class NodeExtensions {
         public MeshGpuInstancing EXT_mesh_gpu_instancing;
+        // Whenever an extension is added, the JsonParser
+        // (specifically step four of JsonParser.ParseJson)
+        // needs to be updated!
     }
 }

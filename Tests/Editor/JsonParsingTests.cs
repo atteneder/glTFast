@@ -355,5 +355,68 @@ namespace GLTFast.Tests
             Assert.AreEqual(Sampler.MinFilterMode.LinearMipmapLinear,sampler7.minFilter);
 
         }
+        
+        [Test]
+        public void UnknownNodeExtension() {
+            var gltf = JsonParser.ParseJson(@"
+{
+    ""nodes"": [
+        {
+            ""name"": ""Node0""
+        },
+        {
+            ""extensions"": {},
+            ""name"": ""Node1""
+        },
+        {
+            ""extensions"": {
+                ""MOZ_hubs_components"": {
+                    ""morph-audio-feedback"": {
+                        ""name"": ""mouthOpen"",
+                        ""minValue"": 0.0,
+                        ""maxValue"": 1.0
+                    }
+                }
+            },
+            ""name"": ""Node2""
+        },
+        {
+            ""extensions"": {
+                ""EXT_mesh_gpu_instancing"": {
+                    ""attributes"": {
+                        ""TRANSLATION"": 42
+                    }
+                }
+            },
+            ""name"": ""Node3""
+        }
+    ]
+}
+"
+            );
+            
+            Assert.NotNull(gltf);
+            Assert.NotNull(gltf.nodes,"No nodes");
+            Assert.AreEqual(4, gltf.nodes.Length, "Invalid nodes quantity");
+
+            var node0 = gltf.nodes[0];
+            Assert.NotNull(node0);
+            Assert.IsNull(node0.extensions);
+            
+            var node1 = gltf.nodes[1];
+            Assert.NotNull(node1);
+            Assert.IsNull(node1.extensions);
+            
+            var node2 = gltf.nodes[2];
+            Assert.NotNull(node2);
+            Assert.IsNull(node2.extensions);
+            
+            var node3 = gltf.nodes[3];
+            Assert.NotNull(node3);
+            Assert.NotNull(node3.extensions);
+            Assert.NotNull(node3.extensions.EXT_mesh_gpu_instancing);
+            Assert.NotNull(node3.extensions.EXT_mesh_gpu_instancing.attributes);
+            Assert.AreEqual(42,node3.extensions.EXT_mesh_gpu_instancing.attributes.TRANSLATION);
+        }
     }
 }
