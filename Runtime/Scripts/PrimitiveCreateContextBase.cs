@@ -32,6 +32,9 @@ namespace GLTFast {
         public bool needsNormals;
         public bool needsTangents;
         public abstract bool IsCompleted {get;}
+        
+        public MorphTargetsContext morphTargetsContext;
+        
         public abstract Primitive? CreatePrimitive();
     }
 } 

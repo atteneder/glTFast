@@ -1,12 +1,16 @@
 # Features
 
-- [x] Runtime import
+- [x] Run-time import
 - [x] Fast and small footprint JSON parsing
 - [x] Multi-threading via C# job system
-- [x] Editor import
+- [x] Design-time (Editor) import
 - [ ] Export
 
 ## Core glTF features
+
+The glTF 2.0 specification is fully supported, with only a few minor remarks.
+
+<details><summary>Detailed list of glTF 2.0 core feature support</summary>
 
 - [x] glTF (gltf + buffers + textures)
 - [x] glTF binary (glb)
@@ -50,8 +54,8 @@
 - [x] Texture sampler
   - [x] Filtering (see ([limitations](#Known-issues)))
   - [x] Wrap modes
-- [ ] Morph targets ([issue][MorphTargets])
-  - [ ] Sparse accessors
+- [x] Morph targets
+- [x] <sup>3</sup>Sparse accessors
 - [x] [Skins][Skins] (sponsored by [Embibe](https://www.embibe.com))
 - [x] Animation
   - [x] via legacy Animation System
@@ -61,6 +65,10 @@
 <sup>1</sup>: Untested due to lack of demo files.
 
 <sup>2</sup>: Beta
+
+<sup>3</sup>: Not on all accessor types; morph targets and vertex positions only
+
+</details>
 
 ## Extensions
 
@@ -166,7 +174,6 @@ Legend:
 [IBL]: https://github.com/atteneder/glTFast/issues/108
 [IOR]: https://github.com/atteneder/glTFast/issues/207
 [MeshOpt]: https://github.com/atteneder/glTFast/issues/106
-[MorphTargets]: https://github.com/atteneder/glTFast/issues/8
 [newIssue]: https://github.com/atteneder/glTFast/issues/new
 [PointLights]: https://github.com/atteneder/glTFast/issues/17
 [SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 

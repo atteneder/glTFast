@@ -8,9 +8,6 @@ Ideas to improve this project
 
 Missing:
 
-- Morph targets
-  - Sparse accessors
-  - Animated
 - Primitive types
   - TRIANGLE_STRIP
   - TRIANGLE_FAN

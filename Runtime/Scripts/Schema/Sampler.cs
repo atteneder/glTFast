@@ -60,22 +60,22 @@ namespace GLTFast.Schema
         /// Magnification filter.
         /// Valid values correspond to WebGL enums: `9728` (NEAREST) and `9729` (LINEAR).
         /// </summary>
-        public int magFilter = (int) MagFilterMode.None;
+        public MagFilterMode magFilter = MagFilterMode.Linear;
 
         /// <summary>
         /// Minification filter. All valid values correspond to WebGL enums.
         /// </summary>
-        public int minFilter = (int) MinFilterMode.None;
+        public MinFilterMode minFilter = MinFilterMode.NearestMipmapLinear;
 
         /// <summary>
         /// s wrapping mode.  All valid values correspond to WebGL enums.
         /// </summary>
-        public int wrapS = (int) WrapMode.Repeat;
+        public WrapMode wrapS = WrapMode.Repeat;
 
         /// <summary>
         /// t wrapping mode.  All valid values correspond to WebGL enums.
         /// </summary>
-        public int wrapT = (int) WrapMode.Repeat;
+        public WrapMode wrapT = WrapMode.Repeat;
 
         public TextureWrapMode wrapU {
             get {
@@ -92,15 +92,15 @@ namespace GLTFast.Schema
         public FilterMode filterMode {
             get {
                 switch(minFilter) {
-                case (int)MinFilterMode.LinearMipmapLinear:
+                case MinFilterMode.LinearMipmapLinear:
                     return FilterMode.Trilinear;
-                case (int)MinFilterMode.Nearest:
-                case (int)MinFilterMode.NearestMipmapNearest:
-                case (int)MinFilterMode.NearestMipmapLinear: // incorrect mip-map filtering in this case!
+                case MinFilterMode.Nearest:
+                case MinFilterMode.NearestMipmapNearest:
+                case MinFilterMode.NearestMipmapLinear: // incorrect mip-map filtering in this case!
                     return FilterMode.Point;
                 }
                 switch(magFilter) {
-                case (int)MagFilterMode.Nearest:
+                case MagFilterMode.Nearest:
                     return FilterMode.Point;
                 default:
                     return FilterMode.Bilinear;

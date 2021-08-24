@@ -37,7 +37,14 @@ namespace GLTFast {
 
         public void StartDecode(NativeSlice<byte> data, int weightsAttributeId, int jointsAttributeId) {
             draco = new DracoMeshLoader();
-            dracoTask = draco.ConvertDracoMeshToUnity(data,needsNormals,needsTangents,weightsAttributeId,jointsAttributeId);
+            dracoTask = draco.ConvertDracoMeshToUnity(
+                data,
+                needsNormals,
+                needsTangents,
+                weightsAttributeId,
+                jointsAttributeId,
+                morphTargetsContext!=null
+                );
         }
         
         public override Primitive? CreatePrimitive() {
@@ -53,6 +60,10 @@ namespace GLTFast {
                 mesh.bounds = bounds.Value;
             } else {
                 mesh.RecalculateBounds();
+            }
+            
+            if (morphTargetsContext != null) {
+                morphTargetsContext.ApplyOnMeshAndDispose(mesh);
             }
 
 #if GLTFAST_KEEP_MESH_DATA
