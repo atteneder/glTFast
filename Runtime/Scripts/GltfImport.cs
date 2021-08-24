@@ -1142,7 +1142,7 @@ namespace GLTFast {
                     var img = images[imageIndex];
                     if(imageVariants[imageIndex]==null) {
                         if(txt.sampler>=0) {
-                            gltfRoot.samplers[txt.sampler].Apply(img);
+                            gltfRoot.samplers[txt.sampler].Apply(img, settings.defaultMinFilterMode, settings.defaultMagFilterMode);
                         }
                         imageVariants[imageIndex] = new Dictionary<int, Texture2D>();
                         imageVariants[imageIndex][txt.sampler] = img;
@@ -1158,7 +1158,7 @@ namespace GLTFast {
                             logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
                             if(txt.sampler>=0) {
-                                gltfRoot.samplers[txt.sampler].Apply(newImg);
+                                gltfRoot.samplers[txt.sampler].Apply(newImg, settings.defaultMinFilterMode, settings.defaultMagFilterMode);
                             }
                             imageVariants[imageIndex][txt.sampler] = newImg;
                             textures[textureIndex] = newImg;
@@ -1707,10 +1707,12 @@ namespace GLTFast {
         Texture2D CreateEmptyTexture(Schema.Image img, int index, bool forceSampleLinear) {
             Texture2D txt;
             if(forceSampleLinear) {
-                txt = new Texture2D(4,4,GraphicsFormat.R8G8B8A8_UNorm,TextureCreationFlags.MipChain);
+                TextureCreationFlags mipmapFlags = settings.generateMipMaps ? TextureCreationFlags.MipChain : TextureCreationFlags.None;
+                txt = new Texture2D(4, 4, GraphicsFormat.R8G8B8A8_UNorm, mipmapFlags);
             } else {
-                txt = new UnityEngine.Texture2D(4, 4);
+                txt = new Texture2D(4, 4, UnityEngine.TextureFormat.RGBA32, mipChain: settings.generateMipMaps);
             }
+            txt.anisoLevel = settings.anisotropicFilterLevel;
             txt.name = string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
             return txt;
         }
