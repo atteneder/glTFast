@@ -582,7 +582,7 @@ namespace GLTFast {
                 return false;
             }
 
-            var bufferCount = gltfRoot.buffers.Length;
+            var bufferCount = gltfRoot.buffers?.Length ?? 0;
             if(bufferCount>0) {
                 buffers = new byte[bufferCount][];
                 bufferHandles = new GCHandle?[bufferCount];
@@ -1023,7 +1023,7 @@ namespace GLTFast {
                 return false;
             }
             
-            if(glbBinChunk.HasValue) {
+            if(glbBinChunk.HasValue && binChunks!=null) {
                 binChunks[0] = glbBinChunk.Value;
                 buffers[0] = bytes;
             }
@@ -1320,10 +1320,12 @@ namespace GLTFast {
 #endif
 
             // Dispose all accessor data buffers, except the ones needed for instantiation
-            for (var index = 0; index < accessorData.Length; index++) {
-                if ((accessorUsage[index] & AccessorUsage.RequiredForInstantiation) == 0) {
-                    accessorData[index]?.Dispose();
-                    accessorData[index] = null;
+            if (accessorData != null) {
+                for (var index = 0; index < accessorData.Length; index++) {
+                    if ((accessorUsage[index] & AccessorUsage.RequiredForInstantiation) == 0) {
+                        accessorData[index]?.Dispose();
+                        accessorData[index] = null;
+                    }
                 }
             }
             return success;

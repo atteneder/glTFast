@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Improved handling corrupted glTF files (thanks [@zharry][zharry] for #230)
 - Loading [Ready Player Me][ReadyPlayerMe] avatars with unsupported node extension (`MOZ_hubs_components`) 
+- Loading glTF-binary files that have no buffers or an empty binary chunk (#227)
 
 ## [4.2.0] - 2021-07-16
 ### Added
