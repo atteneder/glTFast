@@ -16,7 +16,9 @@
 using System;
 
 namespace GLTFast {
-    
+
+    using Schema;
+
     [Serializable]
     public class ImportSettings {
         
@@ -48,5 +50,21 @@ namespace GLTFast {
 
         public NameImportMethod nodeNameMethod = NameImportMethod.Original;
         public AnimationMethod animationMethod = AnimationMethod.Legacy;
+
+        /// <summary>
+        /// Set this property to true to enable mip map generation.
+        /// </summary>
+        public bool generateMipMaps = true;
+
+        /// <summary>
+        /// These two properties define the default filtering mode for textures that have no such specification in data
+        /// </summary>
+        public Sampler.MinFilterMode defaultMinFilterMode = Sampler.MinFilterMode.NearestMipmapLinear;
+        public Sampler.MagFilterMode defaultMagFilterMode = Sampler.MagFilterMode.Linear;
+
+        /// <summary>
+        /// This property defines the anisotropic filtering level for textures
+        /// </summary>
+        public int anisotropicFilterLevel = 1;
     }
 }
