@@ -89,8 +89,21 @@ namespace GLTFast.Schema {
             if ((obj == null) || ! this.GetType().Equals(obj.GetType())) {
                 return false;
             }
-            var b = (MeshPrimitive) obj; 
-            return attributes.Equals(b.attributes) && targets==null || targets.Equals(b.targets);
+            var b = (MeshPrimitive) obj;
+
+            if (attributes.Equals(b.attributes)) {
+                if (targets == null) {
+                    return b.targets == null;
+                }
+                if (b.targets!=null && targets.Length == b.targets.Length) {
+                    for (var i = 0; i < targets.Length; i++) {
+                        if (!targets[i].Equals(b.targets[i])) return false;
+                    }
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public override int GetHashCode()
@@ -172,7 +185,7 @@ namespace GLTFast.Schema {
             if ((obj == null) || ! this.GetType().Equals(obj.GetType())) {
                 return false;
             }
-            var b = (Attributes) obj; 
+            var b = (MorphTarget) obj; 
             return POSITION==b.POSITION
                 && NORMAL==b.NORMAL
                 && TANGENT==b.TANGENT
