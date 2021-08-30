@@ -123,29 +123,17 @@ namespace GLTFast.Schema
         }
 
         public void Apply(Texture2D image,
-                          MinFilterMode defaultMinFilter = MinFilterMode.NearestMipmapLinear,
+                          MinFilterMode defaultMinFilter = MinFilterMode.Linear,
                           MagFilterMode defaultMagFilter = MagFilterMode.Linear) {
             if (image == null) return;
             image.wrapModeU = wrapU;
             image.wrapModeV = wrapV;
 
             // Use the default filtering mode for textures that have no such specification in data
-            if (minFilter == MinFilterMode.None && magFilter == MagFilterMode.None)
-            {
-                image.filterMode = ConvertFilterMode(defaultMinFilter, defaultMagFilter);
-            }
-            else if (minFilter == MinFilterMode.None)
-            {
-                image.filterMode = ConvertFilterMode(defaultMinFilter, magFilter);
-            }
-            else if (magFilter == MagFilterMode.None)
-            {
-                image.filterMode = ConvertFilterMode(minFilter, defaultMagFilter);
-            }
-            else
-            {
-                image.filterMode = ConvertFilterMode(minFilter, magFilter);
-            }
+            image.filterMode = ConvertFilterMode(
+                minFilter == MinFilterMode.None ? defaultMinFilter : minFilter,
+                magFilter == MagFilterMode.None ? defaultMagFilter : magFilter
+            );
         }
     }
 }

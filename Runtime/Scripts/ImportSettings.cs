@@ -59,7 +59,7 @@ namespace GLTFast {
         /// <summary>
         /// These two properties define the default filtering mode for textures that have no such specification in data
         /// </summary>
-        public Sampler.MinFilterMode defaultMinFilterMode = Sampler.MinFilterMode.NearestMipmapLinear;
+        public Sampler.MinFilterMode defaultMinFilterMode = Sampler.MinFilterMode.Linear;
         public Sampler.MagFilterMode defaultMagFilterMode = Sampler.MagFilterMode.Linear;
 
         /// <summary>
