@@ -60,12 +60,12 @@ namespace GLTFast.Schema
         /// Magnification filter.
         /// Valid values correspond to WebGL enums: `9728` (NEAREST) and `9729` (LINEAR).
         /// </summary>
-        public MagFilterMode magFilter = MagFilterMode.Linear;
+        public MagFilterMode magFilter = MagFilterMode.None;
 
         /// <summary>
         /// Minification filter. All valid values correspond to WebGL enums.
         /// </summary>
-        public MinFilterMode minFilter = MinFilterMode.NearestMipmapLinear;
+        public MinFilterMode minFilter = MinFilterMode.None;
 
         /// <summary>
         /// s wrapping mode.  All valid values correspond to WebGL enums.
@@ -89,22 +89,23 @@ namespace GLTFast.Schema
             }
         }
 
-        public FilterMode filterMode {
-            get {
-                switch(minFilter) {
+        static FilterMode ConvertFilterMode(MinFilterMode minFilterToConvert, MagFilterMode magFilterToConvert)
+        {
+            switch (minFilterToConvert)
+            {
                 case MinFilterMode.LinearMipmapLinear:
                     return FilterMode.Trilinear;
                 case MinFilterMode.Nearest:
                 case MinFilterMode.NearestMipmapNearest:
                 case MinFilterMode.NearestMipmapLinear: // incorrect mip-map filtering in this case!
                     return FilterMode.Point;
-                }
-                switch(magFilter) {
+            }
+            switch (magFilterToConvert)
+            {
                 case MagFilterMode.Nearest:
                     return FilterMode.Point;
                 default:
                     return FilterMode.Bilinear;
-                }
             }
         }
 
@@ -121,11 +122,18 @@ namespace GLTFast.Schema
             }
         }
 
-        public void Apply(Texture2D image) {
+        public void Apply(Texture2D image,
+                          MinFilterMode defaultMinFilter = MinFilterMode.Linear,
+                          MagFilterMode defaultMagFilter = MagFilterMode.Linear) {
             if (image == null) return;
             image.wrapModeU = wrapU;
             image.wrapModeV = wrapV;
-            image.filterMode = filterMode;
+
+            // Use the default filtering mode for textures that have no such specification in data
+            image.filterMode = ConvertFilterMode(
+                minFilter == MinFilterMode.None ? defaultMinFilter : minFilter,
+                magFilter == MagFilterMode.None ? defaultMagFilter : magFilter
+            );
         }
     }
 }
