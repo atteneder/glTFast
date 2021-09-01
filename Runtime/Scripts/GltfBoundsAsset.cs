@@ -65,7 +65,7 @@ namespace GLTFast
             return success;
         }
 
-        protected override GameObjectInstantiator GetDefaultInstantiator(ICodeLogger logger) {
+        protected override IInstantiator GetDefaultInstantiator(ICodeLogger logger) {
             return new GameObjectBoundsInstantiator(importer, transform, logger);
         }
         

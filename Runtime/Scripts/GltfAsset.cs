@@ -66,5 +66,10 @@ namespace GLTFast
             }
             return success;
         }
+        
+        protected override void PostInstantiation(IInstantiator instantiator, bool success) {
+            sceneInstance = (instantiator as GameObjectInstantiator).sceneInstance;
+            base.PostInstantiation(instantiator, success);
+        }
     }
 }

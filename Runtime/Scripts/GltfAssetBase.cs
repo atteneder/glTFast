@@ -68,8 +68,7 @@ namespace GLTFast
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
             var success = importer.InstantiateMainScene(instantiator);
-            sceneInstance = instantiator.sceneInstance;
-            currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
+            PostInstantiation(instantiator, success);
             return success;
         }
 
@@ -83,8 +82,7 @@ namespace GLTFast
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
             var success = importer.InstantiateScene(instantiator,sceneIndex);
-            sceneInstance = instantiator.sceneInstance;
-            currentSceneId = success ? sceneIndex : (int?)null;
+            PostInstantiation(instantiator, success);
             return success;
         }
 
@@ -143,8 +141,12 @@ namespace GLTFast
             }
         }
         
-        protected virtual GameObjectInstantiator GetDefaultInstantiator(ICodeLogger logger) {
+        protected virtual IInstantiator GetDefaultInstantiator(ICodeLogger logger) {
             return new GameObjectInstantiator(importer, transform, logger);
+        }
+        
+        protected virtual void PostInstantiation(IInstantiator instantiator, bool success) {
+            currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
         }
 
         protected virtual void OnDestroy()
