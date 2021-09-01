@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - 
+### Added
+- Multiple texture related import settings (thanks [@aurorahcx][aurorahcx] for #215)
+  - `generateMipMaps`
+  - `defaultMinFilterMode` (minification)
+  - `defaultMagFilterMode` (magnification)
+  - `anisotropicFilterLevel`
+### Changed
+- `defaultMinFilterMode` was changed to `Linear` (from `NearestMipmapLinear`). This way textures will fall back to bilinear filtering (`FilterMode.Bilinear`) when it was not specified explicitely.
 ### Fixed
 - Set `_METALLICGLOSSMAP` and `_OCCLUSION` keywords in material editor on texture import (thanks [@hybridherbst][hybridherbst] for #237)
 
@@ -417,6 +425,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.0]: https://github.com/atteneder/glTFast/compare/v0.2.0...v0.1.0
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [DracoUnity]: https://github.com/atteneder/DracoUnity
+[aurorahcx]: https://github.com/aurorahcx
 [hybridherbst]: https://github.com/hybridherbst
 [Bersaelor]: https://github.com/Bersaelor
 [zharry]: https://github.com/zharry
