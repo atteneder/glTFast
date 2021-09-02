@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `anisotropicFilterLevel`
 ### Changed
 - `defaultMinFilterMode` was changed to `Linear` (from `NearestMipmapLinear`). This way textures will fall back to bilinear filtering (`FilterMode.Bilinear`) when it was not specified explicitely.
-- `GltfAssetBase.GetDefaultInstantiator` returns the more generic `IInstantiator`interface now, which makes overriding it easier/possible
+- `GameObject` specifics were moved from `GltfAssetBase` into `GltfAsset` in preparation for ECS
 ### Fixed
 - Set `_METALLICGLOSSMAP` and `_OCCLUSION` keywords in material editor on texture import (thanks [@hybridherbst][hybridherbst] for #237)
 
