@@ -34,6 +34,11 @@ namespace GLTFast
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
+        /// <summary>
+        /// Latest scene's instance.  
+        /// </summary>
+        public GameObjectInstantiator.SceneInstance sceneInstance { get; private set; }
+        
         public string FullUrl => streamingAsset
             ? Path.Combine(Application.streamingAssetsPath, url)
             : url;
@@ -67,9 +72,23 @@ namespace GLTFast
             return success;
         }
         
+        protected override IInstantiator GetDefaultInstantiator(ICodeLogger logger) {
+            return new GameObjectInstantiator(importer, transform, logger);
+        }
+        
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
             sceneInstance = (instantiator as GameObjectInstantiator).sceneInstance;
             base.PostInstantiation(instantiator, success);
+        }
+        
+        /// <summary>
+        /// Removes previously instantiated scene(s)
+        /// </summary>
+        public override void ClearScenes() {
+            foreach (Transform child in transform) {
+                Destroy(child.gameObject);
+            }
+            sceneInstance = null;
         }
     }
 }
