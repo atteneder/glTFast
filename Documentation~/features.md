@@ -192,7 +192,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 ### DOTS Setup
 
 - First, go through the official [DOTS project setup](https://docs.unity3d.com/Packages/com.unity.entities@0.17/manual/install_setup.html)
-- Make sure to enable Hybrid Renderer Version 2
+- Make sure to enable [Hybrid Renderer V2](https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@0.11/manual/creating-a-new-hybrid-renderer-project.html)
 - Use `GltfEntityAsset` instead of `GltfAsset`
 - For customized behavior, use the `EntityInstantiator` instead of the `GameObjectInstantiator`
 
