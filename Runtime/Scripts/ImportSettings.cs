@@ -53,6 +53,8 @@ namespace GLTFast {
 
         /// <summary>
         /// Set this property to true to enable mip map generation.
+        /// Note: Creating mipmaps from Jpeg/PNG textures is very slow (at the moment).
+        /// See https://github.com/atteneder/glTFast/issues/220 for details 
         /// </summary>
         public bool generateMipMaps = false;
 

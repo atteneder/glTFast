@@ -58,12 +58,40 @@ async void LoadGltfBinaryFromMemory() {
 Loading via script allows you to:
 
 - Custom download or file loading behaviour (see [`IDownloadProvider`](../Runtime/Scripts/IDownload.cs))
+- Customize loading behaviour (like texture settings) via [`ImportSettings`](#import-settings)
 - Custom material generation (see [`IMaterialGenerator`](../Runtime/Scripts/IMaterialGenerator.cs))
 - Customize [instantiation](#Instantiation)
 - Load glTF once and instantiate its scenes many times (see example [below](#custom-post-loading-behaviour))
 - Access data of glTF scene (for example get material; see example [below](#custom-post-loading-behaviour))
 - Load [reports](#report) allow reacting and communicating incidents during loading and instantiation
 - Tweak and optimize loading performance
+
+#### Import Settings
+
+`GltfImport.Load` accepts an optional instance of [`ImportSettings`](../Runtime/Scripts/ImportSettings.cs) as parameter. Have a look at this class to see all options available. Here's an example usage:
+
+```C#
+async void Start() {
+    var gltf = new GLTFast.GltfImport();
+
+    // Create a settings object and configure it accordingly
+    var settings = new ImportSettings {
+        generateMipMaps = true,
+        anisotropicFilterLevel = 3,
+        nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique
+    };
+    
+    // Load the glTF and pass along the settings
+    var success = await gltf.Load("file:///path/to/file.gltf", settings);
+
+    if (success) {
+        gltf.InstantiateMainScene(new GameObject("glTF").transform);
+    }
+    else {
+        Debug.LogError("Loading glTF failed!");
+    }
+}
+```
 
 #### Custom Post-Loading Behaviour
 
