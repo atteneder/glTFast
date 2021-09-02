@@ -54,7 +54,7 @@ namespace GLTFast {
         /// <summary>
         /// Set this property to true to enable mip map generation.
         /// </summary>
-        public bool generateMipMaps = true;
+        public bool generateMipMaps = false;
 
         /// <summary>
         /// These two properties define the default filtering mode for textures that have no such specification in data

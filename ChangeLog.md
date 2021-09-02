@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 
 ### Added
 - Multiple texture related import settings (thanks [@aurorahcx][aurorahcx] for #215)
-  - `generateMipMaps` (default is true)
+  - `generateMipMaps` (default is false)
   - `defaultMinFilterMode` (minification; default is linear)
   - `defaultMagFilterMode` (magnification; default is linear)
   - `anisotropicFilterLevel` (default is 1)
