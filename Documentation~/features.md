@@ -180,7 +180,7 @@ Legend:
 
 Unity's [Data-Oriented Technology Stack (DOTS)][DOTS] allows users to create high performance gameplay. glTFast has initial, experimental support for it.
 
-Instead of traditional GameObjects, glTFast will instantiate Entities with Hybrid Renderer components.
+Instead of traditional GameObjects, glTFast will instantiate Entities with Hybrid Renderer (version 2) components.
 
 Possibly incomplete list of things that are known to not work with Entities yet:
 
@@ -188,6 +188,13 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 - Skinning
 - Morph targets
 - Cameras
+
+### DOTS Setup
+
+- First, go through the official [DOTS project setup](https://docs.unity3d.com/Packages/com.unity.entities@0.17/manual/install_setup.html)
+- Make sure to enable Hybrid Renderer Version 2
+- Use `GltfEntityAsset` instead of `GltfAsset`
+- For customized behavior, use the `EntityInstantiator` instead of the `GameObjectInstantiator`
 
 ## Known issues
 
