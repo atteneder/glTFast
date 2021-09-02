@@ -1,0 +1,34 @@
+{
+    "name": "glTFast.dots",
+    "rootNamespace": "",
+    "references": [
+        "glTFast",
+        "glTFastSchema",
+        "Unity.Entities",
+        "Unity.Collections",
+        "Unity.Transforms",
+        "Unity.Mathematics",
+        "Unity.Rendering.Hybrid",
+        "Unity.Burst"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.rendering.hybrid",
+            "expression": "0.10.0",
+            "define": "UNITY_DOTS_HYBRID"
+        },
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "1.0.0",
+            "define": "UNITY_ANIMATION"
+        }
+    ],
+    "noEngineReferences": false
+}
