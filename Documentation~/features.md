@@ -1,10 +1,25 @@
 # Features
 
+## Overview
+
 - [x] Run-time import
 - [x] Fast and small footprint JSON parsing
 - [x] Multi-threading via C# job system
 - [x] Design-time (Editor) import
 - [ ] Export
+
+## Platforms
+
+All of Unity's platforms are supported. glTFast is tested or was reported to run on:
+
+- WebGL
+- iOS
+- Android
+- Windows
+- macOS
+- Linux
+- Universal Windows Platform
+- Lumin (Magic Leap)
 
 ## Core glTF features
 

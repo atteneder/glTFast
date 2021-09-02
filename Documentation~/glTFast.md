@@ -6,25 +6,16 @@ It focuses on speed, memory efficiency and a small build footprint.
 
 Two workflows are supported
 
-- Load glTF assets fast and efficient at runtime
+- Load glTF assets at runtime
 - Import glTF assets as prefabs into the asset database at design-time in the Unity Editor
 
 Try the [WebGL Demo][gltfast-web-demo] and check out the [demo project](https://github.com/atteneder/glTFastDemo).
 
 ## Features
 
-*glTFast* supports large parts of the glTF 2.0 specification plus many extensions, works with URP, HDRP, the Built-In render pipe and runs on following platforms:
+*glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
 
-- WebGL
-- iOS
-- Android
-- Windows
-- macOS
-- Linux
-- Universal Windows Platform
-
-
-Get more details from the [list of features/extensions](./features.md).
+See all details at the [list of features/extensions](./features.md).
 
 ## Usage
 
@@ -302,6 +293,7 @@ It also uses fast low-level memory copy methods, [Unity's Job system](https://do
 
 [unity]: https://unity.com
 [gltf]: https://www.khronos.org/gltf
+[gltf-spec]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md
 [gltfast-web-demo]: https://gltf.pixel.engineer
 [gltfasset_component]: ./img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
 [gltfast3to4]: ./img/gltfast3to4.png  "3D scene view showing BoomBoxWithAxes model twice. One with the legacy axis conversion and one with the new orientation"

@@ -14,24 +14,16 @@ It focuses on speed, memory efficiency and a small build footprint.
 
 Two workflows are supported
 
-- Load glTF assets fast and efficient at runtime
+- Load glTF assets at runtime
 - Import glTF assets as prefabs into the asset database at design-time in the Unity Editor
 
 Try the [WebGL Demo][gltfast-web-demo] and check out the [demo project](https://github.com/atteneder/glTFastDemo).
 
 ## Features
 
-*glTFast* supports the glTF 2.0 specification plus many extensions, works with URP, HDRP, the Built-In render pipe and runs on following platforms:
+*glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
 
-- WebGL
-- iOS
-- Android
-- Windows
-- macOS
-- Linux
-- Universal Windows Platform
-
-Get more details from the [list of features/extensions](./Documentation~/features.md).
+See all details at the [list of features/extensions](./Documentation~/features.md).
 
 ## Installing
 
@@ -83,7 +75,7 @@ var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-See [Load via Script](./Documentation~/glTFast.md#load-via-script) in the detailed documentation for instructions how to customize the loading behaviour via script.
+See [Runtime Loading via Script](./Documentation~/glTFast.md#runtime-loading-via-script) in the detailed documentation for instructions how to customize the loading behaviour via script.
 
 #### Customizing Runtime Loading Behavior
 
@@ -169,6 +161,7 @@ limitations under the License.
 
 [unity]: https://unity.com
 [gltf]: https://www.khronos.org/gltf
+[gltf-spec]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md
 [gltfast-web-demo]: https://gltf.pixel.engineer
 [khronos]: https://www.khronos.org
 [embibe]: https://www.embibe.com
