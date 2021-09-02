@@ -4,7 +4,7 @@
 
 - [x] Run-time import
   - [x] GameObjects
-  - [~] Entities (see [DOTS](#data-oriented-technology-stack))
+  - [x] ⚠️ Entities (see [DOTS](#data-oriented-technology-stack))
 - [x] Fast and small footprint JSON parsing
 - [x] Multi-threading via C# job system
 - [x] Design-time (Editor) import
@@ -176,7 +176,7 @@ Legend:
 
 ## Data-Oriented Technology Stack
 
-> Note: DOTS is highly experimental and many features don't work yet. Do not use it for production ready projects!
+> ⚠️ Note: DOTS is highly experimental and many features don't work yet. Do not use it for production ready projects!
 
 Unity's [Data-Oriented Technology Stack (DOTS)][DOTS] allows users to create high performance gameplay. glTFast has initial, experimental support for it.
 
