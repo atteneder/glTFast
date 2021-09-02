@@ -3,6 +3,8 @@
 ## Overview
 
 - [x] Run-time import
+  - [x] GameObjects
+  - [~] Entities (see [DOTS](#data-oriented-technology-stack))
 - [x] Fast and small footprint JSON parsing
 - [x] Multi-threading via C# job system
 - [x] Design-time (Editor) import
@@ -172,6 +174,21 @@ Legend:
 - ℹ Planned (click for issue)
 - ❌ No plan to support (click to create issue)
 
+## Data-Oriented Technology Stack
+
+> Note: DOTS is highly experimental and many features don't work yet. Do not use it for production ready projects!
+
+Unity's [Data-Oriented Technology Stack (DOTS)][DOTS] allows users to create high performance gameplay. glTFast has initial, experimental support for it.
+
+Instead of traditional GameObjects, glTFast will instantiate Entities with Hybrid Renderer components.
+
+Possibly incomplete list of things that are known to not work with Entities yet:
+
+- Animation
+- Skinning
+- Morph targets
+- Cameras
+
 ## Known issues
 
 - <sup>1</sup>Vertex accessors (positions, normals, etc.) that are used across meshes are duplicated and result in higher memory usage and slower loading (see [this comment](https://github.com/atteneder/glTFast/issues/52#issuecomment-583837852))
@@ -185,6 +202,7 @@ Legend:
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
 [AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166  
 [ClearCoat]: https://github.com/atteneder/glTFast/issues/68
+[DOTS]: https://unity.com/dots
 [HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [IBL]: https://github.com/atteneder/glTFast/issues/108
 [IOR]: https://github.com/atteneder/glTFast/issues/207
