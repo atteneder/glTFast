@@ -857,6 +857,7 @@ namespace GLTFast {
                         txt.LoadImage(www.data,!imageReadable[imageIndex]);
                     } else {
                         txt = www.texture;
+                        txt.name = GetImageName(gltfRoot.images[imageIndex], imageIndex);
                     }
                     images[imageIndex] = txt;
                     await deferAgent.BreakPoint();
@@ -1715,8 +1716,12 @@ namespace GLTFast {
                 txt = new Texture2D(4, 4, UnityEngine.TextureFormat.RGBA32, mipChain: settings.generateMipMaps);
             }
             txt.anisoLevel = settings.anisotropicFilterLevel;
-            txt.name = string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
+            txt.name = GetImageName(img, index);
             return txt;
+        }
+
+        static string GetImageName(Image img, int index) {
+            return string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
         }
 
         private void SafeDestroy(UnityEngine.Object obj) {

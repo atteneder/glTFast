@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GameObject` specifics were moved from `GltfAssetBase` into `GltfAsset` in preparation for ECS
 ### Fixed
 - Set `_METALLICGLOSSMAP` and `_OCCLUSION` keywords in material editor on texture import (thanks [@hybridherbst][hybridherbst] for #237)
+- Missing name on some textures
 
 ## [4.2.1] - 2021-08-26
 ### Changed
