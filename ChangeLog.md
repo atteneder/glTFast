@@ -7,10 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 
 ### Added
 - Multiple texture related import settings (thanks [@aurorahcx][aurorahcx] for #215)
-  - `generateMipMaps`
-  - `defaultMinFilterMode` (minification)
-  - `defaultMagFilterMode` (magnification)
-  - `anisotropicFilterLevel`
+  - `generateMipMaps` (default is true)
+  - `defaultMinFilterMode` (minification; default is linear)
+  - `defaultMagFilterMode` (magnification; default is linear)
+  - `anisotropicFilterLevel` (default is 1)
 ### Changed
 - `defaultMinFilterMode` was changed to `Linear` (from `NearestMipmapLinear`). This way textures will fall back to bilinear filtering (`FilterMode.Bilinear`) when it was not specified explicitely.
 - `GameObject` specifics were moved from `GltfAssetBase` into `GltfAsset` in preparation for ECS
