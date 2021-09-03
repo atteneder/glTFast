@@ -421,7 +421,7 @@ namespace GLTFast.Jobs {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
-    //     public Vector2* result;
+    //     public float2* result;
     //
     //     public void Execute(int i)
     //     {
@@ -444,7 +444,7 @@ namespace GLTFast.Jobs {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
-    //     public Vector2* result;
+    //     public float2* result;
     //
     //     public void Execute(int i)
     //     {
@@ -467,7 +467,7 @@ namespace GLTFast.Jobs {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
-    //     public Vector2* result;
+    //     public float2* result;
     //
     //     public void Execute(int i)
     //     {
@@ -490,7 +490,7 @@ namespace GLTFast.Jobs {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
-    //     public Vector2* result;
+    //     public float2* result;
     //
     //     public void Execute(int i)
     //     {
@@ -512,7 +512,7 @@ namespace GLTFast.Jobs {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
-    //     public Vector2* result;
+    //     public float2* result;
     //
     //     public void Execute(int i) {
     //         result[i].x = ((float*)input)[i*2];
