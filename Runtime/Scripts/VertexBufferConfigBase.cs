@@ -133,12 +133,20 @@ namespace GLTFast
             if(inputType == GLTFComponentType.Byte) {
                 // TODO: test positions. did not have test files
                 if (normalized) {
-                    var job = new Jobs.ConvertNormalsInt8ToFloatInterleavedNormalizedJob();
-                    job.Setup((inputByteStride>0) ? inputByteStride : 3, (sbyte*)input,outputByteStride,output);
+                    var job = new Jobs.ConvertNormalsInt8ToFloatInterleavedNormalizedJob {
+                        input = (sbyte*)input,
+                        inputByteStride = (inputByteStride>0) ? inputByteStride : 3,
+                        outputByteStride = outputByteStride,
+                        result = output
+                    };
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
-                    var job = new Jobs.ConvertPositionsInt8ToFloatInterleavedJob();
-                    job.Setup((inputByteStride>0) ? inputByteStride : 3,(sbyte*)input,outputByteStride,output);
+                    var job = new Jobs.ConvertPositionsInt8ToFloatInterleavedJob {
+                        inputByteStride = inputByteStride > 0 ? inputByteStride : 3,
+                        input = (sbyte*)input,
+                        outputByteStride = outputByteStride,
+                        result = output
+                    };
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 }
             } else

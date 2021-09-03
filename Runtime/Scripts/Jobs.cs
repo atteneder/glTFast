@@ -322,13 +322,14 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public int* result;
+        public int3* result;
 
-        public void Execute(int i)
-        {
-            result[i*3] = input[i*3];
-            result[i*3+2] = input[i*3+1];
-            result[i*3+1] = input[i*3+2];
+        public void Execute(int i) {
+            result[i] = new int3(
+                input[i*3],
+                input[i*3+2],
+                input[i*3+1]
+                );
         }
     }
 
@@ -341,13 +342,14 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public int* result;
+        public int3* result;
 
-        public void Execute(int i)
-        {
-            result[i*3] = input[i*3];
-            result[i*3+2] = input[i*3+1];
-            result[i*3+1] = input[i*3+2];
+        public void Execute(int i) {
+            result[i] = new int3(
+                input[i * 3],
+                input[i * 3 + 2],
+                input[i * 3 + 1]
+            );
         }
     }
 
@@ -394,13 +396,15 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public int* result;
+        public int3* result;
 
         public void Execute(int i)
         {
-            result[i*3] = (int)input[i*3];
-            result[i*3+2] = (int)input[i*3+1];
-            result[i*3+1] = (int)input[i*3+2];
+            result[i] = new int3(
+                (int)input[i * 3],
+                (int)input[i * 3 + 1],
+                (int)input[i * 3 + 2]
+            );
         }
     }
     
@@ -534,12 +538,10 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float2* result;
 
-        public void Execute(int i)
-        {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            byte* off = input + inputByteStride*i;
-            *resultV = *off;
-            *(resultV+1) = 1 - *(off+1);
+        public void Execute(int i) {
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var off = input + inputByteStride*i;
+            *resultV = new float2(off[0], 1 - off[1]);
         }
     }
 
@@ -562,10 +564,12 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            byte* off = input + inputByteStride*i;
-            *resultV = *off / 255f;
-            *(resultV+1) = 1 - *(off+1) / 255f;
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var off = input + inputByteStride*i;
+            *resultV = new float2(
+                off[0],
+                1 - off[1] 
+                ) / 255f;
         }
     }
 
@@ -588,10 +592,9 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            ushort* uv = (ushort*) (input + inputByteStride*i);
-            *resultV = *uv;
-            *(resultV+1) = 1 - *(uv+1);
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var uv = (ushort*) (input + inputByteStride*i);
+            *resultV = new float2 (uv[0], 1 - uv[1] );
         }
     }
 
@@ -612,12 +615,13 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float2* result;
 
-        public void Execute(int i)
-        {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            ushort* uv = (ushort*) (input + inputByteStride*i);
-            *resultV = *uv / (float) ushort.MaxValue;
-            *(resultV+1) = 1 - *(uv+1) / (float) ushort.MaxValue;
+        public void Execute(int i) {
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var uv = (ushort*) (input + inputByteStride*i);
+            *resultV = new float2( 
+                uv[0],
+                1 - uv[1]
+                ) / ushort.MaxValue;
         }
     }
 
@@ -638,12 +642,10 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float2* result;
 
-        public void Execute(int i)
-        {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            short* uv = (short*) ((byte*)input + inputByteStride*i);
-            *resultV = *uv;
-            *(resultV+1) = 1 - *(uv+1);
+        public void Execute(int i) {
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var uv = (short*) ((byte*)input + inputByteStride*i);
+            *resultV = new float2(uv[0],1 - uv[1]);
         }
     }
 
@@ -664,12 +666,14 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float2* result;
 
-        public void Execute(int i)
-        {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            short* uv = (short*) ((byte*)input + inputByteStride*i);
-            *resultV = Mathf.Max( *uv / (float) short.MaxValue, -1.0f);
-            *(resultV+1) = 1 - Mathf.Max( *(uv+1) / (float) short.MaxValue, -1.0f);
+        public void Execute(int i) {
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var uv = (short*) ((byte*)input + inputByteStride*i);
+
+            var tmp = new float2(uv[0], uv[1]) / short.MaxValue;
+            var tmp2 = max(tmp, -1f);
+            tmp2.y = 1 - tmp2.y;
+            *resultV = tmp2;
         }
     }
 
@@ -692,10 +696,9 @@ namespace GLTFast.Jobs {
 
         public void Execute(int i)
         {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            sbyte* off = input + inputByteStride*i;
-            *resultV = *off;
-            *(resultV+1) = 1 - *(off+1);
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var off = input + inputByteStride*i;
+            *resultV = new float2(off[0],1 - off[1]);
         }
     }
 
@@ -716,12 +719,13 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float2* result;
 
-        public void Execute(int i)
-        {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            sbyte* off = input + inputByteStride*i;
-            *resultV = Mathf.Max( *off / 127f, -1.0f);
-            *(resultV+1) = 1 - Mathf.Max( *(off+1) / 127f, -1.0f);
+        public void Execute(int i) {
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var off = input + inputByteStride*i;
+            var tmp = new float2(off[0],off[1]) / 127f;
+            var tmp2 = max(tmp, -1f);
+            tmp2.y = 1-tmp2.y; 
+            *resultV = tmp2;
         }
     }
 
@@ -733,19 +737,15 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public float* input;
+        public byte* input;
 
         [WriteOnly]
-        public NativeArray<Color> result;
+        [NativeDisableUnsafePtrRestriction]
+        public float4* result;
 
         public void Execute(int i) {
-            float* src = (float*) (((byte*) input) + (i * inputByteStride));
-            result[i] = new Color {
-                r = src[0],
-                g = src[1],
-                b = src[2],
-                a = 1f
-            };
+            var src = (float3*) (input + (i * inputByteStride));
+            result[i] = new float4(*src, 1f);
         }
     }
 
@@ -760,16 +760,14 @@ namespace GLTFast.Jobs {
         public byte* input;
 
         [WriteOnly]
-        public NativeArray<Color> result;
+        public NativeArray<float4> result;
 
         public void Execute(int i) {
-            byte* src = input + (i * inputByteStride);
-            result[i] = new Color {
-                r = src[0] / (float) byte.MaxValue,
-                g = src[1] / (float) byte.MaxValue,
-                b = src[2] / (float) byte.MaxValue,
-                a = 1f
-            };
+            var src = input + (i * inputByteStride);
+            result[i] = new float4 (
+                new float3(src[0],src[1],src[2]) / byte.MaxValue,
+                1f
+            );
         }
     }
 
@@ -784,18 +782,15 @@ namespace GLTFast.Jobs {
         public ushort* input;
 
         [WriteOnly]
-        public NativeArray<Color> result;
+        public NativeArray<float4> result;
 
         public void Execute(int i)
         {
-            ushort* src = (ushort*)(((byte*)input) + (i * inputByteStride));
-            result[i] = new Color
-            {
-                r = src[0] / (float)ushort.MaxValue,
-                g = src[1] / (float)ushort.MaxValue,
-                b = src[2] / (float)ushort.MaxValue,
-                a = 1f
-            };
+            var src = (ushort*)(((byte*)input) + (i * inputByteStride));
+            result[i] = new float4(
+                new float3(src[0],src[1],src[2]) / ushort.MaxValue,
+                1f
+            );
         }
     }
 
@@ -809,18 +804,18 @@ namespace GLTFast.Jobs {
         public ushort* input;
 
         [WriteOnly]
-        public NativeArray<Color> result;
+        [NativeDisableUnsafePtrRestriction]
+        public float4* result;
 
         public void Execute(int i)
         {
-            ushort* src = (ushort*)(((byte*)input) + (i * inputByteStride));
-            result[i] = new Color
-            {
-                r = src[0] / (float)ushort.MaxValue,
-                g = src[1] / (float)ushort.MaxValue,
-                b = src[2] / (float)ushort.MaxValue,
-                a = src[3] / (float)ushort.MaxValue
-            };
+            var src = (ushort*)(((byte*)input) + (i * inputByteStride));
+            result[i] = new float4(
+                src[0],
+                src[1],
+                src[2],
+                src[3]
+            ) / ushort.MaxValue;
         }
     }
     
@@ -835,18 +830,16 @@ namespace GLTFast.Jobs {
         public byte* input;
 
         [WriteOnly]
-        public NativeArray<Color> result;
+        public NativeArray<float4> result;
 
-        public void Execute(int i)
-        {
-            byte* src = input + (i * inputByteStride);
-            result[i] = new Color
-            {
-                r = src[0] / (float)byte.MaxValue,
-                g = src[1] / (float)byte.MaxValue,
-                b = src[2] / (float)byte.MaxValue,
-                a = src[3] / (float)byte.MaxValue
-            };
+        public void Execute(int i) {
+            var src = input + (i * inputByteStride);
+            result[i] = new float4 (
+                src[0],
+                src[1],
+                src[2],
+                src[3]
+            ) / byte.MaxValue;
         }
     }
 
@@ -881,17 +874,16 @@ namespace GLTFast.Jobs {
     public unsafe struct ConvertVector3FloatToFloatJob : IJobParallelFor {
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public float* input;
+        public float3* input;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public float* result;
+        public float3* result;
 
         public void Execute(int i) {
-            int ti = i*3;
-            result[ti] = -input[ti];
-            result[ti+1] = input[ti+1];
-            result[ti+2] = input[ti+2];
+            var tmp = input[i];
+            tmp.x *= -1;
+            result[i] = tmp;
         }
     }
 
@@ -900,17 +892,17 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public float* input;
+        public float4* input;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public float* result;
+        public float4* result;
 
         public void Execute(int i) {
-            result[i*4] = input[i*4];
-            result[i*4+1] = -input[i*4+1];
-            result[i*4+2] = -input[i*4+2];
-            result[i*4+3] = input[i*4+3];
+            var tmp = input[i];
+            tmp.y *= -1;
+            tmp.z *= -1;
+            result[i] = tmp;
         }
     }
     
@@ -923,13 +915,21 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public float* result;
+        public float4* result;
 
         public void Execute(int i) {
-            result[i*4] = Mathf.Max( input[i*4] / (float) short.MaxValue, -1f );
-            result[i*4+1] = -Mathf.Max( input[i*4+1] / (float) short.MaxValue, -1f );
-            result[i*4+2] = -Mathf.Max( input[i*4+2] / (float) short.MaxValue, -1f );
-            result[i*4+3] = Mathf.Max( input[i*4+3] / (float) short.MaxValue, -1f );
+            var tmp = new float4(
+                input[i * 4],
+                input[i * 4 + 1],
+                input[i * 4 + 2],
+                input[i * 4 + 3]
+            ) / short.MaxValue;
+
+            var tmp2 = max(tmp, -1f);
+            tmp2.y *= -1;
+            tmp2.z *= -1;
+
+            result[i] = tmp2;
         }
     }
 
@@ -946,13 +946,20 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public float* result;
+        public float4* result;
 
         public void Execute(int i) {
-            result[i*4] = Mathf.Max( input[i*4] / 127f, -1f );
-            result[i*4+1] = -Mathf.Max( input[i*4+1] / 127f, -1f );
-            result[i*4+2] = -Mathf.Max( input[i*4+2] / 127f, -1f );
-            result[i*4+3] = Mathf.Max( input[i*4+3] / 127f, -1f );
+            var tmp = new float4(
+                input[i*4],
+                input[i*4+1],
+                input[i*4+2],
+                input[i*4+3]
+            ) / 127f;
+            
+            var tmp2 = max(tmp, -1);
+            tmp2.y *= -1;
+            tmp2.z *= -1;
+            result[i] = tmp2;
         }
     }
 
@@ -974,10 +981,11 @@ namespace GLTFast.Jobs {
         public float2* result;
 
         public void Execute(int i) {
-            float2* resultV = (float2*) (((byte*)result) + (i*outputByteStride));
-            byte* off = input + (i*inputByteStride);
-            *resultV = *(float2*)off;
-            (*resultV).y = 1-(*resultV).y;
+            var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
+            var off = (float2*) (input + (i*inputByteStride));
+            var tmp = *off;
+            tmp.y = 1 - tmp.y;
+            *resultV = tmp;
         }
     }
 
@@ -1002,10 +1010,11 @@ namespace GLTFast.Jobs {
         public float3* result;
 
         public void Execute(int i) {
-            var resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            var off = (float*) (input + i*inputByteStride);
-            *(resultV) = -*((float*)off);
-            *((float2*)(resultV+1)) = *((float2*)(off+1));
+            var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
+            var off = (float3*) (input + i*inputByteStride);
+            var tmp = *off;
+            tmp.x *= -1;
+            *resultV = tmp;
         }
     }
 
@@ -1064,8 +1073,9 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
             byte* off = input + (i*inputByteStride);
-            *resultV = *((float4*)off);
-            (*resultV).z *= -1;
+            var tmp = *((float4*)off);
+            tmp.z *= -1;
+            *resultV = tmp;
         }
     }
 
@@ -1087,8 +1097,8 @@ namespace GLTFast.Jobs {
         public float4* result;
 
         public void Execute(int i) {
-            float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
-            byte* off = input + (i*inputByteStride);
+            var resultV = (float4*) (((byte*)result) + (i*outputByteStride));
+            var off = input + (i*inputByteStride);
             *resultV = *((float4*)off);
         }
     }
@@ -1111,15 +1121,12 @@ namespace GLTFast.Jobs {
         public float4* result;
 
         public void Execute(int i) {
-            float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
-            short* off = (short*) (((byte*)input) + (i*inputByteStride));
-
-            float4 tmp;
-            tmp.x = Mathf.Max( *off / (float) short.MaxValue, -1f );
-            tmp.y = Mathf.Max( *(off+1) / (float) short.MaxValue, -1f );
-            tmp.z = -Mathf.Max( *(off+2) / (float) short.MaxValue, -1f );
-            tmp.w = Mathf.Max( *(off+3) / (float) short.MaxValue, -1f );
-            *resultV = normalize(tmp);
+            var resultV = (float4*) (((byte*)result) + (i*outputByteStride));
+            var off = (short*) (((byte*)input) + (i*inputByteStride));
+            var tmp = new float4(off[0],off[1],off[2],off[3]) / short.MaxValue;
+            var tmp2 = max(tmp, -1f);
+            tmp2.z *= -1;
+            *resultV = normalize(tmp2);
         }
     }
 
@@ -1141,15 +1148,13 @@ namespace GLTFast.Jobs {
         public float4* result;
 
         public void Execute(int i) {
-            float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
-            sbyte* off = input + (i*inputByteStride);
-
-            float4 tmp;
-            tmp.x = Mathf.Max( *off / 127f, -1f );
-            tmp.y = Mathf.Max( *(off+1) / 127f, -1f );
-            tmp.z = -Mathf.Max( *(off+2) / 127f, -1f );
-            tmp.w = Mathf.Max( *(off+3) / 127f, -1f );
-            *resultV = normalize(tmp);
+            var resultV = (float4*) (((byte*)result) + (i*outputByteStride));
+            var off = input + (i*inputByteStride);
+            var tmp = new float4(off[0],off[1],off[2],off[3]) / 127f;
+            var tmp2 = max(tmp, -1f);
+            tmp2.y *= -1;
+            tmp2.z *= -1;
+            *resultV = normalize(tmp2);
         }
     }
 
@@ -1171,11 +1176,9 @@ namespace GLTFast.Jobs {
         public float3* result;
 
         public void Execute(int i) {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            byte* off = input + (inputByteStride*i);
-            *resultV = -*((ushort*)off);
-            *(resultV+1) = *(((ushort*)off)+1);
-            *(resultV+2) = *(((ushort*)off)+2);
+            var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
+            var off = (ushort*) (input + (inputByteStride*i));
+            *resultV = new float3(-off[0], off[1], off[2]);
         }
     }
 
@@ -1197,12 +1200,13 @@ namespace GLTFast.Jobs {
         public float3* result;
 
         public void Execute(int i) {
-            float3* resultV = (float3*) (((byte*)result) + (i*outputByteStride));
-            byte* off = input + (inputByteStride*i);
-            float3 tmp;
-            tmp.x = -*(((ushort*)off)) / (float) ushort.MaxValue;
-            tmp.y = *(((ushort*)off)+1) / (float) ushort.MaxValue;
-            tmp.z = *(((ushort*)off)+2) / (float) ushort.MaxValue;
+            var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
+            var off = (ushort*) (input + (inputByteStride*i));
+            var tmp = new float3(
+                -(off[0] / (float) ushort.MaxValue),
+                off[1] / (float) ushort.MaxValue,
+                off[2] / (float) ushort.MaxValue
+            );
             *resultV = normalize(tmp);
         }
     }
@@ -1226,11 +1230,9 @@ namespace GLTFast.Jobs {
         public int outputByteStride;
 
         public void Execute(int i) {
-            var resultV = (float*)  (((byte*)result) + (i*outputByteStride));
-            byte* off = input + (i*inputByteStride);
-            *resultV = -*(((short*)off));
-            *(resultV+1) = *(((short*)off)+1);
-            *(resultV+2) = *(((short*)off)+2);
+            var resultV = (float3*)  (((byte*)result) + (i*outputByteStride));
+            var off = (short*) (input + (i*inputByteStride));
+            *resultV = new float3(-off[0],off[1],off[2]);
         }
     }
 
@@ -1252,13 +1254,12 @@ namespace GLTFast.Jobs {
         public float3* result;
 
         public void Execute(int i) {
-            float3* resultV = (float3*) (((byte*)result) + (i*outputByteStride));
-            byte* off = input + (i*inputByteStride);
+            var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
+            var off = (short*) (input + (i*inputByteStride));
 
-            float3 tmp;
-            tmp.x = -Mathf.Max( *(((short*)off)) / (float) short.MaxValue, -1.0f);
-            tmp.y = Mathf.Max( *(((short*)off)+1) / (float) short.MaxValue, -1.0f);
-            tmp.z = Mathf.Max( *(((short*)off)+2) / (float) short.MaxValue, -1.0f);
+            var tmp = new float3(off[0], off[1], off[2]) / short.MaxValue;
+            var tmp2 = max(tmp, -1f);
+            tmp2.x *= -1;
             *resultV = normalize(tmp);
         }
     }
@@ -1280,20 +1281,10 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float3* result;
 
-        public unsafe void Setup(int inputByteStride, sbyte* src, int outputByteStride, float3* dst) {
-            this.inputByteStride = inputByteStride;
-            this.input = src;
-            this.outputByteStride = outputByteStride;
-            this.result = dst;
-        }
-
         public void Execute(int i) {
-            float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            sbyte* off = input + (inputByteStride*i);
-
-            *resultV = -*off;
-            *(resultV+1) = *(off+1);
-            *(resultV+2) = *(off+2);
+            var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
+            var off = input + (inputByteStride*i);
+            *resultV = new float3(-off[0], off[1], off[2]);
         }
     }
 
@@ -1314,22 +1305,14 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float3* result;
 
-        public unsafe void Setup(int byteStride, sbyte* src, int outputByteStride, float3* dst) {
-            this.inputByteStride = byteStride;
-            this.input = src;
-            this.outputByteStride = outputByteStride;
-            this.result = dst;
-        }
-
         public void Execute(int i) {
-            float3* resultV = (float3*) (((byte*)result) + (i*outputByteStride));
-            sbyte* off = input + (inputByteStride*i);
+            var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
+            var off = input + (inputByteStride*i);
 
-            float3 tmp;
-            tmp.x = -Mathf.Max(-1,*off/127f);
-            tmp.y = Mathf.Max(-1,*(off+1)/127f);
-            tmp.z = Mathf.Max(-1,*(off+2)/127f);
-            *resultV = normalize(tmp);
+            var tmp = new float3(off[0], off[1], off[2]) / 127f;
+            var tmp2 = max(tmp, -1);
+            tmp2.x *= -1;
+            *resultV = normalize(tmp2);
         }
     }
 
@@ -1351,11 +1334,9 @@ namespace GLTFast.Jobs {
         public float3* result;
         
         public void Execute(int i) {
-            byte* off = input + (i*inputByteStride);
+            var off = input + (i*inputByteStride);
             var resultV = (float3*) (((byte*) result) + (i*outputByteStride));
-            (*resultV).x = -*off;
-            (*resultV).y = *(off+1);
-            (*resultV).z = *(off+2);
+            *resultV = new float3(-off[0],off[1],off[2]);
         }
     }
 
@@ -1377,13 +1358,13 @@ namespace GLTFast.Jobs {
         public float3* result;
 
         public void Execute(int i) {
-            float3* resultV = (float3*) (((byte*)result) + (i*outputByteStride));
-            byte* off = input + (i*inputByteStride);
-
-            float3 tmp;
-            tmp.x = -Mathf.Max(-1,*off/255f);
-            tmp.y = Mathf.Max(-1,*(off+1)/255f);
-            tmp.z = Mathf.Max(-1,*(off+2)/255f);
+            var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
+            var off = input + (i*inputByteStride);
+            var tmp = new float3(
+                -(off[0] / 255f),
+                off[1] / 255f,
+                off[2] / 255f
+            );
             *resultV = normalize(tmp);
         }
     }
@@ -1400,23 +1381,18 @@ namespace GLTFast.Jobs {
 
         [WriteOnly]
         [NativeDisableUnsafePtrRestriction]
-        public uint* result;
+        public uint4* result;
 
         [ReadOnly]
         public int outputByteStride;
 
         public void Execute(int i)
         {
-            uint* resultV = (uint*) (((byte*)result) + (i*outputByteStride));
-            byte* off = (byte*) (input + (i*inputByteStride));
-
-            *resultV = *off;
-            *(resultV+1) = *(off+1);
-            *(resultV+2) = *(off+2);
-            *(resultV+3) = *(off+3);
+            var resultV = (uint4*) (((byte*)result) + (i*outputByteStride));
+            var off = input + (i*inputByteStride);
+            *resultV = new uint4(off[0],off[1],off[2],off[3]);
         }
     }
-
 
     [BurstCompile]
     public unsafe struct ConvertBoneJointsUInt16ToUInt32Job : IJobParallelFor  {
@@ -1430,20 +1406,16 @@ namespace GLTFast.Jobs {
 
         [WriteOnly]
         [NativeDisableUnsafePtrRestriction]
-        public uint* result;
+        public uint4* result;
 
         [ReadOnly]
         public int outputByteStride;
 
         public void Execute(int i)
         {
-            uint* resultV = (uint*) (((byte*)result) + (i*outputByteStride));
-            ushort* off = (ushort*) (input + (i*inputByteStride));
-
-            *resultV = *off;
-            *(resultV+1) = *(off+1);
-            *(resultV+2) = *(off+2);
-            *(resultV+3) = *(off+3);
+            var resultV = (uint4*) (((byte*)result) + (i*outputByteStride));
+            var off = (ushort*) (input + (i*inputByteStride));
+            *resultV = new uint4(off[0],off[1],off[2],off[3]);
         }
     }
 
@@ -1452,39 +1424,29 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Matrix4x4* input;
+        public float4x4* input;
 
         [WriteOnly]
-        public NativeArray<Matrix4x4> result;
+        [NativeDisableUnsafePtrRestriction]
+        public float4x4* result;
 
-        public void Execute(int i)
-        {
-            result[i] = new Matrix4x4(
-                new Vector4(
-                    input[i].m00,
-                    -input[i].m10,
-                    -input[i].m20,
-                    input[i].m30
-                ),
-                new Vector4(
-                    -input[i].m01,
-                    input[i].m11,
-                    input[i].m21,
-                    input[i].m31
-                ),
-                new Vector4(
-                    -input[i].m02,
-                    input[i].m12,
-                    input[i].m22,
-                    input[i].m32
-                ),
-                new Vector4(
-                    -input[i].m03,
-                    input[i].m13,
-                    input[i].m23,
-                    input[i].m33
-                )
-            );
+        public void Execute(int i) {
+            var tmp = input[i].c0;
+            tmp.y *= -1;
+            tmp.z *= -1;
+            result[i].c0 = tmp;
+            
+            tmp = input[i].c1;
+            tmp.x *= -1;
+            result[i].c1 = tmp;
+            
+            tmp = input[i].c2;
+            tmp.x *= -1;
+            result[i].c2 = tmp;
+            
+            tmp = input[i].c3;
+            tmp.x *= -1;
+            result[i].c3 = tmp;
         }
     }
 
@@ -1499,7 +1461,7 @@ namespace GLTFast.Jobs {
         public NativeArray<float> result;
 
         public void Execute(int i) {
-            result[i] = Mathf.Max( input[i] / 127f, -1.0f);
+            result[i] = max( input[i] / 127f, -1.0f);
         }
     }
 
@@ -1529,7 +1491,7 @@ namespace GLTFast.Jobs {
         public NativeArray<float> result;
 
         public void Execute(int i) {
-            result[i] = Mathf.Max( input[i] / (float) short.MaxValue, -1.0f);
+            result[i] = max( input[i] / (float) short.MaxValue, -1.0f);
         }
     }
 

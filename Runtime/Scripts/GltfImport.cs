@@ -36,6 +36,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Mathematics;
 using Debug = UnityEngine.Debug;
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
@@ -2313,7 +2314,7 @@ namespace GLTFast {
                     var job8 = new Jobs.ConvertIndicesUInt8ToInt32FlippedJob();
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job8.input = (byte*)src;
-                        job8.result = (int*)dst;
+                        job8.result = (int3*)dst;
                     }
                     jobHandle = job8.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
@@ -2330,7 +2331,7 @@ namespace GLTFast {
                     var job16 = new Jobs.ConvertIndicesUInt16ToInt32FlippedJob();
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job16.input = (ushort*) src;
-                        job16.result = (int*) dst;
+                        job16.result = (int3*) dst;
                     }
                     jobHandle = job16.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
@@ -2347,7 +2348,7 @@ namespace GLTFast {
                     var job32 = new Jobs.ConvertIndicesUInt32ToInt32FlippedJob();
                     fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
                         job32.input = (uint*) src;
-                        job32.result = (int*) dst;
+                        job32.result = (int3*) dst;
                     }
                     jobHandle = job32.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
@@ -2392,9 +2393,9 @@ namespace GLTFast {
             switch( accessor.componentType ) {
             case GLTFComponentType.Float:
                 var job32 = new Jobs.ConvertMatricesJob();
-                job32.result = matrices;
+                job32.result = (float4x4*)matrices.GetUnsafePtr();
                 fixed( void* src = &(buffer[start]) ) {
-                    job32.input = (Matrix4x4*) src;
+                    job32.input = (float4x4*) src;
                 }
                 jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
                 break;
@@ -2428,9 +2429,9 @@ namespace GLTFast {
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
             case GLTFComponentType.Float when flip: {
-                var job = new ConvertVector3FloatToFloatJob { result = (float*)vectors.GetUnsafePtr() };
+                var job = new ConvertVector3FloatToFloatJob { result = (float3*)vectors.GetUnsafePtr() };
                 fixed( void* src = &(buffer[start]) ) {
-                    job.input = (float*) src;
+                    job.input = (float3*) src;
                 }
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
@@ -2478,17 +2479,17 @@ namespace GLTFast {
             switch( accessor.componentType ) {
             case GLTFComponentType.Float: {
                 var job = new ConvertRotationsFloatToFloatJob {
-                    result = (float*)vectors.GetUnsafePtr()
+                    result = (float4*)vectors.GetUnsafePtr()
                 };
                 fixed( void* src = &(buffer[start]) ) {
-                    job.input = (float*) src;
+                    job.input = (float4*) src;
                 }
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
             }
             case GLTFComponentType.Short: {
                 var job = new ConvertRotationsInt16ToFloatJob {
-                    result = (float*)vectors.GetUnsafePtr()
+                    result = (float4*)vectors.GetUnsafePtr()
                 };
                 fixed( void* src = &(buffer[start]) ) {
                     job.input = (short*) src;
@@ -2498,7 +2499,7 @@ namespace GLTFast {
             }
             case GLTFComponentType.Byte: {
                 var job = new ConvertRotationsInt8ToFloatJob {
-                    result = (float*)vectors.GetUnsafePtr()
+                    result = (float4*)vectors.GetUnsafePtr()
                 };
                 fixed( void* src = &(buffer[start]) ) {
                     job.input = (sbyte*) src;

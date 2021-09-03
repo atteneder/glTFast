@@ -98,7 +98,7 @@ namespace GLTFast {
                     jointsAcc.count,
                     jointsAcc.componentType,
                     jointsByteStride,
-                    (uint*)(vDataPtr+16),
+                    (uint4*)(vDataPtr+16),
                     32,
                     logger
                 );
@@ -171,7 +171,7 @@ namespace GLTFast {
             int count,
             GLTFComponentType inputType,
             int inputByteStride,
-            uint* output,
+            uint4* output,
             int outputByteStride,
             ICodeLogger logger
         )
