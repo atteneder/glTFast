@@ -17,6 +17,7 @@ using System.IO;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -75,7 +76,7 @@ namespace GLTFast {
                     weightsAcc.count,
                     weightsAcc.componentType,
                     weightsByteStride,
-                    (Vector4*)vDataPtr,
+                    (float4*)vDataPtr,
                     32,
                     weightsAcc.normalized
                 );
@@ -134,7 +135,7 @@ namespace GLTFast {
             int count,
             GLTFComponentType inputType,
             int inputByteStride,
-            Vector4* output,
+            float4* output,
             int outputByteStride,
             bool normalized = false
             )

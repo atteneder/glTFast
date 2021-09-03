@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -79,7 +80,7 @@ namespace GLTFast
             int count,
             GLTFComponentType inputType,
             int inputByteStride,
-            Vector3* output,
+            float3* output,
             int outputByteStride,
             bool normalized = false
         ) {
@@ -173,7 +174,7 @@ namespace GLTFast
             int count,
             GLTFComponentType inputType,
             int inputByteStride,
-            Vector4* output,
+            float4* output,
             int outputByteStride,
             bool normalized = false
             )
@@ -223,7 +224,7 @@ namespace GLTFast
             int sparseCount,
             GLTFComponentType indexType,
             GLTFComponentType valueType,
-            Vector3* output,
+            float3* output,
             int outputByteStride,
             ref JobHandle? dependsOn,
             bool normalized = false

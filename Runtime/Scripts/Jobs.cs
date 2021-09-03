@@ -269,7 +269,8 @@ namespace GLTFast.Jobs {
             destination->z = *((uint*)src+2) / (float) uint.MaxValue;
         }
     }
-
+    
+    [BurstCompile]
     public unsafe struct CreateIndicesInt32Job : IJobParallelFor  {
 
         [ReadOnly]
@@ -285,6 +286,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct CreateIndicesInt32FlippedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -296,8 +298,8 @@ namespace GLTFast.Jobs {
             result[i] = i - 2*(i%3-1);
         }
     }
-
-
+    
+    [BurstCompile]
     public unsafe struct ConvertIndicesUInt8ToInt32Job : IJobParallelFor  {
 
         [ReadOnly]
@@ -314,6 +316,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertIndicesUInt8ToInt32FlippedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -332,6 +335,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertIndicesUInt16ToInt32FlippedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -350,6 +354,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertIndicesUInt16ToInt32Job : IJobParallelFor  {
 
         [ReadOnly]
@@ -366,6 +371,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertIndicesUInt32ToInt32Job : IJobParallelFor  {
 
         [ReadOnly]
@@ -382,6 +388,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertIndicesUInt32ToInt32FlippedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -399,12 +406,13 @@ namespace GLTFast.Jobs {
             result[i*3+1] = (int)input[i*3+2];
         }
     }
-
+    
     // /// <summary>
     // /// Unused at the moment in favor of interleaved variant
     // /// TODO: Investigate if this would be faster
     // /// when input is not interleaved 
     // /// </summary>
+    // [BurstCompile]
     // public unsafe struct ConvertUVsUInt8ToFloatJob : IJobParallelFor  {
     //
     //     [ReadOnly]
@@ -427,6 +435,7 @@ namespace GLTFast.Jobs {
     // /// TODO: Investigate if this would be faster
     // /// when input is not interleaved 
     // /// </summary>
+    // [BurstCompile]
     // public unsafe struct ConvertUVsUInt8ToFloatNormalizedJob : IJobParallelFor  {
     //
     //     [ReadOnly]
@@ -449,6 +458,7 @@ namespace GLTFast.Jobs {
     // /// TODO: Investigate if this would be faster
     // /// when input is not interleaved 
     // /// </summary>
+    // [BurstCompile]
     // public unsafe struct ConvertUVsUInt16ToFloatNormalizedJob : IJobParallelFor  {
     //
     //     [ReadOnly]
@@ -471,6 +481,7 @@ namespace GLTFast.Jobs {
     // /// TODO: Investigate if this would be faster
     // /// when input is not interleaved 
     // /// </summary>
+    // [BurstCompile]
     // public unsafe struct ConvertUVsUInt16ToFloatJob : IJobParallelFor  {
     //
     //     [ReadOnly]
@@ -493,6 +504,7 @@ namespace GLTFast.Jobs {
     // /// TODO: Investigate if this would be faster
     // /// when input is not interleaved 
     // /// </summary>
+    // [BurstCompile]
     // public unsafe struct ConvertUVsFloatToFloatJob : IJobParallelFor {
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
@@ -508,7 +520,7 @@ namespace GLTFast.Jobs {
     //     }
     // }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertUVsUInt8ToFloatInterleavedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -523,7 +535,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i)
         {
@@ -534,7 +546,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertUVsUInt8ToFloatInterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -549,7 +561,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i)
         {
@@ -560,7 +572,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertUVsUInt16ToFloatInterleavedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -575,7 +587,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i)
         {
@@ -586,7 +598,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertUVsUInt16ToFloatInterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -601,7 +613,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i)
         {
@@ -612,7 +624,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertUVsInt16ToFloatInterleavedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -627,7 +639,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i)
         {
@@ -638,7 +650,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertUVsInt16ToFloatInterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -653,7 +665,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i)
         {
@@ -664,7 +676,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertUVsInt8ToFloatInterleavedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -679,7 +691,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i)
         {
@@ -690,7 +702,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertUVsInt8ToFloatInterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -705,7 +717,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i)
         {
@@ -716,6 +728,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertColorsRGBFloatToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
@@ -739,6 +752,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertColorsRGBUInt8ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
@@ -762,6 +776,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertColorsRGBUInt16ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
@@ -812,6 +827,7 @@ namespace GLTFast.Jobs {
         }
     }
     
+    [BurstCompile]
     public unsafe struct ConvertColorsRGBAUInt8ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
@@ -837,6 +853,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct MemCopyJob : IJob {
 
         [ReadOnly]
@@ -863,6 +880,7 @@ namespace GLTFast.Jobs {
     /// <summary>
     /// General purpose vector 3 (position or normal) conversion
     /// </summary>
+    [BurstCompile]
     public unsafe struct ConvertVector3FloatToFloatJob : IJobParallelFor {
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -880,6 +898,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertRotationsFloatToFloatJob : IJobParallelFor {
 
         [ReadOnly]
@@ -898,6 +917,7 @@ namespace GLTFast.Jobs {
         }
     }
     
+    [BurstCompile]
     public unsafe struct ConvertRotationsInt16ToFloatJob : IJobParallelFor {
 
         [ReadOnly]
@@ -920,6 +940,7 @@ namespace GLTFast.Jobs {
     /// Converts an array of glTF space quaternions (normalized, signed bytes) to
     /// Quaternions in Unity space (floats). 
     /// </summary>
+    [BurstCompile]
     public unsafe struct ConvertRotationsInt8ToFloatJob : IJobParallelFor {
 
         [ReadOnly]
@@ -938,6 +959,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertUVsFloatToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -952,12 +974,12 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+        public float2* result;
 
         public void Execute(int i) {
-            Vector2* resultV = (Vector2*) (((byte*)result) + (i*outputByteStride));
+            float2* resultV = (float2*) (((byte*)result) + (i*outputByteStride));
             byte* off = input + (i*inputByteStride);
-            *resultV = *(Vector2*)off;
+            *resultV = *(float2*)off;
             (*resultV).y = 1-(*resultV).y;
         }
     }
@@ -965,6 +987,7 @@ namespace GLTFast.Jobs {
     /// <summary>
     /// General purpose vector 3 (position or normal) conversion
     /// </summary>
+    [BurstCompile]
     public unsafe struct ConvertVector3FloatToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -979,19 +1002,20 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
         public void Execute(int i) {
             var resultV = (float*) (((byte*)result) + (i*outputByteStride));
             var off = (float*) (input + i*inputByteStride);
             *(resultV) = -*((float*)off);
-            *((Vector2*)(resultV+1)) = *((Vector2*)(off+1));
+            *((float2*)(resultV+1)) = *((float2*)(off+1));
         }
     }
 
     /// <summary>
     /// General purpose sparse vector 3 (position or normal) conversion
     /// </summary>
+    [BurstCompile]
     unsafe struct ConvertVector3SparseJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1014,7 +1038,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
         public void Execute(int i) {
             var index = indexConverter.Invoke(indexBuffer,i);
@@ -1023,7 +1047,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertTangentsFloatToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1038,16 +1062,17 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector4* result;
+        public float4* result;
 
         public void Execute(int i) {
-            Vector4* resultV = (Vector4*) (((byte*)result) + (i*outputByteStride));
+            float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
             byte* off = input + (i*inputByteStride);
-            *resultV = *((Vector4*)off);
+            *resultV = *((float4*)off);
             (*resultV).z *= -1;
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertBoneWeightsFloatToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1062,15 +1087,16 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector4* result;
+        public float4* result;
 
         public void Execute(int i) {
-            Vector4* resultV = (Vector4*) (((byte*)result) + (i*outputByteStride));
+            float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
             byte* off = input + (i*inputByteStride);
-            *resultV = *((Vector4*)off);
+            *resultV = *((float4*)off);
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertTangentsInt16ToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1085,23 +1111,22 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector4* result;
+        public float4* result;
 
         public void Execute(int i) {
-            Vector4* resultV = (Vector4*) (((byte*)result) + (i*outputByteStride));
+            float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
             short* off = (short*) (((byte*)input) + (i*inputByteStride));
 
-            Vector4 tmp;
+            float4 tmp;
             tmp.x = Mathf.Max( *off / (float) short.MaxValue, -1f );
             tmp.y = Mathf.Max( *(off+1) / (float) short.MaxValue, -1f );
             tmp.z = -Mathf.Max( *(off+2) / (float) short.MaxValue, -1f );
             tmp.w = Mathf.Max( *(off+3) / (float) short.MaxValue, -1f );
-            tmp.Normalize();
-            *resultV = tmp;
+            *resultV = normalize(tmp);
         }
     }
 
-    /// Untested!
+    [BurstCompile]
     public unsafe struct ConvertTangentsInt8ToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1116,24 +1141,24 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector4* result;
+        public float4* result;
 
         public void Execute(int i) {
-            Vector4* resultV = (Vector4*) (((byte*)result) + (i*outputByteStride));
+            float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
             sbyte* off = input + (i*inputByteStride);
 
-            Vector4 tmp;
+            float4 tmp;
             tmp.x = Mathf.Max( *off / 127f, -1f );
             tmp.y = Mathf.Max( *(off+1) / 127f, -1f );
             tmp.z = -Mathf.Max( *(off+2) / 127f, -1f );
             tmp.w = Mathf.Max( *(off+3) / 127f, -1f );
-            tmp.Normalize();
-            *resultV = tmp;
+            *resultV = normalize(tmp);
         }
     }
 
-    public unsafe struct ConvertPositionsUInt16ToFloatInterleavedJob : IJobParallelFor
-    {
+    [BurstCompile]
+    public unsafe struct ConvertPositionsUInt16ToFloatInterleavedJob : IJobParallelFor {
+
         [ReadOnly]
         public int inputByteStride;
 
@@ -1146,7 +1171,7 @@ namespace GLTFast.Jobs {
         
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
         public void Execute(int i) {
             float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
@@ -1157,6 +1182,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertNormalsUInt16ToFloatInterleavedNormalizedJob : IJobParallelFor
     {
         [ReadOnly]
@@ -1171,20 +1197,20 @@ namespace GLTFast.Jobs {
         
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
         public void Execute(int i) {
-            Vector3* resultV = (Vector3*) (((byte*)result) + (i*outputByteStride));
+            float3* resultV = (float3*) (((byte*)result) + (i*outputByteStride));
             byte* off = input + (inputByteStride*i);
-            Vector3 tmp;
+            float3 tmp;
             tmp.x = -*(((ushort*)off)) / (float) ushort.MaxValue;
             tmp.y = *(((ushort*)off)+1) / (float) ushort.MaxValue;
             tmp.z = *(((ushort*)off)+2) / (float) ushort.MaxValue;
-            tmp.Normalize();
-            *resultV = tmp;
+            *resultV = normalize(tmp);
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertPositionsInt16ToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1197,7 +1223,7 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
         [ReadOnly]
         public int outputByteStride;
@@ -1211,6 +1237,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertNormalsInt16ToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1225,21 +1252,21 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
         public void Execute(int i) {
-            Vector3* resultV = (Vector3*) (((byte*)result) + (i*outputByteStride));
+            float3* resultV = (float3*) (((byte*)result) + (i*outputByteStride));
             byte* off = input + (i*inputByteStride);
 
-            Vector3 tmp;
+            float3 tmp;
             tmp.x = -Mathf.Max( *(((short*)off)) / (float) short.MaxValue, -1.0f);
             tmp.y = Mathf.Max( *(((short*)off)+1) / (float) short.MaxValue, -1.0f);
             tmp.z = Mathf.Max( *(((short*)off)+2) / (float) short.MaxValue, -1.0f);
-            tmp.Normalize();
-            *resultV = tmp;
+            *resultV = normalize(tmp);
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertPositionsInt8ToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1254,9 +1281,9 @@ namespace GLTFast.Jobs {
         
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
-        public unsafe void Setup(int inputByteStride, sbyte* src, int outputByteStride, Vector3* dst) {
+        public unsafe void Setup(int inputByteStride, sbyte* src, int outputByteStride, float3* dst) {
             this.inputByteStride = inputByteStride;
             this.input = src;
             this.outputByteStride = outputByteStride;
@@ -1273,6 +1300,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertNormalsInt8ToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1287,9 +1315,9 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
-        public unsafe void Setup(int byteStride, sbyte* src, int outputByteStride, Vector3* dst) {
+        public unsafe void Setup(int byteStride, sbyte* src, int outputByteStride, float3* dst) {
             this.inputByteStride = byteStride;
             this.input = src;
             this.outputByteStride = outputByteStride;
@@ -1297,18 +1325,18 @@ namespace GLTFast.Jobs {
         }
 
         public void Execute(int i) {
-            Vector3* resultV = (Vector3*) (((byte*)result) + (i*outputByteStride));
+            float3* resultV = (float3*) (((byte*)result) + (i*outputByteStride));
             sbyte* off = input + (inputByteStride*i);
 
-            Vector3 tmp;
+            float3 tmp;
             tmp.x = -Mathf.Max(-1,*off/127f);
             tmp.y = Mathf.Max(-1,*(off+1)/127f);
             tmp.z = Mathf.Max(-1,*(off+2)/127f);
-            tmp.Normalize();
-            *resultV = tmp;
+            *resultV = normalize(tmp);
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertPositionsUInt8ToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1323,17 +1351,18 @@ namespace GLTFast.Jobs {
         
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
         
         public void Execute(int i) {
             byte* off = input + (i*inputByteStride);
-            var resultV = (Vector3*) (((byte*) result) + (i*outputByteStride));
+            var resultV = (float3*) (((byte*) result) + (i*outputByteStride));
             (*resultV).x = -*off;
             (*resultV).y = *(off+1);
             (*resultV).z = *(off+2);
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertNormalsUInt8ToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
@@ -1348,21 +1377,21 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public Vector3* result;
+        public float3* result;
 
         public void Execute(int i) {
-            Vector3* resultV = (Vector3*) (((byte*)result) + (i*outputByteStride));
+            float3* resultV = (float3*) (((byte*)result) + (i*outputByteStride));
             byte* off = input + (i*inputByteStride);
 
-            Vector3 tmp;
+            float3 tmp;
             tmp.x = -Mathf.Max(-1,*off/255f);
             tmp.y = Mathf.Max(-1,*(off+1)/255f);
             tmp.z = Mathf.Max(-1,*(off+2)/255f);
-            tmp.Normalize();
-            *resultV = tmp;
+            *resultV = normalize(tmp);
         }
     }
     
+    [BurstCompile]
     public unsafe struct ConvertBoneJointsUInt8ToUInt32Job : IJobParallelFor  {
 
         [ReadOnly]
@@ -1392,6 +1421,7 @@ namespace GLTFast.Jobs {
     }
 
 
+    [BurstCompile]
     public unsafe struct ConvertBoneJointsUInt16ToUInt32Job : IJobParallelFor  {
 
         [ReadOnly]
@@ -1420,6 +1450,7 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertMatricesJob : IJobParallelFor  {
 
         [ReadOnly]
@@ -1460,7 +1491,9 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertScalarInt8ToFloatNormalizedJob : IJobParallelFor {
+
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public sbyte* input;
@@ -1473,7 +1506,9 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertScalarUInt8ToFloatNormalizedJob : IJobParallelFor {
+
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public byte* input;
@@ -1486,7 +1521,9 @@ namespace GLTFast.Jobs {
         }
     }
     
+    [BurstCompile]
     public unsafe struct ConvertScalarInt16ToFloatNormalizedJob : IJobParallelFor {
+
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public short* input;
@@ -1499,7 +1536,9 @@ namespace GLTFast.Jobs {
         }
     }
 
+    [BurstCompile]
     public unsafe struct ConvertScalarUInt16ToFloatNormalizedJob : IJobParallelFor {
+
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public ushort* input;
