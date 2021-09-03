@@ -276,10 +276,7 @@ namespace GLTFast.Jobs {
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public int* result;
-
-        [ReadOnly]
-        public bool lineLoop;
-
+        
         public void Execute(int i)
         {
             result[i] = i;
