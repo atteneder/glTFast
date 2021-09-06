@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `defaultMinFilterMode` was changed to `Linear` (from `NearestMipmapLinear`). This way textures will fall back to bilinear filtering (`FilterMode.Bilinear`) when it was not specified explicitely.
 - `GameObject` specifics were moved from `GltfAssetBase` into `GltfAsset` in preparation for ECS
 ### Fixed
+- Memory corruption when using unsigned byte positions or signed short UVs
 - Set `_METALLICGLOSSMAP` and `_OCCLUSION` keywords in material editor on texture import (thanks [@hybridherbst][hybridherbst] for #237)
 - Missing name on some textures
 

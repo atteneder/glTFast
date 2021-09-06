@@ -604,7 +604,7 @@ namespace GLTFast.Jobs {
         public void Execute(int i)
         {
             float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            short* uv = (short*) (input + inputByteStride*i);
+            short* uv = (short*) ((byte*)input + inputByteStride*i);
             *resultV = *uv;
             *(resultV+1) = 1 - *(uv+1);
         }
@@ -630,7 +630,7 @@ namespace GLTFast.Jobs {
         public void Execute(int i)
         {
             float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
-            short* uv = (short*) (input + inputByteStride*i);
+            short* uv = (short*) ((byte*)input + inputByteStride*i);
             *resultV = Mathf.Max( *uv / (float) short.MaxValue, -1.0f);
             *(resultV) = 1 - Mathf.Max( *(uv+1) / (float) short.MaxValue, -1.0f);
         }
@@ -1316,9 +1316,9 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             byte* off = input + (i*inputByteStride);
             var resultV = (Vector3*) (((byte*) result) + (i*outputByteStride));
-            resultV[i].x = -*off;
-            resultV[i].y = *(off+1);
-            resultV[i].z = *(off+2);
+            (*resultV).x = -*off;
+            (*resultV).y = *(off+1);
+            (*resultV).z = *(off+2);
         }
     }
 
