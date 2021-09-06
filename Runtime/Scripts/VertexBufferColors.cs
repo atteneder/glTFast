@@ -99,7 +99,7 @@ namespace GLTFast {
                 {
                     case GLTFComponentType.UnsignedByte:
                         {
-                            var job = new Jobs.GetColorsVec3UInt8Job {
+                            var job = new Jobs.ConvertColorsRGBUInt8ToRGBAFloatJob {
                                 input = (byte*) input,
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 3,
                                 result = output
@@ -109,7 +109,7 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.Float:
                         {
-                            var job = new Jobs.GetColorsVec3FloatJob {
+                            var job = new Jobs.ConvertColorsRGBFloatToRGBAFloatJob {
                                 input = (float*) input,
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 12,
                                 result = output
@@ -119,7 +119,7 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.UnsignedShort:
                         {
-                            var job = new Jobs.GetColorsVec3UInt16Job {
+                            var job = new Jobs.ConvertColorsRGBUInt16ToRGBAFloatJob {
                                 input = (System.UInt16*)input,
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 6,
                                 result = output
@@ -138,7 +138,7 @@ namespace GLTFast {
                 {
                     case GLTFComponentType.UnsignedByte:
                         {
-                            var job = new Jobs.GetColorsVec4UInt8Job {
+                            var job = new Jobs.ConvertColorsRGBAUInt8ToRGBAFloatJob {
                                 input = (byte*) input,
                                 inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
                                 result = output
@@ -157,7 +157,7 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.UnsignedShort:
                         {
-                            var job = new Jobs.GetColorsVec4UInt16Job {
+                            var job = new Jobs.ConvertColorsInterleavedRGBAUInt16ToRGBAFloatJob {
                                 input = (System.UInt16*) input,
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 8,
                                 result = output

@@ -120,7 +120,7 @@ namespace GLTFast {
             switch( inputType ) { 
             case GLTFComponentType.Float:
                 {
-                    var jobUv = new Jobs.GetVector2sInterleavedJob {
+                    var jobUv = new Jobs.ConvertUVsFloatToFloatInterleavedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 8,
                         input = (byte*) input,
                         outputByteStride = outputByteStride,
@@ -131,7 +131,7 @@ namespace GLTFast {
                 break;
             case GLTFComponentType.UnsignedByte:
                 if (normalized) {
-                    var jobUv = new Jobs.GetUVsUInt8InterleavedNormalizedJob {
+                    var jobUv = new Jobs.ConvertUVsUInt8ToFloatInterleavedNormalizedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 2,
                         input = (byte*) input,
                         outputByteStride = outputByteStride,
@@ -139,7 +139,7 @@ namespace GLTFast {
                     };
                     jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
-                    var jobUv = new Jobs.GetUVsUInt8InterleavedJob {
+                    var jobUv = new Jobs.ConvertUVsUInt8ToFloatInterleavedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 2,
                         input = (byte*) input,
                         outputByteStride = outputByteStride,
@@ -150,7 +150,7 @@ namespace GLTFast {
                 break;
             case GLTFComponentType.UnsignedShort:
                 if (normalized) {
-                    var jobUv = new Jobs.GetUVsUInt16InterleavedNormalizedJob {
+                    var jobUv = new Jobs.ConvertUVsUInt16ToFloatInterleavedNormalizedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 4,
                         input = (byte*) input,
                         outputByteStride = outputByteStride,
@@ -158,7 +158,7 @@ namespace GLTFast {
                     };
                     jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
-                    var jobUv = new Jobs.GetUVsUInt16InterleavedJob {
+                    var jobUv = new Jobs.ConvertUVsUInt16ToFloatInterleavedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 4,
                         input = (byte*) input,
                         outputByteStride = outputByteStride,
@@ -169,7 +169,7 @@ namespace GLTFast {
                 break;
             case GLTFComponentType.Short:
                 if (normalized) {
-                    var job = new Jobs.GetUVsInt16InterleavedNormalizedJob {
+                    var job = new Jobs.ConvertUVsInt16ToFloatInterleavedNormalizedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
                         input = (System.Int16*) input,
                         outputByteStride = outputByteStride,
@@ -177,7 +177,7 @@ namespace GLTFast {
                     };
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
-                    var job = new Jobs.GetUVsInt16InterleavedJob {
+                    var job = new Jobs.ConvertUVsInt16ToFloatInterleavedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
                         input = (System.Int16*) input,
                         outputByteStride = outputByteStride,
@@ -189,7 +189,7 @@ namespace GLTFast {
             case GLTFComponentType.Byte:
                 var byteStride = inputByteStride>0 ? inputByteStride : 2;
                 if (normalized) {
-                    var jobInt8 = new Jobs.GetUVsInt8InterleavedNormalizedJob {
+                    var jobInt8 = new Jobs.ConvertUVsInt8ToFloatInterleavedNormalizedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 2,
                         input = (sbyte*) input,
                         outputByteStride = outputByteStride,
@@ -197,7 +197,7 @@ namespace GLTFast {
                     };
                     jobHandle = jobInt8.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
-                    var jobInt8 = new Jobs.GetUVsInt8InterleavedJob {
+                    var jobInt8 = new Jobs.ConvertUVsInt8ToFloatInterleavedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 2,
                         input = (sbyte*) input,
                         outputByteStride = outputByteStride,

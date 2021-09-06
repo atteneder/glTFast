@@ -143,7 +143,7 @@ namespace GLTFast {
             JobHandle? jobHandle;
             switch(inputType) {
                 case GLTFComponentType.Float:
-                    var jobTangentI = new Jobs.GetVector4sInterleavedJob();
+                    var jobTangentI = new Jobs.ConvertBoneWeightsFloatToFloatInterleavedJob();
                     jobTangentI.inputByteStride = inputByteStride>0 ? inputByteStride : 16;
                     jobTangentI.input = (byte*)input;
                     jobTangentI.outputByteStride = outputByteStride;
@@ -179,7 +179,7 @@ namespace GLTFast {
             JobHandle? jobHandle;
             switch(inputType) {
                 case GLTFComponentType.UnsignedByte:
-                    var jointsUInt8Job = new Jobs.GetJointsUInt8Job();
+                    var jointsUInt8Job = new Jobs.ConvertBoneJointsUInt8ToUInt32Job();
                     jointsUInt8Job.inputByteStride = inputByteStride>0 ? inputByteStride : 4;
                     jointsUInt8Job.input = (byte*)input;
                     jointsUInt8Job.outputByteStride = outputByteStride;
@@ -187,7 +187,7 @@ namespace GLTFast {
                     jobHandle = jointsUInt8Job.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
                 case GLTFComponentType.UnsignedShort:
-                    var jointsUInt16Job = new Jobs.GetJointsUInt16Job();
+                    var jointsUInt16Job = new Jobs.ConvertBoneJointsUInt16ToUInt32Job();
                     jointsUInt16Job.inputByteStride = inputByteStride>0 ? inputByteStride : 8;
                     jointsUInt16Job.input = (byte*)input;
                     jointsUInt16Job.outputByteStride = outputByteStride;
