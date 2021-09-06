@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `defaultMagFilterMode` (magnification; default is linear)
   - `anisotropicFilterLevel` (default is 1)
 ### Changed
-- `defaultMinFilterMode` was changed to `Linear` (from `NearestMipmapLinear`). This way textures will fall back to bilinear filtering (`FilterMode.Bilinear`) when it was not specified explicitely.
+- `defaultMinFilterMode` was changed to `Linear` (from `NearestMipmapLinear`). This way textures will fall back to bilinear filtering (`FilterMode.Bilinear`) when it was not specified explicitly.
 - `GameObject` specifics were moved from `GltfAssetBase` into `GltfAsset` in preparation for ECS
 ### Fixed
 - Memory corruption when using unsigned byte positions or signed short UVs
