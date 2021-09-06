@@ -1312,14 +1312,7 @@ namespace GLTFast.Jobs {
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public Vector3* result;
-
-        public unsafe void Setup(int byteStride, byte* src, int outputByteStride, Vector3* dst) {
-            this.inputByteStride = byteStride;
-            this.input = src;
-            this.outputByteStride = outputByteStride;
-            this.result = dst;
-        }
-
+        
         public void Execute(int i) {
             byte* off = input + (i*inputByteStride);
             var resultV = (Vector3*) (((byte*) result) + (i*outputByteStride));
@@ -1344,13 +1337,6 @@ namespace GLTFast.Jobs {
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public Vector3* result;
-
-        public unsafe void Setup(int byteStride, byte* src, int outputByteStride, Vector3* dst) {
-            this.inputByteStride = byteStride;
-            this.input = src;
-            this.outputByteStride = outputByteStride;
-            this.result = dst;
-        }
 
         public void Execute(int i) {
             Vector3* resultV = (Vector3*) (((byte*)result) + (i*outputByteStride));

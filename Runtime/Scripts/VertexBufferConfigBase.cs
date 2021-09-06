@@ -144,12 +144,20 @@ namespace GLTFast
             if(inputType == GLTFComponentType.UnsignedByte) {
                 // TODO: test. did not have test files
                 if (normalized) {
-                    var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob();
-                    job.Setup((inputByteStride>0) ? inputByteStride : 3,(byte*)input,outputByteStride,output);
+                    var job = new Jobs.GetVector3FromByteInterleavedNormalizedJob {
+                        input = (byte*)input,
+                        inputByteStride = (inputByteStride > 0) ? inputByteStride : 3,
+                        outputByteStride = outputByteStride,
+                        result = output
+                    };
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
-                    var job = new Jobs.GetVector3FromByteInterleavedJob();
-                    job.Setup((inputByteStride>0) ? inputByteStride : 3,(byte*)input,outputByteStride,output);
+                    var job = new Jobs.GetVector3FromByteInterleavedJob {
+                        input = (byte*)input,
+                        inputByteStride = (inputByteStride > 0) ? inputByteStride : 3,
+                        outputByteStride = outputByteStride,
+                        result = output
+                    };
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 }
             } else {
