@@ -397,88 +397,113 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertUVsUInt8ToFloatJob : IJobParallelFor  {
+    // /// <summary>
+    // /// Unused at the moment in favor of interleaved variant
+    // /// TODO: Investigate if this would be faster
+    // /// when input is not interleaved 
+    // /// </summary>
+    // public unsafe struct ConvertUVsUInt8ToFloatJob : IJobParallelFor  {
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public byte* input;
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public Vector2* result;
+    //
+    //     public void Execute(int i)
+    //     {
+    //         result[i].x = input[i*2];
+    //         result[i].y = 1 - input[i*2+1];
+    //     }
+    // }
 
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public byte* input;
+    // /// <summary>
+    // /// Unused at the moment in favor of interleaved variant
+    // /// TODO: Investigate if this would be faster
+    // /// when input is not interleaved 
+    // /// </summary>
+    // public unsafe struct ConvertUVsUInt8ToFloatNormalizedJob : IJobParallelFor  {
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public byte* input;
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public Vector2* result;
+    //
+    //     public void Execute(int i)
+    //     {
+    //         result[i].x = input[i*2] / 255f;
+    //         result[i].y = 1 - input[i*2+1] / 255f;
+    //     }
+    // }
 
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
+    // /// <summary>
+    // /// Unused at the moment in favor of interleaved variant
+    // /// TODO: Investigate if this would be faster
+    // /// when input is not interleaved 
+    // /// </summary>
+    // public unsafe struct ConvertUVsUInt16ToFloatNormalizedJob : IJobParallelFor  {
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public ushort* input;
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public Vector2* result;
+    //
+    //     public void Execute(int i)
+    //     {
+    //         result[i].x = input[i*2] / (float) ushort.MaxValue;
+    //         result[i].y = 1 - input[i*2+1] / (float) ushort.MaxValue;
+    //     }
+    // }
 
-        public void Execute(int i)
-        {
-            result[i].x = input[i*2];
-            result[i].y = 1 - input[i*2+1];
-        }
-    }
+    // /// <summary>
+    // /// Unused at the moment in favor of interleaved variant
+    // /// TODO: Investigate if this would be faster
+    // /// when input is not interleaved 
+    // /// </summary>
+    // public unsafe struct ConvertUVsUInt16ToFloatJob : IJobParallelFor  {
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public ushort* input;
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public Vector2* result;
+    //
+    //     public void Execute(int i)
+    //     {
+    //         result[i].x = input[i*2];
+    //         result[i].y = 1 - input[i*2+1];
+    //     }
+    // }
 
-    public unsafe struct ConvertUVsUInt8ToFloatNormalizedJob : IJobParallelFor  {
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public byte* input;
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
-
-        public void Execute(int i)
-        {
-            result[i].x = input[i*2] / 255f;
-            result[i].y = 1 - input[i*2+1] / 255f;
-        }
-    }
-
-    public unsafe struct ConvertUVsUInt16ToFloatNormalizedJob : IJobParallelFor  {
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public ushort* input;
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
-
-        public void Execute(int i)
-        {
-            result[i].x = input[i*2] / (float) ushort.MaxValue;
-            result[i].y = 1 - input[i*2+1] / (float) ushort.MaxValue;
-        }
-    }
-
-    public unsafe struct ConvertUVsUInt16ToFloatJob : IJobParallelFor  {
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public ushort* input;
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
-
-        public void Execute(int i)
-        {
-            result[i].x = input[i*2];
-            result[i].y = 1 - input[i*2+1];
-        }
-    }
-
-    public unsafe struct ConvertUVsFloatToFloatJob : IJobParallelFor {
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public float* input;
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public Vector2* result;
-
-        public void Execute(int i) {
-            result[i].x = ((float*)input)[i*2];
-            result[i].y = 1-((float*)input)[i*2+1];
-        }
-    }
+    // /// <summary>
+    // /// Unused at the moment in favor of interleaved variant
+    // /// TODO: Investigate if this would be faster
+    // /// when input is not interleaved 
+    // /// </summary>
+    // public unsafe struct ConvertUVsFloatToFloatJob : IJobParallelFor {
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public float* input;
+    //
+    //     [ReadOnly]
+    //     [NativeDisableUnsafePtrRestriction]
+    //     public Vector2* result;
+    //
+    //     public void Execute(int i) {
+    //         result[i].x = ((float*)input)[i*2];
+    //         result[i].y = 1-((float*)input)[i*2+1];
+    //     }
+    // }
 
     /// Untested!
     public unsafe struct ConvertUVsUInt8ToFloatInterleavedJob : IJobParallelFor  {
