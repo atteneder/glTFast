@@ -129,7 +129,7 @@ async void Start() {
 
 Creating actual GameObjects (or Entities) from the imported data (Meshes, Materials) is called instantiation.
 
-You can customize it by providing an implementation of `IInstantiator` ( see [source](../Runtime/Scripts/IInstatiator.cs) and the reference implementation [`GameObjectInstantiator`](../Runtime/Scripts/GameObjectInstantiator.cs) for details).
+You can customize it by providing an implementation of `IInstantiator` ( see [source](../Runtime/Scripts/IInstantiator.cs) and the reference implementation [`GameObjectInstantiator`](../Runtime/Scripts/GameObjectInstantiator.cs) for details).
 
 Inject your custom instantiation like so
 
