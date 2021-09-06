@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System.Runtime.CompilerServices;
 using System;
 using AOT;
 using UnityEngine;
@@ -22,6 +23,8 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
+
+[assembly: InternalsVisibleTo("glTF-test-framework.Tests")]
 
 namespace GLTFast.Jobs {
     
