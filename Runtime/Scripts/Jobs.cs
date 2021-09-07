@@ -944,17 +944,17 @@ namespace GLTFast.Jobs {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
-        public byte* input;
+        public sbyte* input;
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public float* result;
 
         public void Execute(int i) {
-            result[i*4] = Mathf.Max( input[i*4] / (float) short.MaxValue, -1f );
-            result[i*4+1] = -Mathf.Max( input[i*4+1] / (float) short.MaxValue, -1f );
-            result[i*4+2] = -Mathf.Max( input[i*4+2] / (float) short.MaxValue, -1f );
-            result[i*4+3] = Mathf.Max( input[i*4+3] / (float) short.MaxValue, -1f );
+            result[i*4] = Mathf.Max( input[i*4] / 127f, -1f );
+            result[i*4+1] = -Mathf.Max( input[i*4+1] / 127f, -1f );
+            result[i*4+2] = -Mathf.Max( input[i*4+2] / 127f, -1f );
+            result[i*4+3] = Mathf.Max( input[i*4+3] / 127f, -1f );
         }
     }
 

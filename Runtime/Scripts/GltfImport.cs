@@ -2501,7 +2501,7 @@ namespace GLTFast {
                     result = (float*)vectors.GetUnsafePtr()
                 };
                 fixed( void* src = &(buffer[start]) ) {
-                    job.input = (byte*) src;
+                    job.input = (sbyte*) src;
                 }
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
