@@ -152,7 +152,7 @@ namespace GLTFast
                     };
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
-                    var job = new Jobs.ConvertPositionsByteToFloatInterleavedJob {
+                    var job = new Jobs.ConvertPositionsUInt8ToFloatInterleavedJob {
                         input = (byte*)input,
                         inputByteStride = (inputByteStride > 0) ? inputByteStride : 3,
                         outputByteStride = outputByteStride,
