@@ -87,7 +87,7 @@ namespace GLTFast
 
             Profiler.BeginSample("GetVector3sJob");
             if(inputType == GLTFComponentType.Float) {
-                var job = new Jobs.ConvertPositionsFloatToFloatInterleavedJob();
+                var job = new Jobs.ConvertVector3FloatToFloatInterleavedJob();
                 job.inputByteStride = (inputByteStride>0) ? inputByteStride : 12;
                 job.input = (byte*)input;
                 job.outputByteStride = outputByteStride;
@@ -96,7 +96,7 @@ namespace GLTFast
             } else
             if(inputType == GLTFComponentType.UnsignedShort) {
                 if (normalized) {
-                    var job = new Jobs.ConvertPositionsUInt16ToFloatInterleavedNormalizedJob();
+                    var job = new Jobs.ConvertNormalsUInt16ToFloatInterleavedNormalizedJob();
                     job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
                     job.input = (byte*)input;
                     job.outputByteStride = outputByteStride;
@@ -114,7 +114,7 @@ namespace GLTFast
             if(inputType == GLTFComponentType.Short) {
                 // TODO: test. did not have test files
                 if (normalized) {
-                    var job = new Jobs.ConvertPositionsInt16ToFloatInterleavedNormalizedJob();
+                    var job = new Jobs.ConvertNormalsInt16ToFloatInterleavedNormalizedJob();
                     job.inputByteStride = (inputByteStride>0) ? inputByteStride : 6;
                     job.input = (byte*)input;
                     job.outputByteStride = outputByteStride;
@@ -132,7 +132,7 @@ namespace GLTFast
             if(inputType == GLTFComponentType.Byte) {
                 // TODO: test positions. did not have test files
                 if (normalized) {
-                    var job = new Jobs.ConvertPositionsSByteToFloatInterleavedNormalizedJob();
+                    var job = new Jobs.ConvertNormalsSByteToFloatInterleavedNormalizedJob();
                     job.Setup((inputByteStride>0) ? inputByteStride : 3, (sbyte*)input,outputByteStride,output);
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
@@ -144,7 +144,7 @@ namespace GLTFast
             if(inputType == GLTFComponentType.UnsignedByte) {
                 // TODO: test. did not have test files
                 if (normalized) {
-                    var job = new Jobs.ConvertPositionsByteToFloatInterleavedNormalizedJob {
+                    var job = new Jobs.ConvertNormalsByteToFloatInterleavedNormalizedJob {
                         input = (byte*)input,
                         inputByteStride = (inputByteStride > 0) ? inputByteStride : 3,
                         outputByteStride = outputByteStride,
@@ -231,7 +231,7 @@ namespace GLTFast
             JobHandle? jobHandle;
 
             Profiler.BeginSample("GetVector3sSparseJob");
-            var job = new ConvertPositionsSparseJob {
+            var job = new ConvertVector3SparseJob {
                 indexBuffer = (ushort*)indexBuffer,
                 indexConverter = CachedFunction.GetIndexConverter(indexType),
                 inputByteStride = 3*Accessor.GetComponentTypeSize(valueType),

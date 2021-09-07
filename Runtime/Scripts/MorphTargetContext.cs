@@ -145,6 +145,11 @@ namespace GLTFast {
             fixed (void* dest = &(positions[0])) {
                 JobHandle? h = null;
                 if (posData!=null) {
+#if DEBUG
+                    if (posAcc.normalized) {
+                        Debug.LogError("Normalized Positions will likely produce incorrect results. Please report this error at https://github.com/atteneder/glTFast/issues/new?assignees=&labels=bug&template=bug_report.md&title=Normalized%20Positions");
+                    }
+#endif
                     h = VertexBufferConfigBase.GetVector3sJob(
                         posData,
                         posAcc.count,

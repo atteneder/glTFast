@@ -883,7 +883,10 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertPositionsFloatToFloatJob : IJobParallelFor {
+    /// <summary>
+    /// General purpose vector 3 (position or normal) conversion
+    /// </summary>
+    public unsafe struct ConvertVector3FloatToFloatJob : IJobParallelFor {
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public float* input;
@@ -982,7 +985,10 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertPositionsFloatToFloatInterleavedJob : IJobParallelFor {
+    /// <summary>
+    /// General purpose vector 3 (position or normal) conversion
+    /// </summary>
+    public unsafe struct ConvertVector3FloatToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -1006,7 +1012,10 @@ namespace GLTFast.Jobs {
         }
     }
 
-    unsafe struct ConvertPositionsSparseJob : IJobParallelFor {
+    /// <summary>
+    /// General purpose sparse vector 3 (position or normal) conversion
+    /// </summary>
+    unsafe struct ConvertVector3SparseJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -1171,7 +1180,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertPositionsUInt16ToFloatInterleavedNormalizedJob : IJobParallelFor
+    public unsafe struct ConvertNormalsUInt16ToFloatInterleavedNormalizedJob : IJobParallelFor
     {
         [ReadOnly]
         public int inputByteStride;
@@ -1225,7 +1234,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertPositionsInt16ToFloatInterleavedNormalizedJob : IJobParallelFor {
+    public unsafe struct ConvertNormalsInt16ToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -1287,7 +1296,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertPositionsSByteToFloatInterleavedNormalizedJob : IJobParallelFor {
+    public unsafe struct ConvertNormalsSByteToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -1348,7 +1357,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertPositionsByteToFloatInterleavedNormalizedJob : IJobParallelFor {
+    public unsafe struct ConvertNormalsByteToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;

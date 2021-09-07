@@ -2428,7 +2428,7 @@ namespace GLTFast {
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
             case GLTFComponentType.Float when flip: {
-                var job = new ConvertPositionsFloatToFloatJob { result = (float*)vectors.GetUnsafePtr() };
+                var job = new ConvertVector3FloatToFloatJob { result = (float*)vectors.GetUnsafePtr() };
                 fixed( void* src = &(buffer[start]) ) {
                     job.input = (float*) src;
                 }
