@@ -2489,7 +2489,7 @@ namespace GLTFast {
             }
             case GLTFComponentType.Short: {
                 var job = new ConvertRotationsInt16ToFloatJob {
-                    result = (float4*)vectors.GetUnsafePtr()
+                    result = (float*)vectors.GetUnsafePtr()
                 };
                 fixed( void* src = &(buffer[start]) ) {
                     job.input = (short*) src;
@@ -2499,7 +2499,7 @@ namespace GLTFast {
             }
             case GLTFComponentType.Byte: {
                 var job = new ConvertRotationsInt8ToFloatJob {
-                    result = (float4*)vectors.GetUnsafePtr()
+                    result = (float*)vectors.GetUnsafePtr()
                 };
                 fixed( void* src = &(buffer[start]) ) {
                     job.input = (sbyte*) src;
