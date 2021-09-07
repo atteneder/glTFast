@@ -149,7 +149,11 @@ namespace GLTFast {
                     jobTangentI.input = (byte*)input;
                     jobTangentI.outputByteStride = outputByteStride;
                     jobTangentI.result = output;
+#if UNITY_JOBS
+                    jobHandle = jobTangentI.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = jobTangentI.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                     break;
                 // TODO: Complete those cases
                 // case GLTFComponentType.UnsignedShort:

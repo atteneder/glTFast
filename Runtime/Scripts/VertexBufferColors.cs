@@ -163,7 +163,11 @@ namespace GLTFast {
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 8,
                                 result = (float4*)output.GetUnsafePtr()
                             };
+#if UNITY_JOBS
+                            jobHandle = job.ScheduleBatch(output.Length,GltfImport.DefaultBatchCount);
+#else
                             jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+#endif
                         }
                         break;
                     default:
