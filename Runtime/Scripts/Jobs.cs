@@ -1263,7 +1263,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertPositionsSByteToFloatInterleavedJob : IJobParallelFor {
+    public unsafe struct ConvertPositionsInt8ToFloatInterleavedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -1296,7 +1296,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertNormalsSByteToFloatInterleavedNormalizedJob : IJobParallelFor {
+    public unsafe struct ConvertNormalsInt8ToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -1357,7 +1357,7 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertNormalsByteToFloatInterleavedNormalizedJob : IJobParallelFor {
+    public unsafe struct ConvertNormalsUInt8ToFloatInterleavedNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;

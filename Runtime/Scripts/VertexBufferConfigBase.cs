@@ -132,11 +132,11 @@ namespace GLTFast
             if(inputType == GLTFComponentType.Byte) {
                 // TODO: test positions. did not have test files
                 if (normalized) {
-                    var job = new Jobs.ConvertNormalsSByteToFloatInterleavedNormalizedJob();
+                    var job = new Jobs.ConvertNormalsInt8ToFloatInterleavedNormalizedJob();
                     job.Setup((inputByteStride>0) ? inputByteStride : 3, (sbyte*)input,outputByteStride,output);
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 } else {
-                    var job = new Jobs.ConvertPositionsSByteToFloatInterleavedJob();
+                    var job = new Jobs.ConvertPositionsInt8ToFloatInterleavedJob();
                     job.Setup((inputByteStride>0) ? inputByteStride : 3,(sbyte*)input,outputByteStride,output);
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
                 }
@@ -144,7 +144,7 @@ namespace GLTFast
             if(inputType == GLTFComponentType.UnsignedByte) {
                 // TODO: test. did not have test files
                 if (normalized) {
-                    var job = new Jobs.ConvertNormalsByteToFloatInterleavedNormalizedJob {
+                    var job = new Jobs.ConvertNormalsUInt8ToFloatInterleavedNormalizedJob {
                         input = (byte*)input,
                         inputByteStride = (inputByteStride > 0) ? inputByteStride : 3,
                         outputByteStride = outputByteStride,
