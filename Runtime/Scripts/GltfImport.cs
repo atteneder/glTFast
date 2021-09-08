@@ -49,6 +49,10 @@ namespace GLTFast {
     using Loading;
 
     public class GltfImport : IGltfReadable, IGltfBuffers {
+    
+    
+        public static event Action<GameObject, string> ExtrasFound;
+
 
         /// <summary>
         /// JSON parse speed in bytes per second
@@ -1571,6 +1575,12 @@ namespace GLTFast {
                 }
                 
                 instantiator.SetNodeName(nodeIndex,goName);
+                
+                if (node.extras != null)
+                {
+                    GameObject go = ((GameObjectInstantiator)instantiator).GetGameobject(nodeIndex);
+                    ExtrasFound?.Invoke(go, node.extras);
+                }                
 
                 if (node.camera >= 0
                     && gltf.cameras!=null
