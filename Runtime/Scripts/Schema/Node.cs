@@ -66,7 +66,7 @@ namespace GLTFast.Schema {
 
         public NodeExtensions extensions;
         
-        public string extras;
+        public Extras extras;
 
 
     }
