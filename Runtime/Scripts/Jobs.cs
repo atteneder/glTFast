@@ -1147,7 +1147,7 @@ namespace GLTFast.Jobs {
 
             Vector4 tmp;
             tmp.x = Mathf.Max( *off / 127f, -1f );
-            tmp.y = -Mathf.Max( *(off+1) / 127f, -1f );
+            tmp.y = Mathf.Max( *(off+1) / 127f, -1f );
             tmp.z = -Mathf.Max( *(off+2) / 127f, -1f );
             tmp.w = Mathf.Max( *(off+3) / 127f, -1f );
             tmp.Normalize();

@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Missing name on some textures
 - Incorrect rotations from signed byte quaternions
 - Incorrect UVs when using unsigned byte or signed/unsigned short texture coordinates
+- Incorrect values converting signed byte encoded tangents
 
 ## [4.2.1] - 2021-08-26
 ### Changed
