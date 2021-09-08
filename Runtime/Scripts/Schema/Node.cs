@@ -65,6 +65,10 @@ namespace GLTFast.Schema {
         public int camera = -1;
 
         public NodeExtensions extensions;
+        
+        public string extras;
+
+
     }
     
     [System.Serializable]
@@ -73,5 +77,11 @@ namespace GLTFast.Schema {
         // Whenever an extension is added, the JsonParser
         // (specifically step four of JsonParser.ParseJson)
         // needs to be updated!
+    }
+    
+    [System.Serializable]
+    public class Extras
+    {
+        public string data;
     }
 }
