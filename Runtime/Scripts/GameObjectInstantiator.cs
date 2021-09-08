@@ -83,6 +83,11 @@ namespace GLTFast {
         public void SetNodeName(uint nodeIndex, string name) {
             nodes[nodeIndex].name = name ?? $"Node-{nodeIndex}";
         }
+        
+        public GameObject GetGameobject(uint nodeIndex)
+        {
+            return nodes[nodeIndex];
+        }
 
         public virtual void AddPrimitive(
             uint nodeIndex,
