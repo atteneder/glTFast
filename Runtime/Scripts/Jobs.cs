@@ -660,7 +660,7 @@ namespace GLTFast.Jobs {
             float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
             short* uv = (short*) ((byte*)input + inputByteStride*i);
             *resultV = Mathf.Max( *uv / (float) short.MaxValue, -1.0f);
-            *(resultV) = 1 - Mathf.Max( *(uv+1) / (float) short.MaxValue, -1.0f);
+            *(resultV+1) = 1 - Mathf.Max( *(uv+1) / (float) short.MaxValue, -1.0f);
         }
     }
 
@@ -686,7 +686,7 @@ namespace GLTFast.Jobs {
             float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
             sbyte* off = input + inputByteStride*i;
             *resultV = *off;
-            *(resultV) = 1 - *(off+1);
+            *(resultV+1) = 1 - *(off+1);
         }
     }
 
@@ -712,7 +712,7 @@ namespace GLTFast.Jobs {
             float* resultV = (float*) (((byte*)result) + (i*outputByteStride));
             sbyte* off = input + inputByteStride*i;
             *resultV = Mathf.Max( *off / 127f, -1.0f);
-            *(resultV) = 1 - Mathf.Max( *(off+1) / 127f, -1.0f);
+            *(resultV+1) = 1 - Mathf.Max( *(off+1) / 127f, -1.0f);
         }
     }
 

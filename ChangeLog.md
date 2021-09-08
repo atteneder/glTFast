@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set `_METALLICGLOSSMAP` and `_OCCLUSION` keywords in material editor on texture import (thanks [@hybridherbst][hybridherbst] for #237)
 - Missing name on some textures
 - Incorrect rotations from signed byte quaternions
+- Incorrect UVs when using unsigned byte or signed/unsigned short texture coordinates
 
 ## [4.2.1] - 2021-08-26
 ### Changed
