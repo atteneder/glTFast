@@ -402,8 +402,8 @@ namespace GLTFast.Jobs {
         {
             result[i] = new int3(
                 (int)input[i * 3],
-                (int)input[i * 3 + 1],
-                (int)input[i * 3 + 2]
+                (int)input[i * 3 + 2],
+                (int)input[i * 3 + 1]
             );
         }
     }
@@ -585,10 +585,12 @@ namespace GLTFast.Jobs {
         {
             var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
             var off = input + inputByteStride*i;
-            *resultV = new float2(
+            var tmp = new float2(
                 off[0],
-                1 - off[1] 
+                off[1] 
                 ) / 255f;
+            tmp.y = 1-tmp.y;
+            *resultV = tmp;
         }
     }
 
@@ -656,10 +658,12 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             var resultV = (float2*) (((byte*)result) + (i*outputByteStride));
             var uv = (ushort*) (input + inputByteStride*i);
-            *resultV = new float2( 
+            var tmp = new float2( 
                 uv[0],
-                1 - uv[1]
-                ) / ushort.MaxValue;
+                uv[1]
+            ) / ushort.MaxValue;
+            tmp.y = 1 - tmp.y;
+            *resultV = tmp;
         }
     }
 
@@ -1123,7 +1127,7 @@ namespace GLTFast.Jobs {
             
             for (var x = 0; x < count; x++) {
                 var tmp = *off;
-                tmp.y *= -1;
+                tmp.y = 1-tmp.y;
                 *resultV = tmp;
                 
                 resultV = (float2*)((byte*)resultV + outputByteStride);
@@ -1399,7 +1403,6 @@ namespace GLTFast.Jobs {
             for (var x = 0; x < count; x++) {
                 var tmp = new float4(off[0],off[1],off[2],off[3]) / 127f;
                 var tmp2 = max(tmp, -1f);
-                tmp2.y *= -1;
                 tmp2.z *= -1;
                 *resultV = normalize(tmp2);
                 
@@ -1413,7 +1416,6 @@ namespace GLTFast.Jobs {
             var off = input + (i*inputByteStride);
             var tmp = new float4(off[0],off[1],off[2],off[3]) / 127f;
             var tmp2 = max(tmp, -1f);
-            tmp2.y *= -1;
             tmp2.z *= -1;
             *resultV = normalize(tmp2);
         }
@@ -1449,7 +1451,7 @@ namespace GLTFast.Jobs {
             var off = (ushort*) (input + i*inputByteStride);
             
             for (var x = 0; x < count; x++) {
-                *resultV = new float3(-off[0], off[1], off[2]);
+                *resultV = new float3(-(float)off[0], off[1], off[2]);
                 resultV = (float3*)((byte*)resultV + outputByteStride);
                 off = (ushort*)((byte*)off + inputByteStride);
             }
@@ -1591,7 +1593,7 @@ namespace GLTFast.Jobs {
                 var tmp = new float3(off[0], off[1], off[2]) / short.MaxValue;
                 var tmp2 = max(tmp, -1f);
                 tmp2.x *= -1;
-                *resultV = normalize(tmp);
+                *resultV = normalize(tmp2);
                 
                 resultV = (float3*)((byte*)resultV + outputByteStride);
                 off = (short*)((byte*)off + inputByteStride);
@@ -1733,7 +1735,7 @@ namespace GLTFast.Jobs {
             var off = input + i*inputByteStride;
             
             for (var x = 0; x < count; x++) {
-                *resultV = new float3(-off[0],off[1],off[2]);
+                *resultV = new float3(-(float)off[0],off[1],off[2]);
                 resultV = (float3*)((byte*)resultV + outputByteStride);
                 off += inputByteStride;
             }
