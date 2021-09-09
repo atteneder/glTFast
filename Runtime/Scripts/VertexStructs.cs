@@ -23,7 +23,7 @@ namespace GLTFast.Vertex
     struct VPosNormTan {
         public float3 pos;
         public float3 nrm;
-        public float3 tan;
+        public float4 tan;
     }
 
     [StructLayout(LayoutKind.Sequential)]
