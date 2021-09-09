@@ -207,7 +207,11 @@ namespace GLTFast.Materials {
                 }
             }
 
-            if (gltfMaterial.pbrMetallicRoughness!=null) {
+            if (gltfMaterial.pbrMetallicRoughness!=null
+                // If there's a specular-glossiness extension, ignore metallic-roughness
+                // (according to extension specification)
+                && gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness == null)
+            {
                 baseColorLinear = gltfMaterial.pbrMetallicRoughness.baseColor;
                 material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
                 material.SetFloat(roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );

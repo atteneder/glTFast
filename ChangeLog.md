@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Incorrect rotations from signed byte quaternions
 - Incorrect UVs when using unsigned byte or signed/unsigned short texture coordinates
 - Incorrect values converting signed byte encoded tangents
+- Correct specular-glossiness materials in spite of (correct or incorrect) presence of metallic-roughness properties (fixes #241)
 
 ## [4.2.1] - 2021-08-26
 ### Changed
