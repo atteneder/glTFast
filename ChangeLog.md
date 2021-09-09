@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `defaultMinFilterMode` (minification; default is linear)
   - `defaultMagFilterMode` (magnification; default is linear)
   - `anisotropicFilterLevel` (default is 1)
+- Unit tests for all vertex/index buffer conversion jobs
 ### Changed
+- Performance improvement due to enabling Burst compiler on all vertex/index buffer conversion jobs
 - `defaultMinFilterMode` was changed to `Linear` (from `NearestMipmapLinear`). This way textures will fall back to bilinear filtering (`FilterMode.Bilinear`) when it was not specified explicitly.
 - `GameObject` specifics were moved from `GltfAssetBase` into `GltfAsset` in preparation for ECS
 - Exposing glTFast assembly internals to glTF-test-framework
