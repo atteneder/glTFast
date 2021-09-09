@@ -787,29 +787,6 @@ namespace GLTFast.Jobs {
         }
     }
 
-    public unsafe struct ConvertColorsInterleavedRGBAFloatToRGBAFloatJob : IJobParallelFor {
-
-        [ReadOnly]
-        public int inputByteStride;
-
-        [ReadOnly]
-        [NativeDisableUnsafePtrRestriction]
-        public float* input;
-
-        [WriteOnly]
-        public NativeArray<Color> result;
-
-        public void Execute(int i) {
-            float* src = (float*) (((byte*) input) + (i * inputByteStride));
-            result[i] = new Color(
-                src[0],
-                src[1],
-                src[2],
-                src[3]
-            );
-        }
-    }
-
     public unsafe struct ConvertColorsInterleavedRGBAUInt16ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
