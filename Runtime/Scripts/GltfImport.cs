@@ -74,7 +74,7 @@ namespace GLTFast {
             150_000_000;
 #endif
         
-        public const int DefaultBatchCount = 50000;
+        public const int DefaultBatchCount = 512;
 
         const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
         const string ExtTextureBasisu = "KHR_texture_basisu";
