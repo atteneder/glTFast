@@ -21,6 +21,7 @@ using GLTFast.Vertex;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -142,7 +143,7 @@ namespace GLTFast
                         posAcc.count,
                         posAcc.componentType,
                         posByteStride,
-                        (Vector3*) vDataPtr,
+                        (float3*) vDataPtr,
                         outputByteStride,
                         posAcc.normalized
                     );
@@ -156,7 +157,7 @@ namespace GLTFast
                         posAcc.sparse.count,
                         posAcc.sparse.indices.componentType,
                         posAcc.componentType,
-                        (Vector3*) vDataPtr,
+                        (float3*) vDataPtr,
                         outputByteStride,
                         dependsOn: ref h,
                         posAcc.normalized
@@ -188,7 +189,7 @@ namespace GLTFast
                     nrmAcc.count,
                     nrmAcc.componentType,
                     inputByteStride,
-                    (Vector3*) (vDataPtr+12),
+                    (float3*) (vDataPtr+12),
                     outputByteStride,
                     nrmAcc.normalized
                 );
@@ -211,7 +212,7 @@ namespace GLTFast
                     tanAcc.count,
                     tanAcc.componentType,
                     inputByteStride,
-                    (Vector4*) (vDataPtr+24),
+                    (float4*) (vDataPtr+24),
                     outputByteStride,
                     tanAcc.normalized
                 );

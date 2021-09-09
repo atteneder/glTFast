@@ -16,6 +16,7 @@
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -66,7 +67,7 @@ namespace GLTFast {
                     uvAcc.count,
                     uvAcc.componentType,
                     byteStride,
-                    (Vector2*) (vDataPtr+(i*8)),
+                    (float2*) (vDataPtr+(i*8)),
                     outputByteStride,
                     uvAcc.normalized
                 );
@@ -109,7 +110,7 @@ namespace GLTFast {
             int count,
             GLTFComponentType inputType,
             int inputByteStride,
-            Vector2* output,
+            float2* output,
             int outputByteStride,
             bool normalized = false
             )
@@ -126,7 +127,11 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
+#if UNITY_JOBS
+                    jobHandle = jobUv.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                 }
                 break;
             case GLTFComponentType.UnsignedByte:
@@ -145,7 +150,11 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
+#if UNITY_JOBS
+                    jobHandle = jobUv.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                 }
                 break;
             case GLTFComponentType.UnsignedShort:
@@ -164,7 +173,11 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
+#if UNITY_JOBS
+                    jobHandle = jobUv.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = jobUv.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                 }
                 break;
             case GLTFComponentType.Short:
@@ -175,7 +188,11 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
+#if UNITY_JOBS
+                    jobHandle = job.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                 } else {
                     var job = new Jobs.ConvertUVsInt16ToFloatInterleavedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
@@ -183,7 +200,11 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
+#if UNITY_JOBS
+                    jobHandle = job.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                 }
                 break;
             case GLTFComponentType.Byte:
@@ -195,7 +216,11 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
+#if UNITY_JOBS
+                    jobHandle = jobInt8.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = jobInt8.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                 } else {
                     var jobInt8 = new Jobs.ConvertUVsInt8ToFloatInterleavedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 2,
@@ -203,7 +228,11 @@ namespace GLTFast {
                         outputByteStride = outputByteStride,
                         result = output
                     };
+#if UNITY_JOBS
+                    jobHandle = jobInt8.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = jobInt8.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                 }
                 break;
             default:

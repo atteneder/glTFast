@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using GLTFast.Schema;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -155,7 +156,7 @@ namespace GLTFast {
                         posAcc.count,
                         posAcc.componentType,
                         posByteStride,
-                        (Vector3*)dest,
+                        (float3*)dest,
                         12,
                         posAcc.normalized
                     );
@@ -177,7 +178,7 @@ namespace GLTFast {
                         posAcc.sparse.count,
                         posAcc.sparse.indices.componentType,
                         posAcc.componentType,
-                        (Vector3*) dest,
+                        (float3*) dest,
                         12,
                         dependsOn: ref h,
                         posAcc.normalized
@@ -201,7 +202,7 @@ namespace GLTFast {
                             nrmAcc.count,
                             nrmAcc.componentType,
                             nrmInputByteStride,
-                            (Vector3*)dest,
+                            (float3*)dest,
                             12,
                             nrmAcc.normalized
                         );
@@ -223,7 +224,7 @@ namespace GLTFast {
                             nrmAcc.sparse.count,
                             nrmAcc.sparse.indices.componentType,
                             nrmAcc.componentType,
-                            (Vector3*) dest,
+                            (float3*) dest,
                             12,
                             dependsOn: ref h,
                             nrmAcc.normalized
@@ -248,7 +249,7 @@ namespace GLTFast {
                             tanAcc.count,
                             tanAcc.componentType,
                             tanInputByteStride,
-                            (Vector3*)dest,
+                            (float3*)dest,
                             12,
                             tanAcc.normalized
                         );
@@ -270,7 +271,7 @@ namespace GLTFast {
                             tanAcc.sparse.count,
                             tanAcc.sparse.indices.componentType,
                             tanAcc.componentType,
-                            (Vector3*) dest,
+                            (float3*) dest,
                             12,
                             dependsOn: ref h,
                             tanAcc.normalized

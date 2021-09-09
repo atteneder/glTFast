@@ -16,6 +16,7 @@
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -36,7 +37,7 @@ namespace GLTFast {
     }
 
     class VertexBufferColors : VertexBufferColorsBase {
-        NativeArray<Color> vData;
+        NativeArray<float4> vData;
 
         public override unsafe bool ScheduleVertexColorJob(IGltfBuffers buffers, int colorAccessorIndex, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexColorJob");
@@ -45,7 +46,7 @@ namespace GLTFast {
             if (colorAcc.isSparse) {
                 logger.Error(LogCode.SparseAccessor,"color");
             }
-            vData = new NativeArray<Color>(colorAcc.count, VertexBufferConfigBase.defaultAllocator);
+            vData = new NativeArray<float4>(colorAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();
             
@@ -87,7 +88,7 @@ namespace GLTFast {
             GLTFComponentType inputType,
             GLTFAccessorAttributeType attributeType,
             int inputByteStride,
-            NativeArray<Color> output
+            NativeArray<float4> output
             )
         {
             Profiler.BeginSample("PrepareColors32");
@@ -110,9 +111,9 @@ namespace GLTFast {
                     case GLTFComponentType.Float:
                         {
                             var job = new Jobs.ConvertColorsRGBFloatToRGBAFloatJob {
-                                input = (float*) input,
+                                input = (byte*) input,
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 12,
-                                result = output
+                                result = (float4*)output.GetUnsafePtr()
                             };
                             jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
@@ -160,9 +161,13 @@ namespace GLTFast {
                             var job = new Jobs.ConvertColorsInterleavedRGBAUInt16ToRGBAFloatJob {
                                 input = (System.UInt16*) input,
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 8,
-                                result = output
+                                result = (float4*)output.GetUnsafePtr()
                             };
+#if UNITY_JOBS
+                            jobHandle = job.ScheduleBatch(output.Length,GltfImport.DefaultBatchCount);
+#else
                             jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+#endif
                         }
                         break;
                     default:

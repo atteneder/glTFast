@@ -17,6 +17,7 @@ using System.IO;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
@@ -75,7 +76,7 @@ namespace GLTFast {
                     weightsAcc.count,
                     weightsAcc.componentType,
                     weightsByteStride,
-                    (Vector4*)vDataPtr,
+                    (float4*)vDataPtr,
                     32,
                     weightsAcc.normalized
                 );
@@ -97,7 +98,7 @@ namespace GLTFast {
                     jointsAcc.count,
                     jointsAcc.componentType,
                     jointsByteStride,
-                    (uint*)(vDataPtr+16),
+                    (uint4*)(vDataPtr+16),
                     32,
                     logger
                 );
@@ -134,7 +135,7 @@ namespace GLTFast {
             int count,
             GLTFComponentType inputType,
             int inputByteStride,
-            Vector4* output,
+            float4* output,
             int outputByteStride,
             bool normalized = false
             )
@@ -148,7 +149,11 @@ namespace GLTFast {
                     jobTangentI.input = (byte*)input;
                     jobTangentI.outputByteStride = outputByteStride;
                     jobTangentI.result = output;
+#if UNITY_JOBS
+                    jobHandle = jobTangentI.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
                     jobHandle = jobTangentI.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
                     break;
                 // TODO: Complete those cases
                 // case GLTFComponentType.UnsignedShort:
@@ -170,7 +175,7 @@ namespace GLTFast {
             int count,
             GLTFComponentType inputType,
             int inputByteStride,
-            uint* output,
+            uint4* output,
             int outputByteStride,
             ICodeLogger logger
         )

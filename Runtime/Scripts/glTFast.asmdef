@@ -7,6 +7,8 @@
         "Ktx",
         "Unity.Mathematics",
         "Unity.Burst",
+        "Unity.Collections",
+        "Unity.Jobs",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
@@ -47,6 +49,11 @@
             "name": "com.unity.modules.animation",
             "expression": "1.0.0",
             "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.unity.jobs",
+            "expression": "0.2.0",
+            "define": "UNITY_JOBS"
         }
     ],
     "noEngineReferences": false
