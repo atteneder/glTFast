@@ -49,7 +49,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
   - [x] Built-in Render Pipeline
 - Primitive Types
   - [x] TRIANGLES
-  - [x] <sup>1</sup>POINTS
+  - [x] POINTS
   - [x] <sup>1</sup>LINES
   - [x] LINE_STRIP
   - [x] <sup>1</sup>LINE_LOOP

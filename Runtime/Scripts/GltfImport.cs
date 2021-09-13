@@ -2213,7 +2213,6 @@ namespace GLTFast {
                 c.topology = MeshTopology.Triangles;
                 break;
             case DrawMode.Points:
-                logger?.Error(LogCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Points;
                 break;
             case DrawMode.Lines:
