@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Point clouds (POINTS primitive mode) are approved now - removed error log
+### Fixed
+- Avoid Burst compiler issue on Windows by using `UnsafeUtility.MemCpy` over `System.Buffer.MemoryCopy` (#245)
 
 ## [4.3.0] - 2021-09-10
 ### Added

@@ -1007,12 +1007,7 @@ namespace GLTFast.Jobs {
         public void* result;
 
         public void Execute() {
-            System.Buffer.MemoryCopy(
-                input,
-                result,
-                bufferSize,
-                bufferSize
-            );
+            UnsafeUtility.MemCpy(result,input,bufferSize);
         }
     }
 
