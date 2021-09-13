@@ -51,7 +51,7 @@ namespace GLTFast {
     public class GltfImport : IGltfReadable, IGltfBuffers {
     
     
-        public static event Action<GameObject, string> ExtrasFound;
+        public static event Action<GameObject, Extras> ExtrasFound;
 
 
         /// <summary>
