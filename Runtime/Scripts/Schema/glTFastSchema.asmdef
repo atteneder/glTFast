@@ -2,7 +2,8 @@
     "name": "glTFastSchema",
     "rootNamespace": "",
     "references": [
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "meshoptimizer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -21,6 +22,11 @@
             "name": "com.atteneder.ktx",
             "expression": "1.1.0",
             "define": "KTX_UNITY"
+        },
+        {
+            "name": "com.unity.meshoptimizer",
+            "expression": "",
+            "define": "MESHOPT"
         },
         {
             "name": "com.unity.modules.animation",

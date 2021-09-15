@@ -1,14 +1,15 @@
 {
     "name": "glTFast",
     "references": [
-        "Draco",
         "glTFastSchema",
         "glTFastFakeSchema",
-        "Ktx",
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Jobs",
+        "Draco",
+        "Ktx",
+        "meshoptimizer",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
@@ -54,6 +55,11 @@
             "name": "com.unity.jobs",
             "expression": "0.2.0",
             "define": "UNITY_JOBS"
+        },
+        {
+            "name": "com.unity.meshoptimizer",
+            "expression": "",
+            "define": "MESHOPT"
         }
     ],
     "noEngineReferences": false

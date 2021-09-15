@@ -35,6 +35,7 @@ namespace GLTFast {
         public const string MaterialsTransmission = "KHR_materials_transmission";
         public const string MaterialsUnlit = "KHR_materials_unlit";
         public const string MeshGPUInstancing = "EXT_mesh_gpu_instancing";
+        public const string MeshoptCompression = "EXT_meshopt_compression";
         public const string MeshQuantization = "KHR_mesh_quantization";
         public const string TextureBasisUniversal = "KHR_texture_basisu";
         public const string TextureTransform = "KHR_texture_transform";

@@ -35,6 +35,9 @@ using GLTFast.Jobs;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Debug = UnityEngine.Debug;
+#if MESHOPT
+using Meshoptimizer;
+#endif
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
 #endif
@@ -83,6 +86,9 @@ namespace GLTFast {
 #if KTX_UNITY
             Extensions.TextureBasisUniversal,
 #endif // KTX_UNITY
+#if MESHOPT
+            Extensions.MeshoptCompression,
+#endif
             Extensions.MaterialsPbrSpecularGlossiness,
             Extensions.MaterialsUnlit,
             Extensions.TextureTransform,
@@ -163,6 +169,10 @@ namespace GLTFast {
         /// optional glTF-binary buffer
         /// https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#binary-buffer
         GlbBinChunk? glbBinChunk;
+
+#if MESHOPT
+        Dictionary<int, NativeArray<byte>> meshoptBufferViews;
+#endif
 
         /// <summary>
         /// Unity's animation system addresses target GameObjects by hierarchical name.
@@ -825,7 +835,9 @@ namespace GLTFast {
                         continue;
                     }
                     var b = buffers[i];
-                    binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
+                    if (b != null) {
+                        binChunks[i] = new GlbBinChunk(0,(uint) b.Length);
+                    }
                 }
                 Profiler.EndSample();
             }
@@ -1027,8 +1039,38 @@ namespace GLTFast {
             return buffers[index];
         }
 
-        unsafe NativeSlice<byte> GetBufferView(BufferView bufferView) {
-            int bufferIndex = bufferView.buffer;
+        NativeSlice<byte> GetBufferView(int bufferViewIndex,int offset = 0, int length = 0) {
+            var bufferView = gltfRoot.bufferViews[bufferViewIndex];
+#if MESHOPT
+            if (bufferView.extensions?.EXT_meshopt_compression != null) {
+                var fullSlice = meshoptBufferViews[bufferViewIndex];
+                if (offset == 0 && length <= 0) {
+                    return fullSlice;
+                }
+                Assert.IsTrue(offset >= 0);
+                if (length <= 0) {
+                    length = fullSlice.Length - offset;
+                }
+                Assert.IsTrue(offset+length <= fullSlice.Length);
+                return  new NativeSlice<byte>(fullSlice,offset,length);
+            } 
+#endif
+            return GetBufferViewSlice(bufferView,offset,length);
+        }
+
+        unsafe NativeSlice<byte> GetBufferViewSlice(
+            BufferViewBase bufferView,
+            int offset = 0,
+            int length = 0
+            )
+        {
+            Assert.IsTrue(offset >= 0);
+            if (length <= 0) {
+                length = bufferView.byteLength - offset;
+            }
+            Assert.IsTrue( offset+length <= bufferView.byteLength);
+            
+            var bufferIndex = bufferView.buffer;
             if(!nativeBuffers[bufferIndex].IsCreated) {
                 Profiler.BeginSample("ConvertToNativeArray");
                 var buffer = GetBuffer(bufferIndex);
@@ -1043,8 +1085,42 @@ namespace GLTFast {
                 Profiler.EndSample();
             }
             var chunk = binChunks[bufferIndex];
-            return new NativeSlice<byte>(nativeBuffers[bufferIndex],chunk.start+bufferView.byteOffset,bufferView.byteLength);
+            return new NativeSlice<byte>(
+                nativeBuffers[bufferIndex],
+                chunk.start + bufferView.byteOffset + offset,
+                length
+                );
         }
+
+#if MESHOPT
+        void MeshoptDecode() {
+            if(gltfRoot.bufferViews!=null) {
+                for (var i = 0; i < gltfRoot.bufferViews.Length; i++) {
+                    var bufferView = gltfRoot.bufferViews[i];
+                    if (bufferView.extensions?.EXT_meshopt_compression != null) {
+                        var meshopt = bufferView.extensions?.EXT_meshopt_compression;
+                        if (meshoptBufferViews == null) {
+                            meshoptBufferViews = new Dictionary<int, NativeArray<byte>>();
+                        }
+
+                        var arr = new NativeArray<byte>(meshopt.count * meshopt.byteStride, Allocator.Persistent);
+                        
+                        var origBufferView = GetBufferViewSlice(meshopt);
+
+                        Decode.DecodeGltfBuffer(
+                            arr,
+                            meshopt.count,
+                            meshopt.byteStride,
+                            origBufferView,
+                            meshopt.modeEnum,
+                            meshopt.filterEnum
+                        );
+                        meshoptBufferViews[i] = arr;
+                    }
+                }
+            }
+        }
+#endif // MESHOPT
 
         async Task<bool> Prepare() {
             if(gltfRoot.meshes!=null) {
@@ -1066,7 +1142,12 @@ namespace GLTFast {
                 CreateTexturesFromBuffers(gltfRoot.images,gltfRoot.bufferViews,imageCreateContexts);
             }
             await deferAgent.BreakPoint();
-            
+
+#if MESHOPT
+            // TODO: Make async and jobify
+            MeshoptDecode();
+#endif
+
             var success = true;
             
             if(gltfRoot.accessors!=null) {
@@ -1446,6 +1527,15 @@ namespace GLTFast {
             imageReadable = null;
             imageGamma = null;
             glbBinChunk = null;
+            
+#if MESHOPT
+            if(meshoptBufferViews!=null) {
+                foreach (var nativeBuffer in meshoptBufferViews.Values) {
+                    nativeBuffer.Dispose();
+                }
+                meshoptBufferViews = null;
+            }
+#endif
         }
 
         void InstantiateSceneInternal( Root gltf, IInstantiator instantiator, int sceneId ) {
@@ -1654,7 +1744,6 @@ namespace GLTFast {
 
                 if (imgFormat!=ImageFormat.Unknown) {
                     if (img.bufferView >= 0) {
-                        var bufferView = bufferViews[img.bufferView];
                         
                         if(imgFormat == ImageFormat.KTX) {
 #if KTX_UNITY
@@ -1662,7 +1751,7 @@ namespace GLTFast {
                             if(ktxLoadContextsBuffer==null) {
                                 ktxLoadContextsBuffer = new List<KtxLoadContextBase>();
                             }
-                            var ktxContext = new KtxLoadNativeContext(i,GetBufferView(bufferView));
+                            var ktxContext = new KtxLoadNativeContext(i,GetBufferView(img.bufferView));
                             ktxLoadContextsBuffer.Add(ktxContext);
                             Profiler.EndSample();
                             await deferAgent.BreakPoint();
@@ -1671,6 +1760,7 @@ namespace GLTFast {
 #endif // KTX_UNITY
                         } else {
                             Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBuffer");
+                            var bufferView = bufferViews[img.bufferView];
                             var buffer = GetBuffer(bufferView.buffer);
                             var chunk = binChunks[bufferView.buffer];
 
@@ -2253,7 +2343,7 @@ namespace GLTFast {
             var draco_ext = primitive.extensions.KHR_draco_mesh_compression;
             
             var bufferView = gltf.bufferViews[draco_ext.bufferView];
-            var buffer = GetBufferView(bufferView);
+            var buffer = GetBufferViewSlice(bufferView);
 
             c.StartDecode(buffer, draco_ext.attributes.WEIGHTS_0, draco_ext.attributes.JOINTS_0);
         }
@@ -2290,9 +2380,7 @@ namespace GLTFast {
             Profiler.BeginSample("PrepareGetIndicesJob");
             // index
             var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            int bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
+            var bufferView = GetBufferView(accessor.bufferView,accessor.byteOffset);
 
             Profiler.BeginSample("Alloc");
             indices = new int[accessor.count];
@@ -2301,28 +2389,26 @@ namespace GLTFast {
             resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
             Profiler.EndSample();
 
-            var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             if (accessor.isSparse) {
                 logger.Error(LogCode.SparseAccessor,"indices");
             }
-            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
             case GLTFComponentType.UnsignedByte:
                 if(flip) {
                     var job8 = new Jobs.ConvertIndicesUInt8ToInt32FlippedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job8.input = (byte*)src;
+                    fixed( void* dst = &(indices[0]) ) {
+                        job8.input = (byte*)bufferView.GetUnsafeReadOnlyPtr();
                         job8.result = (int3*)dst;
                     }
                     jobHandle = job8.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
                     var job8 = new Jobs.ConvertIndicesUInt8ToInt32Job();
-                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job8.input = (byte*)src;
+                    fixed( void* dst = &(indices[0]) ) {
+                        job8.input = (byte*)bufferView.GetUnsafeReadOnlyPtr();
                         job8.result = (int*)dst;
                     }
                     jobHandle = job8.Schedule(accessor.count,DefaultBatchCount);
@@ -2331,15 +2417,15 @@ namespace GLTFast {
             case GLTFComponentType.UnsignedShort:
                 if(flip) {
                     var job16 = new Jobs.ConvertIndicesUInt16ToInt32FlippedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job16.input = (ushort*) src;
+                    fixed( void* dst = &(indices[0]) ) {
+                        job16.input = (ushort*) bufferView.GetUnsafeReadOnlyPtr();
                         job16.result = (int3*) dst;
                     }
                     jobHandle = job16.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
                     var job16 = new Jobs.ConvertIndicesUInt16ToInt32Job();
-                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job16.input = (ushort*) src;
+                    fixed( void* dst = &(indices[0]) ) {
+                        job16.input = (ushort*) bufferView.GetUnsafeReadOnlyPtr();
                         job16.result = (int*) dst;
                     }
                     jobHandle = job16.Schedule(accessor.count,DefaultBatchCount);
@@ -2348,15 +2434,15 @@ namespace GLTFast {
             case GLTFComponentType.UnsignedInt:
                 if(flip) {
                     var job32 = new Jobs.ConvertIndicesUInt32ToInt32FlippedJob();
-                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job32.input = (uint*) src;
+                    fixed( void* dst = &(indices[0]) ) {
+                        job32.input = (uint*) bufferView.GetUnsafeReadOnlyPtr();
                         job32.result = (int3*) dst;
                     }
                     jobHandle = job32.Schedule(accessor.count/3,DefaultBatchCount);
                 } else {
                     var job32 = new Jobs.ConvertIndicesUInt32ToInt32Job();
-                    fixed( void* src = &(buffer[start]), dst = &(indices[0]) ) {
-                        job32.input = (uint*) src;
+                    fixed( void* dst = &(indices[0]) ) {
+                        job32.input = (uint*) bufferView.GetUnsafeReadOnlyPtr();
                         job32.result = (int*) dst;
                     }
                     jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
@@ -2375,30 +2461,25 @@ namespace GLTFast {
             Profiler.BeginSample("GetMatricesJob");
             // index
             var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            int bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
-
+            var bufferView = GetBufferView(accessor.bufferView,accessor.byteOffset);
+            
             Profiler.BeginSample("Alloc");
             matrices = new NativeArray<Matrix4x4>(accessor.count,Allocator.Persistent);
             Profiler.EndSample();
             
-            var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.MAT4);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             if (accessor.isSparse) {
                 logger.Error(LogCode.SparseAccessor,"Matrix");
             }
-            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
             case GLTFComponentType.Float:
-                var job32 = new Jobs.ConvertMatricesJob();
-                job32.result = (float4x4*)matrices.GetUnsafePtr();
-                fixed( void* src = &(buffer[start]) ) {
-                    job32.input = (float4x4*) src;
-                }
+                var job32 = new Jobs.ConvertMatricesJob {
+                    input = (float4x4*)bufferView.GetUnsafeReadOnlyPtr(),
+                    result = (float4x4*)matrices.GetUnsafePtr()
+                };
                 jobHandle = job32.Schedule(accessor.count,DefaultBatchCount);
                 break;
             default:
@@ -2413,39 +2494,33 @@ namespace GLTFast {
         unsafe void GetVector3Job(Root gltf, int accessorIndex, out NativeArray<Vector3> vectors, out JobHandle? jobHandle, bool flip) {
             Profiler.BeginSample("GetVector3Job");
             var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
+            var bufferView = GetBufferView(accessor.bufferView,accessor.byteOffset);
 
             Profiler.BeginSample("Alloc");
             vectors = new NativeArray<Vector3>(accessor.count,Allocator.Persistent);
             Profiler.EndSample();
             
-            var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC3);
             if (accessor.isSparse) {
                 logger.Error(LogCode.SparseAccessor,"Vector3");
             }
-            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
             case GLTFComponentType.Float when flip: {
-                var job = new ConvertVector3FloatToFloatJob { result = (float3*)vectors.GetUnsafePtr() };
-                fixed( void* src = &(buffer[start]) ) {
-                    job.input = (float3*) src;
-                }
+                var job = new ConvertVector3FloatToFloatJob {
+                    input = (float3*)bufferView.GetUnsafeReadOnlyPtr(),
+                    result = (float3*)vectors.GetUnsafePtr()
+                };
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
             }
             case GLTFComponentType.Float when !flip: {
                 var job = new MemCopyJob {
+                    input = (float*)bufferView.GetUnsafeReadOnlyPtr(),
                     bufferSize = accessor.count * 12,
                     result = (float*)vectors.GetUnsafePtr()
                 };
-                fixed( void* src = &(buffer[start]) ) {
-                    job.input = (float*) src;
-                }
                 jobHandle = job.Schedule();
                 break;
             }
@@ -2462,50 +2537,40 @@ namespace GLTFast {
             Profiler.BeginSample("GetVector4Job");
             // index
             var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
+            var bufferView = GetBufferView(accessor.bufferView,accessor.byteOffset);
 
             Profiler.BeginSample("Alloc");
             vectors = new NativeArray<Quaternion>(accessor.count,Allocator.Persistent);
             Profiler.EndSample();
             
-            var chunk = binChunks[bufferIndex];
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC4);
             if (accessor.isSparse) {
                 logger.Error(LogCode.SparseAccessor,"Vector4");
             }
-            var start = accessor.byteOffset + bufferView.byteOffset + chunk.start;
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
             case GLTFComponentType.Float: {
                 var job = new ConvertRotationsFloatToFloatJob {
+                    input = (float4*)bufferView.GetUnsafeReadOnlyPtr(),
                     result = (float4*)vectors.GetUnsafePtr()
                 };
-                fixed( void* src = &(buffer[start]) ) {
-                    job.input = (float4*) src;
-                }
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
             }
             case GLTFComponentType.Short: {
                 var job = new ConvertRotationsInt16ToFloatJob {
+                    input = (short*)bufferView.GetUnsafeReadOnlyPtr(),
                     result = (float*)vectors.GetUnsafePtr()
                 };
-                fixed( void* src = &(buffer[start]) ) {
-                    job.input = (short*) src;
-                }
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
             }
             case GLTFComponentType.Byte: {
                 var job = new ConvertRotationsInt8ToFloatJob {
+                    input = (sbyte*)bufferView.GetUnsafeReadOnlyPtr(),
                     result = (float*)vectors.GetUnsafePtr()
                 };
-                fixed( void* src = &(buffer[start]) ) {
-                    job.input = (sbyte*) src;
-                }
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
             }
@@ -2524,8 +2589,7 @@ namespace GLTFast {
             scalars = null;
             jobHandle = null;
             var accessor = gltf.accessors[accessorIndex];
-            var bufferView = gltf.bufferViews[accessor.bufferView];
-            var buffer = GetBufferView(bufferView);
+            var buffer = GetBufferView(accessor.bufferView,accessor.byteOffset);
 
             Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
             if (accessor.isSparse) {
@@ -2601,11 +2665,20 @@ namespace GLTFast {
                 return;
             }
             var bufferView = gltfRoot.bufferViews[accessor.bufferView];
-            byteStride = bufferView.byteStride;
-            var bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
-            fixed(void* src = &(buffer[accessor.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
-                data = src;
+#if MESHOPT
+            var meshopt = bufferView.extensions?.EXT_meshopt_compression;
+            if (meshopt != null) {
+                byteStride = meshopt.byteStride;
+                data = (byte*)meshoptBufferViews[accessor.bufferView].GetUnsafeReadOnlyPtr() + accessor.byteOffset;
+            } else
+#endif
+            {
+                byteStride = bufferView.byteStride;
+                var bufferIndex = bufferView.buffer;
+                var buffer = GetBuffer(bufferIndex);
+                fixed(void* src = &(buffer[accessor.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
+                    data = src;
+                }
             }
             
             // // Alternative that uses NativeArray/Slice
@@ -2615,19 +2688,37 @@ namespace GLTFast {
         
         public unsafe void GetAccessorSparseIndices(AccessorSparseIndices sparseIndices, out void* data) {
             var bufferView = gltfRoot.bufferViews[sparseIndices.bufferView];
-            var bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
-            fixed (void* src = &(buffer[sparseIndices.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
-                data = src;
+#if MESHOPT
+            var meshopt = bufferView.extensions?.EXT_meshopt_compression;
+            if (meshopt != null) {
+                data = (byte*)meshoptBufferViews[(int)sparseIndices.bufferView].GetUnsafeReadOnlyPtr() + sparseIndices.byteOffset;
+            }
+            else
+#endif
+            {
+                var bufferIndex = bufferView.buffer;
+                var buffer = GetBuffer(bufferIndex);
+                fixed (void* src = &(buffer[sparseIndices.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
+                    data = src;
+                }
             }
         }
 
         public unsafe void GetAccessorSparseValues(AccessorSparseValues sparseValues, out void* data) {
             var bufferView = gltfRoot.bufferViews[sparseValues.bufferView];
-            var bufferIndex = bufferView.buffer;
-            var buffer = GetBuffer(bufferIndex);
-            fixed (void* src = &(buffer[sparseValues.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
-                data = src;
+#if MESHOPT
+            var meshopt = bufferView.extensions?.EXT_meshopt_compression;
+            if (meshopt != null) {
+                data = (byte*)meshoptBufferViews[(int)sparseValues.bufferView].GetUnsafeReadOnlyPtr() + sparseValues.byteOffset;
+            }
+            else
+#endif
+            {
+                var bufferIndex = bufferView.buffer;
+                var buffer = GetBuffer(bufferIndex);
+                fixed (void* src = &(buffer[sparseValues.byteOffset + bufferView.byteOffset + binChunks[bufferIndex].start])) {
+                    data = src;
+                }
             }
         }
 #endregion IGltfBuffers
