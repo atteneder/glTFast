@@ -172,6 +172,8 @@ namespace GLTFast {
 
 #if MESHOPT
         Dictionary<int, NativeArray<byte>> meshoptBufferViews;
+        NativeArray<int> meshoptReturnValues;
+        JobHandle meshoptJobHandle;
 #endif
 
         /// <summary>
@@ -547,6 +549,12 @@ namespace GLTFast {
             var success = await WaitForBufferDownloads();
             downloadTasks?.Clear();
 
+#if MESHOPT
+            if (success) {
+                MeshoptDecode();
+            }
+#endif
+            
             if (textureDownloadTasks != null) {
                 success = success && await WaitForTextureDownloads();
                 textureDownloadTasks.Clear();
@@ -1095,19 +1103,23 @@ namespace GLTFast {
 #if MESHOPT
         void MeshoptDecode() {
             if(gltfRoot.bufferViews!=null) {
+                List<JobHandle> jobHandlesList = null;
                 for (var i = 0; i < gltfRoot.bufferViews.Length; i++) {
                     var bufferView = gltfRoot.bufferViews[i];
                     if (bufferView.extensions?.EXT_meshopt_compression != null) {
                         var meshopt = bufferView.extensions?.EXT_meshopt_compression;
-                        if (meshoptBufferViews == null) {
+                        if (jobHandlesList == null) {
                             meshoptBufferViews = new Dictionary<int, NativeArray<byte>>();
+                            jobHandlesList = new List<JobHandle>(gltfRoot.bufferViews.Length);
+                            meshoptReturnValues = new NativeArray<int>(gltfRoot.bufferViews.Length, Allocator.TempJob);
                         }
 
                         var arr = new NativeArray<byte>(meshopt.count * meshopt.byteStride, Allocator.Persistent);
                         
                         var origBufferView = GetBufferViewSlice(meshopt);
-
-                        Decode.DecodeGltfBuffer(
+                        
+                        var jobHandle = Decode.DecodeGltfBuffer(
+                            new NativeSlice<int>(meshoptReturnValues,i,1),
                             arr,
                             meshopt.count,
                             meshopt.byteStride,
@@ -1115,11 +1127,35 @@ namespace GLTFast {
                             meshopt.modeEnum,
                             meshopt.filterEnum
                         );
+                        jobHandlesList.Add(jobHandle);
                         meshoptBufferViews[i] = arr;
+                    }
+                }
+
+                if (jobHandlesList != null) {
+                    using (var jobHandles = new NativeArray<JobHandle>(jobHandlesList.ToArray(), Allocator.Temp)) {
+                        meshoptJobHandle = JobHandle.CombineDependencies(jobHandles);
                     }
                 }
             }
         }
+        
+        async Task<bool> WaitForMeshoptDecode() {
+            var success = true;
+            if (meshoptBufferViews != null) {
+                while (!meshoptJobHandle.IsCompleted) {
+                    await Task.Yield();
+                }
+                meshoptJobHandle.Complete();
+
+                foreach (var returnValue in meshoptReturnValues) {
+                    success &= returnValue == 0;
+                }
+                meshoptReturnValues.Dispose();
+            }
+            return success;
+        }
+
 #endif // MESHOPT
 
         async Task<bool> Prepare() {
@@ -1143,13 +1179,13 @@ namespace GLTFast {
             }
             await deferAgent.BreakPoint();
 
+            var success = true;
+
 #if MESHOPT
-            // TODO: Make async and jobify
-            MeshoptDecode();
+            success = await WaitForMeshoptDecode();
+            if (!success) return false;
 #endif
 
-            var success = true;
-            
             if(gltfRoot.accessors!=null) {
                 success = await LoadAccessorData(gltfRoot);
                 await deferAgent.BreakPoint();
@@ -1534,6 +1570,9 @@ namespace GLTFast {
                     nativeBuffer.Dispose();
                 }
                 meshoptBufferViews = null;
+            }
+            if (meshoptReturnValues.IsCreated) {
+                meshoptReturnValues.Dispose();
             }
 #endif
         }

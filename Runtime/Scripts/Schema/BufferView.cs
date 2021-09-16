@@ -14,7 +14,7 @@
 //
 
 #if MESHOPT
-using static Meshoptimizer.Decode;
+using Meshoptimizer;
 #endif
 
 namespace GLTFast.Schema {
