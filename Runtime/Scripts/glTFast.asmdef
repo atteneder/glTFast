@@ -9,7 +9,7 @@
         "Unity.Jobs",
         "Draco",
         "Ktx",
-        "meshoptimizer",
+        "Unity.Meshopt.Decompress",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
@@ -57,7 +57,7 @@
             "define": "UNITY_JOBS"
         },
         {
-            "name": "com.unity.meshoptimizer",
+            "name": "com.unity.meshopt.decompress",
             "expression": "",
             "define": "MESHOPT"
         }

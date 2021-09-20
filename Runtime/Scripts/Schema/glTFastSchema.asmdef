@@ -3,7 +3,7 @@
     "rootNamespace": "",
     "references": [
         "Unity.Mathematics",
-        "meshoptimizer"
+        "Unity.Meshopt.Decompress"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -24,7 +24,7 @@
             "define": "KTX_UNITY"
         },
         {
-            "name": "com.unity.meshoptimizer",
+            "name": "com.unity.meshopt.decompress",
             "expression": "",
             "define": "MESHOPT"
         },
