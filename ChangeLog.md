@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unrelease] - 
 ### Added
 - Experimental glTF Editor Export (under main menu `File > Export` and via API `GLTFast.Export.GameObjectExport`; #249)
+- Support for meshopt compressed glTFs (EXT_meshopt_compression; #106)
 - *Generate Lightmap UVs* option in the glTF import inspector lets you create a secondary texture coordinate set (similar to the Model Import Settings from other formats; #238)
 - Generic `ICodeLogger` methods that don't require a `LogCode`
 ### Changed
