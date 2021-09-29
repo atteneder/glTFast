@@ -155,11 +155,34 @@ namespace GLTFast {
                     jobHandle = jobTangentI.Schedule(count,GltfImport.DefaultBatchCount);
 #endif
                     break;
-                // TODO: Complete those cases
-                // case GLTFComponentType.UnsignedShort:
-                //     break;
-                // case GLTFComponentType.UnsignedByte:
-                //     break;
+                case GLTFComponentType.UnsignedShort: {
+                    var job = new Jobs.ConvertBoneWeightsUInt16ToFloatInterleavedJob {
+                        inputByteStride = inputByteStride>0 ? inputByteStride : 8,
+                        input = (byte*)input,
+                        outputByteStride = outputByteStride,
+                        result = output
+                    };
+#if UNITY_JOBS
+                    jobHandle = job.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
+                    jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
+                    break;
+                }
+                case GLTFComponentType.UnsignedByte: {
+                    var job = new Jobs.ConvertBoneWeightsUInt8ToFloatInterleavedJob {
+                        inputByteStride = inputByteStride>0 ? inputByteStride : 4,
+                        input = (byte*)input,
+                        outputByteStride = outputByteStride,
+                        result = output
+                    };
+#if UNITY_JOBS
+                    jobHandle = job.ScheduleBatch(count,GltfImport.DefaultBatchCount);
+#else
+                    jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
+#endif
+                    break;
+                }
                 default:
                     logger?.Error(LogCode.TypeUnsupported,"Weights",inputType.ToString());
                     jobHandle = null;
