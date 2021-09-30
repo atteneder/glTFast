@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using System.ComponentModel;
+
 namespace GLTFast.Schema {
 
     public enum DrawMode
@@ -46,11 +48,13 @@ namespace GLTFast.Schema {
         /// or 5125 (UNSIGNED_INT), the latter is only allowed
         /// when `OES_element_index_uint` extension is used; `type` must be `\"SCALAR\"`.
         /// </summary>
+        [DefaultValue(-1)]
         public int indices = -1;
 
         /// <summary>
         /// The index of the material to apply to this primitive when rendering.
         /// </summary>
+        [DefaultValue(-1)]
         public int material = -1;
 
         /// <summary>
@@ -119,14 +123,49 @@ namespace GLTFast.Schema {
 
     [System.Serializable]
     public class Attributes {
+        
+        [DefaultValue(-1)]
         public int POSITION = -1;
+        
+        [DefaultValue(-1)]
         public int NORMAL = -1;
+        
+        [DefaultValue(-1)]
         public int TANGENT = -1;
+        
+        [DefaultValue(-1)]
         public int TEXCOORD_0 = -1;
+        
+        [DefaultValue(-1)]
         public int TEXCOORD_1 = -1;
+        
+        [DefaultValue(-1)]
+        public int TEXCOORD_2 = -1;
+        
+        [DefaultValue(-1)]
+        public int TEXCOORD_3 = -1;
+        
+        [DefaultValue(-1)]
+        public int TEXCOORD_4 = -1;
+        
+        [DefaultValue(-1)]
+        public int TEXCOORD_5 = -1;
+        
+        [DefaultValue(-1)]
+        public int TEXCOORD_6 = -1;
+        
+        [DefaultValue(-1)]
+        public int TEXCOORD_7 = -1;
+
+        [DefaultValue(-1)]
         public int COLOR_0 = -1;
+        
+        [DefaultValue(-1)]
         public int JOINTS_0 = -1;
+        
+        [DefaultValue(-1)]
         public int WEIGHTS_0 = -1;
+        
 
         public override bool Equals(object obj)
         {

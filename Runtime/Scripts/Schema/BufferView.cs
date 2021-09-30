@@ -13,6 +13,9 @@
 // limitations under the License.
 //
 
+using System.ComponentModel;
+using Newtonsoft.Json;
+
 namespace GLTFast.Schema {
 
     public enum BufferViewTarget
@@ -28,6 +31,7 @@ namespace GLTFast.Schema {
         /// The offset into the buffer in bytes.
         /// <minimum>0</minimum>
         /// </summary>
+        [DefaultValue(0)]
         public int byteOffset;
 
         /// <summary>
@@ -42,6 +46,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The index of the buffer.
         /// </summary>
+        [DefaultValue(-1)]
         public int buffer;
 
         /// <summary>
@@ -50,6 +55,7 @@ namespace GLTFast.Schema {
         /// <minimum>0</minimum>
         /// <maximum>255</maximum>
         /// </summary>
+        [DefaultValue(-1)]
         public int byteStride = -1;
 
         /// <summary>

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("glTFastEditorTests")]
@@ -93,6 +94,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The index of the default scene.
         /// </summary>
+        [DefaultValue(-1)]
         public int scene = -1;
 
         /// <summary>
