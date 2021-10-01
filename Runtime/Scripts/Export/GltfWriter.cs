@@ -242,9 +242,8 @@ namespace GLTFast.Export {
             var meshData = meshDataArray[0];
 
             var buffer = bufferWriter;
-            
             var indexData = meshData.GetIndexData<byte>();
-            buffer.Write(indexData.ToArray()); //TODO: avoid ToArray
+            buffer.BaseStream.Write(indexData);
             var indexBufferView = new BufferView {
                 buffer = 0,
                 byteOffset = (int)byteOffset,
@@ -303,7 +302,7 @@ namespace GLTFast.Export {
                 };
                 byteOffset += vData.Length;
                 m_BufferViews.Add(bufferView);
-                buffer.Write(vData.ToArray()); //TODO: avoid ToArray
+                buffer.BaseStream.Write(vData);
                 vData.Dispose();
             }
 
