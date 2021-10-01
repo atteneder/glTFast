@@ -42,18 +42,9 @@ namespace GLTFast.Export {
         List<UnityEngine.Mesh> m_UnityMeshes;
 
         MemoryStream m_BufferStream;
-        BinaryWriter m_BufferWriter;
 
-        BinaryWriter bufferWriter {
-            get {
-                if (m_BufferWriter == null) {
-                    m_BufferStream = new MemoryStream();
-                    m_BufferWriter = new BinaryWriter(m_BufferStream);
-                }
-                return m_BufferWriter;
-            }
-        }
-        
+        Stream bufferWriter => m_BufferStream ?? (m_BufferStream = new MemoryStream());
+
         public GltfWriter() {
             m_Gltf = new Root();
         }
@@ -118,7 +109,7 @@ namespace GLTFast.Export {
                 BakeMeshes();    
             }
 
-            if (m_BufferWriter != null) {
+            if (m_BufferStream != null) {
                 m_Gltf.buffers = new[] {
                     new Buffer {
                         uri = bufferPath,
@@ -243,7 +234,7 @@ namespace GLTFast.Export {
 
             var buffer = bufferWriter;
             var indexData = meshData.GetIndexData<byte>();
-            buffer.BaseStream.Write(indexData);
+            buffer.Write(indexData);
             var indexBufferView = new BufferView {
                 buffer = 0,
                 byteOffset = (int)byteOffset,
@@ -302,7 +293,7 @@ namespace GLTFast.Export {
                 };
                 byteOffset += vData.Length;
                 m_BufferViews.Add(bufferView);
-                buffer.BaseStream.Write(vData);
+                buffer.Write(vData);
                 vData.Dispose();
             }
 
