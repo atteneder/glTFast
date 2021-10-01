@@ -171,14 +171,16 @@ namespace GLTFast.Export {
                     componentType = Accessor.GetComponentType(attribute.format),
                     count = vertexCount,
                     typeEnum = Accessor.GetAccessorAttributeType(attribute.dimension),
-
-                    // min = new []{}, // TODO
-                    // max = new []{}, // TODO
                 };
                 m_Accessors.Add(accessor);
 
                 switch (attribute.attribute) {
                     case VertexAttribute.Position:
+                        var bounds = uMesh.bounds;
+                        var max = bounds.max;
+                        var min = bounds.min;
+                        accessor.min = new[] { min.x, min.y, min.z };
+                        accessor.max = new[] { max.x, max.y, max.z };
                         attributes.POSITION = accessorId;
                         break;
                     case VertexAttribute.Normal:
