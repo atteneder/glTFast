@@ -27,7 +27,6 @@ Missing:
 
 Interesting:
 
-- EXT_meshopt_compression
 - EXT_lights_image_based
 
 Not investigated:
@@ -107,12 +106,14 @@ Used already. Extend usage.
 
 #### Burst compiler
 
-- Speed up jobs
-- Use Unity.Mathematics data types
+- [x] Speed up jobs
+- [x] Use Unity.Mathematics data types
 
 #### Entity Component System
 
-Create entities instead of classic GameObjects
+- [x] Create entities instead of classic GameObjects
+
+Exists on prototype level. Wait for DOTS to stabilize and progress
 
 ### Stream support
 
