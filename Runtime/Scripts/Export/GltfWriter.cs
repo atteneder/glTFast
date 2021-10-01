@@ -138,12 +138,15 @@ namespace GLTFast.Export {
 
         void BakeMeshes() {
             var byteOffset = m_BufferStream?.Length ?? 0;
+            var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
-                byteOffset = BakeMesh(meshId, byteOffset);
+                byteOffset = BakeMesh(meshId, meshDataArray[meshId], byteOffset);
             }
+            meshDataArray.Dispose();
         }
 
-        long BakeMesh(int meshId, long byteOffset) {
+        long BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData, long bufferByteOffset) {
+
             var bufferViewBaseIndex = (m_BufferViews?.Count ?? 0) + 1; // +1 to offset index bufferView
             var mesh = m_Meshes[meshId];
             var uMesh = m_UnityMeshes[meshId];
@@ -229,21 +232,18 @@ namespace GLTFast.Export {
                 streamCount = stream + 1;
             }
 
-            var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(uMesh);
-            var meshData = meshDataArray[0];
-
             var buffer = bufferWriter;
             var indexData = meshData.GetIndexData<byte>();
             buffer.Write(indexData);
             var indexBufferView = new BufferView {
                 buffer = 0,
-                byteOffset = (int)byteOffset,
+                byteOffset = (int)bufferByteOffset,
                 byteLength = indexData.Length,
             };
             m_BufferViews ??= new List<BufferView>();
             var indexBufferViewId = m_BufferViews.Count;
             m_BufferViews.Add(indexBufferView);
-            byteOffset += indexData.Length;
+            bufferByteOffset += indexData.Length;
             indexData.Dispose();
 
             var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GLTFComponentType.UnsignedShort : GLTFComponentType.UnsignedInt;
@@ -287,18 +287,17 @@ namespace GLTFast.Export {
                 var vData = meshData.GetVertexData<byte>(stream);
                 var bufferView = new BufferView {
                     buffer = 0,
-                    byteOffset = (int)byteOffset,
+                    byteOffset = (int)bufferByteOffset,
                     byteLength = vData.Length,
                     byteStride = strides[stream]
                 };
-                byteOffset += vData.Length;
+                bufferByteOffset += vData.Length;
                 m_BufferViews.Add(bufferView);
                 buffer.Write(vData);
                 vData.Dispose();
             }
 
-            meshDataArray.Dispose();
-            return byteOffset;
+            return bufferByteOffset;
         }
 
         static DrawMode? GetDrawMode(MeshTopology topology) {
