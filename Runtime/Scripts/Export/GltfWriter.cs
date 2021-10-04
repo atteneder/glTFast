@@ -19,9 +19,11 @@ using System.IO;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 
 namespace GLTFast.Export {
@@ -159,15 +161,16 @@ namespace GLTFast.Export {
 
             var attributes = new Attributes();
             var vertexCount = uMesh.vertexCount;
-
+            var attrDatas = new Dictionary<VertexAttribute, AttributeData>();
+            
             foreach (var attribute in vertexAttributes) {
                 var attrData = new AttributeData { offset = strides[attribute.stream], stream = attribute.stream };
+                attrDatas[attribute.attribute] = attrData;
                 var size = attribute.dimension * GetAttributeSize(attribute.format);
                 strides[attribute.stream] += size;
 
                 m_Accessors ??= new List<Accessor>();
                 var accessorId = m_Accessors.Count;
-
                 var accessor = new Accessor {
                     bufferView = bufferViewBaseIndex + attribute.stream,
                     byteOffset = attrData.offset,
@@ -179,6 +182,8 @@ namespace GLTFast.Export {
 
                 switch (attribute.attribute) {
                     case VertexAttribute.Position:
+                        Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
+                        Assert.AreEqual(3,attribute.dimension);
                         var bounds = uMesh.bounds;
                         var max = bounds.max;
                         var min = bounds.min;
@@ -187,9 +192,13 @@ namespace GLTFast.Export {
                         attributes.POSITION = accessorId;
                         break;
                     case VertexAttribute.Normal:
+                        Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
+                        Assert.AreEqual(3,attribute.dimension);
                         attributes.NORMAL = accessorId;
                         break;
                     case VertexAttribute.Tangent:
+                        Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
+                        Assert.AreEqual(4,attribute.dimension);
                         attributes.TANGENT = accessorId;
                         break;
                     case VertexAttribute.Color:
@@ -311,21 +320,86 @@ namespace GLTFast.Export {
                 };
             }
 
+            var inputStreams = new NativeArray<byte>[streamCount];
+            var outputStreams = new NativeArray<byte>[streamCount];
+
             for (var stream = 0; stream < streamCount; stream++) {
-                var vData = meshData.GetVertexData<byte>(stream);
+                inputStreams[stream] = meshData.GetVertexData<byte>(stream);
                 var bufferView = new BufferView {
                     buffer = 0,
                     byteOffset = (int)bufferByteOffset,
-                    byteLength = vData.Length,
+                    byteLength = inputStreams[stream].Length,
                     byteStride = strides[stream]
                 };
-                bufferByteOffset += vData.Length;
+                bufferByteOffset += inputStreams[stream].Length;
                 m_BufferViews.Add(bufferView);
-                buffer.Write(vData);
-                vData.Dispose();
+
+                outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
+            }
+
+            foreach (var (vertexAttribute, attrData) in attrDatas) {
+                switch (vertexAttribute) {
+                    case VertexAttribute.Position:
+                    case VertexAttribute.Normal:
+                        ConvertPositionAttribute(
+                            attrData,
+                            (uint)strides[attrData.stream],
+                            vertexCount,
+                            inputStreams[attrData.stream],
+                            outputStreams[attrData.stream]
+                            );
+                        break;
+                    case VertexAttribute.Tangent:
+                        ConvertTangentAttribute(
+                            attrData,
+                            (uint)strides[attrData.stream],
+                            vertexCount,
+                            inputStreams[attrData.stream],
+                            outputStreams[attrData.stream]
+                            );
+                        break;
+                }
+            }
+            
+            for (var stream = 0; stream < streamCount; stream++) {
+                buffer.Write(outputStreams[stream]);
+                inputStreams[stream].Dispose();
+                outputStreams[stream].Dispose();
             }
 
             return bufferByteOffset;
+        }
+
+        static unsafe void ConvertPositionAttribute(
+            AttributeData attrData,
+            uint byteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+            )
+        {
+            var job = new ExportJobs.ConvertPositionFloatJob {
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
+                byteStride = byteStride,
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+            }.Schedule(vertexCount,k_DefaultInnerLoopBatchCount);
+            job.Complete(); // TODO: Wait until thread is finished
+        }
+
+        static unsafe void ConvertTangentAttribute(
+            AttributeData attrData,
+            uint byteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+            )
+        {
+            var job = new ExportJobs.ConvertTangentFloatJob {
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
+                byteStride = byteStride,
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+            }.Schedule(vertexCount,k_DefaultInnerLoopBatchCount);
+            job.Complete(); // TODO: Wait until thread is finished
         }
 
         static DrawMode? GetDrawMode(MeshTopology topology) {

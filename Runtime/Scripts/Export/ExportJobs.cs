@@ -15,7 +15,9 @@
 
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GLTFast.Export {
@@ -37,6 +39,53 @@ namespace GLTFast.Export {
                 result[i*3+0] = input[i*3+0];
                 result[i*3+1] = input[i*3+2];
                 result[i*3+2] = input[i*3+1];
+            }
+        }
+        
+        
+        [BurstCompile]
+        public unsafe struct ConvertPositionFloatJob : IJobParallelFor {
+
+            public uint byteStride;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+            
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i) {
+                var inPtr = (float3*)(input + i * byteStride);
+                var outPtr = (float3*)(output + i * byteStride);
+
+                var tmp = *inPtr;
+                tmp.x *= -1;
+                *outPtr = tmp;
+            }
+        }
+        
+        [BurstCompile]
+        public unsafe struct ConvertTangentFloatJob : IJobParallelFor {
+
+            public uint byteStride;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+            
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i) {
+                var inPtr = (float4*)(input + i * byteStride);
+                var outPtr = (float4*)(output + i * byteStride);
+
+                var tmp = *inPtr;
+                tmp.z *= -1;
+                *outPtr = tmp;
             }
         }
     }
