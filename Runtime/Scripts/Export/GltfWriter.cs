@@ -18,6 +18,8 @@ using System.Collections.Generic;
 using System.IO;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -29,6 +31,7 @@ namespace GLTFast.Export {
     public class GltfWriter {
         
         const int k_MAXStreamCount = 4;
+        const int k_DefaultInnerLoopBatchCount = 512;
         
         Root m_Gltf;
 
@@ -235,8 +238,31 @@ namespace GLTFast.Export {
             }
 
             var buffer = bufferWriter;
+            if (uMesh.indexFormat == IndexFormat.UInt16) {
+                var indexData16 = meshData.GetIndexData<ushort>();
+                var triangleCount = indexData16.Length / 3;
+                var destIndices = new NativeArray<ushort>(indexData16.Length,Allocator.TempJob);
+                var job = new ExportJobs.ConvertIndicesFlippedJob<ushort> {
+                    input = indexData16,
+                    result = destIndices
+                }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
+                job.Complete(); // TODO: Wait until thread is finished
+                buffer.Write(destIndices.Reinterpret<byte>(sizeof(ushort)));
+                destIndices.Dispose();
+            } else {
+                var indexData32 = meshData.GetIndexData<uint>();
+                var triangleCount = indexData32.Length / 3;
+                var destIndices = new NativeArray<uint>(indexData32.Length,Allocator.TempJob);
+                var job = new ExportJobs.ConvertIndicesFlippedJob<uint> {
+                    input = indexData32,
+                    result = destIndices
+                }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
+                job.Complete(); // TODO: Wait until thread is finished
+                buffer.Write(destIndices.Reinterpret<byte>(sizeof(uint)));
+                destIndices.Dispose();
+            }
             var indexData = meshData.GetIndexData<byte>();
-            buffer.Write(indexData);
+
             var indexBufferView = new BufferView {
                 buffer = 0,
                 byteOffset = (int)bufferByteOffset,

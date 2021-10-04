@@ -4,7 +4,8 @@
     "references": [
         "glTFast",
         "glTFastSchema",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "Unity.Burst"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
