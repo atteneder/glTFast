@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using GLTFast.Schema;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Unity.Collections;
@@ -25,11 +26,11 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
+using Buffer = GLTFast.Schema.Buffer;
+using Material = GLTFast.Schema.Material;
+using Mesh = GLTFast.Schema.Mesh;
 
 namespace GLTFast.Export {
-    
-    using Schema;
-
     public class GltfWriter {
         
         const int k_MAXStreamCount = 4;
@@ -40,11 +41,14 @@ namespace GLTFast.Export {
         List<Scene> m_Scenes;
         List<Node> m_Nodes;
         List<Mesh> m_Meshes;
+        List<Material> m_Materials;
         
         List<Accessor> m_Accessors;
         List<BufferView> m_BufferViews;
 
+        List<UnityEngine.Material> m_UnityMaterials;
         List<UnityEngine.Mesh> m_UnityMeshes;
+        Dictionary<int, int[]> m_NodeMaterials;
 
         MemoryStream m_BufferStream;
 
@@ -92,11 +96,57 @@ namespace GLTFast.Export {
             return (uint) m_Nodes.Count - 1;
         }
         
-        public void AddMeshToNode(uint nodeId, [NotNull] UnityEngine.Mesh uMesh) {
+        public void AddMeshToNode(uint nodeId, [NotNull] UnityEngine.Mesh uMesh, List<UnityEngine.Material> uMaterials) {
             var node = m_Nodes[(int)nodeId];
+
+            if (uMaterials != null && uMaterials.Count > 0) {
+                var materialIds = new int[uMaterials.Count];
+                var valid = false;
+                for (var i = 0; i < uMaterials.Count; i++) {
+                    var uMaterial = uMaterials[i];
+                    materialIds[i] = AddMaterial(uMaterial);
+                    if (materialIds[i] >= 0) {
+                        valid = true;
+                    }
+                }
+                if (valid) {
+                    m_NodeMaterials ??= new Dictionary<int, int[]>();
+                    m_NodeMaterials[(int)nodeId] = materialIds;
+                }
+            }
+
             node.mesh = AddMesh(uMesh);
         }
-        
+
+        int AddMaterial(UnityEngine.Material uMaterial) {
+
+            var materialId = -1;
+            if (m_Materials!=null) {
+                materialId = m_UnityMaterials.IndexOf(uMaterial);
+                if (materialId >= 0) {
+                    return materialId;
+                }
+            } else {
+                m_Materials = new List<Material>();    
+                m_UnityMaterials = new List<UnityEngine.Material>();    
+            }
+            
+            var material = ConvertMaterial(uMaterial);
+
+            materialId = m_Materials.Count;
+            m_Materials.Add(material);
+            m_UnityMaterials.Add(uMaterial);
+            return materialId;
+        }
+
+        static Material ConvertMaterial(UnityEngine.Material uMaterial) {
+            var material = new Material {
+                name = uMaterial.name,
+            };
+            material.pbrMetallicRoughness = new PbrMetallicRoughness();
+            return material;
+        }
+
         public void SaveToFile(string path) {
             
             var ext = Path.GetExtension(path);
@@ -120,6 +170,14 @@ namespace GLTFast.Export {
                 BakeMeshes();    
             }
 
+            foreach (var (nodeId,materialIds) in m_NodeMaterials) {
+                var meshId = m_Nodes[nodeId].mesh;
+                var mesh = m_Meshes[meshId];
+                for (int i = 0; i < materialIds.Length; i++) {
+                    mesh.primitives[i].material = materialIds[i];
+                }
+            }
+
             if (m_BufferStream != null) {
                 m_Gltf.buffers = new[] {
                     new Buffer {
@@ -134,6 +192,7 @@ namespace GLTFast.Export {
             m_Gltf.meshes = m_Meshes?.ToArray();
             m_Gltf.accessors = m_Accessors?.ToArray();
             m_Gltf.bufferViews = m_BufferViews?.ToArray();
+            m_Gltf.materials = m_Materials?.ToArray();
 
             m_Gltf.asset = new Asset {
                 version = "2.0",
@@ -321,8 +380,6 @@ namespace GLTFast.Export {
                     mode = mode.Value,
                     attributes = attributes,
                     indices = accessorId,
-
-                    // material = 0
                 };
             }
 

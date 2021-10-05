@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using System;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace GLTFast.Schema {
@@ -31,14 +33,17 @@ namespace GLTFast.Schema {
         /// </summary>
         public float[] baseColorFactor = {1,1,1,1};
 
+        [JsonIgnore]
         public Color baseColor {
-            get {
-                return new Color(
+            get =>
+                new(
                     baseColorFactor[0],
                     baseColorFactor[1],
                     baseColorFactor[2],
                     baseColorFactor[3]
                 );
+            set {
+                baseColorFactor = new[] { value.r, value.g, value.b, value.a };
             }
         }
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace GLTFast.Export {
@@ -26,9 +27,10 @@ namespace GLTFast.Export {
 
         public void AddScene(string name, GameObject[] gameObjects) {
             var rootNodes = new uint[gameObjects.Length];
+            var tempMaterials = new List<Material>();
             for (var index = 0; index < gameObjects.Length; index++) {
                 var gameObject = gameObjects[index];
-                rootNodes[index] = AddGameObject(gameObject);
+                rootNodes[index] = AddGameObject(gameObject,tempMaterials);
             }
             m_Writer.AddScene(name,rootNodes);
         }
@@ -37,14 +39,14 @@ namespace GLTFast.Export {
             m_Writer.SaveToFile(path);
         }
 
-        uint AddGameObject(GameObject gameObject) {
+        uint AddGameObject(GameObject gameObject, List<Material> tempMaterials ) {
             var childCount = gameObject.transform.childCount;
             uint[] children = null;
             if (childCount > 0) {
                 children = new uint[gameObject.transform.childCount];
-                for (int i = 0; i < childCount; i++) {
+                for (var i = 0; i < childCount; i++) {
                     var child = gameObject.transform.GetChild(i);
-                    children[i] = AddGameObject(child.gameObject);
+                    children[i] = AddGameObject(child.gameObject, tempMaterials);
                 }
             }
 
@@ -57,14 +59,21 @@ namespace GLTFast.Export {
                 children
                 );
             Mesh mesh = null;
+            
+            tempMaterials.Clear();
+            
             if (gameObject.TryGetComponent(out MeshFilter meshFilter)) {
                 mesh = meshFilter.sharedMesh;
+                if (gameObject.TryGetComponent(out Renderer renderer)) {
+                    renderer.GetSharedMaterials(tempMaterials);
+                }
             } else
             if (gameObject.TryGetComponent(out SkinnedMeshRenderer smr)) {
                 mesh = smr.sharedMesh;
+                smr.GetSharedMaterials(tempMaterials);
             }
             if (mesh != null) {
-                m_Writer.AddMeshToNode(nodeId,mesh);
+                m_Writer.AddMeshToNode(nodeId,mesh,tempMaterials);
             }
             return nodeId;
         }
