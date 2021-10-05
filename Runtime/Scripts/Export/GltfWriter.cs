@@ -69,18 +69,24 @@ namespace GLTFast.Export {
         
         public uint AddNode(
             string name,
-            Vector3 translation,
-            Quaternion rotation,
-            Vector3 scale,
+            float3 translation,
+            quaternion rotation,
+            float3 scale,
             uint[] children
             ) {
             var node = new Node {
                 name = name,
                 children = children,
-                translation = new []{translation.x,translation.y,translation.z},
-                rotation = new []{rotation.x,rotation.y,rotation.z,rotation.w},
-                scale = new []{scale.x,scale.y,scale.z},
             };
+            if( !translation.Equals(float3.zero) ) {
+                node.translation = new[] { -translation.x, translation.y, translation.z };
+            }
+            if( !rotation.Equals(quaternion.identity) ) {
+                node.rotation = new[] { rotation.value.x, -rotation.value.y, -rotation.value.z, rotation.value.w };
+            }
+            if( !scale.Equals(new float3(1f)) ) {
+                node.scale = new[] { scale.x, scale.y, scale.z };
+            }
             m_Nodes ??= new List<Node>();
             m_Nodes.Add(node);
             return (uint) m_Nodes.Count - 1;
