@@ -48,7 +48,7 @@ namespace GLTFast.Export {
 
         MemoryStream m_BufferStream;
 
-        Stream bufferWriter => m_BufferStream ?? (m_BufferStream = new MemoryStream());
+        Stream bufferWriter => m_BufferStream ??= new MemoryStream();
 
         public GltfWriter() {
             m_Gltf = new Root();
@@ -167,11 +167,11 @@ namespace GLTFast.Export {
 
             var attributes = new Attributes();
             var vertexCount = uMesh.vertexCount;
-            var attrDatas = new Dictionary<VertexAttribute, AttributeData>();
+            var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
             
             foreach (var attribute in vertexAttributes) {
                 var attrData = new AttributeData { offset = strides[attribute.stream], stream = attribute.stream };
-                attrDatas[attribute.attribute] = attrData;
+                attrDataDict[attribute.attribute] = attrData;
                 var size = attribute.dimension * GetAttributeSize(attribute.format);
                 strides[attribute.stream] += size;
 
@@ -343,7 +343,7 @@ namespace GLTFast.Export {
                 outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
             }
 
-            foreach (var (vertexAttribute, attrData) in attrDatas) {
+            foreach (var (vertexAttribute, attrData) in attrDataDict) {
                 switch (vertexAttribute) {
                     case VertexAttribute.Position:
                     case VertexAttribute.Normal:
