@@ -131,20 +131,12 @@ namespace GLTFast.Export {
                 m_UnityMaterials = new List<UnityEngine.Material>();    
             }
             
-            var material = ConvertMaterial(uMaterial);
+            var material = StandardMaterialExport.ConvertMaterial(uMaterial);
 
             materialId = m_Materials.Count;
             m_Materials.Add(material);
             m_UnityMaterials.Add(uMaterial);
             return materialId;
-        }
-
-        static Material ConvertMaterial(UnityEngine.Material uMaterial) {
-            var material = new Material {
-                name = uMaterial.name,
-            };
-            material.pbrMetallicRoughness = new PbrMetallicRoughness();
-            return material;
         }
 
         public void SaveToFile(string path) {

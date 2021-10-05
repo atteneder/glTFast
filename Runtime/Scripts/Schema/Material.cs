@@ -89,6 +89,9 @@ namespace GLTFast.Schema {
                     emissiveFactor[2]
                 );
             }
+            set {
+                emissiveFactor = new[] { value.r, value.g, value.b };
+            }
         }
 
         /// <summary>
