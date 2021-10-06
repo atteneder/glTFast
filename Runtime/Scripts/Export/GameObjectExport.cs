@@ -54,7 +54,9 @@ namespace GLTFast.Export {
                 for (var i = 0; i < childCount; i++) {
                     var child = gameObject.transform.GetChild(i);
                     var childNodeId = AddGameObject(child.gameObject, tempMaterials);
-                    childList.Add((uint)childNodeId);
+                    if (childNodeId >= 0) {
+                        childList.Add((uint)childNodeId);
+                    }
                 }
                 if (childList.Count > 0) {
                     children = childList.ToArray();
