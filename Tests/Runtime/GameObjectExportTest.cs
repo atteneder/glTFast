@@ -17,6 +17,7 @@ using System.IO;
 using GLTFast.Export;
 using NUnit.Framework;
 using UnityEngine;
+using Assert = UnityEngine.Assertions.Assert;
 
 namespace GLTFast.Tests {
     public class GameObjectExportTest {
@@ -38,6 +39,38 @@ namespace GLTFast.Tests {
             var export = new GameObjectExport();
             export.AddScene("UnityScene" ,new []{root});
             export.SaveToFile(Path.Combine(Application.persistentDataPath,"root.gltf"));
+        }
+        
+        [Test]
+        public void MeshMaterialCombinationTest() {
+
+            var mc1 = new GltfWriter.MeshMaterialCombination {
+                meshId = 42,
+                materialIds = new [] {1,2,3}
+            };
+            
+            
+            var mc2 = new GltfWriter.MeshMaterialCombination {
+                meshId = 42,
+                materialIds = new [] {1,2,3}
+            };
+            
+            Assert.AreEqual(mc1,mc2);
+
+            mc1.materialIds[2] = 4;
+            Assert.AreNotEqual(mc1,mc2);
+            
+            mc1.materialIds = new []{1,2};
+            Assert.AreNotEqual(mc1,mc2);
+
+            mc1.materialIds = null;
+            Assert.AreNotEqual(mc1,mc2);
+            
+            mc2.materialIds = null;
+            Assert.AreEqual(mc1,mc2);
+            
+            mc1.meshId = 13;
+            Assert.AreNotEqual(mc1,mc2);
         }
     }
 }

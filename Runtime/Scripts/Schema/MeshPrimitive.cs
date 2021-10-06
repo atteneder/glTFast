@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using System.ComponentModel;
 
 namespace GLTFast.Schema {
@@ -29,7 +30,7 @@ namespace GLTFast.Schema {
     }
 
     [System.Serializable]
-    public class MeshPrimitive {
+    public class MeshPrimitive : ICloneable {
 
         /// <summary>
         /// A dictionary object, where each key corresponds to mesh attribute semantic
@@ -118,6 +119,10 @@ namespace GLTFast.Schema {
                 hash = hash * 7 + targets.GetHashCode();
             }
             return hash;
+        }
+        
+        public object Clone() {
+            return MemberwiseClone();
         }
     }
 

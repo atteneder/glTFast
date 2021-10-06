@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using GLTFast.Schema;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -29,6 +30,8 @@ using UnityEngine.Rendering;
 using Buffer = GLTFast.Schema.Buffer;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
+
+[assembly: InternalsVisibleTo("glTFast.Tests")]
 
 namespace GLTFast.Export {
     public class GltfWriter {
@@ -162,17 +165,7 @@ namespace GLTFast.Export {
                 BakeMeshes();    
             }
 
-            if (m_NodeMaterials != null && m_Meshes != null) {
-                foreach (var (nodeId,materialIds) in m_NodeMaterials) {
-                    var meshId = m_Nodes[nodeId].mesh;
-                    var mesh = m_Meshes[meshId];
-                    for (int i = 0; i < materialIds.Length; i++) {
-                        if (materialIds[i] >= 0) {
-                            mesh.primitives[i].material = materialIds[i];
-                        }
-                    }
-                }
-            }
+            AssignMaterialsToMeshes();
 
             if (m_BufferStream != null) {
                 m_Gltf.buffers = new[] {
@@ -200,6 +193,58 @@ namespace GLTFast.Export {
             m_Meshes = null;
             m_Accessors = null;
             m_BufferViews = null;
+        }
+
+        void AssignMaterialsToMeshes() {
+            if (m_NodeMaterials != null && m_Meshes != null) {
+                var meshMaterialCombos = new Dictionary<MeshMaterialCombination, int>(m_Meshes.Count);
+                var originalCombos = new Dictionary<int, MeshMaterialCombination>(m_Meshes.Count);
+                foreach (var (nodeId, materialIds) in m_NodeMaterials) {
+                    var node = m_Nodes[nodeId];
+                    var originalMeshId = node.mesh;
+                    var mesh = m_Meshes[originalMeshId];
+
+                    var meshMaterialCombo = new MeshMaterialCombination {
+                        meshId = originalMeshId,
+                        materialIds = materialIds,
+                    };
+
+                    if (!originalCombos.TryGetValue(originalMeshId, out var originalCombo)) {
+                        // First usage of the original -> assign materials to original
+                        AssignMaterialsToMesh(materialIds, mesh);
+                        originalCombos[originalMeshId] = meshMaterialCombo;
+                        meshMaterialCombos[meshMaterialCombo] = originalMeshId;
+                    } else {
+                        // Mesh is re-used -> check if this exact materials set was used before
+                        if (meshMaterialCombos.TryGetValue(meshMaterialCombo, out var meshId)) {
+                            // Materials are identical -> re-use Mesh object
+                            node.mesh = meshId;
+                        } else {
+                            // Materials differ -> clone Mesh object and assign materials to clone 
+                            var clonedMeshId = DuplicateMesh(originalMeshId);
+                            mesh = m_Meshes[clonedMeshId];
+                            AssignMaterialsToMesh(materialIds, mesh);
+                            node.mesh = clonedMeshId;
+                            meshMaterialCombos[meshMaterialCombo] = clonedMeshId;
+                        }
+                    }
+                }
+            }
+        }
+
+        static void AssignMaterialsToMesh(int[] materialIds, Mesh mesh) {
+            for (var i = 0; i < materialIds.Length; i++) {
+                if (materialIds[i] >= 0) {
+                    mesh.primitives[i].material = materialIds[i];
+                }
+            }
+        }
+
+        int DuplicateMesh(int meshId) {
+            var src = m_Meshes[meshId];
+            var copy = (Mesh)src.Clone();
+            m_Meshes.Add(copy);
+            return m_Meshes.Count - 1;
         }
 
         void BakeMeshes() {
@@ -520,6 +565,45 @@ namespace GLTFast.Export {
                 VertexAttributeFormat.SInt32 => sizeof(int),
                 _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
             };
+        }
+        
+        internal struct MeshMaterialCombination {
+            public int meshId;
+            public int[] materialIds;
+
+            public override bool Equals(object obj) {
+                //Check for null and compare run-time types.
+                if (obj == null || ! GetType().Equals(obj.GetType())) {
+                    return false;
+                }
+                return Equals((MeshMaterialCombination)obj);
+            }
+
+            bool Equals(MeshMaterialCombination other) {
+                return meshId == other.meshId && Equals(materialIds, other.materialIds);
+            }
+
+            static bool Equals(int[] a, int[] b) {
+                if (a == null && b == null) {
+                    return true;
+                }
+                if (a == null ^ b == null) {
+                    return false;
+                }
+                if (a.Length != b.Length) {
+                    return false;
+                }
+                for (var i = 0; i < a.Length; i++) {
+                    if (a[i] != b[i]) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            public override int GetHashCode() {
+                return HashCode.Combine(meshId, materialIds);
+            }
         }
     }
     
