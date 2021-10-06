@@ -26,27 +26,38 @@ namespace GLTFast.Export {
         }
 
         public void AddScene(string name, GameObject[] gameObjects) {
-            var rootNodes = new uint[gameObjects.Length];
+            var rootNodes = new List<uint>(gameObjects.Length);
             var tempMaterials = new List<Material>();
             for (var index = 0; index < gameObjects.Length; index++) {
                 var gameObject = gameObjects[index];
-                rootNodes[index] = AddGameObject(gameObject,tempMaterials);
+                if(!gameObject.activeInHierarchy) continue;
+                var nodeId = AddGameObject(gameObject,tempMaterials);
+                if (nodeId >= 0) {
+                    rootNodes.Add((uint)nodeId);
+                }
             }
-            m_Writer.AddScene(name,rootNodes);
+            if (rootNodes.Count > 0) {
+                m_Writer.AddScene(name,rootNodes.ToArray());
+            }
         }
 
         public void SaveToFile(string path) {
             m_Writer.SaveToFile(path);
         }
 
-        uint AddGameObject(GameObject gameObject, List<Material> tempMaterials ) {
+        int AddGameObject(GameObject gameObject, List<Material> tempMaterials ) {
+            if(!gameObject.activeInHierarchy) return -1;
             var childCount = gameObject.transform.childCount;
             uint[] children = null;
             if (childCount > 0) {
-                children = new uint[gameObject.transform.childCount];
+                var childList = new List<uint>(gameObject.transform.childCount);
                 for (var i = 0; i < childCount; i++) {
                     var child = gameObject.transform.GetChild(i);
-                    children[i] = AddGameObject(child.gameObject, tempMaterials);
+                    var childNodeId = AddGameObject(child.gameObject, tempMaterials);
+                    childList.Add((uint)childNodeId);
+                }
+                if (childList.Count > 0) {
+                    children = childList.ToArray();
                 }
             }
 
@@ -75,7 +86,7 @@ namespace GLTFast.Export {
             if (mesh != null) {
                 m_Writer.AddMeshToNode(nodeId,mesh,tempMaterials);
             }
-            return nodeId;
+            return (int)nodeId;
         }
     }
 }
