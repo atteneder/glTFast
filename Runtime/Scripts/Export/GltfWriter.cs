@@ -80,7 +80,8 @@ namespace GLTFast.Export {
             quaternion rotation,
             float3 scale,
             uint[] children
-            ) {
+            )
+        {
             var node = new Node {
                 name = name,
                 children = children,
@@ -104,18 +105,12 @@ namespace GLTFast.Export {
 
             if (uMaterials != null && uMaterials.Count > 0) {
                 var materialIds = new int[uMaterials.Count];
-                var valid = false;
                 for (var i = 0; i < uMaterials.Count; i++) {
                     var uMaterial = uMaterials[i];
                     materialIds[i] = uMaterial==null ? -1 : AddMaterial(uMaterial);
-                    if (materialIds[i] >= 0) {
-                        valid = true;
-                    }
                 }
-                if (valid) {
-                    m_NodeMaterials ??= new Dictionary<int, int[]>();
-                    m_NodeMaterials[(int)nodeId] = materialIds;
-                }
+                m_NodeMaterials ??= new Dictionary<int, int[]>();
+                m_NodeMaterials[(int)nodeId] = materialIds;
             }
 
             node.mesh = AddMesh(uMesh);
@@ -234,9 +229,7 @@ namespace GLTFast.Export {
 
         static void AssignMaterialsToMesh(int[] materialIds, Mesh mesh) {
             for (var i = 0; i < materialIds.Length; i++) {
-                if (materialIds[i] >= 0) {
-                    mesh.primitives[i].material = materialIds[i];
-                }
+                mesh.primitives[i].material = materialIds[i] >= 0 ? materialIds[i] : -1;
             }
         }
 
