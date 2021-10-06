@@ -1,7 +1,7 @@
 # glTFast 🚀
 
 <p align="center">
-<img src="./Documentation~/img/gltf-unity-logos.png" />
+<img src="./Documentation~/img/unity-gltf-logos.png" />
 </p>
 
 [![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
