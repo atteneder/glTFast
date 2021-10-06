@@ -104,7 +104,7 @@ namespace GLTFast.Export {
                 var valid = false;
                 for (var i = 0; i < uMaterials.Count; i++) {
                     var uMaterial = uMaterials[i];
-                    materialIds[i] = AddMaterial(uMaterial);
+                    materialIds[i] = uMaterial==null ? -1 : AddMaterial(uMaterial);
                     if (materialIds[i] >= 0) {
                         valid = true;
                     }
@@ -162,11 +162,15 @@ namespace GLTFast.Export {
                 BakeMeshes();    
             }
 
-            foreach (var (nodeId,materialIds) in m_NodeMaterials) {
-                var meshId = m_Nodes[nodeId].mesh;
-                var mesh = m_Meshes[meshId];
-                for (int i = 0; i < materialIds.Length; i++) {
-                    mesh.primitives[i].material = materialIds[i];
+            if (m_NodeMaterials != null && m_Meshes != null) {
+                foreach (var (nodeId,materialIds) in m_NodeMaterials) {
+                    var meshId = m_Nodes[nodeId].mesh;
+                    var mesh = m_Meshes[meshId];
+                    for (int i = 0; i < materialIds.Length; i++) {
+                        if (materialIds[i] >= 0) {
+                            mesh.primitives[i].material = materialIds[i];
+                        }
+                    }
                 }
             }
 
