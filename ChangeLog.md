@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 
 ### Added
 - Completed quantization by supporting UInt8/UInt16 skin bone weights
+### Changes
+- If `skin.skeleton` is properly set, `SkinnedMeshRendererRoot`'s root bone property will be assigned accordingly
 
 ## [4.3.1] - 2021-09-14
 ### Changed
