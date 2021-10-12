@@ -112,10 +112,6 @@ namespace GLTFast {
             Profiler.BeginSample("AnimationUtils.CalculateLinearTangents");
             var prev = curve.keys[0];
 
-            var q1 = quaternion.identity;
-            var q2 = quaternion.identity;
-            math.slerp(q1, q2, 0.4f);
-            
             for (var i = 1; i < times.Length; i++) {
                 var key = curve.keys[i];
                 var dT = key.time - prev.time;
