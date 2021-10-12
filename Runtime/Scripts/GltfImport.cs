@@ -29,9 +29,6 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 using Unity.Collections;
 using Unity.Jobs;
-#if BURST
-using Unity.Mathematics;
-#endif
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
