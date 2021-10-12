@@ -90,6 +90,7 @@ namespace GLTFast {
             Mesh mesh,
             int[] materialIndices,
             uint[] joints = null,
+            uint? rootJoint = null,
             float[] morphTargetWeights = null,
             int primitiveNumeration = 0
         ) {
@@ -121,6 +122,9 @@ namespace GLTFast {
                         bones[j] = nodes[jointIndex].transform;
                     }
                     smr.bones = bones;
+                    if (rootJoint.HasValue) {
+                        smr.rootBone = nodes[rootJoint.Value].transform;
+                    }
                 }
                 smr.sharedMesh = mesh;
                 if (morphTargetWeights!=null) {

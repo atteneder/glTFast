@@ -29,9 +29,6 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 using Unity.Collections;
 using Unity.Jobs;
-#if BURST
-using Unity.Mathematics;
-#endif
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
@@ -1499,12 +1496,16 @@ namespace GLTFast {
                         // Fallback name for Node is first valid Mesh name
                         goName = goName ?? meshName;
                         uint[] joints = null;
+                        uint? rootJoint = null;
 
                         if( mesh.HasVertexAttribute(UnityEngine.Rendering.VertexAttribute.BlendIndices) ) {
                             if(node.skin>=0) {
                                 var skin = gltf.skins[node.skin];
                                 // TODO: see if this can be moved to mesh creation phase / before instantiation
                                 mesh.bindposes = skinsInverseBindMatrices[node.skin];
+                                if (skin.skeleton >= 0) {
+                                    rootJoint = (uint) skin.skeleton;
+                                }
                                 joints = skin.joints;
                             } else {
                                 logger?.Warning(LogCode.SkinMissing);
@@ -1525,6 +1526,7 @@ namespace GLTFast {
                                 mesh,
                                 primitive.materialIndices,
                                 joints,
+                                rootJoint,
                                 gltf.meshes[node.mesh].weights,
                                 primitiveCount
                             );

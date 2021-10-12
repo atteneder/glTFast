@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 
 ### Added
 - Completed quantization by supporting UInt8/UInt16 skin bone weights
+### Changes
+- If `skin.skeleton` is properly set, `SkinnedMeshRendererRoot`'s root bone property will be assigned accordingly
+- Major animation loading performance improvements by inlining and optimizing hot for-loops
+### Fixed
+- Animation sampler properly defaults to `LINEAR` interpolation in case it is not specified
+- Correct `LINEAR` animation interpolation due to fixing tangent calculation
+- Correct `LINEAR` animation interpolation on (quaternion) rotations by ensuring shortest path (#250, #251)
 
 ## [4.3.1] - 2021-09-14
 ### Changed

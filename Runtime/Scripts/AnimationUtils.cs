@@ -20,38 +20,117 @@ using System;
 using System.Text;
 using GLTFast.Schema;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace GLTFast {
 
-    class AnimationUtils {
+    static class AnimationUtils {
 
-        public static void AddTranslationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> values, InterpolationType interpolationType) {
+        const float k_TimeEpsilon = 0.00001f;
+
+        public static void AddTranslationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType) {
+            // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
+            var values = translations.Reinterpret<float3>();
             AddVec3Curves(clip, animationPath, "localPosition.", times, values, interpolationType);
         }
 
-        public static void AddScaleCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> values, InterpolationType interpolationType) {
+        public static void AddScaleCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType) {
+            // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
+            var values = translations.Reinterpret<float3>();
             AddVec3Curves(clip, animationPath, "localScale.", times, values, interpolationType);
         }
 
         public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Quaternion> quaternions, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddRotationCurves");
             var rotX = new AnimationCurve();
             var rotY = new AnimationCurve();
             var rotZ = new AnimationCurve();
             var rotW = new AnimationCurve();
-            for (var i = 0; i < times.Length; i++) {
-                rotX.AddKey(CreateKeyframe(i, times, quaternions, x => x.x, interpolationType));
-                rotY.AddKey(CreateKeyframe(i, times, quaternions, x => x.y, interpolationType));
-                rotZ.AddKey(CreateKeyframe(i, times, quaternions, x => x.z, interpolationType));
-                rotW.AddKey(CreateKeyframe(i, times, quaternions, x => x.w, interpolationType));
+
+            // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
+            var values = quaternions.Reinterpret<quaternion>();
+
+            switch (interpolationType) {
+                case InterpolationType.STEP: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        rotX.AddKey( new Keyframe(time, value.value.x, float.PositiveInfinity, 0) );
+                        rotY.AddKey( new Keyframe(time, value.value.y, float.PositiveInfinity, 0) );
+                        rotZ.AddKey( new Keyframe(time, value.value.z, float.PositiveInfinity, 0) );
+                        rotW.AddKey( new Keyframe(time, value.value.w, float.PositiveInfinity, 0) );
+                    }
+                    break;
+                }
+                case InterpolationType.CUBICSPLINE: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var inTangent = values[i*3];
+                        var value = values[i*3 + 1];
+                        var outTangent = values[i*3 + 2];
+                        rotX.AddKey( new Keyframe(time, value.value.x, inTangent.value.x, outTangent.value.x, .5f, .5f ) );
+                        rotY.AddKey( new Keyframe(time, value.value.y, inTangent.value.y, outTangent.value.y, .5f, .5f ) );
+                        rotZ.AddKey( new Keyframe(time, value.value.z, inTangent.value.z, outTangent.value.z, .5f, .5f ) );
+                        rotW.AddKey( new Keyframe(time, value.value.w, inTangent.value.w, outTangent.value.w, .5f, .5f ) );
+                    }
+                    break;
+                }
+                default: { // LINEAR
+                    var prevTime = times[0];
+                    var prevValue = values[0];
+                    var inTangent = new quaternion(new float4(0f));
+                    
+                    for (var i = 1; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        
+                        // Ensure shortest path rotation ( see https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#interpolation-slerp )
+                        if (math.dot(prevValue, value) < 0) {
+                            value.value = -value.value;
+                        }
+                        
+                        var dT = time - prevTime;
+                        var dV = value.value - prevValue.value;
+                        quaternion outTangent;
+                        if (dT < k_TimeEpsilon) {
+                            outTangent.value.x = (dV.x < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.value.y = (dV.y < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.value.z = (dV.z < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.value.w = (dV.w < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                        } else {
+                            outTangent = dV / dT;
+                        }
+                        
+                        rotX.AddKey( new Keyframe(prevTime, prevValue.value.x, inTangent.value.x, outTangent.value.x ) );
+                        rotY.AddKey( new Keyframe(prevTime, prevValue.value.y, inTangent.value.y, outTangent.value.y ) );
+                        rotZ.AddKey( new Keyframe(prevTime, prevValue.value.z, inTangent.value.z, outTangent.value.z ) );
+                        rotW.AddKey( new Keyframe(prevTime, prevValue.value.w, inTangent.value.w, outTangent.value.w ) );
+
+                        inTangent = outTangent;
+                        prevTime = time;
+                        prevValue = value;
+                    }
+                    
+                    rotX.AddKey( new Keyframe(prevTime, prevValue.value.x, inTangent.value.x, 0 ) );
+                    rotY.AddKey( new Keyframe(prevTime, prevValue.value.y, inTangent.value.y, 0 ) );
+                    rotZ.AddKey( new Keyframe(prevTime, prevValue.value.z, inTangent.value.z, 0 ) );
+                    rotW.AddKey( new Keyframe(prevTime, prevValue.value.w, inTangent.value.w, 0 ) );
+                    
+                    break;
+                }
             }
+            
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.x", rotX);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.y", rotY);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.w", rotW);
+            Profiler.EndSample();
         }
-        
+
         public static string CreateAnimationPath(int nodeIndex, string[] nodeNames, int[] parentIndex) {
+            Profiler.BeginSample("AnimationUtils.CreateAnimationPath");
             var sb = new StringBuilder();
             do {
                 if (sb.Length > 0) {
@@ -60,6 +139,7 @@ namespace GLTFast {
                 sb.Insert(0,nodeNames[nodeIndex]);
                 nodeIndex = parentIndex[nodeIndex];
             } while (nodeIndex>=0);
+            Profiler.EndSample();
             return sb.ToString();
         }
         
@@ -72,6 +152,7 @@ namespace GLTFast {
             string[] morphTargetNames = null
             )
         {
+            Profiler.BeginSample("AnimationUtils.AddMorphTargetWeightCurves");
             int morphTargetCount;
             if (morphTargetNames == null) {
                 morphTargetCount = values.Length / times.Length;
@@ -97,87 +178,140 @@ namespace GLTFast {
                     interpolationType
                     );
             }
+            Profiler.EndSample();
         }
 
-        static void AddVec3Curves(AnimationClip clip, string animationPath, string propertyPrefix, NativeArray<float> times, NativeArray<Vector3> values, InterpolationType interpolationType) {
+        static void AddVec3Curves(AnimationClip clip, string animationPath, string propertyPrefix, NativeArray<float> times, NativeArray<float3> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddVec3Curves");
             var curveX = new AnimationCurve();
             var curveY = new AnimationCurve();
             var curveZ = new AnimationCurve();
-            for (var i = 0; i < times.Length; i++) {
-                curveX.AddKey(CreateKeyframe(i, times, values, x => x.x, interpolationType));
-                curveY.AddKey(CreateKeyframe(i, times, values, x => x.y, interpolationType));
-                curveZ.AddKey(CreateKeyframe(i, times, values, x => x.z, interpolationType));
+
+            switch (interpolationType) {
+                case InterpolationType.STEP: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        curveX.AddKey( new Keyframe(time, value.x, float.PositiveInfinity, 0) );
+                        curveY.AddKey( new Keyframe(time, value.y, float.PositiveInfinity, 0) );
+                        curveZ.AddKey( new Keyframe(time, value.z, float.PositiveInfinity, 0) );
+                    }
+                    break;
+                }
+                case InterpolationType.CUBICSPLINE: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var inTangent = values[i*3];
+                        var value = values[i*3 + 1];
+                        var outTangent = values[i*3 + 2];
+                        curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
+                        curveY.AddKey( new Keyframe(time, value.y, inTangent.y, outTangent.y, .5f, .5f ) );
+                        curveZ.AddKey( new Keyframe(time, value.z, inTangent.z, outTangent.z, .5f, .5f ) );
+                    }
+                    break;
+                }
+                default: { // LINEAR
+                    var prevTime = times[0];
+                    var prevValue = values[0];
+                    var inTangent = new float3(0f);
+                    
+                    for (var i = 1; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        
+                        var dT = time - prevTime;
+                        var dV = value - prevValue;
+                        float3 outTangent;
+                        if (dT < k_TimeEpsilon) {
+                            outTangent.x = (dV.x < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.y = (dV.y < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.z = (dV.z < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                        } else {
+                            outTangent = dV / dT;
+                        }
+                        
+                        curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, outTangent.x ) );
+                        curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, outTangent.y ) );
+                        curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, outTangent.z ) );
+
+                        inTangent = outTangent;
+                        prevTime = time;
+                        prevValue = value;
+                    }
+                    
+                    curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, 0 ) );
+                    curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, 0 ) );
+                    curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, 0 ) );
+                    
+                    break;
+                }
             }
+
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}x", curveX);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}y", curveY);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}z", curveZ);
+            Profiler.EndSample();
         }
         
         static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyPrefix, int curveIndex, int valueStride, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddScalarCurve");
             var curve = new AnimationCurve();
-            for (var timeIndex = 0; timeIndex < times.Length; timeIndex++) {
-                curve.AddKey(CreateScalarKeyframe(timeIndex, times, curveIndex, valueStride, values, interpolationType));
+            
+            switch (interpolationType) {
+                case InterpolationType.STEP: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var valueIndex = i * valueStride + curveIndex;
+                        var value = values[valueIndex];
+                        curve.AddKey( new Keyframe(time, value, float.PositiveInfinity, 0) );
+                    }
+                    break;
+                }
+                case InterpolationType.CUBICSPLINE: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var valueIndex = i * valueStride + curveIndex;
+                        var inTangent = values[valueIndex*3];
+                        var value = values[valueIndex*3 + 1];
+                        var outTangent = values[valueIndex*3 + 2];
+                        curve.AddKey( new Keyframe(time, value, inTangent, outTangent, .5f, .5f ) );
+                    }
+                    break;
+                }
+                default: { // LINEAR
+                    var prevTime = times[0];
+                    var prevValue = values[0];
+                    var inTangent = 0f;
+                    
+                    for (var i = 1; i < times.Length; i++) {
+                        var time = times[i];
+                        var valueIndex = i * valueStride + curveIndex;
+                        var value = values[valueIndex];
+                        
+                        var dT = time - prevTime;
+                        var dV = value - prevValue;
+                        float outTangent;
+                        if (dT < k_TimeEpsilon) {
+                            outTangent = (dV < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                        } else {
+                            outTangent = dV / dT;
+                        }
+                        
+                        curve.AddKey( new Keyframe(prevTime, prevValue, inTangent, outTangent ) );
+
+                        inTangent = outTangent;
+                        prevTime = time;
+                        prevValue = value;
+                    }
+                    
+                    curve.AddKey( new Keyframe(prevTime, prevValue, inTangent, 0 ) );
+                    
+                    break;
+                }
             }
+            
             clip.SetCurve(animationPath, typeof(SkinnedMeshRenderer), $"blendShape.{propertyPrefix}", curve);
-        }
-        
-        static Keyframe CreateKeyframe<T>(int index, NativeArray<float> timeArray, NativeArray<T> valueArray, Func<T, float> getValue, InterpolationType interpolationType) where T : struct {
-            var time = timeArray[index];
-            Keyframe keyframe;
-            switch (interpolationType) {
-                case InterpolationType.STEP:
-                    keyframe = new Keyframe(time, getValue(valueArray[index]), float.PositiveInfinity, 0);
-                    break;
-                case InterpolationType.CUBICSPLINE: {
-                    var inTangent = getValue(valueArray[index*3]);
-                    var value = getValue(valueArray[index*3 + 1]);
-                    var outTangent = getValue(valueArray[index*3 + 2]);
-                    keyframe = new Keyframe(time, value, inTangent, outTangent, .5f, .5f);
-                    break;
-                }
-                default: // LINEAR
-                    keyframe = new Keyframe(time, getValue(valueArray[index]),0,0,0,0);
-                    break;
-            }
-            return keyframe;
-        }
-        
-        static Keyframe CreateScalarKeyframe(
-            int index,
-            NativeArray<float> timeArray,
-            int curveIndex,
-            int valueStride,
-            NativeArray<float> valueArray,
-            InterpolationType interpolationType
-            )
-        {
-            var time = timeArray[index];
-            Keyframe keyframe;
-            var baseIndex = index * valueStride + curveIndex;
-            switch (interpolationType) {
-                case InterpolationType.STEP:
-#if DEBUG
-                    // TODO: Test and remove warning
-                    Debug.LogWarning("STEP interpolation on weights is not tested!");
-#endif
-                    keyframe = new Keyframe(time, valueArray[baseIndex], float.PositiveInfinity, 0);
-                    break;
-                case InterpolationType.CUBICSPLINE: {
-#if DEBUG
-                    // TODO: Test and remove warning
-                    Debug.LogWarning("CUBICSPLINE interpolation on weights is not tested!");
-#endif
-                    var inTangent = valueArray[baseIndex*3];
-                    var value = valueArray[baseIndex*3 + 1];
-                    var outTangent = valueArray[baseIndex*3 + 2];
-                    keyframe = new Keyframe(time, value, inTangent, outTangent, .5f, .5f);
-                    break;
-                }
-                default: // LINEAR
-                    keyframe = new Keyframe(time, valueArray[baseIndex],0,0,0,0);
-                    break;
-            }
-            return keyframe;
+            Profiler.EndSample();
         }
     }
 }
