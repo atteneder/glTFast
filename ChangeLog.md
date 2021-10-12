@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - If `skin.skeleton` is properly set, `SkinnedMeshRendererRoot`'s root bone property will be assigned accordingly
 ### Fixed
 - Animation sampler properly defaults to `LINEAR` interpolation in case it is not specified
+- Correct `LINEAR` animation interpolation due to fixing tangent calculation
 
 ## [4.3.1] - 2021-09-14
 ### Changed

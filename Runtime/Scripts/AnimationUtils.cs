@@ -20,11 +20,14 @@ using System;
 using System.Text;
 using GLTFast.Schema;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GLTFast {
 
     static class AnimationUtils {
+
+        const float k_TimeEpsilon = 0.00001f;
 
         public static void AddTranslationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> values, InterpolationType interpolationType) {
             AddVec3Curves(clip, animationPath, "localPosition.", times, values, interpolationType);
@@ -45,12 +48,46 @@ namespace GLTFast {
                 rotZ.AddKey(CreateKeyframe(i, times, quaternions, x => x.z, interpolationType));
                 rotW.AddKey(CreateKeyframe(i, times, quaternions, x => x.w, interpolationType));
             }
+
+            if (interpolationType == InterpolationType.LINEAR) {
+                CalculateLinearTangents(times, rotX);
+                CalculateLinearTangents(times, rotY);
+                CalculateLinearTangents(times, rotZ);
+                CalculateLinearTangents(times, rotW);
+            }
+            
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.x", rotX);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.y", rotY);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.w", rotW);
         }
         
+        static void CalculateLinearTangents(NativeArray<float> times, AnimationCurve curve) {
+            var prev = curve.keys[0];
+
+            var q1 = quaternion.identity;
+            var q2 = quaternion.identity;
+            math.slerp(q1, q2, 0.4f);
+            
+            for (var i = 1; i < times.Length; i++) {
+                var key = curve.keys[i];
+                var dT = key.time - prev.time;
+                var dV = key.value - prev.value;
+                float inTangent;
+                if (dT < k_TimeEpsilon) {
+                    inTangent = (dV < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                } else {
+                    inTangent = dV / dT;
+                }
+                
+                key.inTangent = inTangent;
+                prev.outTangent = inTangent;
+                curve.MoveKey(i-1, prev);
+                prev = key;
+            }
+            curve.MoveKey(times.Length-1, prev);
+        }
+
         public static string CreateAnimationPath(int nodeIndex, string[] nodeNames, int[] parentIndex) {
             var sb = new StringBuilder();
             do {
@@ -108,6 +145,13 @@ namespace GLTFast {
                 curveY.AddKey(CreateKeyframe(i, times, values, x => x.y, interpolationType));
                 curveZ.AddKey(CreateKeyframe(i, times, values, x => x.z, interpolationType));
             }
+            
+            if (interpolationType == InterpolationType.LINEAR) {
+                CalculateLinearTangents(times, curveX);
+                CalculateLinearTangents(times, curveY);
+                CalculateLinearTangents(times, curveZ);
+            }
+            
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}x", curveX);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}y", curveY);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}z", curveZ);
@@ -117,6 +161,10 @@ namespace GLTFast {
             var curve = new AnimationCurve();
             for (var timeIndex = 0; timeIndex < times.Length; timeIndex++) {
                 curve.AddKey(CreateScalarKeyframe(timeIndex, times, curveIndex, valueStride, values, interpolationType));
+            }
+            
+            if (interpolationType == InterpolationType.LINEAR) {
+                CalculateLinearTangents(times, curve);
             }
             clip.SetCurve(animationPath, typeof(SkinnedMeshRenderer), $"blendShape.{propertyPrefix}", curve);
         }
@@ -136,7 +184,7 @@ namespace GLTFast {
                     break;
                 }
                 default: // LINEAR
-                    keyframe = new Keyframe(time, getValue(valueArray[index]),0,0,0,0);
+                    keyframe = new Keyframe(time, getValue(valueArray[index]));
                     break;
             }
             return keyframe;
@@ -174,7 +222,7 @@ namespace GLTFast {
                     break;
                 }
                 default: // LINEAR
-                    keyframe = new Keyframe(time, valueArray[baseIndex],0,0,0,0);
+                    keyframe = new Keyframe(time, valueArray[baseIndex]);
                     break;
             }
             return keyframe;
