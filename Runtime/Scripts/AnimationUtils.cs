@@ -45,6 +45,7 @@ namespace GLTFast {
             var rotZ = new AnimationCurve();
             var rotW = new AnimationCurve();
 
+            // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
             var values = quaternions.Reinterpret<quaternion>();
 
             switch (interpolationType) {
