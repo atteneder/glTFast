@@ -39,6 +39,7 @@ namespace GLTFast {
         }
 
         public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Quaternion> quaternions, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddRotationCurves");
             var rotX = new AnimationCurve();
             var rotY = new AnimationCurve();
             var rotZ = new AnimationCurve();
@@ -62,6 +63,7 @@ namespace GLTFast {
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.y", rotY);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.w", rotW);
+            Profiler.EndSample();
         }
 
         static void FixRotations(AnimationCurve rotX, AnimationCurve rotY, AnimationCurve rotZ, AnimationCurve rotW) {
@@ -72,6 +74,7 @@ namespace GLTFast {
                 rotZ.keys[0].value,
                 rotW.keys[0].value
             );
+            // prev = math.normalize(prev);
             for (var i = 1; i < rotX.keys.Length; i++) {
                 var keyX = rotX.keys[i];
                 var keyY = rotY.keys[i];
@@ -83,6 +86,7 @@ namespace GLTFast {
                     keyZ.value,
                     keyW.value
                 );
+                // value = math.normalize(value);
 
                 if (math.dot(prev, value) < 0) {
                     value.value = -value.value;
@@ -133,6 +137,7 @@ namespace GLTFast {
         }
 
         public static string CreateAnimationPath(int nodeIndex, string[] nodeNames, int[] parentIndex) {
+            Profiler.BeginSample("AnimationUtils.CreateAnimationPath");
             var sb = new StringBuilder();
             do {
                 if (sb.Length > 0) {
@@ -141,6 +146,7 @@ namespace GLTFast {
                 sb.Insert(0,nodeNames[nodeIndex]);
                 nodeIndex = parentIndex[nodeIndex];
             } while (nodeIndex>=0);
+            Profiler.EndSample();
             return sb.ToString();
         }
         
@@ -153,6 +159,7 @@ namespace GLTFast {
             string[] morphTargetNames = null
             )
         {
+            Profiler.BeginSample("AnimationUtils.AddMorphTargetWeightCurves");
             int morphTargetCount;
             if (morphTargetNames == null) {
                 morphTargetCount = values.Length / times.Length;
@@ -178,9 +185,11 @@ namespace GLTFast {
                     interpolationType
                     );
             }
+            Profiler.EndSample();
         }
 
         static void AddVec3Curves(AnimationClip clip, string animationPath, string propertyPrefix, NativeArray<float> times, NativeArray<Vector3> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddVec3Curves");
             var curveX = new AnimationCurve();
             var curveY = new AnimationCurve();
             var curveZ = new AnimationCurve();
@@ -199,9 +208,11 @@ namespace GLTFast {
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}x", curveX);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}y", curveY);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}z", curveZ);
+            Profiler.EndSample();
         }
         
         static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyPrefix, int curveIndex, int valueStride, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddScalarCurve");
             var curve = new AnimationCurve();
             for (var timeIndex = 0; timeIndex < times.Length; timeIndex++) {
                 curve.AddKey(CreateScalarKeyframe(timeIndex, times, curveIndex, valueStride, values, interpolationType));
@@ -211,6 +222,7 @@ namespace GLTFast {
                 CalculateLinearTangents(times, curve);
             }
             clip.SetCurve(animationPath, typeof(SkinnedMeshRenderer), $"blendShape.{propertyPrefix}", curve);
+            Profiler.EndSample();
         }
         
         static Keyframe CreateKeyframe<T>(int index, NativeArray<float> timeArray, NativeArray<T> valueArray, Func<T, float> getValue, InterpolationType interpolationType) where T : struct {
