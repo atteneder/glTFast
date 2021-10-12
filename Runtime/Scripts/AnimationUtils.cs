@@ -24,7 +24,7 @@ using UnityEngine;
 
 namespace GLTFast {
 
-    class AnimationUtils {
+    static class AnimationUtils {
 
         public static void AddTranslationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> values, InterpolationType interpolationType) {
             AddVec3Curves(clip, animationPath, "localPosition.", times, values, interpolationType);
