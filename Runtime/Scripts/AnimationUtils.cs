@@ -257,7 +257,8 @@ namespace GLTFast {
                 case InterpolationType.STEP: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
-                        var value = values[i];
+                        var valueIndex = i * valueStride + curveIndex;
+                        var value = values[valueIndex];
                         curve.AddKey( new Keyframe(time, value, float.PositiveInfinity, 0) );
                     }
                     break;
@@ -265,9 +266,10 @@ namespace GLTFast {
                 case InterpolationType.CUBICSPLINE: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
-                        var inTangent = values[i*3];
-                        var value = values[i*3 + 1];
-                        var outTangent = values[i*3 + 2];
+                        var valueIndex = i * valueStride + curveIndex;
+                        var inTangent = values[valueIndex*3];
+                        var value = values[valueIndex*3 + 1];
+                        var outTangent = values[valueIndex*3 + 2];
                         curve.AddKey( new Keyframe(time, value, inTangent, outTangent, .5f, .5f ) );
                     }
                     break;
@@ -279,7 +281,8 @@ namespace GLTFast {
                     
                     for (var i = 1; i < times.Length; i++) {
                         var time = times[i];
-                        var value = values[i];
+                        var valueIndex = i * valueStride + curveIndex;
+                        var value = values[valueIndex];
                         
                         var dT = time - prevTime;
                         var dV = value - prevValue;
