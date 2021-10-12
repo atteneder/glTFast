@@ -22,6 +22,7 @@ using GLTFast.Schema;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace GLTFast {
 
@@ -50,6 +51,7 @@ namespace GLTFast {
             }
 
             if (interpolationType == InterpolationType.LINEAR) {
+                FixRotations(rotX, rotY, rotZ, rotW);
                 CalculateLinearTangents(times, rotX);
                 CalculateLinearTangents(times, rotY);
                 CalculateLinearTangents(times, rotZ);
@@ -61,8 +63,49 @@ namespace GLTFast {
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.w", rotW);
         }
+
+        static void FixRotations(AnimationCurve rotX, AnimationCurve rotY, AnimationCurve rotZ, AnimationCurve rotW) {
+            Profiler.BeginSample("AnimationUtils.FixRotations");
+            var prev = new quaternion(
+                rotX.keys[0].value,
+                rotY.keys[0].value,
+                rotZ.keys[0].value,
+                rotW.keys[0].value
+            );
+            for (var i = 1; i < rotX.keys.Length; i++) {
+                var keyX = rotX.keys[i];
+                var keyY = rotY.keys[i];
+                var keyZ = rotZ.keys[i];
+                var keyW = rotW.keys[i];
+                var value = new quaternion(
+                    keyX.value,
+                    keyY.value,
+                    keyZ.value,
+                    keyW.value
+                );
+
+                if (math.dot(prev, value) < 0) {
+                    value.value = -value.value;
+
+                    keyX.value = -keyX.value;
+                    rotX.MoveKey(i, keyX);
+                    
+                    keyY.value = -keyY.value;
+                    rotY.MoveKey(i, keyY);
+                    
+                    keyZ.value = -keyZ.value;
+                    rotZ.MoveKey(i, keyZ);
+                    
+                    keyW.value = -keyW.value;
+                    rotW.MoveKey(i, keyW);
+                }
+                prev = value;
+            }
+            Profiler.EndSample();
+        }
         
         static void CalculateLinearTangents(NativeArray<float> times, AnimationCurve curve) {
+            Profiler.BeginSample("AnimationUtils.CalculateLinearTangents");
             var prev = curve.keys[0];
 
             var q1 = quaternion.identity;
@@ -86,6 +129,7 @@ namespace GLTFast {
                 prev = key;
             }
             curve.MoveKey(times.Length-1, prev);
+            Profiler.EndSample();
         }
 
         public static string CreateAnimationPath(int nodeIndex, string[] nodeNames, int[] parentIndex) {

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Animation sampler properly defaults to `LINEAR` interpolation in case it is not specified
 - Correct `LINEAR` animation interpolation due to fixing tangent calculation
+- Correct `LINEAR` animation interpolation on (quaternion) rotations by ensuring shortest path (#250, #251)
 
 ## [4.3.1] - 2021-09-14
 ### Changed
