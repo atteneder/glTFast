@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Correct `LINEAR` animation interpolation due to fixing tangent calculation
 - Correct `LINEAR` animation interpolation on (quaternion) rotations by ensuring shortest path (#250, #251)
 - Unlit built-in render pipeline materials have correct texture transform again 
+- Correct quantized morph target shading by fixing (not normalizing) delta normals and delta tangents
 
 ## [4.3.1] - 2021-09-14
 ### Changed

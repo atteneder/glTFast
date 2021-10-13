@@ -158,7 +158,8 @@ namespace GLTFast {
                         posByteStride,
                         (float3*)dest,
                         12,
-                        posAcc.normalized
+                        posAcc.normalized,
+                        false // positional data never needs to be normalized
                     );
                     if (h.HasValue) {
                         handles[handleIndex] = h.Value;
@@ -204,7 +205,8 @@ namespace GLTFast {
                             nrmInputByteStride,
                             (float3*)dest,
                             12,
-                            nrmAcc.normalized
+                            nrmAcc.normalized,
+                            false // morph target normals are deltas -> don't normalize
                         );
                         if (h.HasValue) {
                             handles[handleIndex] = h.Value;
@@ -251,7 +253,8 @@ namespace GLTFast {
                             tanInputByteStride,
                             (float3*)dest,
                             12,
-                            tanAcc.normalized
+                            tanAcc.normalized,
+                            false // morph target tangents are deltas -> don't normalize
                         );
                         if (h.HasValue) {
                             handles[handleIndex] = h.Value;

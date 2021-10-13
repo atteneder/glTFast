@@ -145,7 +145,8 @@ namespace GLTFast
                         posByteStride,
                         (float3*) vDataPtr,
                         outputByteStride,
-                        posAcc.normalized
+                        posAcc.normalized,
+                        false // positional data never needs to be normalized
                     );
                 }
                 if (posAcc.isSparse) {
@@ -191,7 +192,8 @@ namespace GLTFast
                     inputByteStride,
                     (float3*) (vDataPtr+12),
                     outputByteStride,
-                    nrmAcc.normalized
+                    nrmAcc.normalized,
+                    true // normals need to be unit length
                 );
                 if (h.HasValue) {
                     handles[handleIndex] = h.Value;
