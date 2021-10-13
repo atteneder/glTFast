@@ -13,6 +13,10 @@
 // limitations under the License.
 //
 
+#if UNITY_2020_2_OR_NEWER
+#define GLTFAST_MESH_DATA
+#endif
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -55,14 +59,14 @@ namespace GLTFast.Export {
 
         MemoryStream m_BufferStream;
 
-        Stream bufferWriter => m_BufferStream ??= new MemoryStream();
+        Stream bufferWriter => m_BufferStream = m_BufferStream ?? new MemoryStream();
 
         public GltfWriter() {
             m_Gltf = new Root();
         }
 
         public uint AddScene(string name, uint[] nodes) {
-            m_Scenes ??= new List<Scene>();
+            m_Scenes = m_Scenes ?? new List<Scene>();
             var scene = new Scene {
                 name = name,
                 nodes = nodes
@@ -95,7 +99,7 @@ namespace GLTFast.Export {
             if( !scale.Equals(new float3(1f)) ) {
                 node.scale = new[] { scale.x, scale.y, scale.z };
             }
-            m_Nodes ??= new List<Node>();
+            m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
             return (uint) m_Nodes.Count - 1;
         }
@@ -109,7 +113,7 @@ namespace GLTFast.Export {
                     var uMaterial = uMaterials[i];
                     materialIds[i] = uMaterial==null ? -1 : AddMaterial(uMaterial);
                 }
-                m_NodeMaterials ??= new Dictionary<int, int[]>();
+                m_NodeMaterials = m_NodeMaterials ?? new Dictionary<int, int[]>();
                 m_NodeMaterials[(int)nodeId] = materialIds;
             }
 
@@ -150,14 +154,19 @@ namespace GLTFast.Export {
             var json = GetJson();
             File.WriteAllText(path,json);
             if (m_BufferStream != null) {
-                using var file = new FileStream(bufferPath, FileMode.Create, FileAccess.Write);
-                m_BufferStream.WriteTo(file);
+                using (var file = new FileStream(bufferPath, FileMode.Create, FileAccess.Write)) {
+                    m_BufferStream.WriteTo(file);
+                }
             }
         }
 
         void Bake(string bufferPath) {
             if (m_Meshes != null) {
-                BakeMeshes();    
+#if GLTFAST_MESH_DATA
+                BakeMeshes();
+#else
+                throw new NotImplementedException("glTF export (containing meshes) is currently not supported on Unity 2020.1 and older");
+#endif
             }
 
             AssignMaterialsToMeshes();
@@ -194,7 +203,9 @@ namespace GLTFast.Export {
             if (m_NodeMaterials != null && m_Meshes != null) {
                 var meshMaterialCombos = new Dictionary<MeshMaterialCombination, int>(m_Meshes.Count);
                 var originalCombos = new Dictionary<int, MeshMaterialCombination>(m_Meshes.Count);
-                foreach (var (nodeId, materialIds) in m_NodeMaterials) {
+                foreach (var nodeMaterial in m_NodeMaterials) {
+                    var nodeId = nodeMaterial.Key;
+                    var materialIds = nodeMaterial.Value;
                     var node = m_Nodes[nodeId];
                     var originalMeshId = node.mesh;
                     var mesh = m_Meshes[originalMeshId];
@@ -240,6 +251,8 @@ namespace GLTFast.Export {
             return m_Meshes.Count - 1;
         }
 
+#if GLTFAST_MESH_DATA
+
         void BakeMeshes() {
             var byteOffset = m_BufferStream?.Length ?? 0;
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
@@ -268,7 +281,7 @@ namespace GLTFast.Export {
                 var size = attribute.dimension * GetAttributeSize(attribute.format);
                 strides[attribute.stream] += size;
 
-                m_Accessors ??= new List<Accessor>();
+                m_Accessors = m_Accessors ?? new List<Accessor>();
                 var accessorId = m_Accessors.Count;
                 var accessor = new Accessor {
                     bufferView = bufferViewBaseIndex + attribute.stream,
@@ -376,7 +389,7 @@ namespace GLTFast.Export {
                 byteOffset = (int)bufferByteOffset,
                 byteLength = indexData.Length,
             };
-            m_BufferViews ??= new List<BufferView>();
+            m_BufferViews = m_BufferViews ?? new List<BufferView>();
             var indexBufferViewId = m_BufferViews.Count;
             m_BufferViews.Add(indexBufferView);
             bufferByteOffset += indexData.Length;
@@ -467,6 +480,8 @@ namespace GLTFast.Export {
             return bufferByteOffset;
         }
 
+#endif // #if GLTFAST_MESH_DATA
+
         static unsafe void ConvertPositionAttribute(
             AttributeData attrData,
             uint byteStride,
@@ -534,8 +549,8 @@ namespace GLTFast.Export {
             var mesh = new Mesh {
                 name = uMesh.name
             };
-            m_Meshes ??= new List<Mesh>();
-            m_UnityMeshes ??= new List<UnityEngine.Mesh>();
+            m_Meshes = m_Meshes ?? new List<Mesh>();
+            m_UnityMeshes = m_UnityMeshes ?? new List<UnityEngine.Mesh>();
             m_Meshes.Add(mesh);
             m_UnityMeshes.Add(uMesh);
             meshId = m_Meshes.Count - 1;
@@ -543,21 +558,34 @@ namespace GLTFast.Export {
         }
         
         static unsafe int GetAttributeSize(VertexAttributeFormat format) {
-            return format switch {
-                VertexAttributeFormat.Float32 => sizeof(float),
-                VertexAttributeFormat.Float16 => sizeof(half),
-                VertexAttributeFormat.UNorm8 => sizeof(byte),
-                VertexAttributeFormat.SNorm8 => sizeof(sbyte),
-                VertexAttributeFormat.UNorm16 => sizeof(ushort),
-                VertexAttributeFormat.SNorm16 => sizeof(short),
-                VertexAttributeFormat.UInt8 => sizeof(byte),
-                VertexAttributeFormat.SInt8 => sizeof(sbyte),
-                VertexAttributeFormat.UInt16 => sizeof(ushort),
-                VertexAttributeFormat.SInt16 => sizeof(short),
-                VertexAttributeFormat.UInt32 => sizeof(uint),
-                VertexAttributeFormat.SInt32 => sizeof(int),
-                _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
-            };
+            switch (format) {
+                case VertexAttributeFormat.Float32:
+                    return sizeof(float);
+                case VertexAttributeFormat.Float16:
+                    return sizeof(half);
+                case VertexAttributeFormat.UNorm8:
+                    return sizeof(byte);
+                case VertexAttributeFormat.SNorm8:
+                    return sizeof(sbyte);
+                case VertexAttributeFormat.UNorm16:
+                    return sizeof(ushort);
+                case VertexAttributeFormat.SNorm16:
+                    return sizeof(short);
+                case VertexAttributeFormat.UInt8:
+                    return sizeof(byte);
+                case VertexAttributeFormat.SInt8:
+                    return sizeof(sbyte);
+                case VertexAttributeFormat.UInt16:
+                    return sizeof(ushort);
+                case VertexAttributeFormat.SInt16:
+                    return sizeof(short);
+                case VertexAttributeFormat.UInt32:
+                    return sizeof(uint);
+                case VertexAttributeFormat.SInt32:
+                    return sizeof(int);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(format), format, null);
+            }
         }
         
         internal struct MeshMaterialCombination {
@@ -593,9 +621,16 @@ namespace GLTFast.Export {
                 }
                 return true;
             }
-            
+
             public override int GetHashCode() {
+#if NET_4_6
                 return HashCode.Combine(meshId, materialIds);
+#else
+                var hash = 17;
+                hash = hash * 31 + meshId.GetHashCode();
+                hash = hash * 31 + materialIds.GetHashCode();
+                return hash;
+#endif
             }
         }
     }

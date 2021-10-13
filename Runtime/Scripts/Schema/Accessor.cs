@@ -201,13 +201,18 @@ namespace GLTFast.Schema {
         }
 
         public static GLTFAccessorAttributeType GetAccessorAttributeType(int dimension) {
-            return dimension switch {
-                1 => GLTFAccessorAttributeType.SCALAR,
-                2 => GLTFAccessorAttributeType.VEC2,
-                3 => GLTFAccessorAttributeType.VEC3,
-                4 => GLTFAccessorAttributeType.VEC4,
-                _ => throw new ArgumentOutOfRangeException(nameof(dimension), dimension, null)
-            };
+            switch (dimension) {
+                case 1:
+                    return GLTFAccessorAttributeType.SCALAR;
+                case 2:
+                    return GLTFAccessorAttributeType.VEC2;
+                case 3:
+                    return GLTFAccessorAttributeType.VEC3;
+                case 4:
+                    return GLTFAccessorAttributeType.VEC4;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(dimension), dimension, null);
+            }
         }
         
         public static int GetAccessorAttributeTypeLength( GLTFAccessorAttributeType type ) {

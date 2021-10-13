@@ -36,7 +36,7 @@ namespace GLTFast.Schema {
         [JsonIgnore]
         public Color baseColor {
             get =>
-                new(
+                new Color(
                     baseColorFactor[0],
                     baseColorFactor[1],
                     baseColorFactor[2],

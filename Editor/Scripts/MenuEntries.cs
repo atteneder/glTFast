@@ -73,15 +73,16 @@ namespace GLTFast.Editor {
         
         static bool TryGetExportNameAndGameObjects(out string name, out GameObject[] gameObjects)
         {
-            switch (Selection.transforms.Length) {
-                case > 1:
-                    name = SceneManager.GetActiveScene().name;
-                    gameObjects = Selection.gameObjects;
-                    return true;
-                case 1:
-                    name = Selection.activeGameObject.name;
-                    gameObjects = Selection.gameObjects;
-                    return true;
+            if (Selection.transforms.Length > 1) {
+                name = SceneManager.GetActiveScene().name;
+                gameObjects = Selection.gameObjects;
+                return true;
+            }
+
+            if (Selection.transforms.Length == 1) {
+                name = Selection.activeGameObject.name;
+                gameObjects = Selection.gameObjects;
+                return true;
             }
 
             if (Selection.objects.Any() && Selection.objects.All(x => x is GameObject)) {

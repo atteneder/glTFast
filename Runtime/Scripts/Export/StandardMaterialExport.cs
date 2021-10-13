@@ -161,7 +161,7 @@ namespace GLTFast.Export {
                 }
                 if (uMaterial.HasProperty(k_TintColor)) {
 	                //particles use _TintColor instead of _Color
-	                material.pbrMetallicRoughness ??= new PbrMetallicRoughness() { metallicFactor = 0, roughnessFactor = 1.0f };
+	                material.pbrMetallicRoughness = material.pbrMetallicRoughness ?? new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
 
 	                material.pbrMetallicRoughness.baseColor = uMaterial.GetColor(k_TintColor);
                 }
