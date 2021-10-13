@@ -76,12 +76,7 @@ SubShader {
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 o.vertex = UnityObjectToClipPos(v.vertex);
-
-#ifdef _UV_ROTATION
-                o.texcoord = TexCoordsSingle((_MainTexUVChannel==0)?v.texcoord0:v.texcoord1,_MainTex);
-#else
-                o.texcoord = TRANSFORM_TEX((_MainTexUVChannel==0)?v.texcoord0:v.texcoord1, _MainTex);
-#endif
+                o.texcoord = TexCoordsSingle((_MainTexUVChannel==0)?v.texcoord0:v.texcoord1, _MainTex);
 
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 o.color = v.color;
