@@ -73,23 +73,21 @@ namespace GLTFast {
         
         public const int DefaultBatchCount = 512;
 
-        const string ExtDracoMeshCompression = "KHR_draco_mesh_compression";
-        const string ExtTextureBasisu = "KHR_texture_basisu";
         const string PrimitiveName = "Primitive";
 
         public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
 #if DRACO_UNITY
-            ExtDracoMeshCompression,
+            Extensions.DracoMeshCompression,
 #endif
 #if KTX_UNITY
-            ExtTextureBasisu,
+            Extensions.TextureBasisUniversal,
 #endif // KTX_UNITY
-            "KHR_materials_pbrSpecularGlossiness",
-            "KHR_materials_unlit",
-            "KHR_texture_transform",
-            "KHR_mesh_quantization",
-            "KHR_materials_transmission",
-            "EXT_mesh_gpu_instancing",
+            Extensions.MaterialsPbrSpecularGlossiness,
+            Extensions.MaterialsUnlit,
+            Extensions.TextureTransform,
+            Extensions.MeshQuantization,
+            Extensions.MaterialsTransmission,
+            Extensions.MeshGPUInstancing,
         };
 
         enum ChunkFormat : uint
@@ -621,12 +619,12 @@ namespace GLTFast {
                     var supported = supportedExtensions.Contains(ext);
                     if(!supported) {
 #if !DRACO_UNITY
-                        if(ext==ExtDracoMeshCompression) {
+                        if(ext==Extensions.DracoMeshCompression) {
                             logger?.Error(LogCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
-                        if(ext==ExtTextureBasisu) {
+                        if(ext==Extensions.TextureBasisUniversal) {
                             logger?.Error(LogCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
@@ -642,12 +640,12 @@ namespace GLTFast {
                     var supported = supportedExtensions.Contains(ext);
                     if(!supported) {
 #if !DRACO_UNITY
-                        if(ext==ExtDracoMeshCompression) {
+                        if(ext==Extensions.DracoMeshCompression) {
                             logger?.Warning(LogCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
-                        if(ext==ExtTextureBasisu) {
+                        if(ext==Extensions.TextureBasisUniversal) {
                             logger?.Warning(LogCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
@@ -952,7 +950,7 @@ namespace GLTFast {
                 }
                 ktxDownloadTasks.Add(index, downloadTask);
 #else
-                logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtTextureBasisu);
+                logger?.Error(LogCode.PackageMissing,"KtxUnity",Extensions.TextureBasisUniversal);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
@@ -1674,7 +1672,7 @@ namespace GLTFast {
                             Profiler.EndSample();
                             await deferAgent.BreakPoint();
 #else
-                            logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtTextureBasisu);
+                            logger?.Error(LogCode.PackageMissing,"KtxUnity",Extensions.TextureBasisUniversal);
 #endif // KTX_UNITY
                         } else {
                             Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBuffer");
