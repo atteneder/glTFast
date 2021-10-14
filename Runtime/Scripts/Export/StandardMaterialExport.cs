@@ -276,6 +276,12 @@ namespace GLTFast.Export {
 		        index = textureId,
 		        // texCoord = 0 // TODO: figure out which UV set was used
 	        };
+	        info.extensions = new TextureInfoExtension {
+		        KHR_texture_transform = new TextureTransform {
+			        scale = new float[]{1,-1},
+			        offset = new float[]{0,1}
+		        }
+	        };
 
 	        return info;
         }
