@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected mesh bounds (calculated from accessor's min/max)
 - No errors when importing empty scenes
 
-## [4.3.2] - 2020-10-13
+## [4.3.2] - 2021-10-13
 ### Added
 - Completed quantization by supporting UInt8/UInt16 skin bone weights
 ### Changes
@@ -144,7 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GameObjectBoundsInstantiator` correctly calculates bounds for scenes that contain multi-primitive meshes (fixes #173)
 - Corrected linear/gamma sampling whenever texture index does not equal image index (fixes #172)
 
-## [3.2.0] - 2020-04-13
+## [3.2.0] - 2021-04-13
 ### Added
 - Support for animations via Unity's legacy animation system (`Animation` component; #124)
 ### Fixed
@@ -153,7 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sample code for custom defer agent is now thread safe (fixes #161)
 - Meshes with two UV sets and vertex colors now work (fixes #162)
 
-## [3.1.0] - 2020-03-16
+## [3.1.0] - 2021-03-16
 ### Added
 - Unlit alpha blended ShaderGraph variants (thanks [@hybridherbst][hybridherbst] for #144)
 - Support for unsigned byte joint indices
@@ -167,7 +167,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Error when trying to set texture offset/scale but material doesn't have _MainTex property (thanks [@hybridherbst][hybridherbst] for #142)
 - Crash when trying to combine meshes created by glTFast by setting proper submesh vertex count (fixes #100)
 
-## [3.0.2] - 2020-02-07
+## [3.0.2] - 2021-02-07
 ### Changed
 - Had to bring back `GltfAsset.isDone` for render tests
 ### Fixed
@@ -175,7 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Escaped, relative buffer/texture URIs now work on local file system consistently 
 - Rendertests work again
 
-## [3.0.1] - 2020-02-04
+## [3.0.1] - 2021-02-04
 ### Added
 - Error message when a UV set other than the first one is used (is unsupported; see issue #34)
 - Unit test for loading all models once (good for quick checks in comparison to performance tests, which take very long)
