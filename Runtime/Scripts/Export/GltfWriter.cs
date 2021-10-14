@@ -34,11 +34,16 @@ using UnityEngine.Rendering;
 using Buffer = GLTFast.Schema.Buffer;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
+using Texture = GLTFast.Schema.Texture;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 [assembly: InternalsVisibleTo("glTFast.Tests")]
 
 namespace GLTFast.Export {
-    public class GltfWriter {
+    public class GltfWriter : IGltfWritable {
         
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
@@ -49,12 +54,15 @@ namespace GLTFast.Export {
         List<Node> m_Nodes;
         List<Mesh> m_Meshes;
         List<Material> m_Materials;
+        List<Texture> m_Textures;
+        List<Image> m_Images;
         
         List<Accessor> m_Accessors;
         List<BufferView> m_BufferViews;
 
         List<UnityEngine.Material> m_UnityMaterials;
         List<UnityEngine.Mesh> m_UnityMeshes;
+        List<UnityEngine.Texture> m_UnityTextures;
         Dictionary<int, int[]> m_NodeMaterials;
 
         MemoryStream m_BufferStream;
@@ -133,12 +141,78 @@ namespace GLTFast.Export {
                 m_UnityMaterials = new List<UnityEngine.Material>();    
             }
             
-            var material = StandardMaterialExport.ConvertMaterial(uMaterial);
+            var material = StandardMaterialExport.ConvertMaterial(uMaterial, this);
 
             materialId = m_Materials.Count;
             m_Materials.Add(material);
             m_UnityMaterials.Add(uMaterial);
             return materialId;
+        }
+
+        
+        public int AddImage( UnityEngine.Texture uTexture ) {
+            var imageId = -1;
+            if (m_UnityTextures != null) {
+                imageId = m_UnityTextures.IndexOf(uTexture);
+                if (imageId >= 0) {
+                    return imageId;
+                }
+            } else {
+                m_UnityTextures = new List<UnityEngine.Texture>();
+                m_Images = new List<Image>();
+            }
+
+            imageId = m_UnityTextures.Count;
+
+            // TODO: Create sampler
+            // TODO: Save as external file
+            // TODO: KTX encoding
+
+#if UNITY_EDITOR
+            var assetPath = AssetDatabase.GetAssetPath(uTexture);
+            if (File.Exists(assetPath)) {
+                var mimeType = GetMimeType(assetPath);
+                if (!string.IsNullOrEmpty(mimeType)) {
+                    var image = new Image {
+                        name = uTexture.name
+                    };
+                    var imageData = File.ReadAllBytes(assetPath);
+                    image.bufferView = WriteToBuffer(imageData);
+                    image.mimeType = mimeType;
+                    m_UnityTextures.Add(uTexture);
+                    m_Images.Add(image);
+                } else {
+                    Debug.LogError($"Could not determine type of image {assetPath}");
+                }
+            }
+#else
+            throw new NotImplementedException("Exporting textures at runtime is not yet implemented");
+#endif
+
+            return imageId;
+        }
+
+        public int AddTexture(int imageId) {
+            m_Textures = m_Textures ?? new List<Texture>();
+            
+            var texture = new Texture {
+                source = imageId
+            };
+            m_Textures.Add(texture);
+            return m_Textures.Count - 1;
+        }
+
+        static string GetMimeType(string assetPath) {
+            string mimeType = null;
+            if (assetPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) {
+                mimeType = "image/png";
+            }
+            else if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                assetPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) {
+                mimeType = "image/jpeg";
+            }
+
+            return mimeType;
         }
 
         public void SaveToFile(string path) {
@@ -186,6 +260,8 @@ namespace GLTFast.Export {
             m_Gltf.accessors = m_Accessors?.ToArray();
             m_Gltf.bufferViews = m_BufferViews?.ToArray();
             m_Gltf.materials = m_Materials?.ToArray();
+            m_Gltf.images = m_Images?.ToArray();
+            m_Gltf.textures = m_Textures?.ToArray();
 
             m_Gltf.asset = new Asset {
                 version = "2.0",
@@ -254,17 +330,15 @@ namespace GLTFast.Export {
 #if GLTFAST_MESH_DATA
 
         void BakeMeshes() {
-            var byteOffset = m_BufferStream?.Length ?? 0;
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
-                byteOffset = BakeMesh(meshId, meshDataArray[meshId], byteOffset);
+                BakeMesh(meshId, meshDataArray[meshId]);
             }
             meshDataArray.Dispose();
         }
 
-        long BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData, long bufferByteOffset) {
+        void BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData) {
 
-            var bufferViewBaseIndex = (m_BufferViews?.Count ?? 0) + 1; // +1 to offset index bufferView
             var mesh = m_Meshes[meshId];
             var uMesh = m_UnityMeshes[meshId];
 
@@ -276,22 +350,26 @@ namespace GLTFast.Export {
             var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
             
             foreach (var attribute in vertexAttributes) {
-                var attrData = new AttributeData { offset = strides[attribute.stream], stream = attribute.stream };
-                attrDataDict[attribute.attribute] = attrData;
+                var attrData = new AttributeData {
+                    offset = strides[attribute.stream],
+                    stream = attribute.stream
+                };
+                
                 var size = attribute.dimension * GetAttributeSize(attribute.format);
                 strides[attribute.stream] += size;
 
-                m_Accessors = m_Accessors ?? new List<Accessor>();
-                var accessorId = m_Accessors.Count;
                 var accessor = new Accessor {
-                    bufferView = bufferViewBaseIndex + attribute.stream,
                     byteOffset = attrData.offset,
                     componentType = Accessor.GetComponentType(attribute.format),
                     count = vertexCount,
                     typeEnum = Accessor.GetAccessorAttributeType(attribute.dimension),
                 };
-                m_Accessors.Add(accessor);
+                
+                var accessorId = AddAccessor(accessor);
 
+                attrData.accessorId = accessorId;
+                attrDataDict[attribute.attribute] = attrData;
+                
                 switch (attribute.attribute) {
                     case VertexAttribute.Position:
                         Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
@@ -359,6 +437,7 @@ namespace GLTFast.Export {
             }
 
             var buffer = bufferWriter;
+            var indexBufferViewId = -1;
             if (uMesh.indexFormat == IndexFormat.UInt16) {
                 var indexData16 = meshData.GetIndexData<ushort>();
                 var triangleCount = indexData16.Length / 3;
@@ -368,7 +447,7 @@ namespace GLTFast.Export {
                     result = destIndices
                 }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
                 job.Complete(); // TODO: Wait until thread is finished
-                buffer.Write(destIndices.Reinterpret<byte>(sizeof(ushort)));
+                indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(ushort)));
                 destIndices.Dispose();
             } else {
                 var indexData32 = meshData.GetIndexData<uint>();
@@ -379,21 +458,9 @@ namespace GLTFast.Export {
                     result = destIndices
                 }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
                 job.Complete(); // TODO: Wait until thread is finished
-                buffer.Write(destIndices.Reinterpret<byte>(sizeof(uint)));
+                indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(uint)));
                 destIndices.Dispose();
             }
-            var indexData = meshData.GetIndexData<byte>();
-
-            var indexBufferView = new BufferView {
-                buffer = 0,
-                byteOffset = (int)bufferByteOffset,
-                byteLength = indexData.Length,
-            };
-            m_BufferViews = m_BufferViews ?? new List<BufferView>();
-            var indexBufferViewId = m_BufferViews.Count;
-            m_BufferViews.Add(indexBufferView);
-            bufferByteOffset += indexData.Length;
-            indexData.Dispose();
 
             var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GLTFComponentType.UnsignedShort : GLTFComponentType.UnsignedInt;
             mesh.primitives = new MeshPrimitive[meshData.subMeshCount];
@@ -418,32 +485,22 @@ namespace GLTFast.Export {
                     // max = new []{}, // TODO
                 };
 
+                var indexAccessorId = AddAccessor(indexAccessor);
+                
                 indexOffset += subMesh.indexCount * Accessor.GetComponentTypeSize(indexComponentType);
-
-                var accessorId = m_Accessors.Count;
-                m_Accessors.Add(indexAccessor);
 
                 mesh.primitives[subMeshIndex] = new MeshPrimitive {
                     mode = mode.Value,
                     attributes = attributes,
-                    indices = accessorId,
+                    indices = indexAccessorId,
                 };
             }
 
             var inputStreams = new NativeArray<byte>[streamCount];
             var outputStreams = new NativeArray<byte>[streamCount];
-
+            
             for (var stream = 0; stream < streamCount; stream++) {
                 inputStreams[stream] = meshData.GetVertexData<byte>(stream);
-                var bufferView = new BufferView {
-                    buffer = 0,
-                    byteOffset = (int)bufferByteOffset,
-                    byteLength = inputStreams[stream].Length,
-                    byteStride = strides[stream]
-                };
-                bufferByteOffset += inputStreams[stream].Length;
-                m_BufferViews.Add(bufferView);
-
                 outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
             }
 
@@ -470,14 +527,24 @@ namespace GLTFast.Export {
                         break;
                 }
             }
-            
+
+            var bufferViewIds = new int[streamCount];
             for (var stream = 0; stream < streamCount; stream++) {
-                buffer.Write(outputStreams[stream]);
+                bufferViewIds[stream] = WriteToBuffer(outputStreams[stream],strides[stream]);
                 inputStreams[stream].Dispose();
                 outputStreams[stream].Dispose();
             }
 
-            return bufferByteOffset;
+            foreach (var (vertexAttribute, attrData) in attrDataDict) {
+                m_Accessors[attrData.accessorId].bufferView = bufferViewIds[attrData.stream];
+            }
+        }
+
+        int AddAccessor(Accessor accessor) {
+            m_Accessors = m_Accessors ?? new List<Accessor>();
+            var accessorId = m_Accessors.Count;
+            m_Accessors.Add(accessor);
+            return accessorId;
         }
 
 #endif // #if GLTFAST_MESH_DATA
@@ -555,6 +622,47 @@ namespace GLTFast.Export {
             m_UnityMeshes.Add(uMesh);
             meshId = m_Meshes.Count - 1;
             return meshId;
+        }
+
+        
+        int WriteToBuffer(NativeArray<byte> data, int? byteStride = null) {
+            // TODO: Don't convert to managed array
+            return WriteToBuffer(data.ToArray(), byteStride);
+        }
+
+        /// <summary>
+        /// Writes the given data to the main buffer, creates a bufferView and returns its index
+        /// </summary>
+        /// <param name="data">Content to write to buffer</param>
+        /// <returns>Buffer view index</returns>
+        int WriteToBuffer(byte[] data, int? byteStride = null, bool fourByteAligned = true) {
+            var buffer = bufferWriter;
+            var byteOffset = buffer.Length;
+
+            if (fourByteAligned) {
+                // Align to 4-byte
+                var alignmentByteCount = (4-(byteOffset & 0x3)) & 0x3;
+                for (int i = 0; i < alignmentByteCount; i++) {
+                    buffer.WriteByte(0);
+                }
+                // Update byteOffset
+                byteOffset = buffer.Length;
+            }
+
+            buffer.Write(data);
+            
+            var bufferView = new BufferView {
+                buffer = 0,
+                byteOffset = (int)byteOffset,
+                byteLength = data.Length,
+            };
+            if (byteStride.HasValue) {
+                bufferView.byteStride = byteStride.Value;
+            }
+            m_BufferViews = m_BufferViews ?? new List<BufferView>();
+            var bufferViewId = m_BufferViews.Count;
+            m_BufferViews.Add(bufferView);
+            return bufferViewId;
         }
         
         static unsafe int GetAttributeSize(VertexAttributeFormat format) {
@@ -638,5 +746,6 @@ namespace GLTFast.Export {
     struct AttributeData {
         public int stream;
         public int offset;
+        public int accessorId;
     }
 }

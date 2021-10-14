@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using System.ComponentModel;
+
 namespace GLTFast.Schema
 {
     [System.Serializable]
@@ -35,6 +37,7 @@ namespace GLTFast.Schema
         /// The index of the bufferView that contains the image.
         /// Use this instead of the image's uri property.
         /// </summary>
+        [DefaultValue(-1)]
         public int bufferView = -1;
 
 #if KTX_UNITY

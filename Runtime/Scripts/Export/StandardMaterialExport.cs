@@ -41,16 +41,25 @@ namespace GLTFast.Export {
 	    static readonly int k_Glossiness = Shader.PropertyToID("_Glossiness");
 	    static readonly int k_GlossMapScale = Shader.PropertyToID("_GlossMapScale");
 		    
+	    enum TextureMapType {
+		    Main,
+		    Bump,
+		    SpecGloss,
+		    Emission,
+		    MetallicGloss,
+		    Light,
+		    Occlusion
+	    }
 
-	    internal static Material ConvertMaterial(UnityEngine.Material uMaterial) {
+	    internal static Material ConvertMaterial(UnityEngine.Material uMaterial, IGltfWritable gltf ) {
             var material = new Material {
                 name = uMaterial.name,
+                pbrMetallicRoughness = new PbrMetallicRoughness {
+	                metallicFactor = 0,
+	                roughnessFactor = 1.0f
+                }
             };
-            material.pbrMetallicRoughness = new PbrMetallicRoughness {
-                metallicFactor = 0,
-                roughnessFactor = 1.0f
-            };
-            
+
             switch (uMaterial.GetTag("RenderType", false, ""))
             {
                 case "TransparentCutout":
@@ -124,7 +133,7 @@ namespace GLTFast.Export {
 			}
 			else if (IsPBRMetallicRoughness(uMaterial))
 			{
-				material.pbrMetallicRoughness = ExportPBRMetallicRoughness(uMaterial);
+				material.pbrMetallicRoughness = ExportPBRMetallicRoughness(uMaterial, gltf);
 			}
 			else if (IsPBRSpecularGlossiness(uMaterial))
 			{
@@ -134,10 +143,10 @@ namespace GLTFast.Export {
 			{
 				var mainTex = uMaterial.GetTexture(k_BaseMap);
 				material.pbrMetallicRoughness = new PbrMetallicRoughness {
-					baseColor = uMaterial.HasProperty("_BaseColor")
-						? uMaterial.GetColor("_BaseColor")
+					baseColor = uMaterial.HasProperty(k_BaseColor)
+						? uMaterial.GetColor(k_BaseColor)
 						: Color.white,
-					// baseColorTexture = mainTex ? ExportTextureInfo(mainTex, TextureMapType.Main) : null
+					baseColorTexture = mainTex==null ? null : ExportTextureInfo( mainTex, TextureMapType.Main, gltf)
 				};
 			}
 			else if (uMaterial.HasProperty(k_ColorTexture))
@@ -147,7 +156,7 @@ namespace GLTFast.Export {
 					baseColor = uMaterial.HasProperty(k_BaseColor)
 						? uMaterial.GetColor(k_BaseColor)
 						: Color.white,
-					// baseColorTexture = mainTex ? ExportTextureInfo(mainTex, TextureMapType.Main) : null
+					baseColorTexture = mainTex==null ? null : ExportTextureInfo(mainTex, TextureMapType.Main, gltf)
 				};
 			}
             else if (uMaterial.HasProperty(k_MainTex)) //else export main texture
@@ -155,8 +164,11 @@ namespace GLTFast.Export {
                 var mainTex = uMaterial.GetTexture(k_MainTex);
 
                 if (mainTex != null) {
-                    material.pbrMetallicRoughness = new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
-                    // material.pbrMetallicRoughness.baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main);
+                    material.pbrMetallicRoughness = new PbrMetallicRoughness {
+	                    metallicFactor = 0, roughnessFactor = 1.0f,
+	                    baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main, gltf)
+                    };
+
                     // ExportTextureTransform(material.pbrMetallicRoughness.BaseColorTexture, uMaterial, "_MainTex");
                 }
                 if (uMaterial.HasProperty(k_TintColor)) {
@@ -182,7 +194,7 @@ namespace GLTFast.Export {
 	        return material.HasProperty("_SpecColor") && material.HasProperty("_SpecGlossMap");
         }
         
-        static PbrMetallicRoughness ExportPBRMetallicRoughness(UnityEngine.Material material)
+        static PbrMetallicRoughness ExportPBRMetallicRoughness(UnityEngine.Material material, IGltfWritable gltf)
 		{
 			var pbr = new PbrMetallicRoughness() { metallicFactor = 0, roughnessFactor = 1.0f };
 
@@ -214,7 +226,7 @@ namespace GLTFast.Export {
 
 				if (mainTex) {
 					if(mainTex is Texture2D) {
-						// pbr.baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main);
+						pbr.baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main, gltf);
 						// ExportTextureTransform(pbr.BaseColorTexture, material, mainTexPropertyName);
 					} else {
 						Debug.LogErrorFormat("Can't export a {0} base texture in material {1}", mainTex.GetType(), material.name);
@@ -256,5 +268,16 @@ namespace GLTFast.Export {
 
 			return pbr;
 		}
+        
+        static TextureInfo ExportTextureInfo( UnityEngine.Texture texture, TextureMapType textureMapType, IGltfWritable gltf) {
+	        var imageId = gltf.AddImage(texture);
+	        var textureId = gltf.AddTexture(imageId);
+	        var info = new TextureInfo {
+		        index = textureId,
+		        // texCoord = 0 // TODO: figure out which UV set was used
+	        };
+
+	        return info;
+        }
     }
 }
