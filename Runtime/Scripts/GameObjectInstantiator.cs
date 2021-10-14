@@ -321,9 +321,11 @@ namespace GLTFast {
             var go = new GameObject(name ?? "Scene");
             go.transform.SetParent( parent, false);
 
-            foreach(var nodeIndex in nodeIndices) {
-                if (nodes[nodeIndex] != null) {
-                    nodes[nodeIndex].transform.SetParent( go.transform, false );
+            if (nodeIndices != null) {
+                foreach(var nodeIndex in nodeIndices) {
+                    if (nodes[nodeIndex] != null) {
+                        nodes[nodeIndex].transform.SetParent( go.transform, false );
+                    }
                 }
             }
 

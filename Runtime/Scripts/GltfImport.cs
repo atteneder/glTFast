@@ -1588,13 +1588,16 @@ namespace GLTFast {
 
             var scene = gltfRoot.scenes[sceneId];
             instantiator.Init();
+
+            if (scene.nodes != null) {
+                foreach (var nodeId in scene.nodes) {
+                    IterateNodes(nodeId,null,CreateHierarchy);
+                }
             
-            foreach (var nodeId in scene.nodes) {
-                IterateNodes(nodeId,null,CreateHierarchy);
-            }
             
-            foreach (var nodeId in scene.nodes) {
-                IterateNodes(nodeId,null,PopulateHierarchy);
+                foreach (var nodeId in scene.nodes) {
+                    IterateNodes(nodeId,null,PopulateHierarchy);
+                }
             }
 
 #if UNITY_ANIMATION
