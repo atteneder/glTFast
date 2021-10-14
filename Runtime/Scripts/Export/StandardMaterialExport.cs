@@ -221,13 +221,13 @@ namespace GLTFast.Export {
             if (material.HasProperty("_MainTex") || material.HasProperty("_BaseMap")) {
 	            // TODO if additive particle, render black into alpha
 				// TODO use private Material.GetFirstPropertyNameIdByAttribute here, supported from 2020.1+
-				var mainTexPropertyName = material.HasProperty("_BaseMap") ? "_BaseMap" : "_MainTex";
-				var mainTex = material.GetTexture(mainTexPropertyName);
+				var mainTexProperty = material.HasProperty(k_BaseMap) ? k_BaseMap : k_MainTex;
+				var mainTex = material.GetTexture(mainTexProperty);
 
 				if (mainTex) {
 					if(mainTex is Texture2D) {
 						pbr.baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main, gltf);
-						// ExportTextureTransform(pbr.BaseColorTexture, material, mainTexPropertyName);
+						ExportTextureTransform(pbr.baseColorTexture, material, mainTexProperty, gltf);
 					} else {
 						Debug.LogErrorFormat("Can't export a {0} base texture in material {1}", mainTex.GetType(), material.name);
 					}
@@ -276,16 +276,26 @@ namespace GLTFast.Export {
 		        index = textureId,
 		        // texCoord = 0 // TODO: figure out which UV set was used
 	        };
-
-	        gltf.RegisterExtensionUsage(Extension.TextureTransform);
-	        info.extensions = new TextureInfoExtension {
-		        KHR_texture_transform = new TextureTransform {
-			        scale = new float[]{1,-1},
-			        offset = new float[]{0,1}
-		        }
-	        };
-
 	        return info;
+        }
+        
+        static void ExportTextureTransform(TextureInfo def, UnityEngine.Material mat, int texPropertyId, IGltfWritable gltf) {
+	        var offset = mat.GetTextureOffset(texPropertyId);
+	        var scale = mat.GetTextureScale(texPropertyId);
+
+	        // Counter measure for Unity/glTF texture coordinate difference
+	        // TODO: Offer UV conversion as alternative
+	        offset.y = 1 - offset.x;
+	        scale.y *= -1;
+
+	        if (offset != Vector2.zero || scale != Vector2.one) {
+		        gltf.RegisterExtensionUsage(Extension.TextureTransform);
+		        def.extensions = def.extensions ?? new TextureInfoExtension();
+		        def.extensions.KHR_texture_transform = new TextureTransform {
+			        scale = new float[] { scale.x, scale.y },
+			        offset = new float[] { offset.x, offset.y }
+		        };
+	        }
         }
     }
 }
