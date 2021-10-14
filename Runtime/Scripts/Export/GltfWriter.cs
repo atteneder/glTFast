@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using GLTFast.Schema;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -625,17 +626,31 @@ namespace GLTFast.Export {
         }
 
         
-        int WriteToBuffer(NativeArray<byte> data, int? byteStride = null) {
-            // TODO: Don't convert to managed array
-            return WriteToBuffer(data.ToArray(), byteStride);
+        unsafe int WriteToBuffer( byte[] data, int? byteStride = null) {
+            var bufferHandle = GCHandle.Alloc(data,GCHandleType.Pinned);
+            fixed (void* bufferAddress = &data[0]) {
+                var nativeData = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(bufferAddress,data.Length,Allocator.None);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+                var safetyHandle = AtomicSafetyHandle.Create();
+                NativeArrayUnsafeUtility.SetAtomicSafetyHandle(array: ref nativeData, safetyHandle);
+#endif
+                var bufferViewId = WriteToBuffer(nativeData, byteStride);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+                AtomicSafetyHandle.Release(safetyHandle);
+#endif
+                bufferHandle.Free();
+                return bufferViewId;
+            }
         }
 
         /// <summary>
         /// Writes the given data to the main buffer, creates a bufferView and returns its index
         /// </summary>
         /// <param name="data">Content to write to buffer</param>
+        /// <param name="byteStride">The byte size of an element. Provide it, if it cannot be inferred from the accessor</param>
+        /// <param name="fourByteAligned">If true, the bufferView has to be 4-byte-aligned (see https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#data-alignment )</param>
         /// <returns>Buffer view index</returns>
-        int WriteToBuffer(byte[] data, int? byteStride = null, bool fourByteAligned = true) {
+        int WriteToBuffer(NativeArray<byte> data, int? byteStride = null, bool fourByteAligned = true) {
             var buffer = bufferWriter;
             var byteOffset = buffer.Length;
 
