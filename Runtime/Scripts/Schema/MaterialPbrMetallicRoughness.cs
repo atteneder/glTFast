@@ -14,6 +14,7 @@
 //
 
 using System;
+using System.ComponentModel;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -64,6 +65,7 @@ namespace GLTFast.Schema {
         /// dirty metallic surfaces.
         /// This value is linear.
         /// </summary>
+        [DefaultValue(1)]
         public float metallicFactor = 1;
 
         /// <summary>
@@ -72,6 +74,7 @@ namespace GLTFast.Schema {
         /// A value of 0.0 means the material is completely smooth.
         /// This value is linear.
         /// </summary>
+        [DefaultValue(1)]
         public float roughnessFactor = 1;
 
         /// <summary>
