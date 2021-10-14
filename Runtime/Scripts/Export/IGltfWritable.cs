@@ -17,6 +17,15 @@ using UnityEngine;
 
 namespace GLTFast.Export {
     public interface IGltfWritable {
+
+        
+        /// <summary>
+        /// Registers the use of a glTF extension
+        /// </summary>
+        /// <param name="extensionNamea"></param>
+        /// <param name="required"></param>
+        /// <returns></returns>
+        void RegisterExtensionUsage(Extension extension, bool required = true);
         
         /// <summary>
         /// Adds a Unity Texture to the glTF and returns the resulting image index

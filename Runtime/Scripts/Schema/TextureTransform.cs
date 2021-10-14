@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using System.ComponentModel;
+
 namespace GLTFast.Schema {
 
     [System.Serializable]
@@ -36,6 +38,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// Overrides the textureInfo texCoord value if supplied, and if this extension is supported.
         /// </summary>
+        [DefaultValue(-1)]
         public int texCoord = -1;
     }
 }

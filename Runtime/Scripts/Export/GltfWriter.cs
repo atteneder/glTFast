@@ -51,6 +51,9 @@ namespace GLTFast.Export {
         
         Root m_Gltf;
 
+        HashSet<Extension> m_ExtensionsUsedOnly;
+        HashSet<Extension> m_ExtensionsRequired;
+        
         List<Scene> m_Scenes;
         List<Node> m_Nodes;
         List<Mesh> m_Meshes;
@@ -74,6 +77,18 @@ namespace GLTFast.Export {
             m_Gltf = new Root();
         }
 
+        public void RegisterExtensionUsage(Extension extension, bool required = true) {
+            if (required) {
+                m_ExtensionsRequired = m_ExtensionsRequired ?? new HashSet<Extension>();
+                m_ExtensionsRequired.Add(extension);
+            } else {
+                if (m_ExtensionsRequired == null || !m_ExtensionsRequired.Contains(extension)) {
+                    m_ExtensionsUsedOnly = m_ExtensionsUsedOnly ?? new HashSet<Extension>();
+                    m_ExtensionsUsedOnly.Add(extension);
+                }
+            }
+        }
+        
         public uint AddScene(string name, uint[] nodes) {
             m_Scenes = m_Scenes ?? new List<Scene>();
             var scene = new Scene {
@@ -268,12 +283,46 @@ namespace GLTFast.Export {
                 version = "2.0",
                 generator = "glTFast 4.4.0-exp"
             };
+            
+            BakeExtensions();
 
             m_Scenes = null;
             m_Nodes = null;
             m_Meshes = null;
             m_Accessors = null;
             m_BufferViews = null;
+            m_Materials = null;
+            m_Images = null;
+            m_Textures = null;
+        }
+
+        void BakeExtensions() {
+            if (m_ExtensionsRequired != null) {
+                var usedOnlyCount = m_ExtensionsUsedOnly == null ? 0 : m_ExtensionsUsedOnly.Count;
+                m_Gltf.extensionsRequired = new string[m_ExtensionsRequired.Count];
+                m_Gltf.extensionsUsed = new string[m_ExtensionsRequired.Count + usedOnlyCount];
+                var i = 0;
+                foreach (var extension in m_ExtensionsRequired) {
+                    var name = extension.GetName();
+                    m_Gltf.extensionsRequired[i] = name;
+                    m_Gltf.extensionsUsed[i] = name;
+                    i++;
+                }
+            }
+
+            if (m_ExtensionsUsedOnly != null) {
+                var i = 0;
+                if (m_Gltf.extensionsUsed == null) {
+                    m_Gltf.extensionsUsed = new string[m_ExtensionsUsedOnly.Count];
+                }
+                else {
+                    i = m_Gltf.extensionsUsed.Length - m_ExtensionsUsedOnly.Count;
+                }
+
+                foreach (var extension in m_ExtensionsUsedOnly) {
+                    m_Gltf.extensionsUsed[i++] = extension.GetName();
+                }
+            }
         }
 
         void AssignMaterialsToMeshes() {
