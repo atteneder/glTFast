@@ -485,47 +485,28 @@ namespace GLTFast.Export {
                 if (stride <= 0) continue;
                 streamCount = stream + 1;
             }
-
-            var buffer = bufferWriter;
-            var indexBufferViewId = -1;
-            if (uMesh.indexFormat == IndexFormat.UInt16) {
-                var indexData16 = meshData.GetIndexData<ushort>();
-                var triangleCount = indexData16.Length / 3;
-                var destIndices = new NativeArray<ushort>(indexData16.Length,Allocator.TempJob);
-                var job = new ExportJobs.ConvertIndicesFlippedJob<ushort> {
-                    input = indexData16,
-                    result = destIndices
-                }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
-                job.Complete(); // TODO: Wait until thread is finished
-                indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(ushort)));
-                destIndices.Dispose();
-            } else {
-                var indexData32 = meshData.GetIndexData<uint>();
-                var triangleCount = indexData32.Length / 3;
-                var destIndices = new NativeArray<uint>(indexData32.Length,Allocator.TempJob);
-                var job = new ExportJobs.ConvertIndicesFlippedJob<uint> {
-                    input = indexData32,
-                    result = destIndices
-                }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
-                job.Complete(); // TODO: Wait until thread is finished
-                indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(uint)));
-                destIndices.Dispose();
-            }
-
+            
             var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GLTFComponentType.UnsignedShort : GLTFComponentType.UnsignedInt;
             mesh.primitives = new MeshPrimitive[meshData.subMeshCount];
+            var indexAccessors = new Accessor[meshData.subMeshCount];
             var indexOffset = 0;
+            MeshTopology? topology = null;
             for (var subMeshIndex = 0; subMeshIndex < meshData.subMeshCount; subMeshIndex++) {
                 var subMesh = meshData.GetSubMesh(subMeshIndex);
+                if (!topology.HasValue) {
+                    topology = subMesh.topology;
+                } else {
+                    Assert.AreEqual(topology.Value, subMesh.topology, "Mixed topologies are not supported!");
+                }
                 var mode = GetDrawMode(subMesh.topology);
                 if (!mode.HasValue) {
-                    // TODO: Support some quad to triangle conversion
                     Debug.LogError($"Unsupported topology {subMesh.topology}");
                     mode = DrawMode.Points;
                 }
 
-                var indexAccessor = new Accessor {
-                    bufferView = indexBufferViewId,
+                Accessor indexAccessor;
+                
+                indexAccessor = new Accessor {
                     typeEnum = GLTFAccessorAttributeType.SCALAR,
                     byteOffset = indexOffset,
                     componentType = indexComponentType,
@@ -534,16 +515,75 @@ namespace GLTFast.Export {
                     // min = new []{}, // TODO
                     // max = new []{}, // TODO
                 };
+                
+                if (subMesh.topology == MeshTopology.Quads) {
+                    indexAccessor.count = indexAccessor.count / 2 * 3; 
+                }
 
                 var indexAccessorId = AddAccessor(indexAccessor);
-                
-                indexOffset += subMesh.indexCount * Accessor.GetComponentTypeSize(indexComponentType);
+                indexAccessors[subMeshIndex] = indexAccessor;
+
+                indexOffset += indexAccessor.count * Accessor.GetComponentTypeSize(indexComponentType);
 
                 mesh.primitives[subMeshIndex] = new MeshPrimitive {
                     mode = mode.Value,
                     attributes = attributes,
                     indices = indexAccessorId,
                 };
+            }
+            Assert.IsTrue(topology.HasValue);
+
+            int indexBufferViewId;
+            if (uMesh.indexFormat == IndexFormat.UInt16) {
+                var indexData16 = meshData.GetIndexData<ushort>();
+                if (topology.Value == MeshTopology.Quads) {
+                    var quadCount = indexData16.Length / 4;
+                    var destIndices = new NativeArray<ushort>(quadCount*6,Allocator.TempJob);
+                    var job = new ExportJobs.ConvertIndicesQuadFlippedJob<ushort> {
+                        input = indexData16,
+                        result = destIndices
+                    }.Schedule(quadCount, k_DefaultInnerLoopBatchCount);
+                    job.Complete(); // TODO: Wait until thread is finished
+                    indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(ushort)));
+                    destIndices.Dispose();
+                } else {
+                    var triangleCount = indexData16.Length / 3;
+                    var destIndices = new NativeArray<ushort>(indexData16.Length,Allocator.TempJob);
+                    var job = new ExportJobs.ConvertIndicesFlippedJob<ushort> {
+                        input = indexData16,
+                        result = destIndices
+                    }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
+                    job.Complete(); // TODO: Wait until thread is finished
+                    indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(ushort)));
+                    destIndices.Dispose();
+                }
+            } else {
+                var indexData32 = meshData.GetIndexData<uint>();
+                if (topology.Value == MeshTopology.Quads) {
+                    var quadCount = indexData32.Length / 4;
+                    var destIndices = new NativeArray<uint>(quadCount*6,Allocator.TempJob);
+                    var job = new ExportJobs.ConvertIndicesQuadFlippedJob<uint> {
+                        input = indexData32,
+                        result = destIndices
+                    }.Schedule(quadCount, k_DefaultInnerLoopBatchCount);
+                    job.Complete(); // TODO: Wait until thread is finished
+                    indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(ushort)));
+                    destIndices.Dispose();
+                } else {
+                    var triangleCount = indexData32.Length / 3;
+                    var destIndices = new NativeArray<uint>(indexData32.Length, Allocator.TempJob);
+                    var job = new ExportJobs.ConvertIndicesFlippedJob<uint> {
+                        input = indexData32,
+                        result = destIndices
+                    }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
+                    job.Complete(); // TODO: Wait until thread is finished
+                    indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(uint)));
+                    destIndices.Dispose();
+                }
+            }
+
+            foreach (var accessor in indexAccessors) {
+                accessor.bufferView = indexBufferViewId;
             }
 
             var inputStreams = new NativeArray<byte>[streamCount];
@@ -633,6 +673,8 @@ namespace GLTFast.Export {
 
         static DrawMode? GetDrawMode(MeshTopology topology) {
             switch (topology) {
+                case MeshTopology.Quads:
+                    return DrawMode.Triangles;
                 case MeshTopology.Triangles:
                     return DrawMode.Triangles;
                 case MeshTopology.Lines:

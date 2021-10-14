@@ -42,7 +42,26 @@ namespace GLTFast.Export {
             }
         }
         
-        
+        [BurstCompile]
+        public struct ConvertIndicesQuadFlippedJob<T> : IJobParallelFor where T : struct {
+
+            [ReadOnly]
+            public NativeArray<T> input;
+
+            [WriteOnly]
+            [NativeDisableParallelForRestriction]
+            public NativeArray<T> result;
+
+            public void Execute(int i) {
+                result[i*6+0] = input[i*4+0];
+                result[i*6+1] = input[i*4+2];
+                result[i*6+2] = input[i*4+1];
+                result[i*6+3] = input[i*4+2];
+                result[i*6+4] = input[i*4+0];
+                result[i*6+5] = input[i*4+3];
+            }
+        }
+
         [BurstCompile]
         public unsafe struct ConvertPositionFloatJob : IJobParallelFor {
 
