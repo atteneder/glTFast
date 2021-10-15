@@ -19,6 +19,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -33,10 +34,14 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 using Buffer = GLTFast.Schema.Buffer;
+using Debug = UnityEngine.Debug;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
 using Texture = GLTFast.Schema.Texture;
 
+#if DEBUG
+using System.Text;
+#endif
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -242,6 +247,7 @@ namespace GLTFast.Export {
             }
             Bake(Path.GetFileName(bufferPath));
             var json = GetJson();
+            LogSummary(json.Length, m_BufferStream?.Length ?? 0);
             File.WriteAllText(path,json);
             if (m_BufferStream != null) {
                 using (var file = new FileStream(bufferPath, FileMode.Create, FileAccess.Write)) {
@@ -249,6 +255,21 @@ namespace GLTFast.Export {
                 }
             }
         }
+
+#if DEBUG
+        [Conditional("DEBUG")]
+        void LogSummary(int jsonLength, long bufferLength) {
+            var sb = new StringBuilder("glTF summary: ");
+            sb.AppendFormat("{0} bytes JSON + {1} bytes buffer", jsonLength, bufferLength);
+            if (m_Gltf != null) {
+                sb.AppendFormat(", {0} nodes", m_Gltf.nodes?.Length ?? 0);
+                sb.AppendFormat(" ,{0} meshes", m_Gltf.meshes?.Length ?? 0);
+                sb.AppendFormat(" ,{0} materials", m_Gltf.materials?.Length ?? 0);
+                sb.AppendFormat(" ,{0} images", m_Gltf.images?.Length ?? 0);
+            }
+            Debug.Log(sb.ToString());
+        }
+#endif
 
         void Bake(string bufferPath) {
             if (m_Meshes != null) {
