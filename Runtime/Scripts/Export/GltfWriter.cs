@@ -198,7 +198,7 @@ namespace GLTFast.Export {
                         name = uTexture.name
                     };
                     var imageData = File.ReadAllBytes(assetPath);
-                    image.bufferView = WriteToBuffer(imageData);
+                    image.bufferView = WriteBufferViewToBuffer(imageData);
                     image.mimeType = mimeType;
                     m_UnityTextures.Add(uTexture);
                     m_Images.Add(image);
@@ -429,6 +429,9 @@ namespace GLTFast.Export {
                 var size = attribute.dimension * GetAttributeSize(attribute.format);
                 strides[attribute.stream] += size;
 
+                // Adhere data alignment rules
+                Assert.IsTrue(attrData.offset % 4 == 0);
+                
                 var accessor = new Accessor {
                     byteOffset = attrData.offset,
                     componentType = Accessor.GetComponentType(attribute.format),
@@ -565,7 +568,10 @@ namespace GLTFast.Export {
                         result = destIndices
                     }.Schedule(quadCount, k_DefaultInnerLoopBatchCount);
                     job.Complete(); // TODO: Wait until thread is finished
-                    indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(ushort)));
+                    indexBufferViewId = WriteBufferViewToBuffer(
+                        destIndices.Reinterpret<byte>(sizeof(ushort)),
+                        byteAlignment:sizeof(ushort)
+                        );
                     destIndices.Dispose();
                 } else {
                     var triangleCount = indexData16.Length / 3;
@@ -575,7 +581,10 @@ namespace GLTFast.Export {
                         result = destIndices
                     }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
                     job.Complete(); // TODO: Wait until thread is finished
-                    indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(ushort)));
+                    indexBufferViewId = WriteBufferViewToBuffer(
+                        destIndices.Reinterpret<byte>(sizeof(ushort)),
+                        byteAlignment:sizeof(ushort)
+                        );
                     destIndices.Dispose();
                 }
             } else {
@@ -588,7 +597,10 @@ namespace GLTFast.Export {
                         result = destIndices
                     }.Schedule(quadCount, k_DefaultInnerLoopBatchCount);
                     job.Complete(); // TODO: Wait until thread is finished
-                    indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(ushort)));
+                    indexBufferViewId = WriteBufferViewToBuffer(
+                        destIndices.Reinterpret<byte>(sizeof(uint)),
+                        byteAlignment:sizeof(uint)
+                        );
                     destIndices.Dispose();
                 } else {
                     var triangleCount = indexData32.Length / 3;
@@ -598,7 +610,10 @@ namespace GLTFast.Export {
                         result = destIndices
                     }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
                     job.Complete(); // TODO: Wait until thread is finished
-                    indexBufferViewId = WriteToBuffer(destIndices.Reinterpret<byte>(sizeof(uint)));
+                    indexBufferViewId = WriteBufferViewToBuffer(
+                        destIndices.Reinterpret<byte>(sizeof(uint)),
+                        byteAlignment:sizeof(uint)
+                        );
                     destIndices.Dispose();
                 }
             }
@@ -643,7 +658,7 @@ namespace GLTFast.Export {
 
             var bufferViewIds = new int[streamCount];
             for (var stream = 0; stream < streamCount; stream++) {
-                bufferViewIds[stream] = WriteToBuffer(outputStreams[stream],strides[stream]);
+                bufferViewIds[stream] = WriteBufferViewToBuffer(outputStreams[stream],strides[stream]);
                 inputStreams[stream].Dispose();
                 outputStreams[stream].Dispose();
             }
@@ -740,16 +755,15 @@ namespace GLTFast.Export {
             return meshId;
         }
 
-        
-        unsafe int WriteToBuffer( byte[] data, int? byteStride = null) {
-            var bufferHandle = GCHandle.Alloc(data,GCHandleType.Pinned);
-            fixed (void* bufferAddress = &data[0]) {
-                var nativeData = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(bufferAddress,data.Length,Allocator.None);
+        unsafe int WriteBufferViewToBuffer( byte[] bufferViewData, int? byteStride = null) {
+            var bufferHandle = GCHandle.Alloc(bufferViewData,GCHandleType.Pinned);
+            fixed (void* bufferAddress = &bufferViewData[0]) {
+                var nativeData = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<byte>(bufferAddress,bufferViewData.Length,Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 var safetyHandle = AtomicSafetyHandle.Create();
                 NativeArrayUnsafeUtility.SetAtomicSafetyHandle(array: ref nativeData, safetyHandle);
 #endif
-                var bufferViewId = WriteToBuffer(nativeData, byteStride);
+                var bufferViewId = WriteBufferViewToBuffer(nativeData, byteStride);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                 AtomicSafetyHandle.Release(safetyHandle);
 #endif
@@ -761,32 +775,38 @@ namespace GLTFast.Export {
         /// <summary>
         /// Writes the given data to the main buffer, creates a bufferView and returns its index
         /// </summary>
-        /// <param name="data">Content to write to buffer</param>
-        /// <param name="byteStride">The byte size of an element. Provide it, if it cannot be inferred from the accessor</param>
-        /// <param name="fourByteAligned">If true, the bufferView has to be 4-byte-aligned (see https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#data-alignment )</param>
+        /// <param name="bufferViewData">Content to write to buffer</param>
+        /// <param name="byteStride">The byte size of an element. Provide it,
+        /// if it cannot be inferred from the accessor</param>
+        /// <param name="byteAlignment">If not zero, the offsets of the bufferView
+        /// will be multiple of it to please alignment rules (padding bytes will be added,
+        /// if required; see https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#data-alignment )
+        /// </param>
         /// <returns>Buffer view index</returns>
-        int WriteToBuffer(NativeArray<byte> data, int? byteStride = null, bool fourByteAligned = true) {
+        int WriteBufferViewToBuffer(NativeArray<byte> bufferViewData, int? byteStride = null, int byteAlignment = 0) {
             var buffer = bufferWriter;
             var byteOffset = buffer.Length;
 
-            if (fourByteAligned) {
-                // Align to 4-byte
-                var alignmentByteCount = (4-(byteOffset & 0x3)) & 0x3;
-                for (int i = 0; i < alignmentByteCount; i++) {
+            if (byteAlignment > 0) {
+                Assert.IsTrue(byteAlignment<5); // There is no componentType that requires more than 4 bytes
+                var alignmentByteCount = (byteAlignment-(byteOffset % byteAlignment)) % byteAlignment;
+                for (var i = 0; i < alignmentByteCount; i++) {
                     buffer.WriteByte(0);
                 }
                 // Update byteOffset
                 byteOffset = buffer.Length;
             }
-
-            buffer.Write(data);
+            
+            buffer.Write(bufferViewData);
             
             var bufferView = new BufferView {
                 buffer = 0,
                 byteOffset = (int)byteOffset,
-                byteLength = data.Length,
+                byteLength = bufferViewData.Length,
             };
             if (byteStride.HasValue) {
+                // Adhere data alignment rules
+                Assert.IsTrue(byteStride.Value % 4 == 0);
                 bufferView.byteStride = byteStride.Value;
             }
             m_BufferViews = m_BufferViews ?? new List<BufferView>();
