@@ -132,7 +132,7 @@ namespace GLTFast.Export {
 				}
 			}
 			if(IsUnlit(uMaterial)) {
-                // ExportUnlit( material, uMaterial );
+                ExportUnlit( material, uMaterial, gltf );
 			}
 			else if (IsPBRMetallicRoughness(uMaterial))
 			{
@@ -172,7 +172,7 @@ namespace GLTFast.Export {
 	                    baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main, gltf)
                     };
 
-                    // ExportTextureTransform(material.pbrMetallicRoughness.BaseColorTexture, uMaterial, "_MainTex");
+                    // ExportTextureTransform(material.pbrMetallicRoughness.baseColorTexture, uMaterial, "_MainTex");
                 }
                 if (uMaterial.HasProperty(k_TintColor)) {
 	                //particles use _TintColor instead of _Color
@@ -221,7 +221,7 @@ namespace GLTFast.Export {
                 pbr.baseColor = material.GetColor(k_TintColor);
             }
 
-            if (material.HasProperty("_MainTex") || material.HasProperty("_BaseMap")) {
+            if (material.HasProperty(k_MainTex) || material.HasProperty("_BaseMap")) {
 	            // TODO if additive particle, render black into alpha
 				// TODO use private Material.GetFirstPropertyNameIdByAttribute here, supported from 2020.1+
 				var mainTexProperty = material.HasProperty(k_BaseMap) ? k_BaseMap : k_MainTex;
@@ -271,6 +271,33 @@ namespace GLTFast.Export {
 
 			return pbr;
 		}
+        
+        static void ExportUnlit(Material material, UnityEngine.Material uMaterial, IGltfWritable gltf){
+
+	        gltf.RegisterExtensionUsage(Extension.MaterialsUnlit);
+	        material.extensions = material.extensions ?? new MaterialExtension();
+	        material.extensions.KHR_materials_unlit = new MaterialUnlit();
+	        
+	        var pbr = material.pbrMetallicRoughness ?? new PbrMetallicRoughness();
+
+	        if (uMaterial.HasProperty(k_Color)) {
+		        pbr.baseColor = uMaterial.GetColor(k_Color);
+	        }
+
+	        if (uMaterial.HasProperty(k_MainTex)) {
+		        var mainTex = uMaterial.GetTexture(k_MainTex);
+		        if (mainTex != null) {
+			        if(mainTex is Texture2D) {
+				        pbr.baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main, gltf);
+				        ExportTextureTransform(pbr.baseColorTexture, uMaterial, k_MainTex, gltf);
+			        } else {
+				        Debug.LogErrorFormat("Can't export a {0} base texture in material {1}", mainTex.GetType(), uMaterial.name);
+			        }
+		        }
+	        }
+
+	        material.pbrMetallicRoughness = pbr;
+        }
         
         static TextureInfo ExportTextureInfo( UnityEngine.Texture texture, TextureMapType textureMapType, IGltfWritable gltf) {
 	        var imageId = gltf.AddImage(texture);
