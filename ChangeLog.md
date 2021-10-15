@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Corrected mesh bounds (calculated from accessor's min/max)
 - No errors when importing empty scenes
+- Removed redundant code
 
 ## [4.3.2] - 2021-10-13
 ### Added

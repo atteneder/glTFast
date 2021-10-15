@@ -148,9 +148,8 @@ namespace GLTFast.Schema {
         /// </summary>
         public AccessorSparse sparse;
 
-        public static int GetAccessorComponentTypeLength( GLTFComponentType componentType ) {
-            switch (componentType)
-            {
+        public static int GetComponentTypeSize( GLTFComponentType componentType ) {
+            switch (componentType) {
                 case GLTFComponentType.Byte:
                 case GLTFComponentType.UnsignedByte:
                     return 1;
@@ -161,27 +160,7 @@ namespace GLTFast.Schema {
                 case GLTFComponentType.UnsignedInt:
                     return 4;
                 default:
-                    Debug.LogError("Unknown GLTFComponentType");
-                    return 0;
-            }
-        }
-
-        public static int GetComponentTypeSize(GLTFComponentType type) {
-            switch (type) {
-                case GLTFComponentType.Byte:
-                    return 1;
-                case GLTFComponentType.UnsignedByte:
-                    return 1;
-                case GLTFComponentType.Short:
-                    return 2;
-                case GLTFComponentType.UnsignedShort:
-                    return 2;
-                case GLTFComponentType.UnsignedInt:
-                    return 4;
-                case GLTFComponentType.Float:
-                    return 4;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                    throw new ArgumentOutOfRangeException(nameof(type), componentType, null);
             }
         }
 

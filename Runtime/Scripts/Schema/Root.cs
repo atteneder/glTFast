@@ -118,7 +118,7 @@ namespace GLTFast.Schema {
 			var accessor = accessors[accessorIndex];
 			var bufferView = bufferViews[accessor.bufferView];
 			if (bufferView.byteStride < 0) return false;
-			int elementSize = Accessor.GetAccessorAttributeTypeLength(accessor.typeEnum) * Accessor.GetAccessorComponentTypeLength(accessor.componentType);
+			var elementSize = Accessor.GetAccessorAttributeTypeLength(accessor.typeEnum) * Accessor.GetComponentTypeSize(accessor.componentType);
 			return bufferView.byteStride > elementSize;
 		}
     }
