@@ -594,7 +594,9 @@ namespace GLTFast.Export {
                 outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
             }
 
-            foreach (var (vertexAttribute, attrData) in attrDataDict) {
+            foreach (var pair in attrDataDict) {
+                var vertexAttribute = pair.Key;
+                var attrData = pair.Value;
                 switch (vertexAttribute) {
                     case VertexAttribute.Position:
                     case VertexAttribute.Normal:
@@ -625,7 +627,8 @@ namespace GLTFast.Export {
                 outputStreams[stream].Dispose();
             }
 
-            foreach (var (vertexAttribute, attrData) in attrDataDict) {
+            foreach (var pair in attrDataDict) {
+                var attrData = pair.Value;
                 m_Accessors[attrData.accessorId].bufferView = bufferViewIds[attrData.stream];
             }
         }

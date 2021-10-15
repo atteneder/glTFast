@@ -13,21 +13,29 @@
 // limitations under the License.
 //
 
-#if UNITY_2020_2_OR_NEWER
-
 using System;
 using System.IO;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
+#if NET_STANDARD
+using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace GLTFast.Export {
     public static class StreamExtension {
         
+#if NET_STANDARD
         public static unsafe void Write(this Stream stream, NativeArray<byte> array) {
             var span = new ReadOnlySpan<byte>(array.GetUnsafeReadOnlyPtr(), array.Length);
             stream.Write(span);
         }
+#else
+        public static void Write(this Stream stream, NativeArray<byte> array) {
+            // TODO: Is there a faster way?
+            foreach (var b in array) {
+                stream.WriteByte(b);
+            }
+        }
+#endif
     }
 }
-#endif
