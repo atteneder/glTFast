@@ -14,6 +14,7 @@
 //
 
 using System;
+using GLTFast.Materials;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -22,6 +23,8 @@ namespace GLTFast.Export {
 	using Schema;
 
     public static class StandardMaterialExport {
+
+	    const string k_KeywordBumpMap = "_BUMPMAP";
 	    
 	    static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
 	    static readonly int k_Cull = Shader.PropertyToID("_Cull");
@@ -101,19 +104,19 @@ namespace GLTFast.Export {
 			}
 			if (
                 uMaterial.HasProperty(k_BumpMap)
-                && (uMaterial.IsKeywordEnabled("_NORMALMAP")
-                || uMaterial.IsKeywordEnabled("_BUMPMAP"))
+                && (uMaterial.IsKeywordEnabled( BuiltInMaterialGenerator.KW_NORMALMAP)
+                || uMaterial.IsKeywordEnabled(k_KeywordBumpMap))
                 )
             {
 				var normalTex = uMaterial.GetTexture(k_BumpMap);
 
 				if (normalTex != null) {
-					// if(normalTex is Texture2D) {
-					// 	material.normalTexture = ExportNormalTextureInfo(normalTex, TextureMapType.Bump, uMaterial);
-					// 	ExportTextureTransform(material.NormalTexture, uMaterial, k_BumpMap);
-					// } else {
-					// 	Debug.LogErrorFormat("Can't export a {0} normal texture in material {1}", normalTex.GetType(), uMaterial.name);
-					// }
+					if(normalTex is Texture2D) {
+						material.normalTexture = ExportNormalTextureInfo(normalTex, TextureMapType.Bump, uMaterial, gltf);
+						ExportTextureTransform(material.normalTexture, uMaterial, k_BumpMap, gltf);
+					} else {
+						Debug.LogErrorFormat("Can't export a {0} normal texture in material {1}", normalTex.GetType(), uMaterial.name);
+					}
 				}
 			}
 
@@ -276,6 +279,27 @@ namespace GLTFast.Export {
 		        index = textureId,
 		        // texCoord = 0 // TODO: figure out which UV set was used
 	        };
+	        return info;
+        }
+        
+        static NormalTextureInfo ExportNormalTextureInfo(
+	        UnityEngine.Texture texture,
+	        TextureMapType textureMapType,
+	        UnityEngine.Material material,
+	        IGltfWritable gltf
+	        )
+        {
+	        var imageId = gltf.AddImage(texture);
+	        var textureId = gltf.AddTexture(imageId);
+	        var info = new NormalTextureInfo {
+		        index = textureId,
+		        // texCoord = 0 // TODO: figure out which UV set was used
+	        };
+
+	        if (material.HasProperty(MaterialGenerator.PROP_BUMP_SCALE)) {
+		        info.scale = material.GetFloat(MaterialGenerator.PROP_BUMP_SCALE);
+	        }
+
 	        return info;
         }
         

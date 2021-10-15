@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using System.ComponentModel;
+
 namespace GLTFast.Schema{ 
     [System.Serializable]
     public class NormalTextureInfo : TextureInfo {
@@ -22,6 +24,7 @@ namespace GLTFast.Schema{
         /// This value is ignored if normalTexture is not specified.
         /// This value is linear.
         /// </summary>
+        [DefaultValue(1.0f)]
         public float scale = 1.0f;
     }
 }

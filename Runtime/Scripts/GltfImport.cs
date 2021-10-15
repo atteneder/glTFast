@@ -40,6 +40,7 @@ using GLTFast.Tests;
 #endif
 
 [assembly: InternalsVisibleTo("glTFastEditorTests")]
+[assembly: InternalsVisibleTo("glTFast.Export")]
 
 namespace GLTFast {
 
