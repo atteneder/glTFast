@@ -20,6 +20,10 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+#if GLTF_VALIDATOR
+using GLTFValidator;
+#endif
+
 namespace GLTFast.Editor {
     
     public static class MenuEntries {
@@ -51,6 +55,11 @@ namespace GLTFast.Editor {
                     var export = new GameObjectExport();
                     export.AddScene(name, gameObjects);
                     export.SaveToFile(path);
+                    
+#if GLTF_VALIDATOR
+                    var report = Validator.Validate(path);
+                    report.Log();
+#endif
                 }
             } else {
                 Debug.LogError("Can't export glTF: selection is empty");
@@ -68,6 +77,10 @@ namespace GLTFast.Editor {
                 var export = new GameObjectExport();
                 export.AddScene(scene.name, gameObjects);
                 export.SaveToFile(path);
+#if GLTF_VALIDATOR
+                var report = Validator.Validate(path);
+                report.Log();
+#endif
             }
         }
         

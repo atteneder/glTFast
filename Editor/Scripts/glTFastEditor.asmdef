@@ -8,7 +8,8 @@
         "glTFast.Export",
         "glTFastTests",
         "UnityEngine.TestTools.Graphics",
-        "Unity.RenderPipelines.HighDefinition.Runtime"
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "com.atteneder.gltf-validator.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -39,6 +40,11 @@
             "name": "com.unity.modules.animation",
             "expression": "1.0.0",
             "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.atteneder.gltf-validator",
+            "expression": "",
+            "define": "GLTF_VALIDATOR"
         }
     ],
     "noEngineReferences": false
