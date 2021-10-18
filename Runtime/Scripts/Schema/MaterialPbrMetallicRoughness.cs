@@ -16,6 +16,7 @@
 using System;
 using System.ComponentModel;
 using Newtonsoft.Json;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GLTFast.Schema {
@@ -86,5 +87,35 @@ namespace GLTFast.Schema {
         /// they are ignored.
         /// </summary>
         public TextureInfo metallicRoughnessTexture;
+
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            if (baseColorFactor != null && (
+                math.abs(baseColorFactor[0] - 1f) > Constants.epsilon ||
+                math.abs(baseColorFactor[1] - 1f) > Constants.epsilon ||
+                math.abs(baseColorFactor[2] - 1f) > Constants.epsilon ||
+                math.abs(baseColorFactor[3] - 1f) > Constants.epsilon
+                ))
+            {
+                writer.AddArrayProperty("baseColorFactor", baseColorFactor);
+            }
+
+            if(metallicFactor < 1f) {
+                writer.AddProperty("metallicFactor", metallicFactor);
+            }
+            if(roughnessFactor < 1f) {
+                writer.AddProperty("roughnessFactor", roughnessFactor);
+            }
+            if(baseColorTexture!=null) {
+                writer.AddProperty("baseColorTexture");
+                baseColorTexture.GltfSerialize(writer);
+            }
+            if(metallicRoughnessTexture!=null) {
+                writer.AddProperty("metallicRoughnessTexture");
+                metallicRoughnessTexture.GltfSerialize(writer);
+            }
+                
+            writer.Close();
+        }
     }
 }

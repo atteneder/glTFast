@@ -18,7 +18,7 @@ using System.ComponentModel;
 namespace GLTFast.Schema {
 
     [System.Serializable]
-    public class Texture {
+    public class Texture : RootChild {
         /// <summary>
         /// The index of the sampler used by this texture.
         /// </summary>
@@ -46,6 +46,22 @@ namespace GLTFast.Schema {
             get {
                 return extensions!=null && extensions.KHR_texture_basisu!=null;
             }
+        }
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeRoot(writer);
+            if (source >= 0) {
+                writer.AddProperty("source", source);
+            }
+            if (sampler >= 0) {
+                writer.AddProperty("sampler", sampler);
+            }
+            if (extensions!=null) {
+                writer.AddProperty("extensions");
+                extensions.GltfSerialize(writer);
+            }
+            writer.Close();
         }
     }
 }

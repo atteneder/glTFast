@@ -34,5 +34,20 @@ namespace GLTFast.Schema {
         public int texCoord = 0;
 
         public TextureInfoExtension extensions;
+        
+        protected void GltfSerializeTextureInfo(JsonWriter writer) {
+            if (index >= 0) {
+                writer.AddProperty("index", index);
+            }
+            if (texCoord > 0) {
+                writer.AddProperty("texCoord", texCoord);
+            }
+        }
+        
+        public virtual void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeTextureInfo(writer);
+            writer.Close();
+        }
     }
 }

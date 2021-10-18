@@ -53,6 +53,12 @@ namespace GLTFast.Schema {
         public float glossinessFactor = 1;
 
         public TextureInfo specularGlossinessTexture = null;
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            writer.Close();
+            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+        }
     }
 }
 

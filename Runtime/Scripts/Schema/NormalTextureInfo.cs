@@ -14,6 +14,7 @@
 //
 
 using System.ComponentModel;
+using Unity.Mathematics;
 
 namespace GLTFast.Schema{ 
     [System.Serializable]
@@ -26,5 +27,14 @@ namespace GLTFast.Schema{
         /// </summary>
         [DefaultValue(1.0f)]
         public float scale = 1.0f;
+        
+        public override void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeTextureInfo(writer);
+            if (math.abs(scale - 1f) > Constants.epsilon) {
+                writer.AddProperty("scale", scale);
+            }
+            writer.Close();
+        }
     }
 }

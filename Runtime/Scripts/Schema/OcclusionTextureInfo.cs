@@ -27,5 +27,12 @@ namespace GLTFast.Schema{
         /// <maximum>1.0</maximum>
         /// </summary>
         public float strength = 1.0f;
+        
+        public override void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeTextureInfo(writer);
+            writer.Close();
+            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+        }
     }
 }

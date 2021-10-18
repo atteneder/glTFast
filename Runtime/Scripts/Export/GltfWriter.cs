@@ -25,7 +25,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using GLTFast.Schema;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -728,11 +727,15 @@ namespace GLTFast.Export {
         }
 
         string GetJson() {
-            // return JsonUtility.ToJson(m_Gltf,true);
-            var settings = new JsonSerializerSettings {
-                DefaultValueHandling = DefaultValueHandling.Ignore
-            };
-            return JsonConvert.SerializeObject(m_Gltf,Formatting.Indented,settings);
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            m_Gltf.GltfSerialize(writer);
+            writer.Flush();
+            stream.Seek(0,SeekOrigin.Begin);
+            var reader = new StreamReader( stream );
+            var json = reader.ReadToEnd();
+            reader.Close();
+            return json;
         }
         
         int AddMesh([NotNull] UnityEngine.Mesh uMesh) {

@@ -252,5 +252,34 @@ namespace GLTFast.Schema {
         }
 
         public bool isSparse => sparse != null;
+
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            writer.AddProperty("componentType", (int)componentType);
+            writer.AddProperty("count", count);
+            writer.AddProperty("type", type);
+            if (bufferView >= 0) {
+                writer.AddProperty("bufferView", bufferView);
+            }
+            if (byteOffset >= 0) {
+                writer.AddProperty("byteOffset", byteOffset);
+            }
+            if (normalized) {
+                writer.AddProperty("normalized", normalized);
+            }
+            if (max!=null) {
+                writer.AddArrayProperty("max", max);
+            }
+            if (min!=null) {
+                writer.AddArrayProperty("min", min);
+            }
+
+            if (sparse != null) {
+                writer.AddProperty("sparse");
+                sparse.GltfSerialize(writer);
+                writer.Close();
+            }
+            writer.Close();
+        }
     }
 }

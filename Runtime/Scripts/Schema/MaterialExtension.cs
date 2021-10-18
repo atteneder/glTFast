@@ -22,5 +22,30 @@ namespace GLTFast.Schema {
         public Transmission KHR_materials_transmission;
         public ClearCoat KHR_materials_clearcoat;
         public Sheen KHR_materials_sheen;
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            if(KHR_materials_pbrSpecularGlossiness!=null) {
+                writer.AddProperty("KHR_materials_pbrSpecularGlossiness");
+                KHR_materials_pbrSpecularGlossiness.GltfSerialize(writer);
+            }
+            if(KHR_materials_unlit!=null) {
+                writer.AddProperty("KHR_materials_unlit");
+                KHR_materials_unlit.GltfSerialize(writer);
+            }
+            if(KHR_materials_transmission!=null) {
+                writer.AddProperty("KHR_materials_transmission");
+                KHR_materials_transmission.GltfSerialize(writer);
+            }
+            if(KHR_materials_clearcoat!=null) {
+                writer.AddProperty("KHR_materials_clearcoat");
+                KHR_materials_clearcoat.GltfSerialize(writer);
+            }
+            if(KHR_materials_sheen!=null) {
+                writer.AddProperty("KHR_materials_sheen");
+                KHR_materials_sheen.GltfSerialize(writer);
+            }
+            writer.Close();
+        }
     }
 }

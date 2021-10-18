@@ -21,5 +21,10 @@ namespace GLTFast.Schema {
         public float transmissionFactor = 0;
         public TextureInfo transmissionTexture = null;
 
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            writer.Close();
+            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+        }
     }
 }

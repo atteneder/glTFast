@@ -18,6 +18,10 @@ namespace GLTFast.Schema {
     [System.Serializable]
     public class TextureExtension {
         public TextureFormat KHR_texture_basisu = null;
+
+        public void GltfSerialize(JsonWriter writer) {
+            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+        }
     }
 
     [System.Serializable]

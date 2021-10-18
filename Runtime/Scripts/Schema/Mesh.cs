@@ -45,10 +45,39 @@ namespace GLTFast.Schema {
             }
             return clone;
         }
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeRoot(writer);
+            if (primitives != null) {
+                writer.AddArray("primitives");
+                foreach (var primitive in primitives) {
+                    primitive.GltfSerialize(writer);
+                }
+                writer.CloseArray();
+            }
+
+            if (weights != null) {
+                writer.AddArrayProperty("weights", weights);
+            }
+
+            if (extras != null) {
+                writer.AddProperty("extras");
+                extras.GltfSerialize(writer);
+                writer.Close();
+            }
+            writer.Close();
+        }
     }
 
     [System.Serializable]
     public class MeshExtras {
         public string[] targetNames;
+
+        public void GltfSerialize(JsonWriter writer) {
+            if (targetNames != null) {
+                writer.AddArrayProperty("targetNames", targetNames);
+            }
+        }
     }
 }
