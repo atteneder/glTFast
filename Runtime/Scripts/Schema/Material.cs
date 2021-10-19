@@ -13,8 +13,6 @@
 // limitations under the License.
 //
 
-using System.ComponentModel;
-using Newtonsoft.Json;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -81,7 +79,6 @@ namespace GLTFast.Schema {
         [UnityEngine.SerializeField]
         float[] emissiveFactor = {0,0,0};
 
-        [JsonIgnore]
         public Color emissive {
             get {
                 return new Color(
@@ -109,7 +106,6 @@ namespace GLTFast.Schema {
 
         AlphaMode? _alphaModeEnum;
         
-        [JsonIgnore]
         public AlphaMode alphaModeEnum {
             get {
                 if ( _alphaModeEnum.HasValue ) {
@@ -136,7 +132,6 @@ namespace GLTFast.Schema {
         /// or equal to this value then it is rendered as fully opaque, otherwise, it is rendered
         /// as fully transparent. This value is ignored for other modes.
         /// </summary>
-        [DefaultValue(.5f)]
         public float alphaCutoff = 0.5f;
 
         /// <summary>
@@ -147,10 +142,8 @@ namespace GLTFast.Schema {
         /// </summary>
         public bool doubleSided = false;
 
-        [JsonIgnore]
         public bool requiresNormals => extensions?.KHR_materials_unlit == null;
 
-        [JsonIgnore]
         public bool requiresTangents => normalTexture!=null && normalTexture.index>=0;
         
         public void GltfSerialize(JsonWriter writer) {

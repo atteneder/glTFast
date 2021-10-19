@@ -18,8 +18,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 
 // GLTF_EXPORT
-using System.ComponentModel;
-using Newtonsoft.Json;
 using UnityEngine.Rendering;
 
 namespace GLTFast.Schema {
@@ -52,7 +50,6 @@ namespace GLTFast.Schema {
         /// The index of the bufferView.
         /// If this is undefined, look in the sparse object for the index and value buffer views.
         /// </summary>
-        [DefaultValue(-1)]
         public int bufferView = -1;
 
         /// <summary>
@@ -92,13 +89,11 @@ namespace GLTFast.Schema {
         /// and the number of elements in the vector or matrix.
         /// </summary>
         [UnityEngine.SerializeField]
-        [JsonProperty]
         string type;
 
         [NonSerialized]
         GLTFAccessorAttributeType _typeEnum = GLTFAccessorAttributeType.Undefined;
         
-        [JsonIgnore]
         public GLTFAccessorAttributeType typeEnum {
             get {
                 if (_typeEnum != GLTFAccessorAttributeType.Undefined) {

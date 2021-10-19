@@ -13,8 +13,6 @@
 // limitations under the License.
 //
 
-using System.ComponentModel;
-
 namespace GLTFast.Schema {
 
     [System.Serializable]
@@ -28,7 +26,6 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The index of the mesh in this node.
         /// </summary>
-        [DefaultValue(-1)]
         public int mesh = -1;
 
         /// <summary>
@@ -60,13 +57,11 @@ namespace GLTFast.Schema {
 
         /// <summary>
         /// </summary>
-        [DefaultValue(-1)]
         public int skin = -1;
 
         /// <summary>
         /// Camera index
         /// </summary>
-        [DefaultValue(-1)]
         public int camera = -1;
 
         public NodeExtensions extensions;

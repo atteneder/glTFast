@@ -13,7 +13,6 @@
 // limitations under the License.
 //
 
-using System.ComponentModel;
 using Unity.Mathematics;
 
 namespace GLTFast.Schema{ 
@@ -25,7 +24,6 @@ namespace GLTFast.Schema{
         /// This value is ignored if normalTexture is not specified.
         /// This value is linear.
         /// </summary>
-        [DefaultValue(1.0f)]
         public float scale = 1.0f;
         
         public override void GltfSerialize(JsonWriter writer) {

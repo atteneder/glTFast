@@ -13,8 +13,6 @@
 // limitations under the License.
 //
 
-using System.ComponentModel;
-
 namespace GLTFast.Schema {
 
     [System.Serializable]
@@ -23,7 +21,6 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The index of the texture.
         /// </summary>
-        [DefaultValue(-1)]
         public int index = -1;
 
         /// <summary>

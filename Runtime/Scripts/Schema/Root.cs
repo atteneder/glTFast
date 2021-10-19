@@ -13,7 +13,6 @@
 // limitations under the License.
 //
 
-using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -95,7 +94,6 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The index of the default scene.
         /// </summary>
-        [DefaultValue(-1)]
         public int scene = -1;
 
         /// <summary>
