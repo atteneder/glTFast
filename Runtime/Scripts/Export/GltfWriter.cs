@@ -46,6 +46,7 @@ using UnityEditor;
 #endif
 
 [assembly: InternalsVisibleTo("glTFast.Tests")]
+[assembly: InternalsVisibleTo("glTFastEditor")]
 
 namespace GLTFast.Export {
     public class GltfWriter : IGltfWritable {
@@ -301,7 +302,7 @@ namespace GLTFast.Export {
 
             m_Gltf.asset = new Asset {
                 version = "2.0",
-                generator = "glTFast 4.4.0-exp"
+                generator = $"Unity {Application.unityVersion} glTFast {Constants.version}"
             };
             
             BakeExtensions();
