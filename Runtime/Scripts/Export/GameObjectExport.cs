@@ -21,8 +21,9 @@ namespace GLTFast.Export {
     public class GameObjectExport {
 
         GltfWriter m_Writer;
-        public GameObjectExport() {
-            m_Writer = new GltfWriter();
+        
+        public GameObjectExport(ExportSettings exportSettings = null) {
+            m_Writer = new GltfWriter(exportSettings);
         }
 
         public void AddScene(string name, GameObject[] gameObjects) {

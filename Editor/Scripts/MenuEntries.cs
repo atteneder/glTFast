@@ -29,6 +29,7 @@ namespace GLTFast.Editor {
     public static class MenuEntries {
 
         const string k_GltfExtension = "gltf";
+        const string k_GltfBinaryExtension = "glb";
 
         static string SaveFolderPath {
             get {
@@ -42,39 +43,83 @@ namespace GLTFast.Editor {
         }
 
         [MenuItem("glTF/Export Selection", true)]
-        public static bool ExportSelectionValidate() {
+        static bool ExportSelectionValidate() {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
 
         [MenuItem("glTF/Export Selection")]
-        public static void ExportSelection() {
+        static void ExportSelectionMenu() {
+            ExportSelection(false);
+        }
 
+        [MenuItem("glTF/Export Selection (glTF-Binary)", true)]
+        static bool ExportSelectionBinaryValidate() {
+            return TryGetExportNameAndGameObjects(out _, out _);
+        }
+
+        [MenuItem("glTF/Export Selection (glTF-Binary)", false, 100)]
+        static void ExportSelectionBinaryMenu() {
+            ExportSelection(true);
+        }
+
+        static void ExportSelection(bool binary) {
             if (TryGetExportNameAndGameObjects(out var name, out var gameObjects)) {
-                var path = EditorUtility.SaveFilePanel("glTF Export Path", SaveFolderPath, $"{name}.{k_GltfExtension}", k_GltfExtension);
+                var extension = binary ? k_GltfBinaryExtension : k_GltfExtension;
+                var path = EditorUtility.SaveFilePanel(
+                    "glTF Export Path",
+                    SaveFolderPath,
+                    $"{name}.{extension}",
+                    extension
+                    );
                 if (!string.IsNullOrEmpty(path)) {
-                    var export = new GameObjectExport();
+                    var settings = GetDefaultSettings(binary);
+                    var export = new GameObjectExport(settings);
                     export.AddScene(name, gameObjects);
                     export.SaveToFile(path);
-                    
+
 #if GLTF_VALIDATOR
                     var report = Validator.Validate(path);
                     report.Log();
 #endif
                 }
-            } else {
+            }
+            else {
                 Debug.LogError("Can't export glTF: selection is empty");
             }
         }
-        
+
+        static ExportSettings GetDefaultSettings(bool binary) {
+            var settings = new ExportSettings {
+                format = binary ? GltfFormat.Binary : GltfFormat.Json
+            };
+            return settings;
+        }
+
         [MenuItem("glTF/Export Scene")]
-        static void ExportScene() {
+        static void ExportSceneMenu() {
+            ExportScene(false);
+        }
+
+        [MenuItem("glTF/Export Scene (glTF-Binary)", false, 101)]
+        static void ExportSceneBinaryMenu() {
+            ExportScene(true);
+        }
+
+        static void ExportScene(bool binary) {
             var scene = SceneManager.GetActiveScene();
             var gameObjects = scene.GetRootGameObjects();
-
-            var path = EditorUtility.SaveFilePanel("glTF Export Path", SaveFolderPath, $"{scene.name}.{k_GltfExtension}", k_GltfExtension);
+            var extension = binary ? k_GltfBinaryExtension : k_GltfExtension;
+            
+            var path = EditorUtility.SaveFilePanel(
+                "glTF Export Path",
+                SaveFolderPath, 
+                $"{scene.name}.{extension}", 
+                extension
+                );
             if (!string.IsNullOrEmpty(path)) {
                 SaveFolderPath = Directory.GetParent(path)?.FullName;
-                var export = new GameObjectExport();
+                var settings = GetDefaultSettings(binary);
+                var export = new GameObjectExport(settings);
                 export.AddScene(scene.name, gameObjects);
                 export.SaveToFile(path);
 #if GLTF_VALIDATOR

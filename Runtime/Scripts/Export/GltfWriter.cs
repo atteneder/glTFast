@@ -53,6 +53,8 @@ namespace GLTFast.Export {
         
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
+
+        ExportSettings settings;
         
         Root m_Gltf;
 
@@ -73,13 +75,13 @@ namespace GLTFast.Export {
         List<UnityEngine.Mesh> m_UnityMeshes;
         List<UnityEngine.Texture> m_UnityTextures;
         Dictionary<int, int[]> m_NodeMaterials;
+        Dictionary<int, string> m_ImagePathsToAdd;
 
-        MemoryStream m_BufferStream;
+        Stream m_BufferStream;
 
-        Stream bufferWriter => m_BufferStream = m_BufferStream ?? new MemoryStream();
-
-        public GltfWriter() {
+        public GltfWriter(ExportSettings exportSettings = null) {
             m_Gltf = new Root();
+            settings = exportSettings ?? new ExportSettings();
         }
 
         public void RegisterExtensionUsage(Extension extension, bool required = true) {
@@ -185,21 +187,23 @@ namespace GLTFast.Export {
 
             imageId = m_UnityTextures.Count;
 
-            // TODO: Create sampler
-            // TODO: Save as external file
+            // TODO: Create sampler, if required
             // TODO: KTX encoding
 
 #if UNITY_EDITOR
+
             var assetPath = AssetDatabase.GetAssetPath(uTexture);
             if (File.Exists(assetPath)) {
                 var mimeType = GetMimeType(assetPath);
                 if (!string.IsNullOrEmpty(mimeType)) {
                     var image = new Image {
-                        name = uTexture.name
+                        name = uTexture.name,
+                        mimeType = mimeType
                     };
-                    var imageData = File.ReadAllBytes(assetPath);
-                    image.bufferView = WriteBufferViewToBuffer(imageData);
-                    image.mimeType = mimeType;
+
+                    m_ImagePathsToAdd = m_ImagePathsToAdd ?? new Dictionary<int, string>();
+                    m_ImagePathsToAdd[imageId] = assetPath;
+                    
                     m_UnityTextures.Add(uTexture);
                     m_Images.Add(image);
                 } else {
@@ -211,6 +215,17 @@ namespace GLTFast.Export {
 #endif
 
             return imageId;
+        }
+
+        ImageDestination GetFinalImageDestination() {
+            var imageDest = settings.imageDestination;
+            if (imageDest == ImageDestination.Automatic) {
+                imageDest = settings.format == GltfFormat.Binary
+                    ? ImageDestination.MainBuffer
+                    : ImageDestination.SeparateFile;
+            }
+
+            return imageDest;
         }
 
         public int AddTexture(int imageId) {
@@ -239,21 +254,70 @@ namespace GLTFast.Export {
         public void SaveToFile(string path) {
             
             var ext = Path.GetExtension(path);
-            string bufferPath;
-            if (string.IsNullOrEmpty(ext)) {
-                bufferPath = path + ".bin";
+            var binary = settings.format == GltfFormat.Binary;
+            string bufferPath = null;
+            if (binary) {
+                m_BufferStream = new MemoryStream();
             } else {
-                bufferPath = path.Substring(0, path.Length - ext.Length) + ".bin";
+                if (string.IsNullOrEmpty(ext)) {
+                    bufferPath = path + ".bin";
+                } else {
+                    bufferPath = path.Substring(0, path.Length - ext.Length) + ".bin";
+                }
+                m_BufferStream = new FileStream(bufferPath,FileMode.Create);
             }
-            Bake(Path.GetFileName(bufferPath));
+
+            Bake(Path.GetFileName(bufferPath), Path.GetDirectoryName(path));
+            
             var json = GetJson();
             LogSummary(json.Length, m_BufferStream?.Length ?? 0);
-            File.WriteAllText(path,json);
-            if (m_BufferStream != null) {
-                using (var file = new FileStream(bufferPath, FileMode.Create, FileAccess.Write)) {
-                    m_BufferStream.WriteTo(file);
+
+            if (binary) {
+                const uint headerSize = 12; // 4 bytes magic + 4 bytes version + 4 bytes length (uint each)
+                const uint chunkOverhead = 8; // 4 bytes chunk length + 4 bytes chunk type (uint each)
+                var glb = new FileStream(path,FileMode.Create);
+                glb.Write(BitConverter.GetBytes(GltfGlobals.GLB_MAGIC));
+                glb.Write(BitConverter.GetBytes((uint)2));
+
+                var jsonPad = GetPadByteCount((uint)json.Length);
+                var totalLength = (uint) (headerSize + chunkOverhead + json.Length + jsonPad);
+                if (m_BufferStream.Length > 0) {
+                    totalLength += (uint) (chunkOverhead + m_BufferStream.Length);
                 }
+                
+                glb.Write(BitConverter.GetBytes(totalLength));
+                
+                glb.Write(BitConverter.GetBytes((uint)(json.Length+jsonPad)));
+                glb.Write(BitConverter.GetBytes((uint)ChunkFormat.JSON));
+                var sw = new StreamWriter(glb);
+                sw.Write(json);
+                for (int i = 0; i < jsonPad; i++) {
+                    sw.Write(' ');
+                }
+                sw.Flush();
+
+                if (m_BufferStream.Length > 0) {
+                    var tmp = BitConverter.GetBytes((uint)m_BufferStream.Length);
+                    glb.Write(tmp);
+                    glb.Write(BitConverter.GetBytes((uint)ChunkFormat.BIN));
+                    var ms = (MemoryStream)m_BufferStream;
+                    ms.WriteTo(glb);
+                }
+                sw.Close();
+                glb.Close();
             }
+            else {
+                File.WriteAllText(path,json);
+                // if (m_BufferStream != null) {
+                //     using (var file = new FileStream(bufferPath, FileMode.Create, FileAccess.Write)) {
+                //         m_BufferStream.WriteTo(file);
+                //     }
+                // }
+            }
+        }
+
+        int GetPadByteCount(uint length) {
+            return (4 - (int)(length & 3) ) & 3;
         }
 
 #if DEBUG
@@ -271,7 +335,7 @@ namespace GLTFast.Export {
         }
 #endif
 
-        void Bake(string bufferPath) {
+        void Bake(string bufferPath, string directory) {
             if (m_Meshes != null) {
 #if GLTFAST_MESH_DATA
                 BakeMeshes();
@@ -282,7 +346,9 @@ namespace GLTFast.Export {
 
             AssignMaterialsToMeshes();
 
-            if (m_BufferStream != null) {
+            BakeImages(directory);
+            
+            if (m_BufferStream != null && m_BufferStream.Length > 0) {
                 m_Gltf.buffers = new[] {
                     new Buffer {
                         uri = bufferPath,
@@ -675,6 +741,50 @@ namespace GLTFast.Export {
 
 #endif // #if GLTFAST_MESH_DATA
 
+        void BakeImages(string directory) {
+            if (m_ImagePathsToAdd != null) {
+                var imageDest = GetFinalImageDestination();
+#if UNITY_EDITOR
+                if (imageDest == ImageDestination.SeparateFile) {
+                    var fileExists = false;
+                    foreach (var pair in m_ImagePathsToAdd) {
+                        var imageId = pair.Key;
+                        var assetPath = pair.Value;
+                        var fileName = Path.GetFileName(assetPath);
+                        var destPath = Path.Combine(directory,fileName);
+                        if (File.Exists(destPath)) {
+                            fileExists = true;
+                            break;
+                        }
+                    }
+
+                    if (fileExists) {
+                        var overwrite = EditorUtility.DisplayDialog(
+                            "Image file conflicts",
+                            "Some image files at the destination will be overwritten",
+                            "Overwrite", "Cancel");
+                        if (!overwrite) {
+                            return;
+                        }
+                    }
+                }
+#endif
+                foreach (var pair in m_ImagePathsToAdd) {
+                    var imageId = pair.Key;
+                    var assetPath = pair.Value;
+                    if (imageDest == ImageDestination.MainBuffer) {
+                        // TODO: Write from file to buffer stream directly
+                        var imageBytes = File.ReadAllBytes(assetPath);
+                        m_Images[imageId].bufferView = WriteBufferViewToBuffer(imageBytes); 
+                    } else if (imageDest == ImageDestination.SeparateFile) {
+                        var fileName = Path.GetFileName(assetPath);
+                        File.Copy(assetPath, Path.Combine(directory,fileName), true);
+                        m_Images[imageId].uri = fileName;
+                    }
+                }
+            }
+        }
+        
         static unsafe void ConvertPositionAttribute(
             AttributeData attrData,
             uint byteStride,
@@ -785,7 +895,7 @@ namespace GLTFast.Export {
         /// </param>
         /// <returns>Buffer view index</returns>
         int WriteBufferViewToBuffer(NativeArray<byte> bufferViewData, int? byteStride = null, int byteAlignment = 0) {
-            var buffer = bufferWriter;
+            var buffer = m_BufferStream;
             var byteOffset = buffer.Length;
 
             if (byteAlignment > 0) {
