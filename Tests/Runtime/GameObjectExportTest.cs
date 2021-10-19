@@ -44,32 +44,24 @@ namespace GLTFast.Tests {
         [Test]
         public void MeshMaterialCombinationTest() {
 
-            var mc1 = new GltfWriter.MeshMaterialCombination {
-                meshId = 42,
-                materialIds = new [] {1,2,3}
-            };
-            
-            
-            var mc2 = new GltfWriter.MeshMaterialCombination {
-                meshId = 42,
-                materialIds = new [] {1,2,3}
-            };
-            
+            var mc1 = new GltfWriter.MeshMaterialCombination(42,new [] {1,2,3});
+            var mc2 = new GltfWriter.MeshMaterialCombination(42,new [] {1,2,3});
+
             Assert.AreEqual(mc1,mc2);
 
-            mc1.materialIds[2] = 4;
+            mc1 = new GltfWriter.MeshMaterialCombination(42,new [] {1,2,4});
             Assert.AreNotEqual(mc1,mc2);
             
-            mc1.materialIds = new []{1,2};
-            Assert.AreNotEqual(mc1,mc2);
-
-            mc1.materialIds = null;
+            mc1 = new GltfWriter.MeshMaterialCombination(42,new [] {1,2});
             Assert.AreNotEqual(mc1,mc2);
             
-            mc2.materialIds = null;
+            mc1 = new GltfWriter.MeshMaterialCombination(42,null);
+            Assert.AreNotEqual(mc1,mc2);
+            
+            mc2 = new GltfWriter.MeshMaterialCombination(42,null);
             Assert.AreEqual(mc1,mc2);
             
-            mc1.meshId = 13;
+            mc1 = new GltfWriter.MeshMaterialCombination(13,null);
             Assert.AreNotEqual(mc1,mc2);
         }
     }

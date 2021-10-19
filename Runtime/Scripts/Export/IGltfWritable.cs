@@ -22,9 +22,8 @@ namespace GLTFast.Export {
         /// <summary>
         /// Registers the use of a glTF extension
         /// </summary>
-        /// <param name="extensionNamea"></param>
-        /// <param name="required"></param>
-        /// <returns></returns>
+        /// <param name="extension">Extension's name</param>
+        /// <param name="required">True if extension is required and used. False if it's used only</param>
         void RegisterExtensionUsage(Extension extension, bool required = true);
         
         /// <summary>

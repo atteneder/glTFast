@@ -90,7 +90,7 @@ namespace GLTFast.Export {
 				}
 
 				if (uMaterial.HasProperty(k_EmissionMap)) {
-					var emissionTex = uMaterial.GetTexture(k_EmissionMap);
+					// var emissionTex = uMaterial.GetTexture(k_EmissionMap);
 
 					// if (emissionTex != null) {
 					// 	if(emissionTex is Texture2D) {
@@ -218,7 +218,7 @@ namespace GLTFast.Export {
                     white = (c.r + c.g + c.b) / 3.0f; //multiply alpha by overall whiteness of TintColor
                 }
 
-                pbr.baseColor = material.GetColor(k_TintColor);
+                pbr.baseColor = material.GetColor(k_TintColor) * white;
             }
 
             if (material.HasProperty(k_MainTex) || material.HasProperty("_BaseMap")) {
@@ -343,8 +343,8 @@ namespace GLTFast.Export {
 		        gltf.RegisterExtensionUsage(Extension.TextureTransform);
 		        def.extensions = def.extensions ?? new TextureInfoExtension();
 		        def.extensions.KHR_texture_transform = new TextureTransform {
-			        scale = new float[] { scale.x, scale.y },
-			        offset = new float[] { offset.x, offset.y }
+			        scale = new[] { scale.x, scale.y },
+			        offset = new[] { offset.x, offset.y }
 		        };
 	        }
         }

@@ -151,7 +151,7 @@ namespace GLTFast.Export {
 
         int AddMaterial(UnityEngine.Material uMaterial) {
 
-            var materialId = -1;
+            int materialId;
             if (m_Materials!=null) {
                 materialId = m_UnityMaterials.IndexOf(uMaterial);
                 if (materialId >= 0) {
@@ -172,7 +172,7 @@ namespace GLTFast.Export {
 
         
         public int AddImage( UnityEngine.Texture uTexture ) {
-            var imageId = -1;
+            int imageId;
             if (m_UnityTextures != null) {
                 imageId = m_UnityTextures.IndexOf(uTexture);
                 if (imageId >= 0) {
@@ -357,12 +357,9 @@ namespace GLTFast.Export {
                     var originalMeshId = node.mesh;
                     var mesh = m_Meshes[originalMeshId];
 
-                    var meshMaterialCombo = new MeshMaterialCombination {
-                        meshId = originalMeshId,
-                        materialIds = materialIds,
-                    };
+                    var meshMaterialCombo = new MeshMaterialCombination(originalMeshId, materialIds);
 
-                    if (!originalCombos.TryGetValue(originalMeshId, out var originalCombo)) {
+                    if (!originalCombos.ContainsKey(originalMeshId)) {
                         // First usage of the original -> assign materials to original
                         AssignMaterialsToMesh(materialIds, mesh);
                         originalCombos[originalMeshId] = meshMaterialCombo;
@@ -851,9 +848,14 @@ namespace GLTFast.Export {
         }
         
         internal struct MeshMaterialCombination {
-            public int meshId;
-            public int[] materialIds;
-
+            readonly int m_MeshId;
+            readonly int[] m_MaterialIds;
+            
+            public MeshMaterialCombination(int meshId, int[] materialIds) {
+                m_MeshId = meshId;
+                m_MaterialIds = materialIds;
+            }
+            
             public override bool Equals(object obj) {
                 //Check for null and compare run-time types.
                 if (obj == null || ! GetType().Equals(obj.GetType())) {
@@ -863,7 +865,7 @@ namespace GLTFast.Export {
             }
 
             bool Equals(MeshMaterialCombination other) {
-                return meshId == other.meshId && Equals(materialIds, other.materialIds);
+                return m_MeshId == other.m_MeshId && Equals(m_MaterialIds, other.m_MaterialIds);
             }
 
             static bool Equals(int[] a, int[] b) {
@@ -889,8 +891,8 @@ namespace GLTFast.Export {
                 return HashCode.Combine(meshId, materialIds);
 #else
                 var hash = 17;
-                hash = hash * 31 + meshId.GetHashCode();
-                hash = hash * 31 + materialIds.GetHashCode();
+                hash = hash * 31 + m_MeshId.GetHashCode();
+                hash = hash * 31 + m_MaterialIds.GetHashCode();
                 return hash;
 #endif
             }
