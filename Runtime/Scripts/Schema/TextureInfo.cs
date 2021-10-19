@@ -39,6 +39,11 @@ namespace GLTFast.Schema {
             if (texCoord > 0) {
                 writer.AddProperty("texCoord", texCoord);
             }
+
+            if (extensions != null) {
+                writer.AddProperty("extensions");
+                extensions.GltfSerialize(writer);
+            }
         }
         
         public virtual void GltfSerialize(JsonWriter writer) {
