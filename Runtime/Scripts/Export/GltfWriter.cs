@@ -848,6 +848,14 @@ namespace GLTFast.Export {
         
         int AddMesh([NotNull] UnityEngine.Mesh uMesh) {
             int meshId;
+            
+#if !UNITY_EDITOR
+            if (!uMesh.isReadable) {
+                Debug.LogError($"Mesh {uMesh.name} is not readable => skipping");
+                return -1;
+            }
+#endif
+       
             if (m_UnityMeshes!=null) {
                 meshId = m_UnityMeshes.IndexOf(uMesh);
                 if (meshId >= 0) {
