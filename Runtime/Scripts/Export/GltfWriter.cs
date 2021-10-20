@@ -251,7 +251,7 @@ namespace GLTFast.Export {
             return mimeType;
         }
 
-        public void SaveToFile(string path) {
+        public bool SaveToFile(string path) {
             
             var ext = Path.GetExtension(path);
             var binary = settings.format == GltfFormat.Binary;
@@ -267,10 +267,15 @@ namespace GLTFast.Export {
                 m_BufferStream = new FileStream(bufferPath,FileMode.Create);
             }
 
-            Bake(Path.GetFileName(bufferPath), Path.GetDirectoryName(path));
+            var success = Bake(Path.GetFileName(bufferPath), Path.GetDirectoryName(path));
+
+            if (!success) {
+                m_BufferStream.Close();
+                return false;
+            }
             
             var json = GetJson();
-            LogSummary(json.Length, m_BufferStream?.Length ?? 0);
+            // LogSummary(json.Length, m_BufferStream?.Length ?? 0);
 
             if (binary) {
                 const uint headerSize = 12; // 4 bytes magic + 4 bytes version + 4 bytes length (uint each)
@@ -314,6 +319,8 @@ namespace GLTFast.Export {
                 //     }
                 // }
             }
+
+            return true;
         }
 
         int GetPadByteCount(uint length) {
@@ -335,7 +342,7 @@ namespace GLTFast.Export {
         }
 #endif
 
-        void Bake(string bufferPath, string directory) {
+        bool Bake(string bufferPath, string directory) {
             if (m_Meshes != null) {
 #if GLTFAST_MESH_DATA
                 BakeMeshes();
@@ -346,7 +353,9 @@ namespace GLTFast.Export {
 
             AssignMaterialsToMeshes();
 
-            BakeImages(directory);
+            var success = BakeImages(directory);
+
+            if (!success) return false;
             
             if (m_BufferStream != null && m_BufferStream.Length > 0) {
                 m_Gltf.buffers = new[] {
@@ -381,6 +390,8 @@ namespace GLTFast.Export {
             m_Materials = null;
             m_Images = null;
             m_Textures = null;
+
+            return true;
         }
 
         void BakeExtensions() {
@@ -741,11 +752,11 @@ namespace GLTFast.Export {
 
 #endif // #if GLTFAST_MESH_DATA
 
-        void BakeImages(string directory) {
+        bool BakeImages(string directory) {
             if (m_ImagePathsToAdd != null) {
                 var imageDest = GetFinalImageDestination();
-#if UNITY_EDITOR
-                if (imageDest == ImageDestination.SeparateFile) {
+                var overwrite = settings.fileConflictResolution == FileConflictResolution.Overwrite;
+                if (!overwrite && imageDest == ImageDestination.SeparateFile) {
                     var fileExists = false;
                     foreach (var pair in m_ImagePathsToAdd) {
                         var imageId = pair.Key;
@@ -759,16 +770,22 @@ namespace GLTFast.Export {
                     }
 
                     if (fileExists) {
-                        var overwrite = EditorUtility.DisplayDialog(
+#if UNITY_EDITOR
+                        overwrite = EditorUtility.DisplayDialog(
                             "Image file conflicts",
                             "Some image files at the destination will be overwritten",
                             "Overwrite", "Cancel");
                         if (!overwrite) {
-                            return;
+                            return false;
                         }
+#else
+                        if (settings.fileConflictResolution == FileConflictResolution.Abort) {
+                            return false;
+                        }
+#endif
                     }
                 }
-#endif
+
                 foreach (var pair in m_ImagePathsToAdd) {
                     var imageId = pair.Key;
                     var assetPath = pair.Value;
@@ -778,11 +795,13 @@ namespace GLTFast.Export {
                         m_Images[imageId].bufferView = WriteBufferViewToBuffer(imageBytes); 
                     } else if (imageDest == ImageDestination.SeparateFile) {
                         var fileName = Path.GetFileName(assetPath);
-                        File.Copy(assetPath, Path.Combine(directory,fileName), true);
+                        File.Copy(assetPath, Path.Combine(directory,fileName), overwrite);
                         m_Images[imageId].uri = fileName;
                     }
                 }
             }
+
+            return true;
         }
         
         static unsafe void ConvertPositionAttribute(

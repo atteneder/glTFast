@@ -48,6 +48,11 @@ namespace GLTFast.Export {
         /// </summary>
         SeparateFile
     }
+
+    public enum FileConflictResolution {
+        Abort,
+        Overwrite
+    }
     
     /// <summary>
     /// glTF export settings
@@ -55,5 +60,6 @@ namespace GLTFast.Export {
     public class ExportSettings {
         public GltfFormat format = GltfFormat.Json;
         public ImageDestination imageDestination = ImageDestination.Automatic;
+        public FileConflictResolution fileConflictResolution = FileConflictResolution.Abort;
     }
 }

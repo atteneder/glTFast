@@ -42,8 +42,8 @@ namespace GLTFast.Export {
             }
         }
 
-        public void SaveToFile(string path) {
-            m_Writer.SaveToFile(path);
+        public bool SaveToFile(string path) {
+            return m_Writer.SaveToFile(path);
         }
 
         int AddGameObject(GameObject gameObject, List<Material> tempMaterials ) {

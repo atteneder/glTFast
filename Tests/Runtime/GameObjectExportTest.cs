@@ -13,17 +13,25 @@
 // limitations under the License.
 //
 
+using System.Collections;
 using System.IO;
 using GLTFast.Export;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
 
 namespace GLTFast.Tests {
+    
+    [TestFixture]
     public class GameObjectExportTest {
 
-        // [UnityTest]
-        // public IEnumerator SimpleTree() {
+        [OneTimeSetUp]
+        public void SetupTest() {
+            SceneManager.LoadScene("ExportScene", LoadSceneMode.Single);
+        }
+
         [Test]
         public void SimpleTree() {
 
@@ -39,6 +47,46 @@ namespace GLTFast.Tests {
             var export = new GameObjectExport();
             export.AddScene("UnityScene" ,new []{root});
             export.SaveToFile(Path.Combine(Application.persistentDataPath,"root.gltf"));
+        }
+        
+        [UnityTest]
+        public IEnumerator ExportSceneGameObjects() {
+            
+            yield return null;
+            
+            var scene = SceneManager.GetActiveScene();
+
+            var rootObjects = scene.GetRootGameObjects();
+
+            Assert.AreEqual(20,rootObjects.Length);
+            foreach (var gameObject in rootObjects) {
+                var export = new GameObjectExport(
+                    new ExportSettings {
+                        fileConflictResolution = FileConflictResolution.Overwrite
+                    });
+                export.AddScene(gameObject.name ,new []{gameObject});
+                var success = export.SaveToFile(Path.Combine(Application.persistentDataPath,$"{gameObject.name}.gltf"));
+                Assert.IsTrue(success);
+            }
+        }
+        
+        [UnityTest]
+        public IEnumerator ExportSceneAll() {
+
+            yield return null;
+            
+            SceneManager.LoadScene("ExportScene", LoadSceneMode.Single);
+
+            var scene = SceneManager.GetActiveScene();
+
+            var rootObjects = scene.GetRootGameObjects();
+
+            var export = new GameObjectExport(
+                new ExportSettings {
+                    fileConflictResolution = FileConflictResolution.Overwrite
+                });
+            export.AddScene("ExportScene", rootObjects);
+            export.SaveToFile(Path.Combine(Application.persistentDataPath,$"ExportScene.gltf"));
         }
         
         [Test]
