@@ -80,6 +80,7 @@ namespace GLTFast.Export {
         Dictionary<int, string> m_ImagePathsToAdd;
 
         Stream m_BufferStream;
+        string m_BufferPath;
 
         public GltfWriter(ExportSettings exportSettings = null, ICodeLogger logger = null) {
             m_Gltf = new Root();
@@ -270,22 +271,19 @@ namespace GLTFast.Export {
             
             var ext = Path.GetExtension(path);
             var binary = settings.format == GltfFormat.Binary;
-            string bufferPath = null;
-            if (binary) {
-                m_BufferStream = new MemoryStream();
-            } else {
+            m_BufferPath = null;
+            if (!binary) {
                 if (string.IsNullOrEmpty(ext)) {
-                    bufferPath = path + ".bin";
+                    m_BufferPath = path + ".bin";
                 } else {
-                    bufferPath = path.Substring(0, path.Length - ext.Length) + ".bin";
+                    m_BufferPath = path.Substring(0, path.Length - ext.Length) + ".bin";
                 }
-                m_BufferStream = new FileStream(bufferPath,FileMode.Create);
             }
 
-            var success = Bake(Path.GetFileName(bufferPath), Path.GetDirectoryName(path));
+            var success = Bake(Path.GetFileName(m_BufferPath), Path.GetDirectoryName(path));
 
             if (!success) {
-                m_BufferStream.Close();
+                m_BufferStream?.Close();
                 return false;
             }
             
@@ -301,7 +299,8 @@ namespace GLTFast.Export {
 
                 var jsonPad = GetPadByteCount((uint)json.Length);
                 var totalLength = (uint) (headerSize + chunkOverhead + json.Length + jsonPad);
-                if (m_BufferStream.Length > 0) {
+                var hasBufferContent = (m_BufferStream?.Length ?? 0) > 0; 
+                if (hasBufferContent) {
                     totalLength += (uint) (chunkOverhead + m_BufferStream.Length);
                 }
                 
@@ -316,7 +315,7 @@ namespace GLTFast.Export {
                 }
                 sw.Flush();
 
-                if (m_BufferStream.Length > 0) {
+                if (hasBufferContent) {
                     var tmp = BitConverter.GetBytes((uint)m_BufferStream.Length);
                     glb.Write(tmp);
                     glb.Write(BitConverter.GetBytes((uint)ChunkFormat.BIN));
@@ -920,6 +919,19 @@ namespace GLTFast.Export {
             }
         }
 
+        Stream CertifyBuffer() {
+            if (m_BufferStream == null) {
+                // Delayed, implicit stream generation.
+                // if `m_BufferPath` was set, we need a FileStream 
+                if (m_BufferPath != null) {
+                    m_BufferStream = new FileStream(m_BufferPath,FileMode.Create);
+                } else {
+                    m_BufferStream = new MemoryStream();
+                }
+            }
+            return m_BufferStream;
+        }
+        
         /// <summary>
         /// Writes the given data to the main buffer, creates a bufferView and returns its index
         /// </summary>
@@ -932,7 +944,7 @@ namespace GLTFast.Export {
         /// </param>
         /// <returns>Buffer view index</returns>
         int WriteBufferViewToBuffer(NativeArray<byte> bufferViewData, int? byteStride = null, int byteAlignment = 0) {
-            var buffer = m_BufferStream;
+            var buffer = CertifyBuffer();
             var byteOffset = buffer.Length;
 
             if (byteAlignment > 0) {
