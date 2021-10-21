@@ -266,6 +266,7 @@ namespace GLTFast.Export {
 
             if (!success) {
                 m_BufferStream?.Close();
+                Dispose();
                 return false;
             }
             
@@ -423,16 +424,6 @@ namespace GLTFast.Export {
             };
             
             BakeExtensions();
-
-            m_Scenes = null;
-            m_Nodes = null;
-            m_Meshes = null;
-            m_Accessors = null;
-            m_BufferViews = null;
-            m_Materials = null;
-            m_Images = null;
-            m_Textures = null;
-
             return true;
         }
 
@@ -1011,6 +1002,29 @@ namespace GLTFast.Export {
         }
 
         void Dispose() {
+            m_Settings = null;
+
+            m_Logger = null;
+            m_Gltf = null;
+            m_ExtensionsUsedOnly = null;
+            m_ExtensionsRequired = null;
+            m_UnityMaterials = null;
+            m_UnityMeshes = null;
+            m_UnityTextures = null;
+            m_NodeMaterials = null;
+            m_ImagePathsToAdd = null;
+            m_BufferStream = null;
+            m_BufferPath = null;
+            
+            m_Scenes = null;
+            m_Nodes = null;
+            m_Meshes = null;
+            m_Accessors = null;
+            m_BufferViews = null;
+            m_Materials = null;
+            m_Images = null;
+            m_Textures = null;
+            
             m_State = State.Disposed;
         }
         
