@@ -20,9 +20,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-#if !GLTFAST_REPORT
 using System.Text;
-#endif
 
 namespace GLTFast {
 
@@ -126,6 +124,16 @@ namespace GLTFast {
 #endif
 
         public static string GetFullMessage(LogCode code, params string[] messages) {
+            if (code == LogCode.None) {
+                var sb = new StringBuilder();
+                foreach (var message in messages) {
+                    if (sb.Length > 0) {
+                        sb.Append(";");
+                    }
+                    sb.Append(message);
+                }
+                return sb.ToString();
+            }
 #if GLTFAST_REPORT
             return messages != null
                 ? string.Format(fullMessages[code], messages)
