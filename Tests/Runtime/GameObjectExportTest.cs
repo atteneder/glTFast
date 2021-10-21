@@ -20,7 +20,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
-using Assert = UnityEngine.Assertions.Assert;
 
 namespace GLTFast.Tests {
     
@@ -47,7 +46,9 @@ namespace GLTFast.Tests {
             var logger = new CollectingLogger();
             var export = new GameObjectExport(logger:logger);
             export.AddScene(new []{root}, "UnityScene");
-            export.SaveToFile(Path.Combine(Application.persistentDataPath,"root.gltf"));
+            var success = export.SaveToFile(Path.Combine(Application.persistentDataPath,"root.gltf"));
+            Assert.IsTrue(success);
+            AssertLogger(logger);
         }
         
         [UnityTest]
@@ -59,7 +60,7 @@ namespace GLTFast.Tests {
 
             var rootObjects = scene.GetRootGameObjects();
 
-            Assert.AreEqual(20,rootObjects.Length);
+            Assert.AreEqual(21,rootObjects.Length);
             foreach (var gameObject in rootObjects) {
                 var logger = new CollectingLogger();
                 var export = new GameObjectExport(
@@ -71,6 +72,7 @@ namespace GLTFast.Tests {
                 export.AddScene(new []{gameObject}, gameObject.name);
                 var success = export.SaveToFile(Path.Combine(Application.persistentDataPath,$"{gameObject.name}.gltf"));
                 Assert.IsTrue(success);
+                AssertLogger(logger);
             }
         }
         
@@ -93,7 +95,9 @@ namespace GLTFast.Tests {
                 logger
                 );
             export.AddScene(rootObjects, "ExportScene");
-            export.SaveToFile(Path.Combine(Application.persistentDataPath,$"ExportScene.gltf"));
+            var success = export.SaveToFile(Path.Combine(Application.persistentDataPath,$"ExportScene.gltf"));
+            Assert.IsTrue(success);
+            AssertLogger(logger);
         }
         
         [Test]
@@ -118,6 +122,15 @@ namespace GLTFast.Tests {
             
             mc1 = new GltfWriter.MeshMaterialCombination(13,null);
             Assert.AreNotEqual(mc1,mc2);
+        }
+
+        void AssertLogger(CollectingLogger logger) {
+            logger.LogAll();
+            if (logger.items != null) {
+                foreach (var item in logger.items) {
+                    Assert.AreEqual(LogType.Log, item.type, item.ToString());
+                }
+            }
         }
     }
 }
