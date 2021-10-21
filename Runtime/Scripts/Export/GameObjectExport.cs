@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -33,6 +34,7 @@ namespace GLTFast.Export {
         /// <param name="name">Name of the scene</param>
         /// <returns>True if the scene was added flawlessly, false otherwise</returns>
         public bool AddScene(GameObject[] gameObjects, string name = null) {
+            CertifyNotDisposed();
             var rootNodes = new List<uint>(gameObjects.Length);
             var tempMaterials = new List<Material>();
             var success = true;
@@ -50,11 +52,19 @@ namespace GLTFast.Export {
 
             return success;
         }
-
-        public bool SaveToFile(string path) {
-            return m_Writer.SaveToFile(path);
+        
+        public bool SaveToFileAndDispose(string path) {
+            CertifyNotDisposed();
+            var success = m_Writer.SaveToFileAndDispose(path);
+            m_Writer = null;
+            return success;
         }
 
+        void CertifyNotDisposed() {
+            if (m_Writer == null) {
+                throw new InvalidOperationException("GameObjectExport was already disposed");
+            }
+        }
         bool AddGameObject(GameObject gameObject, List<Material> tempMaterials, out int nodeId ) {
             if (!gameObject.activeInHierarchy) {
                 nodeId = -1;

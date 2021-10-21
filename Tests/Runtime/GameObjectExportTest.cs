@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
@@ -52,7 +53,7 @@ namespace GLTFast.Tests {
             var export = new GameObjectExport(logger:logger);
             export.AddScene(new []{root}, "UnityScene");
             var path = Path.Combine(Application.persistentDataPath, "root.gltf");
-            var success = export.SaveToFile(path);
+            var success = export.SaveToFileAndDispose(path);
             Assert.IsTrue(success);
             AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
@@ -80,7 +81,7 @@ namespace GLTFast.Tests {
                     );
                 export.AddScene(new []{gameObject}, gameObject.name);
                 var path = Path.Combine(Application.persistentDataPath, $"{gameObject.name}.gltf");
-                var success = export.SaveToFile(path);
+                var success = export.SaveToFileAndDispose(path);
                 Assert.IsTrue(success);
                 AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
@@ -113,7 +114,7 @@ namespace GLTFast.Tests {
                 );
             export.AddScene(rootObjects, "ExportScene");
             var path = Path.Combine(Application.persistentDataPath, $"ExportScene.gltf");
-            var success = export.SaveToFile(path);
+            var success = export.SaveToFileAndDispose(path);
             Assert.IsTrue(success);
             AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
@@ -154,21 +155,60 @@ namespace GLTFast.Tests {
 
             var childA = GameObject.CreatePrimitive(PrimitiveType.Cube);
             childA.name = "child A";
-            var childB = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            childB.name = "child B";
-            childB.transform.localPosition = new Vector3(1, 0, 0);
 
             var logger = new CollectingLogger();
             var export = new GameObjectExport(logger:logger);
             export.AddScene(new []{childA}, "scene A");
             export.AddScene(new []{childA}, "scene B");
             var path = Path.Combine(Application.persistentDataPath, "TwoScenes.gltf");
-            var success = export.SaveToFile(path);
+            var success = export.SaveToFileAndDispose(path);
             Assert.IsTrue(success);
             AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
             ValidateGltf(path, MessageCode.UNUSED_OBJECT);
 #endif
+        }
+        
+        [Test]
+        public void Empty() {
+
+            var logger = new CollectingLogger();
+            var export = new GameObjectExport(logger:logger);
+            var path = Path.Combine(Application.persistentDataPath, "Empty.gltf");
+            var success = export.SaveToFileAndDispose(path);
+            Assert.IsTrue(success);
+            AssertLogger(logger);
+#if GLTF_VALIDATOR && UNITY_EDITOR
+            ValidateGltf(path, MessageCode.UNUSED_OBJECT);
+#endif
+        }
+        
+        
+        [Test]
+        public void SavedTwice() {
+
+            var childA = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            childA.name = "child A";
+
+            var logger = new CollectingLogger();
+            var export = new GameObjectExport(logger:logger);
+            export.AddScene(new []{childA});
+            var path = Path.Combine(Application.persistentDataPath, "SavedTwice1.gltf");
+            var success = export.SaveToFileAndDispose(path);
+            Assert.IsTrue(success);
+            AssertLogger(logger);
+#if GLTF_VALIDATOR && UNITY_EDITOR
+            ValidateGltf(path, MessageCode.UNUSED_OBJECT);
+#endif
+            Assert.Throws<InvalidOperationException>(delegate()
+            {
+                export.AddScene(new []{childA});
+            });
+            path = Path.Combine(Application.persistentDataPath, "SavedTwice2.gltf");
+            Assert.Throws<InvalidOperationException>(delegate()
+            {
+                success = export.SaveToFileAndDispose(path);
+            });
         }
 
         void AssertLogger(CollectingLogger logger) {

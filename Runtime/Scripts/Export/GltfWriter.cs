@@ -33,6 +33,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 using Buffer = GLTFast.Schema.Buffer;
+using Debug = UnityEngine.Debug;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
 using Texture = GLTFast.Schema.Texture;
@@ -50,13 +51,22 @@ using UnityEditor;
 namespace GLTFast.Export {
 
     public class GltfWriter : IGltfWritable {
+
+        enum State {
+            Undefined,
+            Initialized,
+            ContentAdded,
+            Disposed
+        }
         
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
 
-        ExportSettings settings;
+        State m_State = State.Undefined;
 
-        ICodeLogger logger;
+        ExportSettings m_Settings;
+
+        ICodeLogger m_Logger;
         
         Root m_Gltf;
 
@@ -69,7 +79,6 @@ namespace GLTFast.Export {
         List<Material> m_Materials;
         List<Texture> m_Textures;
         List<Image> m_Images;
-        
         List<Accessor> m_Accessors;
         List<BufferView> m_BufferViews;
 
@@ -84,22 +93,11 @@ namespace GLTFast.Export {
 
         public GltfWriter(ExportSettings exportSettings = null, ICodeLogger logger = null) {
             m_Gltf = new Root();
-            settings = exportSettings ?? new ExportSettings();
-            this.logger = logger;
+            m_Settings = exportSettings ?? new ExportSettings();
+            m_Logger = logger;
+            m_State = State.Initialized;
         }
 
-        public void RegisterExtensionUsage(Extension extension, bool required = true) {
-            if (required) {
-                m_ExtensionsRequired = m_ExtensionsRequired ?? new HashSet<Extension>();
-                m_ExtensionsRequired.Add(extension);
-            } else {
-                if (m_ExtensionsRequired == null || !m_ExtensionsRequired.Contains(extension)) {
-                    m_ExtensionsUsedOnly = m_ExtensionsUsedOnly ?? new HashSet<Extension>();
-                    m_ExtensionsUsedOnly.Add(extension);
-                }
-            }
-        }
-        
         /// <summary>
         /// Adds a scene to the glTF
         /// </summary>
@@ -107,6 +105,7 @@ namespace GLTFast.Export {
         /// <param name="name">Name of the scene</param>
         /// <returns>Scene index</returns>
         public uint AddScene(uint[] nodes, string name = null) {
+            CertifyNotDisposed();
             m_Scenes = m_Scenes ?? new List<Scene>();
             var scene = new Scene {
                 name = name,
@@ -127,6 +126,8 @@ namespace GLTFast.Export {
             uint[] children
             )
         {
+            CertifyNotDisposed();
+            m_State = State.ContentAdded;
             var node = new Node {
                 name = name,
                 children = children,
@@ -146,6 +147,7 @@ namespace GLTFast.Export {
         }
         
         public bool AddMeshToNode(int nodeId, [NotNull] UnityEngine.Mesh uMesh, List<UnityEngine.Material> uMaterials) {
+            CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
             var success = true;
@@ -167,28 +169,8 @@ namespace GLTFast.Export {
             return success;
         }
 
-        bool AddMaterial(UnityEngine.Material uMaterial, out int materialId) {
-
-            if (m_Materials!=null) {
-                materialId = m_UnityMaterials.IndexOf(uMaterial);
-                if (materialId >= 0) {
-                    return true;
-                }
-            } else {
-                m_Materials = new List<Material>();    
-                m_UnityMaterials = new List<UnityEngine.Material>();    
-            }
-            
-            var success = StandardMaterialExport.ConvertMaterial(uMaterial, out var material, this, logger);
-
-            materialId = m_Materials.Count;
-            m_Materials.Add(material);
-            m_UnityMaterials.Add(uMaterial);
-            return success;
-        }
-
-        
         public int AddImage( UnityEngine.Texture uTexture ) {
+            CertifyNotDisposed();
             int imageId;
             if (m_UnityTextures != null) {
                 imageId = m_UnityTextures.IndexOf(uTexture);
@@ -222,7 +204,7 @@ namespace GLTFast.Export {
                     m_UnityTextures.Add(uTexture);
                     m_Images.Add(image);
                 } else {
-                    logger?.Error(LogCode.ImageFormatUnknown,uTexture.name,assetPath);
+                    m_Logger?.Error(LogCode.ImageFormatUnknown,uTexture.name,assetPath);
                     return -1;
                 }
             }
@@ -233,18 +215,8 @@ namespace GLTFast.Export {
             return imageId;
         }
 
-        ImageDestination GetFinalImageDestination() {
-            var imageDest = settings.imageDestination;
-            if (imageDest == ImageDestination.Automatic) {
-                imageDest = settings.format == GltfFormat.Binary
-                    ? ImageDestination.MainBuffer
-                    : ImageDestination.SeparateFile;
-            }
-
-            return imageDest;
-        }
-
         public int AddTexture(int imageId) {
+            CertifyNotDisposed();
             m_Textures = m_Textures ?? new List<Texture>();
             
             var texture = new Texture {
@@ -254,23 +226,33 @@ namespace GLTFast.Export {
             return m_Textures.Count - 1;
         }
 
-        static string GetMimeType(string assetPath) {
-            string mimeType = null;
-            if (assetPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) {
-                mimeType = "image/png";
+        public void RegisterExtensionUsage(Extension extension, bool required = true) {
+            CertifyNotDisposed();
+            if (required) {
+                m_ExtensionsRequired = m_ExtensionsRequired ?? new HashSet<Extension>();
+                m_ExtensionsRequired.Add(extension);
+            } else {
+                if (m_ExtensionsRequired == null || !m_ExtensionsRequired.Contains(extension)) {
+                    m_ExtensionsUsedOnly = m_ExtensionsUsedOnly ?? new HashSet<Extension>();
+                    m_ExtensionsUsedOnly.Add(extension);
+                }
             }
-            else if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                assetPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) {
-                mimeType = "image/jpeg";
-            }
-
-            return mimeType;
         }
-
-        public bool SaveToFile(string path) {
-            
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>True if the glTF was created flawlessly and saved, false otherwise</returns>
+        public bool SaveToFileAndDispose(string path) {
+            CertifyNotDisposed();
+#if DEBUG
+            if (m_State != State.ContentAdded) {
+                Debug.LogWarning("Exporting empty glTF");
+            }
+#endif
             var ext = Path.GetExtension(path);
-            var binary = settings.format == GltfFormat.Binary;
+            var binary = m_Settings.format == GltfFormat.Binary;
             m_BufferPath = null;
             if (!binary) {
                 if (string.IsNullOrEmpty(ext)) {
@@ -329,9 +311,60 @@ namespace GLTFast.Export {
                 File.WriteAllText(path,json);
             }
 
+            Dispose();
             return true;
         }
 
+        void CertifyNotDisposed() {
+            if (m_State == State.Disposed) {
+                throw new InvalidOperationException("GltfWriter was already disposed");
+            }
+        }
+
+        static string GetMimeType(string assetPath) {
+            string mimeType = null;
+            if (assetPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) {
+                mimeType = "image/png";
+            }
+            else if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                assetPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) {
+                mimeType = "image/jpeg";
+            }
+
+            return mimeType;
+        }
+
+        ImageDestination GetFinalImageDestination() {
+            var imageDest = m_Settings.imageDestination;
+            if (imageDest == ImageDestination.Automatic) {
+                imageDest = m_Settings.format == GltfFormat.Binary
+                    ? ImageDestination.MainBuffer
+                    : ImageDestination.SeparateFile;
+            }
+
+            return imageDest;
+        }
+
+        bool AddMaterial(UnityEngine.Material uMaterial, out int materialId) {
+
+            if (m_Materials!=null) {
+                materialId = m_UnityMaterials.IndexOf(uMaterial);
+                if (materialId >= 0) {
+                    return true;
+                }
+            } else {
+                m_Materials = new List<Material>();    
+                m_UnityMaterials = new List<UnityEngine.Material>();    
+            }
+            
+            var success = StandardMaterialExport.ConvertMaterial(uMaterial, out var material, this, m_Logger);
+
+            materialId = m_Materials.Count;
+            m_Materials.Add(material);
+            m_UnityMaterials.Add(uMaterial);
+            return success;
+        }
+        
         int GetPadByteCount(uint length) {
             return (4 - (int)(length & 3) ) & 3;
         }
@@ -347,7 +380,7 @@ namespace GLTFast.Export {
                 sb.AppendFormat(" ,{0} materials", m_Gltf.materials?.Length ?? 0);
                 sb.AppendFormat(" ,{0} images", m_Gltf.images?.Length ?? 0);
             }
-            logger?.Info(sb.ToString());
+            m_Logger?.Info(sb.ToString());
         }
 #endif
 
@@ -466,6 +499,7 @@ namespace GLTFast.Export {
                     }
                 }
             }
+            m_NodeMaterials = null;
         }
 
         static void AssignMaterialsToMesh(int[] materialIds, Mesh mesh) {
@@ -607,7 +641,7 @@ namespace GLTFast.Export {
                 }
                 var mode = GetDrawMode(subMesh.topology);
                 if (!mode.HasValue) {
-                    logger?.Error(LogCode.TopologyUnsupported, subMesh.topology.ToString());
+                    m_Logger?.Error(LogCode.TopologyUnsupported, subMesh.topology.ToString());
                     mode = DrawMode.Points;
                 }
 
@@ -764,7 +798,7 @@ namespace GLTFast.Export {
         bool BakeImages(string directory) {
             if (m_ImagePathsToAdd != null) {
                 var imageDest = GetFinalImageDestination();
-                var overwrite = settings.fileConflictResolution == FileConflictResolution.Overwrite;
+                var overwrite = m_Settings.fileConflictResolution == FileConflictResolution.Overwrite;
                 if (!overwrite && imageDest == ImageDestination.SeparateFile) {
                     var fileExists = false;
                     foreach (var pair in m_ImagePathsToAdd) {
@@ -810,6 +844,7 @@ namespace GLTFast.Export {
                 }
             }
 
+            m_ImagePathsToAdd = null;
             return true;
         }
         
@@ -973,6 +1008,10 @@ namespace GLTFast.Export {
             var bufferViewId = m_BufferViews.Count;
             m_BufferViews.Add(bufferView);
             return bufferViewId;
+        }
+
+        void Dispose() {
+            m_State = State.Disposed;
         }
         
         static unsafe int GetAttributeSize(VertexAttributeFormat format) {
