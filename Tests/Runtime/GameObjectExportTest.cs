@@ -62,68 +62,27 @@ namespace GLTFast.Tests {
         }
         
         [UnityTest]
-        public IEnumerator ExportSceneGameObjects() {
-            
+        public IEnumerator ExportSceneGameObjectsJson() {
             yield return null;
-            
-            var scene = SceneManager.GetActiveScene();
+            ExportSceneGameObjects(false);
+        }
 
-            var rootObjects = scene.GetRootGameObjects();
+        [UnityTest]
+        public IEnumerator ExportSceneGameObjectsBinary() {
+            yield return null;
+            ExportSceneGameObjects(true);
+        }
 
-            Assert.AreEqual(21,rootObjects.Length);
-            foreach (var gameObject in rootObjects) {
-                var logger = new CollectingLogger();
-                var export = new GameObjectExport(
-                    new ExportSettings {
-                        fileConflictResolution = FileConflictResolution.Overwrite
-                    },
-                    logger
-                    );
-                export.AddScene(new []{gameObject}, gameObject.name);
-                var path = Path.Combine(Application.persistentDataPath, $"{gameObject.name}.gltf");
-                var success = export.SaveToFileAndDispose(path);
-                Assert.IsTrue(success);
-                AssertLogger(logger);
-#if GLTF_VALIDATOR && UNITY_EDITOR
-                ValidateGltf(path, new [] {
-                    MessageCode.ACCESSOR_MAX_MISMATCH,
-                    MessageCode.NODE_EMPTY,
-                    MessageCode.UNUSED_OBJECT,
-                });
-#endif
-            }
+        [UnityTest]
+        public IEnumerator ExportSceneAllJson() {
+            yield return null;
+            ExportSceneAll(false);
         }
         
         [UnityTest]
-        public IEnumerator ExportSceneAll() {
-
+        public IEnumerator ExportSceneAllBinary() {
             yield return null;
-            
-            SceneManager.LoadScene("ExportScene", LoadSceneMode.Single);
-
-            var scene = SceneManager.GetActiveScene();
-
-            var rootObjects = scene.GetRootGameObjects();
-
-            var logger = new CollectingLogger();
-            var export = new GameObjectExport(
-                new ExportSettings {
-                    fileConflictResolution = FileConflictResolution.Overwrite
-                },
-                logger
-                );
-            export.AddScene(rootObjects, "ExportScene");
-            var path = Path.Combine(Application.persistentDataPath, $"ExportScene.gltf");
-            var success = export.SaveToFileAndDispose(path);
-            Assert.IsTrue(success);
-            AssertLogger(logger);
-#if GLTF_VALIDATOR && UNITY_EDITOR
-            ValidateGltf(path, new [] {
-                MessageCode.ACCESSOR_MAX_MISMATCH,
-                MessageCode.NODE_EMPTY,
-                MessageCode.UNUSED_OBJECT,
-            });
-#endif
+            ExportSceneAll(true);
         }
         
         [Test]
@@ -209,6 +168,67 @@ namespace GLTFast.Tests {
             {
                 success = export.SaveToFileAndDispose(path);
             });
+        }
+
+        void ExportSceneGameObjects(bool binary) {
+            var scene = SceneManager.GetActiveScene();
+
+            var rootObjects = scene.GetRootGameObjects();
+
+            Assert.AreEqual(21,rootObjects.Length);
+            foreach (var gameObject in rootObjects) {
+                var logger = new CollectingLogger();
+                var export = new GameObjectExport(
+                    new ExportSettings {
+                        format = binary ? GltfFormat.Binary : GltfFormat.Json,
+                        fileConflictResolution = FileConflictResolution.Overwrite,
+                    },
+                    logger
+                );
+                export.AddScene(new []{gameObject}, gameObject.name);
+                var extension = binary ? GltfGlobals.glbExt : GltfGlobals.gltfExt;
+                var path = Path.Combine(Application.persistentDataPath, $"{gameObject.name}{extension}");
+                var success = export.SaveToFileAndDispose(path);
+                Assert.IsTrue(success);
+                AssertLogger(logger);
+#if GLTF_VALIDATOR && UNITY_EDITOR
+                ValidateGltf(path, new [] {
+                    MessageCode.ACCESSOR_MAX_MISMATCH,
+                    MessageCode.NODE_EMPTY,
+                    MessageCode.UNUSED_OBJECT,
+                });
+#endif
+            }
+        }
+
+        void ExportSceneAll(bool binary) {
+            SceneManager.LoadScene("ExportScene", LoadSceneMode.Single);
+
+            var scene = SceneManager.GetActiveScene();
+
+            var rootObjects = scene.GetRootGameObjects();
+
+            var logger = new CollectingLogger();
+            var export = new GameObjectExport(
+                new ExportSettings {
+                    format = binary ? GltfFormat.Binary : GltfFormat.Json,
+                    fileConflictResolution = FileConflictResolution.Overwrite,
+                },
+                logger
+            );
+            export.AddScene(rootObjects, "ExportScene");
+            var extension = binary ? GltfGlobals.glbExt : GltfGlobals.gltfExt;
+            var path = Path.Combine(Application.persistentDataPath, $"ExportScene{extension}");
+            var success = export.SaveToFileAndDispose(path);
+            Assert.IsTrue(success);
+            AssertLogger(logger);
+#if GLTF_VALIDATOR && UNITY_EDITOR
+            ValidateGltf(path, new [] {
+                MessageCode.ACCESSOR_MAX_MISMATCH,
+                MessageCode.NODE_EMPTY,
+                MessageCode.UNUSED_OBJECT,
+            });
+#endif
         }
 
         void AssertLogger(CollectingLogger logger) {

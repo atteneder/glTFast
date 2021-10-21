@@ -31,6 +31,9 @@ namespace GLTFast {
 
     public static class GltfGlobals {
         
+        public const string glbExt = ".glb";
+        public const string gltfExt = ".gltf";
+        
         public const uint GLB_MAGIC = 0x46546c67; // represents glTF in ASCII
         
         public static bool IsGltfBinary(byte[] data) {
