@@ -71,6 +71,15 @@ namespace GLTFast.Schema {
             CloseArray();
         }
         
+        public void AddArrayProperty(string name, IEnumerable<float> values) {
+            AddArray(name);
+            foreach (var value in values) {
+                Separate();
+                m_Stream.Write(value.ToString("R"));
+            }
+            CloseArray();
+        }
+        
         public void AddArrayProperty(string name, IEnumerable<string> values) {
             AddArray(name);
             foreach (var value in values) {
