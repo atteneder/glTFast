@@ -26,7 +26,12 @@ namespace GLTFast.Export {
             m_Writer = new GltfWriter(exportSettings);
         }
 
-        public void AddScene(string name, GameObject[] gameObjects) {
+        /// <summary>
+        /// Adds a scene to the glTF
+        /// </summary>
+        /// <param name="gameObjects">Root level GameObjects (will get added recursively)</param>
+        /// <param name="name">Name of the scene</param>
+        public void AddScene(GameObject[] gameObjects, string name = null) {
             var rootNodes = new List<uint>(gameObjects.Length);
             var tempMaterials = new List<Material>();
             for (var index = 0; index < gameObjects.Length; index++) {
@@ -38,7 +43,7 @@ namespace GLTFast.Export {
                 }
             }
             if (rootNodes.Count > 0) {
-                m_Writer.AddScene(name,rootNodes.ToArray());
+                m_Writer.AddScene(rootNodes.ToArray(), name);
             }
         }
 

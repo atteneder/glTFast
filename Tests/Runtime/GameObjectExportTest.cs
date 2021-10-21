@@ -45,7 +45,7 @@ namespace GLTFast.Tests {
             childB.transform.localPosition = new Vector3(1, 0, 0);
 
             var export = new GameObjectExport();
-            export.AddScene("UnityScene" ,new []{root});
+            export.AddScene(new []{root}, "UnityScene");
             export.SaveToFile(Path.Combine(Application.persistentDataPath,"root.gltf"));
         }
         
@@ -64,7 +64,7 @@ namespace GLTFast.Tests {
                     new ExportSettings {
                         fileConflictResolution = FileConflictResolution.Overwrite
                     });
-                export.AddScene(gameObject.name ,new []{gameObject});
+                export.AddScene(new []{gameObject}, gameObject.name);
                 var success = export.SaveToFile(Path.Combine(Application.persistentDataPath,$"{gameObject.name}.gltf"));
                 Assert.IsTrue(success);
             }
@@ -85,7 +85,7 @@ namespace GLTFast.Tests {
                 new ExportSettings {
                     fileConflictResolution = FileConflictResolution.Overwrite
                 });
-            export.AddScene("ExportScene", rootObjects);
+            export.AddScene(rootObjects, "ExportScene");
             export.SaveToFile(Path.Combine(Application.persistentDataPath,$"ExportScene.gltf"));
         }
         

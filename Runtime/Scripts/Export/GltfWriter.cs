@@ -96,7 +96,13 @@ namespace GLTFast.Export {
             }
         }
         
-        public uint AddScene(string name, uint[] nodes) {
+        /// <summary>
+        /// Adds a scene to the glTF
+        /// </summary>
+        /// <param name="nodes">Root level nodes</param>
+        /// <param name="name">Name of the scene</param>
+        /// <returns>Scene index</returns>
+        public uint AddScene(uint[] nodes, string name = null) {
             m_Scenes = m_Scenes ?? new List<Scene>();
             var scene = new Scene {
                 name = name,

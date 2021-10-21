@@ -74,7 +74,7 @@ namespace GLTFast.Editor {
                 if (!string.IsNullOrEmpty(path)) {
                     var settings = GetDefaultSettings(binary);
                     var export = new GameObjectExport(settings);
-                    export.AddScene(name, gameObjects);
+                    export.AddScene(gameObjects, name);
                     export.SaveToFile(path);
 
 #if GLTF_VALIDATOR
@@ -120,7 +120,7 @@ namespace GLTFast.Editor {
                 SaveFolderPath = Directory.GetParent(path)?.FullName;
                 var settings = GetDefaultSettings(binary);
                 var export = new GameObjectExport(settings);
-                export.AddScene(scene.name, gameObjects);
+                export.AddScene(gameObjects, scene.name);
                 export.SaveToFile(path);
 #if GLTF_VALIDATOR
                 var report = Validator.Validate(path);
