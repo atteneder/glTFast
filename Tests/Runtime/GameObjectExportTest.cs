@@ -15,11 +15,16 @@
 
 using System.Collections;
 using System.IO;
+using System.Linq;
 using GLTFast.Export;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+
+#if GLTF_VALIDATOR && UNITY_EDITOR
+using Unity.glTF.Validator;
+#endif
 
 namespace GLTFast.Tests {
     
@@ -46,9 +51,13 @@ namespace GLTFast.Tests {
             var logger = new CollectingLogger();
             var export = new GameObjectExport(logger:logger);
             export.AddScene(new []{root}, "UnityScene");
-            var success = export.SaveToFile(Path.Combine(Application.persistentDataPath,"root.gltf"));
+            var path = Path.Combine(Application.persistentDataPath, "root.gltf");
+            var success = export.SaveToFile(path);
             Assert.IsTrue(success);
             AssertLogger(logger);
+#if GLTF_VALIDATOR && UNITY_EDITOR
+            ValidateGltf(path, MessageCode.UNUSED_OBJECT);
+#endif
         }
         
         [UnityTest]
@@ -70,9 +79,17 @@ namespace GLTFast.Tests {
                     logger
                     );
                 export.AddScene(new []{gameObject}, gameObject.name);
-                var success = export.SaveToFile(Path.Combine(Application.persistentDataPath,$"{gameObject.name}.gltf"));
+                var path = Path.Combine(Application.persistentDataPath, $"{gameObject.name}.gltf");
+                var success = export.SaveToFile(path);
                 Assert.IsTrue(success);
                 AssertLogger(logger);
+#if GLTF_VALIDATOR && UNITY_EDITOR
+                ValidateGltf(path, new [] {
+                    MessageCode.ACCESSOR_MAX_MISMATCH,
+                    MessageCode.NODE_EMPTY,
+                    MessageCode.UNUSED_OBJECT,
+                });
+#endif
             }
         }
         
@@ -95,9 +112,17 @@ namespace GLTFast.Tests {
                 logger
                 );
             export.AddScene(rootObjects, "ExportScene");
-            var success = export.SaveToFile(Path.Combine(Application.persistentDataPath,$"ExportScene.gltf"));
+            var path = Path.Combine(Application.persistentDataPath, $"ExportScene.gltf");
+            var success = export.SaveToFile(path);
             Assert.IsTrue(success);
             AssertLogger(logger);
+#if GLTF_VALIDATOR && UNITY_EDITOR
+            ValidateGltf(path, new [] {
+                MessageCode.ACCESSOR_MAX_MISMATCH,
+                MessageCode.NODE_EMPTY,
+                MessageCode.UNUSED_OBJECT,
+            });
+#endif
         }
         
         [Test]
@@ -123,6 +148,28 @@ namespace GLTFast.Tests {
             mc1 = new GltfWriter.MeshMaterialCombination(13,null);
             Assert.AreNotEqual(mc1,mc2);
         }
+        
+        [Test]
+        public void TwoScenes() {
+
+            var childA = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            childA.name = "child A";
+            var childB = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            childB.name = "child B";
+            childB.transform.localPosition = new Vector3(1, 0, 0);
+
+            var logger = new CollectingLogger();
+            var export = new GameObjectExport(logger:logger);
+            export.AddScene(new []{childA}, "scene A");
+            export.AddScene(new []{childA}, "scene B");
+            var path = Path.Combine(Application.persistentDataPath, "TwoScenes.gltf");
+            var success = export.SaveToFile(path);
+            Assert.IsTrue(success);
+            AssertLogger(logger);
+#if GLTF_VALIDATOR && UNITY_EDITOR
+            ValidateGltf(path, MessageCode.UNUSED_OBJECT);
+#endif
+        }
 
         void AssertLogger(CollectingLogger logger) {
             logger.LogAll();
@@ -132,5 +179,22 @@ namespace GLTFast.Tests {
                 }
             }
         }
+
+#if GLTF_VALIDATOR && UNITY_EDITOR
+        void ValidateGltf(string path, params MessageCode[] expectedMessages) {
+            var report = Validator.Validate(path);
+            Assert.NotNull(report, $"Report null for {path}");
+            // report.Log();
+            if (report.issues != null) {
+                foreach (var message in report.issues.messages) {
+                    if (expectedMessages.Contains(message.codeEnum)) {
+                        continue;
+                    }
+                    Assert.Less(1, message.severity, $"Error {message} (path {Path.GetFileName(path)})");
+                    Assert.Less(2, message.severity, $"Warning {message} (path {Path.GetFileName(path)})");
+                }
+            }
+        }
+#endif
     }
 }

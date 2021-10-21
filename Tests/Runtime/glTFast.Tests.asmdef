@@ -5,7 +5,8 @@
         "glTFast",
         "glTFast.Export",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "com.unity.formats.gltf.validator.Editor"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -18,6 +19,12 @@
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.formats.gltf.validator",
+            "expression": "",
+            "define": "GLTF_VALIDATOR"
+        }
+    ],
     "noEngineReferences": false
 }
