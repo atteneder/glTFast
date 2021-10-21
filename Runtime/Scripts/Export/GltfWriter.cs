@@ -49,12 +49,15 @@ using UnityEditor;
 [assembly: InternalsVisibleTo("glTFastEditor")]
 
 namespace GLTFast.Export {
+
     public class GltfWriter : IGltfWritable {
         
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
 
         ExportSettings settings;
+
+        ICodeLogger logger;
         
         Root m_Gltf;
 
@@ -79,9 +82,10 @@ namespace GLTFast.Export {
 
         Stream m_BufferStream;
 
-        public GltfWriter(ExportSettings exportSettings = null) {
+        public GltfWriter(ExportSettings exportSettings = null, ICodeLogger logger = null) {
             m_Gltf = new Root();
             settings = exportSettings ?? new ExportSettings();
+            this.logger = logger;
         }
 
         public void RegisterExtensionUsage(Extension extension, bool required = true) {
@@ -141,41 +145,46 @@ namespace GLTFast.Export {
             return (uint) m_Nodes.Count - 1;
         }
         
-        public void AddMeshToNode(uint nodeId, [NotNull] UnityEngine.Mesh uMesh, List<UnityEngine.Material> uMaterials) {
-            var node = m_Nodes[(int)nodeId];
+        public bool AddMeshToNode(int nodeId, [NotNull] UnityEngine.Mesh uMesh, List<UnityEngine.Material> uMaterials) {
+            var node = m_Nodes[nodeId];
 
+            var success = true;
             if (uMaterials != null && uMaterials.Count > 0) {
                 var materialIds = new int[uMaterials.Count];
                 for (var i = 0; i < uMaterials.Count; i++) {
                     var uMaterial = uMaterials[i];
-                    materialIds[i] = uMaterial==null ? -1 : AddMaterial(uMaterial);
+                    if (uMaterial == null) {
+                        materialIds[i] = -1;
+                    } else { 
+                        success &= AddMaterial(uMaterial, out materialIds[i]);
+                    }
                 }
                 m_NodeMaterials = m_NodeMaterials ?? new Dictionary<int, int[]>();
-                m_NodeMaterials[(int)nodeId] = materialIds;
+                m_NodeMaterials[nodeId] = materialIds;
             }
 
             node.mesh = AddMesh(uMesh);
+            return success;
         }
 
-        int AddMaterial(UnityEngine.Material uMaterial) {
+        bool AddMaterial(UnityEngine.Material uMaterial, out int materialId) {
 
-            int materialId;
             if (m_Materials!=null) {
                 materialId = m_UnityMaterials.IndexOf(uMaterial);
                 if (materialId >= 0) {
-                    return materialId;
+                    return true;
                 }
             } else {
                 m_Materials = new List<Material>();    
                 m_UnityMaterials = new List<UnityEngine.Material>();    
             }
             
-            var material = StandardMaterialExport.ConvertMaterial(uMaterial, this);
+            var success = StandardMaterialExport.ConvertMaterial(uMaterial, out var material, this, logger);
 
             materialId = m_Materials.Count;
             m_Materials.Add(material);
             m_UnityMaterials.Add(uMaterial);
-            return materialId;
+            return success;
         }
 
         
@@ -213,7 +222,8 @@ namespace GLTFast.Export {
                     m_UnityTextures.Add(uTexture);
                     m_Images.Add(image);
                 } else {
-                    Debug.LogError($"Could not determine type of image {assetPath}");
+                    logger?.Error(LogCode.ImageFormatUnknown,uTexture.name,assetPath);
+                    return -1;
                 }
             }
 #else
@@ -281,7 +291,7 @@ namespace GLTFast.Export {
             }
             
             var json = GetJson();
-            // LogSummary(json.Length, m_BufferStream?.Length ?? 0);
+            LogSummary(json.Length, m_BufferStream?.Length ?? 0);
 
             if (binary) {
                 const uint headerSize = 12; // 4 bytes magic + 4 bytes version + 4 bytes length (uint each)
@@ -319,11 +329,6 @@ namespace GLTFast.Export {
             }
             else {
                 File.WriteAllText(path,json);
-                // if (m_BufferStream != null) {
-                //     using (var file = new FileStream(bufferPath, FileMode.Create, FileAccess.Write)) {
-                //         m_BufferStream.WriteTo(file);
-                //     }
-                // }
             }
 
             return true;
@@ -344,7 +349,7 @@ namespace GLTFast.Export {
                 sb.AppendFormat(" ,{0} materials", m_Gltf.materials?.Length ?? 0);
                 sb.AppendFormat(" ,{0} images", m_Gltf.images?.Length ?? 0);
             }
-            Debug.Log(sb.ToString());
+            logger?.Info(sb.ToString());
         }
 #endif
 
@@ -604,7 +609,7 @@ namespace GLTFast.Export {
                 }
                 var mode = GetDrawMode(subMesh.topology);
                 if (!mode.HasValue) {
-                    Debug.LogError($"Unsupported topology {subMesh.topology}");
+                    logger?.Error(LogCode.TopologyUnsupported, subMesh.topology.ToString());
                     mode = DrawMode.Points;
                 }
 
@@ -876,7 +881,7 @@ namespace GLTFast.Export {
             
 #if !UNITY_EDITOR
             if (!uMesh.isReadable) {
-                Debug.LogError($"Mesh {uMesh.name} is not readable => skipping");
+                logger?.Error(LogCode.MeshNotReadable, uMesh.name);
                 return -1;
             }
 #endif

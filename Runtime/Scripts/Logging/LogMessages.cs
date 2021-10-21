@@ -27,6 +27,7 @@ using System.Text;
 namespace GLTFast {
 
     public enum LogCode : uint {
+        None,
         AccessorAttributeTypeUnknown,
         AccessorInconsistentUsage,
         AccessorsShared,
@@ -54,6 +55,7 @@ namespace GLTFast {
         MaterialTransmissionApprox,
         MaterialTransmissionApproxURP,
         MeshBoundsMissing,
+        MeshNotReadable,
         MissingImageURL,
         MorphTargetContextFail,
         NamingOverride,
@@ -63,8 +65,10 @@ namespace GLTFast {
         SkinMissing,
         SparseAccessor,
         TextureDownloadFailed,
+        TextureInvalidType,
         TextureLoadFailed,
         TextureNotFound,
+        TopologyUnsupported,
         TypeUnsupported,
         UVMulti,
     }
@@ -102,6 +106,7 @@ namespace GLTFast {
             { LogCode.MaterialTransmissionApproxURP, "Chance of incorrect materials! glTF transmission"
                 + " is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             { LogCode.MeshBoundsMissing, "No bounds for mesh {0} => calculating them." },
+            { LogCode.MeshNotReadable, "Skipping non-readable mesh {0}" },
             { LogCode.MissingImageURL, "Image URL missing" },
             { LogCode.MorphTargetContextFail, "Retrieving morph target failed" },
             { LogCode.NamingOverride, "Overriding naming method to be OriginalUnique (animation requirement)" },
@@ -111,8 +116,10 @@ namespace GLTFast {
             { LogCode.SkinMissing, "Skin missing" },
             { LogCode.SparseAccessor, "Sparse Accessor not supported ({0})" },
             { LogCode.TextureDownloadFailed, "Download texture {1} failed: {0}" },
+            { LogCode.TextureInvalidType, "Invalid {0} texture type (material: {1})" },
             { LogCode.TextureLoadFailed, "Texture #{0} not loaded" },
             { LogCode.TextureNotFound, "Texture #{0} not found" },
+            { LogCode.TopologyUnsupported, "Unsupported topology {0}" },
             { LogCode.TypeUnsupported, "Unsupported {0} type {1}" },
             { LogCode.UVMulti, "UV set index {0} is not supported in current render pipeline!" },
         };

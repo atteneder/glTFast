@@ -22,8 +22,8 @@ namespace GLTFast.Export {
 
         GltfWriter m_Writer;
         
-        public GameObjectExport(ExportSettings exportSettings = null) {
-            m_Writer = new GltfWriter(exportSettings);
+        public GameObjectExport(ExportSettings exportSettings = null, ICodeLogger logger = null) {
+            m_Writer = new GltfWriter(exportSettings, logger);
         }
 
         /// <summary>
@@ -31,13 +31,15 @@ namespace GLTFast.Export {
         /// </summary>
         /// <param name="gameObjects">Root level GameObjects (will get added recursively)</param>
         /// <param name="name">Name of the scene</param>
-        public void AddScene(GameObject[] gameObjects, string name = null) {
+        /// <returns>True if the scene was added flawlessly, false otherwise</returns>
+        public bool AddScene(GameObject[] gameObjects, string name = null) {
             var rootNodes = new List<uint>(gameObjects.Length);
             var tempMaterials = new List<Material>();
+            var success = true;
             for (var index = 0; index < gameObjects.Length; index++) {
                 var gameObject = gameObjects[index];
                 if(!gameObject.activeInHierarchy) continue;
-                var nodeId = AddGameObject(gameObject,tempMaterials);
+                success &= AddGameObject(gameObject,tempMaterials, out var nodeId);
                 if (nodeId >= 0) {
                     rootNodes.Add((uint)nodeId);
                 }
@@ -45,21 +47,28 @@ namespace GLTFast.Export {
             if (rootNodes.Count > 0) {
                 m_Writer.AddScene(rootNodes.ToArray(), name);
             }
+
+            return success;
         }
 
         public bool SaveToFile(string path) {
             return m_Writer.SaveToFile(path);
         }
 
-        int AddGameObject(GameObject gameObject, List<Material> tempMaterials ) {
-            if(!gameObject.activeInHierarchy) return -1;
+        bool AddGameObject(GameObject gameObject, List<Material> tempMaterials, out int nodeId ) {
+            if (!gameObject.activeInHierarchy) {
+                nodeId = -1;
+                return true;
+            }
+
+            var success = true;
             var childCount = gameObject.transform.childCount;
             uint[] children = null;
             if (childCount > 0) {
                 var childList = new List<uint>(gameObject.transform.childCount);
                 for (var i = 0; i < childCount; i++) {
                     var child = gameObject.transform.GetChild(i);
-                    var childNodeId = AddGameObject(child.gameObject, tempMaterials);
+                    success &= AddGameObject(child.gameObject, tempMaterials, out var childNodeId);
                     if (childNodeId >= 0) {
                         childList.Add((uint)childNodeId);
                     }
@@ -70,7 +79,7 @@ namespace GLTFast.Export {
             }
 
             var transform = gameObject.transform;
-            var nodeId = m_Writer.AddNode(
+            nodeId = (int) m_Writer.AddNode(
                 gameObject.name,
                 transform.localPosition,
                 transform.localRotation,
@@ -92,9 +101,9 @@ namespace GLTFast.Export {
                 smr.GetSharedMaterials(tempMaterials);
             }
             if (mesh != null) {
-                m_Writer.AddMeshToNode(nodeId,mesh,tempMaterials);
+                success &= m_Writer.AddMeshToNode(nodeId,mesh,tempMaterials);
             }
-            return (int)nodeId;
+            return success;
         }
     }
 }

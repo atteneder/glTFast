@@ -21,5 +21,9 @@ namespace GLTFast {
         void Error(LogCode code, params string[] messages);
         void Warning(LogCode code, params string[] messages);
         void Info(LogCode code, params string[] messages);
+        
+        void Error(string message);
+        void Warning(string message);
+        void Info(string message);
     }
 }

@@ -36,6 +36,18 @@ namespace GLTFast {
             items.Add(new LogItem(LogType.Log, code, messages));
         }
         
+        public void Error(string message) {
+            items.Add(new LogItem(LogType.Error, LogCode.None, message ));
+        }
+        
+        public void Warning(string message) {
+            items.Add(new LogItem(LogType.Warning, LogCode.None, message ));
+        }
+        
+        public void Info(string message) {
+            items.Add(new LogItem(LogType.Log, LogCode.None, message ));
+        }
+        
         public void LogAll() {
             foreach (var item in items) {
                 item.Log();

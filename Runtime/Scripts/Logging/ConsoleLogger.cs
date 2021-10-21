@@ -30,6 +30,18 @@ namespace GLTFast {
         public void Info(LogCode code, params string[] messages) {
             Debug.Log(LogMessages.GetFullMessage(code,messages));
         }
+        
+        public void Error(string message) {
+            Debug.Log(message);
+        }
+        
+        public void Warning(string message) {
+            Debug.Log(message);
+        }
+        
+        public void Info(string message) {
+            Debug.Log(message);
+        }
     }
 }
 

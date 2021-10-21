@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unrelease] - 
 ### Added
 - *Generate Lightmap UVs* option in the glTF import inspector lets you create a secondary texture coordinate set (similar to the Model Import Settings from other formats; #238)
+- Generic `ICodeLogger` methods that don't require a `LogCode`
 
 ## [4.3.4] - 2021-10-26
 ### Added
