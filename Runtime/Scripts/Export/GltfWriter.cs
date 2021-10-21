@@ -33,7 +33,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 using Buffer = GLTFast.Schema.Buffer;
-using Debug = UnityEngine.Debug;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
 using Texture = GLTFast.Schema.Texture;
