@@ -281,10 +281,12 @@ namespace GLTFast.Export {
                 glb.Write(BitConverter.GetBytes((uint)2));
 
                 var jsonPad = GetPadByteCount((uint)json.Length);
+                var binPad = 0;
                 var totalLength = (uint) (headerSize + chunkOverhead + json.Length + jsonPad);
                 var hasBufferContent = (m_BufferStream?.Length ?? 0) > 0; 
                 if (hasBufferContent) {
-                    totalLength += (uint) (chunkOverhead + m_BufferStream.Length);
+                    binPad = GetPadByteCount((uint)m_BufferStream.Length);
+                    totalLength += (uint) (chunkOverhead + m_BufferStream.Length + binPad);
                 }
                 
                 glb.Write(BitConverter.GetBytes(totalLength));
@@ -299,11 +301,14 @@ namespace GLTFast.Export {
                 sw.Flush();
 
                 if (hasBufferContent) {
-                    var tmp = BitConverter.GetBytes((uint)m_BufferStream.Length);
-                    glb.Write(tmp);
+                    glb.Write(BitConverter.GetBytes((uint)(m_BufferStream.Length+binPad)));
                     glb.Write(BitConverter.GetBytes((uint)ChunkFormat.BIN));
                     var ms = (MemoryStream)m_BufferStream;
                     ms.WriteTo(glb);
+                    ms.Flush();
+                    for (int i = 0; i < binPad; i++) {
+                        sw.Write('\0');
+                    }
                 }
                 sw.Close();
                 glb.Close();
