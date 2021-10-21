@@ -21,7 +21,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 #if GLTF_VALIDATOR
-using GLTFValidator;
+using Unity.glTF.Validator;
 #endif
 
 namespace GLTFast.Editor {

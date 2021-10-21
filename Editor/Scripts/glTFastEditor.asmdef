@@ -9,7 +9,7 @@
         "glTFastTests",
         "UnityEngine.TestTools.Graphics",
         "Unity.RenderPipelines.HighDefinition.Runtime",
-        "com.atteneder.gltf-validator.Editor"
+        "com.unity.formats.gltf.validator.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -42,7 +42,7 @@
             "define": "UNITY_ANIMATION"
         },
         {
-            "name": "com.atteneder.gltf-validator",
+            "name": "com.unity.formats.gltf.validator",
             "expression": "",
             "define": "GLTF_VALIDATOR"
         }
