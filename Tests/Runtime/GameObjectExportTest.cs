@@ -17,6 +17,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using GLTFast.Export;
 using NUnit.Framework;
 using UnityEngine;
@@ -37,8 +38,8 @@ namespace GLTFast.Tests {
             SceneManager.LoadScene("ExportScene", LoadSceneMode.Single);
         }
 
-        [Test]
-        public void SimpleTree() {
+        [UnityTest]
+        public IEnumerator SimpleTree() {
 
             var root = new GameObject("root");
             var childA = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -53,7 +54,9 @@ namespace GLTFast.Tests {
             var export = new GameObjectExport(logger:logger);
             export.AddScene(new []{root}, "UnityScene");
             var path = Path.Combine(Application.persistentDataPath, "root.gltf");
-            var success = export.SaveToFileAndDispose(path);
+            var task = export.SaveToFileAndDispose(path);
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
             Assert.IsTrue(success);
             AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
@@ -64,25 +67,29 @@ namespace GLTFast.Tests {
         [UnityTest]
         public IEnumerator ExportSceneGameObjectsJson() {
             yield return null;
-            ExportSceneGameObjects(false);
+            var task = ExportSceneGameObjects(false);
+            yield return Utils.WaitForTask(task);
         }
 
         [UnityTest]
         public IEnumerator ExportSceneGameObjectsBinary() {
             yield return null;
-            ExportSceneGameObjects(true);
+            var task = ExportSceneGameObjects(true);
+            yield return Utils.WaitForTask(task);
         }
 
         [UnityTest]
         public IEnumerator ExportSceneAllJson() {
             yield return null;
-            ExportSceneAll(false);
+            var task = ExportSceneAll(false);
+            yield return Utils.WaitForTask(task);
         }
         
         [UnityTest]
         public IEnumerator ExportSceneAllBinary() {
             yield return null;
-            ExportSceneAll(true);
+            var task = ExportSceneAll(true);
+            yield return Utils.WaitForTask(task);
         }
         
         [Test]
@@ -109,8 +116,8 @@ namespace GLTFast.Tests {
             Assert.AreNotEqual(mc1,mc2);
         }
         
-        [Test]
-        public void TwoScenes() {
+        [UnityTest]
+        public IEnumerator TwoScenes() {
 
             var childA = GameObject.CreatePrimitive(PrimitiveType.Cube);
             childA.name = "child A";
@@ -120,7 +127,9 @@ namespace GLTFast.Tests {
             export.AddScene(new []{childA}, "scene A");
             export.AddScene(new []{childA}, "scene B");
             var path = Path.Combine(Application.persistentDataPath, "TwoScenes.gltf");
-            var success = export.SaveToFileAndDispose(path);
+            var task = export.SaveToFileAndDispose(path);
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
             Assert.IsTrue(success);
             AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
@@ -128,13 +137,15 @@ namespace GLTFast.Tests {
 #endif
         }
         
-        [Test]
-        public void Empty() {
+        [UnityTest]
+        public IEnumerator Empty() {
 
             var logger = new CollectingLogger();
             var export = new GameObjectExport(logger:logger);
             var path = Path.Combine(Application.persistentDataPath, "Empty.gltf");
-            var success = export.SaveToFileAndDispose(path);
+            var task = export.SaveToFileAndDispose(path);
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
             Assert.IsTrue(success);
             AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
@@ -143,8 +154,8 @@ namespace GLTFast.Tests {
         }
         
         
-        [Test]
-        public void SavedTwice() {
+        [UnityTest]
+        public IEnumerator SavedTwice() {
 
             var childA = GameObject.CreatePrimitive(PrimitiveType.Cube);
             childA.name = "child A";
@@ -153,7 +164,9 @@ namespace GLTFast.Tests {
             var export = new GameObjectExport(logger:logger);
             export.AddScene(new []{childA});
             var path = Path.Combine(Application.persistentDataPath, "SavedTwice1.gltf");
-            var success = export.SaveToFileAndDispose(path);
+            var task = export.SaveToFileAndDispose(path);
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
             Assert.IsTrue(success);
             AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
@@ -164,13 +177,10 @@ namespace GLTFast.Tests {
                 export.AddScene(new []{childA});
             });
             path = Path.Combine(Application.persistentDataPath, "SavedTwice2.gltf");
-            Assert.Throws<InvalidOperationException>(delegate()
-            {
-                success = export.SaveToFileAndDispose(path);
-            });
+            AssertThrowsAsync<InvalidOperationException>(async () => await export.SaveToFileAndDispose(path));
         }
 
-        void ExportSceneGameObjects(bool binary) {
+        async Task ExportSceneGameObjects(bool binary) {
             var scene = SceneManager.GetActiveScene();
 
             var rootObjects = scene.GetRootGameObjects();
@@ -188,12 +198,13 @@ namespace GLTFast.Tests {
                 export.AddScene(new []{gameObject}, gameObject.name);
                 var extension = binary ? GltfGlobals.glbExt : GltfGlobals.gltfExt;
                 var path = Path.Combine(Application.persistentDataPath, $"{gameObject.name}{extension}");
-                var success = export.SaveToFileAndDispose(path);
+                var success = await export.SaveToFileAndDispose(path);
                 Assert.IsTrue(success);
                 AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
                 ValidateGltf(path, new [] {
                     MessageCode.ACCESSOR_MAX_MISMATCH,
+                    MessageCode.ACCESSOR_MIN_MISMATCH,
                     MessageCode.NODE_EMPTY,
                     MessageCode.UNUSED_OBJECT,
                 });
@@ -201,7 +212,7 @@ namespace GLTFast.Tests {
             }
         }
 
-        void ExportSceneAll(bool binary) {
+        async Task ExportSceneAll(bool binary) {
             SceneManager.LoadScene("ExportScene", LoadSceneMode.Single);
 
             var scene = SceneManager.GetActiveScene();
@@ -219,12 +230,14 @@ namespace GLTFast.Tests {
             export.AddScene(rootObjects, "ExportScene");
             var extension = binary ? GltfGlobals.glbExt : GltfGlobals.gltfExt;
             var path = Path.Combine(Application.persistentDataPath, $"ExportScene{extension}");
-            var success = export.SaveToFileAndDispose(path);
+            var success = await export.SaveToFileAndDispose(path);
             Assert.IsTrue(success);
             AssertLogger(logger);
 #if GLTF_VALIDATOR && UNITY_EDITOR
             ValidateGltf(path, new [] {
+                MessageCode.ACCESSOR_ELEMENT_OUT_OF_MAX_BOUND,
                 MessageCode.ACCESSOR_MAX_MISMATCH,
+                MessageCode.ACCESSOR_MIN_MISMATCH,
                 MessageCode.NODE_EMPTY,
                 MessageCode.UNUSED_OBJECT,
             });
@@ -239,6 +252,38 @@ namespace GLTFast.Tests {
                 }
             }
         }
+        
+        /// <summary>
+        /// Fill-in for NUnit's Assert.ThrowsAsync
+        /// Source: https://forum.unity.com/threads/can-i-replace-upgrade-unitys-nunit.488580/#post-6543523
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="message"></param>
+        /// <param name="args"></param>
+        /// <typeparam name="TActual"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static TActual AssertThrowsAsync<TActual>(AsyncTestDelegate code, string message = "", params object[] args) where TActual : Exception
+        {
+            return Assert.Throws<TActual>(() =>
+            {
+                try
+                {
+                    code.Invoke().Wait(); // Will wrap any exceptions in an AggregateException
+                }
+                catch (AggregateException e)
+                {
+                    if (e.InnerException is null)
+                    {
+                        throw;
+                    }
+                    throw e.InnerException; // Throw the unwrapped exception
+                }
+            }, message, args);
+        }
+     
+        public delegate Task AsyncTestDelegate();
+
 
 #if GLTF_VALIDATOR && UNITY_EDITOR
         void ValidateGltf(string path, params MessageCode[] expectedMessages) {

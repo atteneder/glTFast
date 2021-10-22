@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using GLTFast.Schema;
 using JetBrains.Annotations;
 using Unity.Collections;
@@ -269,7 +270,7 @@ namespace GLTFast.Export {
         /// </summary>
         /// <param name="path">glTF destination file path</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
-        public bool SaveToFileAndDispose(string path) {
+        public async Task<bool> SaveToFileAndDispose(string path) {
             CertifyNotDisposed();
 #if DEBUG
             if (m_State != State.ContentAdded) {
@@ -287,7 +288,7 @@ namespace GLTFast.Export {
                 }
             }
 
-            var success = Bake(Path.GetFileName(m_BufferPath), Path.GetDirectoryName(path));
+            var success = await Bake(Path.GetFileName(m_BufferPath), Path.GetDirectoryName(path));
 
             if (!success) {
                 m_BufferStream?.Close();
@@ -415,10 +416,10 @@ namespace GLTFast.Export {
         }
 #endif
 
-        bool Bake(string bufferPath, string directory) {
+        async Task<bool> Bake(string bufferPath, string directory) {
             if (m_Meshes != null) {
 #if GLTFAST_MESH_DATA
-                BakeMeshes();
+                await BakeMeshes();
 #else
                 throw new NotImplementedException("glTF export (containing meshes) is currently not supported on Unity 2020.1 and older");
 #endif
@@ -538,19 +539,19 @@ namespace GLTFast.Export {
 
 #if GLTFAST_MESH_DATA
 
-        void BakeMeshes() {
+        async Task BakeMeshes() {
             Profiler.BeginSample("BakeMeshes");
             Profiler.BeginSample("AcquireReadOnlyMeshData");
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             Profiler.EndSample();
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
-                BakeMesh(meshId, meshDataArray[meshId]);
+                await BakeMesh(meshId, meshDataArray[meshId]);
             }
             meshDataArray.Dispose();
             Profiler.EndSample();
         }
 
-        void BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData) {
+        async Task BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData) {
             
             Profiler.BeginSample("BakeMesh");
             
@@ -715,6 +716,9 @@ namespace GLTFast.Export {
                         input = indexData16,
                         result = destIndices
                     }.Schedule(quadCount, k_DefaultInnerLoopBatchCount);
+                    while (!job.IsCompleted) {
+                        await Task.Yield();
+                    }
                     job.Complete(); // TODO: Wait until thread is finished
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(ushort)),
@@ -728,6 +732,9 @@ namespace GLTFast.Export {
                         input = indexData16,
                         result = destIndices
                     }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
+                    while (!job.IsCompleted) {
+                        await Task.Yield();
+                    }
                     job.Complete(); // TODO: Wait until thread is finished
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(ushort)),
@@ -744,6 +751,9 @@ namespace GLTFast.Export {
                         input = indexData32,
                         result = destIndices
                     }.Schedule(quadCount, k_DefaultInnerLoopBatchCount);
+                    while (!job.IsCompleted) {
+                        await Task.Yield();
+                    }
                     job.Complete(); // TODO: Wait until thread is finished
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(uint)),
@@ -757,6 +767,9 @@ namespace GLTFast.Export {
                         input = indexData32,
                         result = destIndices
                     }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
+                    while (!job.IsCompleted) {
+                        await Task.Yield();
+                    }
                     job.Complete(); // TODO: Wait until thread is finished
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(uint)),
@@ -786,7 +799,7 @@ namespace GLTFast.Export {
                 switch (vertexAttribute) {
                     case VertexAttribute.Position:
                     case VertexAttribute.Normal:
-                        ConvertPositionAttribute(
+                        await ConvertPositionAttribute(
                             attrData,
                             (uint)strides[attrData.stream],
                             vertexCount,
@@ -795,7 +808,7 @@ namespace GLTFast.Export {
                             );
                         break;
                     case VertexAttribute.Tangent:
-                        ConvertTangentAttribute(
+                        await ConvertTangentAttribute(
                             attrData,
                             (uint)strides[attrData.stream],
                             vertexCount,
@@ -887,23 +900,38 @@ namespace GLTFast.Export {
             return true;
         }
         
-        static unsafe void ConvertPositionAttribute(
+        static async Task ConvertPositionAttribute(
             AttributeData attrData,
             uint byteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
             )
+        {
+            var job = CreateConvertPositionAttributeJob(attrData, byteStride, vertexCount, inputStream, outputStream);
+            while (!job.IsCompleted) {
+                await Task.Yield();
+            }
+            job.Complete(); // TODO: Wait until thread is finished
+        }
+
+        static unsafe JobHandle CreateConvertPositionAttributeJob(
+            AttributeData attrData,
+            uint byteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+            ) 
         {
             var job = new ExportJobs.ConvertPositionFloatJob {
                 input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
                 byteStride = byteStride,
                 output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
-            }.Schedule(vertexCount,k_DefaultInnerLoopBatchCount);
-            job.Complete(); // TODO: Wait until thread is finished
+            }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
+            return job;
         }
 
-        static unsafe void ConvertTangentAttribute(
+        static async Task ConvertTangentAttribute(
             AttributeData attrData,
             uint byteStride,
             int vertexCount,
@@ -911,12 +939,26 @@ namespace GLTFast.Export {
             NativeArray<byte> outputStream
             )
         {
+            var job = CreateConvertTangentAttributeJob(attrData, byteStride, vertexCount, inputStream, outputStream);
+            while (!job.IsCompleted) {
+                await Task.Yield();
+            }
+            job.Complete(); // TODO: Wait until thread is finished
+        }
+
+        static unsafe JobHandle CreateConvertTangentAttributeJob(
+            AttributeData attrData,
+            uint byteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+        ) {
             var job = new ExportJobs.ConvertTangentFloatJob {
                 input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
                 byteStride = byteStride,
                 output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
-            }.Schedule(vertexCount,k_DefaultInnerLoopBatchCount);
-            job.Complete(); // TODO: Wait until thread is finished
+            }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
+            return job;
         }
 
         static DrawMode? GetDrawMode(MeshTopology topology) {

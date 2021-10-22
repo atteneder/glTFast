@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GLTFast.Export {
@@ -63,9 +64,9 @@ namespace GLTFast.Export {
         /// </summary>
         /// <param name="path">glTF destination file path</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
-        public bool SaveToFileAndDispose(string path) {
+        public async Task<bool> SaveToFileAndDispose(string path) {
             CertifyNotDisposed();
-            var success = m_Writer.SaveToFileAndDispose(path);
+            var success = await m_Writer.SaveToFileAndDispose(path);
             m_Writer = null;
             return success;
         }
