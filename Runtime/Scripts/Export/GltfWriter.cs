@@ -31,6 +31,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Buffer = GLTFast.Schema.Buffer;
 using Debug = UnityEngine.Debug;
@@ -538,15 +539,21 @@ namespace GLTFast.Export {
 #if GLTFAST_MESH_DATA
 
         void BakeMeshes() {
+            Profiler.BeginSample("BakeMeshes");
+            Profiler.BeginSample("AcquireReadOnlyMeshData");
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
+            Profiler.EndSample();
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
                 BakeMesh(meshId, meshDataArray[meshId]);
             }
             meshDataArray.Dispose();
+            Profiler.EndSample();
         }
 
         void BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData) {
-
+            
+            Profiler.BeginSample("BakeMesh");
+            
             var mesh = m_Meshes[meshId];
             var uMesh = m_UnityMeshes[meshId];
 
@@ -694,6 +701,7 @@ namespace GLTFast.Export {
             }
             Assert.IsTrue(topology.HasValue);
 
+            Profiler.BeginSample("ScheduleIndexJob");
             int indexBufferViewId;
             if (uMesh.indexFormat == IndexFormat.UInt16) {
                 var indexData16 = meshData.GetIndexData<ushort>();
@@ -754,6 +762,7 @@ namespace GLTFast.Export {
                     destIndices.Dispose();
                 }
             }
+            Profiler.EndSample();
 
             foreach (var accessor in indexAccessors) {
                 accessor.bufferView = indexBufferViewId;
@@ -767,6 +776,7 @@ namespace GLTFast.Export {
                 outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
             }
 
+            Profiler.BeginSample("ScheduleVertexJob");
             foreach (var pair in attrDataDict) {
                 var vertexAttribute = pair.Key;
                 var attrData = pair.Value;
@@ -792,6 +802,7 @@ namespace GLTFast.Export {
                         break;
                 }
             }
+            Profiler.EndSample();
 
             var bufferViewIds = new int[streamCount];
             for (var stream = 0; stream < streamCount; stream++) {
@@ -804,6 +815,8 @@ namespace GLTFast.Export {
                 var attrData = pair.Value;
                 m_Accessors[attrData.accessorId].bufferView = bufferViewIds[attrData.stream];
             }
+            
+            Profiler.EndSample();
         }
 
         int AddAccessor(Accessor accessor) {
@@ -998,6 +1011,7 @@ namespace GLTFast.Export {
         /// </param>
         /// <returns>Buffer view index</returns>
         int WriteBufferViewToBuffer(NativeArray<byte> bufferViewData, int? byteStride = null, int byteAlignment = 0) {
+            Profiler.BeginSample("WriteBufferViewToBuffer");
             var buffer = CertifyBuffer();
             var byteOffset = buffer.Length;
 
@@ -1026,6 +1040,7 @@ namespace GLTFast.Export {
             m_BufferViews = m_BufferViews ?? new List<BufferView>();
             var bufferViewId = m_BufferViews.Count;
             m_BufferViews.Add(bufferView);
+            Profiler.EndSample();
             return bufferViewId;
         }
 
