@@ -73,7 +73,7 @@ namespace GLTFast.Editor {
                     );
                 if (!string.IsNullOrEmpty(path)) {
                     var settings = GetDefaultSettings(binary);
-                    var export = new GameObjectExport(settings, new ConsoleLogger());
+                    var export = new GameObjectExport(settings, logger: new ConsoleLogger());
                     export.AddScene(gameObjects, name);
                     AsyncHelpers.RunSync(() => export.SaveToFileAndDispose(path));
 
@@ -119,7 +119,7 @@ namespace GLTFast.Editor {
             if (!string.IsNullOrEmpty(path)) {
                 SaveFolderPath = Directory.GetParent(path)?.FullName;
                 var settings = GetDefaultSettings(binary);
-                var export = new GameObjectExport(settings, new ConsoleLogger());
+                var export = new GameObjectExport(settings, logger: new ConsoleLogger());
                 export.AddScene(gameObjects, scene.name);
                 AsyncHelpers.RunSync(() => export.SaveToFileAndDispose(path));
 #if GLTF_VALIDATOR

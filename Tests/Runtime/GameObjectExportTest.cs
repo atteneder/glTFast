@@ -193,7 +193,7 @@ namespace GLTFast.Tests {
                         format = binary ? GltfFormat.Binary : GltfFormat.Json,
                         fileConflictResolution = FileConflictResolution.Overwrite,
                     },
-                    logger
+                    logger: logger
                 );
                 export.AddScene(new []{gameObject}, gameObject.name);
                 var extension = binary ? GltfGlobals.glbExt : GltfGlobals.gltfExt;
@@ -225,7 +225,7 @@ namespace GLTFast.Tests {
                     format = binary ? GltfFormat.Binary : GltfFormat.Json,
                     fileConflictResolution = FileConflictResolution.Overwrite,
                 },
-                logger
+                logger: logger
             );
             export.AddScene(rootObjects, "ExportScene");
             var extension = binary ? GltfGlobals.glbExt : GltfGlobals.gltfExt;

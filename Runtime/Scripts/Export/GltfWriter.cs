@@ -69,7 +69,7 @@ namespace GLTFast.Export {
         State m_State;
 
         ExportSettings m_Settings;
-
+        IDeferAgent m_DeferAgent;
         ICodeLogger m_Logger;
         
         Root m_Gltf;
@@ -96,14 +96,27 @@ namespace GLTFast.Export {
         string m_BufferPath;
 #endregion Private
 
-        public GltfWriter(ExportSettings exportSettings = null, ICodeLogger logger = null) {
+        /// <summary>
+        /// Provides glTF export independent of workflow (GameObjects/Entities)
+        /// </summary>
+        /// <param name="exportSettings">Export settings</param>
+        /// <param name="deferAgent">Defer agent; decides when/if to preempt
+        /// export to preserve a stable frame rate <seealso cref="IDeferAgent"/></param>
+        /// <param name="logger">Interface for logging (error) messages
+        /// <seealso cref="ConsoleLogger"/></param>
+        public GltfWriter(
+            ExportSettings exportSettings = null,
+            IDeferAgent deferAgent = null,
+            ICodeLogger logger = null
+            )
+        {
             m_Gltf = new Root();
             m_Settings = exportSettings ?? new ExportSettings();
             m_Logger = logger;
             m_State = State.Initialized;
+            m_DeferAgent = deferAgent ?? new UninterruptedDeferAgent();
         }
 
-        
         /// <summary>
         /// Adds a node to the glTF
         /// </summary>
@@ -427,7 +440,7 @@ namespace GLTFast.Export {
 
             AssignMaterialsToMeshes();
 
-            var success = BakeImages(directory);
+            var success = await BakeImages(directory);
 
             if (!success) return false;
             
@@ -546,6 +559,7 @@ namespace GLTFast.Export {
             Profiler.EndSample();
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
                 await BakeMesh(meshId, meshDataArray[meshId]);
+                await m_DeferAgent.BreakPoint();
             }
             meshDataArray.Dispose();
             Profiler.EndSample();
@@ -848,7 +862,7 @@ namespace GLTFast.Export {
 
 #endif // #if GLTFAST_MESH_DATA
 
-        bool BakeImages(string directory) {
+        async Task<bool> BakeImages(string directory) {
             if (m_ImagePathsToAdd != null) {
                 var imageDest = GetFinalImageDestination();
                 var overwrite = m_Settings.fileConflictResolution == FileConflictResolution.Overwrite;
@@ -893,6 +907,7 @@ namespace GLTFast.Export {
                         File.Copy(assetPath, Path.Combine(directory,fileName), overwrite);
                         m_Images[imageId].uri = fileName;
                     }
+                    await m_DeferAgent.BreakPoint();
                 }
             }
 

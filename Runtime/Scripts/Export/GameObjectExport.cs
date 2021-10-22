@@ -24,8 +24,20 @@ namespace GLTFast.Export {
 
         GltfWriter m_Writer;
         
-        public GameObjectExport(ExportSettings exportSettings = null, ICodeLogger logger = null) {
-            m_Writer = new GltfWriter(exportSettings, logger);
+        /// <summary>
+        /// Provides glTF export of GameObject based scenes and hierarchies.
+        /// </summary>
+        /// <param name="exportSettings">Export settings</param>
+        /// <param name="deferAgent">Defer agent; decides when/if to preempt
+        /// export to preserve a stable frame rate <seealso cref="IDeferAgent"/></param>
+        /// <param name="logger">Interface for logging (error) messages
+        /// <seealso cref="ConsoleLogger"/></param>
+        public GameObjectExport(
+            ExportSettings exportSettings = null,
+            IDeferAgent deferAgent = null,
+            ICodeLogger logger = null
+        ) {
+            m_Writer = new GltfWriter(exportSettings, deferAgent, logger);
         }
 
         /// <summary>
