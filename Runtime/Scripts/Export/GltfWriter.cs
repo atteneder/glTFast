@@ -59,10 +59,13 @@ namespace GLTFast.Export {
             Disposed
         }
         
+#region Constants
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
+#endregion Constants
 
-        State m_State = State.Undefined;
+#region Private
+        State m_State;
 
         ExportSettings m_Settings;
 
@@ -90,6 +93,7 @@ namespace GLTFast.Export {
 
         Stream m_BufferStream;
         string m_BufferPath;
+#endregion Private
 
         public GltfWriter(ExportSettings exportSettings = null, ICodeLogger logger = null) {
             m_Gltf = new Root();
@@ -98,33 +102,24 @@ namespace GLTFast.Export {
             m_State = State.Initialized;
         }
 
-        /// <summary>
-        /// Adds a scene to the glTF
-        /// </summary>
-        /// <param name="nodes">Root level nodes</param>
-        /// <param name="name">Name of the scene</param>
-        /// <returns>Scene index</returns>
-        public uint AddScene(uint[] nodes, string name = null) {
-            CertifyNotDisposed();
-            m_Scenes = m_Scenes ?? new List<Scene>();
-            var scene = new Scene {
-                name = name,
-                nodes = nodes
-            };
-            m_Scenes.Add(scene);
-            if (m_Scenes.Count == 1) {
-                m_Gltf.scene = 0;
-            }
-            return (uint) m_Scenes.Count - 1;
-        }
         
+        /// <summary>
+        /// Adds a node to the glTF
+        /// </summary>
+        /// <param name="translation">Local translation of the node (in Unity-space)</param>
+        /// <param name="rotation">Local rotation of the node (in Unity-space)</param>
+        /// <param name="scale">Local scale of the node (in Unity-space)</param>
+        /// <param name="children">Array of node indices that are parented to
+        /// this newly created node</param>
+        /// <param name="name">Name of the node</param>
+        /// <returns>glTF node index</returns>
         public uint AddNode(
-            string name,
-            float3 translation,
-            quaternion rotation,
-            float3 scale,
-            uint[] children
-            )
+            float3? translation = null,
+            quaternion? rotation = null,
+            float3? scale = null,
+            uint[] children = null,
+            string name = null
+        )
         {
             CertifyNotDisposed();
             m_State = State.ContentAdded;
@@ -132,20 +127,29 @@ namespace GLTFast.Export {
                 name = name,
                 children = children,
             };
-            if( !translation.Equals(float3.zero) ) {
-                node.translation = new[] { -translation.x, translation.y, translation.z };
+            if( translation.HasValue && !translation.Equals(float3.zero) ) {
+                node.translation = new[] { -translation.Value.x, translation.Value.y, translation.Value.z };
             }
-            if( !rotation.Equals(quaternion.identity) ) {
-                node.rotation = new[] { rotation.value.x, -rotation.value.y, -rotation.value.z, rotation.value.w };
+            if( rotation.HasValue && !rotation.Equals(quaternion.identity) ) {
+                node.rotation = new[] { rotation.Value.value.x, -rotation.Value.value.y, -rotation.Value.value.z, rotation.Value.value.w };
             }
-            if( !scale.Equals(new float3(1f)) ) {
-                node.scale = new[] { scale.x, scale.y, scale.z };
+            if( scale.HasValue && !scale.Equals(new float3(1f)) ) {
+                node.scale = new[] { scale.Value.x, scale.Value.y, scale.Value.z };
             }
             m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
             return (uint) m_Nodes.Count - 1;
         }
         
+        /// <summary>
+        /// Assigns a mesh to a previously added node
+        /// </summary>
+        /// <param name="nodeId">Index of the node to add the mesh to</param>
+        /// <param name="uMesh">Unity mesh to be assigned and exported</param>
+        /// <param name="uMaterials">Materials to be assigned and exported
+        /// (multiple in case of sub-meshes)</param>
+        /// <returns>True if the conversion was flawless, false otherwise (use
+        /// <see cref="m_Logger"/> for analysing errors)</returns>
         public bool AddMeshToNode(int nodeId, [NotNull] UnityEngine.Mesh uMesh, List<UnityEngine.Material> uMaterials) {
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
@@ -167,6 +171,26 @@ namespace GLTFast.Export {
 
             node.mesh = AddMesh(uMesh);
             return success;
+        }
+
+        /// <summary>
+        /// Adds a scene to the glTF
+        /// </summary>
+        /// <param name="nodes">Root level nodes</param>
+        /// <param name="name">Name of the scene</param>
+        /// <returns>glTF scene index</returns>
+        public uint AddScene(uint[] nodes, string name = null) {
+            CertifyNotDisposed();
+            m_Scenes = m_Scenes ?? new List<Scene>();
+            var scene = new Scene {
+                name = name,
+                nodes = nodes
+            };
+            m_Scenes.Add(scene);
+            if (m_Scenes.Count == 1) {
+                m_Gltf.scene = 0;
+            }
+            return (uint) m_Scenes.Count - 1;
         }
 
         public int AddImage( UnityEngine.Texture uTexture ) {
@@ -240,10 +264,11 @@ namespace GLTFast.Export {
         }
         
         /// <summary>
-        /// 
+        /// Exports the collected scenes/content as glTF and disposes this object.
+        /// After the export this instance cannot be re-used!
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns>True if the glTF was created flawlessly and saved, false otherwise</returns>
+        /// <param name="path">glTF destination file path</param>
+        /// <returns>True if the glTF file was created successfully, false otherwise</returns>
         public bool SaveToFileAndDispose(string path) {
             CertifyNotDisposed();
 #if DEBUG

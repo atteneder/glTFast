@@ -28,7 +28,11 @@ namespace GLTFast.Export {
         }
 
         /// <summary>
-        /// Adds a scene to the glTF
+        /// Adds a scene to the glTF.
+        /// If the conversion to glTF was not flawless (i.e. parts of the scene
+        /// were not converted 100% correctly) you still might be able to
+        /// export a glTF. You may use the <seealso cref="CollectingLogger"/>
+        /// to analyze what exactly went wrong. 
         /// </summary>
         /// <param name="gameObjects">Root level GameObjects (will get added recursively)</param>
         /// <param name="name">Name of the scene</param>
@@ -53,6 +57,12 @@ namespace GLTFast.Export {
             return success;
         }
         
+        /// <summary>
+        /// Exports the collected scenes/content as glTF and disposes this object.
+        /// After the export this instance cannot be re-used!
+        /// </summary>
+        /// <param name="path">glTF destination file path</param>
+        /// <returns>True if the glTF file was created successfully, false otherwise</returns>
         public bool SaveToFileAndDispose(string path) {
             CertifyNotDisposed();
             var success = m_Writer.SaveToFileAndDispose(path);
@@ -90,11 +100,11 @@ namespace GLTFast.Export {
 
             var transform = gameObject.transform;
             nodeId = (int) m_Writer.AddNode(
-                gameObject.name,
                 transform.localPosition,
                 transform.localRotation,
                 transform.localScale,
-                children
+                children,
+                gameObject.name
                 );
             Mesh mesh = null;
             
