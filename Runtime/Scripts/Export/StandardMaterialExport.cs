@@ -146,11 +146,11 @@ namespace GLTFast.Export {
 			if(IsUnlit(uMaterial)) {
                 ExportUnlit(material, uMaterial, gltf, logger);
 			}
-			else if (IsPBRMetallicRoughness(uMaterial))
+			else if (IsPbrMetallicRoughness(uMaterial))
 			{
-				success &= ExportPBRMetallicRoughness(uMaterial, out material.pbrMetallicRoughness, gltf, logger);
+				success &= ExportPbrMetallicRoughness(uMaterial, out material.pbrMetallicRoughness, gltf, logger);
 			}
-			else if (IsPBRSpecularGlossiness(uMaterial))
+			else if (IsPbrSpecularGlossiness(uMaterial))
 			{
 				// ExportPBRSpecularGlossiness(material, uMaterial);
 			}
@@ -201,15 +201,15 @@ namespace GLTFast.Export {
             return material.shader.name.ToLowerInvariant().Contains("unlit");
         }
         
-        static bool IsPBRMetallicRoughness(UnityEngine.Material material) {
+        static bool IsPbrMetallicRoughness(UnityEngine.Material material) {
 	        return material.HasProperty("_Metallic") && (material.HasProperty("_MetallicGlossMap") || material.HasProperty(k_Glossiness));
         }
 
-        static bool IsPBRSpecularGlossiness(UnityEngine.Material material) {
+        static bool IsPbrSpecularGlossiness(UnityEngine.Material material) {
 	        return material.HasProperty("_SpecColor") && material.HasProperty("_SpecGlossMap");
         }
         
-        static bool ExportPBRMetallicRoughness(UnityEngine.Material material, out PbrMetallicRoughness pbr, IGltfWritable gltf, ICodeLogger logger) {
+        static bool ExportPbrMetallicRoughness(UnityEngine.Material material, out PbrMetallicRoughness pbr, IGltfWritable gltf, ICodeLogger logger) {
 	        var success = true;
 			pbr = new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
 

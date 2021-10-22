@@ -53,7 +53,6 @@ namespace GLTFast.Export {
     public class GltfWriter : IGltfWritable {
 
         enum State {
-            Undefined,
             Initialized,
             ContentAdded,
             Disposed
@@ -823,7 +822,6 @@ namespace GLTFast.Export {
                 if (!overwrite && imageDest == ImageDestination.SeparateFile) {
                     var fileExists = false;
                     foreach (var pair in m_ImagePathsToAdd) {
-                        var imageId = pair.Key;
                         var assetPath = pair.Value;
                         var fileName = Path.GetFileName(assetPath);
                         var destPath = Path.Combine(directory,fileName);
