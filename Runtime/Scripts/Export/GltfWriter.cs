@@ -559,6 +559,7 @@ namespace GLTFast.Export {
 
             var vertexAttributes = uMesh.GetVertexAttributes();
             var strides = new int[k_MAXStreamCount];
+            var alignments = new int[k_MAXStreamCount];
 
             var attributes = new Attributes();
             var vertexCount = uMesh.vertexCount;
@@ -569,9 +570,11 @@ namespace GLTFast.Export {
                     offset = strides[attribute.stream],
                     stream = attribute.stream
                 };
-                
-                var size = attribute.dimension * GetAttributeSize(attribute.format);
+
+                var attributeSize = GetAttributeSize(attribute.format);
+                var size = attribute.dimension * attributeSize;
                 strides[attribute.stream] += size;
+                alignments[attribute.stream] = math.max(alignments[attribute.stream], attributeSize); 
 
                 // Adhere data alignment rules
                 Assert.IsTrue(attrData.offset % 4 == 0);
@@ -806,7 +809,11 @@ namespace GLTFast.Export {
 
             var bufferViewIds = new int[streamCount];
             for (var stream = 0; stream < streamCount; stream++) {
-                bufferViewIds[stream] = WriteBufferViewToBuffer(outputStreams[stream],strides[stream]);
+                bufferViewIds[stream] = WriteBufferViewToBuffer(
+                    outputStreams[stream],
+                    strides[stream],
+                    alignments[stream]
+                    );
                 inputStreams[stream].Dispose();
                 outputStreams[stream].Dispose();
             }
