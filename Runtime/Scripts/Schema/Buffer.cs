@@ -22,10 +22,10 @@ namespace GLTFast.Schema {
         
         public void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
-            writer.AddProperty("byteLength",byteLength);
             if (!string.IsNullOrEmpty(uri)) {
                 writer.AddProperty("uri", uri);
             }
+            writer.AddProperty("byteLength",byteLength);
             writer.Close();
         }
     }

@@ -63,14 +63,14 @@ namespace GLTFast.Schema {
             writer.AddObject();
             writer.AddProperty("buffer", buffer);
             writer.AddProperty("byteLength", byteLength);
-            if (target > 0) {
-                writer.AddProperty("target", target);
-            }
             if (byteOffset > 0) {
                 writer.AddProperty("byteOffset", byteOffset);
             }
             if (byteStride > 0) {
                 writer.AddProperty("byteStride", byteStride);
+            }
+            if (target > 0) {
+                writer.AddProperty("target", target);
             }
             writer.Close();
         }
