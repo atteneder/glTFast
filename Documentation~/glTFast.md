@@ -15,7 +15,75 @@ Try the [WebGL Demo][gltfast-web-demo] and check out the [demo project](https://
 
 *glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
 
-See all details at the [list of features/extensions](./features.md).
+See the [comprehensive list of supported features and extensions](./features.md).
+
+### Workflows
+
+There are four use-cases for glTF within Unity
+
+- Import
+    - [Runtime Import/Loading](#runtime-importloading) in games/applications
+    - [Editor Import](#editor-import-design-time) (i.e. import assets at design-time)
+- Export
+    - [Runtime Export](#runtime-export) (save and share dynamic, user-generated 3D content)
+    - [Editor Export](#editor-export) (Unity as glTF authoring tool)
+
+![Schematic diagram of the four glTF workflows](./img/Unity-glTF-workflows.png "The four glTF workflows")
+
+#### Runtime Import/Loading
+
+Load and instantiate glTF files at runtime in your game/application via Script or the `GltfAsset` component.
+
+#### Benefits of Runtime Import
+
+- Efficiently load dynamic and/or third-party assets
+    - Make use of state-of-the art mesh and texture compression methods, like KTX/Basis Universal, Draco and meshoptimizer.
+- No need to re-build your application or Asset Bundles upon Unity version upgrades
+
+*glTF* was specifically designed for vendor-independent transmission and runtime loading and naturally plays its strengths there.
+
+#### Editor Import (Design-Time)
+
+Although primarily designed for runtime, *glTF*'s effective design and its modern, physically-based material definition make it great for most simple DCC (digital content creation) interchange as well.
+
+Read about [usage](#editor-import) below.
+
+##### Benefits of Editor Import
+
+- Less friction between artists and developers due to *glTF* as standardized interface
+    - Example: artists don't need to know or follow Unity shader specific conventions and thus developers don't need to instruct them
+- Enables adding rich interaction and behaviour to assets (e.g. custom scripts or animation controllers)
+- In conjunction with [Editor Export](#editor-export), Unity becomes a complete tool for re-mixing 3D content
+- <sup>1</sup>Use default Lit (URP/HDRP) or Standard (Built-in render pipeline) materials
+
+<sup>1</sup>: Not yet supported (see [issue](https://github.com/atteneder/glTFast/issues/258))
+
+#### Editor Export
+
+Use the Unity Editor as an authoring tool and export your scenes and GameObjects as *glTFs*.
+
+> Note: This feature is experimental
+
+##### Use-cases for Editor Export
+
+- [Unity runtime loading](#runtime-import-loading)
+- Social media sharing
+- Use within the [vast glTF eco system][gltf-projects], like third-party viewers or asset pipelines
+- Archiving
+
+#### Runtime Export
+
+Allows your Unity-powered application/game to export scenes/GameObjects to glTF at runtime.
+
+##### Use-cases for Runtime Export
+
+- Preserve dynamic, user-generated 3D content
+    - Create metaverse-ready 3D snapshots of a current state / game action
+    - 3D product configurations (e-commerce)
+- Build high level editing and authoring tools with Unity
+- Social media sharing
+
+> Note: This feature is coming soon (see [issue](https://github.com/atteneder/glTFast/issues/259))
 
 ## Usage
 
@@ -210,7 +278,11 @@ async Task CustomDeferAgent() {
 
 ### Editor Import
 
-To convert your glTF asset into a native Unity prefab, just move/copy it and all its companioning buffer and texture files into the *Assets* folder of your Unity project. It'll get imported into the Asset Database automatically. Select it in the Project view to see detailed settings and import reports in the Inspector. Expand it in the Project View to see the components (Scenes, Meshes, Materials, AnimationClips and Textures) that were imported.
+You can move/copy *glTF* files into your project's *Assets* folder, similar to other 3D formats. *glTFast* will import them to native Unity prefabs and add them to the asset database.
+
+Don't forget to also copy over companion buffer (`.bin`) and image files! The file names and relative paths cannot be changed, otherwise references may break.
+
+Select a glTF in the Project view to see its import settings and eventual warnings/errors in the Inspector. Expand it in the Project View to see the imported components (Scenes, Meshes, Materials, AnimationClips and Textures).
 
 ## Project Setup
 
@@ -218,9 +290,9 @@ To convert your glTF asset into a native Unity prefab, just move/copy it and all
 
 ❗ IMPORTANT ❗
 
-glTF materials might require many shader/features combinations. You **have** to make sure all shader variants your project will ever use are included, or the materials will not work in builds (even if they work in the Editor).
+For runtime import, glTF materials might require many shader/features combinations. You **have** to make sure all shader variants your project will ever use are included, or the materials will not work in builds (even if they work in the Editor).
 
-*glTFast* uses custom shaders that are derived from the Unity Standard shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
+*glTFast* import uses custom shaders that are derived from the Unity *Lit* or *Standard* shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
 
 - Run your scene that loads all glTFs you expect in the editor.
 - Go to Edit->Project Settings->Graphics
@@ -240,7 +312,7 @@ Motivations for this might be using meshes as physics colliders amongst [other c
 
 ### Safe Mode
 
-Arbitrary (and potentially broken) input data is a challenge to software's robustness and safety. Some measurments to make glTFast more robust have a negative impact on its performance though.
+Arbitrary (and potentially broken) input data is a challenge to software's robustness and safety. Some measurements to make glTFast more robust have a negative impact on its performance though.
 
 For this reason some pedantic safety checks in glTFast are not performed by default. You can enable safe-mode by adding the scripting define `GLTFAST_SAFE` to your project.
 
@@ -323,10 +395,11 @@ In the future materials can be created before textures are available/downloaded 
 
 *glTFast* uses [Unity's JsonUtility](https://docs.unity3d.com/ScriptReference/JsonUtility.html) for parsing, which has little overhead, is fast and memory-efficient (See <https://docs.unity3d.com/Manual/JSONSerialization.html>).
 
-It also uses fast low-level memory copy methods, [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html) and the [Advanced Mesh API](https://docs.unity3d.com/ScriptReference/Mesh.html).
+It also uses fast low-level memory copy methods, [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html), [Mathematics](https://docs.unity3d.com/Packages/com.unity.mathematics@1.0/manual/index.html), the [Burst compiler](https://docs.unity3d.com/Packages/com.unity.burst@1.6/manual/index.html) and the [Advanced Mesh API](https://docs.unity3d.com/ScriptReference/Mesh.html).
 
 [unity]: https://unity.com
 [gltf]: https://www.khronos.org/gltf
+[gltf-projects]: https://github.khronos.org/glTF-Project-Explorer
 [gltf-spec]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md
 [gltfast-web-demo]: https://gltf.pixel.engineer
 [gltfasset_component]: ./img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"

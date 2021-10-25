@@ -8,22 +8,37 @@
 [![GitHub issues](https://img.shields.io/github/issues/atteneder/glTFast)](https://github.com/atteneder/glTFast/issues)
 [![GitHub license](https://img.shields.io/github/license/atteneder/glTFast)](https://github.com/atteneder/glTFast/blob/main/LICENSE.md)
 
-*glTFast* enables loading [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
+*glTFast* enables use of [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
 
-It focuses on speed, memory efficiency and a small build footprint.
+It focuses on speed, memory efficiency and a small build footprint while also providing:
 
-Two workflows are supported
+- 100% [glTF 2.0 specification][gltf-spec] compliance
+- Ease of use
+- Robustness and Stability
+- Customization and extensibility for advanced users
 
-- Load glTF assets at runtime
-- Import glTF assets as prefabs into the asset database at design-time in the Unity Editor
-
-Try the [WebGL Demo][gltfast-web-demo] and check out the [demo project](https://github.com/atteneder/glTFastDemo).
+Check out the [demo project](https://github.com/atteneder/glTFastDemo) and try the [WebGL Demo][gltfast-web-demo].
 
 ## Features
 
 *glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
 
-See all details at the [list of features/extensions](./Documentation~/features.md).
+See the [comprehensive list of supported features and extensions](./Documentation~/features.md).
+
+### Workflows
+
+There are four use-cases for glTF within Unity
+
+- Import
+  - [Runtime Import/Loading](./Documentation~/glTFast.md#runtime-importloading) in games/applications
+  - [Editor Import](./Documentation~/glTFast.md#editor-import-design-time) (i.e. import assets at design-time)
+- Export
+  - [Runtime Export](./Documentation~/glTFast.md#runtime-export) (save and share dynamic, user-generated 3D content)
+  - [Editor Export](./Documentation~/glTFast.md#editor-export) (Unity as glTF authoring tool)
+
+[![Schematic diagram of the four glTF workflows](./Documentation~/img/Unity-glTF-workflows.png "The four glTF workflows")][workflows]
+
+Read more about the workflows in the [documentation][workflows].
 
 ## Installing
 
@@ -88,10 +103,6 @@ The loading behavior can be highly customized:
 - Tweak and optimize loading performance
 
 See the [Documentation](./Documentation~/glTFast.md) for details.
-
-### Editor Import
-
-To convert your glTF asset into a native Unity prefab, just move/copy it and all its companioning buffer and texture files into the *Assets* folder of your Unity project. It'll get imported into the Asset Database automatically. Select it in the Project view to see detailed settings and import reports in the Inspector. Expand it in the Project View to see the components (Scenes, Meshes, Materials, AnimationClips and Textures) that were imported.
 
 ## Project Setup
 
@@ -167,3 +178,4 @@ limitations under the License.
 [embibe]: https://www.embibe.com
 [gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
 [upm_install]: ./Documentation~/img/upm_install.png  "Unity Package Manager add menu"
+[workflows]: ./Documentation~/glTFast.md#workflows
