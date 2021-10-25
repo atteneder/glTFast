@@ -92,6 +92,16 @@ gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/ma
 
 See [Runtime Loading via Script](./Documentation~/glTFast.md#runtime-loading-via-script) in the documentation for more details and instructions how to [customize the loading behaviour](./Documentation~/glTFast.md#customize-loading-behavior) via script.
 
+### Editor Import
+
+Move or copy *glTF* files into your project's *Assets* folder, similar to other 3D formats:
+
+![Editor Import][import-gif]
+
+*glTFast* will import them to native Unity prefabs and add them to the asset database.
+
+See [Editor Import](./Documentation~/glTFast.md#editor-import) in the documentation for details.
+
 ## Project Setup
 
 ### Materials and Shader Variants
@@ -141,5 +151,6 @@ limitations under the License.
 [khronos]: https://www.khronos.org
 [embibe]: https://www.embibe.com
 [gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
+[import-gif]: ./Documentation~/img/import.gif  "Video showing glTF files being copied into the Assets folder and imported"
 [upm_install]: ./Documentation~/img/upm_install.png  "Unity Package Manager add menu"
 [workflows]: ./Documentation~/glTFast.md#workflows
