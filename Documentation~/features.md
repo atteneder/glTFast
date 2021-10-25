@@ -218,7 +218,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [PointLights]: https://github.com/atteneder/glTFast/issues/17
 [SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
 [Sheen]: https://github.com/atteneder/glTFast/issues/110
-[Skins]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#skins
+[Skins]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins
 [Specular]: https://github.com/atteneder/glTFast/issues/208
 [Transmission]: https://github.com/atteneder/glTFast/issues/111
 [URP]: https://unity.com/srp/universal-render-pipeline

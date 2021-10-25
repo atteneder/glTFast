@@ -172,7 +172,7 @@ limitations under the License.
 
 [unity]: https://unity.com
 [gltf]: https://www.khronos.org/gltf
-[gltf-spec]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md
+[gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
 [gltfast-web-demo]: https://gltf.pixel.engineer
 [khronos]: https://www.khronos.org
 [embibe]: https://www.embibe.com

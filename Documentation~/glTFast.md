@@ -336,7 +336,7 @@ When upgrading from an older version to 4.x or newer the most notable difference
 
 To counter-act this in applications that used older versions of *glTFast* before, make sure you rotate the parent `Transform` by 180° around the Y-axis, which brings the model back to where it should be.
 
-This change was implemented to conform more closely to the [glTF specification](https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#coordinate-system-and-units), which says:
+This change was implemented to conform more closely to the [glTF specification][gltf-spec-coords], which says:
 
 > The front of a glTF asset faces +Z.
 
@@ -400,7 +400,8 @@ It also uses fast low-level memory copy methods, [Unity's Job system](https://do
 [unity]: https://unity.com
 [gltf]: https://www.khronos.org/gltf
 [gltf-projects]: https://github.khronos.org/glTF-Project-Explorer
-[gltf-spec]: https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md
+[gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
+[gltf-spec-coords]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#coordinate-system-and-units
 [gltfast-web-demo]: https://gltf.pixel.engineer
 [gltfasset_component]: ./img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
 [gltfast3to4]: ./img/gltfast3to4.png  "3D scene view showing BoomBoxWithAxes model twice. One with the legacy axis conversion and one with the new orientation"
