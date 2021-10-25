@@ -90,19 +90,7 @@ var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-See [Runtime Loading via Script](./Documentation~/glTFast.md#runtime-loading-via-script) in the detailed documentation for instructions how to customize the loading behaviour via script.
-
-#### Customizing Runtime Loading Behavior
-
-The loading behavior can be highly customized:
-
-- Customize [instantiation](./Documentation~/glTFast.md#instantiation)
-- Load glTF once and instantiate it many times (see [example](./Documentation~/glTFast.md#custom-post-loading-behaviour))
-- Access data of glTF scene (for example get material; see [example](./Documentation~/glTFast.md#custom-post-loading-behaviour))
-- Load [reports](./Documentation~/glTFast.md#report) allow reacting and communicating incidents during loading and instantiation
-- Tweak and optimize loading performance
-
-See the [Documentation](./Documentation~/glTFast.md) for details.
+See [Runtime Loading via Script](./Documentation~/glTFast.md#runtime-loading-via-script) in the documentation for more details and instructions how to [customize the loading behaviour](./Documentation~/glTFast.md#customize-loading-behavior) via script.
 
 ## Project Setup
 
@@ -114,33 +102,9 @@ See the [Documentation](./Documentation~/glTFast.md) for details.
 
 Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/glTFast.md#materials-and-shader-variants) for details.
 
-## Roadmap
-
-Find plans for upcoming changes at the [milestones](https://github.com/atteneder/glTFast/milestones).
-
-## Motivation
-
-### Goals
-
-- Stay fast, memory efficient and small
-- Feature completeness
-  - Support 100% of the glTF 2.0 specification
-  - Support all official Khronos extensions
-  - Support selected vendor extension
-- Universally usable…
-  - …across all popular Unity versions
-  - …across all platforms and devices
-  - …across different project setups (all important render pipelines, GameObject or entity component system based, DOTS, Tiny, etc.)
-- Allow customization
-
-### Extended goals
-
-- glTF Authoring (create optimized glTFs from prefabs)
-- glTF Runtime Export
-
 ## Get involved
 
-Contributions like ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *glTFast*.
+Contributions in the form of ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *glTFast*.
 
 ## Supporters
 
