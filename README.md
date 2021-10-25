@@ -102,6 +102,11 @@ Move or copy *glTF* files into your project's *Assets* folder, similar to other 
 
 See [Editor Import](./Documentation~/glTFast.md#editor-import) in the documentation for details.
 
+### Editor Export
+
+The main menu has a couple of [entries for glTF export](./Documentation~/glTFast.md#export-from-the-main-menu) under `File > Export` and glTFs can also be
+created [via script](./Documentation~/glTFast.md#export-via-script).
+
 ## Project Setup
 
 ### Materials and Shader Variants
