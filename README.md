@@ -149,13 +149,13 @@ limitations under the License.
 
 *Khronos®* is a registered trademark and *glTF™* is a trademark of [The Khronos Group Inc][khronos].
 
-[unity]: https://unity.com
-[gltf]: https://www.khronos.org/gltf
-[gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
-[gltfast-web-demo]: https://gltf.pixel.engineer
-[khronos]: https://www.khronos.org
 [embibe]: https://www.embibe.com
+[gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
+[gltf]: https://www.khronos.org/gltf
 [gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
+[gltfast-web-demo]: https://gltf.pixel.engineer
 [import-gif]: ./Documentation~/img/import.gif  "Video showing glTF files being copied into the Assets folder and imported"
+[khronos]: https://www.khronos.org
+[unity]: https://unity.com
 [upm_install]: ./Documentation~/img/upm_install.png  "Unity Package Manager add menu"
 [workflows]: ./Documentation~/glTFast.md#workflows
