@@ -1742,7 +1742,8 @@ namespace GLTFast {
             Profiler.BeginSample("LoadAccessorData.Init");
 
             var mainBufferTypes = new Dictionary<MeshPrimitive,MainBufferType>();
-            meshPrimitiveCluster = new Dictionary<MeshPrimitive,List<MeshPrimitive>>[gltf.meshes.Length];
+            var meshCount = gltf.meshes == null ? 0 : gltf.meshes.Length;
+            meshPrimitiveCluster = gltf.meshes==null ? null : new Dictionary<MeshPrimitive,List<MeshPrimitive>>[meshCount];
             Dictionary<MeshPrimitive, MorphTargetsContext> morphTargetsContexts = null;
 #if DEBUG
             var perAttributeMeshCollection = new Dictionary<Attributes,HashSet<int>>();
@@ -1751,7 +1752,7 @@ namespace GLTFast {
             /// Iterate all primitive vertex attributes and remember the accessors usage.
             accessorUsage = new AccessorUsage[gltf.accessors.Length];
             int totalPrimitives = 0;
-            for (int meshIndex = 0; meshIndex < gltf.meshes.Length; meshIndex++)
+            for (int meshIndex = 0; meshIndex < meshCount; meshIndex++)
             {
                 var mesh = gltf.meshes[meshIndex];
                 meshPrimitiveIndex[meshIndex] = totalPrimitives;
@@ -1850,7 +1851,9 @@ namespace GLTFast {
                 }
             }
 
-            meshPrimitiveIndex[gltf.meshes.Length] = totalPrimitives;
+            if (meshPrimitiveIndex != null) {
+                meshPrimitiveIndex[meshCount] = totalPrimitives;
+            }
             primitives = new Primitive[totalPrimitives];
             primitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
             var tmpList = new List<JobHandle>(mainBufferTypes.Count);
@@ -2047,7 +2050,7 @@ namespace GLTFast {
 
             Profiler.BeginSample("LoadAccessorData.PrimitiveCreateContexts");
             int primitiveIndex=0;
-            for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
+            for( int meshIndex = 0; meshIndex<meshCount; meshIndex++ ) {
                 var mesh = gltf.meshes[meshIndex];
                 foreach( var cluster in meshPrimitiveCluster[meshIndex].Values) {
 
@@ -2178,24 +2181,26 @@ namespace GLTFast {
         }
 
         async Task AssignAllAccessorData( Root gltf ) {
-            Profiler.BeginSample("AssignAllAccessorData.Primitive");
-            int i=0;
-            for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
-                var mesh = gltf.meshes[meshIndex];
+            if (gltf.meshes != null) {
+                Profiler.BeginSample("AssignAllAccessorData.Primitive");
+                int i=0;
+                for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
+                    var mesh = gltf.meshes[meshIndex];
 
-                foreach( var cluster in meshPrimitiveCluster[meshIndex]) {
-#if DRACO_UNITY
-                    if( !cluster.Value[0].isDracoCompressed )
-#endif
-                    {
-                        // Create one PrimitiveCreateContext per Primitive cluster
-                        PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
-                        c.mesh = mesh;
+                    foreach( var cluster in meshPrimitiveCluster[meshIndex]) {
+    #if DRACO_UNITY
+                        if( !cluster.Value[0].isDracoCompressed )
+    #endif
+                        {
+                            // Create one PrimitiveCreateContext per Primitive cluster
+                            PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
+                            c.mesh = mesh;
+                        }
+                        i++;
                     }
-                    i++;
                 }
+                Profiler.EndSample();
             }
-            Profiler.EndSample();
             
             if(gltf.skins!=null) {
                 for (int s = 0; s < gltf.skins.Length; s++)

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] -
+### Fixed
+- Import of glTFs with no meshes (#257)
+
 ## [4.3.3] - 2021-10-15 
 ### Fixed
 - Corrected mesh bounds (calculated from accessor's min/max)
