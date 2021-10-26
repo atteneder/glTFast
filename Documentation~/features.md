@@ -2,13 +2,14 @@
 
 ## Overview
 
-- [x] Run-time import
-  - [x] GameObjects
-  - [x] ⚠️ Entities (see [DOTS](#data-oriented-technology-stack))
-- [x] Fast and small footprint JSON parsing
-- [x] Multi-threading via C# job system
-- [x] Design-time (Editor) import
+- [x] Import
+  - [x] Runtime Import
+    - [x] GameObjects
+    - [x] ⚠️ Entities (see [DOTS](#data-oriented-technology-stack))
+  - [x] Design-time (Editor) import
 - [ ] Export
+  - [x] Editor Export
+  - [ ] Runtime Export (see [issue][RuntimeExport])
 
 ## Platforms
 
@@ -216,6 +217,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [MeshOpt]: https://github.com/atteneder/glTFast/issues/106
 [newIssue]: https://github.com/atteneder/glTFast/issues/new
 [PointLights]: https://github.com/atteneder/glTFast/issues/17
+[RuntimeExport]: https://github.com/atteneder/glTFast/issues/259
 [SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
 [Sheen]: https://github.com/atteneder/glTFast/issues/110
 [Skins]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins
