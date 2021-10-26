@@ -11,6 +11,19 @@
 - `?`: Unknown / Untested
 - `n/a`: Not available
 
+## Platforms
+
+All of Unity's platforms are supported. glTFast is tested or was reported to run on:
+
+- WebGL
+- iOS
+- Android
+- Windows
+- macOS
+- Linux
+- Universal Windows Platform
+- Lumin (Magic Leap)
+
 ## Workflows
 
 |          | Runtime | Editor (design-time)
@@ -25,19 +38,6 @@
 | Export   |  | `n/a`
 
 <sup>1</sup>: glTF export currently only works on Unity 2020.2 or newer.
-
-## Platforms
-
-All of Unity's platforms are supported. glTFast is tested or was reported to run on:
-
-- WebGL
-- iOS
-- Android
-- Windows
-- macOS
-- Linux
-- Universal Windows Platform
-- Lumin (Magic Leap)
 
 ## Core glTF features
 
