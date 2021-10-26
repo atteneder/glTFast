@@ -48,10 +48,13 @@ It runs a script that installs *glTFast* via a [scoped registry](https://docs.un
 
 Afterwards *glTFast* and further, optional packages are listed in the *Package Manager* (under *My Registries*) and can be installed and updated from there.
 
-### Optional dependencies
+### Optional Packages
 
-- [Draco 3D Data Compression Unity Package](https://github.com/atteneder/DracoUnity) (provides support for [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression))
-- [KTX/Basis Texture Unity Package](https://github.com/atteneder/KtxUnity) (in Beta; provides support for [KHR_texture_basisu](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu))
+There are some related package that improve *glTFast* by extending its feature set.
+
+- [Draco 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
+- [KTX/Basis Texture Unity Package][KtxUnity] (in Beta; provides support for [KHR_texture_basisu][ExtBasisU])
+- [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
 
 <details><summary>Alternative: Install via GIT URL</summary>
 
@@ -63,9 +66,10 @@ Enter the following URL:
 
 `https://github.com/atteneder/glTFast.git`
 
-To add support for Draco mesh compression, repeat the last step and also add the DracoUnity packages using this URL:
+To add more functionality, repeat the last step and also add related packages using these URLs:
 
-`https://gitlab.com/atteneder/DracoUnity.git`
+- `https://gitlab.com/atteneder/DracoUnity.git` for Draco mesh compression 
+- `https://github.com/atteneder/KtxUnity.git` for KTX texture compression
 
 > Note: You have to have a GIT LFS client (large file support) installed on your system. Otherwise you will get an error that the native library file (dll on Windows) is corrupt!
 
@@ -149,13 +153,19 @@ limitations under the License.
 
 *Khronos®* is a registered trademark and *glTF™* is a trademark of [The Khronos Group Inc][khronos].
 
-[unity]: https://unity.com
-[gltf]: https://www.khronos.org/gltf
-[gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
-[gltfast-web-demo]: https://gltf.pixel.engineer
-[khronos]: https://www.khronos.org
 [embibe]: https://www.embibe.com
+[DracoUnity]: https://github.com/atteneder/DracoUnity
+[ExtBasisU]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu
+[ExtDraco]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression
+[ExtMeshopt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
+[gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
+[gltf]: https://www.khronos.org/gltf
 [gltfasset_component]: ./Documentation~/img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
+[gltfast-web-demo]: https://gltf.pixel.engineer
 [import-gif]: ./Documentation~/img/import.gif  "Video showing glTF files being copied into the Assets folder and imported"
+[khronos]: https://www.khronos.org
+[KtxUnity]: https://github.com/atteneder/KtxUnity
+[Meshopt]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
+[unity]: https://unity.com
 [upm_install]: ./Documentation~/img/upm_install.png  "Unity Package Manager add menu"
 [workflows]: ./Documentation~/glTFast.md#workflows
