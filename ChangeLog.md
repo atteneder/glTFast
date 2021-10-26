@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - *Generate Lightmap UVs* option in the glTF import inspector lets you create a secondary texture coordinate set (similar to the Model Import Settings from other formats; #238)
 - Generic `ICodeLogger` methods that don't require a `LogCode`
 ### Changed
+- Raised required Unity version to 2019.4.7f1 (fixes Burst 1.4 compiler issue #252). If you're on 2019.x, make sure to update to the latest LTS release!
 - Less GC due to `CollectingLogger` creating the item list on demand 
 
 ## [4.3.4] - 2021-10-26

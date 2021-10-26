@@ -3,7 +3,7 @@
   "version": "4.4.0-preview.1",
   "displayName": "glTFast",
   "description": "Load glTF 3D files fast at runtime or import them into the asset database in the Editor",
-  "unity": "2019.3",
+  "unity": "2019.4",
   "keywords": [
     "mesh",
     "gltf",
@@ -27,5 +27,6 @@
     "com.unity.mathematics": "1.2.1",
     "com.unity.burst": "1.4.11"
   },
-  "type": "library"
+  "type": "library",
+  "unityRelease": "7f1"
 }

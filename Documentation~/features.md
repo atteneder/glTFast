@@ -11,6 +11,8 @@
   - [x] Editor Export
   - [ ] Runtime Export (see [issue][RuntimeExport])
 
+*glTFast* requires Unity 2019.4 or newer. glTF export currently only works on Unity 2020.2 or newer.
+
 ## Platforms
 
 All of Unity's platforms are supported. glTFast is tested or was reported to run on:
