@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+#if !GLTFAST_EDITOR_IMPORT_OFF
+
 using System;
 using System.Collections.Generic;
 using UnityEditor;
@@ -209,3 +211,5 @@ namespace GLTFast.Editor {
         }
     }
 }
+
+#endif // !GLTFAST_EDITOR_IMPORT_OFF

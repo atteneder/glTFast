@@ -246,6 +246,12 @@ For this reason some pedantic safety checks in glTFast are not performed by defa
 
 Enable safe-mode if you are not in control over what content your application may end up loading and you cannot test up front.
 
+### Disable Editor Import
+
+By default, *glTFast* provides Editor import for all files ending with `.gltf` or `.glb` via a `ScriptedImporter`.
+If you experience conflicts with other packages that are offering `.gltf`/`.glb` import as well (e.g. [MixedRealityToolkit-Unity][MRTK]) or you simply want to disable Editor import,
+add `GLTFAST_EDITOR_IMPORT_OFF` to the *Scripting Define Symbols* in the *Player Settings* and this feature will be turned off. 
+
 ## Upgrade Guides
 
 ### Upgrade to 4.x
@@ -328,3 +334,4 @@ It also uses fast low-level memory copy methods, [Unity's Job system](https://do
 [GltfAsset]: ../Runtime/Scripts/GltfAsset.cs
 [GltfImport]: ../Runtime/Scripts/GltfImport.cs
 [IGltfReadable]: ../Runtime/Scripts/IGltfReadable.cs
+[MRTK]: https://github.com/microsoft/MixedRealityToolkit-Unity

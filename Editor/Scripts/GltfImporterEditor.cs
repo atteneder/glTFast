@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+#if !GLTFAST_EDITOR_IMPORT_OFF
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -187,3 +189,5 @@ namespace GLTFast {
         }
     }
 }
+
+#endif // !GLTFAST_EDITOR_IMPORT_OFF
