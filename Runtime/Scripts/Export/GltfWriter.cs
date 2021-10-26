@@ -888,7 +888,7 @@ namespace GLTFast.Export {
                             return false;
                         }
 #else
-                        if (settings.fileConflictResolution == FileConflictResolution.Abort) {
+                        if (m_Settings.fileConflictResolution == FileConflictResolution.Abort) {
                             return false;
                         }
 #endif
@@ -1010,7 +1010,7 @@ namespace GLTFast.Export {
             
 #if !UNITY_EDITOR
             if (!uMesh.isReadable) {
-                logger?.Error(LogCode.MeshNotReadable, uMesh.name);
+                m_Logger?.Error(LogCode.MeshNotReadable, uMesh.name);
                 return -1;
             }
 #endif
