@@ -49,10 +49,11 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 |glTF (.gltf) | ✅ | ✅
 |glTF-Binary (.glb) | ✅ | ✅
 | | |
-| **Buffer type**
+| **Buffer**
 | External URIs | ✅ | ✅
 | GLB main buffer | ✅ | ✅
-| Embed buffers or textures (base-64 encoded within JSON) | ✅ | 
+| Embed buffers or textures (base-64 encoded within JSON) | ✅ |
+| [meshoptimizer compression][MeshOpt] (via [package][MeshOptPkg])| ✅ |
 | | |
 | **Basics**
 | Scenes | ✅ | ✅
@@ -136,7 +137,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | | |
 | **Vendor**
 | <sup>1</sup>EXT_mesh_gpu_instancing | ✅ | 
-| EXT_meshopt_compression | [ℹ️][MeshOpt] | 
+| EXT_meshopt_compression | ✅ | 
 | EXT_lights_image_based | [ℹ️][IBL] | 
 
 <sup>1</sup>: Without support for custom vertex attributes (e.g. `_ID`)
@@ -262,7 +263,8 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [IBL]: https://github.com/atteneder/glTFast/issues/108
 [IOR]: https://github.com/atteneder/glTFast/issues/207
-[MeshOpt]: https://github.com/atteneder/glTFast/issues/106
+[MeshOpt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
+[MeshOptPkg]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [newIssue]: https://github.com/atteneder/glTFast/issues/new
 [PointLights]: https://github.com/atteneder/glTFast/issues/17
 [RuntimeExport]: https://github.com/atteneder/glTFast/issues/259
