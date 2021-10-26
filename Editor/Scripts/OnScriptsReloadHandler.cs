@@ -42,7 +42,7 @@ namespace GLTFast {
                         if (package.name == "com.atteneder.gltfast") {
                             var version = package.version;
                             if (Export.Constants.version != version) {
-                                Debug.LogWarning($"Version mismatch in GltfGlobals.cs (is {Export.Constants.version}, should be {version}). Please update!");
+                                Debug.LogWarning($"Version mismatch in Constants.cs (is {Export.Constants.version}, should be {version}). Please update!");
                             }
                         }
                     }
