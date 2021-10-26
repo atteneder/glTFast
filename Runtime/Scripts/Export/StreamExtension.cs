@@ -15,10 +15,13 @@
 
 using System;
 using System.IO;
-using Unity.Collections;
 using UnityEngine;
+
 #if NET_STANDARD
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#else
+using System.Collections.Generic;
 #endif
 
 namespace GLTFast.Export {
@@ -30,7 +33,7 @@ namespace GLTFast.Export {
             stream.Write(span);
         }
 #else
-        public static void Write(this Stream stream, NativeArray<byte> array) {
+        public static void Write(this Stream stream, IEnumerable<byte> array) {
             // TODO: Is there a faster way?
             foreach (var b in array) {
                 stream.WriteByte(b);
