@@ -3,6 +3,7 @@
         <Style src="GltfImporter-style.uss" />
         <ui:Label text="glTF Import Settings" name="Headline" class="h1" />
         <uie:EnumField label="Animation" value="Legacy" binding-path="importSettings.animationMethod" type="GLTFast.ImportSettings+AnimationMethod, glTFast" name="Animation" focusable="true" />
+        <ui:Toggle label="Generate Lightmap UVs" name="SecondaryUVSet" binding-path="editorImportSettings.generateSecondaryUVSet" text="&#x9;" tooltip="Generate lightmap texture coordinates into the second UV channel (if not present)" />
     </ui:VisualElement>
     <ui:VisualElement name="Dependencies" class="dependencies section">
         <Style src="GltfImporter-style.uss" />
