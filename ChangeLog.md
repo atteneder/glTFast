@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unrelease] - 
+### Added
+- *Generate Lightmap UVs* option in the glTF import inspector lets you create a secondary texture coordinate set (similar to the Model Import Settings from other formats; #238)
+
 ## [4.3.4] - 2021-10-26
 ### Added
 - Option to turn off Editor import by adding `GLTFAST_EDITOR_IMPORT_OFF` to the project's *Scripting Define Symbols* in the *Player Settings* (#256)  
