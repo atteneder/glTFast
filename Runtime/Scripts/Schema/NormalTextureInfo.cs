@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using Unity.Mathematics;
+
 namespace GLTFast.Schema{ 
     [System.Serializable]
     public class NormalTextureInfo : TextureInfo {
@@ -23,5 +25,14 @@ namespace GLTFast.Schema{
         /// This value is linear.
         /// </summary>
         public float scale = 1.0f;
+        
+        public override void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeTextureInfo(writer);
+            if (math.abs(scale - 1f) > Constants.epsilon) {
+                writer.AddProperty("scale", scale);
+            }
+            writer.Close();
+        }
     }
 }

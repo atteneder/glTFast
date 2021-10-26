@@ -19,5 +19,14 @@ namespace GLTFast.Schema {
     public class Buffer {
         public uint byteLength;
         public string uri;
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            if (!string.IsNullOrEmpty(uri)) {
+                writer.AddProperty("uri", uri);
+            }
+            writer.AddProperty("byteLength",byteLength);
+            writer.Close();
+        }
     }
 }

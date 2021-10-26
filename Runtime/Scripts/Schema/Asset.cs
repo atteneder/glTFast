@@ -36,5 +36,22 @@ namespace GLTFast.Schema {
         /// The minimum glTF version that this asset targets.
         /// </summary>
         public string minVersion;
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.OpenBrackets();
+            if (!string.IsNullOrEmpty(version)) {
+                writer.AddProperty("version", version);
+            }
+            if (!string.IsNullOrEmpty(generator)) {
+                writer.AddProperty("generator", generator);
+            }
+            if (!string.IsNullOrEmpty(copyright)) {
+                writer.AddProperty("copyright", copyright);
+            }
+            if (!string.IsNullOrEmpty(minVersion)) {
+                writer.AddProperty("minVersion", minVersion);
+            }
+            writer.Close();
+        }
     }
 }

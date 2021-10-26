@@ -25,6 +25,12 @@ namespace GLTFast.Schema {
         public TextureInfo clearcoatRoughnessTexture = null;
 
         public TextureInfo clearcoatNormalTexture = null;
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            writer.Close();
+            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+        }
 
     }
 }

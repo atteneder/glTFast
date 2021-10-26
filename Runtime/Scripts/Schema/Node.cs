@@ -65,6 +65,48 @@ namespace GLTFast.Schema {
         public int camera = -1;
 
         public NodeExtensions extensions;
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeRoot(writer);
+
+            if (children != null) {
+                writer.AddArrayProperty("children", children);
+            }
+
+            if (mesh >= 0) {
+                writer.AddProperty("mesh", mesh);
+            }
+            
+            if (translation!=null) {
+                writer.AddArrayProperty("translation", translation);
+            }
+            
+            if (rotation!=null) {
+                writer.AddArrayProperty("rotation", rotation);
+            }
+            
+            if (scale!=null) {
+                writer.AddArrayProperty("scale", scale);
+            }
+            
+            if (matrix!=null) {
+                writer.AddArrayProperty("matrix", matrix);
+            }
+            
+            if (skin >= 0) {
+                writer.AddProperty("skin", skin);
+            }
+            
+            if (camera >= 0) {
+                writer.AddProperty("camera", skin);
+            }
+
+            if (extensions != null) {
+                extensions.GltfSerialize(writer);
+            }
+            writer.Close();
+        }
     }
     
     [System.Serializable]
@@ -73,5 +115,12 @@ namespace GLTFast.Schema {
         // Whenever an extension is added, the JsonParser
         // (specifically step four of JsonParser.ParseJson)
         // needs to be updated!
+
+        public void GltfSerialize(JsonWriter writer) {
+            if (EXT_mesh_gpu_instancing != null) {
+                writer.AddProperty("EXT_mesh_gpu_instancing");
+                EXT_mesh_gpu_instancing.GltfSerialize(writer);
+            }
+        }
     }
 }

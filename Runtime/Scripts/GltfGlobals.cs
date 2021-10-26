@@ -23,8 +23,16 @@ namespace GLTFast {
         Jpeg,
         KTX
     }
+    
+    enum ChunkFormat : uint {
+        JSON = 0x4e4f534a,
+        BIN = 0x004e4942
+    }
 
     public static class GltfGlobals {
+        
+        public const string glbExt = ".glb";
+        public const string gltfExt = ".gltf";
         
         public const uint GLB_MAGIC = 0x46546c67; // represents glTF in ASCII
         

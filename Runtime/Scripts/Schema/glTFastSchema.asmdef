@@ -1,6 +1,9 @@
 {
     "name": "glTFastSchema",
-    "references": [],
+    "rootNamespace": "",
+    "references": [
+        "Unity.Mathematics"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

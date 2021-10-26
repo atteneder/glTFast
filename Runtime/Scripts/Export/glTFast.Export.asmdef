@@ -1,0 +1,19 @@
+{
+    "name": "glTFast.Export",
+    "rootNamespace": "",
+    "references": [
+        "glTFast",
+        "glTFastSchema",
+        "Unity.Mathematics",
+        "Unity.Burst"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

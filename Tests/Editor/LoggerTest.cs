@@ -27,6 +27,7 @@ namespace GLTFast.Tests
             var r = new CollectingLogger();
             r.Error(LogCode.Download,"404", "https://something.com/nowherfound.glb");
             
+            Assert.NotNull(r.items);
             Assert.AreEqual(1,r.items.Count);
             Assert.AreEqual("Download URL https://something.com/nowherfound.glb failed: 404", r.items[0].ToString());
         }

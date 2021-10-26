@@ -28,5 +28,9 @@ namespace GLTFast.Schema {
         }
 
         public Attributes attributes;
+
+        public void GltfSerialize(JsonWriter writer) {
+            throw new System.NotImplementedException();
+        }
     }
 }

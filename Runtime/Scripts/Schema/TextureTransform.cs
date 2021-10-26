@@ -37,5 +37,22 @@ namespace GLTFast.Schema {
         /// Overrides the textureInfo texCoord value if supplied, and if this extension is supported.
         /// </summary>
         public int texCoord = -1;
+
+        public virtual void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            if (offset != null) {
+                writer.AddArrayProperty("offset", offset);
+            }
+            if (scale != null) {
+                writer.AddArrayProperty("scale", scale);
+            }
+            if(rotation != 0) {
+                writer.AddProperty("rotation", rotation);
+            }
+            if(texCoord >= 0) {
+                writer.AddProperty("texCoord", texCoord);
+            }
+            writer.Close();
+        }
     }
 }

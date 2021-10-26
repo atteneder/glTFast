@@ -21,11 +21,8 @@ using UnityEngine;
 
 namespace GLTFast {
 
-    public static class UriHelper
-    {
-        const string GLB_EXT = ".glb";
-        const string GLTF_EXT = ".gltf";
-
+    public static class UriHelper {
+        
         public static Uri GetBaseUri( Uri uri ) {
             if(uri==null) return null;
             if (!uri.IsAbsoluteUri) {
@@ -125,10 +122,10 @@ namespace GLTFast {
             string path = uri.IsAbsoluteUri ? uri.LocalPath : uri.OriginalString;
             var index = path.LastIndexOf('.',path.Length-1, Mathf.Min(5,path.Length) );
             if(index<0) return null;
-            if(path.EndsWith(GLB_EXT, StringComparison.OrdinalIgnoreCase)) {
+            if(path.EndsWith(GltfGlobals.glbExt, StringComparison.OrdinalIgnoreCase)) {
                 return true;
             }
-            if(path.EndsWith(GLTF_EXT, StringComparison.OrdinalIgnoreCase)) {
+            if(path.EndsWith(GltfGlobals.gltfExt, StringComparison.OrdinalIgnoreCase)) {
                 return false;
             }
             return null;
@@ -157,15 +154,15 @@ namespace GLTFast {
         /// Downside: less convenient
         // public static bool? IsGltfBinary( string uri ) {
         //     // quick glTF-binary check
-        //     if (uri.EndsWith(GLB_EXT, StringComparison.OrdinalIgnoreCase)) return true;
-        //     if (uri.EndsWith(GLTF_EXT, StringComparison.OrdinalIgnoreCase)) return false;
+        //     if (uri.EndsWith(GltfGlobals.glbExt, StringComparison.OrdinalIgnoreCase)) return true;
+        //     if (uri.EndsWith(GltfGlobals.gltfExt, StringComparison.OrdinalIgnoreCase)) return false;
 
         //     // thourough glTF-binary extension check that strips HTTP GET parameters
         //     int getIndex = uri.LastIndexOf('?');
         //     if (getIndex >= 0) {
-        //         var ext = uri.Substring(getIndex - GLTF_EXT.Length, GLTF_EXT.Length);
-        //         if(ext.EndsWith(GLB_EXT, StringComparison.OrdinalIgnoreCase)) return true;
-        //         if(ext.EndsWith(GLTF_EXT, StringComparison.OrdinalIgnoreCase)) return false;
+        //         var ext = uri.Substring(getIndex - GltfGlobals.gltfExt.Length, GltfGlobals.gltfExt.Length);
+        //         if(ext.EndsWith(GltfGlobals.glbExt, StringComparison.OrdinalIgnoreCase)) return true;
+        //         if(ext.EndsWith(GltfGlobals.gltfExt, StringComparison.OrdinalIgnoreCase)) return false;
         //     }
         //     return null;
         // }

@@ -135,5 +135,12 @@ namespace GLTFast.Schema
                 magFilter == MagFilterMode.None ? defaultMagFilter : magFilter
             );
         }
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeRoot(writer);
+            writer.Close();
+            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+        }
     }
 }

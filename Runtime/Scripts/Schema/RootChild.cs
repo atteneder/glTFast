@@ -18,5 +18,11 @@ namespace GLTFast.Schema {
     [System.Serializable]
     public class RootChild {
         public string name;
+        
+        protected void GltfSerializeRoot(JsonWriter writer) {
+            if (!string.IsNullOrEmpty(name)) {
+                writer.AddProperty("name", name);
+            }
+        }
     }
 }

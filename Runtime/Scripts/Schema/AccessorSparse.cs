@@ -36,5 +36,19 @@ namespace GLTFast.Schema {
         /// </summary>
         public AccessorSparseValues values;
 
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            writer.AddProperty("count",count);
+            if (indices != null) {
+                writer.AddProperty("indices");
+                indices.GltfSerialize(writer);
+            }
+            if (values != null) {
+                writer.AddProperty("values");
+                values.GltfSerialize(writer);
+            }
+            writer.Close();
+        }
+
     }
 }

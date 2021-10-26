@@ -22,23 +22,55 @@ namespace GLTFast {
     [Serializable]
     public class CollectingLogger : ICodeLogger {
 
-        public List<LogItem> items = new List<LogItem>();
+        public List<LogItem> items;
 
         public void Error(LogCode code, params string[] messages) {
+            if (items == null) {
+                items = new List<LogItem>();
+            }
             items.Add(new LogItem(LogType.Error, code, messages));
         }
         
         public void Warning(LogCode code, params string[] messages) {
+            if (items == null) {
+                items = new List<LogItem>();
+            }
             items.Add(new LogItem(LogType.Warning, code, messages));
         }
         
         public void Info(LogCode code, params string[] messages) {
+            if (items == null) {
+                items = new List<LogItem>();
+            }
             items.Add(new LogItem(LogType.Log, code, messages));
         }
         
+        public void Error(string message) {
+            if (items == null) {
+                items = new List<LogItem>();
+            }
+            items.Add(new LogItem(LogType.Error, LogCode.None, message ));
+        }
+        
+        public void Warning(string message) {
+            if (items == null) {
+                items = new List<LogItem>();
+            }
+            items.Add(new LogItem(LogType.Warning, LogCode.None, message ));
+        }
+        
+        public void Info(string message) {
+            if (items == null) {
+                items = new List<LogItem>();
+            }
+            items.Add(new LogItem(LogType.Log, LogCode.None, message ));
+        }
+        
         public void LogAll() {
-            foreach (var item in items) {
-                item.Log();
+            if (items != null) {
+                foreach (var item in items) {
+                    item.Log();
+                }
             }
         }
     }

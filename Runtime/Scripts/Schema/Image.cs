@@ -40,5 +40,20 @@ namespace GLTFast.Schema
 #if KTX_UNITY
         public ImageExtension extensions;
 #endif
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeRoot(writer);
+            if (!string.IsNullOrEmpty(uri)) {
+                writer.AddProperty("uri", uri);
+            }
+            if (!string.IsNullOrEmpty(mimeType)) {
+                writer.AddProperty("mimeType", mimeType);
+            }
+            if (bufferView >= 0) {
+                writer.AddProperty("bufferView", bufferView);
+            }
+            writer.Close();
+        }
     }
 }

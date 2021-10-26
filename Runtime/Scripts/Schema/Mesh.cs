@@ -13,10 +13,12 @@
 // limitations under the License.
 //
 
+using System;
+
 namespace GLTFast.Schema {
 
     [System.Serializable]
-    public class Mesh : RootChild {
+    public class Mesh : RootChild, ICloneable {
 
         /// <summary>
         /// An array of primitives, each defining geometry to be rendered with
@@ -32,10 +34,50 @@ namespace GLTFast.Schema {
         public float[] weights;
 
         public MeshExtras extras;
+
+        public object Clone() {
+            var clone = (Mesh)MemberwiseClone();
+            if (primitives != null) {
+                clone.primitives = new MeshPrimitive[primitives.Length];
+                for (var i = 0; i < primitives.Length; i++) {
+                    clone.primitives[i] = (MeshPrimitive) primitives[i].Clone();
+                }
+            }
+            return clone;
+        }
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeRoot(writer);
+            if (primitives != null) {
+                writer.AddArray("primitives");
+                foreach (var primitive in primitives) {
+                    primitive.GltfSerialize(writer);
+                }
+                writer.CloseArray();
+            }
+
+            if (weights != null) {
+                writer.AddArrayProperty("weights", weights);
+            }
+
+            if (extras != null) {
+                writer.AddProperty("extras");
+                extras.GltfSerialize(writer);
+                writer.Close();
+            }
+            writer.Close();
+        }
     }
 
     [System.Serializable]
     public class MeshExtras {
         public string[] targetNames;
+
+        public void GltfSerialize(JsonWriter writer) {
+            if (targetNames != null) {
+                writer.AddArrayProperty("targetNames", targetNames);
+            }
+        }
     }
 }

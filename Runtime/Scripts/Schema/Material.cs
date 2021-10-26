@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GLTFast.Schema {
@@ -86,6 +87,9 @@ namespace GLTFast.Schema {
                     emissiveFactor[2]
                 );
             }
+            set {
+                emissiveFactor = new[] { value.r, value.g, value.b };
+            }
         }
 
         /// <summary>
@@ -98,9 +102,10 @@ namespace GLTFast.Schema {
         /// using the normal painting operation (i.e. the Porter and Duff over operator).
         /// </summary>
         [SerializeField]
-        string alphaMode;
+        public string alphaMode;
 
         AlphaMode? _alphaModeEnum;
+        
         public AlphaMode alphaModeEnum {
             get {
                 if ( _alphaModeEnum.HasValue ) {
@@ -110,8 +115,14 @@ namespace GLTFast.Schema {
                     _alphaModeEnum = (AlphaMode)System.Enum.Parse (typeof(AlphaMode), alphaMode, true);
                     alphaMode = null;
                     return _alphaModeEnum.Value;
-                } else {
-                    return AlphaMode.OPAQUE;
+                }
+
+                return AlphaMode.OPAQUE;
+            }
+            set {
+                _alphaModeEnum = value;
+                if (value != AlphaMode.OPAQUE) {
+                    alphaMode = value.ToString();
                 }
             }
         }
@@ -134,5 +145,43 @@ namespace GLTFast.Schema {
         public bool requiresNormals => extensions?.KHR_materials_unlit == null;
 
         public bool requiresTangents => normalTexture!=null && normalTexture.index>=0;
+        
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            GltfSerializeRoot(writer);
+            if(pbrMetallicRoughness!=null) {
+                writer.AddProperty("pbrMetallicRoughness");
+                pbrMetallicRoughness.GltfSerialize(writer);
+            }
+            if(normalTexture!=null) {
+                writer.AddProperty("normalTexture");
+                normalTexture.GltfSerialize(writer);
+            }
+            if(occlusionTexture!=null) {
+                writer.AddProperty("occlusionTexture");
+                occlusionTexture.GltfSerialize(writer);
+            }
+            if(emissiveTexture!=null) {
+                writer.AddProperty("emissiveTexture");
+                emissiveTexture.GltfSerialize(writer);
+            }
+            if (emissiveFactor != null) {
+                writer.AddArrayProperty("emissiveFactor", emissiveFactor);
+            }
+            if (!string.IsNullOrEmpty(alphaMode)) {
+                writer.AddProperty("alphaMode", alphaMode);
+            }
+            if (math.abs(alphaCutoff - .5f) > Constants.epsilon) {
+                writer.AddProperty("alphaCutoff", alphaCutoff);
+            }
+            if (doubleSided) {
+                writer.AddProperty("doubleSided", doubleSided);
+            }
+            if (extensions != null) {
+                writer.AddProperty("extensions");
+                extensions.GltfSerialize(writer);
+            }
+            writer.Close();
+        }
     }
 }

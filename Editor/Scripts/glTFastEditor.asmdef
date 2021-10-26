@@ -1,12 +1,15 @@
 {
     "name": "glTFastEditor",
+    "rootNamespace": "",
     "references": [
         "Unity.Mathematics",
         "glTFast",
         "glTFastSchema",
+        "glTFast.Export",
         "glTFastTests",
         "UnityEngine.TestTools.Graphics",
-        "Unity.RenderPipelines.HighDefinition.Runtime"
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "com.unity.formats.gltf.validator.Editor"
     ],
     "includePlatforms": [
         "Editor"
@@ -37,6 +40,11 @@
             "name": "com.unity.modules.animation",
             "expression": "1.0.0",
             "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.unity.formats.gltf.validator",
+            "expression": "",
+            "define": "GLTF_VALIDATOR"
         }
     ],
     "noEngineReferences": false

@@ -36,5 +36,15 @@ namespace GLTFast.Schema {
         /// `5125` (UNSIGNED_INT)
         /// </summary>
         public GLTFComponentType componentType;
+
+        public void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            writer.AddProperty("bufferView", bufferView);
+            writer.AddProperty("componentType", componentType);
+            if (byteOffset >= 0) {
+                writer.AddProperty("byteOffset", byteOffset);
+            }
+            writer.Close();
+        }
     }
 }

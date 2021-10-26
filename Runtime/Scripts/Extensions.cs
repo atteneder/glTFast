@@ -14,6 +14,17 @@
 //
 
 namespace GLTFast {
+
+    public enum Extension {
+        DracoMeshCompression,
+        MaterialsPbrSpecularGlossiness,
+        MaterialsTransmission,
+        MaterialsUnlit,
+        MeshGPUInstancing,
+        MeshQuantization,
+        TextureBasisUniversal,
+        TextureTransform,
+    }
     
     /// <summary>
     /// Collection of glTF extension names
@@ -27,5 +38,28 @@ namespace GLTFast {
         public const string MeshQuantization = "KHR_mesh_quantization";
         public const string TextureBasisUniversal = "KHR_texture_basisu";
         public const string TextureTransform = "KHR_texture_transform";
+
+        public static string GetName(this Extension extension) {
+            switch (extension) {
+                case Extension.DracoMeshCompression:
+                    return DracoMeshCompression;
+                case Extension.MaterialsPbrSpecularGlossiness:
+                    return MaterialsPbrSpecularGlossiness;
+                case Extension.MaterialsTransmission:
+                    return MaterialsTransmission;
+                case Extension.MaterialsUnlit:
+                    return MaterialsUnlit;
+                case Extension.MeshGPUInstancing:
+                    return MeshGPUInstancing;
+                case Extension.MeshQuantization:
+                    return MeshQuantization;
+                case Extension.TextureBasisUniversal:
+                    return TextureBasisUniversal;
+                case Extension.TextureTransform:
+                    return TextureTransform;
+                default:
+                    return null;
+            }
+        }
     }
 }
