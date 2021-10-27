@@ -414,9 +414,9 @@ namespace GLTFast.Export {
             return (4 - (int)(length & 3) ) & 3;
         }
 
-#if DEBUG
         [Conditional("DEBUG")]
         void LogSummary(int jsonLength, long bufferLength) {
+#if DEBUG
             var sb = new StringBuilder("glTF summary: ");
             sb.AppendFormat("{0} bytes JSON + {1} bytes buffer", jsonLength, bufferLength);
             if (m_Gltf != null) {
@@ -426,8 +426,8 @@ namespace GLTFast.Export {
                 sb.AppendFormat(" ,{0} images", m_Gltf.images?.Length ?? 0);
             }
             m_Logger?.Info(sb.ToString());
-        }
 #endif
+        }
 
         async Task<bool> Bake(string bufferPath, string directory) {
             if (m_Meshes != null) {
