@@ -1206,8 +1206,8 @@ namespace GLTFast.Export {
             }
 
             public override int GetHashCode() {
-#if NET_4_6
-                return HashCode.Combine(meshId, materialIds);
+#if NET_STANDARD
+                return HashCode.Combine(m_MeshId, m_MaterialIds);
 #else
                 var hash = 17;
                 hash = hash * 31 + m_MeshId.GetHashCode();
