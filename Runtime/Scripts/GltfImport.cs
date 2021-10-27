@@ -2638,7 +2638,7 @@ namespace GLTFast {
             if (accessor.componentType == GLTFComponentType.Float) {
                 Profiler.BeginSample("CopyAnimationTimes");
                 // TODO: For long animations with lots of times, threading this just like everything else maybe makes sense.
-                var bufferTimes = Reinterpret<float>(buffer, accessor.count, accessor.byteOffset);
+                var bufferTimes = Reinterpret<float>(buffer, accessor.count);
                 // Copy values
                 scalars = new NativeArray<float>(bufferTimes, Allocator.Persistent);
                 ReleaseReinterpret(bufferTimes);
@@ -2652,7 +2652,7 @@ namespace GLTFast {
                 switch( accessor.componentType ) {
                     case GLTFComponentType.Byte: {
                         var job = new ConvertScalarInt8ToFloatNormalizedJob {
-                            input = (sbyte*)buffer.GetUnsafeReadOnlyPtr() + accessor.byteOffset,
+                            input = (sbyte*)buffer.GetUnsafeReadOnlyPtr(),
                             result = scalars.Value
                         };
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
@@ -2660,7 +2660,7 @@ namespace GLTFast {
                     }
                     case GLTFComponentType.UnsignedByte: {
                         var job = new ConvertScalarUInt8ToFloatNormalizedJob {
-                            input = (byte*)buffer.GetUnsafeReadOnlyPtr() + accessor.byteOffset,
+                            input = (byte*)buffer.GetUnsafeReadOnlyPtr(),
                             result = scalars.Value
                         };
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
@@ -2668,7 +2668,7 @@ namespace GLTFast {
                     }
                     case GLTFComponentType.Short: {
                         var job = new ConvertScalarInt16ToFloatNormalizedJob {
-                            input = (short*) ((byte*)buffer.GetUnsafeReadOnlyPtr() + accessor.byteOffset),
+                            input = (short*) ((byte*)buffer.GetUnsafeReadOnlyPtr()),
                             result = scalars.Value
                         };
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
@@ -2676,7 +2676,7 @@ namespace GLTFast {
                     }
                     case GLTFComponentType.UnsignedShort: {
                         var job = new ConvertScalarUInt16ToFloatNormalizedJob {
-                            input = (ushort*) ((byte*)buffer.GetUnsafeReadOnlyPtr() + accessor.byteOffset),
+                            input = (ushort*) ((byte*)buffer.GetUnsafeReadOnlyPtr()),
                             result = scalars.Value
                         };
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
