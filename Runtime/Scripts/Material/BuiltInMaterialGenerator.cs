@@ -47,7 +47,6 @@ namespace GLTFast.Materials {
         public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
         public const string KW_EMISSION = "_EMISSION";
         public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
-        public const string KW_NORMALMAP = "_NORMALMAP";
         public const string KW_OCCLUSION = "_OCCLUSION";        
         public const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
 
@@ -248,7 +247,7 @@ namespace GLTFast.Materials {
                 bumpMapRotationPropId,
                 bumpMapUVChannelPropId
             )) {
-                material.EnableKeyword(KW_NORMALMAP);
+                material.EnableKeyword(Constants.kwNormalMap);
                 material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
             }
 

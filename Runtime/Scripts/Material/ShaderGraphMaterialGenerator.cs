@@ -304,7 +304,7 @@ namespace GLTFast.Materials {
                 bumpMapRotationPropId,
                 bumpMapUVChannelPropId
                 )) {
-                // material.EnableKeyword(KW_NORMALMAP);
+                // material.EnableKeyword(Constants.kwNormalMap);
                 material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
             }
             

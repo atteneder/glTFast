@@ -114,7 +114,7 @@ namespace GLTFast.Export {
 			}
 			if (
                 uMaterial.HasProperty(k_BumpMap)
-                && (uMaterial.IsKeywordEnabled( BuiltInMaterialGenerator.KW_NORMALMAP)
+                && (uMaterial.IsKeywordEnabled( Materials.Constants.kwNormalMap)
                 || uMaterial.IsKeywordEnabled(k_KeywordBumpMap))
                 )
             {
@@ -343,8 +343,8 @@ namespace GLTFast.Export {
 		        // texCoord = 0 // TODO: figure out which UV set was used
 	        };
 
-	        if (material.HasProperty(MaterialGenerator.PROP_BUMP_SCALE)) {
-		        info.scale = material.GetFloat(MaterialGenerator.PROP_BUMP_SCALE);
+	        if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
+		        info.scale = material.GetFloat(MaterialGenerator.bumpMapPropId);
 	        }
 
 	        return info;
