@@ -146,6 +146,7 @@ namespace GLTFast.Schema {
                 writer.AddArrayProperty("extensionsUsed", extensionsUsed);
             }
 
+#if UNITY_ANIMATION
             if (animations!=null) {
                 writer.AddArray("animations");
                 foreach( var animation in animations) {
@@ -153,7 +154,8 @@ namespace GLTFast.Schema {
                 }
                 writer.CloseArray();
             }
-            
+#endif
+
             if (buffers!=null) {
                 writer.AddArray("buffers");
                 foreach( var buffer in buffers) {
