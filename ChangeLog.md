@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 
+### Fixed
+- Correct import of interleaved float RGBA vertex colors (thanks [@mikejurka][mikejurka] for #266)
+
 ## [4.4.5] - 2021-11-01
 ### Fixed
 - Error when animation package is not enabled (#267)
@@ -499,5 +503,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [aurorahcx]: https://github.com/aurorahcx
 [hybridherbst]: https://github.com/hybridherbst
 [Bersaelor]: https://github.com/Bersaelor
+[mikejurka]: https://github.com/mikejurka
 [zharry]: https://github.com/zharry
 [ReadyPlayerMe]: https://readyplayer.me
