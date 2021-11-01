@@ -149,11 +149,21 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.Float:
                         {
-                            var job = new Jobs.MemCopyJob();
-                            job.bufferSize = output.Length*16;
-                            job.input = input;
-                            job.result = NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(output);
-                            jobHandle = job.Schedule();
+                            if (inputByteStride == 16 || inputByteStride <= 0)
+                            {
+                                var job = new Jobs.MemCopyJob();
+                                job.bufferSize = output.Length*16;
+                                job.input = input;
+                                job.result = NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(output);
+                                jobHandle = job.Schedule();
+                            } else {
+                                var job = new Jobs.ConvertColorsRGBFloat4ToRGBAFloatJob {
+                                    input = (byte*) input,
+                                    inputByteStride = inputByteStride,
+                                    result = (float4*)output.GetUnsafePtr()
+                                };
+                                jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+                            }
                         }
                         break;
                     case GLTFComponentType.UnsignedShort:

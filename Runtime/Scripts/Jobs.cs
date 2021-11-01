@@ -967,6 +967,26 @@ namespace GLTFast.Jobs {
         }
 #endif
     }
+
+    [BurstCompile]
+    public unsafe struct ConvertColorsRGBFloat4ToRGBAFloatJob : IJobParallelFor {
+
+        [ReadOnly]
+        public int inputByteStride;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public byte* input;
+
+        [WriteOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public float4* result;
+
+        public void Execute(int i) {
+            var src = (float4*) (input + (i * inputByteStride));
+            result[i] = *src;
+        }
+    }
     
     [BurstCompile]
     public unsafe struct ConvertColorsRGBAUInt8ToRGBAFloatJob : IJobParallelFor {
