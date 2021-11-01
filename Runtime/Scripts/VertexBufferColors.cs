@@ -151,13 +151,14 @@ namespace GLTFast {
                         {
                             if (inputByteStride == 16 || inputByteStride <= 0)
                             {
-                                var job = new Jobs.MemCopyJob();
-                                job.bufferSize = output.Length*16;
-                                job.input = input;
-                                job.result = NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(output);
+                                var job = new Jobs.MemCopyJob {
+                                    bufferSize = output.Length*16,
+                                    input = input,
+                                    result = output.GetUnsafeReadOnlyPtr()
+                                };
                                 jobHandle = job.Schedule();
                             } else {
-                                var job = new Jobs.ConvertColorsRGBFloat4ToRGBAFloatJob {
+                                var job = new Jobs.ConvertColorsRGBAFloatToRGBAFloatJob {
                                     input = (byte*) input,
                                     inputByteStride = inputByteStride,
                                     result = (float4*)output.GetUnsafePtr()
@@ -168,7 +169,7 @@ namespace GLTFast {
                         break;
                     case GLTFComponentType.UnsignedShort:
                         {
-                            var job = new Jobs.ConvertColorsInterleavedRGBAUInt16ToRGBAFloatJob {
+                            var job = new Jobs.ConvertColorsRGBAUInt16ToRGBAFloatJob {
                                 input = (System.UInt16*) input,
                                 inputByteStride = inputByteStride>0 ? inputByteStride : 8,
                                 result = (float4*)output.GetUnsafePtr()

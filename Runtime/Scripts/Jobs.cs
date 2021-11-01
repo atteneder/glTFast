@@ -921,7 +921,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertColorsInterleavedRGBAUInt16ToRGBAFloatJob : 
+    public unsafe struct ConvertColorsRGBAUInt16ToRGBAFloatJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -969,7 +969,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertColorsRGBFloat4ToRGBAFloatJob : IJobParallelFor {
+    public unsafe struct ConvertColorsRGBAFloatToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
