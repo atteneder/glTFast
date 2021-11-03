@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - 
+### Added
+- Added warning when more than two UV sets are supposed to be imported (not supported yet)
 ### Fixed
 - Correct import of interleaved float RGBA vertex colors (thanks [@mikejurka][mikejurka] for #266)
 - Corrected potential pitfall by incorrect UV import job handling (thanks [@mikejurka][mikejurka] for reporting)

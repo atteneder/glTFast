@@ -70,6 +70,9 @@ namespace GLTFast
             int weightsAccessorIndex,
             int jointsAccessorIndex
         ) {
+            // More than two UV sets are not supported yet
+            Assert.IsTrue(uvAccessorIndices.Length<3);
+
             buffers.GetAccessor(positionAccessorIndex, out var posAcc, out var posData, out var posByteStride);
             
             Profiler.BeginSample("ScheduleVertexJobs");
