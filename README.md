@@ -1,4 +1,4 @@
-# glTFast 🚀
+# glTFast for Unity
 
 <p align="center">
 <img src="./Documentation~/img/unity-gltf-logos.png" alt="Unity and glTF logos side by side" />
