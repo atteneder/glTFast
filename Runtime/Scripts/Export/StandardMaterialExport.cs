@@ -344,7 +344,7 @@ namespace GLTFast.Export {
 	        };
 
 	        if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
-		        info.scale = material.GetFloat(MaterialGenerator.bumpMapPropId);
+		        info.scale = material.GetFloat(MaterialGenerator.bumpScalePropId);
 	        }
 
 	        return info;
