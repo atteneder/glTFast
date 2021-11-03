@@ -88,13 +88,12 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Positions | ✅ | ✅
 | Normals | ✅ | ✅
 | Tangents | ✅ | ✅
-| Texture coordinates | ✅ | ✅
+| Texture coordinates / UV sets | ✅ | `?`
+| Three or more texture coordinates / UV sets | [issue][UVsets] | `?`
 | Vertex colors | ✅ | `?`
 | Draco mesh compression (via [DracoUnity](https://github.com/atteneder/DracoUnity)) | ✅ | 
 | Implicit (no) indices | ✅ | 
 | Per primitive material | ✅ | ✅
-| Two texture coordinates / UV sets | ✅ | `?`
-| Three or more texture coordinates / UV sets | [issue][UVsets] | `?`
 | Joints (up to 4 per vertex) | ✅ | 
 | Weights (up to 4 per vertex) | ✅ | 
 | | |
