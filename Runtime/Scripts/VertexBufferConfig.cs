@@ -238,7 +238,7 @@ namespace GLTFast
                         uvAccessorIndices.Length
                         )
                     );
-                handleIndex++;
+                handleIndex += uvAccessorIndices.Length;
             }
             
             if (hasColors) {
