@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Correct import of interleaved float RGBA vertex colors (thanks [@mikejurka][mikejurka] for #266)
 - Corrected potential pitfall by incorrect UV import job handling (thanks [@mikejurka][mikejurka] for reporting)
 - (Export) Exception due to incorrect property ID usage
+- JSON parse tests
 
 ## [4.4.5] - 2021-11-01
 ### Fixed
