@@ -969,7 +969,13 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertColorsRGBAFloatToRGBAFloatJob : IJobParallelFor {
+    public unsafe struct ConvertColorsRGBAFloatToRGBAFloatJob : 
+#if UNITY_JOBS
+        IJobParallelForBatch
+#else
+        IJobParallelFor
+#endif
+        {
 
         [ReadOnly]
         public int inputByteStride;
@@ -982,10 +988,21 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float4* result;
 
+#if UNITY_JOBS
+        public void Execute(int i, int count) {
+            var src = (float4*)(input + i*inputByteStride);
+            var endIndex = i + count;
+            for (var x = i; x < endIndex; x++) {
+                result[x] = *src;
+                src = (float4*)((byte*)src + inputByteStride);
+            }
+        }
+#else
         public void Execute(int i) {
             var src = (float4*) (input + (i * inputByteStride));
             result[i] = *src;
         }
+#endif
     }
     
     [BurstCompile]
