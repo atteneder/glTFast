@@ -43,9 +43,13 @@ namespace GLTFast
                 // Auto-Instantiate
                 if (sceneId>=0) {
                     success = importer.InstantiateScene(insta, sceneId);
+                    currentSceneId = success ? sceneId : (int?)null;
                 } else {
                     success = importer.InstantiateMainScene(insta);
+                    currentSceneId = importer.defaultSceneIndex;
                 }
+
+                sceneInstance = insta.sceneInstance;
 
                 if(success) {
                     SetBounds(insta);
@@ -59,6 +63,7 @@ namespace GLTFast
             var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
             var success = base.InstantiateScene(sceneIndex, instantiator);
             currentSceneId = success ? sceneIndex : (int?)null;
+            sceneInstance = instantiator.sceneInstance;
             if (success) {
                 SetBounds(instantiator);
             }

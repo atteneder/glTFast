@@ -37,7 +37,7 @@ namespace GLTFast
         /// <summary>
         /// Latest scene's instance.  
         /// </summary>
-        public GameObjectInstantiator.SceneInstance sceneInstance { get; private set; }
+        public GameObjectInstantiator.SceneInstance sceneInstance { get; protected set; }
         
         public string FullUrl => streamingAsset
             ? Path.Combine(Application.streamingAssetsPath, url)

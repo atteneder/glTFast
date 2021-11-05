@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Exception due to incorrect property ID usage
 - JSON parse tests
 - Added missing Job variant for users of the Jobs package
+- `GltfBoundsAsset` now has correct `sceneInstance` and `currentSceneId` properties
 
 ## [4.4.5] - 2021-11-01
 ### Fixed
