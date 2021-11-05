@@ -2014,7 +2014,7 @@ namespace GLTFast {
                         uvInputs[1] = att.TEXCOORD_1;
                     }
                     if (att.TEXCOORD_2 >= 0) {
-                        logger.Warning(LogCode.UVLimit);
+                        logger?.Warning(LogCode.UVLimit);
                     }
                 }
 
