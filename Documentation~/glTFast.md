@@ -302,30 +302,40 @@ Clicking any of these will open a file selection dialog. If additional files are
 
 #### Export via Script
 
+> Note: The `GLTFast.Export` namespace can only be used if you reference both `glTFast` and `glTFast.Export` Assemblies in your [Assembly Definition][asmdef].
+
 To export a GameObject hierarchy/scene from script, create an instance of `GLTFast.Export.GameObjectExport`,
 add content via `AddScene` and finally call `SaveToFileAndDispose` to export to a file.
 
 ```c#
+using UnityEngine;
 using GLTFast.Export;
 
-async void SimpleExport() {
+public class TestExport : MonoBehaviour {
 
-    // Example of gathering GameObjects to be exported (recursively)
-    var rootLevelNodes = FindGameObjectsWithTag("ExportMe");
-    
-    // GameObjectExport lets you create glTFs from GameObject hierarchies
-    var export = new GameObjectExport();
+    [SerializeField]
+    string path;
 
-    // Add a scene
-    export.AddScene(rootLevelNodes);
+    async void SimpleExport() {
 
-    // Async glTF export
-    bool success = await export.SaveToFileAndDispose(path);
+        // Example of gathering GameObjects to be exported (recursively)
+        var rootLevelNodes = GameObject.FindGameObjectsWithTag("ExportMe");
+        
+        // GameObjectExport lets you create glTFs from GameObject hierarchies
+        var export = new GameObjectExport();
 
-    if(!success) {
-        Debug.LogError("Something went wrong exporting a glTF");
+        // Add a scene
+        export.AddScene(rootLevelNodes);
+
+        // Async glTF export
+        bool success = await export.SaveToFileAndDispose(path);
+
+        if(!success) {
+            Debug.LogError("Something went wrong exporting a glTF");
+        }
     }
 }
+
 ```
 
 After calling `SaveToFileAndDispose` the GameObjectExport instance becomes invalid. Do not re-use it.
@@ -482,16 +492,17 @@ In the future materials can be created before textures are available/downloaded 
 
 It also uses fast low-level memory copy methods, [Unity's Job system](https://docs.unity3d.com/Manual/JobSystem.html), [Mathematics](https://docs.unity3d.com/Packages/com.unity.mathematics@1.0/manual/index.html), the [Burst compiler](https://docs.unity3d.com/Packages/com.unity.burst@1.6/manual/index.html) and the [Advanced Mesh API](https://docs.unity3d.com/ScriptReference/Mesh.html).
 
-[unity]: https://unity.com
-[gltf]: https://www.khronos.org/gltf
+[asmdef]: https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html
 [gltf-projects]: https://github.khronos.org/glTF-Project-Explorer
-[gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
 [gltf-spec-coords]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#coordinate-system-and-units
-[gltfast-web-demo]: https://gltf.pixel.engineer
-[gltfasset_component]: ./img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
-[gltfast3to4]: ./img/gltfast3to4.png  "3D scene view showing BoomBoxWithAxes model twice. One with the legacy axis conversion and one with the new orientation"
+[gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
+[gltf]: https://www.khronos.org/gltf
 [GltfAsset]: ../Runtime/Scripts/GltfAsset.cs
+[gltfasset_component]: ./img/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
+[gltfast-web-demo]: https://gltf.pixel.engineer
+[gltfast3to4]: ./img/gltfast3to4.png  "3D scene view showing BoomBoxWithAxes model twice. One with the legacy axis conversion and one with the new orientation"
 [GltfImport]: ../Runtime/Scripts/GltfImport.cs
 [IGltfReadable]: ../Runtime/Scripts/IGltfReadable.cs
 [import-gif]: ./img/import.gif  "Video showing glTF files being copied into the Assets folder and imported"
 [MRTK]: https://github.com/microsoft/MixedRealityToolkit-Unity
+[unity]: https://unity.com
