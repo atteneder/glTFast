@@ -335,7 +335,6 @@ public class TestExport : MonoBehaviour {
         }
     }
 }
-
 ```
 
 After calling `SaveToFileAndDispose` the GameObjectExport instance becomes invalid. Do not re-use it.
@@ -344,37 +343,45 @@ Further, the export can be customized by passing settings and injectables to the
 constructor:
 
 ```c#
+using UnityEngine;
+using GLTFast;
 using GLTFast.Export;
 
-async void AdvancedExport() {
+public class TestExport : MonoBehaviour {
 
-    // CollectingLogger lets you programatically go through
-    // errors and warnings the export raised
-    var logger = new CollectingLogger();
+    [SerializeField]
+    string path;
 
-    // ExportSettings allow you to configure the export
-    // Check its source for details
-    var exportSettings = new ExportSettings {
-        format = GltfFormat.Binary,
-        fileConflictResolution = FileConflictResolution.Overwrite
-    };
+    async void AdvancedExport() {
 
-    // GameObjectExport lets you create glTFs from GameObject hierarchies
-    var export = new GameObjectExport( exportSettings, logger: logger);
+        // CollectingLogger lets you programatically go through
+        // errors and warnings the export raised
+        var logger = new CollectingLogger();
 
-    // Example of gathering GameObjects to be exported (recursively)
-    var rootLevelNodes = FindGameObjectsWithTag("ExportMe");
+        // ExportSettings allow you to configure the export
+        // Check its source for details
+        var exportSettings = new ExportSettings {
+            format = GltfFormat.Binary,
+            fileConflictResolution = FileConflictResolution.Overwrite
+        };
 
-    // Add a scene
-    export.AddScene(rootLevelNodes, "My new glTF scene");
+        // GameObjectExport lets you create glTFs from GameObject hierarchies
+        var export = new GameObjectExport( exportSettings, logger: logger);
 
-    // Async glTF export
-    bool success = await export.SaveToFileAndDispose(path);
+        // Example of gathering GameObjects to be exported (recursively)
+        var rootLevelNodes = GameObject.FindGameObjectsWithTag("ExportMe");
 
-    if(!success) {
-        Debug.LogError("Something went wrong exporting a glTF");
-        // Log all exporter messages
-        logger.LogAll();
+        // Add a scene
+        export.AddScene(rootLevelNodes, "My new glTF scene");
+
+        // Async glTF export
+        bool success = await export.SaveToFileAndDispose(path);
+
+        if(!success) {
+            Debug.LogError("Something went wrong exporting a glTF");
+            // Log all exporter messages
+            logger.LogAll();
+        }
     }
 }
 ```
