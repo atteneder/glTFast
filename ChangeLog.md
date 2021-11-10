@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added missing Job variant for users of the Jobs package
 - `GltfBoundsAsset` now has correct `sceneInstance` and `currentSceneId` properties
 - Documentation: Fixed and improved export via script section (#270)
+- Removed precausious error message after testing real world example (#268)
 
 ## [4.4.5] - 2021-11-01
 ### Fixed

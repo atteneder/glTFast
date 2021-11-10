@@ -157,7 +157,6 @@ namespace GLTFast
 #endif                        
                     }
                     else {
-                        // TODO: test. did not have test files
                         var job = new ConvertVector3Int16ToFloatInterleavedNormalizedJob {
                             inputByteStride = (inputByteStride>0) ? inputByteStride : 6,
                             input = (byte*)input,
