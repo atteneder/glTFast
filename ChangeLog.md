@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - 
 ### Added
 - Added warning when more than two UV sets are supposed to be imported (not supported yet)
+### Changed
+- Major performance improvement when loading glTFs with many KTX textures
 ### Fixed
 - Correct import of interleaved float RGBA vertex colors (thanks [@mikejurka][mikejurka] for #266)
 - Corrected potential pitfall by incorrect UV import job handling (thanks [@mikejurka][mikejurka] for reporting)

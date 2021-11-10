@@ -883,19 +883,31 @@ namespace GLTFast {
 
 #if KTX_UNITY
         async Task<bool> WaitForKtxDownloads() {
+            var tasks = new Task<bool>[ktxDownloadTasks.Count];
+            var i = 0;
             foreach( var dl in ktxDownloadTasks ) {
-                var www = await dl.Value;
-                if(www.success) {
-                    var ktxContext = new KtxLoadContext(dl.Key,www.data);
-                    bool forceSampleLinear = imageGamma!=null && !imageGamma[ktxContext.imageIndex];
-                    var textureResult = await ktxContext.LoadKtx(forceSampleLinear);
-                    images[ktxContext.imageIndex] = textureResult.texture;
-                } else {
-                    logger?.Error(LogCode.TextureDownloadFailed,www.error,dl.Key.ToString());
-                    return false;
-                }
+                tasks[i] = ProcessKtxDownload(dl.Key, dl.Value);
+                i++;
+            }
+            await Task.WhenAll(tasks);
+            foreach (var task in tasks) {
+                if (!task.Result) return false;
             }
             return true;
+        }
+        
+        async Task<bool> ProcessKtxDownload(int index, Task<IDownload> downloadTask) {
+            var www = await downloadTask;
+            if(www.success) {
+                var ktxContext = new KtxLoadContext(index,www.data);
+                var forceSampleLinear = imageGamma!=null && !imageGamma[ktxContext.imageIndex];
+                var textureResult = await ktxContext.LoadKtx(forceSampleLinear);
+                images[ktxContext.imageIndex] = textureResult.texture;
+                return true;
+            } else {
+                logger?.Error(LogCode.TextureDownloadFailed,www.error,index.ToString());
+                return false;
+            }
         }
 #endif // KTX_UNITY
 
@@ -1207,12 +1219,18 @@ namespace GLTFast {
 #if KTX_UNITY
             if(ktxLoadContextsBuffer!=null) {
 
-                for (int i = 0; i < ktxLoadContextsBuffer.Count; i++)
-                {
+                var ktxTasks = new Task<KtxUnity.TextureResult>[ktxLoadContextsBuffer.Count];
+                for (var i = 0; i < ktxLoadContextsBuffer.Count; i++) {
                     var ktx = ktxLoadContextsBuffer[i];
-                    bool forceSampleLinear = imageGamma!=null && !imageGamma[ktx.imageIndex];
-                    var textureResult = await ktx.LoadKtx(forceSampleLinear);
-                    images[ktx.imageIndex] = textureResult.texture;
+                    var forceSampleLinear = imageGamma!=null && !imageGamma[ktx.imageIndex];
+                    ktxTasks[i] = ktx.LoadKtx(forceSampleLinear);
+                    await deferAgent.BreakPoint();
+                }
+                await Task.WhenAll(ktxTasks);
+
+                for (var i = 0; i < ktxLoadContextsBuffer.Count; i++) {
+                    var ktx = ktxLoadContextsBuffer[i];
+                    images[ktx.imageIndex] = ktxTasks[i].Result.texture;
                 }
                 ktxLoadContextsBuffer.Clear();
             }
