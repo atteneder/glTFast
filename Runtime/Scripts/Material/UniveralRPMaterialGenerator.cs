@@ -39,6 +39,13 @@ namespace GLTFast.Materials {
                 // Fall back to makeshift approximation via premultiply or blend 
                 return base.ApplyTransmissionShaderFeatures(gltfMaterial);
             }
+
+            if (gltfMaterial?.extensions?.KHR_materials_transmission != null 
+                && gltfMaterial.extensions.KHR_materials_transmission.transmissionFactor > 0f) 
+            {
+                return ShaderMode.Blend;
+            }
+
             // No explicitly change in shader features
             return null;
         }
