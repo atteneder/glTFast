@@ -6,9 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 
 ### Changed
-- (HDRP): Configuring double-sided materials via settings and shader keywords instead of duplicated shader graph (with `-double` suffix). This reduces total shader variant count.
+- (HDRP): Configuring materials via settings and shader keywords instead of using duplicated shader graphs. This reduces the total shader variant count.
 ### Fixed
 - Correct blend mode for transmission in URP
+- Correct transparency on HDRP >= 10.x (Unity 2020.3 and newer)
 
 ## [4.4.6] - 2021-11-10
 ### Added

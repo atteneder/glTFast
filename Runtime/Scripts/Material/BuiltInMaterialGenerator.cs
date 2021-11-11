@@ -36,12 +36,6 @@ namespace GLTFast.Materials {
     
     public class BuiltInMaterialGenerator : MaterialGenerator {
 
-        public const string TAG_RENDER_TYPE = "RenderType";
-        public const string TAG_RENDER_TYPE_CUTOUT = "TransparentCutout";
-        public const string TAG_RENDER_TYPE_OPAQUE = "Opaque";
-        public const string TAG_RENDER_TYPE_FADE = "Fade";
-        public const string TAG_RENDER_TYPE_TRANSPARENT = "Transparent";
-
         // Built-in Render Pipeline
         public const string KW_ALPHAPREMULTIPLY_ON = "_ALPHAPREMULTIPLY_ON";
         public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
@@ -51,9 +45,7 @@ namespace GLTFast.Materials {
         public const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
 
         const string KW_ALPHABLEND_ON = "_ALPHABLEND_ON";
-
-        public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
-        public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
+        
         public static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
         public static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
         public static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");

@@ -42,6 +42,12 @@ namespace GLTFast.Materials {
             Unlit,
         }
         
+        public const string TAG_RENDER_TYPE = "RenderType";
+        public const string TAG_RENDER_TYPE_CUTOUT = "TransparentCutout";
+        public const string TAG_RENDER_TYPE_OPAQUE = "Opaque";
+        public const string TAG_RENDER_TYPE_FADE = "Fade";
+        public const string TAG_RENDER_TYPE_TRANSPARENT = "Transparent";
+        
         public const string KW_UV_ROTATION = "_UV_ROTATION";
         public const string KW_UV_CHANNEL_SELECT = "_UV_CHANNEL_SELECT";
         
@@ -50,7 +56,9 @@ namespace GLTFast.Materials {
         public static readonly int bumpMapScaleTransformPropId = Shader.PropertyToID("_BumpMap_ST");
         public static readonly int bumpMapUVChannelPropId = Shader.PropertyToID("_BumpMapUVChannel");
         public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
+        public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
         public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
+        public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
         public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
         public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
         public static readonly int emissionMapRotationPropId = Shader.PropertyToID("_EmissionMapRotation");

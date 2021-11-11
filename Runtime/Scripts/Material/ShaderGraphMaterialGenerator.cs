@@ -94,10 +94,23 @@ namespace GLTFast.Materials {
         protected static readonly int transmissionTextureUVChannelPropId = Shader.PropertyToID("_TransmittanceColorMapUVChannel");
 
 #if USING_HDRP_10_OR_NEWER
+        // const string KW_DISABLE_DECALS = "_DISABLE_DECALS";
+        const string KW_DISABLE_SSR_TRANSPARENT = "_DISABLE_SSR_TRANSPARENT";
         const string KW_DOUBLESIDED_ON = "_DOUBLESIDED_ON";
+        const string KW_ENABLE_FOG_ON_TRANSPARENT = "_ENABLE_FOG_ON_TRANSPARENT";
+        const string KW_SURFACE_TYPE_TRANSPARENT = "_SURFACE_TYPE_TRANSPARENT";
+        
+        const string k_ShaderPassTransparentDepthPrepass = "TransparentDepthPrepass";
+        const string k_ShaderPassTransparentDepthPostpass = "TransparentDepthPostpass";
+        const string k_ShaderPassTransparentBackface = "TransparentBackface";
+        const string k_ShaderPassRayTracingPrepass = "RayTracingPrepass";
+
         static readonly int k_DoubleSidedEnablePropId = Shader.PropertyToID("_DoubleSidedEnable");
         static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
         static readonly int k_DoubleSidedConstantsPropId = Shader.PropertyToID("_DoubleSidedConstants");
+        static readonly int k_ZTestGBufferPropId = Shader.PropertyToID("_ZTestGBuffer");
+        static readonly int k_AlphaDstBlendPropId = Shader.PropertyToID("_AlphaDstBlend");
+        static readonly int k_CullModeForwardPropId = Shader.PropertyToID("_CullModeForward");
 #endif
         
         static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
@@ -115,6 +128,7 @@ namespace GLTFast.Materials {
             if(!metallicShaders.TryGetValue(metallicShaderFeatures,value: out var shader)) {
                 ShaderMode mode = (ShaderMode) (metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
 #if USING_HDRP_10_OR_NEWER
+                mode = ShaderMode.Opaque;
                 doubleSided = false;
 #endif
                 // TODO: add ClearCoat support
@@ -384,6 +398,29 @@ namespace GLTFast.Materials {
                 material.SetFloat("_CullMode", (int)CullMode.Off);
             }
             
+            switch (shaderMode) {
+                case ShaderMode.Opaque:
+                    break;
+                case ShaderMode.Blend:
+                    material.EnableKeyword(BuiltInMaterialGenerator.KW_ALPHATEST_ON);
+                    material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
+                    // material.EnableKeyword(KW_DISABLE_DECALS);
+                    material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
+                    material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
+                    material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
+                    material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPrepass, false);
+                    material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);
+                    material.SetShaderPassEnabled(k_ShaderPassTransparentBackface, false);
+                    material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
+                    material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
+                    material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+                    material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+                    material.SetFloat(cullModePropId, (int)CullMode.Off);
+                    material.SetFloat(k_CullModeForwardPropId, (int)CullMode.Off);
+                    break;
+                case ShaderMode.Premultiply:
+                    break;
+            }
 #endif
 
             material.SetVector(baseColorPropId, baseColorLinear);
