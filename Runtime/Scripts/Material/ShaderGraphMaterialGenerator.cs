@@ -93,6 +93,13 @@ namespace GLTFast.Materials {
         protected static readonly int transmissionTextureRotationPropId = Shader.PropertyToID("_TransmittanceColorMapRotation");
         protected static readonly int transmissionTextureUVChannelPropId = Shader.PropertyToID("_TransmittanceColorMapUVChannel");
 
+#if USING_HDRP_10_OR_NEWER
+        const string KW_DOUBLESIDED_ON = "_DOUBLESIDED_ON";
+        static readonly int k_DoubleSidedEnablePropId = Shader.PropertyToID("_DoubleSidedEnable");
+        static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
+        static readonly int k_DoubleSidedConstantsPropId = Shader.PropertyToID("_DoubleSidedConstants");
+#endif
+        
         static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
         static Dictionary<SpecularShaderFeatures,Shader> specularShaders = new Dictionary<SpecularShaderFeatures,Shader>();
         static Dictionary<UnlitShaderFeatures,Shader> unlitShaders = new Dictionary<UnlitShaderFeatures,Shader>();
@@ -107,6 +114,9 @@ namespace GLTFast.Materials {
             
             if(!metallicShaders.TryGetValue(metallicShaderFeatures,value: out var shader)) {
                 ShaderMode mode = (ShaderMode) (metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
+#if USING_HDRP_10_OR_NEWER
+                doubleSided = false;
+#endif
                 // TODO: add ClearCoat support
                 bool coat = false; // (metallicShaderFeatures & MetallicShaderFeatures.ClearCoat) != 0;
                 // TODO: add sheen support
@@ -361,6 +371,20 @@ namespace GLTFast.Materials {
             }
 
             material.renderQueue = (int) renderQueue.Value;
+
+#if USING_HDRP_10_OR_NEWER
+            if (gltfMaterial.doubleSided) {
+                material.EnableKeyword(KW_DOUBLESIDED_ON);
+                material.SetFloat(k_DoubleSidedEnablePropId, 1);
+                
+                // UnityEditor.Rendering.HighDefinition.DoubleSidedNormalMode.Flip
+                material.SetFloat(k_DoubleSidedNormalModePropId, 0);
+                material.SetVector(k_DoubleSidedConstantsPropId, new Vector4(-1,-1,-1,0));
+                
+                material.SetFloat("_CullMode", (int)CullMode.Off);
+            }
+            
+#endif
 
             material.SetVector(baseColorPropId, baseColorLinear);
             

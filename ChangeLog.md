@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased] - 
+### Changed
+- (HDRP): Configuring double-sided materials via settings and shader keywords instead of duplicated shader graph (with `-double` suffix). This reduces total shader variant count.
 ### Fixed
 - Correct blend mode for transmission in URP
 
