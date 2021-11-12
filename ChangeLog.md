@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Correct blend mode for transmission in URP
 - Correct transparency on HDRP >= 10.x (Unity 2020.3 and newer)
-- Using the second UV set on double-sided materials
+- (URP/HDRP) Using the second UV set on double-sided materials
+- (URP/HDRP) Corrected baseColorTexture UV transform on double-sided materials
 
 ## [4.4.6] - 2021-11-10
 ### Added
