@@ -7,6 +7,7 @@
 [![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
 [![GitHub issues](https://img.shields.io/github/issues/atteneder/glTFast)](https://github.com/atteneder/glTFast/issues)
 [![GitHub license](https://img.shields.io/github/license/atteneder/glTFast)](https://github.com/atteneder/glTFast/blob/main/LICENSE.md)
+![Code coverage result](./Documentation~/img/badge_linecoverage.svg "Code coverage result badge")
 
 *glTFast* enables use of [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
 
