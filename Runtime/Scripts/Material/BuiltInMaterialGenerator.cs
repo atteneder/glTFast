@@ -38,7 +38,6 @@ namespace GLTFast.Materials {
 
         // Built-in Render Pipeline
         public const string KW_ALPHAPREMULTIPLY_ON = "_ALPHAPREMULTIPLY_ON";
-        public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
         public const string KW_EMISSION = "_EMISSION";
         public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
         public const string KW_OCCLUSION = "_OCCLUSION";        

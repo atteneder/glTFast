@@ -48,6 +48,7 @@ namespace GLTFast.Materials {
         public const string TAG_RENDER_TYPE_FADE = "Fade";
         public const string TAG_RENDER_TYPE_TRANSPARENT = "Transparent";
         
+        public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
         public const string KW_UV_ROTATION = "_UV_ROTATION";
         public const string KW_UV_CHANNEL_SELECT = "_UV_CHANNEL_SELECT";
         

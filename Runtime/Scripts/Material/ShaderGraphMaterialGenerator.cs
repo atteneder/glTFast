@@ -402,7 +402,7 @@ namespace GLTFast.Materials {
                 case ShaderMode.Opaque:
                     break;
                 case ShaderMode.Blend:
-                    material.EnableKeyword(BuiltInMaterialGenerator.KW_ALPHATEST_ON);
+                    material.EnableKeyword(KW_ALPHATEST_ON);
                     material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
                     // material.EnableKeyword(KW_DISABLE_DECALS);
                     material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
