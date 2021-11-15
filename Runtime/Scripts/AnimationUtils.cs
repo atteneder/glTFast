@@ -280,7 +280,7 @@ namespace GLTFast {
                 }
                 default: { // LINEAR
                     var prevTime = times[0];
-                    var prevValue = values[0];
+                    var prevValue = values[times.Length * curveIndex];
                     var inTangent = 0f;
                     
                     for (var i = 1; i < times.Length; i++) {
