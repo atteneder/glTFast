@@ -69,7 +69,7 @@ Enter the following URL:
 
 To add more functionality, repeat the last step and also add related packages using these URLs:
 
-- `https://gitlab.com/atteneder/DracoUnity.git` for Draco mesh compression 
+- `https://github.com/atteneder/DracoUnity.git` for Draco mesh compression 
 - `https://github.com/atteneder/KtxUnity.git` for KTX texture compression
 
 > Note: You have to have a GIT LFS client (large file support) installed on your system. Otherwise you will get an error that the native library file (dll on Windows) is corrupt!

@@ -9,7 +9,7 @@ With older versions of Unity and the Package Manager you have to add the package
 Inside your Unity project there's the folder `Packages` containing a file called `manifest.json`. You have to open it and add the following lines inside the `dependencies` category:
 
 ```json
-"com.atteneder.draco": "https://gitlab.com/atteneder/DracoUnity.git",
+"com.atteneder.draco": "https://github.com/atteneder/DracoUnity.git",
 "com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git#gltfast-1",
 ```
 
@@ -18,7 +18,7 @@ It should look something like this:
 ```json
 {
   "dependencies": {
-    "com.atteneder.draco": "https://gitlab.com/atteneder/DracoUnity.git",
+    "com.atteneder.draco": "https://github.com/atteneder/DracoUnity.git",
     "com.atteneder.gltfast": "https://github.com/atteneder/glTFast.git#gltfast-1",
     "com.unity.package-manager-ui": "2.1.2",
     "com.unity.modules.imageconversion": "1.0.0",
