@@ -16,13 +16,13 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector4ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"50cc2671-e469-49b3-804d-a1b67f32fe59\"\n    },\n    \"m_Name\": \"baseColorTexture_ST\",\n    \"m_DefaultReferenceName\": \"Vector4_6585E8BA\",\n    \"m_OverrideReferenceName\": \"_MainTex_ST\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"x\": 1.0,\n        \"y\": 1.0,\n        \"z\": 0.0,\n        \"w\": 0.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"50cc2671-e469-49b3-804d-a1b67f32fe59\"\n    },\n    \"m_Name\": \"baseColorTexture_ST\",\n    \"m_DefaultReferenceName\": \"Vector4_6585E8BA\",\n    \"m_OverrideReferenceName\": \"_BaseMap_ST\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"x\": 1.0,\n        \"y\": 1.0,\n        \"z\": 0.0,\n        \"w\": 0.0\n    }\n}"
         },
         {
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector2ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"8c960e31-f89f-41e6-958a-5a8561a5d8c4\"\n    },\n    \"m_Name\": \"baseColorTextureRotation\",\n    \"m_DefaultReferenceName\": \"Vector2_DC752BB\",\n    \"m_OverrideReferenceName\": \"_MainTexRotation\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"x\": 0.0,\n        \"y\": 0.0,\n        \"z\": 0.0,\n        \"w\": 0.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"8c960e31-f89f-41e6-958a-5a8561a5d8c4\"\n    },\n    \"m_Name\": \"baseColorTextureRotation\",\n    \"m_DefaultReferenceName\": \"Vector2_DC752BB\",\n    \"m_OverrideReferenceName\": \"_BaseMapRotation\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"x\": 0.0,\n        \"y\": 0.0,\n        \"z\": 0.0,\n        \"w\": 0.0\n    }\n}"
         },
         {
             "typeInfo": {
