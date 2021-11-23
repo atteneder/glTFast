@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Morph target animation curves have correct first keyframe value now (thanks [Eric Beets][EricBeetsOfficial-Opuscope] for #277)
+
 ## [4.4.7] - 2021-11-12
 ### Changed
 - (HDRP): Configuring materials via settings and shader keywords instead of using duplicated shader graphs. This reduces the total shader variant count.
@@ -523,6 +527,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [aurorahcx]: https://github.com/aurorahcx
 [hybridherbst]: https://github.com/hybridherbst
 [Bersaelor]: https://github.com/Bersaelor
+[EricBeetsOfficial-Opuscope]: https://github.com/EricBeetsOfficial-Opuscope
 [mikejurka]: https://github.com/mikejurka
 [zharry]: https://github.com/zharry
 [ReadyPlayerMe]: https://readyplayer.me
