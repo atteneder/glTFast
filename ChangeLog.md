@@ -525,9 +525,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [DracoUnity]: https://github.com/atteneder/DracoUnity
 [aurorahcx]: https://github.com/aurorahcx
-[hybridherbst]: https://github.com/hybridherbst
 [Bersaelor]: https://github.com/Bersaelor
 [EricBeetsOfficial-Opuscope]: https://github.com/EricBeetsOfficial-Opuscope
+[hybridherbst]: https://github.com/hybridherbst
 [mikejurka]: https://github.com/mikejurka
-[zharry]: https://github.com/zharry
 [ReadyPlayerMe]: https://readyplayer.me
+[zharry]: https://github.com/zharry
