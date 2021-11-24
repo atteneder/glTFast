@@ -32,11 +32,11 @@ namespace GLTFast {
         }
         
         public void Error(string message) {
-            Debug.Log(message);
+            Debug.LogError(message);
         }
         
         public void Warning(string message) {
-            Debug.Log(message);
+            Debug.LogWarning(message);
         }
         
         public void Info(string message) {
