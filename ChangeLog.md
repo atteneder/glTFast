@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Morph target animation curves have correct first keyframe value now (thanks [Eric Beets][EricBeetsOfficial-Opuscope] for #277)
 - (URH/HDRP) UV transform and UV channel on blended materials
+- Error when using transmission approximation without a logger provided
 
 ## [4.4.7] - 2021-11-12
 ### Changed

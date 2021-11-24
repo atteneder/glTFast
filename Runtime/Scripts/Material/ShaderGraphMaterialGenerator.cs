@@ -443,7 +443,7 @@ namespace GLTFast.Materials {
         {
 #if UNITY_EDITOR
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-            logger.Warning(LogCode.MaterialTransmissionApproxURP);
+            logger?.Warning(LogCode.MaterialTransmissionApproxURP);
 #endif
             // Correct transmission is not supported in Built-In renderer
             // This is an approximation for some corner cases
