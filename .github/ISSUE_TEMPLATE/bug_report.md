@@ -16,6 +16,11 @@ Attach or link to *.gltf/*.glb files that trigger the bug.
 
 > Note: You have to ZIP archive them first in order for GitHub to accept the upload.
 
+If your files are confidential:
+
+- Try to create a similar, but intellectual-property-free glTF that reproduces the bug in the same way (so any community member can have a look)
+- Otherwise, still create this issue and send the files (or a link to them) discretely via email
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
