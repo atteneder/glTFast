@@ -415,6 +415,7 @@ namespace GLTFast.Materials {
                     material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
                     material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
                     material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+                    material.SetFloat(srcBlendPropId, (int) BlendMode.SrcAlpha);//5
                     material.SetFloat(cullModePropId, (int)CullMode.Off);
                     material.SetFloat(k_CullModeForwardPropId, (int)CullMode.Off);
                     break;

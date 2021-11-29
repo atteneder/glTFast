@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (URH/HDRP) UV transform and UV channel on blended materials
 - Error when using transmission approximation without a logger provided
 - `ConsoleLogger` non-`LogCode` messages have the correct log level now
+- Correct blending on URP 12 / HDRP 10 alpha blended materials
 
 ## [4.4.7] - 2021-11-12
 ### Changed
