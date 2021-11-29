@@ -24,7 +24,6 @@ namespace GLTFast.Materials {
     public class HighDefinitionRPMaterialGenerator : ShaderGraphMaterialGenerator {
         
         static readonly int k_AlphaCutoffEnable = Shader.PropertyToID("_AlphaCutoffEnable");
-        static readonly int k_ZTestGBufferPropId = Shader.PropertyToID("_ZTestGBuffer");
 
 #if USING_HDRP_10_OR_NEWER
         // const string KW_DISABLE_DECALS = "_DISABLE_DECALS";
@@ -37,6 +36,7 @@ namespace GLTFast.Materials {
         const string k_ShaderPassTransparentDepthPostpass = "TransparentDepthPostpass";
         const string k_ShaderPassTransparentBackface = "TransparentBackface";
         const string k_ShaderPassRayTracingPrepass = "RayTracingPrepass";
+        const string k_ShaderPassDepthOnlyPass = "DepthOnly";
 
         static readonly int k_DoubleSidedEnablePropId = Shader.PropertyToID("_DoubleSidedEnable");
         static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
@@ -46,6 +46,10 @@ namespace GLTFast.Materials {
 #endif
         
 #if USING_HDRP_10_OR_NEWER
+        protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
+            return "Shader Graphs/glTF-generic";
+        }
+
         protected override void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
 
@@ -56,19 +60,16 @@ namespace GLTFast.Materials {
             material.SetFloat(k_DoubleSidedNormalModePropId, 0);
             material.SetVector(k_DoubleSidedConstantsPropId, new Vector4(-1,-1,-1,0));
                 
-            material.SetFloat("_CullMode", (int)CullMode.Off);
+            material.SetFloat(cullPropId, (int)CullMode.Off);
+            material.SetFloat(cullModePropId, (int)CullMode.Off);
         }
 #endif
 
         protected override void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
             base.SetAlphaModeMask(gltfMaterial,material);
-            material.EnableKeyword(KW_ALPHATEST_ON);
-            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_CUTOUT);
             material.SetFloat(k_AlphaCutoffEnable, 1);
-            material.renderQueue = (int) RenderQueue.AlphaTest;
-            material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
-            material.SetOverrideTag("MotionVector","User");
-            material.SetShaderPassEnabled("MOTIONVECTORS",false);
+            material.SetOverrideTag(TAG_MOTION_VECTOR,TAG_MOTION_VECTOR_USER);
+            material.SetShaderPassEnabled(k_MotionVectorsPass,false);
         }
 
 #if USING_HDRP_10_OR_NEWER
@@ -83,12 +84,11 @@ namespace GLTFast.Materials {
             material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);
             material.SetShaderPassEnabled(k_ShaderPassTransparentBackface, false);
             material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
+            material.SetShaderPassEnabled(k_ShaderPassDepthOnlyPass, false);
             material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
             material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(srcBlendPropId, (int) BlendMode.SrcAlpha);//5
-            material.SetFloat(cullModePropId, (int)CullMode.Off);
-            material.SetFloat(k_CullModeForwardPropId, (int)CullMode.Off);
         }
 #endif
     }

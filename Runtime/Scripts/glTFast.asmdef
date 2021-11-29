@@ -66,6 +66,11 @@
             "name": "com.unity.meshopt.decompress",
             "expression": "",
             "define": "MESHOPT"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "12",
+            "define": "USING_URP_12_OR_NEWER"
         }
     ],
     "noEngineReferences": false

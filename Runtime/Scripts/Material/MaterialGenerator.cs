@@ -57,6 +57,7 @@ namespace GLTFast.Materials {
         public static readonly int bumpMapScaleTransformPropId = Shader.PropertyToID("_BumpMap_ST");
         public static readonly int bumpMapUVChannelPropId = Shader.PropertyToID("_BumpMapUVChannel");
         public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
+        public static readonly int cullPropId = Shader.PropertyToID("_Cull");
         public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
         public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
         public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");

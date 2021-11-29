@@ -34,6 +34,29 @@ namespace GLTFast.Materials {
             supportsCameraOpaqueTexture = renderPipelineAsset.supportsCameraOpaqueTexture;
         }
         
+#if USING_URP_12_OR_NEWER
+        protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
+            return "Shader Graphs/glTF-generic";
+        }
+
+        protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
+            material.EnableKeyword(KW_ALPHATEST_ON);
+            material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
+            material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
+            material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
+            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
+            material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPrepass, false);
+            material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);
+            material.SetShaderPassEnabled(k_ShaderPassTransparentBackface, false);
+            material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
+            material.SetShaderPassEnabled(k_ShaderPassDepthOnlyPass, false);
+            material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
+            material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+            material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+            material.SetFloat(srcBlendPropId, (int) BlendMode.SrcAlpha);//5
+        }
+#endif
+
         protected override ShaderMode? ApplyTransmissionShaderFeatures(Schema.Material gltfMaterial) {
             if (!supportsCameraOpaqueTexture) {
                 // Fall back to makeshift approximation via premultiply or blend 
