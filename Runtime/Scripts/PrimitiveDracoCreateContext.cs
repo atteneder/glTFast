@@ -47,7 +47,7 @@ namespace GLTFast {
                 );
         }
         
-        public override Primitive? CreatePrimitive() {
+        public override async Task<Primitive?> CreatePrimitive() {
 
             var mesh = dracoTask.Result;
             dracoTask.Dispose();
@@ -63,7 +63,7 @@ namespace GLTFast {
             }
             
             if (morphTargetsContext != null) {
-                morphTargetsContext.ApplyOnMeshAndDispose(mesh);
+                await morphTargetsContext.ApplyOnMeshAndDispose(mesh);
             }
 
 #if GLTFAST_KEEP_MESH_DATA
@@ -78,7 +78,8 @@ namespace GLTFast {
             // Profiler.EndSample();
 #endif
 
-            return new Primitive(mesh,materials);
+            Primitive ?p = new Primitive(mesh,materials);
+            return p;
         }
     }
 }
