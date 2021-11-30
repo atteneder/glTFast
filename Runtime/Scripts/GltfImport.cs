@@ -1325,7 +1325,7 @@ namespace GLTFast {
                     while(!primitiveContext.IsCompleted) {
                         await Task.Yield();
                     }
-                    var primitive = primitiveContext.CreatePrimitive();
+                    var primitive = await primitiveContext.CreatePrimitive();
                     if(primitive.HasValue) {
                         primitives[primitiveContext.primtiveIndex] = primitive.Value;
                         resources.Add(primitive.Value.mesh);

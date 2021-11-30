@@ -14,6 +14,7 @@
 //
 
 using UnityEngine.Rendering;
+using System.Threading.Tasks;
 
 namespace GLTFast {
     
@@ -35,6 +36,6 @@ namespace GLTFast {
         
         public MorphTargetsContext morphTargetsContext;
         
-        public abstract Primitive? CreatePrimitive();
+        public abstract Task<Primitive?> CreatePrimitive();
     }
 } 

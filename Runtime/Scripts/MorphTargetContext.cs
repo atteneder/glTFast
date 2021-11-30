@@ -22,6 +22,8 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Mesh = UnityEngine.Mesh;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace GLTFast {
 
@@ -71,10 +73,10 @@ namespace GLTFast {
             return handle;
         }
 
-        public void ApplyOnMeshAndDispose(Mesh mesh) {
+        public async Task ApplyOnMeshAndDispose(Mesh mesh) {
             for (var index = 0; index < contexts.Length; index++) {
                 var context = contexts[index];
-                context.AddToMesh(mesh, meshTargetNames?[index] ?? index.ToString());
+                await context.AddToMesh(mesh, meshTargetNames?[index] ?? index.ToString());
                 context.Dispose();
             }
             contexts = null;
@@ -296,10 +298,12 @@ namespace GLTFast {
             return handle;
         }
 
-        public void AddToMesh(Mesh mesh, string name) {
+        public async Task AddToMesh(Mesh mesh, string name) {
             Profiler.BeginSample("AddBlendShapeFrame");
             mesh.AddBlendShapeFrame(name,1f,positions,normals,tangents);
             Profiler.EndSample();
+            // await Task.Delay(20, CancellationToken.None);
+            await Task.Yield();
         }
 
         public void Dispose() {
