@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- One generic shader graph is used for URP 12 or newer and HDRP 10 or newer
+- Generic shader graph `glTF-generic` for the Universal render pipe 12 or newer
+- Generic shader graph `glTF-HDRP` for High-Definition render pipe 10 or newer
+### Fixed
+- Correct emission in HDRP 12 and later
 
 ## [4.4.11] - 2022-01-24
 ### Changed
