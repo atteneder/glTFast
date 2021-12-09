@@ -1127,7 +1127,7 @@
     "m_SourceType": 1,
     "m_FunctionName": "RPSwitch",
     "m_FunctionSource": "",
-    "m_FunctionBody": "#ifdef HDRP\nOut = HighDefinition;\n#else\nOut = Default;\n#endif"
+    "m_FunctionBody": "#if defined(UNITY_HEADER_HD_INCLUDED)\nOut = HighDefinition;\n#else\nOut = Default;\n#endif"
 }
 
 {
