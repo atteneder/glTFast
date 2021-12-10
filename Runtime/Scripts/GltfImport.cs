@@ -1326,6 +1326,9 @@ namespace GLTFast {
                         await Task.Yield();
                     }
                     var primitive = await primitiveContext.CreatePrimitive();
+                    // The import failed :\
+                    // await defaultDeferAgent.BreakPoint();
+
                     if(primitive.HasValue) {
                         primitives[primitiveContext.primtiveIndex] = primitive.Value;
                         resources.Add(primitive.Value.mesh);
