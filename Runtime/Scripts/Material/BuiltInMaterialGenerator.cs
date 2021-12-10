@@ -48,7 +48,6 @@ namespace GLTFast.Materials {
         public static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
         public static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
         public static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");
-        public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
         public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
 
         static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("_MetallicGlossMap_ST");

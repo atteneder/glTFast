@@ -80,6 +80,7 @@ namespace GLTFast.Materials {
         public static readonly int specGlossScaleTransformMapPropId = Shader.PropertyToID("_SpecGlossMap_ST"); // TODO: Support in shader!
         public static readonly int specGlossMapRotationPropId = Shader.PropertyToID("_SpecGlossMapRotation"); // TODO: Support in shader!
         public static readonly int specGlossMapUVChannelPropId = Shader.PropertyToID("_SpecGlossMapUVChannel"); // TODO: Support in shader!
+        public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
 
         static IMaterialGenerator defaultMaterialGenerator;
         
