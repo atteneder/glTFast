@@ -477,7 +477,7 @@ namespace GLTFast.Materials {
             if (gltfMaterial.doubleSided) feature |= MetallicShaderFeatures.DoubleSided;
 
             if (!sm.HasValue) {
-                sm = gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE ? ShaderMode.Blend : ShaderMode.Opaque;
+                sm = gltfMaterial.alphaModeEnum == AlphaMode.BLEND ? ShaderMode.Blend : ShaderMode.Opaque;
             } 
             
             feature |= (MetallicShaderFeatures)sm;
