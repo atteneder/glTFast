@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- (URP/HDRP) Materials with `alphaMode` `MASK` are alpha tested (and not blended as well) as specified in the specification (thanks [rt-nikowiss][rt-nikowiss] for #296)
+
 ## [4.4.8] - 2021-12-06
 ### Fixed
 - Morph target animation curves have correct first keyframe value now (thanks [Eric Beets][EricBeetsOfficial-Opuscope] for #277)
@@ -534,4 +538,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [hybridherbst]: https://github.com/hybridherbst
 [mikejurka]: https://github.com/mikejurka
 [ReadyPlayerMe]: https://readyplayer.me
+[rt-nikowiss]: https://github.com/rt-nikowiss
 [zharry]: https://github.com/zharry
