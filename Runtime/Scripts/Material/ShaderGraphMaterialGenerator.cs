@@ -92,26 +92,6 @@ namespace GLTFast.Materials {
         protected static readonly int transmissionTextureScaleTransformPropId = Shader.PropertyToID("_TransmittanceColorMap_ST");
         protected static readonly int transmissionTextureRotationPropId = Shader.PropertyToID("_TransmittanceColorMapRotation");
         protected static readonly int transmissionTextureUVChannelPropId = Shader.PropertyToID("_TransmittanceColorMapUVChannel");
-
-#if USING_HDRP_10_OR_NEWER
-        // const string KW_DISABLE_DECALS = "_DISABLE_DECALS";
-        const string KW_DISABLE_SSR_TRANSPARENT = "_DISABLE_SSR_TRANSPARENT";
-        const string KW_DOUBLESIDED_ON = "_DOUBLESIDED_ON";
-        const string KW_ENABLE_FOG_ON_TRANSPARENT = "_ENABLE_FOG_ON_TRANSPARENT";
-        const string KW_SURFACE_TYPE_TRANSPARENT = "_SURFACE_TYPE_TRANSPARENT";
-        
-        const string k_ShaderPassTransparentDepthPrepass = "TransparentDepthPrepass";
-        const string k_ShaderPassTransparentDepthPostpass = "TransparentDepthPostpass";
-        const string k_ShaderPassTransparentBackface = "TransparentBackface";
-        const string k_ShaderPassRayTracingPrepass = "RayTracingPrepass";
-
-        static readonly int k_DoubleSidedEnablePropId = Shader.PropertyToID("_DoubleSidedEnable");
-        static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
-        static readonly int k_DoubleSidedConstantsPropId = Shader.PropertyToID("_DoubleSidedConstants");
-        static readonly int k_ZTestGBufferPropId = Shader.PropertyToID("_ZTestGBuffer");
-        static readonly int k_AlphaDstBlendPropId = Shader.PropertyToID("_AlphaDstBlend");
-        static readonly int k_CullModeForwardPropId = Shader.PropertyToID("_CullModeForward");
-#endif
         
         static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
         static Dictionary<SpecularShaderFeatures,Shader> specularShaders = new Dictionary<SpecularShaderFeatures,Shader>();
@@ -367,7 +347,7 @@ namespace GLTFast.Materials {
             }
 
             if (gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
-                material.SetFloat(cutoffPropId, gltfMaterial.alphaCutoff);
+                SetAlphaModeMask(gltfMaterial, material);
             } else {
                 material.SetFloat(cutoffPropId, 0);
                 // double sided opaque would make errors in HDRP 7.3 otherwise
@@ -386,43 +366,21 @@ namespace GLTFast.Materials {
 
             material.renderQueue = (int) renderQueue.Value;
 
-#if USING_HDRP_10_OR_NEWER
             if (gltfMaterial.doubleSided) {
-                material.EnableKeyword(KW_DOUBLESIDED_ON);
-                material.SetFloat(k_DoubleSidedEnablePropId, 1);
-                
-                // UnityEditor.Rendering.HighDefinition.DoubleSidedNormalMode.Flip
-                material.SetFloat(k_DoubleSidedNormalModePropId, 0);
-                material.SetVector(k_DoubleSidedConstantsPropId, new Vector4(-1,-1,-1,0));
-                
-                material.SetFloat("_CullMode", (int)CullMode.Off);
+                SetDoubleSided(gltfMaterial, material);
             }
-            
+
             switch (shaderMode) {
                 case ShaderMode.Opaque:
+                    SetShaderModeOpaque(gltfMaterial, material);
                     break;
                 case ShaderMode.Blend:
-                    material.EnableKeyword(KW_ALPHATEST_ON);
-                    material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
-                    // material.EnableKeyword(KW_DISABLE_DECALS);
-                    material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
-                    material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
-                    material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
-                    material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPrepass, false);
-                    material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);
-                    material.SetShaderPassEnabled(k_ShaderPassTransparentBackface, false);
-                    material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
-                    material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
-                    material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
-                    material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
-                    material.SetFloat(srcBlendPropId, (int) BlendMode.SrcAlpha);//5
-                    material.SetFloat(cullModePropId, (int)CullMode.Off);
-                    material.SetFloat(k_CullModeForwardPropId, (int)CullMode.Off);
+                    SetShaderModeBlend(gltfMaterial, material);
                     break;
                 case ShaderMode.Premultiply:
+                    SetShaderModePremultiply(gltfMaterial, material);
                     break;
             }
-#endif
 
             material.SetVector(baseColorPropId, baseColorLinear);
             
@@ -433,6 +391,16 @@ namespace GLTFast.Materials {
 
             return material;
         }
+
+        protected virtual void SetDoubleSided(Schema.Material gltfMaterial, Material material) { }
+        
+        protected virtual void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
+            material.SetFloat(cutoffPropId, gltfMaterial.alphaCutoff);
+        }
+
+        protected virtual void SetShaderModeOpaque(Schema.Material gltfMaterial, Material material) { }
+        protected virtual void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) { }
+        protected virtual void SetShaderModePremultiply(Schema.Material gltfMaterial, Material material) { }
 
         protected virtual RenderQueue? ApplyTransmission(
             ref Color baseColorLinear,
