@@ -400,11 +400,9 @@ public class TestExport : MonoBehaviour {
 
 ### Materials and Shader Variants
 
-❗ IMPORTANT ❗
+For runtime import *glTFast* uses custom shader graphs or shaders for rendering glTF materials. Depending on the properties of a glTF material (and extensions it relies on), a specific [shader variant][shader-variants] will get used. In the Editor this shader variant will be built on-demand, but in order for materials to work in your build, you **have** to make sure all shader variants that you're going to need are included.
 
-For runtime import, glTF materials might require many shader/features combinations. You **have** to make sure all shader variants your project will ever use are included, or the materials will not work in builds (even if they work in the Editor).
-
-*glTFast* import uses custom shaders that are derived from the Unity *Lit* or *Standard* shaders (and have a similar big number of variants). Including all those variants can make your build big. There's an easy way to find the right subset, if you already know what files you'll expect:
+Including all possible variants is the safest approach, but can make your build very big. There's another way to find the right subset, if you already know what files you'll expect:
 
 - Run your scene that loads all glTFs you expect in the editor.
 - Go to Edit->Project Settings->Graphics
@@ -414,7 +412,13 @@ For runtime import, glTF materials might require many shader/features combinatio
 
 An alternative way is to create placeholder materials for all feature combinations you expect and put them in a "Resource" folder in your project.
 
-Read the documentation about [`Shader.Find`](https://docs.unity3d.com/ScriptReference/Shader.Find.html) for details how to include shaders in builds.
+Read the documentation about [`Shader.Find`](https://docs.unity3d.com/ScriptReference/Shader.Find.html) for details how to include shaders in builds. It's also recommended to learning more about [shader variants][shader-variants].
+
+Depending on the Unity version and render pipeline in use, different shader graphs or shaders will be used.
+
+- `glTF-generic` shader graph for the Universal render pipe 12 or newer and for High-Definition render pipe 10 or newer
+- Shader graphs in folder `Runtime/Shader/Legacy` for older Universal / High-Definition render pipe versions
+- Shaders in folder `Runtime/Shader/Built-In` for the built-in render pipeline
 
 ### Readable Mesh Data
 
@@ -522,4 +526,5 @@ It also uses fast low-level memory copy methods, [Unity's Job system](https://do
 [IGltfReadable]: ../Runtime/Scripts/IGltfReadable.cs
 [import-gif]: ./img/import.gif  "Video showing glTF files being copied into the Assets folder and imported"
 [MRTK]: https://github.com/microsoft/MixedRealityToolkit-Unity
+[shader-variants]: https://docs.unity3d.com/Manual/shader-variants.html
 [unity]: https://unity.com

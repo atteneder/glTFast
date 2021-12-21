@@ -118,7 +118,7 @@ created [via script](./Documentation~/glTFast.md#export-via-script).
 
 ❗ IMPORTANT ❗
 
-*glTFast* uses custom shaders that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
+*glTFast* uses custom shader graphs that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
 
 Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/glTFast.md#materials-and-shader-variants) for details.
 
