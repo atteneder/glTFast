@@ -38,6 +38,11 @@ namespace GLTFast.Materials {
         protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
             return "Shader Graphs/glTF-generic";
         }
+        
+        protected override void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
+            base.SetDoubleSided(gltfMaterial,material);
+            material.SetFloat(cullPropId, (int)CullMode.Off);
+        }
 
         protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
             material.EnableKeyword(KW_ALPHATEST_ON);

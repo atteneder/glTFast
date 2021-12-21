@@ -60,7 +60,6 @@ namespace GLTFast.Materials {
             material.SetFloat(k_DoubleSidedNormalModePropId, 0);
             material.SetVector(k_DoubleSidedConstantsPropId, new Vector4(-1,-1,-1,0));
                 
-            material.SetFloat(cullPropId, (int)CullMode.Off);
             material.SetFloat(cullModePropId, (int)CullMode.Off);
         }
 #endif

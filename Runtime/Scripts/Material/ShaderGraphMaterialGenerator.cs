@@ -414,7 +414,9 @@ namespace GLTFast.Materials {
             return material;
         }
 
-        protected virtual void SetDoubleSided(Schema.Material gltfMaterial, Material material) { }
+        protected virtual void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
+            material.doubleSidedGI = true;
+        }
         
         protected virtual void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
             material.SetFloat(cutoffPropId, gltfMaterial.alphaCutoff);
