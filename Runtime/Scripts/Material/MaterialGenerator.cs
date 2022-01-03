@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#if USING_URP || USING_HDRP
+#if USING_URP || USING_HDRP || ( UNITY_SHADER_GRAPH_12_OR_NEWER && !GLTFAST_FORCE_BUILTIN_SHADERS)
 #define GLTFAST_SHADER_GRAPH
 #else
 #define GLTFAST_BUILTIN_RP
@@ -105,7 +105,10 @@ namespace GLTFast.Materials {
 #endif
                 throw new System.Exception("glTFast: Unknown Render Pipeline");
             }
-#if GLTFAST_BUILTIN_RP || UNITY_EDITOR
+#if UNITY_SHADER_GRAPH_12_OR_NEWER && !GLTFAST_FORCE_BUILTIN_SHADERS
+            defaultMaterialGenerator = new ShaderGraphMaterialGenerator();
+            return defaultMaterialGenerator;
+#elif GLTFAST_BUILTIN_RP || UNITY_EDITOR
             defaultMaterialGenerator = new BuiltInMaterialGenerator();
             return defaultMaterialGenerator;
 #else

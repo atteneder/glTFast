@@ -71,6 +71,11 @@
             "name": "com.unity.render-pipelines.universal",
             "expression": "12",
             "define": "USING_URP_12_OR_NEWER"
+        },
+        {
+            "name": "com.unity.shadergraph",
+            "expression": "12",
+            "define": "UNITY_SHADER_GRAPH_12_OR_NEWER"
         }
     ],
     "noEngineReferences": false

@@ -6,7 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Changed
-- Generic shader graph `glTF-generic` for the Universal render pipe 12 or newer and for High-Definition render pipe 10 or newer
+- Generic shader graph `glTF-generic` is used for
+  - Universal render pipe 12 or newer
+  - High-Definition render pipe 10 or newer
+  - Built-In render pipe *if* the Shader Graph package 12 or newer is installed (see [upgrade guide](./Documentation~/glTFast.md#upgrade-to-4.5) for details)
 ### Fixed
 - Correct emission in HDRP 12 and later
 

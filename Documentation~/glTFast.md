@@ -416,9 +416,14 @@ Read the documentation about [`Shader.Find`](https://docs.unity3d.com/ScriptRefe
 
 Depending on the Unity version and render pipeline in use, different shader graphs or shaders will be used.
 
-- `glTF-generic` shader graph for the Universal render pipe 12 or newer and for High-Definition render pipe 10 or newer
+- `glTF-generic` shader graph for
+  - Universal render pipe 12 or newer
+  - High-Definition render pipe 10 or newer
+  - Built-In render pipe *if* the Shader Graph package 12 or newer is installed
 - Shader graphs in folder `Runtime/Shader/Legacy` for older Universal / High-Definition render pipe versions
 - Shaders in folder `Runtime/Shader/Built-In` for the built-in render pipeline
+
+If you're using the Built-In render pipe along Shader Graph 12 or newer and want to enforce usage of the shaders in `Runtime/Shader/Built-In`, add `GLTFAST_FORCE_BUILTIN_SHADERS` to the list of scripting define symbols in the project settings.
 
 ### Readable Mesh Data
 
@@ -441,6 +446,12 @@ If you experience conflicts with other packages that are offering `.gltf`/`.glb`
 add `GLTFAST_EDITOR_IMPORT_OFF` to the *Scripting Define Symbols* in the *Player Settings* and this feature will be turned off. 
 
 ## Upgrade Guides
+
+### Upgrade to 4.5
+
+#### Enforce Built-In shaders
+
+If you're using the Built-In render pipe and have the Shader Graph package version 12 or newer installed, glTFast will now use the `glTF-generic` shader graph instead of the shaders it used before. If you want to revert to the old behavior/shaders, add `GLTFAST_FORCE_BUILTIN_SHADERS` to the list of scripting define symbols in the project settings.
 
 ### Upgrade to 4.x
 

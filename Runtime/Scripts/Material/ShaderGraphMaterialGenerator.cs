@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#if USING_URP || USING_HDRP
+#if USING_URP || USING_HDRP || ( UNITY_SHADER_GRAPH_12_OR_NEWER && !GLTFAST_FORCE_BUILTIN_SHADERS)
 #define GLTFAST_SHADER_GRAPH
 #endif
 
@@ -147,6 +147,10 @@ namespace GLTFast.Materials {
         }
 
         protected virtual string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
+#if UNITY_SHADER_GRAPH_12_OR_NEWER
+            // Shader Graph 12 and newer support the Built-In target, so we use it.
+            return "Shader Graphs/glTF-generic";
+#else
             var doubleSided = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0;
             var mode = (ShaderMode)(metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
 
@@ -155,6 +159,7 @@ namespace GLTFast.Materials {
                 ,mode
                 ,doubleSided ? "-double" : ""
             );
+#endif
         }
 
         Material GetUnlitMaterial(Schema.Material gltfMaterial)
