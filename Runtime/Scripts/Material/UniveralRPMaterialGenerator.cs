@@ -35,10 +35,20 @@ namespace GLTFast.Materials {
         }
         
 #if USING_URP_12_OR_NEWER
+#if !UNITY_SHADER_GRAPH_12_OR_NEWER
         protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
-            return "Shader Graphs/glTF-pbrMetallicRoughness";
+            return SHADER_METALLIC;
+        }
+
+        protected override string GetSpecularShaderName(SpecularShaderFeatures features) {
+            return SHADER_SPECULAR;
         }
         
+        protected override string GetUnlitShaderName(UnlitShaderFeatures features) {
+            return SHADER_UNLIT;
+        }
+#endif
+
         protected override void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
             material.SetFloat(cullPropId, (int)CullMode.Off);
