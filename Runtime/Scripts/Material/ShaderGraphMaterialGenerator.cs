@@ -62,12 +62,14 @@ namespace GLTFast.Materials {
             DoubleSided = 1<<2
         }
         
+#if !UNITY_SHADER_GRAPH_12_OR_NEWER
         [Flags]
         protected enum UnlitShaderFeatures {
             Default = 0,
             AlphaBlend = 1<<1,
             DoubleSided = 1<<2
         }
+#endif
 
         const string SHADER_UNLIT = "Shader Graphs/glTF-unlit";
         const string SHADER_SPECULAR = "Shader Graphs/glTF-specular";
@@ -121,7 +123,11 @@ namespace GLTFast.Materials {
         
         static Dictionary<MetallicShaderFeatures,Shader> metallicShaders = new Dictionary<MetallicShaderFeatures,Shader>();
         static Dictionary<SpecularShaderFeatures,Shader> specularShaders = new Dictionary<SpecularShaderFeatures,Shader>();
+#if !UNITY_SHADER_GRAPH_12_OR_NEWER
         static Dictionary<UnlitShaderFeatures,Shader> unlitShaders = new Dictionary<UnlitShaderFeatures,Shader>();
+#else
+        static Shader s_UnlitShader;
+#endif
 
         public override Material GetDefaultMaterial() {
             return GetMetallicMaterial(MetallicShaderFeatures.Default);
@@ -164,9 +170,16 @@ namespace GLTFast.Materials {
 
         Material GetUnlitMaterial(Schema.Material gltfMaterial)
         {
+            Shader shader;
+
+#if UNITY_SHADER_GRAPH_12_OR_NEWER
+            if (s_UnlitShader == null) {
+                s_UnlitShader = FindShader(SHADER_UNLIT); 
+            }
+            shader = s_UnlitShader;
+#else
             var features = GetUnlitShaderFeatures(gltfMaterial);
             bool doubleSided = (features & UnlitShaderFeatures.DoubleSided) != 0;
-            Shader shader = null;
             if(!unlitShaders.TryGetValue(features, out shader)) {
                 bool alphaBlend = (features & UnlitShaderFeatures.AlphaBlend) != 0;
                 var shaderName = string.Format(
@@ -178,6 +191,7 @@ namespace GLTFast.Materials {
                 shader = FindShader(shaderName);
                 unlitShaders[features] = shader;
             }
+#endif
             if(shader==null) {
                 return null;
             }
@@ -506,6 +520,7 @@ namespace GLTFast.Materials {
             return feature;
         }
         
+#if !UNITY_SHADER_GRAPH_12_OR_NEWER
         static UnlitShaderFeatures GetUnlitShaderFeatures(Schema.Material gltfMaterial) {
 
             var feature = UnlitShaderFeatures.Default;
@@ -516,6 +531,7 @@ namespace GLTFast.Materials {
             }
             return feature;
         }
+#endif
     }
 }
 #endif // GLTFAST_SHADER_GRAPH
