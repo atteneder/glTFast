@@ -47,7 +47,7 @@ namespace GLTFast.Materials {
         
 #if USING_HDRP_10_OR_NEWER
         protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
-            return "Shader Graphs/glTF-generic";
+            return "Shader Graphs/glTF-pbrMetallicRoughness";
         }
 
         protected override void SetDoubleSided(Schema.Material gltfMaterial, Material material) {

@@ -155,7 +155,7 @@ namespace GLTFast.Materials {
         protected virtual string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
             // Shader Graph 12 and newer support the Built-In target, so we use it.
-            return "Shader Graphs/glTF-generic";
+            return "Shader Graphs/glTF-pbrMetallicRoughness";
 #else
             var doubleSided = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0;
             var mode = (ShaderMode)(metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
