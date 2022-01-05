@@ -26,23 +26,11 @@ namespace GLTFast.Materials {
         static readonly int k_AlphaCutoffEnable = Shader.PropertyToID("_AlphaCutoffEnable");
 
 #if USING_HDRP_10_OR_NEWER
-        // const string KW_DISABLE_DECALS = "_DISABLE_DECALS";
-        const string KW_DISABLE_SSR_TRANSPARENT = "_DISABLE_SSR_TRANSPARENT";
         const string KW_DOUBLESIDED_ON = "_DOUBLESIDED_ON";
-        const string KW_ENABLE_FOG_ON_TRANSPARENT = "_ENABLE_FOG_ON_TRANSPARENT";
-        const string KW_SURFACE_TYPE_TRANSPARENT = "_SURFACE_TYPE_TRANSPARENT";
-        
-        const string k_ShaderPassTransparentDepthPrepass = "TransparentDepthPrepass";
-        const string k_ShaderPassTransparentDepthPostpass = "TransparentDepthPostpass";
-        const string k_ShaderPassTransparentBackface = "TransparentBackface";
-        const string k_ShaderPassRayTracingPrepass = "RayTracingPrepass";
-        const string k_ShaderPassDepthOnlyPass = "DepthOnly";
 
         static readonly int k_DoubleSidedEnablePropId = Shader.PropertyToID("_DoubleSidedEnable");
         static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
         static readonly int k_DoubleSidedConstantsPropId = Shader.PropertyToID("_DoubleSidedConstants");
-        static readonly int k_AlphaDstBlendPropId = Shader.PropertyToID("_AlphaDstBlend");
-        static readonly int k_CullModeForwardPropId = Shader.PropertyToID("_CullModeForward");
 #endif
         
 #if USING_HDRP_10_OR_NEWER

@@ -103,7 +103,6 @@ namespace GLTFast.Materials {
 #if USING_HDRP_10_OR_NEWER || USING_URP_12_OR_NEWER
         // const string KW_DISABLE_DECALS = "_DISABLE_DECALS";
         protected const string KW_DISABLE_SSR_TRANSPARENT = "_DISABLE_SSR_TRANSPARENT";
-        protected const string KW_DOUBLESIDED_ON = "_DOUBLESIDED_ON";
         protected const string KW_ENABLE_FOG_ON_TRANSPARENT = "_ENABLE_FOG_ON_TRANSPARENT";
         protected const string KW_SURFACE_TYPE_TRANSPARENT = "_SURFACE_TYPE_TRANSPARENT";
         
@@ -114,10 +113,6 @@ namespace GLTFast.Materials {
         protected const string k_ShaderPassDepthOnlyPass = "DepthOnly";
         
         protected static readonly int k_AlphaDstBlendPropId = Shader.PropertyToID("_AlphaDstBlend");
-        protected static readonly int k_CullModeForwardPropId = Shader.PropertyToID("_CullModeForward");
-        protected static readonly int k_DoubleSidedConstantsPropId = Shader.PropertyToID("_DoubleSidedConstants");
-        protected static readonly int k_DoubleSidedEnablePropId = Shader.PropertyToID("_DoubleSidedEnable");
-        protected static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
         protected static readonly int k_ZTestGBufferPropId = Shader.PropertyToID("_ZTestGBuffer");
 #endif
         
