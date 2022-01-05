@@ -106,7 +106,7 @@ namespace GLTFast.Materials {
                 throw new System.Exception("glTFast: Unknown Render Pipeline");
             }
 #if UNITY_SHADER_GRAPH_12_OR_NEWER && !GLTFAST_FORCE_BUILTIN_SHADERS
-            defaultMaterialGenerator = new ShaderGraphMaterialGenerator();
+            defaultMaterialGenerator = new BuiltInShaderGraphMaterialGenerator();
             return defaultMaterialGenerator;
 #elif GLTFAST_BUILTIN_RP || UNITY_EDITOR
             defaultMaterialGenerator = new BuiltInMaterialGenerator();
