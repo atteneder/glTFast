@@ -24,7 +24,14 @@ namespace GLTFast.Materials {
     public class HighDefinitionRPMaterialGenerator : ShaderGraphMaterialGenerator {
         
         static readonly int k_AlphaCutoffEnable = Shader.PropertyToID("_AlphaCutoffEnable");
+        // static readonly int k_RenderQueueType = Shader.PropertyToID("_RenderQueueType");
+        // static readonly int k_SurfaceType = Shader.PropertyToID("_SurfaceType");
+        static readonly int k_ZTestDepthEqualForOpaque = Shader.PropertyToID("_ZTestDepthEqualForOpaque");
 
+        protected const string k_DistortionVectorsPass = "DistortionVectors";
+
+        public static readonly int cullModeForwardPropId = Shader.PropertyToID("_CullModeForward");
+        
 #if USING_HDRP_10_OR_NEWER
         const string KW_DOUBLESIDED_ON = "_DOUBLESIDED_ON";
 
@@ -59,29 +66,59 @@ namespace GLTFast.Materials {
             material.SetVector(k_DoubleSidedConstantsPropId, new Vector4(-1,-1,-1,0));
                 
             material.SetFloat(cullModePropId, (int)CullMode.Off);
+            material.SetFloat(cullModeForwardPropId, (int)CullMode.Off);
         }
 #endif
 
         protected override void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
             base.SetAlphaModeMask(gltfMaterial,material);
+            
             material.SetFloat(k_AlphaCutoffEnable, 1);
             material.SetOverrideTag(TAG_MOTION_VECTOR,TAG_MOTION_VECTOR_USER);
             material.SetShaderPassEnabled(k_MotionVectorsPass,false);
+            
+            
+            if (gltfMaterial.extensions?.KHR_materials_unlit != null) {
+                material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
+                material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
+                material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
+            
+                material.SetOverrideTag(TAG_RENDER_TYPE,TAG_RENDER_TYPE_TRANSPARENT);
+
+                material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPrepass, false);
+                material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);
+                material.SetShaderPassEnabled(k_ShaderPassTransparentBackface, false);
+                material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
+                material.SetShaderPassEnabled(k_ShaderPassDepthOnlyPass, false);
+                material.SetShaderPassEnabled(k_DistortionVectorsPass,false);
+                
+                material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+                material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+                material.SetFloat(srcBlendPropId, (int) BlendMode.One);
+                // material.SetFloat(k_RenderQueueType, 4);
+                // material.SetFloat(k_SurfaceType, 1);
+                material.SetFloat(k_ZTestDepthEqualForOpaque, (int)CompareFunction.LessEqual);
+                material.SetFloat(zWritePropId, 0);
+            }
         }
 
 #if USING_HDRP_10_OR_NEWER
         protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
+            
             material.EnableKeyword(KW_ALPHATEST_ON);
             material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
             // material.EnableKeyword(KW_DISABLE_DECALS);
             material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
             material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
+            
             material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
+            
             material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPrepass, false);
             material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);
             material.SetShaderPassEnabled(k_ShaderPassTransparentBackface, false);
             material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
             material.SetShaderPassEnabled(k_ShaderPassDepthOnlyPass, false);
+            
             material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
             material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10

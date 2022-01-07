@@ -216,7 +216,7 @@ namespace GLTFast.Materials {
             if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial);
                 materialType = MaterialType.Unlit;
-                shaderMode = gltfMaterial.alphaModeEnum != AlphaMode.OPAQUE ? ShaderMode.Blend : ShaderMode.Opaque;
+                shaderMode = gltfMaterial.alphaModeEnum == AlphaMode.BLEND ? ShaderMode.Blend : ShaderMode.Opaque;
             } else {
                 bool isMetallicRoughness = gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness == null;
                 if (isMetallicRoughness) {
@@ -368,6 +368,11 @@ namespace GLTFast.Materials {
 
             if (gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
                 SetAlphaModeMask(gltfMaterial, material);
+#if USING_HDRP
+                if (gltfMaterial.extensions?.KHR_materials_unlit != null) {
+                    renderQueue = RenderQueue.Transparent;
+                } else
+#endif
                 renderQueue = RenderQueue.AlphaTest;
             } else {
                 material.SetFloat(cutoffPropId, 0);
