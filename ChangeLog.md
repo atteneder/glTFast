@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Built-In render pipe *if* the Shader Graph package 12 or newer is installed (see [upgrade guide](./Documentation~/glTFast.md#upgrade-to-4.5) for details)
 ### Fixed
 - Correct emission in HDRP 12 and later
+- (Shader Graph) Vertex color alpha channel is used properly
+- (Shader Graph) Correct vertex colors when project uses linear color space
 
 ## [4.4.11] - 2022-01-24
 ### Changed
