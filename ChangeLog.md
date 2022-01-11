@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Correct emission in HDRP 12 and later
 - (Shader Graph) Vertex color alpha channel is used properly
 - (Shader Graph) Correct vertex colors when project uses linear color space
+- (Shader Graph) Emission is now in correct color space
 
 ## [4.4.11] - 2022-01-24
 ### Changed
