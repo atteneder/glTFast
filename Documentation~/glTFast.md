@@ -423,7 +423,7 @@ Depending on the Unity version and render pipeline in use, different shader grap
 - Shader graphs in folder `Runtime/Shader/Legacy` for older Universal / High-Definition render pipe versions
 - Shaders in folder `Runtime/Shader/Built-In` for the built-in render pipeline
 
-#### Shader Graph and the Built-In Render Pipeline
+#### Shader Graphs and the Built-In Render Pipeline
 
 > This approach is experimental and has know shading issues
 

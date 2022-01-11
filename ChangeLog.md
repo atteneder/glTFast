@@ -5,11 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Generic shader graphs (to reduce the amount of shader graphs to maintain and reduce shader variants)
+  - `glTF-pbrMetallicRoughness`
+  - `glTF-pbrSpecularGlossiness`
+  - `glTF-unlit`
 ### Changed
-- Generic shader graph `glTF-pbrMetallicRoughness` is used for
+- The new, generic shader graphs are used for
   - Universal render pipe 12 or newer
   - High-Definition render pipe 10 or newer
-  - Built-In render pipe *if* the Shader Graph package 12 or newer is installed (see [upgrade guide](./Documentation~/glTFast.md#upgrade-to-4.5) for details)
+  - Optional/Experimental for the Built-In render pipe (see [Shader Graphs and the Built-In Render Pipeline](./Documentation~/glTFast.md#shader-graphs-and-the-built-in-render-pipeline) in the documentatoin for details)
+
 ### Fixed
 - Correct emission in HDRP 12 and later
 - (Shader Graph) Vertex color alpha channel is used properly
