@@ -419,7 +419,7 @@ Depending on the Unity version and render pipeline in use, different shader grap
 - Shader graphs under `Runtime/Shader` for
   - Universal render pipe 12 or newer
   - High-Definition render pipe 10 or newer
-  - Built-In render pipe *if* the Shader Graph package 12 or newer is installed
+  - Built-in render pipe (experimental opt-in; see below)
 - Shader graphs in folder `Runtime/Shader/Legacy` for older Universal / High-Definition render pipe versions
 - Shaders in folder `Runtime/Shader/Built-In` for the built-in render pipeline
 
