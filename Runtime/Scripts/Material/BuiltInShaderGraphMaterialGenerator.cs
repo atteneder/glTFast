@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-#if UNITY_SHADER_GRAPH_12_OR_NEWER && !GLTFAST_FORCE_BUILTIN_SHADERS
+#if UNITY_SHADER_GRAPH_12_OR_NEWER && GLTFAST_BUILTIN_SHADER_GRAPH
 
 using UnityEngine;
 using UnityEngine.Rendering;
