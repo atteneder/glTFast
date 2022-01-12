@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - Matrix decompose error (thanks [weichx][weichx])
+- Flickering animation on invalid glTFs from Sketchfab (#298)
 
 ## [4.4.9] - 2021-12-20
 ### Fixed

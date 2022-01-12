@@ -52,6 +52,10 @@ namespace GLTFast {
             // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
             var values = quaternions.Reinterpret<quaternion>();
 
+#if DEBUG
+            uint duplicates = 0;
+#endif
+            
             switch (interpolationType) {
                 case InterpolationType.STEP: {
                     for (var i = 0; i < times.Length; i++) {
@@ -85,6 +89,15 @@ namespace GLTFast {
                     for (var i = 1; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
+                        
+                        if (prevTime >= time) {
+                            // Time value is not increasing, so we ignore this keyframe
+                            // This happened on some Sketchfab files (see #298)
+#if DEBUG
+                            duplicates++;
+#endif
+                            continue;
+                        }
                         
                         // Ensure shortest path rotation ( see https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#interpolation-slerp )
                         if (math.dot(prevValue, value) < 0) {
@@ -127,6 +140,12 @@ namespace GLTFast {
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.w", rotW);
             Profiler.EndSample();
+
+#if DEBUG
+            if (duplicates > 0) {
+                ReportDuplicateKeyframes();
+            }
+#endif
         }
 
         public static string CreateAnimationPath(int nodeIndex, string[] nodeNames, int[] parentIndex) {
@@ -187,6 +206,10 @@ namespace GLTFast {
             var curveY = new AnimationCurve();
             var curveZ = new AnimationCurve();
 
+#if DEBUG
+            uint duplicates = 0;
+#endif
+
             switch (interpolationType) {
                 case InterpolationType.STEP: {
                     for (var i = 0; i < times.Length; i++) {
@@ -218,6 +241,15 @@ namespace GLTFast {
                     for (var i = 1; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
+                        
+                        if (prevTime >= time) {
+                            // Time value is not increasing, so we ignore this keyframe
+                            // This happened on some Sketchfab files (see #298)
+#if DEBUG
+                            duplicates++;
+#endif
+                            continue;
+                        }
                         
                         var dT = time - prevTime;
                         var dV = value - prevValue;
@@ -251,12 +283,21 @@ namespace GLTFast {
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}y", curveY);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}z", curveZ);
             Profiler.EndSample();
+#if DEBUG
+            if (duplicates > 0) {
+                ReportDuplicateKeyframes();
+            }
+#endif
         }
         
         static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyPrefix, int curveIndex, int valueStride, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
             Profiler.BeginSample("AnimationUtils.AddScalarCurve");
             var curve = new AnimationCurve();
             
+#if DEBUG
+            uint duplicates = 0;
+#endif
+
             switch (interpolationType) {
                 case InterpolationType.STEP: {
                     for (var i = 0; i < times.Length; i++) {
@@ -288,6 +329,15 @@ namespace GLTFast {
                         var valueIndex = i * valueStride + curveIndex;
                         var value = values[valueIndex];
                         
+                        if (prevTime >= time) {
+                            // Time value is not increasing, so we ignore this keyframe
+                            // This happened on some Sketchfab files (see #298)
+#if DEBUG
+                            duplicates++;
+#endif
+                            continue;
+                        }
+                        
                         var dT = time - prevTime;
                         var dV = value - prevValue;
                         float outTangent;
@@ -312,7 +362,18 @@ namespace GLTFast {
             
             clip.SetCurve(animationPath, typeof(SkinnedMeshRenderer), $"blendShape.{propertyPrefix}", curve);
             Profiler.EndSample();
+#if DEBUG
+            if (duplicates > 0) {
+                ReportDuplicateKeyframes();
+            }
+#endif
         }
+        
+#if DEBUG
+        static void ReportDuplicateKeyframes() {
+            Debug.LogError("Time of subsequent animation keyframes is not increasing (glTF-Validator error ACCESSOR_ANIMATION_INPUT_NON_INCREASING)");
+        }
+#endif
     }
 }
 
