@@ -77,17 +77,30 @@ namespace GLTFast {
         /// <param name="rotation">Rotation quaternion values</param>
         /// <param name="scale">Scale</param>
         public static void Decompose( this float3x3 m, out float4 rotation, out float3 scale ) {
+            var lenC0 = length(m.c0);
+            var lenC1 = length(m.c1);
+            var lenC2 = length(m.c2);
+    
             float3x3 rotationMatrix;
-            scale.x = normalize(m.c0,out rotationMatrix.c0);
-            scale.y = normalize(m.c1,out rotationMatrix.c1);
-            scale.z = normalize(m.c2,out rotationMatrix.c2);
+            rotationMatrix.c0 = m.c0 / lenC0;
+            rotationMatrix.c1 = m.c1 / lenC1;
+            rotationMatrix.c2 = m.c2 / lenC2;
+    
+            scale.x = lenC0;
+            scale.y = lenC1;
+            scale.z = lenC2;
 
             if (rotationMatrix.IsNegative()) {
                 rotationMatrix *= -1f;
                 scale *= -1f;
             }
-            normalize(ref rotationMatrix);
-            rotation = quaternion(rotationMatrix).value;
+
+            // Inlined normalize(rotationMatrix)
+            rotationMatrix.c0 = math.normalize(rotationMatrix.c0);
+            rotationMatrix.c1 = math.normalize(rotationMatrix.c1);
+            rotationMatrix.c2 = math.normalize(rotationMatrix.c2);
+    
+            rotation = new quaternion(rotationMatrix).value;
         }
 
         static float normalize(float3 input,out float3 output) {
