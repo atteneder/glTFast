@@ -86,20 +86,20 @@ namespace GLTFast {
                 rotationMatrix *= -1f;
                 scale *= -1f;
             }
-            normalize(rotationMatrix);
+            normalize(ref rotationMatrix);
             rotation = quaternion(rotationMatrix).value;
         }
 
         static float normalize(float3 input,out float3 output) {
-            float len = math.length(input);
+            var len = length(input);
             output = input/len;
             return len;
         }
 
-        static void normalize(float3x3 m) {
-            math.normalize(m.c0);
-            math.normalize(m.c1);
-            math.normalize(m.c2);
+        static void normalize(ref float3x3 m) {
+            m.c0 = math.normalize(m.c0);
+            m.c1 = math.normalize(m.c1);
+            m.c2 = math.normalize(m.c2);
         }
 
         static bool IsNegative(this float3x3 m) {

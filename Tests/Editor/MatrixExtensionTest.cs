@@ -13,10 +13,12 @@
 // limitations under the License.
 //
 
+using GLTFast.Materials;
 using NUnit.Framework;
 using UnityEngine;
 using Unity.Mathematics;
 using UnityEngine.Profiling;
+using UnityEngine.TestTools.Utils;
 
 namespace GLTFast.Tests
 {
@@ -53,29 +55,39 @@ namespace GLTFast.Tests
             );
 
             var m2 = new float4x4(
-                m.m00,m.m01,m.m02,m.m03,
-                m.m10,m.m11,m.m12,m.m13,
-                m.m20,m.m21,m.m22,m.m23,
-                m.m30,m.m31,m.m32,m.m33
+                m.m00, m.m01, m.m02, m.m03,
+                m.m10, m.m11, m.m12, m.m13,
+                m.m20, m.m21, m.m22, m.m23,
+                m.m30, m.m31, m.m32, m.m33
             );
 
-            for (int i = 0; i < 100000; i++) {
-                Profiler.BeginSample("Matrix4x4.DecomposeUnity");
-                if(m.ValidTRS()) {
-                    Vector3 t1 = new Vector3( m.m03, m.m13, m.m23 );
-                    Quaternion r1 = m.rotation;
-                    Vector3 s1 = m.lossyScale;
-                }
-                Profiler.EndSample();
-
-                Profiler.BeginSample("Matrix4x4.DecomposeCustom");
-                m.Decompose(out var t, out var r, out var s);
-                Profiler.EndSample();
-
-                Profiler.BeginSample("float4x4.Decompose");
-                m2.Decompose(out var t3, out var r3, out var s3);
-                Profiler.EndSample();
+            Profiler.BeginSample("Matrix4x4.DecomposeUnity");
+            if (m.ValidTRS()) {
+                Vector3 t1 = new Vector3(m.m03, m.m13, m.m23);
+                Quaternion r1 = m.rotation;
+                Vector3 s1 = m.lossyScale;
             }
+
+            Profiler.EndSample();
+
+            Profiler.BeginSample("Matrix4x4.DecomposeCustom");
+            m.Decompose(out var t, out var r, out var s);
+            Profiler.EndSample();
+
+            var comparer3 = new Vector3EqualityComparer(10e-6f);
+            var comparer4 = new QuaternionEqualityComparer(10e-6f);
+            
+            Assert.That(t, Is.EqualTo(new Vector3(0, 0, 0)).Using(comparer3));
+            Assert.That(r, Is.EqualTo(new Quaternion(0.65328151f, -0.270598054f, 0.270598054f, 0.65328151f)).Using(comparer4));
+            Assert.That(s, Is.EqualTo(new Vector3(-.99999994f, -.99999994f, -1)).Using(comparer3));
+            
+            Profiler.BeginSample("float4x4.Decompose");
+            m2.Decompose(out var t3, out var r3, out var s3);
+            Profiler.EndSample();
+
+            Assert.That((Vector3)t3, Is.EqualTo(new Vector3(0, 0, 0)).Using(comparer3));
+            Assert.That((Quaternion) new quaternion(r3), Is.EqualTo(new Quaternion(0.65328151f, -0.270598054f, 0.270598054f, 0.65328151f)).Using(comparer4));
+            Assert.That((Vector3)s3, Is.EqualTo(new Vector3(-.99999994f, -.99999994f, -1)).Using(comparer3));
         }
     }
 }
