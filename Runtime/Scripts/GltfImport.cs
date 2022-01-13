@@ -2264,7 +2264,7 @@ namespace GLTFast {
         }
 
         MorphTargetsContext CreateMorphTargetsContext(MeshPrimitive primitive,string[] meshTargetNames) {
-            var morphTargetsContext = new MorphTargetsContext(primitive.targets.Length,meshTargetNames);
+            var morphTargetsContext = new MorphTargetsContext(primitive.targets.Length,meshTargetNames,deferAgent);
             foreach (var morphTarget in primitive.targets) {
                 var success = morphTargetsContext.AddMorphTarget(
                     this,

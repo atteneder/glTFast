@@ -19,11 +19,9 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Mesh = UnityEngine.Mesh;
 using System.Threading.Tasks;
-using System.Threading;
 
 namespace GLTFast {
 
@@ -32,12 +30,14 @@ namespace GLTFast {
         NativeArray<JobHandle> handles;
         int currentIndex;
         string[] meshTargetNames;
+        IDeferAgent deferAgent;
 
-        public MorphTargetsContext(int morphTargetCount, string[] meshTargetNames) {
+        public MorphTargetsContext(int morphTargetCount, string[] meshTargetNames, IDeferAgent deferAgent) {
             contexts = new MorphTargetContext[morphTargetCount];
             handles = new NativeArray<JobHandle>(morphTargetCount, VertexBufferConfigBase.defaultAllocator);
             currentIndex = 0;
             this.meshTargetNames = meshTargetNames;
+            this.deferAgent = deferAgent;
         }
         
         public bool AddMorphTarget(
@@ -76,8 +76,9 @@ namespace GLTFast {
         public async Task ApplyOnMeshAndDispose(Mesh mesh) {
             for (var index = 0; index < contexts.Length; index++) {
                 var context = contexts[index];
-                await context.AddToMesh(mesh, meshTargetNames?[index] ?? index.ToString());
+                context.AddToMesh(mesh, meshTargetNames?[index] ?? index.ToString());
                 context.Dispose();
+                await deferAgent.BreakPoint();
             }
             contexts = null;
         }
@@ -298,12 +299,10 @@ namespace GLTFast {
             return handle;
         }
 
-        public async Task AddToMesh(Mesh mesh, string name) {
+        public void AddToMesh(Mesh mesh, string name) {
             Profiler.BeginSample("AddBlendShapeFrame");
             mesh.AddBlendShapeFrame(name,1f,positions,normals,tangents);
             Profiler.EndSample();
-            // await Task.Delay(20, CancellationToken.None);
-            await Task.Yield();
         }
 
         public void Dispose() {
