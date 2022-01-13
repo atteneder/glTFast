@@ -78,8 +78,7 @@ namespace GLTFast {
             // Profiler.EndSample();
 #endif
 
-            Primitive ?p = new Primitive(mesh,materials);
-            return p;
+            return new Primitive(mesh,materials);
         }
     }
 }

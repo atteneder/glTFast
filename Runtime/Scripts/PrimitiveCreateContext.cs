@@ -128,8 +128,7 @@ namespace GLTFast {
 
             Profiler.EndSample();
 
-            Primitive? p = new Primitive(msh, materials);
-            return p;
+            return new Primitive(msh,materials);
         }
         
         void Dispose() {
