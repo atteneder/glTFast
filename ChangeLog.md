@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Improved frame rate when loading glTFs with many morph targets (thanks [Eric Beets][EricBeetsOfficial-Opuscope] for #287)
 ### Fixed
 - Matrix decompose error (thanks [weichx][weichx])
 - Flickering animation on invalid glTFs from Sketchfab (#298)
