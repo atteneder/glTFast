@@ -80,7 +80,7 @@ namespace GLTFast {
             nodes[nodeIndex].transform.SetParent(nodes[parentIndex].transform,false);
         }
 
-        public void SetNodeName(uint nodeIndex, string name) {
+        public virtual void SetNodeName(uint nodeIndex, string name) {
             nodes[nodeIndex].name = name ?? $"Node-{nodeIndex}";
         }
 
