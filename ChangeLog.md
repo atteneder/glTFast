@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [4.4.10] - 2022-01-14
 ### Changed
 - Improved frame rate when loading glTFs with many morph targets (thanks [Eric Beets][EricBeetsOfficial-Opuscope] for #287)
-- `GameObjectInstantiator.SetNodeName` can be overriden now (thanks [STUDIO NYX][NyxStudio] for #297)
+- `GameObjectInstantiator.SetNodeName` can be overridden now (thanks [STUDIO NYX][NyxStudio] for #297)
 ### Fixed
 - Matrix decompose error (thanks [weichx][weichx])
 - Flickering animation on invalid glTFs from Sketchfab (#298)
