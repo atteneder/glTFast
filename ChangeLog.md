@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - Improved frame rate when loading glTFs with many morph targets (thanks [Eric Beets][EricBeetsOfficial-Opuscope] for #287)
+- `GameObjectInstantiator.SetNodeName` can be overriden now (thanks [STUDIO NYX][NyxStudio] for #297)
 ### Fixed
 - Matrix decompose error (thanks [weichx][weichx])
 - Flickering animation on invalid glTFs from Sketchfab (#298)
@@ -546,5 +547,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [mikejurka]: https://github.com/mikejurka
 [ReadyPlayerMe]: https://readyplayer.me
 [rt-nikowiss]: https://github.com/rt-nikowiss
+[NyxStudio]: https://github.com/NyxStudio
 [zharry]: https://github.com/zharry
 [weichx]: https://gist.github.com/weichx
