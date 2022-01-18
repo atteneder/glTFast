@@ -144,6 +144,11 @@ namespace GLTFast.Editor {
                 var clips = m_Gltf.GetAnimationClips();
                 if (clips != null) {
                     foreach (var animationClip in clips) {
+                        if (importSettings.animationMethod == ImportSettings.AnimationMethod.Mecanim) {
+                            var settings = AnimationUtility.GetAnimationClipSettings(animationClip);
+                            settings.loopTime = true;
+                            AnimationUtility.SetAnimationClipSettings (animationClip, settings);
+                        }
                         AddObjectToAsset(ctx, $"animations/{animationClip.name}", animationClip);
                     }
                 }
