@@ -49,15 +49,14 @@ namespace GLTFast.Vertex
     }
     
     [StructLayout(LayoutKind.Sequential)]
-    struct VBones {
-        public float weight0;
-        public float weight1;
-        public float weight2;
-        public float weight3;
+    unsafe struct VBones {
+        public fixed float weights[4];
+        public fixed uint joints[4];
 
-        public uint joint0;
-        public uint joint1;
-        public uint joint2;
-        public uint joint3;
+#if DEBUG
+        public override string ToString() {
+            return $"{joints[0]}/{weights[0]}, {joints[1]}/{weights[1]}, {joints[2]}/{weights[2]}, {joints[3]}/{weights[3]}";
+        }
+#endif
     }
 }

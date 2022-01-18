@@ -16,6 +16,7 @@
 using System.Runtime.CompilerServices;
 using System;
 using AOT;
+using GLTFast.Vertex;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -2102,6 +2103,60 @@ namespace GLTFast.Jobs {
             var resultV = (uint4*) (((byte*)result) + (i*outputByteStride));
             var off = (ushort*) (input + (i*inputByteStride));
             *resultV = new uint4(off[0],off[1],off[2],off[3]);
+        }
+    }
+    
+    [BurstCompile]
+    struct SortJointsByWeightsJob : IJobParallelFor {
+
+        public NativeArray<VBones> bones;
+        
+        /// <summary>
+        /// Number of skin weights that are taken into account (project quality setting)
+        /// </summary>
+        public int skinWeights;
+
+
+        public unsafe void Execute(int index) {
+            var v = bones[index];
+
+            // Most joints/weights are already sorted by weight
+            // Detect and early return if true
+            var asc = true;
+            for (var i = 0; i < 3; i++) {
+                var a = v.weights[i];
+                var b = v.weights[i + 1];
+                if (a < b) {
+                    asc = false;
+                    break;
+                }
+            }
+            if (asc) return;
+
+            // Sort otherwise
+            for (var i = 0; i < skinWeights; i++) {
+                var max = v.weights[i];
+                var maxI = i;
+
+                for (var j = i+1; j < 4; j++) {
+                    var value = v.weights[j];
+                    if (v.weights[j] > max) {
+                        max = value;
+                        maxI = j;
+                    }
+                }
+
+                if (maxI > i) {
+                    Swap(ref v, maxI, i);
+                }
+            }
+
+            bones[index] = v;
+        }
+
+        static unsafe void Swap(ref VBones v, int a, int b) {
+            (v.weights[a], v.weights[b]) = (v.weights[b], v.weights[a]);
+            (v.joints[a], v.joints[b]) = (v.joints[b], v.joints[a]);
         }
     }
 

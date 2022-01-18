@@ -61,7 +61,7 @@ namespace GLTFast
             this.logger = logger;
         }
         
-        public abstract unsafe JobHandle? ScheduleVertexJobs(
+        public abstract JobHandle? ScheduleVertexJobs(
             IGltfBuffers buffers,
             int positionAccessorIndex,
             int normalAccessorIndex,

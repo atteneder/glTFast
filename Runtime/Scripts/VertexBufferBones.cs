@@ -13,7 +13,9 @@
 // limitations under the License.
 //
 
+using System;
 using System.IO;
+using GLTFast.Jobs;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -36,12 +38,11 @@ namespace GLTFast {
             this.logger = logger;
         }
 
-        public abstract bool ScheduleVertexBonesJob(
+        public abstract JobHandle? ScheduleVertexBonesJob(
             IGltfBuffers buffers,
             int weightsAccessorIndex,
-            int jointsAccessorIndex,
-            NativeSlice<JobHandle> handles
-            );
+            int jointsAccessorIndex
+        );
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
@@ -52,12 +53,11 @@ namespace GLTFast {
 
         public VertexBufferBones(ICodeLogger logger) : base(logger) {}
         
-        public override unsafe bool ScheduleVertexBonesJob(
+        public override unsafe JobHandle? ScheduleVertexBonesJob(
             IGltfBuffers buffers,
             int weightsAccessorIndex,
-            int jointsAccessorIndex,
-            NativeSlice<JobHandle> handles
-            )
+            int jointsAccessorIndex
+        )
         {
             Profiler.BeginSample("ScheduleVertexBonesJob");
             Profiler.BeginSample("AllocateNativeArray");
@@ -69,6 +69,9 @@ namespace GLTFast {
             vData = new NativeArray<VBones>(weightsAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
             Profiler.EndSample();
+
+            JobHandle weightsHandle;
+            JobHandle jointsHandle;
             
             {
                 var h = GetWeightsJob(
@@ -81,10 +84,10 @@ namespace GLTFast {
                     weightsAcc.normalized
                 );
                 if (h.HasValue) {
-                    handles[0] = h.Value;
+                    weightsHandle = h.Value;
                 } else {
                     Profiler.EndSample();
-                    return false;
+                    return null;
                 }
             }
 
@@ -103,14 +106,27 @@ namespace GLTFast {
                     logger
                 );
                 if (h.HasValue) {
-                    handles[1] = h.Value;
+                    jointsHandle = h.Value;
                 } else {
                     Profiler.EndSample();
-                    return false;
+                    return null;
                 }
             }
+
+            var jobHandle = JobHandle.CombineDependencies(weightsHandle,jointsHandle);
+
+            var skinWeights = (int)QualitySettings.skinWeights;
+
+            if(skinWeights < 4) {
+                var job = new SortJointsByWeightsJob {
+                    bones = vData,
+                    skinWeights = math.max(1,skinWeights)
+                };
+                jobHandle = job.Schedule(vData.Length, GltfImport.DefaultBatchCount, jobHandle); 
+            }
+            
             Profiler.EndSample();
-            return true;
+            return jobHandle;
         }
 
         public override void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream) {

@@ -127,7 +127,7 @@ namespace GLTFast
 
             hasBones = weightsAccessorIndex >= 0 && jointsAccessorIndex >= 0;
             if(hasBones) {
-                jobCount+=2;
+                jobCount++;
                 bones = new VertexBufferBones(logger);
             }
 
@@ -254,17 +254,18 @@ namespace GLTFast
             }
 
             if (hasBones) {
-                bones.ScheduleVertexBonesJob(
+                var h = bones.ScheduleVertexBonesJob(
                     buffers,
                     weightsAccessorIndex,
-                    jointsAccessorIndex,
-                    new NativeSlice<JobHandle>(
-                        handles,
-                        handleIndex,
-                        2
-                        )
-                    );
-                handleIndex+=2;
+                    jointsAccessorIndex
+                );
+                if (h.HasValue) {
+                    handles[handleIndex] = h.Value;
+                    handleIndex++;
+                } else {
+                    Profiler.EndSample();
+                    return null;
+                }
             }
             
             var handle = (jobCount > 1) ? JobHandle.CombineDependencies(handles) : handles[0];
