@@ -24,6 +24,10 @@ using UnityEngine;
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
 
+        public class Settings {
+            public bool skinUpdateWhenOffscreen = true;
+        }
+        
         public class SceneInstance {
             public List<Camera> cameras { get; private set; }
 
@@ -34,6 +38,8 @@ namespace GLTFast {
                 cameras.Add(camera);
             }
         }
+        
+        protected Settings settings;
         
         protected ICodeLogger logger;
         
@@ -48,10 +54,17 @@ namespace GLTFast {
         /// </summary>
         public SceneInstance sceneInstance { get; protected set; }
         
-        public GameObjectInstantiator(IGltfReadable gltf, Transform parent, ICodeLogger logger = null) {
+        public GameObjectInstantiator(
+            IGltfReadable gltf,
+            Transform parent,
+            ICodeLogger logger = null,
+            Settings settings = null
+            )
+        {
             this.gltf = gltf;
             this.parent = parent;
             this.logger = logger;
+            this.settings = settings ?? new Settings();
         }
 
         public virtual void Init() {
@@ -114,6 +127,7 @@ namespace GLTFast {
                 renderer = mr;
             } else {
                 var smr = meshGo.AddComponent<SkinnedMeshRenderer>();
+                smr.updateWhenOffscreen = settings.skinUpdateWhenOffscreen;
                 if (joints != null) {
                     var bones = new Transform[joints.Length];
                     for (var j = 0; j < bones.Length; j++)

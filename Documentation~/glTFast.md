@@ -211,6 +211,16 @@ public class YourCustomInstantiator : GLTFast.IInstantiator {
   gltfAsset.InstantiateMainScene( new YourCustomInstantiator() );
 ```
 
+##### GameObjectInstantiator Setup
+
+The `GameObjectInstantiator` accepts settings (via the constructor's `settings` parameter).
+
+###### `skinUpdateWhenOffscreen`
+
+Meshes that are skinned or have morph targets and are animated might move way outside their initial bounding box and thus break the culling. To prevent this the `SkinnedMeshRenderer`'s *Update When Offscreen* property is enabled by default. This comes at a runtime performance cost (see [Determining a GameObject’s visibility](https://docs.unity3d.com/2021.2/Documentation/Manual/class-SkinnedMeshRenderer.html) from the documentation).
+
+You can disable this by setting `skinUpdateWhenOffscreen` to false.
+
 #### Logging
 
 When loading a glTF file, glTFast logs messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those log messages. Examples:
