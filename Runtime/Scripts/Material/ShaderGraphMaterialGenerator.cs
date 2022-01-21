@@ -93,7 +93,7 @@ namespace GLTFast.Materials {
         static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("metallicRoughnessTexture_ST");
         static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("metallicRoughnessTextureRotation");
         static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("metallicRoughnessTextureUVChannel");
-        
+        static readonly int specularFactorPropId = Shader.PropertyToID("_SpecularFactor");
         static readonly int smoothnessPropId = Shader.PropertyToID("_Smoothness");
         protected static readonly int transmissionFactorPropId = Shader.PropertyToID("transmissionFactor");
         protected static readonly int transmissionTexturePropId = Shader.PropertyToID("_TransmittanceColorMap");
@@ -247,7 +247,11 @@ namespace GLTFast.Materials {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
                     baseColorLinear = specGloss.diffuseColor;
+#if UNITY_SHADER_GRAPH_12_OR_NEWER
+                    material.SetVector(specularFactorPropId, specGloss.specularColor);
+#else
                     material.SetVector(specColorPropId, specGloss.specularColor);
+#endif                    
                     material.SetFloat(smoothnessPropId, specGloss.glossinessFactor);
 
                     TrySetTexture(
