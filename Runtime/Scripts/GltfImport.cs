@@ -1170,30 +1170,6 @@ namespace GLTFast {
 
 #endif // MESHOPT
 
-        private struct SamplerKey : IEquatable<SamplerKey> {
-            private Sampler m_s;
-            public Sampler Sampler {
-                get { return m_s; }
-            }
-
-            public SamplerKey(Sampler sampler) {
-                m_s = sampler;
-            }
-
-            public override int GetHashCode() {
-                return (m_s.magFilter, m_s.minFilter, m_s.wrapS, m_s.wrapT).GetHashCode();
-            }
-
-            public bool Equals(SamplerKey other) {
-                return m_s.magFilter == other.m_s.magFilter &&
-                    m_s.minFilter == other.m_s.minFilter &&
-                    m_s.wrapS == other.m_s.wrapS &&
-                    m_s.wrapT == other.m_s.wrapT;
-            }
-
-            public override bool Equals(object obj) => obj is SamplerKey other && Equals(other);
-        }
-
         async Task<bool> Prepare() {
             if(gltfRoot.meshes!=null) {
                 meshPrimitiveIndex = new int[gltfRoot.meshes.Length+1];
@@ -1291,7 +1267,7 @@ namespace GLTFast {
                 {
                     var txt = gltfRoot.textures[textureIndex];
                     SamplerKey key;
-                    if(txt.sampler >= 0) {
+                    if(txt.sampler>=0) {
                         key = new SamplerKey(gltfRoot.samplers[txt.sampler]);
                     } else {
                         key = defaultKey;
@@ -1299,11 +1275,10 @@ namespace GLTFast {
 
                     var imageIndex = txt.GetImageIndex();
                     var img = images[imageIndex];
-                    if(imageVariants[imageIndex] == null) {
+                    if(imageVariants[imageIndex]==null) {
                         if(txt.sampler>=0) {
                             key.Sampler.Apply(img, settings.defaultMinFilterMode, settings.defaultMagFilterMode);
                         }
-
                         imageVariants[imageIndex] = new Dictionary<SamplerKey,Texture2D>();
                         imageVariants[imageIndex][key] = img;
                         textures[textureIndex] = img;
@@ -1311,13 +1286,13 @@ namespace GLTFast {
                         if (imageVariants[imageIndex].TryGetValue(key, out var imgVariant)) {
                             textures[textureIndex] = imgVariant;
                         } else {
-                            var newImg = UnityEngine.Object.Instantiate(img);
+                            var newImg = Texture2D.Instantiate(img);
                             resources.Add(newImg);
 #if DEBUG
                             newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
                             logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
-                            if (txt.sampler >= 0) {
+                            if (txt.sampler>=0) {
                                 key.Sampler.Apply(newImg, settings.defaultMinFilterMode, settings.defaultMagFilterMode);
                             }
                             imageVariants[imageIndex][key] = newImg;
