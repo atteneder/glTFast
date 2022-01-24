@@ -456,7 +456,7 @@ add `GLTFAST_EDITOR_IMPORT_OFF` to the *Scripting Define Symbols* in the *Player
 
 ### Upgrade to 4.5
 
-New shader graphs are used with certain Universal and High Definition render pipeline versions, so projects that included *glTFast*'s shaders have to check and update their included shaders or shader variant collections (see [Materials and Shader Variants](#materials-and-shader-variants for details)).
+New shader graphs are used with certain Universal and High Definition render pipeline versions, so projects that included *glTFast*'s shaders have to check and update their included shaders or shader variant collections (see [Materials and Shader Variants](#materials-and-shader-variants) for details).
 
 ### Upgrade to 4.x
 
