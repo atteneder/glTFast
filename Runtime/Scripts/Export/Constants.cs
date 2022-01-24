@@ -17,6 +17,6 @@ using UnityEngine;
 
 namespace GLTFast.Export {
     static class Constants {
-        public const string version = "4.4.11";   
+        public const string version = "4.5.0";   
     }
 }
