@@ -58,6 +58,7 @@ struct VertexOutputBaseSimple
 #endif
 
     half4 color                         : COLOR;
+    float pointSize                     : PSIZE;
     UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -142,6 +143,7 @@ VertexOutputBaseSimple vertForwardBaseSimple (VertexInput v)
     #if !GLOSSMAP
         o.eyeVec.w = saturate(_Glossiness + UNIFORM_REFLECTIVITY()); // grazing term
     #endif
+    o.pointSize = 1;
 
     UNITY_TRANSFER_FOG(o, o.pos);
     return o;
@@ -298,6 +300,7 @@ struct VertexOutputForwardAddSimple
     float2 texEmission                  : TEXCOORD8;
 #endif
     half4 color                         : COLOR;
+    float pointSize                     : PSIZE;
 
     UNITY_LIGHTING_COORDS(5, 6)
 
@@ -344,6 +347,7 @@ VertexOutputForwardAddSimple vertForwardAddSimple (VertexInput v)
             o.fogCoord.yzw = reflect(eyeVec, normalWorld);
         #endif
     #endif
+    o.pointSize = 1;
 
     UNITY_TRANSFER_FOG(o,o.pos);
     return o;
