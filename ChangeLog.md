@@ -15,7 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Universal render pipe 12 or newer
   - High-Definition render pipe 10 or newer
   - Optional/Experimental for the Built-In render pipe (see [Shader Graphs and the Built-In Render Pipeline](./Documentation~/glTFast.md#shader-graphs-and-the-built-in-render-pipeline) in the documentatoin for details)
-
 ### Fixed
 - Correct emission in HDRP 12 and later
 - (Shader Graph) Vertex color alpha channel is used properly
