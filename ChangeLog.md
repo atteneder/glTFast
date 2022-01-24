@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Editor Import): Imported Mecanim AnimationClips now have Loop Time set to true (fixes #291)
 ### Fixed
 - Improved skin deformation on unorderd-joints-glTFs in projects with `Skin Weights` (quality setting) below 4 (#294)
+- Textures are not duplicated anymore if they reference different samplers with equal settings (yields huge memory savings, depending on some glTFs; thanks [Vadim Andriyanov][Battlehub0x] for #304)
 
 ## [4.4.10] - 2022-01-14
 ### Changed
@@ -548,6 +549,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [DracoUnity]: https://github.com/atteneder/DracoUnity
 [aurorahcx]: https://github.com/aurorahcx
+[Battlehub0x]: https://github.com/Battlehub0x
 [Bersaelor]: https://github.com/Bersaelor
 [EricBeetsOfficial-Opuscope]: https://github.com/EricBeetsOfficial-Opuscope
 [hybridherbst]: https://github.com/hybridherbst
