@@ -39,6 +39,7 @@ using Debug = UnityEngine.Debug;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
 using Texture = GLTFast.Schema.Texture;
+using TextureFormat = UnityEngine.TextureFormat;
 
 #if DEBUG
 using System.Text;
@@ -63,6 +64,9 @@ namespace GLTFast.Export {
 #region Constants
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
+
+        const string k_MimeTypePNG = "image/png";
+        const string k_MimeTypeJPG = "image/jpeg";
 #endregion Constants
 
 #region Private
@@ -246,9 +250,44 @@ namespace GLTFast.Export {
                     return -1;
                 }
             }
-#else
-            throw new NotImplementedException("Exporting textures at runtime is not yet implemented");
+            else
 #endif
+            {
+                Texture2D exportTexture;
+                if (uTexture.isReadable) {
+                    exportTexture = uTexture as Texture2D;
+                    if (exportTexture == null) {
+                        m_Logger?.Error(LogCode.ImageFormatUnknown,uTexture.name,"n/a");
+                        return -1;
+                    }
+                } else {
+                    var destRenderTexture = RenderTexture.GetTemporary(uTexture.width, uTexture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                    Graphics.Blit(uTexture, destRenderTexture);
+                    exportTexture = new Texture2D(uTexture.width, uTexture.height, TextureFormat.ARGB32, false, true);
+                    exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
+                    exportTexture.Apply();
+                }
+
+                // TODO: smart PNG vs Jpeg decision
+                const bool hasAlpha = false;
+                var imageData = hasAlpha ? exportTexture.EncodeToPNG() : exportTexture.EncodeToJPG(90);
+                var extension = hasAlpha ? "png" : "jpg";
+                
+                var image = new Image {
+                    name = uTexture.name,
+                    mimeType = hasAlpha ? k_MimeTypePNG : k_MimeTypeJPG
+                };
+        
+                // TODO: tempPath - avoid conflict with existing files
+                var tempPath = Path.Combine(Application.temporaryCachePath, $"{uTexture.name}.{extension}");
+                File.WriteAllBytes(tempPath, imageData);
+                
+                m_ImagePathsToAdd = m_ImagePathsToAdd ?? new Dictionary<int, string>();
+                m_ImagePathsToAdd[imageId] = tempPath;
+                
+                m_UnityTextures.Add(uTexture);
+                m_Images.Add(image);
+            }
 
             return imageId;
         }
@@ -375,11 +414,11 @@ namespace GLTFast.Export {
         static string GetMimeType(string assetPath) {
             string mimeType = null;
             if (assetPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) {
-                mimeType = "image/png";
+                mimeType = k_MimeTypePNG;
             }
             else if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                 assetPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) {
-                mimeType = "image/jpeg";
+                mimeType = k_MimeTypeJPG;
             }
 
             return mimeType;
