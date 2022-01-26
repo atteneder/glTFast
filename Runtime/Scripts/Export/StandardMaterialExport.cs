@@ -15,6 +15,7 @@
 
 using System;
 using GLTFast.Materials;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -93,25 +94,36 @@ namespace GLTFast.Export {
             material.doubleSided = uMaterial.HasProperty(k_Cull) &&
 				uMaterial.GetInt(k_Cull) == (int) CullMode.Off;
 
-			if(uMaterial.IsKeywordEnabled("_EMISSION")) {
-				if (uMaterial.HasProperty(k_EmissionColor)) {
-					material.emissive = uMaterial.GetColor(k_EmissionColor);
-				}
+            if(uMaterial.IsKeywordEnabled("_EMISSION")) {
+	            if (uMaterial.HasProperty(k_EmissionColor)) {
+		            var emissionColor = uMaterial.GetColor(k_EmissionColor);
 
-				if (uMaterial.HasProperty(k_EmissionMap)) {
-					// var emissionTex = uMaterial.GetTexture(k_EmissionMap);
-     //
-					// if (emissionTex != null) {
-					// 	if(emissionTex is Texture2D) {
-					// 		material.emissiveTexture = ExportTextureInfo(emissionTex, TextureMapType.Emission);
-     //                        ExportTextureTransform(material.EmissiveTexture, uMaterial, "_EmissionMap");
-					// 	} else {
-					// 		logger?.Error(LogCode.TextureInvalidType, "emission", material.name );
-					//		success = false;
-					// 	}
-					//                }
-				}
-			}
+		            // Clamp emissionColor to 0..1
+		            var maxFactor = math.max(emissionColor.r,math.max(emissionColor.g,emissionColor.b));
+		            if (maxFactor > 1f) {
+			            emissionColor.r /= maxFactor;
+			            emissionColor.g /= maxFactor;
+			            emissionColor.b /= maxFactor;
+			            // TODO: use maxFactor as emissiveStrength (KHR_materials_emissive_strength)
+		            }
+
+		            material.emissive = emissionColor;
+	            }
+
+	            if (uMaterial.HasProperty(k_EmissionMap)) {
+		            var emissionTex = uMaterial.GetTexture(k_EmissionMap);
+     
+		            if (emissionTex != null) {
+			            if(emissionTex is Texture2D) {
+				            material.emissiveTexture = ExportTextureInfo(emissionTex, TextureMapType.Emission, gltf);
+				            ExportTextureTransform(material.emissiveTexture, uMaterial, k_EmissionMap, gltf);
+			            } else {
+				            logger?.Error(LogCode.TextureInvalidType, "emission", material.name );
+				            success = false;
+			            }
+		            }
+	            }
+            }
 			if (
                 uMaterial.HasProperty(k_BumpMap)
                 && (uMaterial.IsKeywordEnabled( Materials.Constants.kwNormalMap)

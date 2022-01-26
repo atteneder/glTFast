@@ -165,7 +165,13 @@ namespace GLTFast.Schema {
                 writer.AddProperty("emissiveTexture");
                 emissiveTexture.GltfSerialize(writer);
             }
-            if (emissiveFactor != null) {
+            if (emissiveFactor != null
+                && (
+                    emissiveFactor[0] > Constants.epsilon
+                    || emissiveFactor[1] > Constants.epsilon
+                    || emissiveFactor[2] > Constants.epsilon)
+                )
+            {
                 writer.AddArrayProperty("emissiveFactor", emissiveFactor);
             }
             if (!string.IsNullOrEmpty(alphaMode)) {
