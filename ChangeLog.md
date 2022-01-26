@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Fixed
+- Point meshes are rendered consistently on more platforms (iOS, Vulkan) due to explicitely setting `PSIZE` (thanks [Kim Wonkee][wonkee-kim] for #309)
+
 ## [4.5.0] - 2022-01-24
 ### Added
 - Generic shader graphs (to reduce the amount of shader graphs to maintain and reduce shader variants)
@@ -576,3 +580,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [NyxStudio]: https://github.com/NyxStudio
 [zharry]: https://github.com/zharry
 [weichx]: https://gist.github.com/weichx
+[wonkee-kim]: https://github.com/wonkee-kim
