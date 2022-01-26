@@ -134,13 +134,13 @@ namespace GLTFast.Export {
 			if (uMaterial.HasProperty(k_OcclusionMap)) {
 				var occTex = uMaterial.GetTexture(k_OcclusionMap);
 				if (occTex != null) {
-					// if(occTex is Texture2D) {
-					// 	material.occlusionTexture = ExportOcclusionTextureInfo(occTex, TextureMapType.Occlusion, uMaterial);
-					// 	ExportTextureTransform(material.OcclusionTexture, uMaterial, "_OcclusionMap");
-					// } else {
-					// 	logger?.Error(LogCode.TextureInvalidType, "occlusion", material.name );
-					//  success = false;
-					// }
+					if(occTex is Texture2D) {
+						material.occlusionTexture = ExportOcclusionTextureInfo(occTex, TextureMapType.Occlusion, uMaterial, gltf);
+						ExportTextureTransform(material.occlusionTexture, uMaterial, k_OcclusionMap, gltf);
+					} else {
+						logger?.Error(LogCode.TextureInvalidType, "occlusion", material.name );
+					 success = false;
+					}
 				}
 			}
 			if(IsUnlit(uMaterial)) {
@@ -345,6 +345,29 @@ namespace GLTFast.Export {
 
 	        if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
 		        info.scale = material.GetFloat(MaterialGenerator.bumpScalePropId);
+	        }
+
+	        return info;
+        }
+
+        static OcclusionTextureInfo ExportOcclusionTextureInfo(
+	        UnityEngine.Texture texture,
+	        TextureMapType textureMapType,
+	        UnityEngine.Material material,
+	        IGltfWritable gltf
+	        )
+        {
+	        var imageId = gltf.AddImage(texture);
+	        if (imageId < 0) {
+		        return null;
+	        }
+	        var textureId = gltf.AddTexture(imageId);
+	        var info = new OcclusionTextureInfo {
+		        index = textureId
+	        };
+
+	        if (material.HasProperty(MaterialGenerator.occlusionStrengthPropId)) {
+		        info.strength = material.GetFloat(MaterialGenerator.occlusionStrengthPropId);
 	        }
 
 	        return info;
