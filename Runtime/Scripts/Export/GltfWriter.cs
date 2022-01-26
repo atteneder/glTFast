@@ -255,11 +255,17 @@ namespace GLTFast.Export {
 
         public int AddTexture(int imageId) {
             CertifyNotDisposed();
-            m_Textures = m_Textures ?? new List<Texture>();
+            m_Textures ??= new List<Texture>();
             
             var texture = new Texture {
                 source = imageId
             };
+
+            var index = m_Textures.IndexOf(texture);
+            if (index >= 0) {
+                return index;
+            }
+            
             m_Textures.Add(texture);
             return m_Textures.Count - 1;
         }
