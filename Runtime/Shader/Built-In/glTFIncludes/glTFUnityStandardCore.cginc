@@ -423,6 +423,7 @@ struct VertexOutputForwardBase
     float4 eyeVec                         : TEXCOORD1;    // eyeVec.xyz | fogCoord
     float4 tangentToWorldAndPackedData[3] : TEXCOORD2;    // [3x3:tangentToWorld | 1x3:viewDirForParallax or worldPos]
     half4 ambientOrLightmapUV             : TEXCOORD5;    // SH or Lightmap UV
+    float pointSize                       : PSIZE;
     UNITY_LIGHTING_COORDS(6,7)
 
     // next ones would not fit into SM2.0 limits, but they are always for SM3.0+
@@ -508,6 +509,7 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
 
     UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o,o.pos);
     o.color = v.color;
+    o.pointSize = 1;
     return o;
 }
 
@@ -557,6 +559,7 @@ struct VertexOutputForwardAdd
     float4 eyeVec                       : TEXCOORD1;    // eyeVec.xyz | fogCoord
     float4 tangentToWorldAndLightDir[3] : TEXCOORD2;    // [3x3:tangentToWorld | 1x3:lightDir]
     float3 posWorld                     : TEXCOORD5;
+    float pointSize                     : PSIZE;
     UNITY_LIGHTING_COORDS(6, 7)
 
     // next ones would not fit into SM2.0 limits, but they are always for SM3.0+
@@ -635,6 +638,7 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
 
     UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o, o.pos);
     o.color = v.color;
+    o.pointSize = 1;
     return o;
 }
 
@@ -677,6 +681,7 @@ struct VertexOutputDeferred
         float3 posWorld                     : TEXCOORD6;
     #endif
     half4 color                             : COLOR;
+    float pointSize                         : PSIZE;
 
 #if defined(_OCCLUSION) || defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     float4 texORM                       : TEXCOORD9;
@@ -761,6 +766,7 @@ VertexOutputDeferred vertDeferred (VertexInput v)
     #endif
 
     o.color = v.color;
+    o.pointSize = 1;
 
     return o;
 }
