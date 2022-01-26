@@ -66,6 +66,7 @@ SubShader {
                 float4 vertex : SV_POSITION;
                 float2 texcoord : TEXCOORD0;
                 fixed4 color : COLOR;
+                float pointSize : PSIZE;
                 UNITY_FOG_COORDS(1)
                 UNITY_VERTEX_OUTPUT_STEREO
             };
@@ -80,6 +81,7 @@ SubShader {
 
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 o.color = v.color;
+                o.pointSize = 1;
                 return o;
             }
 
