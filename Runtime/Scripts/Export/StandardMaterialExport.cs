@@ -326,7 +326,12 @@ namespace GLTFast.Export {
         }
         
         static TextureInfo ExportTextureInfo( UnityEngine.Texture texture, TextureMapType textureMapType, IGltfWritable gltf) {
-	        var imageId = gltf.AddImage(texture);
+	        var texture2d = texture as Texture2D;
+	        if (texture2d == null) {
+		        return null;
+	        }
+	        var imageExport = new ImageExport(texture2d);
+	        var imageId = gltf.AddImage(imageExport);
 	        if (imageId < 0) {
 		        return null;
 	        }
@@ -345,7 +350,12 @@ namespace GLTFast.Export {
 	        IGltfWritable gltf
 	        )
         {
-	        var imageId = gltf.AddImage(texture);
+	        var texture2d = texture as Texture2D;
+	        if (texture2d == null) {
+		        return null;
+	        }
+	        var imageExport = new ImageExport(texture2d);
+	        var imageId = gltf.AddImage(imageExport);
 	        if (imageId < 0) {
 		        return null;
 	        }
@@ -369,7 +379,12 @@ namespace GLTFast.Export {
 	        IGltfWritable gltf
 	        )
         {
-	        var imageId = gltf.AddImage(texture);
+	        var texture2d = texture as Texture2D;
+	        if (texture2d == null) {
+		        return null;
+	        }
+	        var imageExport = new ImageExport(texture2d);
+	        var imageId = gltf.AddImage(imageExport);
 	        if (imageId < 0) {
 		        return null;
 	        }

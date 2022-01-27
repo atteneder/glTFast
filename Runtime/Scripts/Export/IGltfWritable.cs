@@ -27,11 +27,11 @@ namespace GLTFast.Export {
         void RegisterExtensionUsage(Extension extension, bool required = true);
         
         /// <summary>
-        /// Adds a Unity Texture to the glTF and returns the resulting image index
+        /// Adds an ImageExport to the glTF and returns the resulting image index
         /// </summary>
-        /// <param name="uTexture">Unity Texture</param>
+        /// <param name="imageExport">Image to be exported</param>
         /// <returns>glTF image index</returns>
-        int AddImage(Texture uTexture);
+        int AddImage(ImageExportBase imageExport);
 
         /// <summary>
         /// Creates a glTF texture from with a given image index

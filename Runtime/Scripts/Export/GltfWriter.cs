@@ -39,7 +39,6 @@ using Debug = UnityEngine.Debug;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
 using Texture = GLTFast.Schema.Texture;
-using TextureFormat = UnityEngine.TextureFormat;
 
 #if DEBUG
 using System.Text;
@@ -64,9 +63,6 @@ namespace GLTFast.Export {
 #region Constants
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
-
-        const string k_MimeTypePNG = "image/png";
-        const string k_MimeTypeJPG = "image/jpeg";
 #endregion Constants
 
 #region Private
@@ -90,11 +86,10 @@ namespace GLTFast.Export {
         List<Accessor> m_Accessors;
         List<BufferView> m_BufferViews;
 
+        List<ImageExportBase> m_ImageExports;
         List<UnityEngine.Material> m_UnityMaterials;
         List<UnityEngine.Mesh> m_UnityMeshes;
-        List<UnityEngine.Texture> m_UnityTextures;
         Dictionary<int, int[]> m_NodeMaterials;
-        Dictionary<int, string> m_ImagePathsToAdd;
 
         Stream m_BufferStream;
         string m_BufferPath;
@@ -211,83 +206,31 @@ namespace GLTFast.Export {
             return (uint) m_Scenes.Count - 1;
         }
 
-        public int AddImage( UnityEngine.Texture uTexture ) {
+        public int AddImage( ImageExportBase imageExport ) {
             CertifyNotDisposed();
             int imageId;
-            if (m_UnityTextures != null) {
-                imageId = m_UnityTextures.IndexOf(uTexture);
+            if (m_ImageExports != null) {
+                imageId = m_ImageExports.IndexOf(imageExport);
                 if (imageId >= 0) {
                     return imageId;
                 }
             } else {
-                m_UnityTextures = new List<UnityEngine.Texture>();
+                m_ImageExports = new List<ImageExportBase>();
                 m_Images = new List<Image>();
             }
 
-            imageId = m_UnityTextures.Count;
+            imageId = m_ImageExports.Count;
 
             // TODO: Create sampler, if required
             // TODO: KTX encoding
 
-#if UNITY_EDITOR
-
-            var assetPath = AssetDatabase.GetAssetPath(uTexture);
-            if (File.Exists(assetPath)) {
-                var mimeType = GetMimeType(assetPath);
-                if (!string.IsNullOrEmpty(mimeType)) {
-                    var image = new Image {
-                        name = uTexture.name,
-                        mimeType = mimeType
-                    };
-
-                    m_ImagePathsToAdd = m_ImagePathsToAdd ?? new Dictionary<int, string>();
-                    m_ImagePathsToAdd[imageId] = assetPath;
-                    
-                    m_UnityTextures.Add(uTexture);
-                    m_Images.Add(image);
-                } else {
-                    m_Logger?.Error(LogCode.ImageFormatUnknown,uTexture.name,assetPath);
-                    return -1;
-                }
-            }
-            else
-#endif
-            {
-                Texture2D exportTexture;
-                if (uTexture.isReadable) {
-                    exportTexture = uTexture as Texture2D;
-                    if (exportTexture == null) {
-                        m_Logger?.Error(LogCode.ImageFormatUnknown,uTexture.name,"n/a");
-                        return -1;
-                    }
-                } else {
-                    var destRenderTexture = RenderTexture.GetTemporary(uTexture.width, uTexture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-                    Graphics.Blit(uTexture, destRenderTexture);
-                    exportTexture = new Texture2D(uTexture.width, uTexture.height, TextureFormat.ARGB32, false, true);
-                    exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
-                    exportTexture.Apply();
-                }
-
-                // TODO: smart PNG vs Jpeg decision
-                const bool hasAlpha = false;
-                var imageData = hasAlpha ? exportTexture.EncodeToPNG() : exportTexture.EncodeToJPG(90);
-                var extension = hasAlpha ? "png" : "jpg";
-                
-                var image = new Image {
-                    name = uTexture.name,
-                    mimeType = hasAlpha ? k_MimeTypePNG : k_MimeTypeJPG
-                };
-        
-                // TODO: tempPath - avoid conflict with existing files
-                var tempPath = Path.Combine(Application.temporaryCachePath, $"{uTexture.name}.{extension}");
-                File.WriteAllBytes(tempPath, imageData);
-                
-                m_ImagePathsToAdd = m_ImagePathsToAdd ?? new Dictionary<int, string>();
-                m_ImagePathsToAdd[imageId] = tempPath;
-                
-                m_UnityTextures.Add(uTexture);
-                m_Images.Add(image);
-            }
+            var image = new Image {
+                name = imageExport.fileName,
+                mimeType = imageExport.mimeType
+            };
+            
+            m_ImageExports.Add(imageExport);
+            m_Images.Add(image);
 
             return imageId;
         }
@@ -409,19 +352,6 @@ namespace GLTFast.Export {
             if (m_State == State.Disposed) {
                 throw new InvalidOperationException("GltfWriter was already disposed");
             }
-        }
-
-        static string GetMimeType(string assetPath) {
-            string mimeType = null;
-            if (assetPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) {
-                mimeType = k_MimeTypePNG;
-            }
-            else if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-                assetPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) {
-                mimeType = k_MimeTypeJPG;
-            }
-
-            return mimeType;
         }
 
         ImageDestination GetFinalImageDestination() {
@@ -908,14 +838,13 @@ namespace GLTFast.Export {
 #endif // #if GLTFAST_MESH_DATA
 
         async Task<bool> BakeImages(string directory) {
-            if (m_ImagePathsToAdd != null) {
+            if (m_ImageExports != null) {
                 var imageDest = GetFinalImageDestination();
                 var overwrite = m_Settings.fileConflictResolution == FileConflictResolution.Overwrite;
                 if (!overwrite && imageDest == ImageDestination.SeparateFile) {
                     var fileExists = false;
-                    foreach (var pair in m_ImagePathsToAdd) {
-                        var assetPath = pair.Value;
-                        var fileName = Path.GetFileName(assetPath);
+                    foreach (var imageExport in m_ImageExports) {
+                        var fileName = Path.GetFileName(imageExport.fileName);
                         var destPath = Path.Combine(directory,fileName);
                         if (File.Exists(destPath)) {
                             fileExists = true;
@@ -940,23 +869,23 @@ namespace GLTFast.Export {
                     }
                 }
 
-                foreach (var pair in m_ImagePathsToAdd) {
-                    var imageId = pair.Key;
-                    var assetPath = pair.Value;
+                for (var imageId = 0; imageId < m_ImageExports.Count; imageId++) {
+                    var imageExport = m_ImageExports[imageId];
                     if (imageDest == ImageDestination.MainBuffer) {
                         // TODO: Write from file to buffer stream directly
-                        var imageBytes = File.ReadAllBytes(assetPath);
-                        m_Images[imageId].bufferView = WriteBufferViewToBuffer(imageBytes); 
-                    } else if (imageDest == ImageDestination.SeparateFile) {
-                        var fileName = Path.GetFileName(assetPath);
-                        File.Copy(assetPath, Path.Combine(directory,fileName), overwrite);
+                        var imageBytes = imageExport.GetData();
+                        m_Images[imageId].bufferView = WriteBufferViewToBuffer(imageBytes);
+                    }
+                    else if (imageDest == ImageDestination.SeparateFile) {
+                        var fileName = Path.GetFileName(imageExport.fileName);
+                        imageExport.Write( Path.Combine(directory, fileName), overwrite);
                         m_Images[imageId].uri = fileName;
                     }
                     await m_DeferAgent.BreakPoint();
                 }
             }
 
-            m_ImagePathsToAdd = null;
+            m_ImageExports = null;
             return true;
         }
         
@@ -1160,11 +1089,10 @@ namespace GLTFast.Export {
             m_Gltf = null;
             m_ExtensionsUsedOnly = null;
             m_ExtensionsRequired = null;
+            m_ImageExports = null;
             m_UnityMaterials = null;
             m_UnityMeshes = null;
-            m_UnityTextures = null;
             m_NodeMaterials = null;
-            m_ImagePathsToAdd = null;
             m_BufferStream = null;
             m_BufferPath = null;
             
