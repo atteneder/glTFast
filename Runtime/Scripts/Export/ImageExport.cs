@@ -34,7 +34,7 @@ namespace GLTFast.Export {
         public abstract void Write(string filePath, bool overwrite);
         public abstract byte[] GetData();
 
-        protected static byte[] EncodeTexture(Texture2D texture, Format format) {
+        protected static byte[] EncodeTexture(Texture2D texture, Format format, Material blitMaterial = null) {
 
             Texture2D exportTexture;
             if (texture.isReadable) {
@@ -45,7 +45,11 @@ namespace GLTFast.Export {
                 }
             } else {
                 var destRenderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-                Graphics.Blit(texture, destRenderTexture);
+                if (blitMaterial == null) {
+                    Graphics.Blit(texture, destRenderTexture);
+                } else {
+                    Graphics.Blit(texture, destRenderTexture, blitMaterial);
+                }
                 exportTexture = new Texture2D(texture.width, texture.height, TextureFormat.ARGB32, false, true);
                 exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
                 exportTexture.Apply();
@@ -61,14 +65,14 @@ namespace GLTFast.Export {
 
     public class ImageExport : ImageExportBase {
 
-        Texture2D m_Texture;
+        protected Texture2D m_Texture;
 
         public ImageExport(Texture2D texture) {
             this.m_Texture = texture;
         }
         
 #if UNITY_EDITOR
-        string m_AssetPath;
+        protected string m_AssetPath;
         public ImageExport(string assetPath) {
             this.m_AssetPath = assetPath;
         }
@@ -121,6 +125,10 @@ namespace GLTFast.Export {
             }
         }
 
+        protected virtual byte[] GenerateTexture() {
+            return EncodeTexture(m_Texture, format);
+        }
+
         public override void Write(string filePath, bool overwrite) {
 #if UNITY_EDITOR
             if (m_AssetPath!=null && File.Exists(m_AssetPath)) {
@@ -128,7 +136,7 @@ namespace GLTFast.Export {
             } else
 #endif
             if (m_Texture != null) {
-                var imageData = EncodeTexture(m_Texture, format);
+                var imageData = GenerateTexture();
                 File.WriteAllBytes(filePath,imageData);
             }
         }
@@ -189,5 +197,32 @@ namespace GLTFast.Export {
             return Format.Unknown;
         }
 #endif
+    }
+
+    public class NormalImageExport : ImageExport {
+        
+        static Material s_NormalBlitMaterial;
+        
+        public NormalImageExport(Texture2D texture)
+            : base(texture) { }
+
+        public NormalImageExport(string assetPath)
+            : base(assetPath) { }
+        
+        static Material GetNormalBlitMaterial() {
+            if (s_NormalBlitMaterial == null) {
+                var normalBlitShader = Shader.Find("Hidden/glTFExportNormal");
+                if (normalBlitShader == null) {
+                    return null;
+                }
+                s_NormalBlitMaterial = new Material(normalBlitShader);
+            }
+
+            return s_NormalBlitMaterial;
+        }
+
+        protected override byte[] GenerateTexture() {
+            return EncodeTexture(m_Texture, format, GetNormalBlitMaterial());
+        }
     }
 }

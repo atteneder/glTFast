@@ -354,7 +354,7 @@ namespace GLTFast.Export {
 	        if (texture2d == null) {
 		        return null;
 	        }
-	        var imageExport = new ImageExport(texture2d);
+	        var imageExport = new NormalImageExport(texture2d);
 	        var imageId = gltf.AddImage(imageExport);
 	        if (imageId < 0) {
 		        return null;
