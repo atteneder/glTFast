@@ -8,6 +8,9 @@ ShaderVariantCollection:
   m_PrefabAsset: {fileID: 0}
   m_Name: glTFExport
   m_Shaders:
+  - first: {fileID: 4800000, guid: 200d9689f5dda4633867345ba978a8dd, type: 3}
+    second:
+      variants: []
   - first: {fileID: 4800000, guid: 12e0e6f24241d4f38811bfce257ae65d, type: 3}
     second:
       variants: []

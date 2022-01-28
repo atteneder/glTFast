@@ -84,7 +84,7 @@ namespace GLTFast.Export {
 #endif
         
         public ImageExport(Texture2D texture) {
-            this.m_Texture = texture;
+            m_Texture = texture;
 #if UNITY_EDITOR
             m_AssetPath = AssetDatabase.GetAssetPath(texture);
 #endif
@@ -223,6 +223,41 @@ namespace GLTFast.Export {
 
         protected override byte[] GenerateTexture() {
             return EncodeTexture(m_Texture, format, hasAlpha:false, blitMaterial:GetNormalBlitMaterial());
+        }
+    }
+    
+    public class OccRoughMetImageExport : ImageExport {
+        
+        static Material s_BlitMaterial;
+        
+        public OccRoughMetImageExport(Texture2D texture)
+            : base(texture) { }
+
+        static Material GetBlitMaterial() {
+            if (s_BlitMaterial == null) {
+                var normalBlitShader = Shader.Find("Hidden/glTFExportMetalGloss");
+                if (normalBlitShader == null) {
+                    return null;
+                }
+                s_BlitMaterial = new Material(normalBlitShader);
+            }
+
+            if (s_BlitMaterial == null) {
+                Debug.LogError("Missing Shader glTFExportMetalGloss");
+            }
+
+            return s_BlitMaterial;
+        }
+
+        public override void Write(string filePath, bool overwrite) {
+            if (m_Texture != null) {
+                var imageData = GenerateTexture();
+                File.WriteAllBytes(filePath,imageData);
+            }
+        }
+        
+        protected override byte[] GenerateTexture() {
+            return EncodeTexture(m_Texture, format, hasAlpha:false, blitMaterial:GetBlitMaterial());
         }
     }
 }
