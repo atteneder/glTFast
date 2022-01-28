@@ -1093,6 +1093,7 @@ namespace GLTFast.Export {
             m_UnityMaterials = null;
             m_UnityMeshes = null;
             m_NodeMaterials = null;
+            m_BufferStream?.Close();
             m_BufferStream = null;
             m_BufferPath = null;
             
