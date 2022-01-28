@@ -17,6 +17,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace GLTFast.Export {
     public abstract class ImageExportBase {
@@ -30,27 +33,37 @@ namespace GLTFast.Export {
         public abstract string fileName { get; }
         public abstract string mimeType { get; }
 
-        public abstract string GetAssetPath();
         public abstract void Write(string filePath, bool overwrite);
         public abstract byte[] GetData();
 
-        protected static byte[] EncodeTexture(Texture2D texture, Format format, Material blitMaterial = null) {
+        protected static byte[] EncodeTexture(Texture2D texture, Format format, bool hasAlpha = true, Material blitMaterial = null) {
 
             Texture2D exportTexture;
-            if (texture.isReadable) {
+            if (texture.isReadable && blitMaterial==null) {
                 exportTexture = texture;
                 if (exportTexture == null) {
                     // m_Logger?.Error(LogCode.ImageFormatUnknown,texture.name,"n/a");
                     return null;
                 }
             } else {
-                var destRenderTexture = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
+                var destRenderTexture = RenderTexture.GetTemporary(
+                    texture.width,
+                    texture.height,
+                    0,
+                    RenderTextureFormat.ARGB32,
+                    RenderTextureReadWrite.Linear
+                    );
                 if (blitMaterial == null) {
                     Graphics.Blit(texture, destRenderTexture);
                 } else {
                     Graphics.Blit(texture, destRenderTexture, blitMaterial);
                 }
-                exportTexture = new Texture2D(texture.width, texture.height, TextureFormat.ARGB32, false, true);
+                exportTexture = new Texture2D(
+                    texture.width,
+                    texture.height,
+                    hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24,
+                    false,
+                    true);
                 exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
                 exportTexture.Apply();
             }
@@ -66,17 +79,16 @@ namespace GLTFast.Export {
     public class ImageExport : ImageExportBase {
 
         protected Texture2D m_Texture;
-
-        public ImageExport(Texture2D texture) {
-            this.m_Texture = texture;
-        }
-        
 #if UNITY_EDITOR
         protected string m_AssetPath;
-        public ImageExport(string assetPath) {
-            this.m_AssetPath = assetPath;
-        }
 #endif
+        
+        public ImageExport(Texture2D texture) {
+            this.m_Texture = texture;
+#if UNITY_EDITOR
+            m_AssetPath = AssetDatabase.GetAssetPath(texture);
+#endif
+        }
         
         protected Format format {
             get {
@@ -88,10 +100,6 @@ namespace GLTFast.Export {
                 // TODO: smart PNG vs Jpeg decision
                 return Format.Png;
             }
-        }
-
-        public override string GetAssetPath() {
-            return m_AssetPath;
         }
 
         public override string fileName {
@@ -131,7 +139,7 @@ namespace GLTFast.Export {
 
         public override void Write(string filePath, bool overwrite) {
 #if UNITY_EDITOR
-            if (m_AssetPath!=null && File.Exists(m_AssetPath)) {
+            if (m_AssetPath!=null) {
                 File.Copy(m_AssetPath, filePath, overwrite);
             } else
 #endif
@@ -143,9 +151,9 @@ namespace GLTFast.Export {
 
         public override byte[] GetData() {
 #if UNITY_EDITOR
-            if (m_AssetPath!=null && File.Exists(m_AssetPath)) {
+            if (m_AssetPath!=null) {
                 return File.ReadAllBytes(m_AssetPath);
-            } else
+            }
 #endif
             if (m_Texture != null) {
                 var imageData = EncodeTexture(m_Texture, format);
@@ -161,11 +169,6 @@ namespace GLTFast.Export {
             if (m_Texture != null) {
                 hash = hash * 7 + m_Texture.GetHashCode();
             }
-#if UNITY_EDITOR
-            if (m_AssetPath != null) {
-                hash = hash * 7 + m_AssetPath.GetHashCode();
-            }
-#endif
             return hash;
         }
 
@@ -178,11 +181,7 @@ namespace GLTFast.Export {
         }
         
         bool Equals(ImageExport other) {
-            return m_Texture == other.m_Texture
-                && (
-                    m_AssetPath == null && other.m_AssetPath == null
-                    || (m_AssetPath != null && m_AssetPath.Equals(other.m_AssetPath))
-                );
+            return m_Texture == other.m_Texture;
         }
         
 #if UNITY_EDITOR
@@ -206,9 +205,6 @@ namespace GLTFast.Export {
         public NormalImageExport(Texture2D texture)
             : base(texture) { }
 
-        public NormalImageExport(string assetPath)
-            : base(assetPath) { }
-        
         static Material GetNormalBlitMaterial() {
             if (s_NormalBlitMaterial == null) {
                 var normalBlitShader = Shader.Find("Hidden/glTFExportNormal");
@@ -218,11 +214,15 @@ namespace GLTFast.Export {
                 s_NormalBlitMaterial = new Material(normalBlitShader);
             }
 
+            if (s_NormalBlitMaterial == null) {
+                Debug.LogError("Missing Shader glTFExportNormal");
+            }
+
             return s_NormalBlitMaterial;
         }
 
         protected override byte[] GenerateTexture() {
-            return EncodeTexture(m_Texture, format, GetNormalBlitMaterial());
+            return EncodeTexture(m_Texture, format, hasAlpha:false, blitMaterial:GetNormalBlitMaterial());
         }
     }
 }
