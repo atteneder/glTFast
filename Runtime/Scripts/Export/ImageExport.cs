@@ -14,6 +14,7 @@
 //
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine;
 
@@ -37,7 +38,7 @@ namespace GLTFast.Export {
 
             Texture2D exportTexture;
             if (texture.isReadable) {
-                exportTexture = texture as Texture2D;
+                exportTexture = texture;
                 if (exportTexture == null) {
                     // m_Logger?.Error(LogCode.ImageFormatUnknown,texture.name,"n/a");
                     return null;
@@ -60,24 +61,24 @@ namespace GLTFast.Export {
 
     public class ImageExport : ImageExportBase {
 
-        Texture2D texture;
+        Texture2D m_Texture;
 
         public ImageExport(Texture2D texture) {
-            this.texture = texture;
+            this.m_Texture = texture;
         }
         
 #if UNITY_EDITOR
-        string assetPath;
+        string m_AssetPath;
         public ImageExport(string assetPath) {
-            this.assetPath = assetPath;
+            this.m_AssetPath = assetPath;
         }
 #endif
         
         protected Format format {
             get {
 #if UNITY_EDITOR
-                if (assetPath != null) {
-                    return GetFormat(assetPath);
+                if (m_AssetPath != null) {
+                    return GetFormat(m_AssetPath);
                 }
 #endif
                 // TODO: smart PNG vs Jpeg decision
@@ -86,17 +87,17 @@ namespace GLTFast.Export {
         }
 
         public override string GetAssetPath() {
-            return assetPath;
+            return m_AssetPath;
         }
 
         public override string fileName {
             get {
 #if UNITY_EDITOR
-                if (assetPath != null) {
-                    return Path.GetFileName(assetPath);
+                if (m_AssetPath != null) {
+                    return Path.GetFileName(m_AssetPath);
                 }
 #endif
-                return $"{texture.name}.{fileExtension}";
+                return $"{m_Texture.name}.{fileExtension}";
             }
         }
 
@@ -122,54 +123,57 @@ namespace GLTFast.Export {
 
         public override void Write(string filePath, bool overwrite) {
 #if UNITY_EDITOR
-            if (assetPath!=null && File.Exists(assetPath)) {
-                File.Copy(assetPath, filePath, overwrite);
+            if (m_AssetPath!=null && File.Exists(m_AssetPath)) {
+                File.Copy(m_AssetPath, filePath, overwrite);
             } else
 #endif
-            if (texture != null) {
-                var imageData = EncodeTexture(texture, format);
+            if (m_Texture != null) {
+                var imageData = EncodeTexture(m_Texture, format);
                 File.WriteAllBytes(filePath,imageData);
             }
         }
 
         public override byte[] GetData() {
 #if UNITY_EDITOR
-            if (assetPath!=null && File.Exists(assetPath)) {
-                return File.ReadAllBytes(assetPath);
+            if (m_AssetPath!=null && File.Exists(m_AssetPath)) {
+                return File.ReadAllBytes(m_AssetPath);
             } else
 #endif
-            if (texture != null) {
-                var imageData = EncodeTexture(texture, format);
+            if (m_Texture != null) {
+                var imageData = EncodeTexture(m_Texture, format);
                 return imageData;
             }
 
             return null;
         }
 
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode() {
             var hash = 13;
-            if (texture != null) {
-                hash = hash * 7 + texture.GetHashCode();
+            if (m_Texture != null) {
+                hash = hash * 7 + m_Texture.GetHashCode();
             }
-            if (assetPath != null) {
-                hash = hash * 7 + assetPath.GetHashCode();
+#if UNITY_EDITOR
+            if (m_AssetPath != null) {
+                hash = hash * 7 + m_AssetPath.GetHashCode();
             }
+#endif
             return hash;
         }
 
         public override bool Equals(object obj) {
             //Check for null and compare run-time types.
-            if (obj == null || ! GetType().Equals(obj.GetType())) {
+            if (obj == null || GetType() != obj.GetType()) {
                 return false;
             }
             return Equals((ImageExport)obj);
         }
         
         bool Equals(ImageExport other) {
-            return texture == other.texture
+            return m_Texture == other.m_Texture
                 && (
-                    assetPath == null && other.assetPath == null
-                    || (assetPath != null && assetPath.Equals(other.assetPath))
+                    m_AssetPath == null && other.m_AssetPath == null
+                    || (m_AssetPath != null && m_AssetPath.Equals(other.m_AssetPath))
                 );
         }
         
