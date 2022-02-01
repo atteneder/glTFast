@@ -67,9 +67,9 @@ namespace GLTFast {
             }
 
 #if GLTFAST_KEEP_MESH_DATA
-            Profiler.BeginSample("UploadMeshData");
+            UnityEngine.Profiling.Profiler.BeginSample("UploadMeshData");
             mesh.UploadMeshData(false);
-            Profiler.EndSample();
+            UnityEngine.Profiling.Profiler.EndSample();
 #else
             /// Don't upload explicitely. Unity takes care of upload on demand/deferred
 
