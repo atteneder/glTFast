@@ -106,7 +106,7 @@ namespace GLTFast.Export {
 
         public override byte[] GetData() {
 #if UNITY_EDITOR
-            if (validAssetPath) {
+            if (validAssetPath && GetFormatFromExtension(m_AssetPath)==format) {
                 return File.ReadAllBytes(m_AssetPath);
             }
 #endif
