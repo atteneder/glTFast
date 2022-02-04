@@ -27,6 +27,7 @@ namespace GLTFast.Export {
 
 	    const string k_KeywordBumpMap = "_BUMPMAP";
 	    const string k_KeywordMetallicGlossMap = "_METALLICGLOSSMAP";
+	    const string k_KeywordSmoothnessTextureAlbedoChannelA = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A";
 		    
 	    static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
 	    static readonly int k_Cull = Shader.PropertyToID("_Cull");
@@ -45,16 +46,6 @@ namespace GLTFast.Export {
 	    static readonly int k_Smoothness = Shader.PropertyToID("_Smoothness");
 	    static readonly int k_Glossiness = Shader.PropertyToID("_Glossiness");
 	    static readonly int k_GlossMapScale = Shader.PropertyToID("_GlossMapScale");
-		    
-	    enum TextureMapType {
-		    Main,
-		    Bump,
-		    SpecGloss,
-		    Emission,
-		    MetallicGloss,
-		    Light,
-		    Occlusion
-	    }
 
 	    /// <summary>
 	    /// Converts a Unity material to a glTF material. 
@@ -116,7 +107,7 @@ namespace GLTFast.Export {
      
 		            if (emissionTex != null) {
 			            if(emissionTex is Texture2D) {
-				            material.emissiveTexture = ExportTextureInfo(emissionTex, TextureMapType.Emission, gltf);
+				            material.emissiveTexture = ExportTextureInfo(emissionTex, gltf);
 				            ExportTextureTransform(material.emissiveTexture, uMaterial, k_EmissionMap, gltf);
 			            } else {
 				            logger?.Error(LogCode.TextureInvalidType, "emission", material.name );
@@ -135,7 +126,7 @@ namespace GLTFast.Export {
 
 				if (normalTex != null) {
 					if(normalTex is Texture2D) {
-						material.normalTexture = ExportNormalTextureInfo(normalTex, TextureMapType.Bump, uMaterial, gltf);
+						material.normalTexture = ExportNormalTextureInfo(normalTex, uMaterial, gltf);
 						ExportTextureTransform(material.normalTexture, uMaterial, k_BumpMap, gltf);
 					} else {
 						logger?.Error(LogCode.TextureInvalidType, "normal", uMaterial.name );
@@ -144,24 +135,31 @@ namespace GLTFast.Export {
 				}
 			}
 
-			if (uMaterial.HasProperty(k_OcclusionMap)) {
-				var occTex = uMaterial.GetTexture(k_OcclusionMap);
-				if (occTex != null) {
-					if(occTex is Texture2D) {
-						material.occlusionTexture = ExportOcclusionTextureInfo(occTex, TextureMapType.Occlusion, uMaterial, gltf);
-						ExportTextureTransform(material.occlusionTexture, uMaterial, k_OcclusionMap, gltf);
-					} else {
-						logger?.Error(LogCode.TextureInvalidType, "occlusion", material.name );
-					 success = false;
-					}
-				}
+			var isPbrMetallicRoughness = IsPbrMetallicRoughness(uMaterial);
+			var needsMetalRoughTexture = 
+				isPbrMetallicRoughness &&
+				(
+					uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap)
+					|| uMaterial.IsKeywordEnabled(k_KeywordSmoothnessTextureAlbedoChannelA)
+				);
+
+			OrmImageExport ormImageExport = null;
+
+			if (needsMetalRoughTexture) {
+				ormImageExport = new OrmImageExport();
 			}
 			if(IsUnlit(uMaterial)) {
                 ExportUnlit(material, uMaterial, gltf, logger);
 			}
-			else if (IsPbrMetallicRoughness(uMaterial))
+			else if (isPbrMetallicRoughness)
 			{
-				success &= ExportPbrMetallicRoughness(uMaterial, out material.pbrMetallicRoughness, gltf, logger);
+				success &= ExportPbrMetallicRoughness(
+					uMaterial,
+					material,
+					ormImageExport,
+					gltf,
+					logger
+					);
 			}
 			else if (IsPbrSpecularGlossiness(uMaterial))
 			{
@@ -174,7 +172,7 @@ namespace GLTFast.Export {
 					baseColor = uMaterial.HasProperty(k_BaseColor)
 						? uMaterial.GetColor(k_BaseColor)
 						: Color.white,
-					baseColorTexture = mainTex==null ? null : ExportTextureInfo( mainTex, TextureMapType.Main, gltf)
+					baseColorTexture = mainTex==null ? null : ExportTextureInfo( mainTex, gltf)
 				};
 			}
 			else if (uMaterial.HasProperty(k_ColorTexture))
@@ -184,7 +182,7 @@ namespace GLTFast.Export {
 					baseColor = uMaterial.HasProperty(k_BaseColor)
 						? uMaterial.GetColor(k_BaseColor)
 						: Color.white,
-					baseColorTexture = mainTex==null ? null : ExportTextureInfo(mainTex, TextureMapType.Main, gltf)
+					baseColorTexture = mainTex==null ? null : ExportTextureInfo(mainTex, gltf)
 				};
 			}
             else if (uMaterial.HasProperty(k_MainTex)) //else export main texture
@@ -194,7 +192,7 @@ namespace GLTFast.Export {
                 if (mainTex != null) {
                     material.pbrMetallicRoughness = new PbrMetallicRoughness {
 	                    metallicFactor = 0, roughnessFactor = 1.0f,
-	                    baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main, gltf)
+	                    baseColorTexture = ExportTextureInfo(mainTex, gltf)
                     };
 
                     // ExportTextureTransform(material.pbrMetallicRoughness.baseColorTexture, uMaterial, "_MainTex");
@@ -207,6 +205,46 @@ namespace GLTFast.Export {
                 }
                 material.doubleSided = true;
             }
+			
+			if (uMaterial.HasProperty(k_OcclusionMap)) {
+				var occTex = uMaterial.GetTexture(k_OcclusionMap);
+				if (occTex != null) {
+					if(occTex is Texture2D occTex2d) {
+						if (ormImageExport == null) {
+							material.occlusionTexture = ExportOcclusionTextureInfo(occTex2d, uMaterial, gltf);
+						}
+						else {
+							material.occlusionTexture = new OcclusionTextureInfo();
+							ormImageExport.SetOcclusionTexture(occTex2d);
+						}
+						ExportTextureTransform(material.occlusionTexture, uMaterial, k_OcclusionMap, gltf);
+					} else {
+						logger?.Error(LogCode.TextureInvalidType, "occlusion", material.name );
+						success = false;
+					}
+				}
+			}
+
+			if (ormImageExport != null && material.pbrMetallicRoughness != null) {
+				if (AddImageExport(gltf, ormImageExport, out var ormTextureId)) {
+					if (material.pbrMetallicRoughness.metallicRoughnessTexture != null) {
+						material.pbrMetallicRoughness.metallicRoughnessTexture.index = ormTextureId;
+						ExportTextureTransform(material.pbrMetallicRoughness.metallicRoughnessTexture, uMaterial, k_MetallicGlossMap, gltf);
+					}
+
+					if (ormImageExport.hasOcclusion) {
+						material.occlusionTexture.index = ormTextureId;
+						ExportTextureTransform(material.occlusionTexture, uMaterial, k_OcclusionMap, gltf);
+						if (uMaterial.HasProperty(MaterialGenerator.occlusionStrengthPropId)) {
+							material.occlusionTexture.strength = uMaterial.GetFloat(MaterialGenerator.occlusionStrengthPropId);
+						}
+					}
+				}
+				else {
+					Debug.LogError("TODO: logger.?");
+				}
+			}
+
 			return success;
         }
 
@@ -215,87 +253,109 @@ namespace GLTFast.Export {
         }
         
         static bool IsPbrMetallicRoughness(UnityEngine.Material material) {
-	        return material.HasProperty("_Metallic") && (material.HasProperty("_MetallicGlossMap") || material.HasProperty(k_Glossiness));
+	        return material.HasProperty(MaterialGenerator.metallicPropId) && (material.HasProperty(k_MetallicGlossMap) || material.HasProperty(k_Glossiness));
         }
 
         static bool IsPbrSpecularGlossiness(UnityEngine.Material material) {
-	        return material.HasProperty("_SpecColor") && material.HasProperty("_SpecGlossMap");
+	        return material.HasProperty(MaterialGenerator.specColorPropId) && material.HasProperty(MaterialGenerator.specGlossMapPropId);
         }
         
-        static bool ExportPbrMetallicRoughness(UnityEngine.Material material, out PbrMetallicRoughness pbr, IGltfWritable gltf, ICodeLogger logger) {
+        static bool ExportPbrMetallicRoughness(
+	        UnityEngine.Material uMaterial,
+	        Material material,
+	        OrmImageExport ormImageExport,
+	        IGltfWritable gltf,
+	        ICodeLogger logger
+	        ) {
 	        var success = true;
-			pbr = new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
+			var pbr = new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
 
-			if (material.HasProperty(k_BaseColor))
+			var hasAlphaSmoothness = uMaterial.IsKeywordEnabled(k_KeywordSmoothnessTextureAlbedoChannelA);
+			
+			if (uMaterial.HasProperty(k_BaseColor))
 			{
-				pbr.baseColor = material.GetColor(k_BaseColor);
+				pbr.baseColor = uMaterial.GetColor(k_BaseColor);
 			} else
-			if (material.HasProperty(k_Color)) {
-				pbr.baseColor = material.GetColor(k_Color);
+			if (uMaterial.HasProperty(k_Color)) {
+				pbr.baseColor = uMaterial.GetColor(k_Color);
 			}
 
-            if (material.HasProperty(k_TintColor)) {
+            if (uMaterial.HasProperty(k_TintColor)) {
 	            //particles use _TintColor instead of _Color
 	            float white = 1;
-                if (material.HasProperty(k_Color))
+                if (uMaterial.HasProperty(k_Color))
                 {
-                    var c = material.GetColor(k_Color);
+                    var c = uMaterial.GetColor(k_Color);
                     white = (c.r + c.g + c.b) / 3.0f; //multiply alpha by overall whiteness of TintColor
                 }
 
-                pbr.baseColor = material.GetColor(k_TintColor) * white;
+                pbr.baseColor = uMaterial.GetColor(k_TintColor) * white;
             }
 
-            if (material.HasProperty(k_MainTex) || material.HasProperty("_BaseMap")) {
+            if (uMaterial.HasProperty(k_MainTex) || uMaterial.HasProperty("_BaseMap")) {
 	            // TODO if additive particle, render black into alpha
 				// TODO use private Material.GetFirstPropertyNameIdByAttribute here, supported from 2020.1+
-				var mainTexProperty = material.HasProperty(k_BaseMap) ? k_BaseMap : k_MainTex;
-				var mainTex = material.GetTexture(mainTexProperty);
+				var mainTexProperty = uMaterial.HasProperty(k_BaseMap) ? k_BaseMap : k_MainTex;
+				var mainTex = uMaterial.GetTexture(mainTexProperty);
 
 				if (mainTex) {
 					if(mainTex is Texture2D) {
-						pbr.baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main, gltf);
-						ExportTextureTransform(pbr.baseColorTexture, material, mainTexProperty, gltf);
+						pbr.baseColorTexture = ExportTextureInfo(
+							mainTex,
+							gltf,
+							// Force RGB for the baseColor, so that the alpha (which is smoothness)
+							// is not used for alpha-opacity
+							hasAlphaSmoothness
+								? ImageExportBase.Format.Jpg
+								: ImageExportBase.Format.Unknown
+							);
+						ExportTextureTransform(pbr.baseColorTexture, uMaterial, mainTexProperty, gltf);
 					} else {
-						logger?.Error(LogCode.TextureInvalidType, "main", material.name );
+						logger?.Error(LogCode.TextureInvalidType, "main", uMaterial.name );
 						success = false;
 					}
 				}
 			}
 
-			if (material.HasProperty(k_Metallic) && !material.IsKeywordEnabled("_METALLICGLOSSMAP")) {
-				pbr.metallicFactor = material.GetFloat(k_Metallic);
+			if (uMaterial.HasProperty(k_Metallic) && !uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap)) {
+				pbr.metallicFactor = uMaterial.GetFloat(k_Metallic);
 			}
 
-			if (material.HasProperty(k_Glossiness) || material.HasProperty(k_Smoothness)) {
-				var smoothnessPropertyName = material.HasProperty(k_Smoothness) ?  k_Smoothness : k_Glossiness;
-				var metallicGlossMap = material.GetTexture(k_MetallicGlossMap);
-				float smoothness = material.GetFloat(smoothnessPropertyName);
-				// legacy workaround: the UnityGLTF shaders misuse k_Glossiness as roughness but don't have a keyword for it.
-				if (material.shader.name.Equals("GLTF/PbrMetallicRoughness", StringComparison.Ordinal)) {
-					smoothness = 1 - smoothness;
-				}
-				pbr.roughnessFactor = (metallicGlossMap!=null && material.HasProperty(k_GlossMapScale))
-					? material.GetFloat(k_GlossMapScale)
+			if (uMaterial.HasProperty(k_Glossiness) || uMaterial.HasProperty(k_Smoothness)) {
+				var smoothnessPropId = uMaterial.HasProperty(k_Smoothness) ?  k_Smoothness : k_Glossiness;
+				var metallicGlossMap = uMaterial.GetTexture(k_MetallicGlossMap);
+				var smoothness = uMaterial.GetFloat(smoothnessPropId);
+				pbr.roughnessFactor = (metallicGlossMap!=null || hasAlphaSmoothness) && uMaterial.HasProperty(k_GlossMapScale)
+					? uMaterial.GetFloat(k_GlossMapScale)
 					: 1f - smoothness;
 			}
 
-			if (material.HasProperty(k_MetallicGlossMap)) {
-				var mrTex = material.GetTexture(k_MetallicGlossMap);
-
+			if (uMaterial.HasProperty(k_MetallicGlossMap)) {
+				var mrTex = uMaterial.GetTexture(k_MetallicGlossMap);
 				if (mrTex != null) {
-					if(mrTex is Texture2D) {
-						pbr.metallicRoughnessTexture = ExportMetallicGlossTextureInfo(mrTex, TextureMapType.MetallicGloss, material, gltf);
-						if (material.IsKeywordEnabled(k_KeywordMetallicGlossMap))
+					if(mrTex is Texture2D mrTex2d) {
+						pbr.metallicRoughnessTexture ??= new TextureInfo();
+						ormImageExport.SetMetalGlossTexture(mrTex2d);
+						if (uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap))
 							pbr.metallicFactor = 1.0f;
-						ExportTextureTransform(pbr.metallicRoughnessTexture, material, k_MetallicGlossMap, gltf);
+						ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, k_MetallicGlossMap, gltf);
 					} else {
-						logger?.Error(LogCode.TextureInvalidType, "metallic/gloss", material.name );
+						logger?.Error(LogCode.TextureInvalidType, "metallic/gloss", uMaterial.name );
 						success = false;
 					}
 				}
 			}
 
+			if (uMaterial.IsKeywordEnabled(k_KeywordSmoothnessTextureAlbedoChannelA)) {
+				var smoothnessTex = uMaterial.GetTexture(k_MainTex) as Texture2D;
+				if (smoothnessTex != null) {
+					pbr.metallicRoughnessTexture ??= new TextureInfo();
+					ormImageExport.SetSmoothnessTexture(smoothnessTex);
+					ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, k_MainTex, gltf);
+				}
+			}
+
+			material.pbrMetallicRoughness = pbr;
 			return success;
 		}
         
@@ -315,7 +375,7 @@ namespace GLTFast.Export {
 		        var mainTex = uMaterial.GetTexture(k_MainTex);
 		        if (mainTex != null) {
 			        if(mainTex is Texture2D) {
-				        pbr.baseColorTexture = ExportTextureInfo(mainTex, TextureMapType.Main, gltf);
+				        pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf);
 				        ExportTextureTransform(pbr.baseColorTexture, uMaterial, k_MainTex, gltf);
 			        } else {
 				        logger?.Error(LogCode.TextureInvalidType, "main", material.name );
@@ -326,27 +386,23 @@ namespace GLTFast.Export {
 	        material.pbrMetallicRoughness = pbr;
         }
         
-        static TextureInfo ExportTextureInfo( UnityEngine.Texture texture, TextureMapType textureMapType, IGltfWritable gltf) {
+        static TextureInfo ExportTextureInfo( UnityEngine.Texture texture, IGltfWritable gltf, ImageExportBase.Format format = ImageExportBase.Format.Unknown) {
 	        var texture2d = texture as Texture2D;
 	        if (texture2d == null) {
 		        return null;
 	        }
-	        var imageExport = new ImageExport(texture2d);
-	        var imageId = gltf.AddImage(imageExport);
-	        if (imageId < 0) {
-		        return null;
+	        var imageExport = new ImageExport(texture2d, format);
+	        if (AddImageExport(gltf, imageExport, out var textureId)) {
+		        return new TextureInfo {
+			        index = textureId,
+			        // texCoord = 0 // TODO: figure out which UV set was used
+		        };
 	        }
-	        var textureId = gltf.AddTexture(imageId);
-	        var info = new TextureInfo {
-		        index = textureId,
-		        // texCoord = 0 // TODO: figure out which UV set was used
-	        };
-	        return info;
+	        return null;
         }
         
         static NormalTextureInfo ExportNormalTextureInfo(
 	        UnityEngine.Texture texture,
-	        TextureMapType textureMapType,
 	        UnityEngine.Material material,
 	        IGltfWritable gltf
 	        )
@@ -356,56 +412,22 @@ namespace GLTFast.Export {
 		        return null;
 	        }
 	        var imageExport = new NormalImageExport(texture2d);
-	        var imageId = gltf.AddImage(imageExport);
-	        if (imageId < 0) {
-		        return null;
-	        }
-	        var textureId = gltf.AddTexture(imageId);
-	        var info = new NormalTextureInfo {
-		        index = textureId,
-		        // texCoord = 0 // TODO: figure out which UV set was used
-	        };
+	        if (AddImageExport(gltf, imageExport, out var textureId)) {
+		        var info = new NormalTextureInfo {
+			        index = textureId,
+			        // texCoord = 0 // TODO: figure out which UV set was used
+		        };
 
-	        if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
-		        info.scale = material.GetFloat(MaterialGenerator.bumpScalePropId);
+		        if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
+			        info.scale = material.GetFloat(MaterialGenerator.bumpScalePropId);
+		        }
+				return info;
 	        }
-
-	        return info;
+	        return null;
         }
         
-        
-        static TextureInfo ExportMetallicGlossTextureInfo(
-	        UnityEngine.Texture texture,
-	        TextureMapType textureMapType,
-	        UnityEngine.Material material,
-	        IGltfWritable gltf
-        )
-        {
-	        var texture2d = texture as Texture2D;
-	        if (texture2d == null) {
-		        return null;
-	        }
-	        var imageExport = new OccRoughMetImageExport(texture2d);
-	        var imageId = gltf.AddImage(imageExport);
-	        if (imageId < 0) {
-		        return null;
-	        }
-	        var textureId = gltf.AddTexture(imageId);
-	        var info = new NormalTextureInfo {
-		        index = textureId,
-		        // texCoord = 0 // TODO: figure out which UV set was used
-	        };
-
-	        if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
-		        info.scale = material.GetFloat(MaterialGenerator.bumpScalePropId);
-	        }
-
-	        return info;
-        }
-
         static OcclusionTextureInfo ExportOcclusionTextureInfo(
 	        UnityEngine.Texture texture,
-	        TextureMapType textureMapType,
 	        UnityEngine.Material material,
 	        IGltfWritable gltf
 	        )
@@ -415,16 +437,30 @@ namespace GLTFast.Export {
 		        return null;
 	        }
 	        var imageExport = new ImageExport(texture2d);
+	        if (AddImageExport(gltf, imageExport, out var textureId)) {
+		        return new OcclusionTextureInfo {
+			        index = textureId
+		        };
+	        }
+	        return null;
+        }
+
+        /// <summary>
+        /// Adds an ImageExport to the glTF.
+        /// No conversions or channel swizzling 
+        /// </summary>
+        /// <param name="gltf"></param>
+        /// <param name="imageExport"></param>
+        /// <param name="textureId"></param>
+        /// <returns>glTF texture ID</returns>
+        static bool AddImageExport(IGltfWritable gltf, ImageExportBase imageExport, out int textureId) {
 	        var imageId = gltf.AddImage(imageExport);
 	        if (imageId < 0) {
-		        return null;
+		        textureId = -1;
+		        return false;
 	        }
-	        var textureId = gltf.AddTexture(imageId);
-	        var info = new OcclusionTextureInfo {
-		        index = textureId
-	        };
-
-	        return info;
+	        textureId = gltf.AddTexture(imageId);
+	        return true;
         }
         
         static void ExportTextureTransform(TextureInfo def, UnityEngine.Material mat, int texPropertyId, IGltfWritable gltf) {
