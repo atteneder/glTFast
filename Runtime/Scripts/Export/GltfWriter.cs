@@ -89,6 +89,7 @@ namespace GLTFast.Export {
         List<BufferView> m_BufferViews;
 
         List<ImageExportBase> m_ImageExports;
+        List<SamplerKey> m_SamplerKeys;
         List<UnityEngine.Material> m_UnityMaterials;
         List<UnityEngine.Mesh> m_UnityMeshes;
         Dictionary<int, int[]> m_NodeMaterials;
@@ -255,22 +256,24 @@ namespace GLTFast.Export {
             return m_Textures.Count - 1;
         }
         
-        public int AddSampler(FilterMode filterMode, TextureWrapMode wrapMode) {
-            if (filterMode == FilterMode.Bilinear && wrapMode == TextureWrapMode.Repeat) {
+        public int AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV) {
+            if (filterMode == FilterMode.Bilinear && wrapModeU == TextureWrapMode.Repeat && wrapModeV == TextureWrapMode.Repeat) {
                 // This is the default, so no sampler needed
                 return -1;
             }
             CertifyNotDisposed();
             m_Samplers ??= new List<Sampler>();
+            m_SamplerKeys ??= new List<SamplerKey>();
 
-            var sampler = new Sampler(filterMode, wrapMode);
-
-            var index = m_Samplers.IndexOf(sampler);
+            var samplerKey = new SamplerKey(filterMode, wrapModeU, wrapModeV );
+            
+            var index = m_SamplerKeys.IndexOf(samplerKey);
             if (index >= 0) {
                 return index;
             }
             
-            m_Samplers.Add(sampler);
+            m_Samplers.Add(new Sampler(filterMode, wrapModeU, wrapModeV));
+            m_SamplerKeys.Add(samplerKey);
             return m_Samplers.Count - 1;
         }
 
@@ -1140,6 +1143,7 @@ namespace GLTFast.Export {
             m_ExtensionsUsedOnly = null;
             m_ExtensionsRequired = null;
             m_ImageExports = null;
+            m_SamplerKeys = null;
             m_UnityMaterials = null;
             m_UnityMeshes = null;
             m_NodeMaterials = null;

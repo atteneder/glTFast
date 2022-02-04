@@ -460,7 +460,7 @@ namespace GLTFast.Export {
 		        return false;
 	        }
 
-	        var samplerId = gltf.AddSampler(imageExport.filterMode, imageExport.wrapMode);
+	        var samplerId = gltf.AddSampler(imageExport.filterMode, imageExport.wrapModeU, imageExport.wrapModeV);
 	        textureId = gltf.AddTexture(imageId,samplerId);
 	        return true;
         }

@@ -1335,8 +1335,10 @@ namespace GLTFast {
                 {
                     var txt = gltfRoot.textures[textureIndex];
                     SamplerKey key;
+                    Sampler sampler = null;
                     if(txt.sampler>=0) {
-                        key = new SamplerKey(gltfRoot.samplers[txt.sampler]);
+                        sampler = gltfRoot.samplers[txt.sampler];
+                        key = new SamplerKey(sampler);
                     } else {
                         key = defaultKey;
                     }
@@ -1345,7 +1347,7 @@ namespace GLTFast {
                     var img = images[imageIndex];
                     if(imageVariants[imageIndex]==null) {
                         if(txt.sampler>=0) {
-                            key.Sampler.Apply(img, settings.defaultMinFilterMode, settings.defaultMagFilterMode);
+                            sampler.Apply(img, settings.defaultMinFilterMode, settings.defaultMagFilterMode);
                         }
                         imageVariants[imageIndex] = new Dictionary<SamplerKey,Texture2D>();
                         imageVariants[imageIndex][key] = img;
@@ -1360,9 +1362,7 @@ namespace GLTFast {
                             newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
                             logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
-                            if (txt.sampler>=0) {
-                                key.Sampler.Apply(newImg, settings.defaultMinFilterMode, settings.defaultMagFilterMode);
-                            }
+                            sampler?.Apply(newImg, settings.defaultMinFilterMode, settings.defaultMagFilterMode);
                             imageVariants[imageIndex][key] = newImg;
                             textures[textureIndex] = newImg;
                         }

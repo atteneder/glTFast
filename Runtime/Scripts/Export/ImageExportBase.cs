@@ -33,7 +33,8 @@ namespace GLTFast.Export {
         public abstract string fileName { get; }
         public abstract string mimeType { get; }
         public abstract FilterMode filterMode { get; }
-        public abstract TextureWrapMode wrapMode { get; }
+        public abstract TextureWrapMode wrapModeU { get; }
+        public abstract TextureWrapMode wrapModeV { get; }
         
         public abstract void Write(string filePath, bool overwrite);
         public abstract byte[] GetData();

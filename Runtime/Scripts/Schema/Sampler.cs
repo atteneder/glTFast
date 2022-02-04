@@ -78,17 +78,10 @@ namespace GLTFast.Schema
         /// </summary>
         public WrapMode wrapT = WrapMode.Repeat;
 
-        public TextureWrapMode wrapU {
-            get {
-                return ConvertWrapMode((WrapMode)wrapS);
-            }
-        }
+        public FilterMode filterMode => ConvertFilterMode(minFilter, magFilter);
 
-        public TextureWrapMode wrapV {
-            get {
-                return ConvertWrapMode((WrapMode)wrapT);
-            }
-        }
+        public TextureWrapMode wrapU => ConvertWrapMode((WrapMode)wrapS);
+        public TextureWrapMode wrapV => ConvertWrapMode((WrapMode)wrapT);
 
         static FilterMode ConvertFilterMode(MinFilterMode minFilterToConvert, MagFilterMode magFilterToConvert)
         {
@@ -123,9 +116,18 @@ namespace GLTFast.Schema
             }
         }
 
+        static WrapMode ConvertWrapMode(TextureWrapMode wrapMode) {
+            return wrapMode switch {
+                TextureWrapMode.Clamp => WrapMode.ClampToEdge,
+                TextureWrapMode.Mirror => WrapMode.MirroredRepeat,
+                TextureWrapMode.MirrorOnce => WrapMode.MirroredRepeat,
+                _ => WrapMode.Repeat
+            };
+        }
+
         public Sampler() { }
 
-        public Sampler(FilterMode filterMode, TextureWrapMode wrapMode) {
+        public Sampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV) {
             switch (filterMode) {
                 case FilterMode.Point:
                     magFilter = MagFilterMode.Nearest;
@@ -140,20 +142,9 @@ namespace GLTFast.Schema
                     minFilter = MinFilterMode.LinearMipmapLinear;
                     break;
             }
-            switch (wrapMode) {
-                case TextureWrapMode.Repeat:
-                    wrapS = wrapT = WrapMode.Repeat;
-                    break;
-                case TextureWrapMode.Clamp:
-                    wrapS = wrapT = WrapMode.ClampToEdge;
-                    break;
-                case TextureWrapMode.Mirror:
-                    wrapS = wrapT = WrapMode.MirroredRepeat;
-                    break;
-                case TextureWrapMode.MirrorOnce:
-                    wrapS = wrapT = WrapMode.MirroredRepeat;
-                    break;
-            }
+
+            wrapS = ConvertWrapMode(wrapModeU);
+            wrapT = ConvertWrapMode(wrapModeV);
         }
 
         public void Apply(Texture2D image,

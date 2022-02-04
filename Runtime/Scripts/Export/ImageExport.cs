@@ -61,7 +61,8 @@ namespace GLTFast.Export {
         }
 
         public override FilterMode filterMode => m_Texture != null ? m_Texture.filterMode : FilterMode.Bilinear;
-        public override TextureWrapMode wrapMode => m_Texture != null ? m_Texture.wrapMode : TextureWrapMode.Repeat;
+        public override TextureWrapMode wrapModeU => m_Texture != null ? m_Texture.wrapModeU : TextureWrapMode.Repeat;
+        public override TextureWrapMode wrapModeV => m_Texture != null ? m_Texture.wrapModeV : TextureWrapMode.Repeat;
 
         public override string mimeType {
             get {

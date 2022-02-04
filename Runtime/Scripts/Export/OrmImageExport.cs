@@ -66,16 +66,31 @@ namespace GLTFast.Export {
             }
         }
 
-        public override TextureWrapMode wrapMode {
+        public override TextureWrapMode wrapModeU {
             get {
                 if (m_Texture != null) {
-                    return m_Texture.wrapMode;
+                    return m_Texture.wrapModeU;
                 }
                 if (m_OccTexture != null) {
-                    return m_OccTexture.wrapMode;
+                    return m_OccTexture.wrapModeU;
                 }
                 if (m_SmoothnessTexture != null) {
-                    return m_SmoothnessTexture.wrapMode;
+                    return m_SmoothnessTexture.wrapModeU;
+                }
+                return TextureWrapMode.Repeat;
+            }
+        }
+
+        public override TextureWrapMode wrapModeV {
+            get {
+                if (m_Texture != null) {
+                    return m_Texture.wrapModeV;
+                }
+                if (m_OccTexture != null) {
+                    return m_OccTexture.wrapModeV;
+                }
+                if (m_SmoothnessTexture != null) {
+                    return m_SmoothnessTexture.wrapModeV;
                 }
                 return TextureWrapMode.Repeat;
             }

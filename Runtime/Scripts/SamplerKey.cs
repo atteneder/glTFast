@@ -15,27 +15,35 @@
 
 using System;
 using GLTFast.Schema;
+using UnityEngine;
 
 namespace GLTFast {
     struct SamplerKey : IEquatable<SamplerKey> {
-        private Sampler m_s;
-        public Sampler Sampler {
-            get { return m_s; }
-        }
+        
+        FilterMode m_FilterMode;
+        TextureWrapMode m_WrapModeU;
+        TextureWrapMode m_WrapModeV;
 
         public SamplerKey(Sampler sampler) {
-            m_s = sampler;
+            m_FilterMode = sampler.filterMode;
+            m_WrapModeU = sampler.wrapU;
+            m_WrapModeV = sampler.wrapV;
         }
 
+        public SamplerKey(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV) {
+            m_FilterMode = filterMode;
+            m_WrapModeU = wrapModeU;
+            m_WrapModeV = wrapModeV;
+        }
+        
         public override int GetHashCode() {
-            return (m_s.magFilter, m_s.minFilter, m_s.wrapS, m_s.wrapT).GetHashCode();
+            return (m_FilterMode,m_WrapModeU,m_WrapModeV).GetHashCode();
         }
 
         public bool Equals(SamplerKey other) {
-            return m_s.magFilter == other.m_s.magFilter &&
-                m_s.minFilter == other.m_s.minFilter &&
-                m_s.wrapS == other.m_s.wrapS &&
-                m_s.wrapT == other.m_s.wrapT;
+            return m_FilterMode == other.m_FilterMode &&
+                m_WrapModeU == other.m_WrapModeU &&
+                m_WrapModeV == other.m_WrapModeV;
         }
 
         public override bool Equals(object obj) => obj is SamplerKey other && Equals(other);
