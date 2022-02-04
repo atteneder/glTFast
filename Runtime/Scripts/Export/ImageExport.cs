@@ -80,8 +80,13 @@ namespace GLTFast.Export {
             }
         }
 
-        protected virtual byte[] GenerateTexture() {
-            return EncodeTexture(m_Texture, format);
+        protected virtual bool GenerateTexture(out byte[] imageData) {
+            if (m_Texture != null) {
+                imageData = EncodeTexture(m_Texture, format);
+                return true;
+            }
+            imageData = null;
+            return false;
         }
 
         public override void Write(string filePath, bool overwrite) {
@@ -90,8 +95,7 @@ namespace GLTFast.Export {
                 File.Copy(m_AssetPath, filePath, overwrite);
             } else
 #endif
-            if (m_Texture != null) {
-                var imageData = GenerateTexture();
+            if(GenerateTexture(out var imageData)) {
                 File.WriteAllBytes(filePath,imageData);
             }
         }
@@ -102,12 +106,8 @@ namespace GLTFast.Export {
                 return File.ReadAllBytes(m_AssetPath);
             }
 #endif
-            if (m_Texture != null) {
-                var imageData = EncodeTexture(m_Texture, format);
-                return imageData;
-            }
-
-            return null;
+            GenerateTexture(out var imageData);
+            return imageData;
         }
 
         [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]

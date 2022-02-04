@@ -87,14 +87,18 @@ namespace GLTFast.Export {
         }
 
         public override void Write(string filePath, bool overwrite) {
-            if (m_Texture != null || m_OccTexture!=null || m_SmoothnessTexture!=null) {
-                var imageData = GenerateTexture();
+            if (GenerateTexture(out var imageData)) {
                 File.WriteAllBytes(filePath,imageData);
             }
         }
         
-        protected override byte[] GenerateTexture() {
-            return EncodeOrmTexture(m_Texture, m_OccTexture, m_SmoothnessTexture, format);
+        protected override bool GenerateTexture(out byte[] imageData) {
+            if (m_Texture != null || m_OccTexture!=null || m_SmoothnessTexture!=null) {
+                imageData = EncodeOrmTexture(m_Texture, m_OccTexture, m_SmoothnessTexture, format);
+                return true;
+            }
+            imageData = null;
+            return false;
         }
         
         protected static byte[] EncodeOrmTexture(

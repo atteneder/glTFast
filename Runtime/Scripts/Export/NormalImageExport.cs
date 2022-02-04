@@ -31,8 +31,13 @@ namespace GLTFast.Export {
             return s_NormalBlitMaterial;
         }
 
-        protected override byte[] GenerateTexture() {
-            return EncodeTexture(m_Texture, format, hasAlpha:false, blitMaterial:GetNormalBlitMaterial());
+        protected override bool GenerateTexture(out byte[] imageData) {
+            if (m_Texture != null) {
+                imageData = EncodeTexture(m_Texture, format, hasAlpha:false, blitMaterial:GetNormalBlitMaterial());
+                return true;
+            }
+            imageData = null;
+            return false;
         }
     }
 }
