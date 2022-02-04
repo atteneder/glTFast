@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Metallic-gloss map support (converted to roughness-metallic)
 - (Export) Combine multiple maps to single occlusion-roughness-metallic map
 - (Export) Emission support
+- (Export) Correct texture filter and wrap modes by creating glTF `sampler`
 - (Documentation) XML documentation comments on many types
 - (Documentation) Initial setup for DocFX generator
 ### Changed

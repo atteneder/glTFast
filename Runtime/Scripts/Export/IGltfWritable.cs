@@ -37,7 +37,16 @@ namespace GLTFast.Export {
         /// Creates a glTF texture from with a given image index
         /// </summary>
         /// <param name="imageId">glTF image index returned by <seealso cref="AddImage"/></param>
+        /// <param name="samplerId">glTF sampler index returned by <seealso cref="AddSampler"/></param>
         /// <returns>glTF texture index</returns>
-        int AddTexture(int imageId);
+        int AddTexture(int imageId, int samplerId);
+
+        /// <summary>
+        /// Creates a glTF sampler based on Unity filter and wrap settings
+        /// </summary>
+        /// <param name="filterMode">Texture filter mode</param>
+        /// <param name="wrapMode">Texture wrap mode</param>
+        /// <returns>glTF sampler index or -1 if no sampler is required</returns>
+        int AddSampler(FilterMode filterMode, TextureWrapMode wrapMode);
     }
 }

@@ -33,8 +33,9 @@ namespace GLTFast.Export {
         public OrmImageExport(
             Texture2D metalGlossTexture = null,
             Texture2D occlusionTexture = null,
-            Texture2D smoothnessTexture = null)
-            : base(metalGlossTexture) 
+            Texture2D smoothnessTexture = null,
+            Format format = Format.Unknown)
+            : base(metalGlossTexture,format) 
         {
             m_OccTexture = occlusionTexture;
             m_SmoothnessTexture = smoothnessTexture;
@@ -49,6 +50,36 @@ namespace GLTFast.Export {
         }
         
         protected override Format format => m_Format != Format.Unknown ? m_Format : Format.Jpg;
+
+        public override FilterMode filterMode {
+            get {
+                if (m_Texture != null) {
+                    return m_Texture.filterMode;
+                }
+                if (m_OccTexture != null) {
+                    return m_OccTexture.filterMode;
+                }
+                if (m_SmoothnessTexture != null) {
+                    return m_SmoothnessTexture.filterMode;
+                }
+                return FilterMode.Bilinear;
+            }
+        }
+
+        public override TextureWrapMode wrapMode {
+            get {
+                if (m_Texture != null) {
+                    return m_Texture.wrapMode;
+                }
+                if (m_OccTexture != null) {
+                    return m_OccTexture.wrapMode;
+                }
+                if (m_SmoothnessTexture != null) {
+                    return m_SmoothnessTexture.wrapMode;
+                }
+                return TextureWrapMode.Repeat;
+            }
+        }
 
         public bool hasOcclusion => m_OccTexture != null;
 

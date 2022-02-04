@@ -459,7 +459,9 @@ namespace GLTFast.Export {
 		        textureId = -1;
 		        return false;
 	        }
-	        textureId = gltf.AddTexture(imageId);
+
+	        var samplerId = gltf.AddSampler(imageExport.filterMode, imageExport.wrapMode);
+	        textureId = gltf.AddTexture(imageId,samplerId);
 	        return true;
         }
         

@@ -38,6 +38,7 @@ using Buffer = GLTFast.Schema.Buffer;
 using Debug = UnityEngine.Debug;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
+using Sampler = GLTFast.Schema.Sampler;
 using Texture = GLTFast.Schema.Texture;
 
 #if DEBUG
@@ -83,6 +84,7 @@ namespace GLTFast.Export {
         List<Material> m_Materials;
         List<Texture> m_Textures;
         List<Image> m_Images;
+        List<Sampler> m_Samplers;
         List<Accessor> m_Accessors;
         List<BufferView> m_BufferViews;
 
@@ -235,12 +237,13 @@ namespace GLTFast.Export {
             return imageId;
         }
 
-        public int AddTexture(int imageId) {
+        public int AddTexture(int imageId, int samplerId) {
             CertifyNotDisposed();
             m_Textures ??= new List<Texture>();
             
             var texture = new Texture {
-                source = imageId
+                source = imageId,
+                sampler = samplerId
             };
 
             var index = m_Textures.IndexOf(texture);
@@ -250,6 +253,25 @@ namespace GLTFast.Export {
             
             m_Textures.Add(texture);
             return m_Textures.Count - 1;
+        }
+        
+        public int AddSampler(FilterMode filterMode, TextureWrapMode wrapMode) {
+            if (filterMode == FilterMode.Bilinear && wrapMode == TextureWrapMode.Repeat) {
+                // This is the default, so no sampler needed
+                return -1;
+            }
+            CertifyNotDisposed();
+            m_Samplers ??= new List<Sampler>();
+
+            var sampler = new Sampler(filterMode, wrapMode);
+
+            var index = m_Samplers.IndexOf(sampler);
+            if (index >= 0) {
+                return index;
+            }
+            
+            m_Samplers.Add(sampler);
+            return m_Samplers.Count - 1;
         }
 
         public void RegisterExtensionUsage(Extension extension, bool required = true) {
@@ -436,6 +458,7 @@ namespace GLTFast.Export {
             m_Gltf.materials = m_Materials?.ToArray();
             m_Gltf.images = m_Images?.ToArray();
             m_Gltf.textures = m_Textures?.ToArray();
+            m_Gltf.samplers = m_Samplers?.ToArray();
 
             m_Gltf.asset = new Asset {
                 version = "2.0",
@@ -1132,6 +1155,7 @@ namespace GLTFast.Export {
             m_Materials = null;
             m_Images = null;
             m_Textures = null;
+            m_Samplers = null;
             
             m_State = State.Disposed;
         }

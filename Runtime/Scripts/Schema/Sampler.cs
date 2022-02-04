@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using UnityEngine;
 
 namespace GLTFast.Schema
@@ -122,6 +123,39 @@ namespace GLTFast.Schema
             }
         }
 
+        public Sampler() { }
+
+        public Sampler(FilterMode filterMode, TextureWrapMode wrapMode) {
+            switch (filterMode) {
+                case FilterMode.Point:
+                    magFilter = MagFilterMode.Nearest;
+                    minFilter = MinFilterMode.Nearest;
+                    break;
+                case FilterMode.Bilinear:
+                    magFilter = MagFilterMode.Linear;
+                    minFilter = MinFilterMode.Linear;
+                    break;
+                case FilterMode.Trilinear:
+                    magFilter = MagFilterMode.Linear;
+                    minFilter = MinFilterMode.LinearMipmapLinear;
+                    break;
+            }
+            switch (wrapMode) {
+                case TextureWrapMode.Repeat:
+                    wrapS = wrapT = WrapMode.Repeat;
+                    break;
+                case TextureWrapMode.Clamp:
+                    wrapS = wrapT = WrapMode.ClampToEdge;
+                    break;
+                case TextureWrapMode.Mirror:
+                    wrapS = wrapT = WrapMode.MirroredRepeat;
+                    break;
+                case TextureWrapMode.MirrorOnce:
+                    wrapS = wrapT = WrapMode.MirroredRepeat;
+                    break;
+            }
+        }
+
         public void Apply(Texture2D image,
                           MinFilterMode defaultMinFilter = MinFilterMode.Linear,
                           MagFilterMode defaultMagFilter = MagFilterMode.Linear) {
@@ -139,8 +173,23 @@ namespace GLTFast.Schema
         public void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
+            // Assuming MagFilterMode.Linear is the project's default, only
+            // serialize valid, non-default values
+            if (magFilter == MagFilterMode.Nearest) {
+                writer.AddProperty("magFilter", (int)magFilter);
+            }
+            // Assuming MinFilterMode.Linear is the project's default, only
+            // serialize valid, non-default values
+            if (minFilter != MinFilterMode.None && minFilter != MinFilterMode.Linear) {
+                writer.AddProperty("minFilter", (int)minFilter);
+            }
+            if (wrapS != WrapMode.None && wrapS != WrapMode.Repeat) {
+                writer.AddProperty("wrapS", (int)wrapS);
+            }
+            if (wrapT != WrapMode.None && wrapT != WrapMode.Repeat) {
+                writer.AddProperty("wrapT", (int)wrapT);
+            }
             writer.Close();
-            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
 }
