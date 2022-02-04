@@ -839,16 +839,40 @@ namespace GLTFast.Export {
 
         async Task<bool> BakeImages(string directory) {
             if (m_ImageExports != null) {
+                Dictionary<int,string> fileNameOverrides = null;
                 var imageDest = GetFinalImageDestination();
                 var overwrite = m_Settings.fileConflictResolution == FileConflictResolution.Overwrite;
                 if (!overwrite && imageDest == ImageDestination.SeparateFile) {
                     var fileExists = false;
-                    foreach (var imageExport in m_ImageExports) {
+                    var fileNames = new HashSet<string>(m_ImageExports.Count);
+                
+                    bool GetUniqueFileName(ref string filename) {
+                        if(fileNames.Contains(filename)) {
+                            var i = 0;
+                            var extension = Path.GetExtension(filename);
+                            var baseName = Path.GetFileNameWithoutExtension(filename);
+                            string newName;
+                            do {
+                                newName = $"{baseName}_{i++}{extension}";
+                            } while (fileNames.Contains(newName));
+
+                            filename = newName;
+                            return true;
+                        }
+                        return false;
+                    }
+                    
+                    for (var imageId = 0; imageId < m_ImageExports.Count; imageId++) {
+                        var imageExport = m_ImageExports[imageId];
                         var fileName = Path.GetFileName(imageExport.fileName);
-                        var destPath = Path.Combine(directory,fileName);
+                        if (GetUniqueFileName(ref fileName)) {
+                            fileNameOverrides ??= new Dictionary<int, string>();
+                            fileNameOverrides[imageId] = fileName;
+                        }
+                        fileNames.Add(fileName);
+                        var destPath = Path.Combine(directory, fileName);
                         if (File.Exists(destPath)) {
                             fileExists = true;
-                            break;
                         }
                     }
 
@@ -877,7 +901,10 @@ namespace GLTFast.Export {
                         m_Images[imageId].bufferView = WriteBufferViewToBuffer(imageBytes);
                     }
                     else if (imageDest == ImageDestination.SeparateFile) {
-                        var fileName = Path.GetFileName(imageExport.fileName);
+                        string fileName = null;
+                        if (!(fileNameOverrides != null && fileNameOverrides.TryGetValue(imageId, out fileName))) {
+                            fileName = imageExport.fileName;
+                        }
                         imageExport.Write( Path.Combine(directory, fileName), overwrite);
                         m_Images[imageId].uri = fileName;
                     }
