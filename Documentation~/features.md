@@ -66,7 +66,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | KTX with Basis Universal compression (via [KtxUnity](https://github.com/atteneder/KtxUnity)) | ✅ | 
 | | |
 | **Texture sampler**
-| Filtering  | ✅ with [limitations](#Known-issues) | 
+| Filtering  | ✅ with [limitations](./KnownIssues.md) | 
 | Wrap modes | ✅ | 
 | | |
 | **Materials Overview** (see [details](#materials-details))
@@ -244,16 +244,6 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 - Make sure to enable [Hybrid Renderer V2](https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@0.11/manual/creating-a-new-hybrid-renderer-project.html)
 - Use `GltfEntityAsset` instead of `GltfAsset`
 - For customized behavior, use the `EntityInstantiator` instead of the `GameObjectInstantiator`
-
-## Known issues
-
-- <sup>1</sup>Vertex accessors (positions, normals, etc.) that are used across meshes are duplicated and result in higher memory usage and slower loading (see [this comment](https://github.com/atteneder/glTFast/issues/52#issuecomment-583837852))
-- <sup>1</sup>When using more than one sampler on one image, that image is duplicated and results in higher memory usage
-- Texture sampler minification/magnification filter limitations (see [issue][SamplerFilter]):
-  - <sup>1</sup>There's no differentiation between `minFilter` and `magFilter`. `minFilter` settings are prioritized.
-  - <sup>1</sup>`minFilter` mode `NEAREST_MIPMAP_LINEAR` is not supported and will result in `NEAREST`.
-
-<sup>1</sup>: A Unity API limitation.
 
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
 [AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166  
