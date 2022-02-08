@@ -16,6 +16,7 @@
 using System.IO;
 using System.Linq;
 using GLTFast.Export;
+using GLTFast.Utils;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
