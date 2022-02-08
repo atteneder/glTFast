@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GLTFast.Utils;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
