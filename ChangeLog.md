@@ -118,7 +118,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Import of glTFs with no meshes (#257)
 
-## [4.3.3] - 2021-10-15 
+## [4.3.3] - 2021-10-15
 ### Fixed
 - Corrected mesh bounds (calculated from accessor's min/max)
 - No errors when importing empty scenes
