@@ -35,7 +35,6 @@ namespace GLTFast.Schema {
 
         public TextureInfo diffuseTexture = null;
 
-        /// </summary>
         public float[] specularFactor = { 1, 1, 1 };
 
         public Color specularColor {
@@ -48,8 +47,6 @@ namespace GLTFast.Schema {
             }
         }
 
-
-        /// </summary>
         public float glossinessFactor = 1;
 
         public TextureInfo specularGlossinessTexture = null;
