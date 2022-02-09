@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Documentation) Initial setup for DocFX generator
 ### Changed
 - (Documentation) Split up monolithic docs into multiple markdown files
+- (Documentation) Changelog links to code are now `xref` (for DocFX)
 ### Fixed
 - Point meshes are rendered consistently on more platforms (iOS, Vulkan) due to explicitely setting `PSIZE` (thanks [Kim Wonkee][wonkee-kim] for #309)
 - Removed Editor markup resources from builds
@@ -27,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The new, generic shader graphs are used for
   - Universal render pipe 12 or newer
   - High-Definition render pipe 10 or newer
-  - Optional/Experimental for the Built-In render pipe (see [Shader Graphs and the Built-In Render Pipeline](./Documentation~/ProjectSetup.md#shader-graphs-and-the-built-in-render-pipeline) in the documentatoin for details)
+  - Optional/Experimental for the Built-In render pipe (see [Shader Graphs and the Built-In Render Pipeline](xref:doc-project-setup#shader-graphs-and-the-built-in-render-pipeline) in the documentatoin for details)
 ### Fixed
 - Correct emission in HDRP 12 and later
 - (Shader Graph) Vertex color alpha channel is used properly
@@ -232,7 +233,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GPU instancing via [`EXT_mesh_gpu_instancing` glTF extension](https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Vendor/EXT_mesh_gpu_instancing/README.md) (#107).
 - Camera support (via `IInstantiator.AddCamera`; #12)
 ### Changed
-- Coordinate space conversion from glTF's right-handed to Unity's left-handed system changed. Please see the [upgrade guide](./Documentation~/UpgradeGuides.md#upgrade-to-4.x) for details and the motivation behind it.
+- Coordinate space conversion from glTF's right-handed to Unity's left-handed system changed. Please see the [upgrade guide](xref:doc-upgrade-guides#upgrade-to-4x) for details and the motivation behind it.
 - Nodes' names are made unique (within their hierarchical position) by supplementing a continuous number. This is required for correct animation target lookup and import continuity.
 - `IInstantiator.AddPrimitive` extended parameter `first` (`bool`; true for the first primitive) to primitiveNumeration (`int`; counting upwards from zero). This allows for creating unique GameObject names.
 - Renamed the main class `GltFast` to `GltfImporter` to properly reflect its purpose. There is a fallback `GltFast` class for backwards compatibility

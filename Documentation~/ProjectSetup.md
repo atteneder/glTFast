@@ -1,3 +1,7 @@
+---
+uid: doc-project-setup
+---
+
 # Project Setup
 
 ## Materials and Shader Variants

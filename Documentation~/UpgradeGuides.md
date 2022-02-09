@@ -1,3 +1,7 @@
+---
+uid: doc-upgrade-guides
+---
+
 # Upgrade Guides
 
 ## Upgrade to 4.5
