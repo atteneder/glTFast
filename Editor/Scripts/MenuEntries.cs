@@ -27,7 +27,7 @@ using Unity.glTF.Validator;
 
 namespace GLTFast.Editor {
     
-    public static class MenuEntries {
+    static class MenuEntries {
 
         const string k_GltfExtension = "gltf";
         const string k_GltfBinaryExtension = "glb";

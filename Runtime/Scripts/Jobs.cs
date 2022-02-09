@@ -272,7 +272,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    public unsafe struct CreateIndicesInt32Job : IJobParallelFor  {
+    unsafe struct CreateIndicesInt32Job : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -285,7 +285,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct CreateIndicesInt32FlippedJob : IJobParallelFor  {
+    unsafe struct CreateIndicesInt32FlippedJob : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -298,7 +298,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    public unsafe struct ConvertIndicesUInt8ToInt32Job : IJobParallelFor  {
+    unsafe struct ConvertIndicesUInt8ToInt32Job : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -315,7 +315,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertIndicesUInt8ToInt32FlippedJob : IJobParallelFor  {
+    unsafe struct ConvertIndicesUInt8ToInt32FlippedJob : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -335,7 +335,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertIndicesUInt16ToInt32FlippedJob : IJobParallelFor  {
+    unsafe struct ConvertIndicesUInt16ToInt32FlippedJob : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -355,7 +355,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertIndicesUInt16ToInt32Job : IJobParallelFor  {
+    unsafe struct ConvertIndicesUInt16ToInt32Job : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -372,7 +372,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertIndicesUInt32ToInt32Job : IJobParallelFor  {
+    unsafe struct ConvertIndicesUInt32ToInt32Job : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -389,7 +389,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertIndicesUInt32ToInt32FlippedJob : IJobParallelFor  {
+    unsafe struct ConvertIndicesUInt32ToInt32FlippedJob : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -415,7 +415,7 @@ namespace GLTFast.Jobs {
     // /// when input is not interleaved 
     // /// </summary>
     // [BurstCompile]
-    // public unsafe struct ConvertUVsUInt8ToFloatJob : IJobParallelFor  {
+    // unsafe struct ConvertUVsUInt8ToFloatJob : IJobParallelFor  {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
@@ -438,7 +438,7 @@ namespace GLTFast.Jobs {
     // /// when input is not interleaved 
     // /// </summary>
     // [BurstCompile]
-    // public unsafe struct ConvertUVsUInt8ToFloatNormalizedJob : IJobParallelFor  {
+    // unsafe struct ConvertUVsUInt8ToFloatNormalizedJob : IJobParallelFor  {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
@@ -461,7 +461,7 @@ namespace GLTFast.Jobs {
     // /// when input is not interleaved 
     // /// </summary>
     // [BurstCompile]
-    // public unsafe struct ConvertUVsUInt16ToFloatNormalizedJob : IJobParallelFor  {
+    // unsafe struct ConvertUVsUInt16ToFloatNormalizedJob : IJobParallelFor  {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
@@ -484,7 +484,7 @@ namespace GLTFast.Jobs {
     // /// when input is not interleaved 
     // /// </summary>
     // [BurstCompile]
-    // public unsafe struct ConvertUVsUInt16ToFloatJob : IJobParallelFor  {
+    // unsafe struct ConvertUVsUInt16ToFloatJob : IJobParallelFor  {
     //
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
@@ -507,7 +507,7 @@ namespace GLTFast.Jobs {
     // /// when input is not interleaved 
     // /// </summary>
     // [BurstCompile]
-    // public unsafe struct ConvertUVsFloatToFloatJob : IJobParallelFor {
+    // unsafe struct ConvertUVsFloatToFloatJob : IJobParallelFor {
     //     [ReadOnly]
     //     [NativeDisableUnsafePtrRestriction]
     //     public float* input;
@@ -523,7 +523,7 @@ namespace GLTFast.Jobs {
     // }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsUInt8ToFloatInterleavedJob : 
+    unsafe struct ConvertUVsUInt8ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -566,7 +566,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsUInt8ToFloatInterleavedNormalizedJob : IJobParallelFor  {
+    unsafe struct ConvertUVsUInt8ToFloatInterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
         public int inputByteStride;
@@ -596,7 +596,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsUInt16ToFloatInterleavedJob : 
+    unsafe struct ConvertUVsUInt16ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -640,7 +640,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsUInt16ToFloatInterleavedNormalizedJob : IJobParallelFor  {
+    unsafe struct ConvertUVsUInt16ToFloatInterleavedNormalizedJob : IJobParallelFor  {
 
         [ReadOnly]
         public int inputByteStride;
@@ -669,7 +669,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsInt16ToFloatInterleavedJob : 
+    unsafe struct ConvertUVsInt16ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -712,7 +712,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsInt16ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertUVsInt16ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -763,7 +763,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsInt8ToFloatInterleavedJob : 
+    unsafe struct ConvertUVsInt8ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -807,7 +807,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsInt8ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertUVsInt8ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -857,7 +857,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertColorsRGBFloatToRGBAFloatJob : IJobParallelFor {
+    unsafe struct ConvertColorsRGBFloatToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -877,7 +877,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertColorsRGBUInt8ToRGBAFloatJob : IJobParallelFor {
+    unsafe struct ConvertColorsRGBUInt8ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -899,7 +899,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertColorsRGBUInt16ToRGBAFloatJob : IJobParallelFor {
+    unsafe struct ConvertColorsRGBUInt16ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -922,7 +922,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertColorsRGBAUInt16ToRGBAFloatJob : 
+    unsafe struct ConvertColorsRGBAUInt16ToRGBAFloatJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -970,7 +970,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertColorsRGBAFloatToRGBAFloatJob : 
+    unsafe struct ConvertColorsRGBAFloatToRGBAFloatJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1007,7 +1007,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    public unsafe struct ConvertColorsRGBAUInt8ToRGBAFloatJob : IJobParallelFor {
+    unsafe struct ConvertColorsRGBAUInt8ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -1031,7 +1031,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct MemCopyJob : IJob {
+    unsafe struct MemCopyJob : IJob {
 
         [ReadOnly]
         public long bufferSize;
@@ -1053,7 +1053,7 @@ namespace GLTFast.Jobs {
     /// General purpose vector 3 (position or normal) conversion
     /// </summary>
     [BurstCompile]
-    public unsafe struct ConvertVector3FloatToFloatJob : IJobParallelFor {
+    unsafe struct ConvertVector3FloatToFloatJob : IJobParallelFor {
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
         public float3* input;
@@ -1070,7 +1070,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertRotationsFloatToFloatJob : IJobParallelFor {
+    unsafe struct ConvertRotationsFloatToFloatJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -1089,7 +1089,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    public unsafe struct ConvertRotationsInt16ToFloatJob : IJobParallelFor {
+    unsafe struct ConvertRotationsInt16ToFloatJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -1112,7 +1112,7 @@ namespace GLTFast.Jobs {
     /// Quaternions in Unity space (floats). 
     /// </summary>
     [BurstCompile]
-    public unsafe struct ConvertRotationsInt8ToFloatJob : IJobParallelFor {
+    unsafe struct ConvertRotationsInt8ToFloatJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -1131,7 +1131,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertUVsFloatToFloatInterleavedJob : 
+    unsafe struct ConvertUVsFloatToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1182,7 +1182,7 @@ namespace GLTFast.Jobs {
     /// General purpose vector 3 (position or normal) conversion
     /// </summary>
     [BurstCompile]
-    public unsafe struct ConvertVector3FloatToFloatInterleavedJob :
+    unsafe struct ConvertVector3FloatToFloatInterleavedJob :
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1265,7 +1265,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertTangentsFloatToFloatInterleavedJob : 
+    unsafe struct ConvertTangentsFloatToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1313,7 +1313,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertBoneWeightsFloatToFloatInterleavedJob : 
+    unsafe struct ConvertBoneWeightsFloatToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1356,7 +1356,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertBoneWeightsUInt8ToFloatInterleavedJob : 
+    unsafe struct ConvertBoneWeightsUInt8ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1409,7 +1409,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertBoneWeightsUInt16ToFloatInterleavedJob : 
+    unsafe struct ConvertBoneWeightsUInt16ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1462,7 +1462,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertTangentsInt16ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertTangentsInt16ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1512,7 +1512,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertTangentsInt8ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertTangentsInt8ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1562,7 +1562,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertPositionsUInt16ToFloatInterleavedJob : 
+    unsafe struct ConvertPositionsUInt16ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1605,7 +1605,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertPositionsUInt16ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertPositionsUInt16ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1656,7 +1656,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertPositionsInt16ToFloatInterleavedJob : 
+    unsafe struct ConvertPositionsInt16ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1704,7 +1704,7 @@ namespace GLTFast.Jobs {
     /// Result is not normalized (scaled to unit length)
     /// </summary>
     [BurstCompile]
-    public unsafe struct ConvertVector3Int16ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertVector3Int16ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1759,7 +1759,7 @@ namespace GLTFast.Jobs {
     /// Result is normalized (scaled to unit length)
     /// </summary>
     [BurstCompile]
-    public unsafe struct ConvertNormalsInt16ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertNormalsInt16ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1810,7 +1810,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertPositionsInt8ToFloatInterleavedJob : 
+    unsafe struct ConvertPositionsInt8ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1857,7 +1857,7 @@ namespace GLTFast.Jobs {
     /// Result is not normalized (scaled to unit length)
     /// </summary>
     [BurstCompile]
-    public unsafe struct ConvertVector3Int8ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertVector3Int8ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1912,7 +1912,7 @@ namespace GLTFast.Jobs {
     /// Result is normalized (scaled to unit length)
     /// </summary>
     [BurstCompile]
-    public unsafe struct ConvertNormalsInt8ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertNormalsInt8ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1963,7 +1963,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertPositionsUInt8ToFloatInterleavedJob : 
+    unsafe struct ConvertPositionsUInt8ToFloatInterleavedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -2006,7 +2006,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertPositionsUInt8ToFloatInterleavedNormalizedJob : 
+    unsafe struct ConvertPositionsUInt8ToFloatInterleavedNormalizedJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -2057,7 +2057,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    public unsafe struct ConvertBoneJointsUInt8ToUInt32Job : IJobParallelFor  {
+    unsafe struct ConvertBoneJointsUInt8ToUInt32Job : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -2082,7 +2082,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertBoneJointsUInt16ToUInt32Job : IJobParallelFor  {
+    unsafe struct ConvertBoneJointsUInt16ToUInt32Job : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -2161,7 +2161,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertMatricesJob : IJobParallelFor  {
+    unsafe struct ConvertMatricesJob : IJobParallelFor  {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -2192,7 +2192,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertScalarInt8ToFloatNormalizedJob : IJobParallelFor {
+    unsafe struct ConvertScalarInt8ToFloatNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -2207,7 +2207,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertScalarUInt8ToFloatNormalizedJob : IJobParallelFor {
+    unsafe struct ConvertScalarUInt8ToFloatNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -2222,7 +2222,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    public unsafe struct ConvertScalarInt16ToFloatNormalizedJob : IJobParallelFor {
+    unsafe struct ConvertScalarInt16ToFloatNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]
@@ -2237,7 +2237,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    public unsafe struct ConvertScalarUInt16ToFloatNormalizedJob : IJobParallelFor {
+    unsafe struct ConvertScalarUInt16ToFloatNormalizedJob : IJobParallelFor {
 
         [ReadOnly]
         [NativeDisableUnsafePtrRestriction]

@@ -34,18 +34,18 @@ namespace GLTFast {
         /// <summary>
         /// glTF-Binary file extension
         /// </summary>
-        public const string glbExt = ".glb";
+        internal const string glbExt = ".glb";
         
         /// <summary>
         /// glTF file extension
         /// </summary>
-        public const string gltfExt = ".gltf";
+        internal const string gltfExt = ".gltf";
         
         /// <summary>
         /// First four bytes of a glTF-Binary file are made up of this signature
         /// Represents glTF in ASCII
         /// </summary>
-        public const uint GLB_MAGIC = 0x46546c67; 
+        internal const uint GLB_MAGIC = 0x46546c67; 
         
         /// <summary>
         /// Figures out if a byte array contains data of a glTF-Binary

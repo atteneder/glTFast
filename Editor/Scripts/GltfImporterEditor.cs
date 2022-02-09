@@ -34,7 +34,7 @@ namespace GLTFast {
 
     [CustomEditor(typeof(GltfImporter))]
     // [CanEditMultipleObjects]
-    public class GltfImporterEditor : ScriptedImporterEditor
+    class GltfImporterEditor : ScriptedImporterEditor
     {
         
         // To be assigned defaults from the inspector 

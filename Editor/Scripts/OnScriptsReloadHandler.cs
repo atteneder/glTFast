@@ -19,7 +19,7 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 
 namespace GLTFast {
-    public static class OnScriptsReloadHandler {
+    static class OnScriptsReloadHandler {
         
 // Only run this check if glTFast is in Packages/manifest.json testables
 // (which indicates you're developing it)

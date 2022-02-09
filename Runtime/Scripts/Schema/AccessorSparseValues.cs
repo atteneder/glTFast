@@ -29,7 +29,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public int byteOffset = 0;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             writer.AddProperty("bufferView", bufferView);
             if (byteOffset >= 0) {

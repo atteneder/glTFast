@@ -46,7 +46,7 @@ namespace GLTFast.Schema {
             return clone;
         }
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
             if (primitives != null) {
@@ -74,7 +74,7 @@ namespace GLTFast.Schema {
     public class MeshExtras {
         public string[] targetNames;
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             if (targetNames != null) {
                 writer.AddArrayProperty("targetNames", targetNames);
             }

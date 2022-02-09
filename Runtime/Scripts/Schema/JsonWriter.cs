@@ -19,8 +19,8 @@ using System.IO;
 using UnityEngine;
 
 namespace GLTFast.Schema {
-    
-    public class JsonWriter {
+
+    class JsonWriter {
         
         StreamWriter m_Stream;
 

@@ -19,7 +19,7 @@ namespace GLTFast.Schema {
     public class Scene : RootChild {
         public uint[] nodes;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
             writer.AddArrayProperty("nodes",nodes);

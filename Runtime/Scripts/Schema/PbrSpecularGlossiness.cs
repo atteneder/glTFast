@@ -51,7 +51,7 @@ namespace GLTFast.Schema {
 
         public TextureInfo specularGlossinessTexture = null;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             writer.Close();
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");

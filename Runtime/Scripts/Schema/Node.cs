@@ -66,7 +66,7 @@ namespace GLTFast.Schema {
 
         public NodeExtensions extensions;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
 
@@ -116,7 +116,7 @@ namespace GLTFast.Schema {
         // (specifically step four of JsonParser.ParseJson)
         // needs to be updated!
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             if (EXT_mesh_gpu_instancing != null) {
                 writer.AddProperty("EXT_mesh_gpu_instancing");
                 EXT_mesh_gpu_instancing.GltfSerialize(writer);

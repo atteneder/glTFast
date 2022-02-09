@@ -24,7 +24,7 @@ using static GLTFast.Materials.MaterialGenerator;
 
 namespace GLTFast.Editor
 {
-    public class ShaderGraphGUI : ShaderGUIBase
+    class ShaderGraphGUI : ShaderGUIBase
     {
 
         private UvTransform? uvTransform;

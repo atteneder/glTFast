@@ -67,7 +67,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public int target;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             writer.AddProperty("buffer", buffer);
             writer.AddProperty("byteLength", byteLength);

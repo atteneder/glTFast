@@ -84,11 +84,11 @@ namespace GLTFast {
         /// Default value for a C# Job's innerloopBatchCount parameter.
         /// See <cref>IJobParallelForExtensions.Schedule</cref>
         /// </summary>
-        public const int DefaultBatchCount = 512;
+        internal const int DefaultBatchCount = 512;
 
         const string PrimitiveName = "Primitive";
 
-        public static readonly HashSet<string> supportedExtensions = new HashSet<string> {
+        static readonly HashSet<string> supportedExtensions = new HashSet<string> {
 #if DRACO_UNITY
             Extensions.DracoMeshCompression,
 #endif

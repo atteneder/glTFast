@@ -23,7 +23,7 @@ using UnityEngine;
 namespace GLTFast.Export {
     
     [BurstCompile]
-    public static class ExportJobs {
+    static class ExportJobs {
 
         [BurstCompile]
         public struct ConvertIndicesFlippedJob<T> : IJobParallelFor where T : struct {
