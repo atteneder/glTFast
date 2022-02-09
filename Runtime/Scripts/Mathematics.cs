@@ -21,12 +21,16 @@ namespace GLTFast {
 
     using Unity.Mathematics;
 
+    /// <summary>
+    /// Mathematics helper methods
+    /// </summary>
     public static class Mathematics
     {
         /// <summary>
         /// Decomposes a 4x4 TRS matrix into separate transforms (translation * rotation * scale)
         /// Matrix may not contain skew
         /// </summary>
+        /// <param name="m">Input matrix</param>
         /// <param name="translation">Translation</param>
         /// <param name="rotation">Rotation</param>
         /// <param name="scale">Scale</param>
@@ -52,6 +56,7 @@ namespace GLTFast {
         /// Decomposes a 4x4 TRS matrix into separate transforms (translation * rotation * scale)
         /// Matrix may not contain skew
         /// </summary>
+        /// <param name="m">Input matrix</param>
         /// <param name="translation">Translation</param>
         /// <param name="rotation">Rotation</param>
         /// <param name="scale">Scale</param>
@@ -74,6 +79,7 @@ namespace GLTFast {
         /// <summary>
         /// Decomposes a 3x3 matrix into rotation and scale
         /// </summary>
+        /// <param name="m">Input matrix</param>
         /// <param name="rotation">Rotation quaternion values</param>
         /// <param name="scale">Scale</param>
         public static void Decompose( this float3x3 m, out float4 rotation, out float3 scale ) {

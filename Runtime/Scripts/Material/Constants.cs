@@ -21,6 +21,10 @@ namespace GLTFast.Materials {
     /// TODO: Make const var location consistent
     /// </summary>
     public static class Constants {
+        
+        /// <summary>
+        /// Shader keyword for normal mapping
+        /// </summary>
         public const string kwNormalMap = "_NORMALMAP";
     }
 }

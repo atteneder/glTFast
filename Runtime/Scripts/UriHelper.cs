@@ -149,22 +149,22 @@ namespace GLTFast {
             return ImageFormat.Unknown;
         }
         
-        /// string-based IsGltfBinary alternative
-        /// Profiling result: Faster/less memory, but for .glb/.gltf just barely better (uknown ~2x)
-        /// Downside: less convenient
-        // public static bool? IsGltfBinary( string uri ) {
-        //     // quick glTF-binary check
-        //     if (uri.EndsWith(GltfGlobals.glbExt, StringComparison.OrdinalIgnoreCase)) return true;
-        //     if (uri.EndsWith(GltfGlobals.gltfExt, StringComparison.OrdinalIgnoreCase)) return false;
-
-        //     // thourough glTF-binary extension check that strips HTTP GET parameters
-        //     int getIndex = uri.LastIndexOf('?');
-        //     if (getIndex >= 0) {
-        //         var ext = uri.Substring(getIndex - GltfGlobals.gltfExt.Length, GltfGlobals.gltfExt.Length);
-        //         if(ext.EndsWith(GltfGlobals.glbExt, StringComparison.OrdinalIgnoreCase)) return true;
-        //         if(ext.EndsWith(GltfGlobals.gltfExt, StringComparison.OrdinalIgnoreCase)) return false;
-        //     }
-        //     return null;
-        // }
+        // // string-based IsGltfBinary alternative
+        // // Profiling result: Faster/less memory, but for .glb/.gltf just barely better (unknown ~2x)
+        // // Downside: less convenient
+        //  public static bool? IsGltfBinary( string uri ) {
+        //      // quick glTF-binary check
+        //      if (uri.EndsWith(GltfGlobals.glbExt, StringComparison.OrdinalIgnoreCase)) return true;
+        //      if (uri.EndsWith(GltfGlobals.gltfExt, StringComparison.OrdinalIgnoreCase)) return false;
+        //
+        //      // thorough glTF-binary extension check that strips HTTP GET parameters
+        //      int getIndex = uri.LastIndexOf('?');
+        //      if (getIndex >= 0) {
+        //          var ext = uri.Substring(getIndex - GltfGlobals.gltfExt.Length, GltfGlobals.gltfExt.Length);
+        //          if(ext.EndsWith(GltfGlobals.glbExt, StringComparison.OrdinalIgnoreCase)) return true;
+        //          if(ext.EndsWith(GltfGlobals.gltfExt, StringComparison.OrdinalIgnoreCase)) return false;
+        //      }
+        //      return null;
+        //  }
     }
 }

@@ -20,20 +20,59 @@ using UnityEngine;
 
 namespace GLTFast.Loading {
 
+    /// <summary>
+    /// Provides a mechanism for loading external resources from a URI 
+    /// </summary>
     public interface IDownloadProvider {
+        /// <summary>
+        /// Sends an URI request
+        /// </summary>
+        /// <param name="url">URI to request</param>
+        /// <returns>IDownload object representing the request</returns>
         Task<IDownload> Request(Uri url);
         Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable);
     }
 
+    /// <summary>
+    /// Provides a mechanism to inspect the progress and result of a download
+    /// or file access request
+    /// </summary>
     public interface IDownload : IEnumerator {
+        /// <summary>
+        /// True, if the request was successful
+        /// </summary>
         bool success {get;}
+        
+        /// <summary>
+        /// Error message in case the request failed. Null otherwise.
+        /// </summary>
         string error {get;}
+        
+        /// <summary>
+        /// Resulting data
+        /// </summary>
         byte[] data { get; }
+        
+        /// <summary>
+        /// Resulting data as text
+        /// </summary>
         string text { get; }
+        
+        /// <summary>
+        /// True if the result is a glTF-binary, false if it is not.
+        /// No value if determining the glTF type was not possible or failed. 
+        /// </summary>
         bool? isBinary { get; }
     }
 
+    /// <summary>
+    /// Provides a mechanism to inspect the progress and result of a texture download
+    /// or texture file access request
+    /// </summary>
     public interface ITextureDownload : IDownload {
+        /// <summary>
+        /// Resulting texture
+        /// </summary>
         Texture2D texture { get; }
     }
 }

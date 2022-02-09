@@ -15,6 +15,10 @@
 
 namespace GLTFast {
     using Schema;
+    
+    /// <summary>
+    /// Provides a mechanism to convert glTF materials into Unity Materials
+    /// </summary>
     public interface IMaterialGenerator {
 
         /// <summary>

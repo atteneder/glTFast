@@ -50,6 +50,10 @@ namespace GLTFast {
     using Schema;
     using Loading;
 
+    /// <summary>
+    /// Loads a glTF's content, converts it to Unity resources and is able to
+    /// feed it to an <cref>IInstantiator</cref> for instantiation.
+    /// </summary>
     public class GltfImport : IGltfReadable, IGltfBuffers {
 
         /// <summary>
@@ -75,6 +79,10 @@ namespace GLTFast {
             150_000_000;
 #endif
         
+        /// <summary>
+        /// Default value for a C# Job's innerloopBatchCount parameter.
+        /// See <cref>IJobParallelForExtensions.Schedule</cref>
+        /// </summary>
         public const int DefaultBatchCount = 512;
 
         const string PrimitiveName = "Primitive";
@@ -228,6 +236,13 @@ namespace GLTFast {
 
         ICodeLogger logger;
         
+        /// <summary>
+        /// Constructs a GltfImport instance with injectable customization objects.
+        /// </summary>
+        /// <param name="downloadProvider">Provides file access or download customization</param>
+        /// <param name="deferAgent">Provides custom update loop behavior for better frame rate control</param>
+        /// <param name="materialGenerator">Provides custom glTF to Unity material conversion</param>
+        /// <param name="logger">Provides custom message logging</param>
         public GltfImport(
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
@@ -258,6 +273,7 @@ namespace GLTFast {
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> Load( string url, ImportSettings importSettings = null ) {
             return await Load(new Uri(url,UriKind.RelativeOrAbsolute), importSettings);
         }
@@ -268,6 +284,7 @@ namespace GLTFast {
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> Load( Uri url, ImportSettings importSettings = null) {
             settings = importSettings ?? new ImportSettings();
             return await LoadRoutine(url);
@@ -424,16 +441,45 @@ namespace GLTFast {
             }
         }
 
+        /// <summary>
+        /// Number of materials
+        /// </summary>
         public int materialCount => materials?.Length ?? 0;
+        
+        /// <summary>
+        /// Number of images
+        /// </summary>
         public int imageCount => images?.Length ?? 0;
+        
+        /// <summary>
+        /// Number of textures
+        /// </summary>
         public int textureCount => textures?.Length ?? 0;
-        public int? defaultSceneIndex => gltfRoot != null && gltfRoot.scene >= 0 ? gltfRoot.scene : (int?) null; 
+        
+        /// <summary>
+        /// Default scene index
+        /// </summary>
+        public int? defaultSceneIndex => gltfRoot != null && gltfRoot.scene >= 0 ? gltfRoot.scene : (int?) null;
+        
+        /// <summary>
+        /// Number of scenes
+        /// </summary>
         public int sceneCount => gltfRoot?.scenes?.Length ?? 0;
 
+        /// <summary>
+        /// Get a glTF's scene's name by its index
+        /// </summary>
+        /// <param name="sceneIndex">glTF scene index</param>
+        /// <returns>Scene name or null</returns>
         public string GetSceneName(int sceneIndex) {
             return gltfRoot?.scenes?[sceneIndex]?.name;
         }
         
+        /// <summary>
+        /// Get a Unity Material by its glTF material index 
+        /// </summary>
+        /// <param name="index">glTF material index</param>
+        /// <returns>Corresponding Unity Material</returns>
         public UnityEngine.Material GetMaterial( int index = 0 ) {
             if(materials!=null && index >= 0 && index < materials.Length ) {
                 return materials[index];
@@ -441,6 +487,10 @@ namespace GLTFast {
             return null;
         }
 
+        /// <summary>
+        /// Returns a fallback default material that is provided by the IMaterialGenerator
+        /// </summary>
+        /// <returns></returns>
         public UnityEngine.Material GetDefaultMaterial() {
 #if UNITY_EDITOR
             if (defaultMaterial == null) {
@@ -452,6 +502,11 @@ namespace GLTFast {
 #endif
         }
         
+        /// <summary>
+        /// Returns a texture by its glTF image index
+        /// </summary>
+        /// <param name="index">glTF image index</param>
+        /// <returns>Corresponding Unity texture</returns>
         public Texture2D GetImage( int index = 0 ) {
             if(images!=null && index >= 0 && index < images.Length ) {
                 return images[index];
@@ -459,6 +514,11 @@ namespace GLTFast {
             return null;
         }
 
+        /// <summary>
+        /// Returns a texture by its glTF texture index
+        /// </summary>
+        /// <param name="index">glTF texture index</param>
+        /// <returns>Corresponding Unity texture</returns>
         public Texture2D GetTexture( int index = 0 ) {
             if(textures!=null && index >= 0 && index < textures.Length ) {
                 return textures[index];
@@ -467,11 +527,19 @@ namespace GLTFast {
         }
         
 #if UNITY_ANIMATION
+        /// <summary>
+        /// Returns all imported animation clips
+        /// </summary>
+        /// <returns>All imported animation clips</returns>
         public AnimationClip[] GetAnimationClips() {
             return animationClips;
         }
 #endif
 
+        /// <summary>
+        /// Returns all imported meshes
+        /// </summary>
+        /// <returns>All imported meshes</returns>
         public UnityEngine.Mesh[] GetMeshes() {
             if (primitives == null || primitives.Length < 1) return null;
             var result = new UnityEngine.Mesh[primitives.Length];

@@ -34,6 +34,9 @@ using UnityEngine.Rendering.HighDefinition;
 
 namespace GLTFast.Materials {
 
+    /// <summary>
+    /// Common base class for implementations of IMaterialGenerator
+    /// </summary>
     public abstract class MaterialGenerator : IMaterialGenerator {
         protected enum MaterialType {
             // Unknown,

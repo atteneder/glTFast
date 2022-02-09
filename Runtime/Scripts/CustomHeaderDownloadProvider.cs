@@ -20,6 +20,9 @@ using System.Threading.Tasks;
 
 namespace GLTFast.Loading {
 
+    /// <summary>
+    /// Represents an HTTP request header key-value pair
+    /// </summary>
     [Serializable]
     public struct HttpHeader
     {
@@ -29,10 +32,17 @@ namespace GLTFast.Loading {
 
     public delegate void EditUnityWebRequest( UnityWebRequest request );
 
+    /// <summary>
+    /// DownloadProvider that sends HTTP request with custom header entries
+    /// </summary>
     public class CustomHeaderDownloadProvider : IDownloadProvider {
 
         HttpHeader[] _headers;
 
+        /// <summary>
+        /// Creates a new CustomHeaderDownloadProvider with a given set of HTTP request header entries
+        /// </summary>
+        /// <param name="headers">HTTP request header entries to send</param>
         public CustomHeaderDownloadProvider( HttpHeader[] headers ) {
             _headers = headers;
         }

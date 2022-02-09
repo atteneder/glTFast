@@ -17,10 +17,24 @@ using UnityEngine;
 
 namespace GLTFast {
     
+    /// <summary>
+    /// Provides read-only access to a glTF (schema and imported Unity resources)
+    /// </summary>
     public interface IGltfReadable {
         
+        /// <summary>
+        /// Number of materials
+        /// </summary>
         int materialCount { get; }
+        
+        /// <summary>
+        /// Number of images
+        /// </summary>
         int imageCount { get; }
+        
+        /// <summary>
+        /// Number of textures
+        /// </summary>
         int textureCount { get; }
 
         Material GetMaterial(int index = 0);
