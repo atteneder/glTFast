@@ -1,0 +1,5 @@
+apiRules:
+  - exclude:
+      hasAttribute:
+        uid: System.ObsoleteAttribute
+      type: Type
