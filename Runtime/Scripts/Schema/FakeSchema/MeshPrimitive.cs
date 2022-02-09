@@ -13,10 +13,19 @@
 // limitations under the License.
 //
 
+#if DRACO_UNITY
+
 namespace GLTFast.FakeSchema {
+    
+    [System.Serializable]
+    class MeshPrimitive {
+        public MeshPrimitiveExtensions extensions;
+    }
 
     [System.Serializable]
-    public class RootChild {
-        public string name;        
+    class MeshPrimitiveExtensions {
+        public string KHR_draco_mesh_compression;
     }
 }
+
+#endif

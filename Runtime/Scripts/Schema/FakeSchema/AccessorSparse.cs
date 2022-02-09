@@ -14,16 +14,12 @@
 //
 
 #if GLTFAST_SAFE
-using UnityEngine;
-
 namespace GLTFast.FakeSchema {
-    
+
     [System.Serializable]
-    public class Accessor {
-        /// <summary>
-        /// Sparse storage of attributes that deviate from their initialization value.
-        /// </summary>
-        public AccessorSparse sparse;
+    class AccessorSparse {
+        public string indices;
+        public string values;
     }
 }
 #endif

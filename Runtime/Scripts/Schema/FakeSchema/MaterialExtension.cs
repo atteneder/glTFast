@@ -16,7 +16,7 @@
 namespace GLTFast.FakeSchema {
 
     [System.Serializable]
-    public class MaterialExtension {
+    class MaterialExtension {
         public string KHR_materials_pbrSpecularGlossiness;
         public string KHR_materials_unlit;
         public string KHR_materials_transmission;
