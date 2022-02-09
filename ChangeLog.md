@@ -6,12 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- XML documentation comments on many types
+- (Documentation) XML documentation comments on many types
+- (Documentation) Initial setup for DocFX generator
+### Changed
+- (Documentation) Split up monolithic docs into multiple markdown files
 ### Fixed
 - Point meshes are rendered consistently on more platforms (iOS, Vulkan) due to explicitely setting `PSIZE` (thanks [Kim Wonkee][wonkee-kim] for #309)
 - Removed Editor markup resources from builds
 - Misformated XML documentation comments
 - Correct render pipeline detection in case of quality settings override
+- (Documentation) Many minor fixes like XML doc linter errors/warnings
 
 ## [4.5.0] - 2022-01-24
 ### Added
