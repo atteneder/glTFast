@@ -58,6 +58,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `GameObject -> Export glTF` for GameObjects (may also be accessed from hierarchy view context menu)
 - (Documentation) Split up monolithic docs into multiple markdown files
 - (Documentation) Changelog links to code are now `xref` (for DocFX)
+### Removed
+- Converted a lot of unintentionally public classes, types and properties to internal ones
+- `StopWatch`, a class used for measuring load times in tests, was moved to a dedicated test repository
 ### Fixed
 - Point meshes are rendered consistently on more platforms (iOS, Vulkan) due to explicitely setting `PSIZE` (thanks [Kim Wonkee][wonkee-kim] for #309)
 - Removed Editor markup resources from builds
