@@ -36,6 +36,12 @@ namespace GLTFast {
     // [CanEditMultipleObjects]
     public class GltfImporterEditor : ScriptedImporterEditor
     {
+        
+        // To be assigned defaults from the inspector 
+        [SerializeField] VisualTreeAsset mainMarkup; // Editor/UI/GltfImporter.uxml
+        [SerializeField] VisualTreeAsset reportItemMarkup; // Editor/UI/ReportItem.uxml
+        [SerializeField] VisualTreeAsset dependencyMarkup; // Editor/UI/Dependency.uxml
+        
         SerializedProperty m_AssetDependencies;
         SerializedProperty m_ReportItems;
         
@@ -51,13 +57,9 @@ namespace GLTFast {
             // Update the serializedObject in case it has been changed outside the Inspector.
             serializedObject.Update();
 
-            const string mainMarkup = "GltfImporter";
-            const string reportItemMarkup = "ReportItem";
-            const string dependencyMarkup = "Dependency";
             var root = new VisualElement();
             
-            var visualTree = Resources.Load(mainMarkup) as VisualTreeAsset;
-            visualTree.CloneTree(root);
+            mainMarkup.CloneTree(root);
             
             var numDeps = m_AssetDependencies.arraySize;
             
@@ -74,10 +76,9 @@ namespace GLTFast {
             
             if (reportItemCount > 0) {
                 // var reportList = new List<ReportItem>
-                var reportItemTree = Resources.Load(reportItemMarkup) as VisualTreeAsset;
                 var reportList = reportRoot.Query<ListView>().First();
                 // reportList.bindingPath = nameof(m_ReportItems);
-                reportList.makeItem = () => reportItemTree.CloneTree();
+                reportList.makeItem = () => reportItemMarkup.CloneTree();
                 reportList.bindItem = (element, i) => {
                     if (i >= reportItemCount || i >= m_ReportItems.arraySize) {
                         element.style.display = DisplayStyle.None;
@@ -135,7 +136,6 @@ namespace GLTFast {
             }
             
             if (maliciousTextureImporters.Count>0) {
-                var dependencyTree = Resources.Load(dependencyMarkup) as VisualTreeAsset;
 
                 root.Query<Button>("fixall").First().clickable.clicked += () => {
                     AssetDatabase.StartAssetEditing();
@@ -149,7 +149,7 @@ namespace GLTFast {
                 var foldout = root.Query<Foldout>().First();
                 // var row = root.Query<VisualElement>(className: "fix-texture-row").First();
                 foreach (var maliciousTextureImporter in maliciousTextureImporters) {
-                    var row = dependencyTree.CloneTree();
+                    var row = dependencyMarkup.CloneTree();
                     foldout.Add(row);
                     // textureRowTree.CloneTree(foldout);
                     var path = AssetDatabase.GetAssetPath(maliciousTextureImporter);

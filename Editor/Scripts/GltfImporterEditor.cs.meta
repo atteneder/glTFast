@@ -3,7 +3,13 @@ guid: 0b04a08654076497abec2857c0edb835
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - mainMarkup: {fileID: 9197481963319205126, guid: d72633e56500240858af54bf878c907d,
+      type: 3}
+  - reportItemMarkup: {fileID: 9197481963319205126, guid: 727aa1886d86e4b3faa4ca8f263a6ee4,
+      type: 3}
+  - dependencyMarkup: {fileID: 9197481963319205126, guid: 4df82ef208e584428bdb29715790cd6f,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
