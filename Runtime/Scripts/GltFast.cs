@@ -17,5 +17,6 @@ using System;
 
 namespace GLTFast {
     [Obsolete("Was renamed to GltfImport")]
+    // ReSharper disable once UnusedType.Global
     public class GLTFast : GltfImport { }
 }
