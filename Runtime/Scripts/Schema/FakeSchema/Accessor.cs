@@ -13,22 +13,17 @@
 // limitations under the License.
 //
 
+#if GLTFAST_SAFE
+using UnityEngine;
+
 namespace GLTFast.FakeSchema {
     
     [System.Serializable]
-    public class Root
-    {
+    class Accessor {
         /// <summary>
-        /// An array of materials. A material defines the appearance of a primitive.
+        /// Sparse storage of attributes that deviate from their initialization value.
         /// </summary>
-        public Material[] materials;
-
-#if GLTFAST_SAFE
-        public Accessor[] accessors;
-#endif
-
-#if DRACO_UNITY
-        public Mesh[] meshes;
-#endif
+        public AccessorSparse sparse;
     }
 }
+#endif

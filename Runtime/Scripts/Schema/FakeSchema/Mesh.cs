@@ -13,13 +13,14 @@
 // limitations under the License.
 //
 
-#if GLTFAST_SAFE
+#if DRACO_UNITY
+
 namespace GLTFast.FakeSchema {
 
     [System.Serializable]
-    public class AccessorSparse {
-        public string indices;
-        public string values;
+    class Mesh : RootChild {
+        public MeshPrimitive[] primitives;
     }
 }
+
 #endif
