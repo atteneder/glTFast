@@ -165,7 +165,7 @@ namespace GLTFast.Schema
             );
         }
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
             // Assuming MagFilterMode.Linear is the project's default, only

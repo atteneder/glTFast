@@ -55,22 +55,20 @@ namespace GLTFast.Materials {
     public class BuiltInMaterialGenerator : MaterialGenerator {
 
         // Built-in Render Pipeline
-        public const string KW_ALPHAPREMULTIPLY_ON = "_ALPHAPREMULTIPLY_ON";
-        public const string KW_EMISSION = "_EMISSION";
-        public const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
-        public const string KW_OCCLUSION = "_OCCLUSION";        
-        public const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
-
         const string KW_ALPHABLEND_ON = "_ALPHABLEND_ON";
-        
-        public static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
-        public static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
-        public static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");
+        const string KW_ALPHAPREMULTIPLY_ON = "_ALPHAPREMULTIPLY_ON";
+        const string KW_EMISSION = "_EMISSION";
+        const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
+        const string KW_OCCLUSION = "_OCCLUSION";
+        const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
 
+        static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
+        static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
         static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("_MetallicGlossMap_ST");
         static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("_MetallicGlossMapRotation");
         static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("_MetallicGlossMapUVChannel");
         static readonly int modePropId = Shader.PropertyToID("_Mode");
+        static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");
 
 #if UNITY_EDITOR
         const string SHADER_PATH_PREFIX = "Packages/com.atteneder.gltfast/Runtime/Shader/Built-In/";

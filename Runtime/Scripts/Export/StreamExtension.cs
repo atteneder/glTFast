@@ -25,7 +25,7 @@ using System.Collections.Generic;
 #endif
 
 namespace GLTFast.Export {
-    public static class StreamExtension {
+    static class StreamExtension {
         
 #if NET_STANDARD
         public static unsafe void Write(this Stream stream, NativeArray<byte> array) {

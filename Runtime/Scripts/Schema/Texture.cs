@@ -46,7 +46,7 @@ namespace GLTFast.Schema {
             }
         }
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
             if (source >= 0) {

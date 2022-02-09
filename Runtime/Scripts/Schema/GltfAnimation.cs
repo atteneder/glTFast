@@ -35,7 +35,7 @@ namespace GLTFast.Schema {
 		/// </summary>
 		public AnimationSampler[] samplers;
 		
-		public void GltfSerialize(JsonWriter writer) {
+		internal void GltfSerialize(JsonWriter writer) {
 			writer.AddObject();
 			GltfSerializeRoot(writer);
 			writer.Close();
@@ -66,7 +66,7 @@ namespace GLTFast.Schema {
 	    /// </summary>
 	    public AnimationChannelTarget target;
 	    
-	    public void GltfSerialize(JsonWriter writer) {
+	    internal void GltfSerialize(JsonWriter writer) {
 		    throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
 	    }
     }
@@ -99,7 +99,7 @@ namespace GLTFast.Schema {
 		    }
 	    }
 	    
-	    public void GltfSerialize(JsonWriter writer) {
+	    internal void GltfSerialize(JsonWriter writer) {
 		    throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
 	    }
     }

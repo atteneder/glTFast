@@ -275,7 +275,7 @@ namespace GLTFast.Schema {
 
         public bool isSparse => sparse != null;
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             if (bufferView >= 0) {
                 writer.AddProperty("bufferView", bufferView);

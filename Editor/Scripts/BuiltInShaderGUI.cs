@@ -22,7 +22,7 @@ namespace GLTFast.Editor
 {
     using Materials;
 
-    public class BuiltInShaderGUI : ShaderGUIBase
+    class BuiltInShaderGUI : ShaderGUIBase
     {
 
         /// <summary>

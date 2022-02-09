@@ -122,7 +122,7 @@ namespace GLTFast.Schema {
             return MemberwiseClone();
         }
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             if(attributes!=null) {
                 writer.AddProperty("attributes");
@@ -212,7 +212,7 @@ namespace GLTFast.Schema {
             return hash;
         }
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             if( POSITION >= 0 ) writer.AddProperty("POSITION", POSITION);
             if( NORMAL >= 0 ) writer.AddProperty("NORMAL", NORMAL);
@@ -238,7 +238,7 @@ namespace GLTFast.Schema {
         public MeshPrimitiveDracoExtension KHR_draco_mesh_compression;
 #endif
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
 #if DRACO_UNITY
             if (KHR_draco_mesh_compression != null) {
                 writer.AddProperty("KHR_draco_mesh_compression");
@@ -254,7 +254,7 @@ namespace GLTFast.Schema {
         public int bufferView;
         public Attributes attributes;
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
@@ -288,7 +288,7 @@ namespace GLTFast.Schema {
             return hash;
         }
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             if( POSITION >= 0 ) writer.AddProperty("POSITION", POSITION);
             if( NORMAL >= 0 ) writer.AddProperty("NORMAL", NORMAL);
             if( TANGENT >= 0 ) writer.AddProperty("TANGENT", TANGENT);

@@ -21,7 +21,7 @@ using static GLTFast.Materials.MaterialGenerator;
 
 namespace GLTFast.Editor
 {
-    public class ShaderGUIBase : ShaderGUI
+    class ShaderGUIBase : ShaderGUI
     {
         protected const float TOLERANCE = 0.001f;
 

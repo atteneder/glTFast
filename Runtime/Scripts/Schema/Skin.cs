@@ -21,7 +21,7 @@ namespace GLTFast.Schema {
         public int skeleton = -1;
         public uint[] joints;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
             writer.Close();

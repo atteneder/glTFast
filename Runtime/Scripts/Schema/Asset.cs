@@ -37,7 +37,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public string minVersion;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.OpenBrackets();
             if (!string.IsNullOrEmpty(version)) {
                 writer.AddProperty("version", version);

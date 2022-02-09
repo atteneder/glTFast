@@ -16,7 +16,7 @@
 namespace GLTFast.Schema {
     [System.Serializable]
     public class MaterialUnlit {
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             writer.Close();
         }

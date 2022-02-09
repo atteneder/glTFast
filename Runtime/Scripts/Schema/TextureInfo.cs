@@ -32,7 +32,7 @@ namespace GLTFast.Schema {
 
         public TextureInfoExtension extensions;
         
-        protected void GltfSerializeTextureInfo(JsonWriter writer) {
+        internal void GltfSerializeTextureInfo(JsonWriter writer) {
             if (index >= 0) {
                 writer.AddProperty("index", index);
             }
@@ -46,7 +46,7 @@ namespace GLTFast.Schema {
             }
         }
         
-        public virtual void GltfSerialize(JsonWriter writer) {
+        internal virtual void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeTextureInfo(writer);
             writer.Close();

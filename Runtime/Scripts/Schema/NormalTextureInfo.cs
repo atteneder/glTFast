@@ -26,7 +26,7 @@ namespace GLTFast.Schema{
         /// </summary>
         public float scale = 1.0f;
         
-        public override void GltfSerialize(JsonWriter writer) {
+        internal override void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeTextureInfo(writer);
             if (math.abs(scale - 1f) > Constants.epsilon) {

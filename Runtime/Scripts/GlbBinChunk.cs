@@ -16,7 +16,7 @@
 using UnityEngine;
 
 namespace GLTFast {
-	public struct GlbBinChunk
+	struct GlbBinChunk
 	{
 		public int start;
 		public uint length;

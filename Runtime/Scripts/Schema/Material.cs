@@ -146,7 +146,7 @@ namespace GLTFast.Schema {
 
         public bool requiresTangents => normalTexture!=null && normalTexture.index>=0;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
             if(pbrMetallicRoughness!=null) {

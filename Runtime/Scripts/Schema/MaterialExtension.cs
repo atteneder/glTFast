@@ -23,7 +23,7 @@ namespace GLTFast.Schema {
         public ClearCoat KHR_materials_clearcoat;
         public Sheen KHR_materials_sheen;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             if(KHR_materials_pbrSpecularGlossiness!=null) {
                 writer.AddProperty("KHR_materials_pbrSpecularGlossiness");

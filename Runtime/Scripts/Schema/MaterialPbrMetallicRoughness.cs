@@ -83,7 +83,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public TextureInfo metallicRoughnessTexture;
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             if (baseColorFactor != null && (
                 math.abs(baseColorFactor[0] - 1f) > Constants.epsilon ||

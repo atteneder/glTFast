@@ -41,7 +41,7 @@ namespace GLTFast.Schema
         public ImageExtension extensions;
 #endif
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
             if (!string.IsNullOrEmpty(uri)) {

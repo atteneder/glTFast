@@ -21,7 +21,7 @@ using UnityEngine;
 
 namespace GLTFast {
 
-    public static class UriHelper {
+     static class UriHelper {
         
         public static Uri GetBaseUri( Uri uri ) {
             if(uri==null) return null;
