@@ -40,7 +40,7 @@ namespace GLTFast.Export {
             IDeferAgent deferAgent = null,
             ICodeLogger logger = null
         ) {
-            m_Settings = gameObjectExportSettings;
+            m_Settings = gameObjectExportSettings ?? new GameObjectExportSettings();
             m_Writer = new GltfWriter(exportSettings, deferAgent, logger);
         }
 
