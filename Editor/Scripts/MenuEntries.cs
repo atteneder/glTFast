@@ -42,49 +42,84 @@ namespace GLTFast.Editor {
             set => EditorUserSettings.SetConfigValue("glTF.saveFilePath",value);
         }
 
-        [MenuItem("Assets/Export glTF/Selection (glTF)", true)]
+        [MenuItem("Assets/Export glTF/glTF", true)]
         static bool ExportSelectionValidate() {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
 
-        [MenuItem("Assets/Export glTF/Selection (glTF)", false, 10)]
+        [MenuItem("Assets/Export glTF/glTF", false, 10)]
         static void ExportSelectionMenu() {
             ExportSelection(false);
         }
 
-        [MenuItem("Assets/Export glTF/Selection (glTF-Binary)", true)]
+        [MenuItem("Assets/Export glTF/glTF-Binary", true)]
         static bool ExportSelectionBinaryValidate() {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
 
-        [MenuItem("Assets/Export glTF/Selection (glTF-Binary)", false, 11)]
+        [MenuItem("Assets/Export glTF/glTF-Binary", false, 11)]
         static void ExportSelectionBinaryMenu() {
             ExportSelection(true);
+        }
+        
+        [MenuItem("GameObject/Export glTF/glTF", true)]
+        static bool ExportGameObjectValidate() {
+            return TryGetExportNameAndGameObjects(out _, out _);
+        }
+        
+        [MenuItem("GameObject/Export glTF/glTF", false, 29)]
+        static void ExportGameObjectMenu(MenuCommand command) {
+            ExportGameObject(command, false);
+        }
+        
+        [MenuItem("GameObject/Export glTF/glTF-Binary", true)]
+        static bool ExportGameObjectBinaryValidate() {
+            return TryGetExportNameAndGameObjects(out _, out _);
+        }
+        
+        [MenuItem("GameObject/Export glTF/glTF-Binary", false, 29)]
+        static void ExportGameObjectBinaryMenu(MenuCommand command) {
+            ExportGameObject(command, true);
+        }
+
+        static void ExportGameObject(MenuCommand command, bool binary) {
+            var go = command.context as GameObject;
+            if (go != null) {
+                Export(binary, go.name, new[] { go });
+            }
+            else if (TryGetExportNameAndGameObjects(out var name, out var gameObjects)) {
+                Export(binary, name, gameObjects);
+            }
         }
 
         static void ExportSelection(bool binary) {
             if (TryGetExportNameAndGameObjects(out var name, out var gameObjects)) {
-                var extension = binary ? k_GltfBinaryExtension : k_GltfExtension;
-                var path = EditorUtility.SaveFilePanel(
-                    "glTF Export Path",
-                    SaveFolderPath,
-                    $"{name}.{extension}",
-                    extension
-                    );
-                if (!string.IsNullOrEmpty(path)) {
-                    var settings = GetDefaultSettings(binary);
-                    var export = new GameObjectExport(settings, logger: new ConsoleLogger());
-                    export.AddScene(gameObjects, name);
-                    AsyncHelpers.RunSync(() => export.SaveToFileAndDispose(path));
-
-#if GLTF_VALIDATOR
-                    var report = Validator.Validate(path);
-                    report.Log();
-#endif
-                }
+                Export(binary, name, gameObjects);
             }
             else {
                 Debug.LogError("Can't export glTF: selection is empty");
+            }
+        }
+
+        static void Export(bool binary, string name, GameObject[] gameObjects) {
+            var extension = binary ? k_GltfBinaryExtension : k_GltfExtension;
+            var path = EditorUtility.SaveFilePanel(
+                "glTF Export Path",
+                SaveFolderPath,
+                $"{name}.{extension}",
+                extension
+            );
+            if (!string.IsNullOrEmpty(path)) {
+                var settings = GetDefaultSettings(binary);
+                var goSettings = new GameObjectExportSettings { onlyActiveInHierarchy = false };
+                var export = new GameObjectExport(settings, gameObjectExportSettings: goSettings, logger: new ConsoleLogger());
+                export.AddScene(gameObjects, name);
+                AsyncHelpers.RunSync(() => export.SaveToFileAndDispose(path));
+
+#if GLTF_VALIDATOR
+                var report = Validator.Validate(path);
+                report.Log();
+#endif
             }
         }
 
@@ -95,12 +130,12 @@ namespace GLTFast.Editor {
             return settings;
         }
 
-        [MenuItem("Assets/Export glTF/Scene (glTF)", false, 100)]
+        [MenuItem("File/Export Scene/glTF", false, 173)]
         static void ExportSceneMenu() {
             ExportScene(false);
         }
-
-        [MenuItem("Assets/Export glTF/Scene (glTF-Binary)", false, 101)]
+        
+        [MenuItem("File/Export Scene/glTF-Binary", false, 174)]
         static void ExportSceneBinaryMenu() {
             ExportScene(true);
         }
@@ -131,21 +166,13 @@ namespace GLTFast.Editor {
         
         static bool TryGetExportNameAndGameObjects(out string name, out GameObject[] gameObjects)
         {
-            if (Selection.transforms.Length > 1) {
-                name = SceneManager.GetActiveScene().name;
-                gameObjects = Selection.gameObjects;
-                return true;
-            }
+            var transforms = Selection.GetTransforms(SelectionMode.Assets | SelectionMode.TopLevel);
+            if (transforms.Length > 0) {
+                name = transforms.Length > 1
+                    ? SceneManager.GetActiveScene().name
+                    : Selection.activeObject.name;
 
-            if (Selection.transforms.Length == 1) {
-                name = Selection.activeGameObject.name;
-                gameObjects = Selection.gameObjects;
-                return true;
-            }
-
-            if (Selection.objects.Any() && Selection.objects.All(x => x is GameObject)) {
-                name = Selection.objects.First().name;
-                gameObjects = Selection.objects.Select(x => (x as GameObject)).ToArray();
+                gameObjects = transforms.Select(x => x.gameObject).ToArray();
                 return true;
             }
 

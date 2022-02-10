@@ -23,20 +23,24 @@ namespace GLTFast.Export {
     public class GameObjectExport {
 
         GltfWriter m_Writer;
-        
+        GameObjectExportSettings m_Settings;
+
         /// <summary>
         /// Provides glTF export of GameObject based scenes and hierarchies.
         /// </summary>
         /// <param name="exportSettings">Export settings</param>
+        /// <param name="gameObjectExportSettings">GameObject export settings</param>
         /// <param name="deferAgent">Defer agent; decides when/if to preempt
         /// export to preserve a stable frame rate <seealso cref="IDeferAgent"/></param>
         /// <param name="logger">Interface for logging (error) messages
         /// <seealso cref="ConsoleLogger"/></param>
         public GameObjectExport(
             ExportSettings exportSettings = null,
+            GameObjectExportSettings gameObjectExportSettings = null,
             IDeferAgent deferAgent = null,
             ICodeLogger logger = null
         ) {
+            m_Settings = gameObjectExportSettings;
             m_Writer = new GltfWriter(exportSettings, deferAgent, logger);
         }
 
@@ -57,7 +61,7 @@ namespace GLTFast.Export {
             var success = true;
             for (var index = 0; index < gameObjects.Length; index++) {
                 var gameObject = gameObjects[index];
-                if(!gameObject.activeInHierarchy) continue;
+                if(m_Settings.onlyActiveInHierarchy && !gameObject.activeInHierarchy) continue;
                 success &= AddGameObject(gameObject,tempMaterials, out var nodeId);
                 if (nodeId >= 0) {
                     rootNodes.Add((uint)nodeId);
@@ -89,7 +93,7 @@ namespace GLTFast.Export {
             }
         }
         bool AddGameObject(GameObject gameObject, List<Material> tempMaterials, out int nodeId ) {
-            if (!gameObject.activeInHierarchy) {
+            if (m_Settings.onlyActiveInHierarchy && !gameObject.activeInHierarchy) {
                 nodeId = -1;
                 return true;
             }

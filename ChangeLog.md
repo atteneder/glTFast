@@ -14,7 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Documentation) XML documentation comments on many types
 - (Documentation) Initial setup for DocFX generator
 ### Changed
-- glTF export menu entries moved from `File -> Export` to `Assets -> Export glTF`
+- glTF export menu entries moved from `File -> Export` to
+  - `File -> Export Scene` to export the active scene
+  - `Assets -> Export glTF` for assets (may also be accessed from project view context menu)
+  - `GameObject -> Export glTF` for GameObjects (may also be accessed from hierarchy view context menu)
 - (Documentation) Split up monolithic docs into multiple markdown files
 - (Documentation) Changelog links to code are now `xref` (for DocFX)
 ### Fixed
@@ -26,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Removed redundant texture entries in glTF schema
 - (Export) Properly closing buffer file stream
 - (Export) Conflict of textures with identical names
+- (Export) Exporting assets/prefabs from project view created empty glTFs
 - Textures are not duplicated anymore if they use different samplers resulting in equal Unity settings (saves memory on corner-case glTFs)
 
 ## [4.5.0] - 2022-01-24
