@@ -18,6 +18,12 @@ using GLTFast.Materials;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+#if USING_URP
+using UnityEngine.Rendering.Universal;
+#endif
+#if USING_HDRP
+using UnityEngine.Rendering.HighDefinition;
+#endif
 
 namespace GLTFast.Export {
 	
@@ -27,7 +33,9 @@ namespace GLTFast.Export {
 
 	    const string k_KeywordBumpMap = "_BUMPMAP";
 	    const string k_KeywordMetallicGlossMap = "_METALLICGLOSSMAP"; // Built-In Standard
+#if USING_URP || USING_HDRP
 	    const string k_KeywordMetallicSpecGlossMap = "_METALLICSPECGLOSSMAP"; // URP Lit
+#endif
 	    const string k_KeywordSmoothnessTextureAlbedoChannelA = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A";
 		    
 	    static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
@@ -140,8 +148,7 @@ namespace GLTFast.Export {
 			var needsMetalRoughTexture = 
 				isPbrMetallicRoughness &&
 				(
-					uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap) // Built-In Standard
-					|| uMaterial.IsKeywordEnabled(k_KeywordMetallicSpecGlossMap) // URP Lit
+					HasMetallicGlossMap(uMaterial)
 					|| uMaterial.IsKeywordEnabled(k_KeywordSmoothnessTextureAlbedoChannelA)
 				);
 
@@ -347,7 +354,7 @@ namespace GLTFast.Export {
 					if(mrTex is Texture2D mrTex2d) {
 						pbr.metallicRoughnessTexture ??= new TextureInfo();
 						ormImageExport.SetMetalGlossTexture(mrTex2d);
-						if (uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap))
+						if (HasMetallicGlossMap(uMaterial))
 							pbr.metallicFactor = 1.0f;
 						ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, k_MetallicGlossMap, gltf);
 					} else {
@@ -369,6 +376,14 @@ namespace GLTFast.Export {
 			material.pbrMetallicRoughness = pbr;
 			return success;
 		}
+
+        static bool HasMetallicGlossMap(UnityEngine.Material uMaterial) {
+	        return uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap) // Built-In Standard
+#if USING_URP || USING_HDRP
+		        || uMaterial.IsKeywordEnabled(k_KeywordMetallicSpecGlossMap) // URP Lit
+#endif
+		        ;
+        }
         
         static void ExportUnlit(Material material, UnityEngine.Material uMaterial, int mainTexProperty, IGltfWritable gltf, ICodeLogger logger){
 
