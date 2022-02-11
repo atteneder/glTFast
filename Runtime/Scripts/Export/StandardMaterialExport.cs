@@ -241,14 +241,16 @@ namespace GLTFast.Export {
 
 					if (ormImageExport.hasOcclusion) {
 						material.occlusionTexture.index = ormTextureId;
-						ExportTextureTransform(material.occlusionTexture, uMaterial, k_OcclusionMap, gltf);
-						if (uMaterial.HasProperty(MaterialGenerator.occlusionStrengthPropId)) {
-							material.occlusionTexture.strength = uMaterial.GetFloat(MaterialGenerator.occlusionStrengthPropId);
-						}
 					}
 				}
 				else {
 					Debug.LogError("TODO: logger.?");
+				}
+			}
+
+			if (material.occlusionTexture != null) {
+				if (uMaterial.HasProperty(MaterialGenerator.occlusionStrengthPropId)) {
+					material.occlusionTexture.strength = uMaterial.GetFloat(MaterialGenerator.occlusionStrengthPropId);
 				}
 			}
 
