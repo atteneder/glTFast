@@ -144,18 +144,20 @@ namespace GLTFast.Export {
 				);
 
 			OrmImageExport ormImageExport = null;
-
+			var mainTexProperty = uMaterial.HasProperty(k_BaseMap) ? k_BaseMap : k_MainTex;
+			
 			if (needsMetalRoughTexture) {
 				ormImageExport = new OrmImageExport();
 			}
 			if(IsUnlit(uMaterial)) {
-                ExportUnlit(material, uMaterial, gltf, logger);
+                ExportUnlit(material, uMaterial, mainTexProperty, gltf, logger);
 			}
 			else if (isPbrMetallicRoughness)
 			{
 				success &= ExportPbrMetallicRoughness(
 					uMaterial,
 					material,
+					mainTexProperty,
 					ormImageExport,
 					gltf,
 					logger
@@ -195,7 +197,7 @@ namespace GLTFast.Export {
 	                    baseColorTexture = ExportTextureInfo(mainTex, gltf)
                     };
 
-                    // ExportTextureTransform(material.pbrMetallicRoughness.baseColorTexture, uMaterial, "_MainTex");
+                    // ExportTextureTransform(material.pbrMetallicRoughness.baseColorTexture, uMaterial, k_MainTex);
                 }
                 if (uMaterial.HasProperty(k_TintColor)) {
 	                //particles use _TintColor instead of _Color
@@ -217,7 +219,12 @@ namespace GLTFast.Export {
 							material.occlusionTexture = new OcclusionTextureInfo();
 							ormImageExport.SetOcclusionTexture(occTex2d);
 						}
-						ExportTextureTransform(material.occlusionTexture, uMaterial, k_OcclusionMap, gltf);
+						ExportTextureTransform(
+							material.occlusionTexture,
+							uMaterial,
+							mainTexProperty, // Standard and Lit re-use main texture transform
+							gltf
+							);
 					} else {
 						logger?.Error(LogCode.TextureInvalidType, "occlusion", material.name );
 						success = false;
@@ -263,6 +270,7 @@ namespace GLTFast.Export {
         static bool ExportPbrMetallicRoughness(
 	        UnityEngine.Material uMaterial,
 	        Material material,
+	        int mainTexProperty,
 	        OrmImageExport ormImageExport,
 	        IGltfWritable gltf,
 	        ICodeLogger logger
@@ -291,11 +299,10 @@ namespace GLTFast.Export {
 
                 pbr.baseColor = uMaterial.GetColor(k_TintColor) * white;
             }
-
-            if (uMaterial.HasProperty(k_MainTex) || uMaterial.HasProperty("_BaseMap")) {
+            
+            if (uMaterial.HasProperty(k_MainTex) || uMaterial.HasProperty(k_BaseMap)) {
 	            // TODO if additive particle, render black into alpha
 				// TODO use private Material.GetFirstPropertyNameIdByAttribute here, supported from 2020.1+
-				var mainTexProperty = uMaterial.HasProperty(k_BaseMap) ? k_BaseMap : k_MainTex;
 				var mainTex = uMaterial.GetTexture(mainTexProperty);
 
 				if (mainTex) {
@@ -347,11 +354,11 @@ namespace GLTFast.Export {
 			}
 
 			if (uMaterial.IsKeywordEnabled(k_KeywordSmoothnessTextureAlbedoChannelA)) {
-				var smoothnessTex = uMaterial.GetTexture(k_MainTex) as Texture2D;
+				var smoothnessTex = uMaterial.GetTexture(mainTexProperty) as Texture2D;
 				if (smoothnessTex != null) {
 					pbr.metallicRoughnessTexture ??= new TextureInfo();
 					ormImageExport.SetSmoothnessTexture(smoothnessTex);
-					ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, k_MainTex, gltf);
+					ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, mainTexProperty, gltf);
 				}
 			}
 
@@ -359,7 +366,7 @@ namespace GLTFast.Export {
 			return success;
 		}
         
-        static void ExportUnlit(Material material, UnityEngine.Material uMaterial, IGltfWritable gltf, ICodeLogger logger){
+        static void ExportUnlit(Material material, UnityEngine.Material uMaterial, int mainTexProperty, IGltfWritable gltf, ICodeLogger logger){
 
 	        gltf.RegisterExtensionUsage(Extension.MaterialsUnlit);
 	        material.extensions = material.extensions ?? new MaterialExtension();
@@ -371,12 +378,12 @@ namespace GLTFast.Export {
 		        pbr.baseColor = uMaterial.GetColor(k_Color);
 	        }
 
-	        if (uMaterial.HasProperty(k_MainTex)) {
-		        var mainTex = uMaterial.GetTexture(k_MainTex);
+	        if (uMaterial.HasProperty(mainTexProperty)) {
+		        var mainTex = uMaterial.GetTexture(mainTexProperty);
 		        if (mainTex != null) {
 			        if(mainTex is Texture2D) {
 				        pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf);
-				        ExportTextureTransform(pbr.baseColorTexture, uMaterial, k_MainTex, gltf);
+				        ExportTextureTransform(pbr.baseColorTexture, uMaterial, mainTexProperty, gltf);
 			        } else {
 				        logger?.Error(LogCode.TextureInvalidType, "main", material.name );
 			        }
