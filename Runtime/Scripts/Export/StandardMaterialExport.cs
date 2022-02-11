@@ -26,7 +26,8 @@ namespace GLTFast.Export {
     public static class StandardMaterialExport {
 
 	    const string k_KeywordBumpMap = "_BUMPMAP";
-	    const string k_KeywordMetallicGlossMap = "_METALLICGLOSSMAP";
+	    const string k_KeywordMetallicGlossMap = "_METALLICGLOSSMAP"; // Built-In Standard
+	    const string k_KeywordMetallicSpecGlossMap = "_METALLICSPECGLOSSMAP"; // URP Lit
 	    const string k_KeywordSmoothnessTextureAlbedoChannelA = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A";
 		    
 	    static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
@@ -139,7 +140,8 @@ namespace GLTFast.Export {
 			var needsMetalRoughTexture = 
 				isPbrMetallicRoughness &&
 				(
-					uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap)
+					uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap) // Built-In Standard
+					|| uMaterial.IsKeywordEnabled(k_KeywordMetallicSpecGlossMap) // URP Lit
 					|| uMaterial.IsKeywordEnabled(k_KeywordSmoothnessTextureAlbedoChannelA)
 				);
 
