@@ -324,7 +324,7 @@ namespace GLTFast {
         //     }
         // }
 
-        public void AddScene(
+        public virtual void AddScene(
             string name,
             uint[] nodeIndices
 #if UNITY_ANIMATION
