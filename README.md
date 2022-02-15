@@ -134,7 +134,7 @@ Thanks to [Embibe][embibe] for sponsoring the development of skin support! ‚ù§Ô∏
 
 ## License
 
-Copyright (c) 2020-2021 Andreas Atteneder, All Rights Reserved.
+Copyright (c) 2020-2022 Andreas Atteneder, All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use files in this repository except in compliance with the License.
