@@ -23,8 +23,8 @@ There are four use-cases for glTF within Unity
     - [Runtime Import/Loading](ImportRuntime.md) in games/applications
     - [Editor Import](ImportEditor.md) (i.e. import assets at design-time)
 - Export
-    - [Runtime Export](Export.md#runtime-export) (save and share dynamic, user-generated 3D content)
-    - [Editor Export](Export.md#editor-export) (Unity as glTF authoring tool)
+    - [Runtime Export](ExportRuntime.md) (save and share dynamic, user-generated 3D content)
+    - [Editor Export](ExportEditor.md) (Unity as glTF authoring tool)
 
 ![Schematic diagram of the four glTF workflows](Images/Unity-glTF-workflows.png "The four glTF workflows")
 
@@ -51,7 +51,7 @@ Read about [usage](ImportEditor.md) below.
 - Less friction between artists and developers due to *glTF* as standardized interface
     - Example: artists don't need to know or follow Unity shader specific conventions and thus developers don't need to instruct them
 - Enables adding rich interaction and behaviour to assets (e.g. custom scripts or animation controllers)
-- In conjunction with [Editor Export](Export.md#editor-export), Unity becomes a complete tool for re-mixing 3D content
+- In conjunction with [Editor Export](ExportEditor.md), Unity becomes a complete tool for re-mixing 3D content
 - <sup>1</sup>Use default Lit (URP/HDRP) or Standard (Built-in render pipeline) materials
 
 <sup>1</sup>: Not yet supported (see [issue](https://github.com/atteneder/glTFast/issues/258))

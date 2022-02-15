@@ -1,8 +1,6 @@
-# glTF Export
+# Editor Export
 
-## Editor Export
-
-### Export from the Main Menu
+## Export from the Main Menu
 
 The main menu has a couple of entries for export under `File > Export`:
 
@@ -13,7 +11,7 @@ The main menu has a couple of entries for export under `File > Export`:
 
 Clicking any of these will open a file selection dialog. If additional files are to be generated (e.g. a buffer or image files) and there's a conflict (i.e. an existing file in that location), a follow-up dialog will as for permission to overwrite.
 
-### Export via Script
+## Export via Script
 
 > Note: The `GLTFast.Export` namespace can only be used if you reference both `glTFast` and `glTFast.Export` Assemblies in your [Assembly Definition][asmdef].
 
@@ -98,9 +96,5 @@ public class TestExport : MonoBehaviour {
     }
 }
 ```
-
-## Runtime Export
-
-> Note: This feature is coming soon (see [issue](https://github.com/atteneder/glTFast/issues/259))
 
 [asmdef]: https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html

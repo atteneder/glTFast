@@ -34,8 +34,8 @@ There are four use-cases for glTF within Unity
   - [Runtime Import/Loading](./Documentation~/ImportRuntime.md) in games/applications
   - [Editor Import](./Documentation~/ImportEditor.md) (i.e. import assets at design-time)
 - Export
-  - [Runtime Export](./Documentation~/Export.md#runtime-export) (save and share dynamic, user-generated 3D content)
-  - [Editor Export](./Documentation~/Export.md#editor-export) (Unity as glTF authoring tool)
+  - [Runtime Export](./Documentation~/ExportRuntime.md) (save and share dynamic, user-generated 3D content)
+  - [Editor Export](./Documentation~/ExportEditor.md) (Unity as glTF authoring tool)
 
 [![Schematic diagram of the four glTF workflows](./Documentation~/Images/Unity-glTF-workflows.png "The four glTF workflows")][workflows]
 
@@ -109,8 +109,8 @@ See [Editor Import](./Documentation~/ImportEditor.md) in the documentation for d
 
 ### Editor Export
 
-The main menu has a couple of [entries for glTF export](./Documentation~/Export.md#export-from-the-main-menu) under `File > Export` and glTFs can also be
-created [via script](./Documentation~/Export.md#export-via-script).
+The main menu has a couple of [entries for glTF export](./Documentation~/ExportEditor.md#export-from-the-main-menu) under `File > Export` and glTFs can also be
+created [via script](./Documentation~/ExportEditor.md#export-via-script).
 
 ## Project Setup
 
