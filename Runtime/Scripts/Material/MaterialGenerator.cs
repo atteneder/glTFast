@@ -92,23 +92,26 @@ namespace GLTFast.Materials {
         public static IMaterialGenerator GetDefaultMaterialGenerator() {
 
             if (defaultMaterialGenerator != null) return defaultMaterialGenerator;
-
+#if USING_URP || USING_HDRP
             // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
-            if (GraphicsSettings.renderPipelineAsset != null) {
+            var rpAsset = QualitySettings.renderPipeline ?? GraphicsSettings.defaultRenderPipeline;
+
+            if (rpAsset != null) {
 #if USING_URP
-                if (GraphicsSettings.renderPipelineAsset is UniversalRenderPipelineAsset urpAsset) {
+                if (rpAsset is UniversalRenderPipelineAsset urpAsset) {
                     defaultMaterialGenerator = new UniveralRPMaterialGenerator(urpAsset);
                     return defaultMaterialGenerator;
                 }
 #endif
 #if USING_HDRP
-                if (GraphicsSettings.renderPipelineAsset is HDRenderPipelineAsset) {
+                if (rpAsset is HDRenderPipelineAsset) {
                     defaultMaterialGenerator = new HighDefinitionRPMaterialGenerator();
                     return defaultMaterialGenerator;
                 }
 #endif
                 throw new System.Exception("glTFast: Unknown Render Pipeline");
             }
+#endif
 #if UNITY_SHADER_GRAPH_12_OR_NEWER && GLTFAST_BUILTIN_SHADER_GRAPH
             defaultMaterialGenerator = new BuiltInShaderGraphMaterialGenerator();
             return defaultMaterialGenerator;
