@@ -29,7 +29,7 @@ namespace GLTFast.Export {
 	
 	using Schema;
 
-    public static class StandardMaterialExport {
+    public class StandardMaterialExport : IMaterialExport {
 
 	    const string k_KeywordBumpMap = "_BUMPMAP";
 	    const string k_KeywordMetallicGlossMap = "_METALLICGLOSSMAP"; // Built-In Standard
@@ -64,7 +64,7 @@ namespace GLTFast.Export {
 	    /// <param name="gltf">Associated IGltfWriter. Is used for adding images and textures.</param>
 	    /// <param name="logger">Logger used for reporting</param>
 	    /// <returns>True if no errors occured, false otherwise</returns>
-	    internal static bool ConvertMaterial(UnityEngine.Material uMaterial, out Material material, IGltfWritable gltf, ICodeLogger logger ) {
+	    public bool ConvertMaterial(UnityEngine.Material uMaterial, out Material material, IGltfWritable gltf, ICodeLogger logger ) {
 		    var success = true;
             material = new Material {
                 name = uMaterial.name,

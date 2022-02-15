@@ -162,31 +162,18 @@ namespace GLTFast.Export {
         /// </summary>
         /// <param name="nodeId">Index of the node to add the mesh to</param>
         /// <param name="uMesh">Unity mesh to be assigned and exported</param>
-        /// <param name="uMaterials">Materials to be assigned and exported
+        /// <param name="materialIds">glTF materials IDs to be assigned
         /// (multiple in case of sub-meshes)</param>
-        /// <returns>True if the conversion was flawless, false otherwise (use
-        /// <see cref="m_Logger"/> for analysing errors)</returns>
-        public bool AddMeshToNode(int nodeId, [NotNull] UnityEngine.Mesh uMesh, List<UnityEngine.Material> uMaterials) {
+        public void AddMeshToNode(int nodeId, [NotNull] UnityEngine.Mesh uMesh, int[] materialIds) {
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
-            var success = true;
-            if (uMaterials != null && uMaterials.Count > 0) {
-                var materialIds = new int[uMaterials.Count];
-                for (var i = 0; i < uMaterials.Count; i++) {
-                    var uMaterial = uMaterials[i];
-                    if (uMaterial == null) {
-                        materialIds[i] = -1;
-                    } else { 
-                        success &= AddMaterial(uMaterial, out materialIds[i]);
-                    }
-                }
+            if (materialIds is { Length: > 0 }) {
                 m_NodeMaterials = m_NodeMaterials ?? new Dictionary<int, int[]>();
                 m_NodeMaterials[nodeId] = materialIds;
             }
 
             node.mesh = AddMesh(uMesh);
-            return success;
         }
 
         /// <summary>
@@ -390,7 +377,14 @@ namespace GLTFast.Export {
             return imageDest;
         }
 
-        bool AddMaterial(UnityEngine.Material uMaterial, out int materialId) {
+        /// <summary>
+        /// Adds a 
+        /// </summary>
+        /// <param name="uMaterial"></param>
+        /// <param name="materialId"></param>
+        /// <param name="materialExport"></param>
+        /// <returns></returns>
+        public bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport) {
 
             if (m_Materials!=null) {
                 materialId = m_UnityMaterials.IndexOf(uMaterial);
@@ -402,7 +396,7 @@ namespace GLTFast.Export {
                 m_UnityMaterials = new List<UnityEngine.Material>();    
             }
             
-            var success = StandardMaterialExport.ConvertMaterial(uMaterial, out var material, this, m_Logger);
+            var success = materialExport.ConvertMaterial(uMaterial, out var material, this, m_Logger);
 
             materialId = m_Materials.Count;
             m_Materials.Add(material);

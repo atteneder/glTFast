@@ -23,13 +23,16 @@ namespace GLTFast.Export {
     public class GameObjectExport {
 
         GltfWriter m_Writer;
+        IMaterialExport m_MaterialExport;
         GameObjectExportSettings m_Settings;
+        ICodeLogger m_Logger;
 
         /// <summary>
         /// Provides glTF export of GameObject based scenes and hierarchies.
         /// </summary>
         /// <param name="exportSettings">Export settings</param>
         /// <param name="gameObjectExportSettings">GameObject export settings</param>
+        /// <param name="materialExport">Provides material conversion</param>
         /// <param name="deferAgent">Defer agent; decides when/if to preempt
         /// export to preserve a stable frame rate <seealso cref="IDeferAgent"/></param>
         /// <param name="logger">Interface for logging (error) messages
@@ -37,11 +40,14 @@ namespace GLTFast.Export {
         public GameObjectExport(
             ExportSettings exportSettings = null,
             GameObjectExportSettings gameObjectExportSettings = null,
+            IMaterialExport materialExport = null,
             IDeferAgent deferAgent = null,
             ICodeLogger logger = null
         ) {
             m_Settings = gameObjectExportSettings ?? new GameObjectExportSettings();
             m_Writer = new GltfWriter(exportSettings, deferAgent, logger);
+            m_MaterialExport = materialExport ?? MaterialExport.GetDefaultMaterialExport();
+            m_Logger = logger;
         }
 
         /// <summary>
@@ -137,8 +143,19 @@ namespace GLTFast.Export {
                 mesh = smr.sharedMesh;
                 smr.GetSharedMaterials(tempMaterials);
             }
+
+            var materialIds = new int[tempMaterials.Count];
+            for (var i = 0; i < tempMaterials.Count; i++) {
+                var uMaterial = tempMaterials[i];
+                if ( uMaterial!=null && m_Writer.AddMaterial(uMaterial, out var materialId, m_MaterialExport) ) {
+                    materialIds[i] = materialId;
+                } else {
+                    materialIds[i] = -1;
+                }
+            }
+
             if (mesh != null) {
-                success &= m_Writer.AddMeshToNode(nodeId,mesh,tempMaterials);
+                m_Writer.AddMeshToNode(nodeId,mesh,materialIds);
             }
             return success;
         }
