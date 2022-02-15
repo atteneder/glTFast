@@ -31,11 +31,11 @@ See the [comprehensive list of supported features and extensions](./Documentatio
 There are four use-cases for glTF within Unity
 
 - Import
-  - [Runtime Import/Loading](./Documentation~/glTFast.md#runtime-importloading) in games/applications
-  - [Editor Import](./Documentation~/glTFast.md#editor-import-design-time) (i.e. import assets at design-time)
+  - [Runtime Import/Loading](./Documentation~/ImportRuntime.md) in games/applications
+  - [Editor Import](./Documentation~/ImportEditor.md) (i.e. import assets at design-time)
 - Export
-  - [Runtime Export](./Documentation~/glTFast.md#runtime-export) (save and share dynamic, user-generated 3D content)
-  - [Editor Export](./Documentation~/glTFast.md#editor-export) (Unity as glTF authoring tool)
+  - [Runtime Export](./Documentation~/Export.md#runtime-export) (save and share dynamic, user-generated 3D content)
+  - [Editor Export](./Documentation~/Export.md#editor-export) (Unity as glTF authoring tool)
 
 [![Schematic diagram of the four glTF workflows](./Documentation~/Images/Unity-glTF-workflows.png "The four glTF workflows")][workflows]
 
@@ -95,7 +95,7 @@ var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-See [Runtime Loading via Script](./Documentation~/glTFast.md#runtime-loading-via-script) in the documentation for more details and instructions how to [customize the loading behaviour](./Documentation~/glTFast.md#customize-loading-behavior) via script.
+See [Runtime Loading via Script](./Documentation~/ImportRuntime.md#runtime-loading-via-script) in the documentation for more details and instructions how to [customize the loading behaviour](./Documentation~/ImportRuntime.md#customize-loading-behavior) via script.
 
 ### Editor Import
 
@@ -105,12 +105,12 @@ Move or copy *glTF* files into your project's *Assets* folder, similar to other 
 
 *glTFast* will import them to native Unity prefabs and add them to the asset database.
 
-See [Editor Import](./Documentation~/glTFast.md#editor-import) in the documentation for details.
+See [Editor Import](./Documentation~/ImportEditor.md) in the documentation for details.
 
 ### Editor Export
 
-The main menu has a couple of [entries for glTF export](./Documentation~/glTFast.md#export-from-the-main-menu) under `File > Export` and glTFs can also be
-created [via script](./Documentation~/glTFast.md#export-via-script).
+The main menu has a couple of [entries for glTF export](./Documentation~/Export.md#export-from-the-main-menu) under `File > Export` and glTFs can also be
+created [via script](./Documentation~/Export.md#export-via-script).
 
 ## Project Setup
 
@@ -120,7 +120,7 @@ created [via script](./Documentation~/glTFast.md#export-via-script).
 
 *glTFast* uses custom shader graphs that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
 
-Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/glTFast.md#materials-and-shader-variants) for details.
+Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/ProjectSetup.md#materials-and-shader-variants) for details.
 
 ## Get involved
 
@@ -169,4 +169,4 @@ limitations under the License.
 [Meshopt]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [unity]: https://unity.com
 [upm_install]: ./Documentation~/Images/upm_install.png  "Unity Package Manager add menu"
-[workflows]: ./Documentation~/glTFast.md#workflows
+[workflows]: ./Documentation~/index.md#workflows
