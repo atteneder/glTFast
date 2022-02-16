@@ -19,18 +19,11 @@
 #define GLTFAST_BUILTIN_RP
 #endif
 
-using System.Collections.Generic;
+using System;
 using GLTFast.Schema;
 using UnityEngine;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
-using UnityEngine.Rendering;
-#if USING_URP
-using UnityEngine.Rendering.Universal;
-#endif
-#if USING_HDRP
-using UnityEngine.Rendering.HighDefinition;
-#endif
 
 namespace GLTFast.Materials {
 
@@ -92,35 +85,32 @@ namespace GLTFast.Materials {
         public static IMaterialGenerator GetDefaultMaterialGenerator() {
 
             if (defaultMaterialGenerator != null) return defaultMaterialGenerator;
-#if USING_URP || USING_HDRP
-            // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
-            var rpAsset = QualitySettings.renderPipeline ?? GraphicsSettings.defaultRenderPipeline;
 
-            if (rpAsset != null) {
+            var renderPipeline = RenderPipelineUtils.DetectRenderPipeline();
+
+            switch (renderPipeline) {
+#if UNITY_SHADER_GRAPH_12_OR_NEWER && GLTFAST_BUILTIN_SHADER_GRAPH
+                case RenderPipeline.BuiltIn:
+                    defaultMaterialGenerator = new BuiltInShaderGraphMaterialGenerator();
+                    return defaultMaterialGenerator;
+#elif GLTFAST_BUILTIN_RP || UNITY_EDITOR
+                case RenderPipeline.BuiltIn:
+                    defaultMaterialGenerator = new BuiltInMaterialGenerator();
+                    return defaultMaterialGenerator;
+#endif
 #if USING_URP
-                if (rpAsset is UniversalRenderPipelineAsset urpAsset) {
+                case RenderPipeline.Universal:
                     defaultMaterialGenerator = new UniveralRPMaterialGenerator(urpAsset);
                     return defaultMaterialGenerator;
-                }
 #endif
+                case RenderPipeline.HighDefinition:
 #if USING_HDRP
-                if (rpAsset is HDRenderPipelineAsset) {
                     defaultMaterialGenerator = new HighDefinitionRPMaterialGenerator();
                     return defaultMaterialGenerator;
-                }
 #endif
-                throw new System.Exception("glTFast: Unknown Render Pipeline");
+                default:
+                    throw new System.Exception($"Could not determine default MaterialGenerator (render pipeline {renderPipeline})");
             }
-#endif
-#if UNITY_SHADER_GRAPH_12_OR_NEWER && GLTFAST_BUILTIN_SHADER_GRAPH
-            defaultMaterialGenerator = new BuiltInShaderGraphMaterialGenerator();
-            return defaultMaterialGenerator;
-#elif GLTFAST_BUILTIN_RP || UNITY_EDITOR
-            defaultMaterialGenerator = new BuiltInMaterialGenerator();
-            return defaultMaterialGenerator;
-#else
-            throw new System.Exception("Could not determine default MaterialGenerator");
-#endif
         }
 
         protected ICodeLogger logger;

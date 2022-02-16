@@ -29,30 +29,24 @@ namespace GLTFast.Export {
 	
     using Schema;
 
-    public class StandardMaterialExport : IMaterialExport {
+    public class StandardMaterialExport : MaterialExportBase {
 
         const string k_KeywordBumpMap = "_BUMPMAP";
+        const string k_KeywordEmission = "_EMISSION";
         const string k_KeywordMetallicGlossMap = "_METALLICGLOSSMAP"; // Built-In Standard
 #if USING_URP || USING_HDRP
         const string k_KeywordMetallicSpecGlossMap = "_METALLICSPECGLOSSMAP"; // URP Lit
 #endif
         const string k_KeywordSmoothnessTextureAlbedoChannelA = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A";
 		    
-        static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
-        static readonly int k_Cull = Shader.PropertyToID("_Cull");
         static readonly int k_EmissionColor = Shader.PropertyToID("_EmissionColor");
         static readonly int k_EmissionMap = Shader.PropertyToID("_EmissionMap");
         static readonly int k_BumpMap = Shader.PropertyToID("_BumpMap");
         static readonly int k_OcclusionMap = Shader.PropertyToID("_OcclusionMap");
         static readonly int k_BaseMap = Shader.PropertyToID("_BaseMap");
         static readonly int k_ColorTexture = Shader.PropertyToID("_ColorTexture");
-        static readonly int k_BaseColor = Shader.PropertyToID("_BaseColor");
-        static readonly int k_MainTex = Shader.PropertyToID("_MainTex");
         static readonly int k_TintColor = Shader.PropertyToID("_TintColor");
-        static readonly int k_Color = Shader.PropertyToID("_Color");
-        static readonly int k_Metallic = Shader.PropertyToID("_Metallic");
         static readonly int k_MetallicGlossMap = Shader.PropertyToID("_MetallicGlossMap");
-        static readonly int k_Smoothness = Shader.PropertyToID("_Smoothness");
         static readonly int k_Glossiness = Shader.PropertyToID("_Glossiness");
         static readonly int k_GlossMapScale = Shader.PropertyToID("_GlossMapScale");
 
@@ -64,7 +58,7 @@ namespace GLTFast.Export {
         /// <param name="gltf">Associated IGltfWriter. Is used for adding images and textures.</param>
         /// <param name="logger">Logger used for reporting</param>
         /// <returns>True if no errors occured, false otherwise</returns>
-        public bool ConvertMaterial(UnityEngine.Material uMaterial, out Material material, IGltfWritable gltf, ICodeLogger logger ) {
+        public override bool ConvertMaterial(UnityEngine.Material uMaterial, out Material material, IGltfWritable gltf, ICodeLogger logger ) {
             var success = true;
             material = new Material {
                 name = uMaterial.name,
@@ -74,28 +68,10 @@ namespace GLTFast.Export {
                 }
             };
 
-            switch (uMaterial.GetTag("RenderType", false, ""))
-            {
-                case "TransparentCutout":
-                    if (uMaterial.HasProperty(k_Cutoff))
-                    {
-                        material.alphaCutoff = uMaterial.GetFloat(k_Cutoff);
-                    }
-                    material.alphaModeEnum = Material.AlphaMode.MASK;
-                    break;
-                case "Transparent":
-                case "Fade":
-                    material.alphaModeEnum = Material.AlphaMode.BLEND;
-                    break;
-                default:
-                    material.alphaModeEnum = Material.AlphaMode.OPAQUE;
-                    break;
-            }
-            
-            material.doubleSided = uMaterial.HasProperty(k_Cull) &&
-                uMaterial.GetInt(k_Cull) == (int) CullMode.Off;
+            SetAlphaModeAndCutoff(uMaterial, material);
+            material.doubleSided = IsDoubleSided(uMaterial);
 
-            if(uMaterial.IsKeywordEnabled("_EMISSION")) {
+            if(uMaterial.IsKeywordEnabled(k_KeywordEmission)) {
                 if (uMaterial.HasProperty(k_EmissionColor)) {
                     var emissionColor = uMaterial.GetColor(k_EmissionColor);
 
@@ -172,13 +148,9 @@ namespace GLTFast.Export {
                     logger
                 );
             }
-            else if (IsPbrSpecularGlossiness(uMaterial))
+            else if (uMaterial.HasProperty(mainTexProperty))
             {
-                // ExportPBRSpecularGlossiness(material, uMaterial);
-            }
-            else if (uMaterial.HasProperty(k_BaseMap))
-            {
-                var mainTex = uMaterial.GetTexture(k_BaseMap);
+                var mainTex = uMaterial.GetTexture(mainTexProperty);
                 material.pbrMetallicRoughness = new PbrMetallicRoughness {
                     baseColor = uMaterial.HasProperty(k_BaseColor)
                         ? uMaterial.GetColor(k_BaseColor)
@@ -266,10 +238,6 @@ namespace GLTFast.Export {
             return success;
         }
 
-        static bool IsUnlit(UnityEngine.Material material) {
-            return material.shader.name.ToLowerInvariant().Contains("unlit");
-        }
-        
         static bool IsPbrMetallicRoughness(UnityEngine.Material material) {
             return material.HasProperty(MaterialGenerator.metallicPropId)
                 && (
@@ -279,10 +247,6 @@ namespace GLTFast.Export {
                 );
         }
 
-        static bool IsPbrSpecularGlossiness(UnityEngine.Material material) {
-            return material.HasProperty(MaterialGenerator.specColorPropId) && material.HasProperty(MaterialGenerator.specGlossMapPropId);
-        }
-        
         static bool ExportPbrMetallicRoughness(
             UnityEngine.Material uMaterial,
             Material material,
@@ -316,7 +280,7 @@ namespace GLTFast.Export {
                 pbr.baseColor = uMaterial.GetColor(k_TintColor) * white;
             }
             
-            if (uMaterial.HasProperty(k_MainTex) || uMaterial.HasProperty(k_BaseMap)) {
+            if (uMaterial.HasProperty(mainTexProperty)) {
                 // TODO if additive particle, render black into alpha
                 // TODO use private Material.GetFirstPropertyNameIdByAttribute here, supported from 2020.1+
                 var mainTex = uMaterial.GetTexture(mainTexProperty);
@@ -390,73 +354,6 @@ namespace GLTFast.Export {
                 ;
         }
         
-        static void ExportUnlit(Material material, UnityEngine.Material uMaterial, int mainTexProperty, IGltfWritable gltf, ICodeLogger logger){
-
-            gltf.RegisterExtensionUsage(Extension.MaterialsUnlit);
-            material.extensions = material.extensions ?? new MaterialExtension();
-            material.extensions.KHR_materials_unlit = new MaterialUnlit();
-	        
-            var pbr = material.pbrMetallicRoughness ?? new PbrMetallicRoughness();
-
-            if (uMaterial.HasProperty(k_Color)) {
-                pbr.baseColor = uMaterial.GetColor(k_Color);
-            }
-
-            if (uMaterial.HasProperty(mainTexProperty)) {
-                var mainTex = uMaterial.GetTexture(mainTexProperty);
-                if (mainTex != null) {
-                    if(mainTex is Texture2D) {
-                        pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf);
-                        ExportTextureTransform(pbr.baseColorTexture, uMaterial, mainTexProperty, gltf);
-                    } else {
-                        logger?.Error(LogCode.TextureInvalidType, "main", material.name );
-                    }
-                }
-            }
-
-            material.pbrMetallicRoughness = pbr;
-        }
-        
-        static TextureInfo ExportTextureInfo( UnityEngine.Texture texture, IGltfWritable gltf, ImageExportBase.Format format = ImageExportBase.Format.Unknown) {
-            var texture2d = texture as Texture2D;
-            if (texture2d == null) {
-                return null;
-            }
-            var imageExport = new ImageExport(texture2d, format);
-            if (AddImageExport(gltf, imageExport, out var textureId)) {
-                return new TextureInfo {
-                    index = textureId,
-                    // texCoord = 0 // TODO: figure out which UV set was used
-                };
-            }
-            return null;
-        }
-        
-        static NormalTextureInfo ExportNormalTextureInfo(
-            UnityEngine.Texture texture,
-            UnityEngine.Material material,
-            IGltfWritable gltf
-        )
-        {
-            var texture2d = texture as Texture2D;
-            if (texture2d == null) {
-                return null;
-            }
-            var imageExport = new NormalImageExport(texture2d);
-            if (AddImageExport(gltf, imageExport, out var textureId)) {
-                var info = new NormalTextureInfo {
-                    index = textureId,
-                    // texCoord = 0 // TODO: figure out which UV set was used
-                };
-
-                if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
-                    info.scale = material.GetFloat(MaterialGenerator.bumpScalePropId);
-                }
-                return info;
-            }
-            return null;
-        }
-        
         static OcclusionTextureInfo ExportOcclusionTextureInfo(
             UnityEngine.Texture texture,
             UnityEngine.Material material,
@@ -474,45 +371,6 @@ namespace GLTFast.Export {
                 };
             }
             return null;
-        }
-
-        /// <summary>
-        /// Adds an ImageExport to the glTF.
-        /// No conversions or channel swizzling 
-        /// </summary>
-        /// <param name="gltf"></param>
-        /// <param name="imageExport"></param>
-        /// <param name="textureId"></param>
-        /// <returns>glTF texture ID</returns>
-        static bool AddImageExport(IGltfWritable gltf, ImageExportBase imageExport, out int textureId) {
-            var imageId = gltf.AddImage(imageExport);
-            if (imageId < 0) {
-                textureId = -1;
-                return false;
-            }
-
-            var samplerId = gltf.AddSampler(imageExport.filterMode, imageExport.wrapModeU, imageExport.wrapModeV);
-            textureId = gltf.AddTexture(imageId,samplerId);
-            return true;
-        }
-        
-        static void ExportTextureTransform(TextureInfo def, UnityEngine.Material mat, int texPropertyId, IGltfWritable gltf) {
-            var offset = mat.GetTextureOffset(texPropertyId);
-            var scale = mat.GetTextureScale(texPropertyId);
-
-            // Counter measure for Unity/glTF texture coordinate difference
-            // TODO: Offer UV conversion as alternative
-            offset.y = 1 - offset.x;
-            scale.y *= -1;
-
-            if (offset != Vector2.zero || scale != Vector2.one) {
-                gltf.RegisterExtensionUsage(Extension.TextureTransform);
-                def.extensions = def.extensions ?? new TextureInfoExtension();
-                def.extensions.KHR_texture_transform = new TextureTransform {
-                    scale = new[] { scale.x, scale.y },
-                    offset = new[] { offset.x, offset.y }
-                };
-            }
         }
     }
 }

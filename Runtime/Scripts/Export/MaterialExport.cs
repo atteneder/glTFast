@@ -23,7 +23,22 @@ namespace GLTFast.Export {
         
         public static IMaterialExport GetDefaultMaterialExport() {
             if (m_MaterialExport == null) {
-                m_MaterialExport = new StandardMaterialExport();
+
+                var renderPipeline = RenderPipelineUtils.DetectRenderPipeline();
+
+                switch (renderPipeline) {
+                    case RenderPipeline.BuiltIn:
+                    case RenderPipeline.Universal:
+                        m_MaterialExport = new StandardMaterialExport();
+                        break;
+#if USING_HDRP
+                    case RenderPipeline.HighDefinition:
+                        m_MaterialExport = new HighDefinitionMaterialExport();
+                        break;
+#endif
+                    default:
+                        throw new System.Exception($"Could not determine default MaterialExport (render pipeline {renderPipeline})");
+                }
             }
             return m_MaterialExport;
         }
