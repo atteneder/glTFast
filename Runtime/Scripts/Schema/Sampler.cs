@@ -117,12 +117,16 @@ namespace GLTFast.Schema
         }
 
         static WrapMode ConvertWrapMode(TextureWrapMode wrapMode) {
-            return wrapMode switch {
-                TextureWrapMode.Clamp => WrapMode.ClampToEdge,
-                TextureWrapMode.Mirror => WrapMode.MirroredRepeat,
-                TextureWrapMode.MirrorOnce => WrapMode.MirroredRepeat,
-                _ => WrapMode.Repeat
-            };
+            switch (wrapMode) {
+                case TextureWrapMode.Clamp:
+                    return WrapMode.ClampToEdge;
+                case TextureWrapMode.Mirror:
+                case TextureWrapMode.MirrorOnce:
+                    return WrapMode.MirroredRepeat;
+                case TextureWrapMode.Repeat:
+                default:
+                    return WrapMode.Repeat;
+            }
         }
 
         public Sampler() { }

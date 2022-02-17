@@ -62,7 +62,7 @@ namespace GLTFast.Export {
         }
         
         protected static bool IsUnlit(UnityEngine.Material material) {
-            return material.shader.name.Contains("unlit", StringComparison.OrdinalIgnoreCase);
+            return material.shader.name.ToLower().Contains("unlit");
         }
         
         protected static void ExportUnlit(Material material, UnityEngine.Material uMaterial, int mainTexProperty, IGltfWritable gltf, ICodeLogger logger){

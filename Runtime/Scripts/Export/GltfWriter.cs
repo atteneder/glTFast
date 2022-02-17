@@ -168,7 +168,7 @@ namespace GLTFast.Export {
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
-            if (materialIds is { Length: > 0 }) {
+            if (materialIds!=null && materialIds.Length > 0 ) {
                 m_NodeMaterials = m_NodeMaterials ?? new Dictionary<int, int[]>();
                 m_NodeMaterials[nodeId] = materialIds;
             }
@@ -227,7 +227,7 @@ namespace GLTFast.Export {
 
         public int AddTexture(int imageId, int samplerId) {
             CertifyNotDisposed();
-            m_Textures ??= new List<Texture>();
+            m_Textures = m_Textures ?? new List<Texture>();
             
             var texture = new Texture {
                 source = imageId,
@@ -249,8 +249,8 @@ namespace GLTFast.Export {
                 return -1;
             }
             CertifyNotDisposed();
-            m_Samplers ??= new List<Sampler>();
-            m_SamplerKeys ??= new List<SamplerKey>();
+            m_Samplers = m_Samplers ?? new List<Sampler>();
+            m_SamplerKeys = m_SamplerKeys ?? new List<SamplerKey>();
 
             var samplerKey = new SamplerKey(filterMode, wrapModeU, wrapModeV );
             
@@ -864,7 +864,11 @@ namespace GLTFast.Export {
                 var overwrite = m_Settings.fileConflictResolution == FileConflictResolution.Overwrite;
                 if (!overwrite && imageDest == ImageDestination.SeparateFile) {
                     var fileExists = false;
-                    var fileNames = new HashSet<string>(m_ImageExports.Count);
+                    var fileNames = new HashSet<string>(
+#if NET_STANDARD
+                        m_ImageExports.Count
+#endif
+                        );
                 
                     bool GetUniqueFileName(ref string filename) {
                         if(fileNames.Contains(filename)) {
@@ -886,7 +890,7 @@ namespace GLTFast.Export {
                         var imageExport = m_ImageExports[imageId];
                         var fileName = Path.GetFileName(imageExport.fileName);
                         if (GetUniqueFileName(ref fileName)) {
-                            fileNameOverrides ??= new Dictionary<int, string>();
+                            fileNameOverrides = fileNameOverrides ?? new Dictionary<int, string>();
                             fileNameOverrides[imageId] = fileName;
                         }
                         fileNames.Add(fileName);

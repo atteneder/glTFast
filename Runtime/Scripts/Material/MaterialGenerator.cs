@@ -24,6 +24,10 @@ using GLTFast.Schema;
 using UnityEngine;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
+using UnityEngine.Rendering;
+#if USING_URP
+using UnityEngine.Rendering.Universal;
+#endif
 
 namespace GLTFast.Materials {
 
@@ -100,6 +104,7 @@ namespace GLTFast.Materials {
 #endif
 #if USING_URP
                 case RenderPipeline.Universal:
+                    var urpAsset = (UniversalRenderPipelineAsset) (QualitySettings.renderPipeline ? QualitySettings.renderPipeline : GraphicsSettings.defaultRenderPipeline);
                     defaultMaterialGenerator = new UniveralRPMaterialGenerator(urpAsset);
                     return defaultMaterialGenerator;
 #endif

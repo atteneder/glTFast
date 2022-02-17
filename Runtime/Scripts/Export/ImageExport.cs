@@ -66,21 +66,29 @@ namespace GLTFast.Export {
 
         public override string mimeType {
             get {
-                return format switch {
-                    Format.Jpg => Constants.mimeTypeJPG,
-                    Format.Png => Constants.mimeTypePNG,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                switch (format) {
+                    case Format.Jpg:
+                        return Constants.mimeTypeJPG;
+                    case Format.Png:
+                        return Constants.mimeTypePNG;
+                    case Format.Unknown:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
         protected string fileExtension {
             get {
-                return format switch {
-                    Format.Jpg => "jpg",
-                    Format.Png => "png",
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                switch (format) {
+                    case Format.Jpg:
+                        return "jpg";
+                    case Format.Png:
+                        return "png";
+                    case Format.Unknown:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 

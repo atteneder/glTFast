@@ -321,7 +321,7 @@ namespace GLTFast.Export {
                 var mrTex = uMaterial.GetTexture(k_MetallicGlossMap);
                 if (mrTex != null) {
                     if(mrTex is Texture2D mrTex2d) {
-                        pbr.metallicRoughnessTexture ??= new TextureInfo();
+                        pbr.metallicRoughnessTexture = pbr.metallicRoughnessTexture ?? new TextureInfo();
                         ormImageExport.SetMetalGlossTexture(mrTex2d);
                         if (HasMetallicGlossMap(uMaterial))
                             pbr.metallicFactor = 1.0f;
@@ -336,7 +336,7 @@ namespace GLTFast.Export {
             if (uMaterial.IsKeywordEnabled(k_KeywordSmoothnessTextureAlbedoChannelA)) {
                 var smoothnessTex = uMaterial.GetTexture(mainTexProperty) as Texture2D;
                 if (smoothnessTex != null) {
-                    pbr.metallicRoughnessTexture ??= new TextureInfo();
+                    pbr.metallicRoughnessTexture = pbr.metallicRoughnessTexture ?? new TextureInfo();
                     ormImageExport.SetSmoothnessTexture(smoothnessTex);
                     ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, mainTexProperty, gltf);
                 }
