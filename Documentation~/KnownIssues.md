@@ -7,3 +7,5 @@
   - <sup>1</sup>`minFilter` mode `NEAREST_MIPMAP_LINEAR` is not supported and will result in `NEAREST`.
 
 <sup>1</sup>: A Unity API limitation.
+
+[SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
