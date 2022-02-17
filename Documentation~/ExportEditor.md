@@ -17,4 +17,4 @@ Clicking any of these will open a file selection dialog. If additional files are
 
 ## Export via Script
 
-Exporting via script works exactly the same as [Runtime Export](ExportRuntime.md#export-via-script), with the exception that you don't need to [include the required shaders](ExportRuntime.md#include-required-shaders).
+Exporting via script works exactly the same as [Runtime Export](ExportRuntime.md), with the exception that you don't need to [include the required shaders](ExportRuntime.md#include-required-shaders).

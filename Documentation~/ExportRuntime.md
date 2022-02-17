@@ -6,7 +6,7 @@ You can export individual GameObjects or entire scenes to glTF files at runtime.
 
 To be able to export certain textures correctly, a couple of shaders are required. They are located at `Runtime/Shader/Export`. Make sure to include them all in your build.
 
-The easiest way to include them is to add `glTFExport.shadervariants` to the list of *Preloaded Shaders* in the *Project Settings* > *Graphics* > *Shader Loading*.
+The easiest way to include them is to add `glTFExport.shadervariants` to the list of *Preloaded Shaders* under *Project Settings* > *Graphics* > *Shader Loading*.
 
 ## Export via Script
 
