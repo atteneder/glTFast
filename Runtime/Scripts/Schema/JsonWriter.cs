@@ -14,6 +14,7 @@
 //
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using UnityEngine;
 
@@ -75,7 +76,7 @@ namespace GLTFast.Schema {
             AddArray(name);
             foreach (var value in values) {
                 Separate();
-                m_Stream.Write(value.ToString("R"));
+                m_Stream.Write(value.ToString("R", CultureInfo.InvariantCulture));
             }
             CloseArray();
         }

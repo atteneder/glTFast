@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Properly closing buffer file stream
 - (Export) Conflict of textures with identical names
 - (Export) Exporting assets/prefabs from project view created empty glTFs
+- (Export) Correct float array serialization on systems with non-english culture configuration (#335)
 - Textures are not duplicated anymore if they use different samplers resulting in equal Unity settings (saves memory on corner-case glTFs)
 
 ## [4.5.0] - 2022-01-24
