@@ -195,7 +195,16 @@ Not investigated yet:
 
 ### Material Export
 
+Material export is currently only tested on the following shaders:
 
+- Universal and High Definition render pipeline
+  - `Lit` 
+  - `Unlit` 
+- Built-In render pipeline
+  - `Standard` 
+  - `Unlit` 
+
+Other shaders might (partially) work if they have similar properties (with identical names).
 
 | Material Feature              | URP<sup>1</sup> | HDRP<sup>2</sup> | Built-In<sup>3</sup> |
 |-------------------------------|-----|------|----------|
