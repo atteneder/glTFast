@@ -42,42 +42,42 @@ namespace GLTFast.Editor {
             set => EditorUserSettings.SetConfigValue("glTF.saveFilePath",value);
         }
 
-        [MenuItem("Assets/Export glTF/glTF", true)]
+        [MenuItem("Assets/Export glTF/glTF (.gltf)", true)]
         static bool ExportSelectionValidate() {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
 
-        [MenuItem("Assets/Export glTF/glTF", false, 10)]
+        [MenuItem("Assets/Export glTF/glTF (.gltf)", false, 10)]
         static void ExportSelectionMenu() {
             ExportSelection(false);
         }
 
-        [MenuItem("Assets/Export glTF/glTF-Binary", true)]
+        [MenuItem("Assets/Export glTF/glTF-Binary (.glb)", true)]
         static bool ExportSelectionBinaryValidate() {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
 
-        [MenuItem("Assets/Export glTF/glTF-Binary", false, 11)]
+        [MenuItem("Assets/Export glTF/glTF-Binary (.glb)", false, 11)]
         static void ExportSelectionBinaryMenu() {
             ExportSelection(true);
         }
         
-        [MenuItem("GameObject/Export glTF/glTF", true)]
+        [MenuItem("GameObject/Export glTF/glTF (.gltf)", true)]
         static bool ExportGameObjectValidate() {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
         
-        [MenuItem("GameObject/Export glTF/glTF", false, 29)]
+        [MenuItem("GameObject/Export glTF/glTF (.gltf)", false, 29)]
         static void ExportGameObjectMenu(MenuCommand command) {
             ExportGameObject(command, false);
         }
         
-        [MenuItem("GameObject/Export glTF/glTF-Binary", true)]
+        [MenuItem("GameObject/Export glTF/glTF-Binary (.glb)", true)]
         static bool ExportGameObjectBinaryValidate() {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
         
-        [MenuItem("GameObject/Export glTF/glTF-Binary", false, 29)]
+        [MenuItem("GameObject/Export glTF/glTF-Binary (.glb)", false, 29)]
         static void ExportGameObjectBinaryMenu(MenuCommand command) {
             ExportGameObject(command, true);
         }
@@ -130,12 +130,12 @@ namespace GLTFast.Editor {
             return settings;
         }
 
-        [MenuItem("File/Export Scene/glTF", false, 173)]
+        [MenuItem("File/Export Scene/glTF (.gltf)", false, 173)]
         static void ExportSceneMenu() {
             ExportScene(false);
         }
         
-        [MenuItem("File/Export Scene/glTF-Binary", false, 174)]
+        [MenuItem("File/Export Scene/glTF-Binary (.glb)", false, 174)]
         static void ExportSceneBinaryMenu() {
             ExportScene(true);
         }
