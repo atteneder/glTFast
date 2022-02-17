@@ -25,6 +25,9 @@ using GLTFast.Schema;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Material = UnityEngine.Material;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace GLTFast.Materials {
 
@@ -71,10 +74,20 @@ namespace GLTFast.Materials {
         }
 #endif
 
-        protected const string SHADER_METALLIC = "Shader Graphs/glTF-pbrMetallicRoughness";
-        protected const string SHADER_UNLIT = "Shader Graphs/glTF-unlit";
-        protected const string SHADER_SPECULAR = "Shader Graphs/glTF-pbrSpecularGlossiness";
+#if UNITY_EDITOR
+#if UNITY_SHADER_GRAPH_12_OR_NEWER
+        protected const string SHADER_PATH_PREFIX = "Packages/com.atteneder.gltfast/Runtime/Shader/";
+#else
+        protected const string SHADER_PATH_PREFIX = "Packages/com.atteneder.gltfast/Runtime/Shader/Legacy/";
+#endif
+#else
+        protected const string SHADER_GRAPHS = "Shader Graphs/";
+#endif
+        protected const string SHADER_METALLIC = "glTF-pbrMetallicRoughness";
+        protected const string SHADER_UNLIT = "glTF-unlit";
+        protected const string SHADER_SPECULAR = "glTF-pbrSpecularGlossiness";
 
+        
         // Keywords
         const string KW_OCCLUSION = "OCCLUSION";
         const string KW_EMISSION = "EMISSION";
@@ -129,81 +142,6 @@ namespace GLTFast.Materials {
 
         public override Material GetDefaultMaterial() {
             return GetMetallicMaterial(MetallicShaderFeatures.Default);
-        }
-
-        Material GetMetallicMaterial( MetallicShaderFeatures metallicShaderFeatures ) {
-            Shader shader;
-#if UNITY_SHADER_GRAPH_12_OR_NEWER
-            if (s_MetallicShader == null) {
-                s_MetallicShader = FindShader(SHADER_METALLIC); 
-            }
-            shader = s_MetallicShader;
-#else
-            if(!metallicShaders.TryGetValue(metallicShaderFeatures,value: out shader)) {
-                var shaderName = GetMetallicShaderName(metallicShaderFeatures);
-                shader = FindShader(shaderName);
-                metallicShaders[metallicShaderFeatures] = shader;
-            }
-#endif
-            if(shader==null) {
-                return null;
-            }
-            var mat = new Material(shader);
-#if UNITY_EDITOR
-            mat.doubleSidedGI = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0; 
-#endif
-            return mat;
-        }
-
-        Material GetUnlitMaterial(Schema.Material gltfMaterial)
-        {
-            Shader shader;
-
-#if UNITY_SHADER_GRAPH_12_OR_NEWER
-            if (s_UnlitShader == null) {
-                s_UnlitShader = FindShader(SHADER_UNLIT); 
-            }
-            shader = s_UnlitShader;
-#else
-            var features = GetUnlitShaderFeatures(gltfMaterial);
-            if(!unlitShaders.TryGetValue(features, out shader)) {
-                var shaderName = GetUnlitShaderName(features);
-                shader = FindShader(shaderName);
-                unlitShaders[features] = shader;
-            }
-#endif
-            if(shader==null) {
-                return null;
-            }
-            var mat = new Material(shader);
-#if UNITY_EDITOR
-            mat.doubleSidedGI = gltfMaterial.doubleSided;
-#endif
-            return mat;
-        }
-        
-        Material GetSpecularMaterial(SpecularShaderFeatures features) {
-            Shader shader;
-#if UNITY_SHADER_GRAPH_12_OR_NEWER
-            if (s_SpecularShader == null) {
-                s_SpecularShader = FindShader(SHADER_SPECULAR); 
-            }
-            shader = s_SpecularShader;
-#else
-            if(!specularShaders.TryGetValue(features,out shader)) {
-                var shaderName = GetSpecularShaderName(features);
-                shader = FindShader(shaderName);
-                specularShaders[features] = shader;
-            }
-#endif
-            if(shader==null) {
-                return null;
-            }
-            var mat = new Material(shader);
-#if UNITY_EDITOR
-            mat.doubleSidedGI = (features & SpecularShaderFeatures.DoubleSided) != 0;
-#endif
-            return mat;
         }
 
         public override Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf) {
@@ -422,6 +360,101 @@ namespace GLTFast.Materials {
             return material;
         }
 
+        Material GetMetallicMaterial( MetallicShaderFeatures metallicShaderFeatures ) {
+            Shader shader = GetMetallicShader(metallicShaderFeatures);
+            if(shader==null) {
+                return null;
+            }
+            var mat = new Material(shader);
+#if UNITY_EDITOR
+            mat.doubleSidedGI = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0; 
+#endif
+            return mat;
+        }
+
+        Material GetUnlitMaterial(Schema.Material gltfMaterial)
+        {
+            Shader shader = GetUnlitShader(gltfMaterial);
+            if(shader==null) {
+                return null;
+            }
+            var mat = new Material(shader);
+#if UNITY_EDITOR
+            mat.doubleSidedGI = gltfMaterial.doubleSided;
+#endif
+            return mat;
+        }
+
+        Material GetSpecularMaterial(SpecularShaderFeatures features) {
+            var shader = GetSpecularShader(features);
+            if(shader==null) {
+                return null;
+            }
+            var mat = new Material(shader);
+#if UNITY_EDITOR
+            mat.doubleSidedGI = (features & SpecularShaderFeatures.DoubleSided) != 0;
+#endif
+            return mat;
+        }
+
+        Shader GetMetallicShader(MetallicShaderFeatures metallicShaderFeatures) {
+            Shader shader;
+#if UNITY_SHADER_GRAPH_12_OR_NEWER
+            if (s_MetallicShader == null) {
+                s_MetallicShader = LoadShaderByName(SHADER_METALLIC);
+            }
+            shader = s_MetallicShader;
+#else
+            if (!metallicShaders.TryGetValue(metallicShaderFeatures, value: out shader)) {
+                shader = LoadShaderByName(GetMetallicShaderName(metallicShaderFeatures));
+                metallicShaders[metallicShaderFeatures] = shader;
+            }
+#endif
+            return shader;
+        }
+        
+        Shader GetUnlitShader(Schema.Material gltfMaterial) {
+            Shader shader;
+#if UNITY_SHADER_GRAPH_12_OR_NEWER
+            if (s_UnlitShader == null) {
+                s_UnlitShader = LoadShaderByName(SHADER_UNLIT);
+            }
+            shader = s_UnlitShader;
+#else
+            var features = GetUnlitShaderFeatures(gltfMaterial);
+            if (!unlitShaders.TryGetValue(features, out shader)) {
+                shader = LoadShaderByName(GetUnlitShaderName(features));
+                unlitShaders[features] = shader;
+            }
+#endif
+            return shader;
+        }
+
+        
+        Shader GetSpecularShader(SpecularShaderFeatures features) {
+            Shader shader;
+#if UNITY_SHADER_GRAPH_12_OR_NEWER
+            if (s_SpecularShader == null) {
+                s_SpecularShader = LoadShaderByName(SHADER_SPECULAR);
+            }
+            shader = s_SpecularShader;
+#else
+            if (!specularShaders.TryGetValue(features, out shader)) {
+                shader = LoadShaderByName(GetSpecularShaderName(features));
+                specularShaders[features] = shader;
+            }
+#endif
+            return shader;
+        }
+
+        Shader LoadShaderByName(string shaderName) {
+#if UNITY_EDITOR
+            return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{shaderName}.shadergraph");
+#else
+            return FindShader($"{SHADER_GRAPHS}{shaderName}");
+#endif
+        }
+
         protected virtual void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
             material.doubleSidedGI = true;
         }
@@ -510,18 +543,27 @@ namespace GLTFast.Materials {
         }
         
 #if !UNITY_SHADER_GRAPH_12_OR_NEWER
+        
         protected virtual string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
             var doubleSided = (metallicShaderFeatures & MetallicShaderFeatures.DoubleSided) != 0;
             var mode = (ShaderMode)(metallicShaderFeatures & MetallicShaderFeatures.ModeMask);
-
-            return string.Format(
-                "{0}-{1}{2}"
-                ,SHADER_METALLIC
-                ,mode
-                ,doubleSided ? "-double" : ""
-            );
+            return $"{SHADER_METALLIC}-{mode}{(doubleSided ? "-double" : "")}";
         }
-
+        
+        protected virtual string GetUnlitShaderName(UnlitShaderFeatures features) {
+            var doubleSided = (features & UnlitShaderFeatures.DoubleSided) != 0;
+            var alphaBlend = (features & UnlitShaderFeatures.AlphaBlend) != 0;
+            var shaderName = $"{SHADER_UNLIT}{(alphaBlend ? "-Blend" : "-Opaque")}{(doubleSided ? "-double" : "")}";
+            return shaderName;
+        }
+        
+        protected virtual string GetSpecularShaderName(SpecularShaderFeatures features) {
+            var alphaBlend = (features & SpecularShaderFeatures.AlphaBlend) != 0;
+            var doubleSided = (features & SpecularShaderFeatures.DoubleSided) != 0;
+            var shaderName = $"{SHADER_SPECULAR}{(alphaBlend ? "-Blend" : "-Opaque")}{(doubleSided ? "-double" : "")}";
+            return shaderName;
+        }
+        
         static UnlitShaderFeatures GetUnlitShaderFeatures(Schema.Material gltfMaterial) {
 
             var feature = UnlitShaderFeatures.Default;
@@ -531,30 +573,6 @@ namespace GLTFast.Materials {
                 feature |= UnlitShaderFeatures.AlphaBlend;
             }
             return feature;
-        }
-        
-        protected virtual string GetUnlitShaderName(UnlitShaderFeatures features) {
-            var doubleSided = (features & UnlitShaderFeatures.DoubleSided) != 0;
-            var alphaBlend = (features & UnlitShaderFeatures.AlphaBlend) != 0;
-            var shaderName = string.Format(
-                "{0}{1}{2}",
-                SHADER_UNLIT,
-                alphaBlend ? "-Blend" : "-Opaque",
-                doubleSided ? "-double" : ""
-            );
-            return shaderName;
-        }
-        
-        protected virtual string GetSpecularShaderName(SpecularShaderFeatures features) {
-            var alphaBlend = (features & SpecularShaderFeatures.AlphaBlend) != 0;
-            var doubleSided = (features & SpecularShaderFeatures.DoubleSided) != 0;
-            var shaderName = string.Format(
-                "{0}{1}{2}",
-                SHADER_SPECULAR,
-                alphaBlend ? "-Blend" : "-Opaque",
-                doubleSided ? "-double" : ""
-            );
-            return shaderName;
         }
 #endif
     }

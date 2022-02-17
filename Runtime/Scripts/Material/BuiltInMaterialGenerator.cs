@@ -22,6 +22,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Material = UnityEngine.Material;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace GLTFast.Materials {
 
@@ -69,10 +72,17 @@ namespace GLTFast.Materials {
         static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("_MetallicGlossMapUVChannel");
         static readonly int modePropId = Shader.PropertyToID("_Mode");
 
+#if UNITY_EDITOR
+        const string SHADER_PATH_PREFIX = "Packages/com.atteneder.gltfast/Runtime/Shader/Built-In/";
+        const string SHADER_PATH_PBR_METALLIC_ROUGHNESS = "glTFPbrMetallicRoughness.shader";
+        const string SHADER_PATH_PBR_SPECULAR_GLOSSINESS = "glTFPbrSpecularGlossiness.shader";
+        const string SHADER_PATH_UNLIT = "glTFUnlit.shader";
+#else
         const string SHADER_PBR_METALLIC_ROUGHNESS = "glTF/PbrMetallicRoughness";
         const string SHADER_PBR_SPECULAR_GLOSSINESS = "glTF/PbrSpecularGlossiness";
         const string SHADER_UNLIT = "glTF/Unlit";
-        
+#endif
+
         Shader pbrMetallicRoughnessShader;
         Shader pbrSpecularGlossinessShader;
         Shader unlitShader;
@@ -82,15 +92,27 @@ namespace GLTFast.Materials {
         }
         
         protected virtual Shader FinderShaderMetallicRoughness() {
+#if UNITY_EDITOR
+            return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_PBR_METALLIC_ROUGHNESS}");
+#else
             return FindShader(SHADER_PBR_METALLIC_ROUGHNESS);
+#endif
         }
         
         protected virtual Shader FinderShaderSpecularGlossiness() {
+#if UNITY_EDITOR
+            return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_PBR_SPECULAR_GLOSSINESS}");
+#else
             return FindShader(SHADER_PBR_SPECULAR_GLOSSINESS);
+#endif
         }
 
         protected virtual Shader FinderShaderUnlit() {
+#if UNITY_EDITOR
+            return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_UNLIT}");
+#else
             return FindShader(SHADER_UNLIT);
+#endif
         }
 
         Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {

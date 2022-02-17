@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Exporting assets/prefabs from project view created empty glTFs
 - (Export) Correct float array serialization on systems with non-english culture configuration (#335)
 - Textures are not duplicated anymore if they use different samplers resulting in equal Unity settings (saves memory on corner-case glTFs)
+- (Import) First-time imports work now, because it is ensured that the shaders are loaded correctly (#315)
 
 ## [4.5.0] - 2022-01-24
 ### Added
