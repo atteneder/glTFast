@@ -66,13 +66,13 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | KTX with Basis Universal compression (via [KtxUnity](https://github.com/atteneder/KtxUnity)) | ✅ | 
 | | |
 | **Texture sampler**
-| Filtering  | ✅ with [limitations](./KnownIssues.md) | 
-| Wrap modes | ✅ | 
+| Filtering  | ✅ with [limitations](./KnownIssues.md) | ✅ with [limitations](./KnownIssues.md) |
+| Wrap modes | ✅ | ✅ |
 | | |
 | **Materials Overview** (see [details](#materials-details))
-| [Universal Render Pipeline (URP)][URP] | ✅ | 
-| [High Definition Render Pipeline (HDRP)][HDRP] | ✅ | 
-| Built-in Render Pipeline | ✅ | ☑️
+| [Universal Render Pipeline (URP)][URP] | ✅ | ☑️ |
+| [High Definition Render Pipeline (HDRP)][HDRP] | ✅ | ☑️ |
+| Built-in Render Pipeline | ✅ | ☑️ |
 | | |
 | **Topologies / Primitive Types**
 | TRIANGLES | ✅ | ✅
@@ -132,7 +132,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | KHR_materials_ior | [ℹ️][IOR] | 
 | KHR_materials_specular | [ℹ️][Specular] | 
 | KHR_materials_volume | [ℹ️][Volume] | 
-| KHR_xmp |️ |
+| KHR_xmp_json_ld |️ |
 | | |
 | **Vendor**
 | <sup>1</sup>EXT_mesh_gpu_instancing | ✅ | 
@@ -150,9 +150,10 @@ Not investigated yet:
 - MSFT_packing_normalRoughnessMetallic
 - MSFT_packing_occlusionRoughnessMetallic
 
-Will not be supported:
+ Will not become supported (reason in brackets):
 
-- KHR_techniques_webgl
+- KHR_xmp (archived; prefer KHR_xmp_json_ld)
+- KHR_techniques_webgl (archived)
 - ADOBE_materials_clearcoat_specular (prefer KHR_materials_clearcoat)
 - ADOBE_materials_thin_transparency (prefer KHR_materials_transmission)
 - EXT_texture_webp (prefer KTX/basisu)
@@ -198,14 +199,14 @@ Will not be supported:
 
 | Material Feature              | URP<sup>1</sup> | HDRP<sup>2</sup> | Built-In<sup>3</sup> |
 |-------------------------------|-----|------|----------|
-| PBR Metallic-Roughness        | `?` | `?` | ✅ |
+| PBR Metallic-Roughness        | ✅ | ✅ | ✅ |
 | PBR Specular-Glossiness       |  |  |  |
-| Unlit                         | `?` | `?` | ✅ |
-| Normal texture                | `?` | `?` | ✅ |
-| Occlusion texture             | `?` | `?` |  |
-| Emission texture              | `?` | `?` |  |
-| Alpha modes OPAQUE/MASK/BLEND | `?` | `?` | ✅ |
-| Double sided / Two sided      | `?` | `?` | ✅ |
+| Unlit                         | ✅ | ✅ | ✅ |
+| Normal texture                | ✅ | ✅ | ✅ |
+| Occlusion texture             | ✅ | ✅ | ✅ |
+| Emission texture              | ✅ | ✅ | ✅ |
+| Alpha modes OPAQUE/MASK/BLEND | ✅ | ✅ | ✅ |
+| Double sided / Two sided      | ✅ | ✅ | ✅ |
 | Vertex colors                 | `?` | `?` | `?` |
 | Multiple UV sets              | `?` | `?` | `?` |
 | Texture Transform             | ✅ | ✅ | ✅ |
