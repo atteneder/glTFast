@@ -448,11 +448,20 @@ namespace GLTFast.Materials {
         }
 
         Shader LoadShaderByName(string shaderName) {
+            Shader shader;
 #if UNITY_EDITOR
-            return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{shaderName}.shadergraph");
+            var shaderPath = $"{SHADER_PATH_PREFIX}{shaderName}.shadergraph";
+            shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderPath);
+            if (shader == null) {
+                logger?.Error($"Cannot load shader at path {shaderPath}");
+            }
 #else
-            return FindShader($"{SHADER_GRAPHS}{shaderName}");
+            shader = FindShader($"{SHADER_GRAPHS}{shaderName}");
+            if (shader == null) {
+                logger?.Error(LogCode.ShaderMissing,shaderName);
+            }
 #endif
+            return shader;
         }
 
         protected virtual void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
