@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) HDRP >= 10.0: Alpha blended materials are not invisible anymore
 - (Import) URP >= 12.0: Alpha masked materials are correctly alpha tested now
 - (Import) URP >= 12.0: Alpha blended `pbrMetallicRougness` materials are correctly blended now
+- 2019 HDRP compiler errors
 
 ## [4.5.0] - 2022-01-24
 ### Added

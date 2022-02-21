@@ -80,20 +80,21 @@ namespace GLTFast.Materials {
             
             
             if (gltfMaterial.extensions?.KHR_materials_unlit != null) {
+#if USING_HDRP_10_OR_NEWER
                 material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
                 material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
                 material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
-            
-                material.SetOverrideTag(TAG_RENDER_TYPE,TAG_RENDER_TYPE_TRANSPARENT);
-
+                
                 material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPrepass, false);
                 material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);
                 material.SetShaderPassEnabled(k_ShaderPassTransparentBackface, false);
                 material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
                 material.SetShaderPassEnabled(k_ShaderPassDepthOnlyPass, false);
-                material.SetShaderPassEnabled(k_DistortionVectorsPass,false);
-                
+
                 material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+#endif
+                material.SetOverrideTag(TAG_RENDER_TYPE,TAG_RENDER_TYPE_TRANSPARENT);
+                material.SetShaderPassEnabled(k_DistortionVectorsPass,false);
                 material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
                 material.SetFloat(srcBlendPropId, (int) BlendMode.One);
                 // material.SetFloat(k_RenderQueueType, 4);
