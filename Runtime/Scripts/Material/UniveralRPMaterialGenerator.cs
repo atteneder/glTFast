@@ -76,11 +76,8 @@ namespace GLTFast.Materials {
             material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
             material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
-            
-            if (gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness != null) {
-                material.SetFloat(k_Surface, 1);
-                material.SetFloat(zWritePropId, 0);
-            }
+            material.SetFloat(k_Surface, 1);
+            material.SetFloat(zWritePropId, 0);
         }
 #endif
 
