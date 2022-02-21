@@ -75,7 +75,7 @@ namespace GLTFast.Materials {
 #endif
 
 #if UNITY_EDITOR
-#if UNITY_SHADER_GRAPH_12_OR_NEWER
+#if UNITY_SHADER_GRAPH_12_OR_NEWER || USING_HDRP_10_OR_NEWER
         protected const string SHADER_PATH_PREFIX = "Packages/com.atteneder.gltfast/Runtime/Shader/";
 #else
         protected const string SHADER_PATH_PREFIX = "Packages/com.atteneder.gltfast/Runtime/Shader/Legacy/";
