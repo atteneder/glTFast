@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) URP >= 12.0: Alpha masked materials are correctly alpha tested now
 - (Import) URP >= 12.0: Alpha blended `pbrMetallicRougness` materials are correctly blended now
 - 2019 HDRP compiler errors
+- (Import) Improved error logs in Editor imports
 
 ## [4.5.0] - 2022-01-24
 ### Added

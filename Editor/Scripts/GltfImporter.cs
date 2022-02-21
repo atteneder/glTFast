@@ -120,7 +120,9 @@ namespace GLTFast.Editor {
                 
                 for (var i = 0; i < m_Gltf.materialCount; i++) {
                     var mat = m_Gltf.GetMaterial(i);
-                    AddObjectToAsset(ctx, $"materials/{mat.name}", mat);
+                    if (mat != null) {
+                        AddObjectToAsset(ctx, $"materials/{mat.name}", mat);
+                    }
                 }
 
                 if (m_Gltf.defaultMaterial != null) {
@@ -133,6 +135,9 @@ namespace GLTFast.Editor {
                 var meshes = m_Gltf.GetMeshes();
                 if (meshes != null) {
                     foreach (var mesh in meshes) {
+                        if (mesh == null) {
+                            continue;
+                        }
                         if (editorImportSettings.generateSecondaryUVSet && !HasSecondaryUVs(mesh)) {
                             Unwrapping.GenerateSecondaryUVSet(mesh);
                         }
@@ -144,6 +149,9 @@ namespace GLTFast.Editor {
                 var clips = m_Gltf.GetAnimationClips();
                 if (clips != null) {
                     foreach (var animationClip in clips) {
+                        if (animationClip == null) {
+                            continue;
+                        }
                         if (importSettings.animationMethod == ImportSettings.AnimationMethod.Mecanim) {
                             var settings = AnimationUtility.GetAnimationClipSettings(animationClip);
                             settings.loopTime = true;
