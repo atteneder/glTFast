@@ -30,6 +30,7 @@ namespace GLTFast.Materials {
 
         static bool supportsCameraOpaqueTexture;
         
+        static readonly int k_AlphaClip = Shader.PropertyToID("_AlphaClip");
         static readonly int k_Surface = Shader.PropertyToID("_Surface");
 
         public UniveralRPMaterialGenerator(UniversalRenderPipelineAsset renderPipelineAsset) {
@@ -54,6 +55,11 @@ namespace GLTFast.Materials {
         protected override void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
             material.SetFloat(cullPropId, (int)CullMode.Off);
+        }
+
+        protected override void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
+            base.SetAlphaModeMask(gltfMaterial, material);
+            material.SetFloat(k_AlphaClip, 1);
         }
 
         protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
