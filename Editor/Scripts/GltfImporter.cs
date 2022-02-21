@@ -210,6 +210,10 @@ namespace GLTFast.Editor {
             if (instantiationLogger?.items != null) {
                 reportItemList.AddRange(instantiationLogger.items);
             }
+
+            if (reportItemList.Any(x => x.type == LogType.Error || x.type == LogType.Exception)) {
+                Debug.LogError($"Failed to import {assetPath} (see inspector for details)", this);
+            }
             reportItems = reportItemList.ToArray();
         }
 

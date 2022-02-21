@@ -405,7 +405,7 @@ namespace GLTFast.Materials {
             }
             shader = s_MetallicShader;
 #else
-            if (!metallicShaders.TryGetValue(metallicShaderFeatures, value: out shader)) {
+            if (!metallicShaders.TryGetValue(metallicShaderFeatures, value: out shader) || shader == null) {
                 shader = LoadShaderByName(GetMetallicShaderName(metallicShaderFeatures));
                 metallicShaders[metallicShaderFeatures] = shader;
             }
@@ -422,7 +422,7 @@ namespace GLTFast.Materials {
             shader = s_UnlitShader;
 #else
             var features = GetUnlitShaderFeatures(gltfMaterial);
-            if (!unlitShaders.TryGetValue(features, out shader)) {
+            if (!unlitShaders.TryGetValue(features, out shader) || shader == null) {
                 shader = LoadShaderByName(GetUnlitShaderName(features));
                 unlitShaders[features] = shader;
             }
@@ -439,7 +439,7 @@ namespace GLTFast.Materials {
             }
             shader = s_SpecularShader;
 #else
-            if (!specularShaders.TryGetValue(features, out shader)) {
+            if (!specularShaders.TryGetValue(features, out shader) || shader == null) {
                 shader = LoadShaderByName(GetSpecularShaderName(features));
                 specularShaders[features] = shader;
             }
