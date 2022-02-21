@@ -18,14 +18,15 @@
 using System;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.HighDefinition;
 
 namespace GLTFast.Materials {
 
     public class HighDefinitionRPMaterialGenerator : ShaderGraphMaterialGenerator {
         
         static readonly int k_AlphaCutoffEnable = Shader.PropertyToID("_AlphaCutoffEnable");
-        // static readonly int k_RenderQueueType = Shader.PropertyToID("_RenderQueueType");
-        // static readonly int k_SurfaceType = Shader.PropertyToID("_SurfaceType");
+        static readonly int k_RenderQueueType = Shader.PropertyToID("_RenderQueueType");
+        static readonly int k_SurfaceType = Shader.PropertyToID("_SurfaceType");
         static readonly int k_ZTestDepthEqualForOpaque = Shader.PropertyToID("_ZTestDepthEqualForOpaque");
 
         protected const string k_DistortionVectorsPass = "DistortionVectors";
@@ -105,7 +106,7 @@ namespace GLTFast.Materials {
 #if USING_HDRP_10_OR_NEWER
         protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
             
-            material.EnableKeyword(KW_ALPHATEST_ON);
+            material.DisableKeyword(KW_ALPHATEST_ON);
             material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
             // material.EnableKeyword(KW_DISABLE_DECALS);
             material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
@@ -119,7 +120,12 @@ namespace GLTFast.Materials {
             material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
             material.SetShaderPassEnabled(k_ShaderPassDepthOnlyPass, false);
             
-            material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
+            material.SetFloat(k_AlphaCutoffEnable, 0);
+            material.SetFloat(k_RenderQueueType, (int)CustomPass.RenderQueueType.PreRefraction );// 4
+            material.SetFloat(k_SurfaceType, 1 );
+            material.SetFloat(zWritePropId, 0);
+            material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.LessEqual); //4
+            material.SetFloat(k_ZTestDepthEqualForOpaque, (int)CompareFunction.LessEqual); //4
             material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(srcBlendPropId, (int) BlendMode.SrcAlpha);//5
