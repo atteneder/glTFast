@@ -278,86 +278,156 @@ namespace GLTFast.Export {
         }
         
         /// <summary>
-        /// Exports the collected scenes/content as glTF and disposes this object.
+        /// Exports the collected scenes/content as glTF, writes it to a file
+        /// and disposes this object.
         /// After the export this instance cannot be re-used!
         /// </summary>
         /// <param name="path">glTF destination file path</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
         public async Task<bool> SaveToFileAndDispose(string path) {
+            
             CertifyNotDisposed();
+            
+            var ext = Path.GetExtension(path);
+            var binary = m_Settings.format == GltfFormat.Binary;
+            string bufferPath = null;
+            if (!binary) {
+                if (string.IsNullOrEmpty(ext)) {
+                    bufferPath = path + ".bin";
+                } else {
+                    bufferPath = path.Substring(0, path.Length - ext.Length) + ".bin";
+                }
+            }
+            
+            var outStream = new FileStream(path,FileMode.Create);
+            var success = await SaveAndDispose(outStream, bufferPath, Path.GetDirectoryName(path) );
+            outStream.Close();
+            return success;
+        }
+        
+        /// <summary>
+        /// Exports the collected scenes/content as glTF, writes it to a Stream
+        /// and disposes this object. Only works for self-contained glTF-Binary.
+        /// After the export this instance cannot be re-used!
+        /// </summary>
+        /// <param name="stream">glTF destination stream</param>
+        /// <returns>True if the glTF file was created successfully, false otherwise</returns>
+        public async Task<bool> SaveToStreamAndDispose(Stream stream) {
+            
+            CertifyNotDisposed();
+
+            if (m_Settings.format != GltfFormat.Binary || GetFinalImageDestination()==ImageDestination.SeparateFile) {
+                m_Logger.Error(LogCode.None, "Save to Stream currently only works for self-contained glTF-Binary");
+                return false;
+            }
+            
+            return await SaveAndDispose(stream);
+        }
+        
+        async Task<bool> SaveAndDispose(Stream outStream, string bufferPath = null, string directory = null) {
+
 #if DEBUG
             if (m_State != State.ContentAdded) {
                 Debug.LogWarning("Exporting empty glTF");
             }
 #endif
-            var ext = Path.GetExtension(path);
-            var binary = m_Settings.format == GltfFormat.Binary;
-            m_BufferPath = null;
-            if (!binary) {
-                if (string.IsNullOrEmpty(ext)) {
-                    m_BufferPath = path + ".bin";
-                } else {
-                    m_BufferPath = path.Substring(0, path.Length - ext.Length) + ".bin";
-                }
-            }
+            m_BufferPath = bufferPath;
 
-            var success = await Bake(Path.GetFileName(m_BufferPath), Path.GetDirectoryName(path));
+            var success = await Bake(Path.GetFileName(m_BufferPath), directory);
 
             if (!success) {
                 m_BufferStream?.Close();
                 Dispose();
                 return false;
             }
-            
-            var json = GetJson();
-            LogSummary(json.Length, m_BufferStream?.Length ?? 0);
 
-            if (binary) {
-                const uint headerSize = 12; // 4 bytes magic + 4 bytes version + 4 bytes length (uint each)
-                const uint chunkOverhead = 8; // 4 bytes chunk length + 4 bytes chunk type (uint each)
-                var glb = new FileStream(path,FileMode.Create);
-                glb.Write(BitConverter.GetBytes(GltfGlobals.GLB_MAGIC));
-                glb.Write(BitConverter.GetBytes((uint)2));
+            var isBinary = m_Settings.format == GltfFormat.Binary;
 
-                var jsonPad = GetPadByteCount((uint)json.Length);
+            const uint headerSize = 12; // 4 bytes magic + 4 bytes version + 4 bytes length (uint each)
+            const uint chunkOverhead = 8; // 4 bytes chunk length + 4 bytes chunk type (uint each)
+            if (isBinary) {
+                outStream.Write(BitConverter.GetBytes(GltfGlobals.GLB_MAGIC));
+                outStream.Write(BitConverter.GetBytes((uint)2));
+
+                MemoryStream jsonStream = null;
+                uint jsonLength;
+                
+                if(outStream.CanSeek) {
+                    // Write empty 3 place-holder uints for:
+                    // - total length
+                    // - JSON chunk length
+                    // - JSON chunk format identifier
+                    // They'll get filled in later
+                    for (var i = 0; i < 12; i++) {
+                        outStream.WriteByte(0);
+                    }
+                    await WriteJsonToStream(outStream);
+                    jsonLength = (uint)(outStream.Length - headerSize - chunkOverhead);
+                }
+                else {
+                    jsonStream = new MemoryStream();
+                    await WriteJsonToStream(jsonStream);
+                    jsonLength = (uint) jsonStream.Length;
+                }
+                LogSummary(jsonLength, m_BufferStream?.Length ?? 0);
+                var jsonPad = GetPadByteCount(jsonLength);
                 var binPad = 0;
-                var totalLength = (uint) (headerSize + chunkOverhead + json.Length + jsonPad);
+                var totalLength = (uint) (headerSize + chunkOverhead + jsonLength + jsonPad);
                 var hasBufferContent = (m_BufferStream?.Length ?? 0) > 0; 
                 if (hasBufferContent) {
                     binPad = GetPadByteCount((uint)m_BufferStream.Length);
                     totalLength += (uint) (chunkOverhead + m_BufferStream.Length + binPad);
                 }
-                
-                glb.Write(BitConverter.GetBytes(totalLength));
-                
-                glb.Write(BitConverter.GetBytes((uint)(json.Length+jsonPad)));
-                glb.Write(BitConverter.GetBytes((uint)ChunkFormat.JSON));
-                var sw = new StreamWriter(glb);
-                sw.Write(json);
-                for (int i = 0; i < jsonPad; i++) {
-                    sw.Write(' ');
+
+                if (outStream.CanSeek) {
+                    outStream.Seek(8, SeekOrigin.Begin);
                 }
-                sw.Flush();
+                
+                outStream.Write(BitConverter.GetBytes(totalLength));
+                
+                outStream.Write(BitConverter.GetBytes((uint)(jsonLength+jsonPad)));
+                outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.JSON));
+
+                if (outStream.CanSeek) {
+                    outStream.Seek(0, SeekOrigin.End);
+                }
+                else {
+                    jsonStream.WriteTo(outStream);
+                    jsonStream.Close();
+                }
+                
+                for (var i = 0; i < jsonPad; i++) {
+                    outStream.WriteByte(0x20);
+                }
 
                 if (hasBufferContent) {
-                    glb.Write(BitConverter.GetBytes((uint)(m_BufferStream.Length+binPad)));
-                    glb.Write(BitConverter.GetBytes((uint)ChunkFormat.BIN));
+                    outStream.Write(BitConverter.GetBytes((uint)(m_BufferStream.Length+binPad)));
+                    outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.BIN));
                     var ms = (MemoryStream)m_BufferStream;
-                    ms.WriteTo(glb);
-                    ms.Flush();
-                    for (int i = 0; i < binPad; i++) {
-                        sw.Write('\0');
+                    ms.WriteTo(outStream);
+                    await ms.FlushAsync();
+                    for (var i = 0; i < binPad; i++) {
+                        outStream.WriteByte(0);
                     }
                 }
-                sw.Close();
-                glb.Close();
             }
             else {
-                File.WriteAllText(path,json);
+                await WriteJsonToStream(outStream);
+                var jsonLength = 0u;
+                if (outStream.CanSeek) {
+                    jsonLength = (uint)(outStream.Length - headerSize - chunkOverhead);
+                }
+                LogSummary(jsonLength, m_BufferStream?.Length ?? 0);
             }
 
             Dispose();
             return true;
+        }
+
+        async Task WriteJsonToStream(Stream outStream) {
+            var writer = new StreamWriter(outStream);
+            m_Gltf.GltfSerialize(writer);
+            await writer.FlushAsync();
         }
 
         void CertifyNotDisposed() {
@@ -409,7 +479,7 @@ namespace GLTFast.Export {
         }
 
         [Conditional("DEBUG")]
-        void LogSummary(int jsonLength, long bufferLength) {
+        void LogSummary(long jsonLength, long bufferLength) {
 #if DEBUG
             var sb = new StringBuilder("glTF summary: ");
             sb.AppendFormat("{0} bytes JSON + {1} bytes buffer", jsonLength, bufferLength);
@@ -1018,18 +1088,6 @@ namespace GLTFast.Export {
             }
         }
 
-        string GetJson() {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            m_Gltf.GltfSerialize(writer);
-            writer.Flush();
-            stream.Seek(0,SeekOrigin.Begin);
-            var reader = new StreamReader( stream );
-            var json = reader.ReadToEnd();
-            reader.Close();
-            return json;
-        }
-        
         int AddMesh([NotNull] UnityEngine.Mesh uMesh) {
             int meshId;
             

@@ -15,6 +15,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -81,7 +82,8 @@ namespace GLTFast.Export {
         }
         
         /// <summary>
-        /// Exports the collected scenes/content as glTF and disposes this object.
+        /// Exports the collected scenes/content as glTF, writes it to a file
+        /// and disposes this object.
         /// After the export this instance cannot be re-used!
         /// </summary>
         /// <param name="path">glTF destination file path</param>
@@ -89,6 +91,20 @@ namespace GLTFast.Export {
         public async Task<bool> SaveToFileAndDispose(string path) {
             CertifyNotDisposed();
             var success = await m_Writer.SaveToFileAndDispose(path);
+            m_Writer = null;
+            return success;
+        }
+        
+        /// <summary>
+        /// Exports the collected scenes/content as glTF, writes it to a Stream
+        /// and disposes this object. Only works for self-contained glTF-Binary.
+        /// After the export this instance cannot be re-used!
+        /// </summary>
+        /// <param name="stream">glTF destination stream</param>
+        /// <returns>True if the glTF file was written successfully, false otherwise</returns>
+        public async Task<bool> SaveToStreamAndDispose(Stream stream) {
+            CertifyNotDisposed();
+            var success = await m_Writer.SaveToStreamAndDispose(stream);
             m_Writer = null;
             return success;
         }
