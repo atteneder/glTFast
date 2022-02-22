@@ -14,6 +14,7 @@
 //
 
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -238,9 +239,33 @@ namespace GLTFast.Schema {
         public Bounds? TryGetBounds() {
             Assert.AreEqual(GLTFAccessorAttributeType.VEC3 ,typeEnum);
             if (min != null && min.Length > 2 && max != null && max.Length > 2) {
+                var maxBounds = new float3(-min[0], max[1], max[2]);
+                var minBounds = new float3(-max[0], min[1], min[2]);
+                switch (componentType) {
+                    case GLTFComponentType.Byte:
+                        maxBounds = math.max(maxBounds/sbyte.MaxValue,-1);
+                        minBounds = math.max(minBounds/sbyte.MaxValue,-1);
+                        break;
+                    case GLTFComponentType.UnsignedByte:
+                        maxBounds /= byte.MaxValue;
+                        minBounds /= byte.MaxValue;
+                        break;
+                    case GLTFComponentType.Short:
+                        maxBounds = math.max(maxBounds/short.MaxValue,-1);
+                        minBounds = math.max(minBounds/short.MaxValue,-1);
+                        break;
+                    case GLTFComponentType.UnsignedShort:
+                        maxBounds /= ushort.MaxValue;
+                        minBounds /= ushort.MaxValue;
+                        break;
+                    case GLTFComponentType.UnsignedInt:
+                        maxBounds /= uint.MaxValue;
+                        minBounds /= uint.MaxValue;
+                        break;
+                }
                 return new Bounds {
-                    max = new Vector3(-min[0], max[1], max[2]),
-                    min = new Vector3(-max[0], min[1], min[2])
+                    max = maxBounds,
+                    min = minBounds
                 };
             }
             return null;

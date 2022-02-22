@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) URP >= 12.0: Alpha blended `pbrMetallicRougness` materials are correctly blended now
 - 2019 HDRP compiler errors
 - (Import) Improved error logs in Editor imports
+- Correct bounds calculation of meshes with normalized position accessors (applies for most quantized meshes; #323)
 
 ## [4.5.0] - 2022-01-24
 ### Added
