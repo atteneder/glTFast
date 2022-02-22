@@ -129,11 +129,18 @@ namespace GLTFast.Export {
                 );
 
             OrmImageExport ormImageExport = null;
-            var mainTexProperty = uMaterial.HasProperty(k_BaseMap) ? k_BaseMap : k_MainTex;
-			
+            var mainTexProperty = k_MainTex;
+            if (uMaterial.HasProperty(k_BaseMap)) {
+                mainTexProperty = k_BaseMap;
+            }
+            else if (uMaterial.HasProperty(k_ColorTexture)) {
+                mainTexProperty = k_ColorTexture;    
+            }
+
             if (needsMetalRoughTexture) {
                 ormImageExport = new OrmImageExport();
             }
+
             if(IsUnlit(uMaterial)) {
                 ExportUnlit(material, uMaterial, mainTexProperty, gltf, logger);
             }
@@ -152,41 +159,20 @@ namespace GLTFast.Export {
             {
                 var mainTex = uMaterial.GetTexture(mainTexProperty);
                 material.pbrMetallicRoughness = new PbrMetallicRoughness {
+                    metallicFactor = 0,
+                    roughnessFactor = 1.0f,
                     baseColor = uMaterial.HasProperty(k_BaseColor)
                         ? uMaterial.GetColor(k_BaseColor)
-                        : Color.white,
-                    baseColorTexture = mainTex==null ? null : ExportTextureInfo( mainTex, gltf)
+                        : Color.white
                 };
-            }
-            else if (uMaterial.HasProperty(k_ColorTexture))
-            {
-                var mainTex = uMaterial.GetTexture(k_ColorTexture);
-                material.pbrMetallicRoughness = new PbrMetallicRoughness {
-                    baseColor = uMaterial.HasProperty(k_BaseColor)
-                        ? uMaterial.GetColor(k_BaseColor)
-                        : Color.white,
-                    baseColorTexture = mainTex==null ? null : ExportTextureInfo(mainTex, gltf)
-                };
-            }
-            else if (uMaterial.HasProperty(k_MainTex)) //else export main texture
-            {
-                var mainTex = uMaterial.GetTexture(k_MainTex);
-
                 if (mainTex != null) {
-                    material.pbrMetallicRoughness = new PbrMetallicRoughness {
-                        metallicFactor = 0, roughnessFactor = 1.0f,
-                        baseColorTexture = ExportTextureInfo(mainTex, gltf)
-                    };
-
-                    // ExportTextureTransform(material.pbrMetallicRoughness.baseColorTexture, uMaterial, k_MainTex);
+                    material.pbrMetallicRoughness.baseColorTexture = ExportTextureInfo(mainTex, gltf);
+                    ExportTextureTransform(material.pbrMetallicRoughness.baseColorTexture, uMaterial, mainTexProperty, gltf);
                 }
                 if (uMaterial.HasProperty(k_TintColor)) {
                     //particles use _TintColor instead of _Color
-                    material.pbrMetallicRoughness = material.pbrMetallicRoughness ?? new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
-
                     material.pbrMetallicRoughness.baseColor = uMaterial.GetColor(k_TintColor);
                 }
-                material.doubleSided = true;
             }
 			
             if (uMaterial.HasProperty(k_OcclusionMap)) {

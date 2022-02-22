@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Exporting assets/prefabs from project view created empty glTFs
 - (Export) Correct float array serialization on systems with non-english culture configuration (#335)
 - Textures are not duplicated anymore if they use different samplers resulting in equal Unity settings (saves memory on corner-case glTFs)
+- (Export) Various material fixes and improvements
 - (Import) First-time imports work now, because it is ensured that the shaders are loaded correctly (#315)
 - (Import) HDRP >= 10.0: Alpha blended materials are not invisible anymore
 - (Import) URP >= 12.0: Alpha masked materials are correctly alpha tested now
