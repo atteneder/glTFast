@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- (Export) Runtime glTF export to files
 - (Export) Occlusion map support
 - (Export) Metallic-gloss map support (converted to roughness-metallic)
 - (Export) Combine multiple maps to single occlusion-roughness-metallic map
@@ -38,8 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) HDRP >= 10.0: Alpha blended materials are not invisible anymore
 - (Import) URP >= 12.0: Alpha masked materials are correctly alpha tested now
 - (Import) URP >= 12.0: Alpha blended `pbrMetallicRougness` materials are correctly blended now
-- 2019 HDRP compiler errors
 - (Import) Improved error logs in Editor imports
+- 2019 HDRP compiler errors
 - Correct bounds calculation of meshes with normalized position accessors (applies for most quantized meshes; #323)
 
 ## [4.5.0] - 2022-01-24
