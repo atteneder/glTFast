@@ -12,8 +12,16 @@ The easiest way to include them is to add `glTFExport.shadervariants` to the lis
 
 > Note: The `GLTFast.Export` namespace can only be used if you reference both `glTFast` and `glTFast.Export` Assemblies in your [Assembly Definition][asmdef].
 
-To export a GameObject hierarchy/scene from script, create an instance of `GLTFast.Export.GameObjectExport`,
-add content via `AddScene` and finally call `SaveToFileAndDispose` to export to a file.
+Here's a step-by-step guilde to export a GameObject hierarchy/scene from script
+
+- Create an instance of `GLTFast.Export.GameObjectExport`
+- Add content via `AddScene`
+- Two options for the final export
+  - Call `SaveToFileAndDispose` to export a glTF to a file(s)
+  - Call `SaveToStreamAndDispose` to export to a `System.IO.Stream`
+
+glTF export might create more than one file. For example the binary buffer is usually a separate `.bin` file and textures might be separate files as well.
+
 
 ```c#
 using UnityEngine;
@@ -93,5 +101,7 @@ public class TestExport : MonoBehaviour {
     }
 }
 ```
+
+> Exporting to a `Stream` currently only works for self-contained glTF-Binary files (where the binary buffer and all textures are included in the `.glb` file). Trying other export settings will fail.
 
 [asmdef]: https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html
