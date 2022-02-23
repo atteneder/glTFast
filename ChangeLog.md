@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) Improved error logs in Editor imports
 - 2019 HDRP compiler errors
 - Correct bounds calculation of meshes with normalized position accessors (applies for most quantized meshes; #323)
+- Removed precausious error message (#281)
 
 ## [4.5.0] - 2022-01-24
 ### Added
