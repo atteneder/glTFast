@@ -951,7 +951,6 @@ namespace GLTFast.Export {
                 var attribute = vertexAttributes[streamId];
                 
                 switch (attribute.attribute) {
-                    case VertexAttribute.Color:
                     case VertexAttribute.BlendWeight:
                     case VertexAttribute.BlendIndices:
                         Debug.LogWarning($"Vertex attribute {attribute.attribute} is not supported yet");
@@ -997,6 +996,8 @@ namespace GLTFast.Export {
                         attributes.TANGENT = accessorId;
                         break;
                     case VertexAttribute.Color:
+                        accessor.componentType = GLTFComponentType.UnsignedByte;
+                        accessor.normalized = true;
                         attributes.COLOR_0 = accessorId;
                         break;
                     case VertexAttribute.TexCoord0:
@@ -1229,8 +1230,20 @@ namespace GLTFast.Export {
                         outStream.Dispose();
                         break;
                     }
-                    case VertexAttribute.Color:
+                    case VertexAttribute.Color: {
+                        var colors = new List<Color32>();
+                        uMesh.GetColors(colors);
+                        var outStream = new NativeArray<Color32>(colors.Count, Allocator.TempJob);
+                        for (var i = 0; i < colors.Count; i++) {
+                            outStream[i] = colors[i];
+                        }
+                        bufferViewId = WriteBufferViewToBuffer(
+                            outStream.Reinterpret<byte>(4),
+                            4
+                        );
+                        outStream.Dispose();
                         break;
+                    }
                     case VertexAttribute.TexCoord0:
                     case VertexAttribute.TexCoord1:
                     case VertexAttribute.TexCoord2:
