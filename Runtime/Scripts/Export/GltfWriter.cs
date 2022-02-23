@@ -498,7 +498,7 @@ namespace GLTFast.Export {
 #if GLTFAST_MESH_DATA
                 await BakeMeshes();
 #else
-                throw new NotImplementedException("glTF export (containing meshes) is currently not supported on Unity 2020.1 and older");
+                await BakeMeshesLegacy();
 #endif
             }
 
@@ -924,7 +924,352 @@ namespace GLTFast.Export {
             m_Accessors.Add(accessor);
             return accessorId;
         }
+#else
 
+        async Task BakeMeshesLegacy() {
+            Profiler.BeginSample("BakeMeshesLegacy");
+            for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
+                BakeMeshLegacy(meshId);
+                await m_DeferAgent.BreakPoint();
+            }
+            Profiler.EndSample();
+        }
+
+        void BakeMeshLegacy(int meshId) {
+            
+            Profiler.BeginSample("BakeMeshLegacy");
+            
+            var mesh = m_Meshes[meshId];
+            var uMesh = m_UnityMeshes[meshId];
+
+            var attributes = new Attributes();
+            var vertexAttributes = uMesh.GetVertexAttributes();
+            var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
+            
+            for (var streamId = 0; streamId<vertexAttributes.Length; streamId++) {
+                
+                var attribute = vertexAttributes[streamId];
+                
+                switch (attribute.attribute) {
+                    case VertexAttribute.Color:
+                    case VertexAttribute.BlendWeight:
+                    case VertexAttribute.BlendIndices:
+                        Debug.LogWarning($"Vertex attribute {attribute.attribute} is not supported yet");
+                        continue;
+                }
+                
+                var attrData = new AttributeData {
+                    offset = 0,
+                    stream = streamId
+                };
+
+                var accessor = new Accessor {
+                    byteOffset = attrData.offset,
+                    componentType = Accessor.GetComponentType(attribute.format),
+                    count = uMesh.vertexCount,
+                    typeEnum = Accessor.GetAccessorAttributeType(attribute.dimension),
+                };
+                
+                var accessorId = AddAccessor(accessor);
+
+                attrData.accessorId = accessorId;
+                attrDataDict[attribute.attribute] = attrData;
+                
+                switch (attribute.attribute) {
+                    case VertexAttribute.Position:
+                        Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
+                        Assert.AreEqual(3,attribute.dimension);
+                        var bounds = uMesh.bounds;
+                        var max = bounds.max;
+                        var min = bounds.min;
+                        accessor.min = new[] { -max.x, min.y, min.z };
+                        accessor.max = new[] { -min.x, max.y, max.z };
+                        attributes.POSITION = accessorId;
+                        break;
+                    case VertexAttribute.Normal:
+                        Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
+                        Assert.AreEqual(3,attribute.dimension);
+                        attributes.NORMAL = accessorId;
+                        break;
+                    case VertexAttribute.Tangent:
+                        Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
+                        Assert.AreEqual(4,attribute.dimension);
+                        attributes.TANGENT = accessorId;
+                        break;
+                    case VertexAttribute.Color:
+                        attributes.COLOR_0 = accessorId;
+                        break;
+                    case VertexAttribute.TexCoord0:
+                        attributes.TEXCOORD_0 = accessorId;
+                        break;
+                    case VertexAttribute.TexCoord1:
+                        attributes.TEXCOORD_1 = accessorId;
+                        break;
+                    case VertexAttribute.TexCoord2:
+                        attributes.TEXCOORD_2 = accessorId;
+                        break;
+                    case VertexAttribute.TexCoord3:
+                        attributes.TEXCOORD_3 = accessorId;
+                        break;
+                    case VertexAttribute.TexCoord4:
+                        attributes.TEXCOORD_4 = accessorId;
+                        break;
+                    case VertexAttribute.TexCoord5:
+                        attributes.TEXCOORD_5 = accessorId;
+                        break;
+                    case VertexAttribute.TexCoord6:
+                        attributes.TEXCOORD_6 = accessorId;
+                        break;
+                    case VertexAttribute.TexCoord7:
+                        attributes.TEXCOORD_7 = accessorId;
+                        break;
+                    case VertexAttribute.BlendWeight:
+                        attributes.WEIGHTS_0 = accessorId;
+                        break;
+                    case VertexAttribute.BlendIndices:
+                        attributes.JOINTS_0 = accessorId;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            var streamCount = attrDataDict.Count;
+            var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GLTFComponentType.UnsignedShort : GLTFComponentType.UnsignedInt;
+            mesh.primitives = new MeshPrimitive[uMesh.subMeshCount];
+            var indexAccessors = new Accessor[uMesh.subMeshCount];
+            var indexOffset = 0;
+            MeshTopology? topology = null;
+            var totalIndexCount = 0u;
+            for (var subMeshIndex = 0; subMeshIndex < uMesh.subMeshCount; subMeshIndex++) {
+                var subMesh = uMesh.GetSubMesh(subMeshIndex);
+                if (!topology.HasValue) {
+                    topology = subMesh.topology;
+                } else {
+                    Assert.AreEqual(topology.Value, subMesh.topology, "Mixed topologies are not supported!");
+                }
+                var mode = GetDrawMode(subMesh.topology);
+                if (!mode.HasValue) {
+                    m_Logger?.Error(LogCode.TopologyUnsupported, subMesh.topology.ToString());
+                    mode = DrawMode.Points;
+                }
+
+                Accessor indexAccessor;
+                
+                indexAccessor = new Accessor {
+                    typeEnum = GLTFAccessorAttributeType.SCALAR,
+                    byteOffset = indexOffset,
+                    componentType = indexComponentType,
+                    count = subMesh.indexCount,
+
+                    // min = new []{}, // TODO
+                    // max = new []{}, // TODO
+                };
+                
+                if (subMesh.topology == MeshTopology.Quads) {
+                    indexAccessor.count = indexAccessor.count / 2 * 3; 
+                }
+
+                var indexAccessorId = AddAccessor(indexAccessor);
+                indexAccessors[subMeshIndex] = indexAccessor;
+
+                indexOffset += indexAccessor.count * Accessor.GetComponentTypeSize(indexComponentType);
+
+                mesh.primitives[subMeshIndex] = new MeshPrimitive {
+                    mode = mode.Value,
+                    attributes = attributes,
+                    indices = indexAccessorId,
+                };
+
+                totalIndexCount += uMesh.GetIndexCount(subMeshIndex);
+            }
+            Assert.IsTrue(topology.HasValue);
+
+            Profiler.BeginSample("ExportIndices");
+            int indexBufferViewId;
+            var totalFaceCount = topology==MeshTopology.Quads ? (uint)(totalIndexCount * 1.5) : totalIndexCount;
+            if (uMesh.indexFormat == IndexFormat.UInt16) {
+                var destIndices = new NativeArray<ushort>((int)totalFaceCount,Allocator.TempJob);
+                var offset = 0;
+                for (var subMeshIndex = 0; subMeshIndex < uMesh.subMeshCount; subMeshIndex++) {
+                    var indexData16 = uMesh.GetIndices(subMeshIndex);
+                    switch (topology) {
+                        case MeshTopology.Triangles: {
+                            var triCount = indexData16.Length / 3;
+                            for (var i = 0; i < triCount; i++) {
+                                destIndices[offset+i*3] = (ushort) indexData16[i*3];
+                                destIndices[offset+i*3+1] = (ushort) indexData16[i*3+2];
+                                destIndices[offset+i*3+2] = (ushort) indexData16[i*3+1];
+                            }
+                            offset += indexData16.Length;
+                            break;
+                        }
+                        case MeshTopology.Quads: {
+                            var quadCount = indexData16.Length / 4;
+                            for (var i = 0; i < quadCount; i++) {
+                                destIndices[offset+i*6+0] = (ushort) indexData16[i*4+0];
+                                destIndices[offset+i*6+1] = (ushort) indexData16[i*4+2];
+                                destIndices[offset+i*6+2] = (ushort) indexData16[i*4+1];
+                                destIndices[offset+i*6+3] = (ushort) indexData16[i*4+2];
+                                destIndices[offset+i*6+4] = (ushort) indexData16[i*4+0];
+                                destIndices[offset+i*6+5] = (ushort) indexData16[i*4+3];
+                            }
+                            offset += quadCount*6;
+                            break;
+                        }
+                        default: {
+                            for (var i = 0; i < indexData16.Length; i++) {
+                                destIndices[offset+i] = (ushort) indexData16[i];
+                            }
+                            offset += indexData16.Length;
+                            break;
+                        }
+                    }
+                }
+                indexBufferViewId = WriteBufferViewToBuffer(
+                    destIndices.Reinterpret<byte>(sizeof(ushort)),
+                    byteAlignment:sizeof(ushort)
+                );
+                destIndices.Dispose();
+            } else {
+                var destIndices = new NativeArray<uint>((int)totalFaceCount,Allocator.TempJob);
+                var offset = 0;
+                for (var subMeshIndex = 0; subMeshIndex < uMesh.subMeshCount; subMeshIndex++) {
+                    var indexData16 = uMesh.GetIndices(subMeshIndex);
+                    switch (topology) {
+                        case MeshTopology.Triangles: {
+                            var triCount = indexData16.Length / 3;
+                            for (var i = 0; i < triCount; i++) {
+                                destIndices[offset+i*3] = (uint) indexData16[i*3];
+                                destIndices[offset+i*3+1] = (uint) indexData16[i*3+2];
+                                destIndices[offset+i*3+2] = (uint) indexData16[i*3+1];
+                            }
+                            offset += indexData16.Length;
+                            break;
+                        }
+                        case MeshTopology.Quads:{
+                            var quadCount = indexData16.Length / 4;
+                            for (var i = 0; i < quadCount; i++) {
+                                destIndices[offset+i*6+0] = (uint) indexData16[i*4+0];
+                                destIndices[offset+i*6+1] = (uint) indexData16[i*4+2];
+                                destIndices[offset+i*6+2] = (uint) indexData16[i*4+1];
+                                destIndices[offset+i*6+3] = (uint) indexData16[i*4+2];
+                                destIndices[offset+i*6+4] = (uint) indexData16[i*4+0];
+                                destIndices[offset+i*6+5] = (uint) indexData16[i*4+3];
+                            }
+                            offset += quadCount*6;
+                            break;
+                        }
+                        default: {
+                            for (var i = 0; i < indexData16.Length; i++) {
+                                destIndices[offset+i] = (uint) indexData16[i];
+                            }
+                            offset += indexData16.Length;
+                            break;
+                        }
+                    }
+                }
+                indexBufferViewId = WriteBufferViewToBuffer(
+                    destIndices.Reinterpret<byte>(sizeof(uint)),
+                    byteAlignment:sizeof(uint)
+                );
+                destIndices.Dispose();
+            }
+            Profiler.EndSample();
+
+            foreach (var accessor in indexAccessors) {
+                accessor.bufferView = indexBufferViewId;
+            }
+
+            Profiler.BeginSample("ExportVertexAttributes");
+            foreach (var pair in attrDataDict) {
+                var vertexAttribute = pair.Key;
+                var attrData = pair.Value;
+                var bufferViewId = -1;
+                switch (vertexAttribute) {
+                    case VertexAttribute.Position: {
+                        var vertices = new List<Vector3>();
+                        uMesh.GetVertices(vertices);
+                        var outStream = new NativeArray<Vector3>(vertices.Count, Allocator.TempJob);
+                        for (var i = 0; i < vertices.Count; i++) {
+                            outStream[i] = new Vector3(-vertices[i].x,vertices[i].y,vertices[i].z);
+                        }
+                        bufferViewId = WriteBufferViewToBuffer(
+                            outStream.Reinterpret<byte>(12),
+                            12
+                        );
+                        outStream.Dispose();
+                        break;
+                    }
+                    case VertexAttribute.Normal: {
+                        var normals = new List<Vector3>();
+                        uMesh.GetNormals(normals);
+                        var outStream = new NativeArray<Vector3>(normals.Count, Allocator.TempJob);
+                        for (var i = 0; i < normals.Count; i++) {
+                            outStream[i] = new Vector3(-normals[i].x,normals[i].y,normals[i].z);
+                        }
+                        bufferViewId = WriteBufferViewToBuffer(
+                            outStream.Reinterpret<byte>(12),
+                            12
+                        );
+                        outStream.Dispose();
+                        break;
+                    }
+                    case VertexAttribute.Tangent: {
+                        var tangents = new List<Vector4>();
+                        uMesh.GetTangents(tangents);
+                        var outStream = new NativeArray<Vector4>(tangents.Count, Allocator.TempJob);
+                        for (var i = 0; i < tangents.Count; i++) {
+                            outStream[i] = new Vector4(tangents[i].x,tangents[i].y,-tangents[i].z,tangents[i].w);
+                        }
+                        bufferViewId = WriteBufferViewToBuffer(
+                            outStream.Reinterpret<byte>(16),
+                            16
+                        );
+                        outStream.Dispose();
+                        break;
+                    }
+                    case VertexAttribute.Color:
+                        break;
+                    case VertexAttribute.TexCoord0:
+                    case VertexAttribute.TexCoord1:
+                    case VertexAttribute.TexCoord2:
+                    case VertexAttribute.TexCoord3:
+                    case VertexAttribute.TexCoord4:
+                    case VertexAttribute.TexCoord5:
+                    case VertexAttribute.TexCoord6:
+                    case VertexAttribute.TexCoord7: {
+                        var uvs = new List<Vector2>();
+                        var channel = (int)vertexAttribute - (int)VertexAttribute.TexCoord0;
+                        uMesh.GetUVs( channel, uvs);
+                        var outStream = new NativeArray<Vector2>(uvs.Count, Allocator.TempJob);
+                        for (var i = 0; i < uvs.Count; i++) {
+                            outStream[i] = uvs[i];
+                        }
+                        bufferViewId = WriteBufferViewToBuffer(
+                            outStream.Reinterpret<byte>(8),
+                            8
+                        );
+                        outStream.Dispose();
+                        break;
+                    }
+                    case VertexAttribute.BlendWeight:
+                        break;
+                    case VertexAttribute.BlendIndices:
+                        break;
+                }
+                m_Accessors[attrData.accessorId].bufferView = bufferViewId;
+            }
+            Profiler.EndSample();
+            Profiler.EndSample();
+        }
+
+        int AddAccessor(Accessor accessor) {
+            m_Accessors = m_Accessors ?? new List<Accessor>();
+            var accessorId = m_Accessors.Count;
+            m_Accessors.Add(accessor);
+            return accessorId;
+        }
 #endif // #if GLTFAST_MESH_DATA
 
         async Task<bool> BakeImages(string directory) {

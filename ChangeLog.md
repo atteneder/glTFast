@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - (Export) Runtime glTF export to files
+- (Export) Export for Unity versions older than 2020.2
 - (Export) Save to `System.IO.Stream`
 - (Export) Occlusion map support
 - (Export) Metallic-gloss map support (converted to roughness-metallic)
