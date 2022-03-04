@@ -24,14 +24,14 @@ using UnityEngine.Rendering.HighDefinition;
 
 namespace GLTFast {
 
-    enum RenderPipeline {
+    public enum RenderPipeline {
 	    Unknown,
         BuiltIn,
         Universal,
         HighDefinition
     }
 
-    static class RenderPipelineUtils {
+    public static class RenderPipelineUtils {
         public static RenderPipeline DetectRenderPipeline() {
 #if USING_URP || USING_HDRP
 	        // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
