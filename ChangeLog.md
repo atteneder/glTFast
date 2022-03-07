@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - `RenderPipelineUtils` to detect current render pipeline
+### Fixed
+- Using correct file API for reading bytes in `EditorDownloadProvider` (thanks [@hybridherbst][hybridherbst] for #360)
 
 ## [4.6.0] - 2022-02-23
 ### Added
