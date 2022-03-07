@@ -58,7 +58,7 @@ namespace GLTFast.Editor {
     public class SyncFileLoader : IDownload {
         public SyncFileLoader(Uri url) {
             var path = url.OriginalString;
-            data = UnityEngine.Windows.File.ReadAllBytes(path);
+            data = File.ReadAllBytes(path);
         }
         
         public object Current => null;
