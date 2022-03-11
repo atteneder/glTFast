@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RenderPipelineUtils` to detect current render pipeline
 ### Fixed
 - Using correct file API for reading bytes in `EditorDownloadProvider` (thanks [@hybridherbst][hybridherbst] for #360)
+- GUID conflict with UnityGLTF
 
 ## [4.6.0] - 2022-02-23
 ### Added
