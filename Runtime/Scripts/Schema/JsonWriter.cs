@@ -99,6 +99,14 @@ namespace GLTFast.Schema {
             m_Stream.Write("\":");
             m_Stream.Write(value.ToString());
         }
+
+        public void AddProperty(string name, float value) {
+            Separate();
+            m_Stream.Write('"');
+            m_Stream.Write(name);
+            m_Stream.Write("\":");
+            m_Stream.Write(value.ToString("R", CultureInfo.InvariantCulture));
+        }
         
         public void AddProperty(string name, string value) {
             Separate();
