@@ -111,7 +111,7 @@ namespace GLTFast.Editor {
             );
             if (!string.IsNullOrEmpty(path)) {
                 var settings = GetDefaultSettings(binary);
-                var goSettings = new GameObjectExportSettings { onlyActiveInHierarchy = false };
+                var goSettings = new GameObjectExportSettings();
                 var export = new GameObjectExport(settings, gameObjectExportSettings: goSettings, logger: new ConsoleLogger());
                 export.AddScene(gameObjects, name);
                 AsyncHelpers.RunSync(() => export.SaveToFileAndDispose(path));
