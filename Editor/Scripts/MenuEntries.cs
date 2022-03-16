@@ -47,7 +47,7 @@ namespace GLTFast.Editor {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
 
-        [MenuItem("Assets/Export glTF/glTF (.gltf)", false, 10)]
+        [MenuItem("Assets/Export glTF/glTF (.gltf)", false, 31)]
         static void ExportSelectionMenu() {
             ExportSelection(false);
         }
@@ -57,7 +57,7 @@ namespace GLTFast.Editor {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
 
-        [MenuItem("Assets/Export glTF/glTF-Binary (.glb)", false, 11)]
+        [MenuItem("Assets/Export glTF/glTF-Binary (.glb)", false, 32)]
         static void ExportSelectionBinaryMenu() {
             ExportSelection(true);
         }
@@ -67,7 +67,7 @@ namespace GLTFast.Editor {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
         
-        [MenuItem("GameObject/Export glTF/glTF (.gltf)", false, 29)]
+        [MenuItem("GameObject/Export glTF/glTF (.gltf)", false, 32)]
         static void ExportGameObjectMenu(MenuCommand command) {
             ExportGameObject(command, false);
         }
@@ -77,7 +77,7 @@ namespace GLTFast.Editor {
             return TryGetExportNameAndGameObjects(out _, out _);
         }
         
-        [MenuItem("GameObject/Export glTF/glTF-Binary (.glb)", false, 29)]
+        [MenuItem("GameObject/Export glTF/glTF-Binary (.glb)", false, 31)]
         static void ExportGameObjectBinaryMenu(MenuCommand command) {
             ExportGameObject(command, true);
         }
