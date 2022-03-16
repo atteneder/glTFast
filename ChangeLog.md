@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Using correct file API for reading bytes in `EditorDownloadProvider` (thanks [@hybridherbst][hybridherbst] for #360)
 - GUID conflict with UnityGLTF
 - (Export) Correct float serialization on systems with non-English culture configuration (relates to #335)
+- Documentation link in error message about missing shaders (#368)
 
 ## [4.6.0] - 2022-02-23
 ### Added
