@@ -675,6 +675,7 @@ namespace GLTFast.Export {
                     case VertexAttribute.Position:
                         Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
                         Assert.AreEqual(3,attribute.dimension);
+                        uMesh.RecalculateBounds();
                         var bounds = uMesh.bounds;
                         var max = bounds.max;
                         var min = bounds.min;
@@ -724,6 +725,7 @@ namespace GLTFast.Export {
                         break;
                     case VertexAttribute.BlendIndices:
                         attributes.JOINTS_0 = accessorId;
+                        accessor.componentType = GLTFComponentType.UnsignedShort;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -781,6 +783,10 @@ namespace GLTFast.Export {
                     attributes = attributes,
                     indices = indexAccessorId,
                 };
+            }
+            if (!topology.HasValue)
+            {
+                topology = MeshTopology.Triangles;
             }
             Assert.IsTrue(topology.HasValue);
 
