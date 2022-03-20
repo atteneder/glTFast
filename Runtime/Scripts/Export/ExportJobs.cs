@@ -107,5 +107,30 @@ namespace GLTFast.Export {
                 *outPtr = tmp;
             }
         }
+
+        [BurstCompile]
+        public unsafe struct CopyFloat4Job : IJobParallelFor
+        {
+
+            public uint byteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (float4*)(input + i * byteStride);
+                var outPtr = (float4*)(output + i * byteStride);
+
+                var tmp = *inPtr;
+                *outPtr = tmp;
+            }
+        }
+
     }
 }

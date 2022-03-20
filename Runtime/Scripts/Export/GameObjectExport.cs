@@ -28,6 +28,10 @@ namespace GLTFast.Export {
         GameObjectExportSettings m_Settings;
         ICodeLogger m_Logger;
 
+
+        Dictionary<Transform, int> TransformToNodeID = new Dictionary<Transform, int>();
+
+
         /// <summary>
         /// Provides glTF export of GameObject based scenes and hierarchies.
         /// </summary>
@@ -78,6 +82,7 @@ namespace GLTFast.Export {
                 m_Writer.AddScene(rootNodes.ToArray(), name);
             }
 
+            m_Writer.ResolveSkinJoints(TransformToNodeID);
             return success;
         }
         
@@ -114,6 +119,7 @@ namespace GLTFast.Export {
                 throw new InvalidOperationException("GameObjectExport was already disposed");
             }
         }
+
         bool AddGameObject(GameObject gameObject, List<Material> tempMaterials, out int nodeId ) {
             if (m_Settings.onlyActiveInHierarchy && !gameObject.activeInHierarchy) {
                 nodeId = -1;
@@ -145,10 +151,12 @@ namespace GLTFast.Export {
                 children,
                 gameObject.name
                 );
+            TransformToNodeID[gameObject.transform] = nodeId;
             Mesh mesh = null;
             
             tempMaterials.Clear();
-            
+
+            Transform [] skinJoints = null;
             if (gameObject.TryGetComponent(out MeshFilter meshFilter)) {
                 mesh = meshFilter.sharedMesh;
                 if (gameObject.TryGetComponent(out Renderer renderer)) {
@@ -158,6 +166,8 @@ namespace GLTFast.Export {
             if (gameObject.TryGetComponent(out SkinnedMeshRenderer smr)) {
                 mesh = smr.sharedMesh;
                 smr.GetSharedMaterials(tempMaterials);
+                UnityEngine.Debug.Log("Gather skinning info over here");
+                skinJoints = smr.bones;
             }
 
             var materialIds = new int[tempMaterials.Count];
@@ -171,7 +181,7 @@ namespace GLTFast.Export {
             }
 
             if (mesh != null) {
-                m_Writer.AddMeshToNode(nodeId,mesh,materialIds);
+                m_Writer.AddMeshToNode(nodeId,mesh,materialIds, skinJoints);
             }
             return success;
         }
