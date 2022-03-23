@@ -13,6 +13,9 @@
 // limitations under the License.
 //
 
+#define USE_MATH_EXT
+#define USE_MATHEMATICS
+
 using System.Runtime.CompilerServices;
 using System;
 using AOT;
@@ -24,6 +27,7 @@ using Unity.Burst;
 using Unity.Jobs;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
+using GLTFast.Maths;
 
 [assembly: InternalsVisibleTo("glTF-test-framework.Tests")]
 
@@ -1062,10 +1066,24 @@ namespace GLTFast.Jobs {
         [NativeDisableUnsafePtrRestriction]
         public float3* result;
 
-        public void Execute(int i) {
+        public void Execute(int i) 
+        {
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            var tmp = *input;
+            *result = tmp.ToUnity();
+
+#else
+            var tmp = *input;
+            Vector3 gltfVec3 = tmp;
+            Vector3 unityVec3 = gltfVec3.ToUnity();
+            *result = unityVec3;
+#endif
+#else
             var tmp = input[i];
             tmp.x *= -1;
             result[i] = tmp;
+#endif
         }
     }
 
@@ -1081,10 +1099,28 @@ namespace GLTFast.Jobs {
         public float4* result;
 
         public void Execute(int i) {
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            quaternion q = *(quaternion*)input;
+            q = q.ToUnity();
+            result[i].x = q.value.x;
+            result[i].y = q.value.y;
+            result[i].z = q.value.z;
+            result[i].w = q.value.w;
+#else
+            Quaternion q = new Quaternion(input[i].x,input[i].y,input[i].z,input[i].w);
+            q = q.ToUnity();
+            result[i].x = q.x;
+            result[i].y = q.y;
+            result[i].z = q.z;
+            result[i].w = q.w;
+#endif
+#else
             var tmp = input[i];
             tmp.y *= -1;
             tmp.z *= -1;
             result[i] = tmp;
+#endif
         }
     }
     
@@ -1100,10 +1136,35 @@ namespace GLTFast.Jobs {
         public float* result;
 
         public void Execute(int i) {
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            quaternion q = new quaternion(Mathf.Max(input[i * 4] / short.MaxValue, -1f),
+                Mathf.Max(input[i * 4 + 1] / short.MaxValue, -1f),
+                Mathf.Max(input[i * 4 + 2] / short.MaxValue, -1f),
+                Mathf.Max(input[i * 4 + 3] / short.MaxValue, -1f));
+            q = q.ToUnity();
+            result[i * 4] = q.value.x;
+            result[i * 4 + 1] = q.value.y;
+            result[i * 4 + 2] = q.value.z;
+            result[i * 4 + 3] = q.value.w;
+
+#else
+            Quaternion q = new Quaternion(Mathf.Max(input[i * 4] / short.MaxValue, -1f),
+                Mathf.Max(input[i * 4 + 1] / short.MaxValue, -1f),
+                Mathf.Max(input[i * 4 + 2] / short.MaxValue, -1f),
+                Mathf.Max(input[i * 4 + 3] / short.MaxValue, -1f));
+            q = q.ToUnity();
+            result[i * 4] = q.x;
+            result[i * 4 + 1] = q.y;
+            result[i * 4 + 2] = q.z;
+            result[i * 4 + 3] = q.w;
+#endif
+#else
             result[i*4] = Mathf.Max( input[i*4] / (float) short.MaxValue, -1f );
             result[i*4+1] = -Mathf.Max( input[i*4+1] / (float) short.MaxValue, -1f );
             result[i*4+2] = -Mathf.Max( input[i*4+2] / (float) short.MaxValue, -1f );
             result[i*4+3] = Mathf.Max( input[i*4+3] / (float) short.MaxValue, -1f );
+#endif
         }
     }
 
@@ -1123,10 +1184,34 @@ namespace GLTFast.Jobs {
         public float* result;
 
         public void Execute(int i) {
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            quaternion q = new quaternion(Mathf.Max(input[i * 4] / 127f, -1f),
+                Mathf.Max(input[i * 4 + 1] / 127f, -1f),
+                Mathf.Max(input[i * 4 + 2] / 127f, -1f),
+                Mathf.Max(input[i * 4 + 3] / 127f, -1f));
+            q = q.ToUnity();
+            result[i * 4] = q.value.x;
+            result[i * 4 + 1] = q.value.y;
+            result[i * 4 + 2] = q.value.z;
+            result[i * 4 + 3] = q.value.w;
+#else
+            Quaternion q = new Quaternion(Mathf.Max(input[i * 4] / 127f, -1f),
+                Mathf.Max(input[i * 4+1] / 127f, -1f),
+                Mathf.Max(input[i * 4+2] / 127f, -1f),
+                Mathf.Max(input[i * 4+3] / 127f, -1f));
+            q = q.ToUnity();
+            result[i*4] = q.x;
+            result[i*4+1] = q.y;
+            result[i*4+2] = q.z;
+            result[i*4+3] = q.w;
+#endif
+#else
             result[i*4] = Mathf.Max( input[i*4] / 127f, -1f );
             result[i*4+1] = -Mathf.Max( input[i*4+1] / 127f, -1f );
             result[i*4+2] = -Mathf.Max( input[i*4+2] / 127f, -1f );
             result[i*4+3] = Mathf.Max( input[i*4+3] / 127f, -1f );
+#endif
         }
     }
 
@@ -1181,7 +1266,7 @@ namespace GLTFast.Jobs {
     /// <summary>
     /// General purpose vector 3 (position or normal) conversion
     /// </summary>
-    [BurstCompile]
+    //[BurstCompile]
     public unsafe struct ConvertVector3FloatToFloatInterleavedJob :
 #if UNITY_JOBS
         IJobParallelForBatch
@@ -1222,9 +1307,22 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
             var off = (float3*) (input + i*inputByteStride);
+
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            var tmp = *off;
+            *resultV = tmp.ToUnity();
+#else
+            var tmp = *off;
+            Vector3 gltfVec3 = tmp;
+            Vector3 unityVec3 = gltfVec3.ToUnity();
+            *resultV = unityVec3;
+#endif
+#else
             var tmp = *off;
             tmp.x *= -1;
             *resultV = tmp;
+#endif
         }
 #endif
     }
@@ -1306,8 +1404,18 @@ namespace GLTFast.Jobs {
             float4* resultV = (float4*) (((byte*)result) + (i*outputByteStride));
             byte* off = input + (i*inputByteStride);
             var tmp = *((float4*)off);
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            *resultV = tmp.ToUnityVector();
+#else
+            Vector4 n = tmp;
+            n = n.ToUnityVector();
+            *resultV = n;
+#endif
+#else
             tmp.z *= -1;
             *resultV = tmp;
+#endif
         }
 #endif
     }
@@ -1505,8 +1613,19 @@ namespace GLTFast.Jobs {
             var off = (short*) (((byte*)input) + (i*inputByteStride));
             var tmp = new float4(off[0],off[1],off[2],off[3]) / short.MaxValue;
             var tmp2 = max(tmp, -1f);
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            *resultV = tmp2.ToUnityVector();
+#else
+            Vector4 n = tmp2;
+            n = n.ToUnityVector();
+            n.Normalize();
+            *resultV = n;
+#endif
+#else
             tmp2.z *= -1;
             *resultV = normalize(tmp2);
+#endif
         }
 #endif
     }
@@ -1555,8 +1674,19 @@ namespace GLTFast.Jobs {
             var off = input + (i*inputByteStride);
             var tmp = new float4(off[0],off[1],off[2],off[3]) / 127f;
             var tmp2 = max(tmp, -1f);
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            *resultV = tmp2.ToUnityVector();
+#else
+            Vector4 n = tmp2;
+            n = n.ToUnityVector();
+            n.Normalize();
+            *resultV = n;
+#endif
+#else
             tmp2.z *= -1;
             *resultV = normalize(tmp2);
+#endif
         }
 #endif
     }
@@ -1599,10 +1729,21 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
             var off = (ushort*) (input + (inputByteStride*i));
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            float3 p = new float3(off[0], off[1], off[2]);
+            *resultV = p.ToUnity();
+#else
+            Vector3 p = new Vector3(off[0],off[1],off[2]);
+            p = p.ToUnity();
+            *resultV = p;
+#endif
+#else
             *resultV = new float3(-(float)off[0], off[1], off[2]);
+#endif
         }
 #endif
-    }
+        }
 
     [BurstCompile]
     public unsafe struct ConvertPositionsUInt16ToFloatInterleavedNormalizedJob : 
@@ -1646,11 +1787,25 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
             var off = (ushort*) (input + (inputByteStride*i));
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            float3 p = new float3(off[0], off[1], off[2]);
+            p = p / (float)ushort.MaxValue;
+            *resultV = p.ToUnity();
+#else
+            Vector3 p = new Vector3(off[0],off[1],off[2]);
+            p = p / (float)ushort.MaxValue;
+            p = p.ToUnity();
+            *resultV = p;
+#endif
+#else
+
             *resultV = new float3(
                 -(off[0] / (float) ushort.MaxValue),
                 off[1] / (float) ushort.MaxValue,
                 off[2] / (float) ushort.MaxValue
             );
+#endif
         }
 #endif
     }
@@ -1694,7 +1849,18 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             var resultV = (float3*)  (((byte*)result) + (i*outputByteStride));
             var off = (short*) (input + (i*inputByteStride));
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            float3 p = new float3(off[0], off[1], off[2]);
+            *resultV = p.ToUnity();
+#else
+            Vector3 p = new Vector3(off[0],off[1],off[2]);
+            p = p.ToUnity();
+            *resultV = p;
+#endif
+#else
             *resultV = new float3(-(float)off[0],off[1],off[2]);
+#endif
         }
 #endif
     }
@@ -1748,8 +1914,18 @@ namespace GLTFast.Jobs {
 
             var tmp = new float3(off[0], off[1], off[2]) / short.MaxValue;
             var tmp2 = max(tmp, -1f);
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            *resultV = tmp.ToUnityVector();
+#else
+            Vector3 n = tmp2;
+            n = n.ToUnityVector();
+            *resultV = n;
+#endif
+#else
             tmp2.x *= -1;
             *resultV = tmp2;
+#endif
         }
 #endif
     }
@@ -1803,8 +1979,19 @@ namespace GLTFast.Jobs {
 
             var tmp = new float3(off[0], off[1], off[2]) / short.MaxValue;
             var tmp2 = max(tmp, -1f);
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            *resultV = tmp2.ToUnityVector();
+#else
+            Vector3 n = tmp2;
+            n = n.ToUnityVector();
+            n.Normalize();
+            *resultV = n;
+#endif
+#else
             tmp2.x *= -1;
             *resultV = normalize(tmp2);
+#endif
         }
 #endif
     }
@@ -1847,10 +2034,21 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             var resultV = (float3*) (((byte*)result) + (i*outputByteStride));
             var off = input + (inputByteStride*i);
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            float3 p = new float3(off[0], off[1], off[2]);
+            *resultV = p.ToUnity();
+#else
+            Vector3 p = new Vector3(off[0],off[1],off[2]);
+            p = p.ToUnity();
+            *resultV = p;
+#endif
+#else
             *resultV = new float3(-(float)off[0], off[1], off[2]);
+#endif
         }
 #endif
-    }
+        }
 
     /// <summary>
     /// General purpose conversion (positions or morph target delta normals)
@@ -1901,8 +2099,19 @@ namespace GLTFast.Jobs {
 
             var tmp = new float3(off[0], off[1], off[2]) / 127f;
             var tmp2 = max(tmp, -1);
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            *resultV = tmp2.ToUnityVector();
+#else
+            Vector3 n = tmp2;
+            n = n.ToUnityVector();
+            n.Normalize();
+            *resultV = n;
+#endif
+#else
             tmp2.x *= -1;
             *resultV = tmp2;
+#endif
         }
 #endif
     }
@@ -1956,8 +2165,19 @@ namespace GLTFast.Jobs {
 
             var tmp = new float3(off[0], off[1], off[2]) / 127f;
             var tmp2 = max(tmp, -1);
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            *resultV = tmp2.ToUnityVector();
+#else
+            Vector3 n = tmp2;
+            n = n.ToUnityVector();
+            n.Normalize();
+            *resultV = n;
+#endif
+#else
             tmp2.x *= -1;
             *resultV = normalize(tmp2);
+#endif
         }
 #endif
     }
@@ -2000,10 +2220,20 @@ namespace GLTFast.Jobs {
         public void Execute(int i) {
             var off = input + (i*inputByteStride);
             var resultV = (float3*) (((byte*) result) + (i*outputByteStride));
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            float3 v = new float3(off[0], off[1], off[2]);
+            *resultV = v.ToUnity();
+#else
+            Vector3 v = new Vector3(off[0],off[1],off[2]);
+            *resultV = v.ToUnity();
+#endif
+#else
             *resultV = new float3(-(float)off[0],off[1],off[2]);
+#endif
         }
 #endif
-    }
+        }
 
     [BurstCompile]
     public unsafe struct ConvertPositionsUInt8ToFloatInterleavedNormalizedJob : 
@@ -2172,6 +2402,14 @@ namespace GLTFast.Jobs {
         public float4x4* result;
 
         public void Execute(int i) {
+#if USE_MATH_EXT
+#if USE_MATHEMATICS
+            result[i] = input[i].ToUnity();
+#else
+            Matrix4x4 gltf = input[i];
+            result[i] = gltf.ToUnity();
+#endif
+#else
             var tmp = input[i].c0;
             tmp.y *= -1;
             tmp.z *= -1;
@@ -2188,6 +2426,7 @@ namespace GLTFast.Jobs {
             tmp = input[i].c3;
             tmp.x *= -1;
             result[i].c3 = tmp;
+#endif
         }
     }
 

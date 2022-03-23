@@ -70,6 +70,7 @@ namespace GLTFast
             int weightsAccessorIndex,
             int jointsAccessorIndex
         ) {
+            UnityEngine.Debug.Log("Scheduling vertex jobs");
             buffers.GetAccessor(positionAccessorIndex, out var posAcc, out var posData, out var posByteStride);
             
             Profiler.BeginSample("ScheduleVertexJobs");

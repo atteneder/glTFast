@@ -14,7 +14,7 @@
 //
 
 #if UNITY_2020_2_OR_NEWER
-//#define GLTFAST_MESH_DATA
+#define GLTFAST_MESH_DATA
 #endif
 
 using System;
@@ -42,6 +42,7 @@ using Mesh = GLTFast.Schema.Mesh;
 using Sampler = GLTFast.Schema.Sampler;
 using Texture = GLTFast.Schema.Texture;
 
+using GLTFast.Maths;
 #if DEBUG
 using System.Text;
 #endif
@@ -56,26 +57,34 @@ namespace GLTFast.Export {
 
     public static class MathGLTFExtensions
     {
-        public static Vector3 switchHandedness(this Vector3 input)
+        public static void convertVector3LeftToRightHandedness(ref Vector3 vect)
         {
-            return new Vector3(input.x, input.y, -input.z);
+            vect.z = -vect.z;
         }
 
-        public static Vector4 switchHandedness(this Vector4 input)
+        public static void convertVector4LeftToRightHandedness(ref Vector4 vect)
         {
-            return new Vector4(input.x, input.y, -input.z, -input.w);
+            vect.z = -vect.z;
+            vect.w = -vect.w;
         }
 
-        public static Quaternion switchHandedness(this Quaternion input)
+        public static void convertQuatLeftToRightHandedness(ref Quaternion quat)
         {
-            return new Quaternion(input.x, input.y, -input.z, -input.w);
+            quat.w = -quat.w;
+            quat.z = -quat.z;
         }
-        public static Matrix4x4 switchHandedness(this Matrix4x4 matrix)
-        {
-            Vector3 position = matrix.GetColumn(3).switchHandedness();
-            Quaternion rotation = Quaternion.LookRotation(matrix.GetColumn(2), matrix.GetColumn(1)).switchHandedness();
-            Vector3 scale = new Vector3(matrix.GetColumn(0).magnitude, matrix.GetColumn(1).magnitude, matrix.GetColumn(2).magnitude);
 
+        // Decomposes a matrix, converts each component from left to right handed and
+        // rebuilds a matrix
+        // FIXME: there is probably a better way to do that. It doesn't work well with non uniform scales
+        public static void convertMatrixLeftToRightHandedness(ref Matrix4x4 mat)
+        {
+            Vector3 position = mat.GetColumn(3);
+            convertVector3LeftToRightHandedness(ref position);
+            Quaternion rotation = Quaternion.LookRotation(mat.GetColumn(2), mat.GetColumn(1));
+            convertQuatLeftToRightHandedness(ref rotation);
+
+            Vector3 scale = new Vector3(mat.GetColumn(0).magnitude, mat.GetColumn(1).magnitude, mat.GetColumn(2).magnitude);
             float epsilon = 0.00001f;
 
             // Some issues can occurs with non uniform scales
@@ -85,18 +94,17 @@ namespace GLTFast.Export {
             }
 
             // Handle negative scale component in matrix decomposition
-            if (Matrix4x4.Determinant(matrix) < 0)
+            if (Matrix4x4.Determinant(mat) < 0)
             {
-                Quaternion rot = Quaternion.LookRotation(matrix.GetColumn(2), matrix.GetColumn(1));
-                Matrix4x4 corr = Matrix4x4.TRS(matrix.GetColumn(3), rot, Vector3.one).inverse;
-                Matrix4x4 extractedScale = corr * matrix;
+                Quaternion rot = Quaternion.LookRotation(mat.GetColumn(2), mat.GetColumn(1));
+                Matrix4x4 corr = Matrix4x4.TRS(mat.GetColumn(3), rot, Vector3.one).inverse;
+                Matrix4x4 extractedScale = corr * mat;
                 scale = new Vector3(extractedScale.m00, extractedScale.m11, extractedScale.m22);
             }
 
             // convert transform values from left handed to right handed
-            return Matrix4x4.TRS(position, rotation, scale);
+            mat.SetTRS(position, rotation, scale);
         }
-
     }
     public class GltfWriter : IGltfWritable {
 
@@ -397,7 +405,7 @@ namespace GLTFast.Export {
         
         async Task<bool> SaveAndDispose(Stream outStream, string bufferPath = null, string directory = null) {
 
-            UnityEngine.Debug.LogFormat("<color=yellow>{0}</color>", "Save and Dispose");
+            //UnityEngine.Debug.LogFormat("<color=yellow>{0}</color>", "Save and Dispose");
 #if DEBUG
             if (m_State != State.ContentAdded) {
                 Debug.LogWarning("Exporting empty glTF");
@@ -566,7 +574,7 @@ namespace GLTFast.Export {
         }
 
         async Task<bool> Bake(string bufferPath, string directory) {
-            UnityEngine.Debug.LogFormat("Baking the gltf");
+            //UnityEngine.Debug.LogFormat("Baking the gltf");
             if (m_Meshes != null) {
 #if GLTFAST_MESH_DATA
                 await BakeMeshes();
@@ -707,7 +715,7 @@ namespace GLTFast.Export {
 
         async Task BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData) {
 
-            UnityEngine.Debug.Log("Baking Mesh");
+            //UnityEngine.Debug.Log("Baking Mesh");
             Profiler.BeginSample("BakeMesh");
             
             var mesh = m_Meshes[meshId];
@@ -729,6 +737,7 @@ namespace GLTFast.Export {
 
                 var attributeSize = GetAttributeSize(attribute.format);
                 var size = attribute.dimension * attributeSize;
+                //UnityEngine.Debug.Log(attribute.attribute + ":" + attribute.dimension+":"+attribute.format + ":" + attributeSize+":"+attribute.stream+":"+ attrData.offset);
                 strides[attribute.stream] += size;
                 alignments[attribute.stream] = math.max(alignments[attribute.stream], attributeSize); 
 
@@ -943,7 +952,8 @@ namespace GLTFast.Export {
 
             var inputStreams = new NativeArray<byte>[streamCount];
             var outputStreams = new NativeArray<byte>[streamCount];
-            
+
+            //UnityEngine.Debug.Log("Number of streams for mesh:" + streamCount);
             for (var stream = 0; stream < streamCount; stream++) {
                 inputStreams[stream] = meshData.GetVertexData<byte>(stream);
                 outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
@@ -983,7 +993,13 @@ namespace GLTFast.Export {
                             );
                         break;
                     case VertexAttribute.BlendIndices:
-                        UnityEngine.Debug.Log("No job scheduled for :" + vertexAttribute);
+                        await CopyJointsAttribute(
+                            attrData,
+                            (uint)strides[attrData.stream],
+                            vertexCount,
+                            inputStreams[attrData.stream],
+                            outputStreams[attrData.stream]
+                            );
                         break;
                 }
             }
@@ -1599,6 +1615,41 @@ namespace GLTFast.Export {
             return job;
         }
 
+        static async Task CopyJointsAttribute(
+            AttributeData attrData,
+            uint byteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+            )
+        {
+            var job = CreateCopyJointsAttributeJob(attrData, byteStride, vertexCount, inputStream, outputStream);
+            while (!job.IsCompleted)
+            {
+                await Task.Yield();
+            }
+            job.Complete(); // TODO: Wait until thread is finished
+        }
+
+        static unsafe JobHandle CreateCopyJointsAttributeJob(
+            AttributeData attrData,
+            uint byteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+            )
+        {
+            var job = new ExportJobs.CopyJointJob
+            {
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
+                byteStride = byteStride,
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+            }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
+            return job;
+        }
+
+
+
         static DrawMode? GetDrawMode(MeshTopology topology) {
             switch (topology) {
                 case MeshTopology.Quads:
@@ -1633,13 +1684,13 @@ namespace GLTFast.Export {
                     JointBindPosePair pair = m_SkinJointsPair[i];
                     if (pair.joints.SequenceEqual(skinJoints) && pair.bindposes.SequenceEqual(uMesh.bindposes))
                     {
-                        UnityEngine.Debug.Log("Found skin set");
+                        //UnityEngine.Debug.Log("Found skin set");
                         return i;
                     }
                 }
             }
 
-            UnityEngine.Debug.Log("Adding skin set");
+            //UnityEngine.Debug.Log("Adding skin set");
             m_SkinJointsPair = m_SkinJointsPair ?? new List<JointBindPosePair>();
             JointBindPosePair newpair = new JointBindPosePair();
             newpair.bindposes = uMesh.bindposes;
@@ -1681,7 +1732,7 @@ namespace GLTFast.Export {
         }
         public void ResolveSkinJoints(Dictionary<Transform, int> TransformToNodeID)
         {
-            UnityEngine.Debug.LogFormat("<color=cyan>{0}</color>", "Resolving Skin Joints to node:" + m_Skins.Count);
+            //UnityEngine.Debug.LogFormat("<color=cyan>{0}</color>", "Resolving Skin Joints to node:" + m_Skins.Count);
             for (int i = 0; i < m_SkinJointsPair.Count; i++)
             {
                 m_Skins[i].joints = new uint[m_SkinJointsPair[i].joints.Length];
@@ -1704,7 +1755,6 @@ namespace GLTFast.Export {
                     count = m_SkinJointsPair[i].bindposes.Length,
                     typeEnum = GLTFAccessorAttributeType.MAT4,
                 };
-                bool switchHandedness = false;
                 int id = AddAccessor(accessor);
                 m_Skins[i].inverseBindMatrices = id;
                 MemoryStream ms = new MemoryStream();
@@ -1713,7 +1763,9 @@ namespace GLTFast.Export {
                 for (int j = 0; j < m_SkinJointsPair[i].bindposes.Length; j++)
                 {
                     // we have to write the matrix
-                    Matrix4x4 mamat = switchHandedness ? m_SkinJointsPair[i].bindposes[j].switchHandedness() : m_SkinJointsPair[i].bindposes[j];
+                    Matrix4x4 bpose = m_SkinJointsPair[i].bindposes[j];
+                    Matrix4x4 mamat = bpose.ToGLTF();
+                    //mamat = bpose.ReverseZ();
                     for (int k = 0; k < 4; ++k)
                     {
                         Vector4 col = mamat.GetColumn(k);
@@ -1725,11 +1777,11 @@ namespace GLTFast.Export {
                 }
                 bw.Flush();
                 byte[] data = ms.ToArray();
-                UnityEngine.Debug.Log("Matrix:" + data.Length);
+                //UnityEngine.Debug.Log("Matrix:" + data.Length);
                 accessor.bufferView = WriteBufferViewToBuffer(data);
                 bw.Close();
             }
-            UnityEngine.Debug.LogFormat("<color=cyan>{0}</color>", "Done Baking Skins");
+            //UnityEngine.Debug.LogFormat("<color=cyan>{0}</color>", "Done Baking Skins");
         }
         unsafe int WriteBufferViewToBuffer( byte[] bufferViewData, int? byteStride = null) {
             var bufferHandle = GCHandle.Alloc(bufferViewData,GCHandleType.Pinned);

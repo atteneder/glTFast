@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-
+#define USE_MATHEMATICS
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using GLTFast.Maths;
 
 namespace GLTFast.Export {
     
@@ -62,7 +63,7 @@ namespace GLTFast.Export {
             }
         }
 
-        [BurstCompile]
+        //[BurstCompile]
         public unsafe struct ConvertPositionFloatJob : IJobParallelFor {
 
             public uint byteStride;
@@ -78,14 +79,26 @@ namespace GLTFast.Export {
             public void Execute(int i) {
                 var inPtr = (float3*)(input + i * byteStride);
                 var outPtr = (float3*)(output + i * byteStride);
-
+#if false
                 var tmp = *inPtr;
                 tmp.x *= -1;
                 *outPtr = tmp;
+
+#else
+#if USE_MATHEMATICS
+                var tmp = *inPtr;
+                *outPtr = tmp.ToGLTF();
+#else
+                var tmp = *inPtr;
+                Vector3 unityVec3 = tmp;
+                Vector3 gltfVec3 = unityVec3.ToGLTF();
+                *outPtr = gltfVec3;
+#endif
+#endif
             }
         }
         
-        [BurstCompile]
+        //[BurstCompile]
         public unsafe struct ConvertTangentFloatJob : IJobParallelFor {
 
             public uint byteStride;
@@ -101,10 +114,21 @@ namespace GLTFast.Export {
             public void Execute(int i) {
                 var inPtr = (float4*)(input + i * byteStride);
                 var outPtr = (float4*)(output + i * byteStride);
-
+#if false
                 var tmp = *inPtr;
                 tmp.z *= -1;
                 *outPtr = tmp;
+#else
+#if USE_MATHEMATICS
+                var tmp = *inPtr;
+                *outPtr = tmp.ToGLTFVector();
+#else
+                var tmp = *inPtr;
+                Vector4 unityVec4 = tmp;
+                Vector4 gltfVec4 = unityVec4.ToGLTFVector();
+                *outPtr = gltfVec4;
+#endif
+#endif
             }
         }
 
@@ -131,6 +155,34 @@ namespace GLTFast.Export {
                 *outPtr = tmp;
             }
         }
+
+        [BurstCompile]
+        public unsafe struct CopyJointJob : IJobParallelFor
+        {
+
+            public uint byteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (int4*)(input + i * byteStride);
+                var outPtr = (ushort*)(output + i * byteStride);
+
+                int4 val = *inPtr;
+                outPtr[0] = (ushort)val.x;
+                outPtr[1] = (ushort)val.y;
+                outPtr[2] = (ushort)val.z;
+                outPtr[3] = (ushort)val.w;
+            }
+        }
+
 
     }
 }

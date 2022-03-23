@@ -166,7 +166,7 @@ namespace GLTFast.Export {
             if (gameObject.TryGetComponent(out SkinnedMeshRenderer smr)) {
                 mesh = smr.sharedMesh;
                 smr.GetSharedMaterials(tempMaterials);
-                UnityEngine.Debug.Log("Gather skinning info over here");
+                //UnityEngine.Debug.Log("Gather skinning info over here");
                 skinJoints = smr.bones;
             }
 
