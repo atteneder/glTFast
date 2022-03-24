@@ -87,7 +87,8 @@ namespace GLTFast.Export {
 #else
 #if USE_MATHEMATICS
                 var tmp = *inPtr;
-                *outPtr = tmp.ToGLTF();
+                float3 res = tmp.ToGLTF();
+                *outPtr = res;
 #else
                 var tmp = *inPtr;
                 Vector3 unityVec3 = tmp;
@@ -111,6 +112,8 @@ namespace GLTFast.Export {
             [NativeDisableUnsafePtrRestriction]
             public byte* output;
 
+
+
             public void Execute(int i) {
                 var inPtr = (float4*)(input + i * byteStride);
                 var outPtr = (float4*)(output + i * byteStride);
@@ -121,7 +124,13 @@ namespace GLTFast.Export {
 #else
 #if USE_MATHEMATICS
                 var tmp = *inPtr;
-                *outPtr = tmp.ToGLTFVector();
+                float4 tan = tmp.ToGLTF();
+                float3 tv = new float3(tan.x, tan.y, tan.z);
+                tv = math.normalize(tv);
+                tan.x = tv.x;
+                tan.y = tv.y;
+                tan.z = tv.z;
+                *outPtr = tan;
 #else
                 var tmp = *inPtr;
                 Vector4 unityVec4 = tmp;

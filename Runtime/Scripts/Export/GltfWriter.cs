@@ -113,11 +113,11 @@ namespace GLTFast.Export {
             ContentAdded,
             Disposed
         }
-        
+
         public class JointBindPosePair
         {
-            public UnityEngine.Transform [] joints ;
-            public Matrix4x4 [] bindposes;
+            public UnityEngine.Transform[] joints;
+            public Matrix4x4[] bindposes;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -139,20 +139,20 @@ namespace GLTFast.Export {
         #region Constants
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
-#endregion Constants
+        #endregion Constants
 
-#region Private
+        #region Private
         State m_State;
 
         ExportSettings m_Settings;
         IDeferAgent m_DeferAgent;
         ICodeLogger m_Logger;
-        
+
         Root m_Gltf;
 
         HashSet<Extension> m_ExtensionsUsedOnly;
         HashSet<Extension> m_ExtensionsRequired;
-        
+
         List<Scene> m_Scenes;
         List<Node> m_Nodes;
         List<Mesh> m_Meshes;
@@ -173,7 +173,7 @@ namespace GLTFast.Export {
         List<JointBindPosePair> m_SkinJointsPair;
         Stream m_BufferStream;
         string m_BufferPath;
-#endregion Private
+        #endregion Private
 
         /// <summary>
         /// Provides glTF export independent of workflow (GameObjects/Entities)
@@ -220,20 +220,20 @@ namespace GLTFast.Export {
                 name = name,
                 children = children,
             };
-            if( translation.HasValue && !translation.Equals(float3.zero) ) {
+            if (translation.HasValue && !translation.Equals(float3.zero)) {
                 node.translation = new[] { -translation.Value.x, translation.Value.y, translation.Value.z };
             }
-            if( rotation.HasValue && !rotation.Equals(quaternion.identity) ) {
+            if (rotation.HasValue && !rotation.Equals(quaternion.identity)) {
                 node.rotation = new[] { rotation.Value.value.x, -rotation.Value.value.y, -rotation.Value.value.z, rotation.Value.value.w };
             }
-            if( scale.HasValue && !scale.Equals(new float3(1f)) ) {
+            if (scale.HasValue && !scale.Equals(new float3(1f))) {
                 node.scale = new[] { scale.Value.x, scale.Value.y, scale.Value.z };
             }
             m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
-            return (uint) m_Nodes.Count - 1;
+            return (uint)m_Nodes.Count - 1;
         }
-        
+
         /// <summary>
         /// Assigns a mesh to a previously added node
         /// </summary>
@@ -245,14 +245,14 @@ namespace GLTFast.Export {
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
-            if (materialIds!=null && materialIds.Length > 0 ) {
+            if (materialIds != null && materialIds.Length > 0) {
                 m_NodeMaterials = m_NodeMaterials ?? new Dictionary<int, int[]>();
                 m_NodeMaterials[nodeId] = materialIds;
             }
 
             node.mesh = AddMesh(uMesh);
             if (skinJoints != null && skinJoints.Length > 0)
-                node.skin = AddSkin(uMesh,skinJoints);
+                node.skin = AddSkin(uMesh, skinJoints);
         }
 
         /// <summary>
@@ -272,10 +272,10 @@ namespace GLTFast.Export {
             if (m_Scenes.Count == 1) {
                 m_Gltf.scene = 0;
             }
-            return (uint) m_Scenes.Count - 1;
+            return (uint)m_Scenes.Count - 1;
         }
 
-        public int AddImage( ImageExportBase imageExport ) {
+        public int AddImage(ImageExportBase imageExport) {
             CertifyNotDisposed();
             int imageId;
             if (m_ImageExports != null) {
@@ -297,7 +297,7 @@ namespace GLTFast.Export {
                 name = imageExport.fileName,
                 mimeType = imageExport.mimeType
             };
-            
+
             m_ImageExports.Add(imageExport);
             m_Images.Add(image);
 
@@ -307,7 +307,7 @@ namespace GLTFast.Export {
         public int AddTexture(int imageId, int samplerId) {
             CertifyNotDisposed();
             m_Textures = m_Textures ?? new List<Texture>();
-            
+
             var texture = new Texture {
                 source = imageId,
                 sampler = samplerId
@@ -317,11 +317,11 @@ namespace GLTFast.Export {
             if (index >= 0) {
                 return index;
             }
-            
+
             m_Textures.Add(texture);
             return m_Textures.Count - 1;
         }
-        
+
         public int AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV) {
             if (filterMode == FilterMode.Bilinear && wrapModeU == TextureWrapMode.Repeat && wrapModeV == TextureWrapMode.Repeat) {
                 // This is the default, so no sampler needed
@@ -331,13 +331,13 @@ namespace GLTFast.Export {
             m_Samplers = m_Samplers ?? new List<Sampler>();
             m_SamplerKeys = m_SamplerKeys ?? new List<SamplerKey>();
 
-            var samplerKey = new SamplerKey(filterMode, wrapModeU, wrapModeV );
-            
+            var samplerKey = new SamplerKey(filterMode, wrapModeU, wrapModeV);
+
             var index = m_SamplerKeys.IndexOf(samplerKey);
             if (index >= 0) {
                 return index;
             }
-            
+
             m_Samplers.Add(new Sampler(filterMode, wrapModeU, wrapModeV));
             m_SamplerKeys.Add(samplerKey);
             return m_Samplers.Count - 1;
@@ -355,7 +355,7 @@ namespace GLTFast.Export {
                 }
             }
         }
-        
+
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a file
         /// and disposes this object.
@@ -364,9 +364,9 @@ namespace GLTFast.Export {
         /// <param name="path">glTF destination file path</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
         public async Task<bool> SaveToFileAndDispose(string path) {
-            
+
             CertifyNotDisposed();
-            
+
             var ext = Path.GetExtension(path);
             var binary = m_Settings.format == GltfFormat.Binary;
             string bufferPath = null;
@@ -377,13 +377,13 @@ namespace GLTFast.Export {
                     bufferPath = path.Substring(0, path.Length - ext.Length) + ".bin";
                 }
             }
-            
-            var outStream = new FileStream(path,FileMode.Create);
-            var success = await SaveAndDispose(outStream, bufferPath, Path.GetDirectoryName(path) );
+
+            var outStream = new FileStream(path, FileMode.Create);
+            var success = await SaveAndDispose(outStream, bufferPath, Path.GetDirectoryName(path));
             outStream.Close();
             return success;
         }
-        
+
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a Stream
         /// and disposes this object. Only works for self-contained glTF-Binary.
@@ -392,17 +392,17 @@ namespace GLTFast.Export {
         /// <param name="stream">glTF destination stream</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
         public async Task<bool> SaveToStreamAndDispose(Stream stream) {
-            
+
             CertifyNotDisposed();
 
-            if (m_Settings.format != GltfFormat.Binary || GetFinalImageDestination()==ImageDestination.SeparateFile) {
+            if (m_Settings.format != GltfFormat.Binary || GetFinalImageDestination() == ImageDestination.SeparateFile) {
                 m_Logger.Error(LogCode.None, "Save to Stream currently only works for self-contained glTF-Binary");
                 return false;
             }
-            
+
             return await SaveAndDispose(stream);
         }
-        
+
         async Task<bool> SaveAndDispose(Stream outStream, string bufferPath = null, string directory = null) {
 
             //UnityEngine.Debug.LogFormat("<color=yellow>{0}</color>", "Save and Dispose");
@@ -431,8 +431,8 @@ namespace GLTFast.Export {
 
                 MemoryStream jsonStream = null;
                 uint jsonLength;
-                
-                if(outStream.CanSeek) {
+
+                if (outStream.CanSeek) {
                     // Write empty 3 place-holder uints for:
                     // - total length
                     // - JSON chunk length
@@ -447,25 +447,25 @@ namespace GLTFast.Export {
                 else {
                     jsonStream = new MemoryStream();
                     await WriteJsonToStream(jsonStream);
-                    jsonLength = (uint) jsonStream.Length;
+                    jsonLength = (uint)jsonStream.Length;
                 }
                 LogSummary(jsonLength, m_BufferStream?.Length ?? 0);
                 var jsonPad = GetPadByteCount(jsonLength);
                 var binPad = 0;
-                var totalLength = (uint) (headerSize + chunkOverhead + jsonLength + jsonPad);
-                var hasBufferContent = (m_BufferStream?.Length ?? 0) > 0; 
+                var totalLength = (uint)(headerSize + chunkOverhead + jsonLength + jsonPad);
+                var hasBufferContent = (m_BufferStream?.Length ?? 0) > 0;
                 if (hasBufferContent) {
                     binPad = GetPadByteCount((uint)m_BufferStream.Length);
-                    totalLength += (uint) (chunkOverhead + m_BufferStream.Length + binPad);
+                    totalLength += (uint)(chunkOverhead + m_BufferStream.Length + binPad);
                 }
 
                 if (outStream.CanSeek) {
                     outStream.Seek(8, SeekOrigin.Begin);
                 }
-                
+
                 outStream.Write(BitConverter.GetBytes(totalLength));
-                
-                outStream.Write(BitConverter.GetBytes((uint)(jsonLength+jsonPad)));
+
+                outStream.Write(BitConverter.GetBytes((uint)(jsonLength + jsonPad)));
                 outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.JSON));
 
                 if (outStream.CanSeek) {
@@ -475,13 +475,13 @@ namespace GLTFast.Export {
                     jsonStream.WriteTo(outStream);
                     jsonStream.Close();
                 }
-                
+
                 for (var i = 0; i < jsonPad; i++) {
                     outStream.WriteByte(0x20);
                 }
 
                 if (hasBufferContent) {
-                    outStream.Write(BitConverter.GetBytes((uint)(m_BufferStream.Length+binPad)));
+                    outStream.Write(BitConverter.GetBytes((uint)(m_BufferStream.Length + binPad)));
                     outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.BIN));
                     var ms = (MemoryStream)m_BufferStream;
                     ms.WriteTo(outStream);
@@ -536,16 +536,16 @@ namespace GLTFast.Export {
         /// <returns></returns>
         public bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport) {
 
-            if (m_Materials!=null) {
+            if (m_Materials != null) {
                 materialId = m_UnityMaterials.IndexOf(uMaterial);
                 if (materialId >= 0) {
                     return true;
                 }
             } else {
-                m_Materials = new List<Material>();    
-                m_UnityMaterials = new List<UnityEngine.Material>();    
+                m_Materials = new List<Material>();
+                m_UnityMaterials = new List<UnityEngine.Material>();
             }
-            
+
             var success = materialExport.ConvertMaterial(uMaterial, out var material, this, m_Logger);
 
             materialId = m_Materials.Count;
@@ -553,9 +553,9 @@ namespace GLTFast.Export {
             m_UnityMaterials.Add(uMaterial);
             return success;
         }
-        
+
         int GetPadByteCount(uint length) {
-            return (4 - (int)(length & 3) ) & 3;
+            return (4 - (int)(length & 3)) & 3;
         }
 
         [Conditional("DEBUG")]
@@ -589,7 +589,7 @@ namespace GLTFast.Export {
             var success = await BakeImages(directory);
 
             if (!success) return false;
-            
+
             if (m_BufferStream != null && m_BufferStream.Length > 0) {
                 m_Gltf.buffers = new[] {
                     new Buffer {
@@ -614,7 +614,7 @@ namespace GLTFast.Export {
                 version = "2.0",
                 generator = $"Unity {Application.unityVersion} glTFast {Constants.version}"
             };
-            
+
             BakeExtensions();
             return true;
         }
@@ -758,14 +758,17 @@ namespace GLTFast.Export {
                 
                 switch (attribute.attribute) {
                     case VertexAttribute.Position:
+                        //UnityEngine.Debug.Log("Doing accessor bounds");
                         Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
                         Assert.AreEqual(3,attribute.dimension);
                         uMesh.RecalculateBounds();
                         var bounds = uMesh.bounds;
                         var max = bounds.max;
                         var min = bounds.min;
-                        accessor.min = new[] { -max.x, min.y, min.z };
-                        accessor.max = new[] { -min.x, max.y, max.z };
+                        max = max.ToGLTF();
+                        min = min.ToGLTF();
+                        accessor.min = new[] { (float)min.x, (float)min.y, (float)min.z };
+                        accessor.max = new[] { (float)max.x, (float)max.y, (float)max.z };
                         attributes.POSITION = accessorId;
                         break;
                     case VertexAttribute.Normal:
@@ -960,19 +963,189 @@ namespace GLTFast.Export {
             }
 
             Profiler.BeginSample("ScheduleVertexJob");
+            //UnityEngine.Debug.Log("schedule vertex jobs");
             foreach (var pair in attrDataDict) {
                 var vertexAttribute = pair.Key;
                 var attrData = pair.Value;
                 switch (vertexAttribute) {
-                    case VertexAttribute.Position:
                     case VertexAttribute.Normal:
-                        await ConvertPositionAttribute(
-                            attrData,
-                            (uint)strides[attrData.stream],
-                            vertexCount,
-                            inputStreams[attrData.stream],
-                            outputStreams[attrData.stream]
-                            );
+                        {
+                            var minArray = new NativeArray<double3>(1, Allocator.TempJob);
+                            var maxArray = new NativeArray<double3>(1, Allocator.TempJob);
+                            await ConvertPositionAttribute(
+                                attrData,
+                                (uint)strides[attrData.stream],
+                                vertexCount,
+                                inputStreams[attrData.stream],
+                                outputStreams[attrData.stream]
+                                );
+                            minArray.Dispose();
+                            maxArray.Dispose();
+                        }
+                        break;
+
+                    case VertexAttribute.Position:
+                        {
+                            var minArray = new NativeArray<double3>(1, Allocator.TempJob);
+                            var maxArray = new NativeArray<double3>(1, Allocator.TempJob);
+                            unsafe
+                            {
+                                double3* ptr = (double3*)minArray.GetUnsafePtr();
+                                (*ptr).x = double.MaxValue;
+                                (*ptr).y = double.MaxValue;
+                                (*ptr).z = double.MaxValue;
+                                ptr = (double3*)maxArray.GetUnsafePtr();
+                                (*ptr).x = double.MinValue;
+                                (*ptr).y = double.MinValue;
+                                (*ptr).z = double.MinValue;
+                            }
+                            await ConvertPositionAttribute(
+                                attrData,
+                                (uint)strides[attrData.stream],
+                                vertexCount,
+                                inputStreams[attrData.stream],
+                                outputStreams[attrData.stream]
+                                );
+                            Accessor acc = m_Accessors[attrData.accessorId];
+#if false
+                            //acc.max = new double[3];
+                            //acc.min = new double[3];
+                            acc.max[0] = (double)maxArray[0].x;
+                            acc.max[1] = (double)maxArray[0].y;
+                            acc.max[2] = (double)maxArray[0].z;
+
+                            acc.min[0] = (double)minArray[0].x;
+                            acc.min[1] = (double)minArray[0].y;
+                            acc.min[2] = (double)minArray[0].z;
+#endif
+#if false                            
+
+                            if (acc.max == null)
+                            {
+                                acc.max = new double[3];
+                                acc.min = new double[3];
+                                acc.max[0] = (double)maxArray[0].x;
+                                acc.max[1] = (double)maxArray[0].y;
+                                acc.max[2] = (double)maxArray[0].z;
+
+                                acc.min[0] = (double)minArray[0].x;
+                                acc.min[1] = (double)minArray[0].y;
+                                acc.min[2] = (double)minArray[0].z;
+                            }
+                            else
+                            {
+                                acc.max[0] = math.max(acc.max[0], (double)maxArray[0].x);
+                                acc.max[1] = math.max(acc.max[1], (double)maxArray[0].y);
+                                acc.max[2] = math.max(acc.max[2], (double)maxArray[0].z);
+
+                                acc.min[0] = math.min(acc.min[0], (double)minArray[0].x);
+                                acc.min[1] = math.min(acc.min[1], (double)minArray[0].y);
+                                acc.min[2] = math.min(acc.min[2], (double)minArray[0].z);
+                            }
+#endif
+#if false
+                            uint stride = (uint)strides[attrData.stream];
+                            bool problem = false;
+                            unsafe
+                            {
+                                byte* ptr = (byte*)outputStreams[attrData.stream].GetUnsafePtr();
+                                for (int i = 0; i < vertexCount; i++)
+                                {
+                                    float3* pos = (float3*)(ptr + i * stride);
+                                    if (acc.max[0]<(*pos).x || acc.max[1] < (*pos).y || acc.max[2]< (*pos).z)
+                                    {
+                                        UnityEngine.Debug.Log("Max problem:" + i + mesh.name);
+                                        problem = true;
+                                    }
+                                    else if (acc.min[0]>(*pos).x || acc.min[1]>(*pos).y || acc.min[2] > (*pos).z)
+                                    {
+                                        UnityEngine.Debug.Log("Min problem:" + i + mesh.name);
+                                        problem = true;
+                                    }
+
+                                    if (problem)
+                                    {
+                                        UnityEngine.Debug.Log(mesh.name + ":Max:" + acc.max[0] + "," + acc.max[1] + "," + acc.max[2]);
+                                        UnityEngine.Debug.Log(mesh.name + ":Min:" + acc.min[0] + "," + acc.min[1] + "," + acc.min[2]);
+                                        break;
+                                    }
+                                }
+                            }
+#endif
+#if true
+
+                            uint stride2 = (uint)strides[attrData.stream];
+                            //UnityEngine.Debug.Log("Fixing min max");
+                            unsafe
+                            {
+                                byte* ptr = (byte*)outputStreams[attrData.stream].GetUnsafePtr();
+                                for (int i = 0; i < vertexCount; i++)
+                                {
+                                    float3* pos = (float3*)(ptr + i * stride2);
+#if true
+                                    if ((*pos).x > acc.max[0])
+                                        acc.max[0] = (*pos).x;
+                                    if ((*pos).y > acc.max[1])
+                                        acc.max[1] = (*pos).y;
+                                    if ((*pos).z > acc.max[2])
+                                        acc.max[2] = (*pos).z;
+
+                                    if ((*pos).x < acc.min[0])
+                                        acc.min[0] = (*pos).x;
+                                    if ((*pos).y < acc.min[1])
+                                        acc.min[1] = (*pos).y;
+                                    if ((*pos).z < acc.min[2])
+                                        acc.min[2] = (*pos).z;
+
+
+#else
+                                    acc.max[0] = math.max(acc.max[0], (double)(*pos).x);
+                                    acc.max[1] = math.max(acc.max[1], (double)(*pos).y);
+                                    acc.max[2] = math.max(acc.max[2], (double)(*pos).z);
+
+                                    acc.min[0] = math.min(acc.min[0], (double)(*pos).x);
+                                    acc.min[1] = math.min(acc.min[1], (double)(*pos).y);
+                                    acc.min[2] = math.min(acc.min[2], (double)(*pos).z);
+#endif
+                                }
+                            }
+#endif
+#if false
+                            UnityEngine.Debug.Log("Testing min max again");
+                            uint stride3 = (uint)strides[attrData.stream];
+                            bool problem2 = false;
+                            unsafe
+                            {
+                                byte* ptr = (byte*)outputStreams[attrData.stream].GetUnsafePtr();
+                                for (int i = 0; i < vertexCount; i++)
+                                {
+                                    float3* pos = (float3*)(ptr + i * stride3);
+                                    if (acc.max[0] < (*pos).x || acc.max[1] < (*pos).y || acc.max[2] < (*pos).z)
+                                    {
+                                        UnityEngine.Debug.Log("After Max problem:" + i + mesh.name);
+                                        problem2 = true;
+                                    }
+                                    else if (acc.min[0] > (*pos).x || acc.min[1] > (*pos).y || acc.min[2] > (*pos).z)
+                                    {
+                                        UnityEngine.Debug.Log("After Min problem:" + i + mesh.name);
+                                        problem2 = true;
+                                    }
+
+                                    if (problem2)
+                                    {
+                                        UnityEngine.Debug.Log("After:"+mesh.name + ":Max:" + acc.max[0] + "," + acc.max[1] + "," + acc.max[2]);
+                                        UnityEngine.Debug.Log("After:"+mesh.name + ":Min:" + acc.min[0] + "," + acc.min[1] + "," + acc.min[2]);
+                                        break;
+                                    }
+                                }
+                            }
+#endif
+
+
+                            minArray.Dispose();
+                            maxArray.Dispose();
+
+                        }
                         break;
                     case VertexAttribute.Tangent:
                         await ConvertTangentAttribute(
@@ -1032,7 +1205,7 @@ namespace GLTFast.Export {
         }
 #else
 
-        async Task BakeMeshesLegacy() {
+                            async Task BakeMeshesLegacy() {
             Profiler.BeginSample("BakeMeshesLegacy");
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
                 BakeMeshLegacy(meshId);
@@ -1532,7 +1705,9 @@ namespace GLTFast.Export {
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
+            
             job.Complete(); // TODO: Wait until thread is finished
+
         }
 
         static unsafe JobHandle CreateConvertPositionAttributeJob(
@@ -1541,7 +1716,7 @@ namespace GLTFast.Export {
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
-            ) 
+            )
         {
             var job = new ExportJobs.ConvertPositionFloatJob {
                 input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
@@ -1699,6 +1874,7 @@ namespace GLTFast.Export {
 
             m_Skins = m_Skins ?? new List<Skin>();
             Skin skin = new Skin();
+            //skin.skeleton = 0;
             m_Skins.Add(skin);
             return m_SkinJointsPair.Count - 1;
         }

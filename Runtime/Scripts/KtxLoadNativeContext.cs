@@ -30,7 +30,7 @@ namespace GLTFast {
         }
 
         public override async Task<TextureResult> LoadKtx(bool linear) {
-            return await ktxTexture.LoadBytesRoutine(slice,linear);
+            return await ktxTexture.LoadBytesRoutine(slice,linear:linear);
         }
     }
 }
