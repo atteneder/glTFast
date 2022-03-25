@@ -1908,6 +1908,8 @@ namespace GLTFast.Export {
         }
         public void ResolveSkinJoints(Dictionary<Transform, int> TransformToNodeID)
         {
+            if (TransformToNodeID == null || m_SkinJointsPair== null)
+                return;
             //UnityEngine.Debug.LogFormat("<color=cyan>{0}</color>", "Resolving Skin Joints to node:" + m_Skins.Count);
             for (int i = 0; i < m_SkinJointsPair.Count; i++)
             {
@@ -1922,6 +1924,8 @@ namespace GLTFast.Export {
 
         public void BakeSkins()
         {
+            if (m_SkinJointsPair == null)
+                return;
             for (int i = 0; i < m_SkinJointsPair.Count; i++)
             {
                 Accessor accessor = new Accessor
