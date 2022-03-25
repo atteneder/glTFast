@@ -289,9 +289,11 @@ namespace GLTFast.Schema {
         }
 
         public void GltfSerialize(JsonWriter writer) {
-            if( POSITION >= 0 ) writer.AddProperty("POSITION", POSITION);
+            writer.AddObject();
+            if ( POSITION >= 0 ) writer.AddProperty("POSITION", POSITION);
             if( NORMAL >= 0 ) writer.AddProperty("NORMAL", NORMAL);
             if( TANGENT >= 0 ) writer.AddProperty("TANGENT", TANGENT);
+            writer.Close();
         }
     }
 }

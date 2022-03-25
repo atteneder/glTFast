@@ -157,6 +157,7 @@ namespace GLTFast.Export {
             tempMaterials.Clear();
 
             Transform [] skinJoints = null;
+            float[] blendShapeWeights = null;
             if (gameObject.TryGetComponent(out MeshFilter meshFilter)) {
                 mesh = meshFilter.sharedMesh;
                 if (gameObject.TryGetComponent(out Renderer renderer)) {
@@ -168,6 +169,18 @@ namespace GLTFast.Export {
                 smr.GetSharedMaterials(tempMaterials);
                 //UnityEngine.Debug.Log("Gather skinning info over here");
                 skinJoints = smr.bones;
+                // the way unity works, skinned mesh renderer is also where morph targets are set..
+                // its possible that it may not be skinned but still contains the morpsh..
+                // lets get all the targets
+                if (mesh.blendShapeCount>0)
+                {
+                    blendShapeWeights = new float[mesh.blendShapeCount];
+                    for (int i=0;i< mesh.blendShapeCount;i++)
+                    {
+                        blendShapeWeights[i] = smr.GetBlendShapeWeight(i);
+                    }
+                }
+                
             }
 
             var materialIds = new int[tempMaterials.Count];
@@ -181,7 +194,7 @@ namespace GLTFast.Export {
             }
 
             if (mesh != null) {
-                m_Writer.AddMeshToNode(nodeId,mesh,materialIds, skinJoints);
+                m_Writer.AddMeshToNode(nodeId,mesh,materialIds, skinJoints, blendShapeWeights);
             }
             return success;
         }

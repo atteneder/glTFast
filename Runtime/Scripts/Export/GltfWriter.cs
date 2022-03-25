@@ -241,7 +241,7 @@ namespace GLTFast.Export {
         /// <param name="uMesh">Unity mesh to be assigned and exported</param>
         /// <param name="materialIds">glTF materials IDs to be assigned
         /// (multiple in case of sub-meshes)</param>
-        public void AddMeshToNode(int nodeId, [NotNull] UnityEngine.Mesh uMesh, int[] materialIds, Transform[] skinJoints = null) {
+        public void AddMeshToNode(int nodeId, [NotNull] UnityEngine.Mesh uMesh, int[] materialIds, Transform[] skinJoints = null,float [] blendShapeWeights = null) {
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
@@ -250,7 +250,7 @@ namespace GLTFast.Export {
                 m_NodeMaterials[nodeId] = materialIds;
             }
 
-            node.mesh = AddMesh(uMesh);
+            node.mesh = AddMesh(uMesh, blendShapeWeights);
             if (skinJoints != null && skinJoints.Length > 0)
                 node.skin = AddSkin(uMesh, skinJoints);
         }
@@ -1193,8 +1193,154 @@ namespace GLTFast.Export {
                 var attrData = pair.Value;
                 m_Accessors[attrData.accessorId].bufferView = bufferViewIds[attrData.stream];
             }
-            
+
+
+            // we also need to create the morph targest over here
+            if (uMesh.blendShapeCount>0)
+            {
+                Assert.IsTrue(meshData.subMeshCount == 1);
+                // until we find a contrary then I will fix it
+                MeshPrimitive meshPrim = mesh.primitives[0];
+                List<MorphTarget> Morphs = new List<MorphTarget>();
+                int vc = uMesh.vertexCount;
+                for (int k=0;k<uMesh.blendShapeCount;k++)
+                {
+                    //MorphTargetContext ctx = new MorphTargetContext();
+                    MorphTarget gltfTarget = new MorphTarget();
+                    Morphs.Add(gltfTarget);
+                    string morphTargetName = uMesh.GetBlendShapeName(k);
+                    for (int j = 0; j < uMesh.GetBlendShapeFrameCount(k);j++)
+                    {
+                        float frameWeight = uMesh.GetBlendShapeFrameWeight(k, j);
+                        Vector3 [] deltaVertices = new Vector3[vc];
+                        Vector3[] deltaNormals = new Vector3[vc];
+                        Vector3[] Vertices = new Vector3[vc];
+                        Vector3[] Normals = new Vector3[vc];
+                        Vertices = uMesh.vertices;
+                        Normals = uMesh.normals;
+                        UnityEngine.Debug.Log(morphTargetName+":"+j+":Frame weight:" + frameWeight);
+                        uMesh.GetBlendShapeFrameVertices(k, j, deltaVertices, deltaNormals, null);
+                        /*
+                        for (int i=0;i<vc;i++)
+                        {
+                            deltaVertices[i] = Vertices[i] + deltaVertices[i];
+                            deltaNormals[i] = Normals[i] + deltaNormals[i];
+                        }
+                        */
+                        // now we create all the accessors for them
+                        var input = new NativeArray<float3>(vc, Allocator.TempJob);
+                        var output = new NativeArray<float3>(vc, Allocator.TempJob);
+
+                        CopyVertexArrayToNativeArray(input,deltaVertices);
+                        AttributeData attrData = new AttributeData();
+                        attrData.offset = 0; 
+                        await ConvertPositionAttribute(
+                            attrData,
+                            (uint)UnsafeUtility.SizeOf<float3>(),
+                            vc,
+                            input.Reinterpret<byte>(UnsafeUtility.SizeOf<float3>()),
+                            output.Reinterpret<byte>(UnsafeUtility.SizeOf<float3>())
+                            );
+                        var accessor = new Accessor
+                        {
+                            byteOffset = attrData.offset,
+                            componentType = GLTFComponentType.Float,
+                            count = vertexCount,
+                            typeEnum = GLTFAccessorAttributeType.VEC3,
+                        };
+                        int bufferID  = WriteBufferViewToBuffer(
+                            output.Reinterpret<byte>(UnsafeUtility.SizeOf<float3>()), UnsafeUtility.SizeOf<float3>()
+                            );
+                        accessor.bufferView = bufferID;
+                        int accID = AddAccessor(accessor);
+                        gltfTarget.POSITION = accID;
+                        accessor.max = new float[3];
+                        accessor.min = new float[3];
+                        accessor.max[0] = float.MinValue;
+                        accessor.max[1] = float.MinValue;
+                        accessor.max[2] = float.MinValue;
+                        accessor.min[0] = float.MaxValue;
+                        accessor.min[1] = float.MaxValue;
+                        accessor.min[2] = float.MaxValue;
+
+                        unsafe
+                        {
+                            float3* ptr = (float3*)output.GetUnsafePtr();
+                            for (int l=0;l<vc;l++)
+                            {
+                                float3 pos = ptr[l];
+                                if (pos.x > accessor.max[0])
+                                    accessor.max[0] = pos.x;
+                                if (pos.y > accessor.max[1])
+                                    accessor.max[1] = pos.y;
+                                if (pos.z > accessor.max[2])
+                                    accessor.max[2] = pos.z;
+
+                                if (pos.x < accessor.min[0])
+                                    accessor.min[0] = pos.x;
+                                if (pos.y < accessor.min[1])
+                                    accessor.min[1] = pos.y;
+                                if (pos.z < accessor.min[2])
+                                    accessor.min[2] = pos.z;
+
+                            }
+                        }
+
+#if false
+                        SetNativeVertexArray(deltaNormals, input);
+                        attrData.offset = 0;
+                        await ConvertPositionAttribute(
+                            attrData,
+                            (uint)UnsafeUtility.SizeOf<float3>(),
+                            vc,
+                            input.Reinterpret<byte>(UnsafeUtility.SizeOf<float3>()),
+                            output.Reinterpret<byte>(UnsafeUtility.SizeOf<float3>())
+                            );
+                        accessor = new Accessor
+                        {
+                            byteOffset = attrData.offset,
+                            componentType = GLTFComponentType.Float,
+                            count = vertexCount,
+                            typeEnum = GLTFAccessorAttributeType.VEC3,
+                        };
+                        bufferID = WriteBufferViewToBuffer(
+                            output.Reinterpret<byte>(UnsafeUtility.SizeOf<float3>()), UnsafeUtility.SizeOf<float3>()
+                            );
+                        accessor.bufferView = bufferID;
+                        accID = AddAccessor(accessor);
+                        gltfTarget.NORMAL = accID;
+#endif
+                        input.Dispose();
+                        output.Dispose();
+
+                    }
+                    //gltfTarget.
+                }
+                UnityEngine.Debug.Log("Adding morphs to mesh primitive");
+                meshPrim.targets = Morphs.ToArray();
+            }
+
             Profiler.EndSample();
+        }
+        unsafe void CopyVertexArrayToNativeArray( NativeArray<float3> vertexBuffer, Vector3[] vertexArray)
+        {
+
+            fixed (void* vertexBufferPointer = vertexArray)
+            {
+                // ...and use memcpy to copy the Vector3[] into a NativeArray<floar3> without casting. whould be fast!
+                UnsafeUtility.MemCpy(NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(vertexBuffer),
+                    vertexBufferPointer, vertexArray.Length * (long)UnsafeUtility.SizeOf<float3>());
+            }
+        }
+
+        unsafe void CopyNativeArrayToVertexArray(Vector3[] vertexArray, NativeArray<float3> vertexBuffer)
+        {
+            // pin the target vertex array and get a pointer to it
+            fixed (void* vertexArrayPointer = vertexArray)
+            {
+                // memcopy the native array over the top
+                UnsafeUtility.MemCpy(vertexArrayPointer, NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(vertexBuffer), vertexArray.Length * (long)UnsafeUtility.SizeOf<float3>());
+            }
         }
 
         int AddAccessor(Accessor accessor) {
@@ -1205,7 +1351,7 @@ namespace GLTFast.Export {
         }
 #else
 
-                            async Task BakeMeshesLegacy() {
+                        async Task BakeMeshesLegacy() {
             Profiler.BeginSample("BakeMeshesLegacy");
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
                 BakeMeshLegacy(meshId);
@@ -1879,7 +2025,7 @@ namespace GLTFast.Export {
             return m_SkinJointsPair.Count - 1;
         }
 
-        int AddMesh([NotNull] UnityEngine.Mesh uMesh) {
+        int AddMesh([NotNull] UnityEngine.Mesh uMesh, float [] blendShapeWeights = null) {
             int meshId;
             
 #if !UNITY_EDITOR
@@ -1903,12 +2049,13 @@ namespace GLTFast.Export {
             m_UnityMeshes = m_UnityMeshes ?? new List<UnityEngine.Mesh>();
             m_Meshes.Add(mesh);
             m_UnityMeshes.Add(uMesh);
+            mesh.weights = blendShapeWeights;
             meshId = m_Meshes.Count - 1;
             return meshId;
         }
         public void ResolveSkinJoints(Dictionary<Transform, int> TransformToNodeID)
         {
-            if (TransformToNodeID == null || m_SkinJointsPair== null)
+            if (TransformToNodeID == null || m_SkinJointsPair == null || m_SkinJointsPair.Count == 0)
                 return;
             //UnityEngine.Debug.LogFormat("<color=cyan>{0}</color>", "Resolving Skin Joints to node:" + m_Skins.Count);
             for (int i = 0; i < m_SkinJointsPair.Count; i++)
