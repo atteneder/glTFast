@@ -1194,7 +1194,7 @@ namespace GLTFast.Export {
                 m_Accessors[attrData.accessorId].bufferView = bufferViewIds[attrData.stream];
             }
 
-
+#if true
             // we also need to create the morph targest over here
             if (uMesh.blendShapeCount>0)
             {
@@ -1206,11 +1206,13 @@ namespace GLTFast.Export {
                 for (int k=0;k<uMesh.blendShapeCount;k++)
                 {
                     //MorphTargetContext ctx = new MorphTargetContext();
-                    MorphTarget gltfTarget = new MorphTarget();
-                    Morphs.Add(gltfTarget);
-                    string morphTargetName = uMesh.GetBlendShapeName(k);
                     for (int j = 0; j < uMesh.GetBlendShapeFrameCount(k);j++)
                     {
+                        if (j == 1 && uMesh.GetBlendShapeFrameCount(k) == 3)
+                            continue;
+                        MorphTarget gltfTarget = new MorphTarget();
+                        Morphs.Add(gltfTarget);
+                        string morphTargetName = uMesh.GetBlendShapeName(k);
                         float frameWeight = uMesh.GetBlendShapeFrameWeight(k, j);
                         Vector3 [] deltaVertices = new Vector3[vc];
                         Vector3[] deltaNormals = new Vector3[vc];
@@ -1286,8 +1288,8 @@ namespace GLTFast.Export {
                             }
                         }
 
-#if false
-                        SetNativeVertexArray(deltaNormals, input);
+#if true
+                        CopyVertexArrayToNativeArray(input, deltaNormals);
                         attrData.offset = 0;
                         await ConvertPositionAttribute(
                             attrData,
@@ -1312,14 +1314,17 @@ namespace GLTFast.Export {
 #endif
                         input.Dispose();
                         output.Dispose();
-
+                        // only do the 1st
+                        //break;
                     }
                     //gltfTarget.
+                    //break;
                 }
                 UnityEngine.Debug.Log("Adding morphs to mesh primitive");
                 meshPrim.targets = Morphs.ToArray();
+                mesh.weights = new float[Morphs.Count].ToArray();
             }
-
+#endif
             Profiler.EndSample();
         }
         unsafe void CopyVertexArrayToNativeArray( NativeArray<float3> vertexBuffer, Vector3[] vertexArray)
