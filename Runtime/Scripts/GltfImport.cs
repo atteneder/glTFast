@@ -265,6 +265,11 @@ namespace GLTFast {
             this.logger = logger;
         }
 
+        ~GltfImport()
+        {
+            defaultDeferAgent = null;
+        }
+
 #region Public
 
         /// <summary>
