@@ -8,6 +8,7 @@
         "Unity.Collections",
         "Unity.Transforms",
         "Unity.Mathematics",
+        "Unity.Entities.Hybrid",
         "Unity.Rendering.Hybrid",
         "Unity.Burst"
     ],
@@ -21,7 +22,7 @@
     "versionDefines": [
         {
             "name": "com.unity.rendering.hybrid",
-            "expression": "0.10.0",
+            "expression": "0.49.0",
             "define": "UNITY_DOTS_HYBRID"
         },
         {
