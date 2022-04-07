@@ -31,7 +31,7 @@ namespace GLTFast {
 
         public override async Task<TextureResult> LoadKtx(bool linear) {
             var slice = new NativeArray<byte>(data,KtxNativeInstance.defaultAllocator);
-            var result = await ktxTexture.LoadBytesRoutine(slice,linear);
+            var result = await ktxTexture.LoadBytesRoutine(slice,linear:linear);
             slice.Dispose();
             data = null;
             return result;

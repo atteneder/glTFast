@@ -42,13 +42,14 @@ namespace GLTFast.Export {
         protected static byte[] EncodeTexture(Texture2D texture, Format format, bool hasAlpha = true, Material blitMaterial = null) {
 
             Texture2D exportTexture;
-            if (texture.isReadable && blitMaterial==null) {
+            if (texture.isReadable && blitMaterial==null && false) { // readable texture could be compressed
                 exportTexture = texture;
                 if (exportTexture == null) {
                     // m_Logger?.Error(LogCode.ImageFormatUnknown,texture.name,"n/a");
                     return null;
                 }
             } else {
+                //UnityEngine.Debug.Log("Starting to encode image to png:"+format);
                 var destRenderTexture = RenderTexture.GetTemporary(
                     texture.width,
                     texture.height,
@@ -70,7 +71,8 @@ namespace GLTFast.Export {
                 exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
                 exportTexture.Apply();
             }
-            
+
+            //UnityEngine.Debug.Log("About to encode:" + exportTexture.format);
             var imageData = format == Format.Png 
                 ? exportTexture.EncodeToPNG()
                 : exportTexture.EncodeToJPG(60);

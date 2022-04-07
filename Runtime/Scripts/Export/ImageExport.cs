@@ -93,6 +93,7 @@ namespace GLTFast.Export {
         }
 
         protected virtual bool GenerateTexture(out byte[] imageData) {
+            //UnityEngine.Debug.Log("Generate Texture from imageData");
             if (m_Texture != null) {
                 imageData = EncodeTexture(m_Texture, format);
                 return true;

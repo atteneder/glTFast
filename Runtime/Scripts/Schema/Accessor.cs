@@ -239,8 +239,8 @@ namespace GLTFast.Schema {
         public Bounds? TryGetBounds() {
             Assert.AreEqual(GLTFAccessorAttributeType.VEC3 ,typeEnum);
             if (min != null && min.Length > 2 && max != null && max.Length > 2) {
-                var maxBounds = new float3(-min[0], max[1], max[2]);
-                var minBounds = new float3(-max[0], min[1], min[2]);
+                var maxBounds = new double3(-min[0], max[1], max[2]);
+                var minBounds = new double3(-max[0], min[1], min[2]);
                 if(normalized) {
                     switch (componentType) {
                         case GLTFComponentType.Byte:
@@ -266,8 +266,8 @@ namespace GLTFast.Schema {
                     }
                 }
                 return new Bounds {
-                    max = maxBounds,
-                    min = minBounds
+                    max = (float3)maxBounds,
+                    min = (float3)minBounds
                 };
             }
             return null;
@@ -290,9 +290,11 @@ namespace GLTFast.Schema {
                 writer.AddProperty("normalized", normalized);
             }
             if (max!=null) {
+                //UnityEngine.Debug.Log("Writing array max property");
                 writer.AddArrayProperty("max", max);
             }
             if (min!=null) {
+                //UnityEngine.Debug.Log("Writing array min property");
                 writer.AddArrayProperty("min", min);
             }
 

@@ -298,6 +298,7 @@ namespace GLTFast {
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
         /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null, ImportSettings importSettings = null) {
+            UnityEngine.Debug.Log("Loading GLTF Binary");
             settings = importSettings ?? new ImportSettings();
             var success = await LoadGltfBinaryBuffer(bytes,uri);
             if(success) await LoadContent();
@@ -740,6 +741,7 @@ namespace GLTFast {
         }
 
         async Task<bool> LoadGltf( string json, Uri url ) {
+            UnityEngine.Debug.Log("Loading GLTF");
             var baseUri = UriHelper.GetBaseUri(url);
             var success = await ParseJsonAndLoadBuffers(json,baseUri);
             if(success) await LoadImages(baseUri);
@@ -1060,6 +1062,7 @@ namespace GLTFast {
         }
 
         async Task<bool> LoadGltfBinaryBuffer( byte[] bytes, Uri uri = null ) {
+            UnityEngine.Debug.Log("Loading GLTF Binary Buffer");
             Profiler.BeginSample("LoadGltfBinary.Phase1");
             
             if (!GltfGlobals.IsGltfBinary(bytes)) {
@@ -2630,6 +2633,7 @@ namespace GLTFast {
         }
 
         unsafe void GetVector3Job(Root gltf, int accessorIndex, out NativeArray<Vector3> vectors, out JobHandle? jobHandle, bool flip) {
+            UnityEngine.Debug.Log("Getting vector3 job");
             Profiler.BeginSample("GetVector3Job");
             var accessor = gltf.accessors[accessorIndex];
             var bufferView = GetBufferView(accessor.bufferView,accessor.byteOffset);

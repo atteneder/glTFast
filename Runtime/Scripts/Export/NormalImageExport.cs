@@ -32,6 +32,7 @@ namespace GLTFast.Export {
         }
 
         protected override bool GenerateTexture(out byte[] imageData) {
+            //UnityEngine.Debug.Log("Exporting Normal Image");
             if (m_Texture != null) {
                 imageData = EncodeTexture(m_Texture, format, hasAlpha:false, blitMaterial:GetNormalBlitMaterial());
                 return true;
