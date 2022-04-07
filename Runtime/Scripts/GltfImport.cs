@@ -35,6 +35,7 @@ using GLTFast.Jobs;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 #if MESHOPT
 using Meshoptimizer;
 #endif
@@ -253,8 +254,13 @@ namespace GLTFast {
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
 
             if (deferAgent == null) {
-                if (defaultDeferAgent == null) {
-                    defaultDeferAgent = new GameObject("glTFast_DeferAgent").AddComponent<TimeBudgetPerFrameDeferAgent>(); 
+                if ((defaultDeferAgent as Object) == null) { // Cast to Object to enforce Unity Object's null check (is MonoBehavior alive?)
+                    var defaultDeferAgentGameObject = new GameObject("glTFast_DeferAgent");
+                    // Keep it across scene loads
+                    Object.DontDestroyOnLoad(defaultDeferAgentGameObject);
+                    defaultDeferAgent = defaultDeferAgentGameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
+                    // Adding a DefaultDeferAgent component will make it un-register via <see cref="UnsetDefaultDeferAgent"/>
+                    defaultDeferAgentGameObject.AddComponent<DefaultDeferAgent>();
                 }
                 this.deferAgent = defaultDeferAgent;
             } else {
@@ -580,6 +586,16 @@ namespace GLTFast {
         
 #endregion Public
 
+        /// <summary>
+        /// Allows un-registering default IDeferAgent, if it's no longer available
+        /// </summary>
+        /// <param name="deferAgent">IDeferAgent in question</param>
+        internal static void UnsetDefaultDeferAgent(IDeferAgent deferAgent) {
+            if (defaultDeferAgent == deferAgent) {
+                defaultDeferAgent = null;
+            }
+        }
+        
         async Task<bool> LoadRoutine( Uri url ) {
 
             var download = await downloadProvider.Request(url);

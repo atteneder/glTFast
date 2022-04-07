@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GUID conflict with UnityGLTF
 - (Export) Correct float serialization on systems with non-English culture configuration (relates to #335)
 - Documentation link in error message about missing shaders (#368)
+- Slow loading after scene loading due to reference to destroyed default `IDeferAgent` (#165)
 
 ## [4.6.0] - 2022-02-23
 ### Added
