@@ -58,7 +58,12 @@ namespace GLTFast.Editor {
     public class SyncFileLoader : IDownload {
         public SyncFileLoader(Uri url) {
             var path = url.OriginalString;
-            data = File.ReadAllBytes(path);
+            if (File.Exists(path)) {
+                data = File.ReadAllBytes(path);
+            }
+            else {
+                error = $"Cannot find resource at path {path}";
+            }
         }
         
         public object Current => null;
