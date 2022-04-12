@@ -110,6 +110,7 @@ namespace GLTFast.Editor {
                 extension
             );
             if (!string.IsNullOrEmpty(path)) {
+                SaveFolderPath = Directory.GetParent(path)?.FullName;
                 var settings = GetDefaultSettings(binary);
                 var goSettings = new GameObjectExportSettings { onlyActiveInHierarchy = false };
                 var export = new GameObjectExport(settings, gameObjectExportSettings: goSettings, logger: new ConsoleLogger());
