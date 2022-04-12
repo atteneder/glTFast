@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Slow loading after scene loading due to reference to destroyed default `IDeferAgent` (#165)
 - (Import) Better error handling when textures are missing
 - (Export) Remember destination path when exporting individual GameObjects from menu
+- (Export) Vertical texture transform offset is correct now
 
 ## [4.6.0] - 2022-02-23
 ### Added

@@ -158,7 +158,7 @@ namespace GLTFast.Export {
 
             // Counter measure for Unity/glTF texture coordinate difference
             // TODO: Offer UV conversion as alternative
-            offset.y = 1 - offset.x;
+            offset.y = 1 - offset.y;
             scale.y *= -1;
 
             if (offset != Vector2.zero || scale != Vector2.one) {
