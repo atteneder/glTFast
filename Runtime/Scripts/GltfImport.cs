@@ -254,11 +254,14 @@ namespace GLTFast {
             this.downloadProvider = downloadProvider ?? new DefaultDownloadProvider();
 
             if (deferAgent == null) {
-                if ((defaultDeferAgent as Object) == null) { // Cast to Object to enforce Unity Object's null check (is MonoBehavior alive?)
-                    var defaultDeferAgentGameObject = new GameObject("glTFast_DeferAgent");
+                if (defaultDeferAgent==null 
+                    || (defaultDeferAgent is Object agent && agent == null) // Cast to Object to enforce Unity Object's null check (is MonoBehavior alive?)
+                    )
+                {
+                    var defaultDeferAgentGameObject = new GameObject("glTF-StableFramerate");
                     // Keep it across scene loads
                     Object.DontDestroyOnLoad(defaultDeferAgentGameObject);
-                    defaultDeferAgent = defaultDeferAgentGameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();
+                    SetDefaultDeferAgent(defaultDeferAgentGameObject.AddComponent<TimeBudgetPerFrameDeferAgent>());
                     // Adding a DefaultDeferAgent component will make it un-register via <see cref="UnsetDefaultDeferAgent"/>
                     defaultDeferAgentGameObject.AddComponent<DefaultDeferAgent>();
                 }
@@ -271,6 +274,33 @@ namespace GLTFast {
             this.logger = logger;
         }
 
+#region PublicStatic
+        /// <summary>
+        /// Sets the default <see cref="IDeferAgent"/> for subsequently
+        /// generated GltfImport instances.
+        /// </summary>
+        /// <param name="deferAgent">New default <see cref="IDeferAgent"/></param>
+        public static void SetDefaultDeferAgent(IDeferAgent deferAgent) {
+#if DEBUG
+            if (defaultDeferAgent!=null && defaultDeferAgent != deferAgent) {
+                Debug.LogWarning("GltfImport.defaultDeferAgent got overruled! Make sure there is only one default at any time", deferAgent as Object);
+            }
+#endif
+            defaultDeferAgent = deferAgent;
+        }
+
+        /// <summary>
+        /// Allows un-registering default <see cref="IDeferAgent"/>.
+        /// For example if it's no longer available.
+        /// </summary>
+        /// <param name="deferAgent"><see cref="IDeferAgent"/> in question</param>
+        public static void UnsetDefaultDeferAgent(IDeferAgent deferAgent) {
+            if (defaultDeferAgent == deferAgent) {
+                defaultDeferAgent = null;
+            }
+        }
+#endregion
+        
 #region Public
 
         /// <summary>
@@ -586,16 +616,6 @@ namespace GLTFast {
         
 #endregion Public
 
-        /// <summary>
-        /// Allows un-registering default IDeferAgent, if it's no longer available
-        /// </summary>
-        /// <param name="deferAgent">IDeferAgent in question</param>
-        internal static void UnsetDefaultDeferAgent(IDeferAgent deferAgent) {
-            if (defaultDeferAgent == deferAgent) {
-                defaultDeferAgent = null;
-            }
-        }
-        
         async Task<bool> LoadRoutine( Uri url ) {
 
             var download = await downloadProvider.Request(url);

@@ -152,7 +152,7 @@ Look into [`ICodeLogger`][ICodeLogger] and [`LogMessages`][[LogMessages]] for de
 
 ### Tune loading performance
 
-When loading glTFs, *glTFast* let's you optimize for two diametrical extremes
+When loading glTFs, *glTFast* let's you optimize towards one of two diametrical goals
 
 - A stable frame rate
 - Fastest loading time
@@ -166,10 +166,14 @@ You can solve this by using a common "defer agent". It decides if work should co
 - `TimeBudgetPerFrameDeferAgent` for stable frame rate
 - `UninterruptedDeferAgent` for fastest, uninterrupted loading
 
-Usage example
+The recommended way is to set a global default defer agent. The easiest way to do this is to add the prefab `Runtime/Prefabs/glTF-StableFramerate.prefab` to your entrance scene. You can change the `FrameBudget` value of its `TimeBudgetPerFrameDeferAgent` component to tweak performance to your needs. An alternative for fastest loading is the prefab in `Runtime/Prefabs/glTF-FastestLoading.prefab`.
+
+You can accomplish the same from script by calling `GltfImport.SetDefaultDeferAgent` (and `UnsetDefaultDeferAgent`, respectively).
+
+For most granular control, you can pass a custom defer agent to each individual `GltfImport` instance:
 
 ```C#
-async Task CustomDeferAgent() {
+async Task CustomDeferAgentPerGltfImport() {
     // Recommended: Use a common defer agent across multiple GltfImport instances!
     // For a stable frame rate:
     IDeferAgent deferAgent = gameObject.AddComponent<TimeBudgetPerFrameDeferAgent>();

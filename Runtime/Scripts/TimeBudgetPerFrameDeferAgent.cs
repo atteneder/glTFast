@@ -21,6 +21,11 @@ namespace GLTFast {
     
     [DefaultExecutionOrder(-10)]
     public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent {
+
+        [SerializeField]
+        [Range(.01f,5f)]
+        [Tooltip("Per-frame time budget as fraction of the targeted frame time. Keep it well below 0.5, so there's enough time for other game logic and rendering. A value of 1.0 can lead to dropping a full frame. Even higher values can stall for multiple frames.")]
+        float frameBudget = .5f;
         
         float lastTime;
         float timeBudget = .5f/30;
@@ -29,9 +34,13 @@ namespace GLTFast {
         /// Defers work to the next frame if a fix time budget is
         /// used up.
         /// </summary>
-        /// <param name="frameBudget">Time budget as part of the target frame rate.</param>
-        public void SetFrameBudget( float frameBudget = 0.5f )
-        {
+        /// <param name="newFrameBudget">Per-frame time budget as fraction of the targeted frame time</param>
+        public void SetFrameBudget( float newFrameBudget = 0.5f ) {
+            frameBudget = newFrameBudget;
+            UpdateTimeBudget();
+        }
+
+        void UpdateTimeBudget() {
             float targetFrameRate = Application.targetFrameRate;
             if(targetFrameRate<0) targetFrameRate = 30;
             timeBudget = frameBudget/targetFrameRate;
@@ -39,7 +48,7 @@ namespace GLTFast {
         }
 
         void Awake() {
-            SetFrameBudget();
+            UpdateTimeBudget();
         }
 
         void Update() {

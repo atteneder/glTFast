@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - `RenderPipelineUtils` to detect current render pipeline
 - Option to make glTFast an alternative `.glb`/`.gltf` importer (not default anymore; via scripting define `GLTFAST_FORCE_DEFAULT_IMPORTER_OFF`). Useful in projects where you have another default importer for glTF (thanks @hybridherbst][hybridherbst] for #367)
+- Prefabs `glTF-StableFramerate` and `glTF-FastestLoading` for easy, no-code setup of global runtime loading behavior (via `IDeferAgent`)
+- `GltfImport.SetDefaultDeferAgent` and `GltfImport.UnsetDefaultDeferAgent` for setup of global runtime loading behavior (via `IDeferAgent`)
+- `TimeBudgetPerFrameDeferAgent` component now has a `frameBudget` property with a nice slider in the inspector
+- `UninterruptedDefaultDeferAgent`, a Monobehavior wrapping `UninterruptedDeferAgent`
 ### Changed
 - (DOTS) Update to Entities 0.50
 - (DOTS) Removed unused `GltfComponent`
