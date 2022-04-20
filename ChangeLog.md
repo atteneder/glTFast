@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (DOTS) Update to Entities 0.50
 - (DOTS) Removed unused `GltfComponent`
 - Bumped Mathematics and Burst package dependency versions to current 2019 LTS verified versions
+- Renamed `UniveralRPMaterialGenerator` to `UniversalRPMaterialGenerator` (typo)
 ### Fixed
 - Using correct file API for reading bytes in `EditorDownloadProvider` (thanks [@hybridherbst][hybridherbst] for #360)
 - GUID conflict with UnityGLTF

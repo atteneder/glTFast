@@ -26,14 +26,14 @@ using Texture = GLTFast.Schema.Texture;
 
 namespace GLTFast.Materials {
 
-    public class UniveralRPMaterialGenerator : ShaderGraphMaterialGenerator {
+    public class UniversalRPMaterialGenerator : ShaderGraphMaterialGenerator {
 
         static bool supportsCameraOpaqueTexture;
         
         static readonly int k_AlphaClip = Shader.PropertyToID("_AlphaClip");
         static readonly int k_Surface = Shader.PropertyToID("_Surface");
 
-        public UniveralRPMaterialGenerator(UniversalRenderPipelineAsset renderPipelineAsset) {
+        public UniversalRPMaterialGenerator(UniversalRenderPipelineAsset renderPipelineAsset) {
             supportsCameraOpaqueTexture = renderPipelineAsset.supportsCameraOpaqueTexture;
         }
         
