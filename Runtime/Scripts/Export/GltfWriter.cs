@@ -618,7 +618,6 @@ namespace GLTFast.Export {
 #if GLTFAST_MESH_DATA
 
         async Task BakeMeshes() {
-            Profiler.BeginSample("BakeMeshes");
             Profiler.BeginSample("AcquireReadOnlyMeshData");
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             Profiler.EndSample();
@@ -627,12 +626,11 @@ namespace GLTFast.Export {
                 await m_DeferAgent.BreakPoint();
             }
             meshDataArray.Dispose();
-            Profiler.EndSample();
         }
 
         async Task BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData) {
             
-            Profiler.BeginSample("BakeMesh");
+            Profiler.BeginSample("BakeMesh 1");
             
             var mesh = m_Meshes[meshId];
             var uMesh = m_UnityMeshes[meshId];
@@ -783,82 +781,97 @@ namespace GLTFast.Export {
                 };
             }
             Assert.IsTrue(topology.HasValue);
-
-            Profiler.BeginSample("ScheduleIndexJob");
+            Profiler.EndSample(); // "BakeMesh 1"
+            
             int indexBufferViewId;
             if (uMesh.indexFormat == IndexFormat.UInt16) {
                 var indexData16 = meshData.GetIndexData<ushort>();
                 if (topology.Value == MeshTopology.Quads) {
+                    Profiler.BeginSample("IndexJobUInt16QuadsSchedule");
                     var quadCount = indexData16.Length / 4;
                     var destIndices = new NativeArray<ushort>(quadCount*6,Allocator.TempJob);
                     var job = new ExportJobs.ConvertIndicesQuadFlippedJob<ushort> {
                         input = indexData16,
                         result = destIndices
                     }.Schedule(quadCount, k_DefaultInnerLoopBatchCount);
+                    Profiler.EndSample();
                     while (!job.IsCompleted) {
                         await Task.Yield();
                     }
+                    Profiler.BeginSample("IndexJobUInt16QuadsPostWork");
                     job.Complete(); // TODO: Wait until thread is finished
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(ushort)),
                         byteAlignment:sizeof(ushort)
                         );
                     destIndices.Dispose();
+                    Profiler.EndSample();
                 } else {
+                    Profiler.BeginSample("IndexJobUInt16TrisSchedule");
                     var triangleCount = indexData16.Length / 3;
                     var destIndices = new NativeArray<ushort>(indexData16.Length,Allocator.TempJob);
                     var job = new ExportJobs.ConvertIndicesFlippedJob<ushort> {
                         input = indexData16,
                         result = destIndices
                     }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
+                    Profiler.EndSample();
                     while (!job.IsCompleted) {
                         await Task.Yield();
                     }
+                    Profiler.BeginSample("IndexJobUInt16TrisPostWork");
                     job.Complete(); // TODO: Wait until thread is finished
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(ushort)),
                         byteAlignment:sizeof(ushort)
                         );
                     destIndices.Dispose();
+                    Profiler.EndSample();
                 }
             } else {
                 var indexData32 = meshData.GetIndexData<uint>();
                 if (topology.Value == MeshTopology.Quads) {
+                    Profiler.BeginSample("IndexJobUInt32QuadsSchedule");
                     var quadCount = indexData32.Length / 4;
                     var destIndices = new NativeArray<uint>(quadCount*6,Allocator.TempJob);
                     var job = new ExportJobs.ConvertIndicesQuadFlippedJob<uint> {
                         input = indexData32,
                         result = destIndices
                     }.Schedule(quadCount, k_DefaultInnerLoopBatchCount);
+                    Profiler.EndSample();
                     while (!job.IsCompleted) {
                         await Task.Yield();
                     }
+                    Profiler.BeginSample("IndexJobUInt32QuadsPostWork");
                     job.Complete(); // TODO: Wait until thread is finished
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(uint)),
                         byteAlignment:sizeof(uint)
                         );
                     destIndices.Dispose();
+                    Profiler.EndSample();
                 } else {
+                    Profiler.BeginSample("IndexJobUInt32TrisSchedule");
                     var triangleCount = indexData32.Length / 3;
                     var destIndices = new NativeArray<uint>(indexData32.Length, Allocator.TempJob);
                     var job = new ExportJobs.ConvertIndicesFlippedJob<uint> {
                         input = indexData32,
                         result = destIndices
                     }.Schedule(triangleCount, k_DefaultInnerLoopBatchCount);
+                    Profiler.EndSample();
                     while (!job.IsCompleted) {
                         await Task.Yield();
                     }
+                    Profiler.BeginSample("IndexJobUInt32TrisPostWork");
                     job.Complete(); // TODO: Wait until thread is finished
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(uint)),
                         byteAlignment:sizeof(uint)
                         );
                     destIndices.Dispose();
+                    Profiler.EndSample();
                 }
             }
-            Profiler.EndSample();
-
+            
             foreach (var accessor in indexAccessors) {
                 accessor.bufferView = indexBufferViewId;
             }
@@ -870,8 +883,7 @@ namespace GLTFast.Export {
                 inputStreams[stream] = meshData.GetVertexData<byte>(stream);
                 outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
             }
-
-            Profiler.BeginSample("ScheduleVertexJob");
+            
             foreach (var pair in attrDataDict) {
                 var vertexAttribute = pair.Key;
                 var attrData = pair.Value;
@@ -897,7 +909,6 @@ namespace GLTFast.Export {
                         break;
                 }
             }
-            Profiler.EndSample();
 
             var bufferViewIds = new int[streamCount];
             for (var stream = 0; stream < streamCount; stream++) {
@@ -914,8 +925,6 @@ namespace GLTFast.Export {
                 var attrData = pair.Value;
                 m_Accessors[attrData.accessorId].bufferView = bufferViewIds[attrData.stream];
             }
-            
-            Profiler.EndSample();
         }
 
         int AddAccessor(Accessor accessor) {
@@ -927,12 +936,10 @@ namespace GLTFast.Export {
 #else
 
         async Task BakeMeshesLegacy() {
-            Profiler.BeginSample("BakeMeshesLegacy");
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
                 BakeMeshLegacy(meshId);
                 await m_DeferAgent.BreakPoint();
             }
-            Profiler.EndSample();
         }
 
         void BakeMeshLegacy(int meshId) {
