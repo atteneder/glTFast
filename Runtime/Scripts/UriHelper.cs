@@ -78,7 +78,11 @@ namespace GLTFast {
             var start = 0;
             parentLevels = 0;
             while(true) {
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_WSA
                 var i = uri.IndexOfAny(new char[]{Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar},start);
+#else
+                var i = uri.IndexOf(Path.DirectorySeparatorChar,start);
+#endif
                 var found = i >= 0;
                 var len = found ? (i - start) : uri.Length-start;
                     if (len > 0) {
