@@ -78,7 +78,7 @@ namespace GLTFast {
             var start = 0;
             parentLevels = 0;
             while(true) {
-                var i = uri.IndexOf('/',start);
+                var i = uri.IndexOfAny(new char[]{Path.DirectorySeparatorChar,Path.AltDirectorySeparatorChar},start);
                 var found = i >= 0;
                 var len = found ? (i - start) : uri.Length-start;
                     if (len > 0) {
@@ -105,7 +105,7 @@ namespace GLTFast {
             var first = true;
             foreach (var segment in segments) {
                 if (!first) {
-                    sb.Append('/');
+                    sb.Append(Path.DirectorySeparatorChar);
                 }
                 sb.Append(segment);
                 first = false;
