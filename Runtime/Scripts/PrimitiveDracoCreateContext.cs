@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Collections;
 using Draco;
+using UnityEngine.Rendering;
 
 namespace GLTFast {
 
@@ -58,6 +59,17 @@ namespace GLTFast {
 
             if (bounds.HasValue) {
                 mesh.bounds = bounds.Value;
+                
+                // Setting the submeshes' bounds to the overall bounds
+                // Calculating the actual sub-mesh bounds (by iterating the verts referenced
+                // by the sub-mesh indices) would be slow. Also, hardly any glTFs re-use
+                // the same vertex buffer across primitives of a node (which is the
+                // only way a mesh can have sub-meshes)
+                for (var i = 0; i < mesh.subMeshCount; i++) {
+                    var subMeshDescriptor = mesh.GetSubMesh(i);
+                    subMeshDescriptor.bounds = bounds.Value;
+                    mesh.SetSubMesh(i, subMeshDescriptor, MeshUpdateFlags.DontValidateIndices | MeshUpdateFlags.DontResetBoneBounds | MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds );
+                }
             } else {
                 mesh.RecalculateBounds();
             }
