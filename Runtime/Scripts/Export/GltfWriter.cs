@@ -1654,7 +1654,12 @@ namespace GLTFast.Export {
 #else
                 var hash = 17;
                 hash = hash * 31 + m_MeshId.GetHashCode();
-                hash = hash * 31 + m_MaterialIds.GetHashCode();
+                if (m_MaterialIds != null) {
+                    hash = hash * 31 + m_MaterialIds.Length;
+                    foreach (var id in m_MaterialIds) {
+                        hash = hash * 31 + id;
+                    }
+                }
                 return hash;
 #endif
             }

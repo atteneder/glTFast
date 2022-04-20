@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Vertical texture transform offset is correct now
 - Improved relative file path handling on platforms with non-forward slash directory separator (Windows)
 - (Import) Draco compressed meshes' submeshes now have bounds set from the accessor's min/max values (just like regular/uncompressed meshes; #384)
+- (Export) De-duplication by properly re-using glTF `mesh` if accessors and materials are identical (#364)
 
 ## [4.6.0] - 2022-02-23
 ### Added
