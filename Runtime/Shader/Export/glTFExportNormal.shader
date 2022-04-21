@@ -47,12 +47,6 @@
 				float3 unpacked = UnpackNormal(col);
 				// unpacked.xyz = LinearToGammaSpace(unpacked.xyz);
 				float4 result = float4(unpacked * 0.5f + 0.5f, 1);
-				#ifdef UNITY_COLORSPACE_GAMMA
-				#else
-				// hack for linear color space, need to figure out
-				// right way to sample textures.
-				result.xyz = GammaToLinearSpace(result.xyz);
-				#endif
 				return result;
 			}
 
