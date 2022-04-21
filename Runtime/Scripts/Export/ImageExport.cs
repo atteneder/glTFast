@@ -25,6 +25,8 @@ using UnityEditor;
 namespace GLTFast.Export {
     public class ImageExport : ImageExportBase {
 
+        static Material s_ColorBlitMaterial;
+        
         protected Texture2D m_Texture;
         protected Format m_Format;
         
@@ -94,7 +96,7 @@ namespace GLTFast.Export {
 
         protected virtual bool GenerateTexture(out byte[] imageData) {
             if (m_Texture != null) {
-                imageData = EncodeTexture(m_Texture, format);
+                imageData = EncodeTexture(m_Texture, format, blitMaterial:GetColorBlitMaterial());
                 return true;
             }
             imageData = null;
@@ -168,5 +170,12 @@ namespace GLTFast.Export {
             return Format.Unknown;
         }
 #endif
+        
+        static Material GetColorBlitMaterial() {
+            if (s_ColorBlitMaterial == null) {
+                s_ColorBlitMaterial = LoadBlitMaterial("glTFExportColor");
+            }
+            return s_ColorBlitMaterial;
+        }
     }
 }

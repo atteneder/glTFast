@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) Draco compressed meshes' submeshes now have bounds set from the accessor's min/max values (just like regular/uncompressed meshes; #384)
 - (Export) De-duplication by properly re-using glTF `mesh` if accessors and materials are identical (#364)
 - (Export) Removed error messages about non-matching Profiler calls (#357)
+- (Export) Re-encoded (blitted) textures are in correct sRGB color space, even when the project is in linear color space (#353)
 
 ## [4.6.0] - 2022-02-23
 ### Added

@@ -23,3 +23,6 @@ ShaderVariantCollection:
   - first: {fileID: 4800000, guid: 5415cfa8493204ba5ae288a245ca7616, type: 3}
     second:
       variants: []
+  - first: {fileID: 4800000, guid: 8b605e834d6d2408a9e781775006555e, type: 3}
+    second:
+      variants: []
