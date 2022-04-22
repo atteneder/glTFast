@@ -350,7 +350,7 @@ namespace GLTFast.Materials {
                     break;
             }
 
-            material.SetVector(baseColorPropId, baseColorLinear);
+            material.SetVector(baseColorPropId, baseColorLinear.gamma);
             
             if(gltfMaterial.emissive != Color.black) {
                 material.SetColor(emissionColorPropId, gltfMaterial.emissive);
