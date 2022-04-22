@@ -508,7 +508,12 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     #endif
 
     UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o,o.pos);
+#ifdef UNITY_COLORSPACE_GAMMA
+    o.color.rgb = LinearToGammaSpace(v.color.rgb);
+    o.color.a = v.color.a;
+#else
     o.color = v.color;
+#endif
     o.pointSize = 1;
     return o;
 }
@@ -637,7 +642,12 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     #endif
 
     UNITY_TRANSFER_FOG_COMBINED_WITH_EYE_VEC(o, o.pos);
+#ifdef UNITY_COLORSPACE_GAMMA
+    o.color.rgb = LinearToGammaSpace(v.color.rgb);
+    o.color.a = v.color.a;
+#else
     o.color = v.color;
+#endif
     o.pointSize = 1;
     return o;
 }
@@ -765,7 +775,12 @@ VertexOutputDeferred vertDeferred (VertexInput v)
         o.tangentToWorldAndPackedData[2].w = viewDirForParallax.z;
     #endif
 
+#ifdef UNITY_COLORSPACE_GAMMA
+    o.color.rgb = LinearToGammaSpace(v.color.rgb);
+    o.color.a = v.color.a;
+#else
     o.color = v.color;
+#endif
     o.pointSize = 1;
 
     return o;

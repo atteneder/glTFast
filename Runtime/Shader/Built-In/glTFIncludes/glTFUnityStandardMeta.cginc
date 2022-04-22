@@ -41,7 +41,12 @@ struct v2f_meta
 v2f_meta vert_meta (VertexInput v)
 {
     v2f_meta o;
+#ifdef UNITY_COLORSPACE_GAMMA
+    o.color.rgb = LinearToGammaSpace(v.color.rgb);
+    o.color.a = v.color.a;
+#else
     o.color = v.color;
+#endif
     o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 
     o.uv.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);

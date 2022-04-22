@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Removed error messages about non-matching Profiler calls (#357)
 - (Export) Re-encoded (blitted) textures are in correct sRGB color space, even when the project is in linear color space (#353)
 - (Export) Removed incorrect color space conversion on normal maps (#346)
+- For projects using the built-in render pipeline in gamma color space, vertex colors are now applied in the correct color space
 
 ## [4.6.0] - 2022-02-23
 ### Added
