@@ -104,6 +104,7 @@ namespace GLTFast {
             Extensions.MeshQuantization,
             Extensions.MaterialsTransmission,
             Extensions.MeshGPUInstancing,
+            Extensions.LightsPunctual,
         };
 
         static IDeferAgent defaultDeferAgent;
@@ -589,6 +590,13 @@ namespace GLTFast {
         public Camera GetSourceCamera(uint index) {
             if (gltfRoot?.cameras != null && index < gltfRoot.cameras.Length) {
                 return gltfRoot.cameras[index];
+            }
+            return null;
+        }
+        
+        public LightPunctual GetSourceCameraLightPunctual(uint index) {
+            if (gltfRoot?.extensions?.KHR_lights_punctual.lights != null && index < gltfRoot.extensions.KHR_lights_punctual.lights.Length) {
+                return gltfRoot.extensions.KHR_lights_punctual.lights[index];
             }
             return null;
         }
@@ -1888,6 +1896,13 @@ namespace GLTFast {
                     )
                 {
                     instantiator.AddCamera(nodeIndex,(uint)node.camera);
+                }
+
+                if (node.extensions?.KHR_lights_punctual != null && gltf.extensions?.KHR_lights_punctual?.lights != null) {
+                    var lightIndex = node.extensions.KHR_lights_punctual.light;
+                    if (lightIndex < gltf.extensions.KHR_lights_punctual.lights.Length) {
+                        instantiator.AddLightPunctual(nodeIndex,(uint)lightIndex);
+                    }
                 }
             }
             

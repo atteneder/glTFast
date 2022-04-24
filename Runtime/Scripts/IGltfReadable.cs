@@ -47,5 +47,6 @@ namespace GLTFast {
         Schema.Material GetSourceMaterial(int index = 0);
         Schema.Texture GetSourceTexture(int index = 0);
         Schema.Image GetSourceImage(int index = 0);
+        Schema.LightPunctual GetSourceCameraLightPunctual(uint index);
     }
 }

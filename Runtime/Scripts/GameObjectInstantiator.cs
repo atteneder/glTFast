@@ -15,8 +15,13 @@
 
 using System;
 using System.Collections.Generic;
+using GLTFast.Schema;
 using Unity.Collections;
 using UnityEngine;
+using Camera = UnityEngine.Camera;
+using Material = UnityEngine.Material;
+using Mesh = UnityEngine.Mesh;
+
 // #if UNITY_EDITOR && UNITY_ANIMATION
 // using UnityEditor.Animations;
 // #endif
@@ -329,6 +334,42 @@ namespace GLTFast {
         //     }
         // }
 
+        public void AddLightPunctual(
+            uint nodeIndex,
+            uint lightIndex
+        ) {
+            var node = nodes[nodeIndex];
+            var lightSource = gltf.GetSourceCameraLightPunctual(lightIndex);
+            var light = node.AddComponent<Light>();
+
+            switch (lightSource.typeEnum) {
+                case LightPunctual.Type.Unknown:
+                    break;
+                case LightPunctual.Type.Spot:
+                    light.type = LightType.Spot;
+                    break;
+                case LightPunctual.Type.Directional:
+                    light.type = LightType.Directional;
+                    break;
+                case LightPunctual.Type.Point:
+                    light.type = LightType.Point;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
+            light.color = lightSource.lightColor;
+            light.intensity = lightSource.intensity;
+            if (lightSource.range > 0) {
+                light.range = lightSource.range;
+            }
+
+            if (lightSource.typeEnum == LightPunctual.Type.Spot) {
+                light.innerSpotAngle = lightSource.spot.innerConeAngle;
+                light.spotAngle = lightSource.spot.outerConeAngle;
+            }
+        }
+        
         public virtual void AddScene(
             string name,
             uint[] nodeIndices

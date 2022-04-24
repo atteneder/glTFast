@@ -66,7 +66,11 @@ namespace GLTFast {
         /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_transform/README.md">KHR_texture_transform</see> glTF extension
         /// </summary>
         public const string TextureTransform = "KHR_texture_transform";
-
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> glTF extension
+        /// </summary>
+        public const string LightsPunctual = "KHR_lights_punctual";
+        
         /// <summary>
         /// Returns the official name of the glTF extension
         /// </summary>

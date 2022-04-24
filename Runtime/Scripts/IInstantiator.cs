@@ -110,6 +110,16 @@ namespace GLTFast {
             uint nodeIndex,
             uint cameraIndex
         );
+
+        /// <summary>
+        /// Called when a node has a punctual light assigned (KHR_lights_punctual)
+        /// </summary>
+        /// <param name="nodeIndex">Index of the node</param>
+        /// <param name="lightIndex">Index of the punctual light</param>
+        void AddLightPunctual(
+            uint nodeIndex,
+            uint lightIndex
+        );
         
         /// <summary>
         /// Called for adding a glTF scene.

@@ -176,7 +176,7 @@ namespace GLTFast {
                 for (int i = 0; i < root.nodes.Length; i++) {
                     var e = root.nodes[i].extensions;
                     if (e != null) {
-                        if (e.EXT_mesh_gpu_instancing?.attributes == null) {
+                        if (e.EXT_mesh_gpu_instancing?.attributes == null && e.KHR_lights_punctual == null) {
                             root.nodes[i].extensions = null;
                         }
                     }
