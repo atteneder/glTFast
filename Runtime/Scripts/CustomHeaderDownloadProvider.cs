@@ -26,8 +26,15 @@ namespace GLTFast.Loading {
     [Serializable]
     public struct HttpHeader
     {
-        public string Key;
-        public string Value;
+        /// <summary>
+        /// HTTP header key/name
+        /// </summary>
+        public string key;
+        
+        /// <summary>
+        /// HTTP header value
+        /// </summary>
+        public string value;
     }
 
     public delegate void EditUnityWebRequest( UnityWebRequest request );
@@ -68,7 +75,7 @@ namespace GLTFast.Loading {
             if(_headers!=null) {
                 foreach(var header in _headers)
                 {
-                    request.SetRequestHeader(header.Key, header.Value);
+                    request.SetRequestHeader(header.key, header.value);
                 }
             }
         }
