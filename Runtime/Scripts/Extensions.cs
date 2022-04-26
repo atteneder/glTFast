@@ -53,7 +53,7 @@ namespace GLTFast {
     /// <summary>
     /// Collection of glTF extension names
     /// </summary>
-    public static class Extensions {
+    public static class ExtensionName {
         /// <summary>
         /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md">KHR_draco_mesh_compression</see> glTF extension 
         /// </summary>

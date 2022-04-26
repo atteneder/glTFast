@@ -90,21 +90,21 @@ namespace GLTFast {
 
         static readonly HashSet<string> supportedExtensions = new HashSet<string> {
 #if DRACO_UNITY
-            Extensions.DracoMeshCompression,
+            ExtensionName.DracoMeshCompression,
 #endif
 #if KTX_UNITY
-            Extensions.TextureBasisUniversal,
+            ExtensionName.TextureBasisUniversal,
 #endif // KTX_UNITY
 #if MESHOPT
-            Extensions.MeshoptCompression,
+            ExtensionName.MeshoptCompression,
 #endif
-            Extensions.MaterialsPbrSpecularGlossiness,
-            Extensions.MaterialsUnlit,
-            Extensions.TextureTransform,
-            Extensions.MeshQuantization,
-            Extensions.MaterialsTransmission,
-            Extensions.MeshGPUInstancing,
-            Extensions.LightsPunctual,
+            ExtensionName.MaterialsPbrSpecularGlossiness,
+            ExtensionName.MaterialsUnlit,
+            ExtensionName.TextureTransform,
+            ExtensionName.MeshQuantization,
+            ExtensionName.MaterialsTransmission,
+            ExtensionName.MeshGPUInstancing,
+            ExtensionName.LightsPunctual,
         };
 
         static IDeferAgent defaultDeferAgent;
