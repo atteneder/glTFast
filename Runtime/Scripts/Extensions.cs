@@ -16,13 +16,37 @@
 namespace GLTFast {
 
     public enum Extension {
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md">KHR_draco_mesh_compression</see> glTF extension 
+        /// </summary>
         DracoMeshCompression,
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness">KHR_materials_pbrSpecularGlossiness</see> glTF extension
+        /// </summary>
         MaterialsPbrSpecularGlossiness,
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_transmission/README.md">KHR_materials_transmission</see> glTF extension
+        /// </summary>
         MaterialsTransmission,
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_unlit/README.md">KHR_materials_unlit</see> glTF extension
+        /// </summary>
         MaterialsUnlit,
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_mesh_gpu_instancing/README.md">EXT_mesh_gpu_instancing</see> glTF extension
+        /// </summary>
         MeshGPUInstancing,
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_mesh_quantization/README.md">KHR_mesh_quantization</see> glTF extension
+        /// </summary>
         MeshQuantization,
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_basisu/README.md">KHR_texture_basisu</see> glTF extension
+        /// </summary>
         TextureBasisUniversal,
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_transform/README.md">KHR_texture_transform</see> glTF extension
+        /// </summary>
         TextureTransform,
     }
     
