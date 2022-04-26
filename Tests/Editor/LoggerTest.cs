@@ -20,7 +20,7 @@ using UnityEngine.TestTools;
 
 namespace GLTFast.Tests
 {
-    public class LoggerTest
+    class LoggerTest
     {
         [Test]
         public static void CollectingLoggerTest() {

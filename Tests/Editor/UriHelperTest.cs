@@ -20,7 +20,7 @@ using UnityEngine.Profiling;
 
 namespace GLTFast.Tests
 {
-    public class UriHelperTest
+    class UriHelperTest
     {
         static Uri[] glb = new []{
             new Uri("file.glb",UriKind.RelativeOrAbsolute),

@@ -19,7 +19,7 @@ using UnityEngine;
 
 namespace GLTFast.Tests
 {
-    public class JsonParsingTests
+    class JsonParsingTests
     {
         [Test]
         public void MaterialExtensions() {

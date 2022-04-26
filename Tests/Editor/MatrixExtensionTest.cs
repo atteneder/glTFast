@@ -22,7 +22,7 @@ using UnityEngine.TestTools.Utils;
 
 namespace GLTFast.Tests
 {
-    public class MatrixExtensionTest {
+    class MatrixExtensionTest {
 
         [Test]
         public void MatrixDecomposeTest() {

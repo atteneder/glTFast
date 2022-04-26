@@ -16,12 +16,10 @@
 using GLTFast.Schema;
 using NUnit.Framework;
 using UnityEngine;
-using Unity.Mathematics;
-using UnityEngine.Profiling;
 
 namespace GLTFast.Tests
 {
-    public class MeshPrimitiveTest {
+    class MeshPrimitiveTest {
 
         [Test]
         public void MeshPrimitiveEqualTest() {

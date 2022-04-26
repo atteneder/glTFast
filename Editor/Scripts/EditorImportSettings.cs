@@ -22,7 +22,7 @@ namespace GLTFast.Editor {
     /// Editor Import specific settings (not relevant at runtime)
     /// </summary>
     [Serializable]
-    public class EditorImportSettings {
+    class EditorImportSettings {
         
         /// <summary>
         /// Creates a secondary UV set on all meshes, if there is none present already.
