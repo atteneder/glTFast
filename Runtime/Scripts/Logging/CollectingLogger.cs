@@ -22,7 +22,7 @@ namespace GLTFast {
     [Serializable]
     public class CollectingLogger : ICodeLogger {
 
-        public List<LogItem> items;
+        List<LogItem> items;
 
         public void Error(LogCode code, params string[] messages) {
             if (items == null) {
@@ -73,6 +73,18 @@ namespace GLTFast {
                 }
             }
         }
+        
+        /// <summary>
+        /// Number of log items in <see cref="Items"/>
+        /// </summary>
+        public int Count {
+            get { return items?.Count ?? 0; }
+        }
+
+        /// <summary>
+        /// Items that were logged
+        /// </summary>
+        public IEnumerable<LogItem> Items { get { return items?.AsReadOnly(); } }
     }
     
     [Serializable]

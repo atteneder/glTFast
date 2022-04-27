@@ -226,11 +226,11 @@ namespace GLTFast.Editor {
             assetDependencies = deps.ToArray();
 
             var reportItemList = new List<LogItem>();
-            if (logger.items != null) {
-                reportItemList.AddRange(logger.items);
+            if (logger.Count > 0) {
+                reportItemList.AddRange(logger.Items);
             }
-            if (instantiationLogger?.items != null) {
-                reportItemList.AddRange(instantiationLogger.items);
+            if (instantiationLogger?.Items != null) {
+                reportItemList.AddRange(instantiationLogger.Items);
             }
 
             if (reportItemList.Any(x => x.type == LogType.Error || x.type == LogType.Exception)) {
