@@ -29,7 +29,7 @@ namespace GLTFast {
         BIN = 0x004e4942
     }
 
-    public static class GltfGlobals {
+    static class GltfGlobals {
         
         /// <summary>
         /// glTF-Binary file extension

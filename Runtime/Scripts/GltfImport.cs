@@ -43,6 +43,7 @@ using Meshoptimizer;
 using GLTFast.Tests;
 #endif
 
+[assembly: InternalsVisibleTo("glTFastEditor")]
 [assembly: InternalsVisibleTo("glTFastEditorTests")]
 [assembly: InternalsVisibleTo("glTFast.Export")]
 
