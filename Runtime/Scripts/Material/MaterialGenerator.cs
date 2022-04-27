@@ -30,6 +30,8 @@ using UnityEngine.Rendering.Universal;
 #endif
 
 namespace GLTFast.Materials {
+    
+    using Logging;
 
     /// <summary>
     /// Common base class for implementations of IMaterialGenerator

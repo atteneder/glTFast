@@ -18,6 +18,7 @@ using UnityEngine;
 
 namespace GLTFast
 {
+    using Logging;
     using Loading;
 
     public abstract class GltfAssetBase : MonoBehaviour

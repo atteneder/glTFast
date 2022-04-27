@@ -49,8 +49,9 @@ using GLTFast.Tests;
 
 namespace GLTFast {
 
-    using Schema;
     using Loading;
+    using Logging;
+    using Schema;
 
     /// <summary>
     /// Loads a glTF's content, converts it to Unity resources and is able to

@@ -22,6 +22,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using Mesh = UnityEngine.Mesh;
 using System.Threading.Tasks;
+using GLTFast.Logging;
 
 namespace GLTFast {
 

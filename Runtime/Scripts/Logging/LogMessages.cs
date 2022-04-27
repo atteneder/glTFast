@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 
-namespace GLTFast {
+namespace GLTFast.Logging {
 
     public enum LogCode : uint {
         None,

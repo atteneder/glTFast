@@ -31,6 +31,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace GLTFast {
+    
+    using Logging;
 
     [CustomEditor(typeof(GltfImporter))]
     // [CanEditMultipleObjects]

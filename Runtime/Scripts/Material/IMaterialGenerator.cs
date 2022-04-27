@@ -14,6 +14,7 @@
 //
 
 namespace GLTFast {
+    using Logging;
     using Schema;
     
     /// <summary>

@@ -27,8 +27,9 @@ using UnityEngine.Rendering;
 
 namespace GLTFast {
 
-    using Vertex;
+    using Logging;
     using Schema;
+    using Vertex;
 
     abstract class VertexBufferBonesBase {
         

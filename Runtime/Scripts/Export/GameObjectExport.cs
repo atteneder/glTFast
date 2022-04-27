@@ -21,6 +21,8 @@ using UnityEngine;
 
 namespace GLTFast.Export {
 
+    using Logging;
+    
     public class GameObjectExport {
 
         GltfWriter m_Writer;

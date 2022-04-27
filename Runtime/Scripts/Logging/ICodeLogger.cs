@@ -16,7 +16,7 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast {
+namespace GLTFast.Logging {
     public interface ICodeLogger {
         void Error(LogCode code, params string[] messages);
         void Warning(LogCode code, params string[] messages);

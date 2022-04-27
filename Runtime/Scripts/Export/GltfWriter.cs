@@ -53,6 +53,8 @@ using UnityEditor;
 
 namespace GLTFast.Export {
 
+    using Logging;
+    
     public class GltfWriter : IGltfWritable {
 
         enum State {

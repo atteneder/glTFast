@@ -32,7 +32,7 @@ namespace GLTFast
 #if BURST
     using Unity.Mathematics;
 #endif
-    using Schema;
+    using Logging;
 
     class VertexBufferConfig<VType> :
         VertexBufferConfigBase

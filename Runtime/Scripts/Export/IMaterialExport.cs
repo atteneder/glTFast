@@ -16,6 +16,8 @@
 using UnityEngine;
 
 namespace GLTFast.Export {
+    
+    using Logging;
 
     /// <summary>
     /// Converts a Unity Material into a glTF material 

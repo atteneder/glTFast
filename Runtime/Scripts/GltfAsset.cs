@@ -15,11 +15,13 @@
 
 using System.IO;
 using System.Threading.Tasks;
-using GLTFast.Loading;
 using UnityEngine;
 
 namespace GLTFast
 {
+    using Loading;
+    using Logging;
+    
     public class GltfAsset : GltfAssetBase
     {
         [Tooltip("URL to load the glTF from.")]

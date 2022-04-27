@@ -20,6 +20,8 @@ using UnityEngine;
 
 namespace GLTFast
 {
+    using Logging;
+
     public class GltfBoundsAsset : GltfAsset {
 
         [Tooltip("Create a box collider encapsulating the glTF asset")]

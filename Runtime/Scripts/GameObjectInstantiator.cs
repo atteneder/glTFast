@@ -30,6 +30,9 @@ using Mesh = UnityEngine.Mesh;
 // #endif
 
 namespace GLTFast {
+    
+    using Logging;
+    
     public class GameObjectInstantiator : IInstantiator {
 
         public class SceneInstance {

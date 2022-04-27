@@ -27,6 +27,7 @@ using UnityEngine.Rendering.HighDefinition;
 
 namespace GLTFast.Export {
 	
+    using Logging;
     using Schema;
 
     public class StandardMaterialExport : MaterialExportBase {

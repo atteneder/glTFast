@@ -32,6 +32,7 @@ namespace GLTFast
     using Unity.Mathematics;
 #endif
     using Jobs;
+    using Logging;
     using Schema;
 
     [System.Flags]

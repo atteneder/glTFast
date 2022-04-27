@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using GLTFast.Logging;
 using GLTFast.Schema;
 using UnityEngine;
 using UnityEngine.Rendering;

@@ -16,6 +16,7 @@
 #if USING_HDRP
 
 using System;
+using GLTFast.Logging;
 using Unity.Mathematics;
 using UnityEngine;
 

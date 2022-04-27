@@ -18,6 +18,8 @@ using UnityEngine;
 
 namespace GLTFast {
 
+    using Logging;
+    
     public class GameObjectBoundsInstantiator : GameObjectInstantiator {
 
         Dictionary<uint, Bounds> nodeBounds;

@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GLTFast {
+namespace GLTFast.Logging {
 
     [Serializable]
     public class CollectingLogger : ICodeLogger {

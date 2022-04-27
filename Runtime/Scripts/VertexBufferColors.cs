@@ -24,7 +24,7 @@ using UnityEngine.Rendering;
 
 namespace GLTFast {
 
-    using Vertex;
+    using Logging;
     using Schema;
 
     abstract class VertexBufferColorsBase {

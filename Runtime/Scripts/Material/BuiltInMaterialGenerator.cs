@@ -28,6 +28,7 @@ using UnityEditor;
 
 namespace GLTFast.Materials {
 
+    using Logging;
     using AlphaMode = Schema.Material.AlphaMode;
 
     /// <summary>
