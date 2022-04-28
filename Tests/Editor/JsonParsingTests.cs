@@ -418,5 +418,14 @@ namespace GLTFast.Tests
             Assert.NotNull(node3.extensions.EXT_mesh_gpu_instancing.attributes);
             Assert.AreEqual(42,node3.extensions.EXT_mesh_gpu_instancing.attributes.TRANSLATION);
         }
+
+        [Test]
+        public void ParseGarbage() {
+            var gltf = JsonParser.ParseJson(@"");
+            Assert.IsNull(gltf);
+            
+            gltf = JsonParser.ParseJson(@"garbage");
+            Assert.IsNull(gltf);
+        }
     }
 }

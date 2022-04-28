@@ -690,6 +690,12 @@ namespace GLTFast {
                 // Loading subsequent buffers and images has to start asap.
                 // That's why parsing JSON right away is *very* important. 
             }
+            
+            if (gltfRoot == null) {
+                Debug.LogError("JsonParsingFailed");
+                logger?.Error(LogCode.JsonParsingFailed);
+                return false;
+            }
 
             if(!CheckExtensionSupport(gltfRoot)) {
                 return false;

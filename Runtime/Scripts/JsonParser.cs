@@ -30,11 +30,22 @@ namespace GLTFast {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 #endif
+            Root root = null;
+            
             // Step one: main JSON parsing
             Profiler.BeginSample("JSON main");
-            var root = JsonUtility.FromJson<Root>(json);
-            Profiler.EndSample();
+            try {
+                root = JsonUtility.FromJson<Root>(json);
+            }
+            catch (System.ArgumentException) {
+                return null;
+            }
 
+            if (root == null) {
+                return null;
+            }
+            Profiler.EndSample();
+            
             // Step two:
             // detect, if a secondary null-check is necessary.
             Profiler.BeginSample("JSON extension check");
