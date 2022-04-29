@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mecanim (non-legacy) is now the default for importing animation clips at design-time (thanks @hybridherbst][hybridherbst] for #388)
 ### Fixed
 - Fail more gracefully when parsing invalid JSON
+- Proper error handling on glTF-binary files with invalid chunks (unknown type or invalid length; #389)
 
 ## [4.7.0] - 2022-04-25
 ### Added

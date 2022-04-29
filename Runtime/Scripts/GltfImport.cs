@@ -1126,10 +1126,21 @@ namespace GLTFast {
             Profiler.EndSample();
             
             while( index < bytes.Length ) {
+            
+                if (index + 8 > bytes.Length) {
+                    logger?.Error(LogCode.ChunkIncomplete);
+                    return false;
+                }
+
                 uint chLength = BitConverter.ToUInt32( bytes, index );
                 index += 4;
                 uint chType = BitConverter.ToUInt32( bytes, index );
                 index += 4;
+
+                if (index + chLength > bytes.Length) {
+                    logger?.Error(LogCode.ChunkIncomplete);
+                    return false;
+                }
 
                 if (chType == (uint)ChunkFormat.BIN) {
                     Assert.IsFalse(glbBinChunk.HasValue); // There can only be one binary chunk
@@ -1147,6 +1158,10 @@ namespace GLTFast {
                     if(!success) {
                         return false;
                     }
+                }
+                else {
+                    logger?.Error(LogCode.ChunkUnknown, chType.ToString());
+                    return false;
                 }
  
                 index += (int) chLength;
