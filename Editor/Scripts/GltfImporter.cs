@@ -101,7 +101,9 @@ namespace GLTFast.Editor {
                 // Design-time import specific changes to default settings
                 importSettings = new ImportSettings {
                     // Avoid naming conflicts by default
-                    nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique
+                    nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique,
+                    generateMipMaps = true,
+                    animationMethod = ImportSettings.AnimationMethod.Mecanim,
                 };
             }
             
