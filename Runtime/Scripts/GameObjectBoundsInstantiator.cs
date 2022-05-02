@@ -33,11 +33,13 @@ namespace GLTFast {
         /// <param name="gltf">glTF to instantiate from</param>
         /// <param name="parent">Generated GameObjects will get parented to this Transform</param>
         /// <param name="logger">Custom logger</param>
+        /// <param name="settings">Instantiation settings</param>
         public GameObjectBoundsInstantiator(
             IGltfReadable gltf,
             Transform parent,
-            ICodeLogger logger = null
-            ) : base(gltf,parent,logger) {}
+            ICodeLogger logger = null,
+            Settings settings = null
+            ) : base(gltf,parent,logger,settings) {}
         
         public override void Init() {
             base.Init();
