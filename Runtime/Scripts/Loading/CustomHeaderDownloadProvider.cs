@@ -54,6 +54,11 @@ namespace GLTFast.Loading {
             _headers = headers;
         }
 
+        /// <summary>
+        /// Sends a URI request
+        /// </summary>
+        /// <param name="url">URI to request</param>
+        /// <returns>Object representing the request</returns>
         public async Task<IDownload> Request(Uri url) {
             var req = new CustomHeaderDownload(url,RegisterHttpHeaders);
             while (req.MoveNext()) {
@@ -81,7 +86,16 @@ namespace GLTFast.Loading {
         }
     }
 
+    /// <summary>
+    /// Download that allows modifying the HTTP request before it's sent
+    /// </summary>
     public class CustomHeaderDownload : AwaitableDownload {
+        
+        /// <summary>
+        /// Constructs an <see cref="IDownload"/> with a modifier
+        /// </summary>
+        /// <param name="url">URI to request</param>
+        /// <param name="editor">Callback that modifies the UnityWebRequest before it's sent</param>
         public CustomHeaderDownload(Uri url, EditUnityWebRequest editor) : base() {
             request = UnityWebRequest.Get(url);
             editor(request);
@@ -89,8 +103,17 @@ namespace GLTFast.Loading {
         }
     }
 
+    /// <summary>
+    /// Texture download that allows modifying the HTTP request before it's sent
+    /// </summary>
     public class CustomHeaderTextureDownload : AwaitableTextureDownload {
 
+        /// <summary>
+        /// Constructs an <see cref="ITextureDownload"/> with a modifier
+        /// </summary>
+        /// <param name="url">URI to request</param>
+        /// <param name="nonReadable">If true, resulting texture is not readable (uses less memory)</param>
+        /// <param name="editor">Callback that modifies the UnityWebRequest before it's sent</param>
         public CustomHeaderTextureDownload(Uri url, bool nonReadable, EditUnityWebRequest editor) : base() {
             request = CreateRequest(url,nonReadable);
             editor(request);

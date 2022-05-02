@@ -25,11 +25,18 @@ namespace GLTFast.Loading {
     /// </summary>
     public interface IDownloadProvider {
         /// <summary>
-        /// Sends an URI request
+        /// Sends a URI request
         /// </summary>
         /// <param name="url">URI to request</param>
-        /// <returns>IDownload object representing the request</returns>
+        /// <returns>Object representing the request</returns>
         Task<IDownload> Request(Uri url);
+
+        /// <summary>
+        /// Sends a URI request to load a texture
+        /// </summary>
+        /// <param name="url">URI to request</param>
+        /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
+        /// <returns>Object representing the request</returns>
         Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable);
     }
 

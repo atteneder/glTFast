@@ -19,7 +19,17 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 namespace GLTFast.Loading {
+    
+    /// <summary>
+    /// Default <see cref="IDownloadProvider"/> implementation
+    /// </summary>
     public class DefaultDownloadProvider : IDownloadProvider {
+        
+        /// <summary>
+        /// Sends a URI request
+        /// </summary>
+        /// <param name="url">URI to request</param>
+        /// <returns>Object representing the request</returns>
         public async  Task<IDownload> Request(Uri url) {
             var req = new AwaitableDownload(url);
             while (req.MoveNext()) {
@@ -28,6 +38,12 @@ namespace GLTFast.Loading {
             return req;
         }
 
+        /// <summary>
+        /// Sends a URI request to load a texture
+        /// </summary>
+        /// <param name="url">URI to request</param>
+        /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
+        /// <returns>Object representing the request</returns>
         public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
             var req = new AwaitableTextureDownload(url,nonReadable);
             while (req.MoveNext()) {
@@ -37,6 +53,9 @@ namespace GLTFast.Loading {
         }
     }
 
+    /// <summary>
+    /// Default <see cref="IDownload"/> implementation that loads URIs via <see cref="UnityWebRequest"/>
+    /// </summary>
     public class AwaitableDownload : IDownload {
         const string GLB_MIME = "model/gltf-binary";
         const string GLTF_MIME = "model/gltf+json";
