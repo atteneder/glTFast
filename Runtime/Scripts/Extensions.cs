@@ -15,6 +15,9 @@
 
 namespace GLTFast {
 
+    /// <summary>
+    /// <see href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#specifying-extensions">glTF Extensions</see>
+    /// </summary>
     public enum Extension {
         /// <summary>
         /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md">KHR_draco_mesh_compression</see> glTF extension 

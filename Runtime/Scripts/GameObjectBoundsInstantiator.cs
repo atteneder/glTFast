@@ -20,11 +20,24 @@ namespace GLTFast {
 
     using Logging;
     
+    /// <summary>
+    /// Generates a GameObject hierarchy from a glTF scene and provides its bounding box 
+    /// </summary>
     public class GameObjectBoundsInstantiator : GameObjectInstantiator {
 
         Dictionary<uint, Bounds> nodeBounds;
 
-        public GameObjectBoundsInstantiator(IGltfReadable gltf, Transform parent, ICodeLogger logger = null) : base(gltf,parent,logger) {}
+        /// <summary>
+        /// Constructs a GameObjectBoundsInstantiator
+        /// </summary>
+        /// <param name="gltf">glTF to instantiate from</param>
+        /// <param name="parent">Generated GameObjects will get parented to this Transform</param>
+        /// <param name="logger">Custom logger</param>
+        public GameObjectBoundsInstantiator(
+            IGltfReadable gltf,
+            Transform parent,
+            ICodeLogger logger = null
+            ) : base(gltf,parent,logger) {}
         
         public override void Init() {
             base.Init();

@@ -69,6 +69,13 @@ namespace GLTFast {
         /// </summary>
         public SceneInstance sceneInstance { get; protected set; }
         
+        /// <summary>
+        /// Constructs a GameObjectInstantiator
+        /// </summary>
+        /// <param name="gltf">glTF to instantiate from</param>
+        /// <param name="parent">Generated GameObjects will get parented to this Transform</param>
+        /// <param name="logger">Custom logger</param>
+        /// <param name="settings">Instantiation settings</param>
         public GameObjectInstantiator(
             IGltfReadable gltf,
             Transform parent,

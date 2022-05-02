@@ -17,6 +17,10 @@ using System;
 using UnityEngine;
 
 namespace GLTFast {
+    
+    /// <summary>
+    /// Makes GameObject survive scene changes (<seealso cref="DontDestroyOnLoad"/>)
+    /// </summary>
     public class DontDestroyOnLoad : MonoBehaviour {
         void Awake() {
             DontDestroyOnLoad(gameObject);
