@@ -96,10 +96,10 @@ namespace GLTFast.Loading {
         /// </summary>
         /// <param name="url">URI to request</param>
         /// <param name="editor">Callback that modifies the UnityWebRequest before it's sent</param>
-        public CustomHeaderDownload(Uri url, EditUnityWebRequest editor) : base() {
-            request = UnityWebRequest.Get(url);
-            editor(request);
-            asynOperation = request.SendWebRequest();
+        public CustomHeaderDownload(Uri url, EditUnityWebRequest editor) {
+            m_Request = UnityWebRequest.Get(url);
+            editor(m_Request);
+            m_AsyncOperation = m_Request.SendWebRequest();
         }
     }
 
@@ -114,10 +114,10 @@ namespace GLTFast.Loading {
         /// <param name="url">URI to request</param>
         /// <param name="nonReadable">If true, resulting texture is not readable (uses less memory)</param>
         /// <param name="editor">Callback that modifies the UnityWebRequest before it's sent</param>
-        public CustomHeaderTextureDownload(Uri url, bool nonReadable, EditUnityWebRequest editor) : base() {
-            request = CreateRequest(url,nonReadable);
-            editor(request);
-            asynOperation = request.SendWebRequest();
+        public CustomHeaderTextureDownload(Uri url, bool nonReadable, EditUnityWebRequest editor) {
+            m_Request = CreateRequest(url,nonReadable);
+            editor(m_Request);
+            m_AsyncOperation = m_Request.SendWebRequest();
         }
     }
 }

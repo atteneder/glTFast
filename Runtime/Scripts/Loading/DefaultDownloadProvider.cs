@@ -14,6 +14,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -60,41 +61,86 @@ namespace GLTFast.Loading {
         const string GLB_MIME = "model/gltf-binary";
         const string GLTF_MIME = "model/gltf+json";
 
-        protected UnityWebRequest request;
-        protected UnityWebRequestAsyncOperation asynOperation;
+        /// <summary>
+        /// <see cref="UnityWebRequest"/> that is used for the download
+        /// </summary>
+        protected UnityWebRequest m_Request;
+        
+        /// <summary>
+        /// The download's <see cref="UnityWebRequestAsyncOperation"/>
+        /// </summary>
+        protected UnityWebRequestAsyncOperation m_AsyncOperation;
 
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
+        protected AwaitableDownload() {}
 
-        public AwaitableDownload() {}
-
+        /// <summary>
+        /// Creates a download of a URI
+        /// </summary>
+        /// <param name="url">URI to request</param>
         public AwaitableDownload(Uri url) {
             Init(url);
         }
 
-        protected void Init(Uri url) {
-            request = UnityWebRequest.Get(url);
-            asynOperation = request.SendWebRequest();
+        void Init(Uri url) {
+            m_Request = UnityWebRequest.Get(url);
+            m_AsyncOperation = m_Request.SendWebRequest();
         }
 
-        public object Current { get { return asynOperation; } }
-        public bool MoveNext() { return !asynOperation.isDone; }
+        /// <summary>
+        /// Part of <see cref="IEnumerator"/>, the mechanism that is used for async download
+        /// </summary>
+        public object Current { get { return m_AsyncOperation; } }
+        
+        /// <summary>
+        /// Part of <see cref="IEnumerator"/>, the mechanism that is used for async download
+        /// </summary>
+        /// <returns>True if the download is still pending; false if the download has finished.</returns>
+        public bool MoveNext() { return !m_AsyncOperation.isDone; }
+        
+        /// <summary>
+        /// Not used. Part of <see cref="IEnumerator"/>, the mechanism that is used for async download.
+        /// </summary>
         public void Reset() {}
 
+        /// <summary>
+        /// True if the download finished and was successful
+        /// </summary>
 #if UNITY_2020_1_OR_NEWER
-        public bool success => request.isDone && request.result == UnityWebRequest.Result.Success;
+        public bool success => m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
 #else
         public bool success => request.isDone && !request.isNetworkError && !request.isHttpError;
 #endif
 
-        public string error { get { return request.error; } }
-        public byte[] data { get { return request.downloadHandler.data; } }
-        public string text { get { return request.downloadHandler.text; } }
+        /// <summary>
+        /// If the download failed, error description
+        /// </summary>
+        public string error { get { return m_Request.error; } }
+        
+        /// <summary>
+        /// Downloaded data as byte array
+        /// </summary>
+        public byte[] data { get { return m_Request.downloadHandler.data; } }
+        
+        /// <summary>
+        /// Downloaded data as string
+        /// </summary>
+        public string text { get { return m_Request.downloadHandler.text; } }
+        
+        /// <summary>
+        /// True if the requested download is a glTF-Binary file.
+        /// False if it is a regular JSON-based glTF file.
+        /// Null if the type could not be determined.
+        /// </summary>
         public bool? isBinary
         {
             get
             {
                 if (success)
                 {
-                    string contentType = request.GetResponseHeader("Content-Type");
+                    string contentType = m_Request.GetResponseHeader("Content-Type");
                     if (contentType == GLB_MIME)
                         return true;
                     if (contentType == GLTF_MIME)
@@ -106,9 +152,7 @@ namespace GLTFast.Loading {
     }
 
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
-
-        public AwaitableTextureDownload():base() {}
-        public AwaitableTextureDownload(Uri url):base(url) {}
+        protected AwaitableTextureDownload() {}
 
         public AwaitableTextureDownload(Uri url, bool nonReadable) {
             Init(url,nonReadable);
@@ -118,14 +162,14 @@ namespace GLTFast.Loading {
             return UnityWebRequestTexture.GetTexture(url,nonReadable);
         }
 
-        protected void Init(Uri url, bool nonReadable) {
-            request = CreateRequest(url,nonReadable);
-            asynOperation = request.SendWebRequest();
+        void Init(Uri url, bool nonReadable) {
+            m_Request = CreateRequest(url,nonReadable);
+            m_AsyncOperation = m_Request.SendWebRequest();
         }
 
         public Texture2D texture {
             get {
-                return (request.downloadHandler as  DownloadHandlerTexture ).texture;
+                return (m_Request.downloadHandler as  DownloadHandlerTexture ).texture;
             }
         }
     }
