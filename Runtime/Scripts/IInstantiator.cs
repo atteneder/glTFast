@@ -17,10 +17,17 @@ using Unity.Collections;
 using UnityEngine;
 
 namespace GLTFast {
+    
+    /// <summary>
+    /// After parsing and loading a glTF's content and converting its content
+    /// into Unity resources,the second step is instantiation.
+    /// Implementors of this interface can convert glTF resources into scene
+    /// objects. 
+    /// </summary>
     public interface IInstantiator {
 
         /// <summary>
-        /// Used to initialize Instantiators. Always called first.
+        /// Used to initialize instantiators. Always called first.
         /// </summary>
         void Init();
 

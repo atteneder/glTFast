@@ -27,13 +27,7 @@ namespace GLTFast {
 
         Dictionary<uint, Bounds> nodeBounds;
 
-        /// <summary>
-        /// Constructs a GameObjectBoundsInstantiator
-        /// </summary>
-        /// <param name="gltf">glTF to instantiate from</param>
-        /// <param name="parent">Generated GameObjects will get parented to this Transform</param>
-        /// <param name="logger">Custom logger</param>
-        /// <param name="settings">Instantiation settings</param>
+        /// <inheritdoc />
         public GameObjectBoundsInstantiator(
             IGltfReadable gltf,
             Transform parent,
@@ -41,11 +35,13 @@ namespace GLTFast {
             Settings settings = null
             ) : base(gltf,parent,logger,settings) {}
         
+        /// <inheritdoc />
         public override void Init() {
             base.Init();
             nodeBounds = new Dictionary<uint, Bounds>();
         }
 
+        /// <inheritdoc />
         public override void AddPrimitive(
             uint nodeIndex,
             string meshName,
@@ -79,6 +75,10 @@ namespace GLTFast {
             }
         }
 
+        /// <summary>
+        /// Attempts to calculate the instance's bounds
+        /// </summary>
+        /// <returns>Instance's bounds, if calculation succeeded</returns>
         public Bounds? CalculateBounds() {
 
             if (nodeBounds == null) { return null; }

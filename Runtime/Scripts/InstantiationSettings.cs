@@ -17,11 +17,32 @@ using System;
 
 namespace GLTFast {
 
+    /// <summary>
+    /// Instantiation settings
+    /// </summary>
     [Serializable]
     public class InstantiationSettings {
+        
+        /// <summary>
+        /// Can be used to exclude component instantiation based on type. 
+        /// </summary>
         public ComponentType mask = ComponentType.All;
+        
+        /// <summary>
+        /// Instantiated objects will be assigned to this layer.
+        /// </summary>
         public int layer;
+        
+        /// <summary>
+        /// Corresponds to <see cref="SkinnedMeshRenderer.updateWhenOffscreen"/>
+        /// When true, calculate the mesh bounds at all times, even when
+        /// the mesh is not visible.
+        /// </summary>
         public bool skinUpdateWhenOffscreen = true;
+        
+        /// <summary>
+        /// Light intensity values are multiplied by this factor.
+        /// </summary>
         public float lightIntensityFactor = 1.0f;
     }
 }
