@@ -21,6 +21,7 @@ using UnityEngine;
 namespace GLTFast
 {
     using Logging;
+    using Materials;
 
     public class GltfBoundsAsset : GltfAsset {
 

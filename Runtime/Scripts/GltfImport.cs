@@ -51,6 +51,7 @@ namespace GLTFast {
 
     using Loading;
     using Logging;
+    using Materials;
     using Schema;
 
     /// <summary>

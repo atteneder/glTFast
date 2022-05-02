@@ -21,6 +21,7 @@ namespace GLTFast
 {
     using Loading;
     using Logging;
+    using Materials;
     
     public class GltfAsset : GltfAssetBase
     {

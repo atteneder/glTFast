@@ -20,6 +20,7 @@ namespace GLTFast
 {
     using Logging;
     using Loading;
+    using Materials;
 
     public abstract class GltfAssetBase : MonoBehaviour
     {

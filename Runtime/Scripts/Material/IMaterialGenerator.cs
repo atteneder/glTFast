@@ -13,7 +13,7 @@
 // limitations under the License.
 //
 
-namespace GLTFast {
+namespace GLTFast.Materials {
     using Logging;
     using Schema;
     
