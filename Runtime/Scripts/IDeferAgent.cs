@@ -18,13 +18,14 @@ using System.Threading.Tasks;
 namespace GLTFast {
 
     /// <summary>
-    /// An IDeferAgent can be used to interrupting the glTF loading procedure
-    /// at certain points. This decision is always a trade-off between minimum
-    /// loading time and a stable frame rate.
+    /// An IDeferAgent decides whether to interrupt a preemptable procedure
+    /// running on the main thread at the current point in time.
+    /// This decision manages the trade-off between minimum procedure duration
+    /// and a responsive frame rate.
     /// </summary>
     public interface IDeferAgent {
         /// <summary>
-        /// This will be called by GltfImport at various points in the loading procedure.
+        /// This will be called at various points in the loading procedure.
         /// </summary>
         /// <returns>True if the remaining work of the loading procedure should
         /// be deferred to the next frame/Update loop invocation. False if
