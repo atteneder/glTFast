@@ -62,21 +62,6 @@ namespace GLTFast.Export {
         bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport);
         
         /// <summary>
-        /// Adds a scene to the glTF
-        /// </summary>
-        /// <param name="nodes">Root level nodes</param>
-        /// <param name="name">Name of the scene</param>
-        /// <returns>glTF scene index</returns>
-        uint AddScene(uint[] nodes, string name = null);
-        
-        /// <summary>
-        /// Registers the use of a glTF extension
-        /// </summary>
-        /// <param name="extension">Extension's name</param>
-        /// <param name="required">True if extension is required and used. False if it's used only</param>
-        void RegisterExtensionUsage(Extension extension, bool required = true);
-        
-        /// <summary>
         /// Adds an ImageExport to the glTF and returns the resulting image index
         /// </summary>
         /// <param name="imageExport">Image to be exported</param>
@@ -100,6 +85,21 @@ namespace GLTFast.Export {
         /// <returns>glTF sampler index or -1 if no sampler is required</returns>
         int AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV);
 
+        /// <summary>
+        /// Adds a scene to the glTF
+        /// </summary>
+        /// <param name="nodes">Root level nodes</param>
+        /// <param name="name">Name of the scene</param>
+        /// <returns>glTF scene index</returns>
+        uint AddScene(uint[] nodes, string name = null);
+        
+        /// <summary>
+        /// Registers the use of a glTF extension
+        /// </summary>
+        /// <param name="extension">Extension's name</param>
+        /// <param name="required">True if extension is required and used. False if it's used only</param>
+        void RegisterExtensionUsage(Extension extension, bool required = true);
+        
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a file
         /// and disposes this object.

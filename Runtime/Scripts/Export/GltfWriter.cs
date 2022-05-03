@@ -65,6 +65,12 @@ namespace GLTFast.Export {
             Disposed
         }
         
+        struct AttributeData {
+            public int stream;
+            public int offset;
+            public int accessorId;
+        }
+        
 #region Constants
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
@@ -178,6 +184,27 @@ namespace GLTFast.Export {
                 m_Gltf.scene = 0;
             }
             return (uint) m_Scenes.Count - 1;
+        }
+        
+        /// <inheritdoc />
+        public bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport) {
+
+            if (m_Materials!=null) {
+                materialId = m_UnityMaterials.IndexOf(uMaterial);
+                if (materialId >= 0) {
+                    return true;
+                }
+            } else {
+                m_Materials = new List<Material>();    
+                m_UnityMaterials = new List<UnityEngine.Material>();    
+            }
+            
+            var success = materialExport.ConvertMaterial(uMaterial, out var material, this, m_Logger);
+
+            materialId = m_Materials.Count;
+            m_Materials.Add(material);
+            m_UnityMaterials.Add(uMaterial);
+            return success;
         }
 
         /// <inheritdoc />
@@ -423,27 +450,6 @@ namespace GLTFast.Export {
             return imageDest;
         }
 
-        /// <inheritdoc />
-        public bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport) {
-
-            if (m_Materials!=null) {
-                materialId = m_UnityMaterials.IndexOf(uMaterial);
-                if (materialId >= 0) {
-                    return true;
-                }
-            } else {
-                m_Materials = new List<Material>();    
-                m_UnityMaterials = new List<UnityEngine.Material>();    
-            }
-            
-            var success = materialExport.ConvertMaterial(uMaterial, out var material, this, m_Logger);
-
-            materialId = m_Materials.Count;
-            m_Materials.Add(material);
-            m_UnityMaterials.Add(uMaterial);
-            return success;
-        }
-        
         int GetPadByteCount(uint length) {
             return (4 - (int)(length & 3) ) & 3;
         }
@@ -1585,67 +1591,5 @@ namespace GLTFast.Export {
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
         }
-        
-        internal struct MeshMaterialCombination {
-            readonly int m_MeshId;
-            readonly int[] m_MaterialIds;
-            
-            public MeshMaterialCombination(int meshId, int[] materialIds) {
-                m_MeshId = meshId;
-                m_MaterialIds = materialIds;
-            }
-            
-            public override bool Equals(object obj) {
-                //Check for null and compare run-time types.
-                if (obj == null || ! GetType().Equals(obj.GetType())) {
-                    return false;
-                }
-                return Equals((MeshMaterialCombination)obj);
-            }
-
-            bool Equals(MeshMaterialCombination other) {
-                return m_MeshId == other.m_MeshId && Equals(m_MaterialIds, other.m_MaterialIds);
-            }
-
-            static bool Equals(int[] a, int[] b) {
-                if (a == null && b == null) {
-                    return true;
-                }
-                if (a == null ^ b == null) {
-                    return false;
-                }
-                if (a.Length != b.Length) {
-                    return false;
-                }
-                for (var i = 0; i < a.Length; i++) {
-                    if (a[i] != b[i]) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            public override int GetHashCode() {
-#if NET_STANDARD
-                return HashCode.Combine(m_MeshId, m_MaterialIds);
-#else
-                var hash = 17;
-                hash = hash * 31 + m_MeshId.GetHashCode();
-                if (m_MaterialIds != null) {
-                    hash = hash * 31 + m_MaterialIds.Length;
-                    foreach (var id in m_MaterialIds) {
-                        hash = hash * 31 + id;
-                    }
-                }
-                return hash;
-#endif
-            }
-        }
-    }
-    
-    struct AttributeData {
-        public int stream;
-        public int offset;
-        public int accessorId;
     }
 }
