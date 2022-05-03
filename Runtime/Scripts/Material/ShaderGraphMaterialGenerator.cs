@@ -97,8 +97,8 @@ namespace GLTFast.Materials {
         
         protected const string k_MotionVectorsPass = "MOTIONVECTORS";
         
-        static readonly int baseColorPropId = Shader.PropertyToID("_BaseColor");
-        static readonly int baseMapPropId = Shader.PropertyToID("_BaseMap");
+        static readonly int baseColorPropId = Shader.PropertyToID("_Color");
+        static readonly int baseMapPropId = Shader.PropertyToID("_MainTex");
         static readonly int baseMapScaleTransformPropId = Shader.PropertyToID("_BaseMap_ST"); //TODO: support in shader!
         static readonly int baseMapRotationPropId = Shader.PropertyToID("_BaseMapRotation"); //TODO; support in shader!
         static readonly int baseMapUVChannelPropId = Shader.PropertyToID("_BaseMapUVChannel"); //TODO; support in shader!
