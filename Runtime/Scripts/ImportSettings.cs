@@ -18,7 +18,10 @@ using System;
 namespace GLTFast {
 
     using Schema;
-
+    
+    /// <summary>
+    /// glTF import settings
+    /// </summary>
     [Serializable]
     public class ImportSettings {
         
