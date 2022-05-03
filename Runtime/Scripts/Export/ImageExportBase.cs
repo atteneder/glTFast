@@ -17,28 +17,76 @@ using System;
 using UnityEngine;
 
 namespace GLTFast.Export {
+    
+    /// <summary>
+    /// Wrapper to export a glTF image from one or more Unity textures
+    /// </summary>
     public abstract class ImageExportBase {
 
+        /// <summary>
+        /// Exported image file format
+        /// </summary>
         public enum Format {
+            /// <summary>
+            /// Unknown, no preferred file format
+            /// </summary>
             Unknown,
+            /// <summary>
+            /// Jpeg file format
+            /// </summary>
             Jpg,
+            /// <summary>
+            /// PNG (Portable Network Graphics) file format
+            /// </summary>
             Png
         }
 
-        protected enum Channels {
-            RGB,
-            RGBA
-        }
-        
+        /// <summary>
+        /// Exported texture's file name
+        /// </summary>
         public abstract string fileName { get; }
+        
+        /// <summary>
+        /// Exported texture's mime type
+        /// </summary>
         public abstract string mimeType { get; }
+        
+        /// <summary>
+        /// Source texture's filter mode
+        /// </summary>
         public abstract FilterMode filterMode { get; }
+        
+        /// <summary>
+        /// Source texture's wrap mode (U direction)
+        /// </summary>
         public abstract TextureWrapMode wrapModeU { get; }
+        
+        /// <summary>
+        /// Source texture's wrap mode (V direction)
+        /// </summary>
         public abstract TextureWrapMode wrapModeV { get; }
         
+        /// <summary>
+        /// Writes image file
+        /// </summary>
+        /// <param name="filePath">Destination file path</param>
+        /// <param name="overwrite">If true, existing files will be overwritten</param>
         public abstract void Write(string filePath, bool overwrite);
+        
+        /// <summary>
+        /// Returns the exported and encoded texture data
+        /// </summary>
+        /// <returns></returns>
         public abstract byte[] GetData();
 
+        /// <summary>
+        /// Encodes the export texture
+        /// </summary>
+        /// <param name="texture">Main texture to encode</param>
+        /// <param name="format">Image format</param>
+        /// <param name="hasAlpha">True if the texture has an alpha channel</param>
+        /// <param name="blitMaterial">Custom blit material</param>
+        /// <returns>Encoded texture data</returns>
         protected static byte[] EncodeTexture(Texture2D texture, Format format, bool hasAlpha = true, Material blitMaterial = null) {
 
             Texture2D exportTexture;

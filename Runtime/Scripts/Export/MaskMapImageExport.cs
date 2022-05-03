@@ -19,15 +19,20 @@ using UnityEngine;
 
 namespace GLTFast.Export {
 
+    /// <summary>
+    /// Exports a glTF ORM (occlusion/roughness/metallic) image map
+    /// </summary>
     public class MaskMapImageExport : ImageExport {
         
         static Material s_BlitMaterial;
 
+        /// <inheritdoc />
         public MaskMapImageExport(
             Texture2D maskMap = null,
             Format format = Format.Unknown)
             : base(maskMap,format) {}
 
+        /// <inheritdoc />
         protected override Format format => m_Format != Format.Unknown ? m_Format : Format.Jpg;
 
         static Material GetMaskMapBlitMaterial() {
@@ -37,6 +42,7 @@ namespace GLTFast.Export {
             return s_BlitMaterial;
         }
         
+        /// <inheritdoc />
         protected override bool GenerateTexture(out byte[] imageData) {
             if (m_Texture != null) {
                 imageData = EncodeTexture(m_Texture, format, false, GetMaskMapBlitMaterial());
@@ -46,6 +52,7 @@ namespace GLTFast.Export {
             return false;
         }
         
+        /// <inheritdoc />
         public override void Write(string filePath, bool overwrite) {
             if (GenerateTexture(out var imageData)) {
                 File.WriteAllBytes(filePath,imageData);

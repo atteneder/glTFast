@@ -23,18 +23,39 @@ using UnityEditor;
 #endif
 
 namespace GLTFast.Export {
+    
+    /// <inheritdoc />
     public class ImageExport : ImageExportBase {
 
         static Material s_ColorBlitMaterial;
         
+        /// <summary>
+        /// Main source texture
+        /// </summary>
         protected Texture2D m_Texture;
+        
+        /// <summary>
+        /// Preferred image format
+        /// </summary>
         protected Format m_Format;
         
 #if UNITY_EDITOR
+        /// <summary>
+        /// Asset's path
+        /// </summary>
         protected string m_AssetPath;
+        
+        /// <summary>
+        /// True if <seealso cref="m_AssetPath"/> is a valid path
+        /// </summary>
         protected bool validAssetPath => !string.IsNullOrEmpty(m_AssetPath) && File.Exists(m_AssetPath);
 #endif
         
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="texture">Main source texture</param>
+        /// <param name="format">Export image format</param>
         public ImageExport(Texture2D texture, Format format = Format.Unknown) {
             m_Texture = texture;
             m_Format = format;
@@ -43,6 +64,9 @@ namespace GLTFast.Export {
 #endif
         }
         
+        /// <summary>
+        /// Final export format
+        /// </summary>
         protected virtual Format format {
             get {
                 if (m_Format != Format.Unknown) return m_Format;
@@ -50,6 +74,7 @@ namespace GLTFast.Export {
             }
         }
 
+        /// <inheritdoc />
         public override string fileName {
             get {
 #if UNITY_EDITOR
@@ -62,10 +87,16 @@ namespace GLTFast.Export {
             }
         }
 
+        /// <inheritdoc />
         public override FilterMode filterMode => m_Texture != null ? m_Texture.filterMode : FilterMode.Bilinear;
+        
+        /// <inheritdoc />
         public override TextureWrapMode wrapModeU => m_Texture != null ? m_Texture.wrapModeU : TextureWrapMode.Repeat;
+        
+        /// <inheritdoc />
         public override TextureWrapMode wrapModeV => m_Texture != null ? m_Texture.wrapModeV : TextureWrapMode.Repeat;
 
+        /// <inheritdoc />
         public override string mimeType {
             get {
                 switch (format) {
@@ -80,6 +111,10 @@ namespace GLTFast.Export {
             }
         }
 
+        /// <summary>
+        /// File extension according to image format
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         protected string fileExtension {
             get {
                 switch (format) {
@@ -94,6 +129,11 @@ namespace GLTFast.Export {
             }
         }
 
+        /// <summary>
+        /// Encodes the export texture
+        /// </summary>
+        /// <param name="imageData">Destination buffer</param>
+        /// <returns>True if encoding succeeded, false otherwise</returns>
         protected virtual bool GenerateTexture(out byte[] imageData) {
             if (m_Texture != null) {
                 imageData = EncodeTexture(m_Texture, format, blitMaterial:GetColorBlitMaterial());
@@ -103,6 +143,7 @@ namespace GLTFast.Export {
             return false;
         }
 
+        /// <inheritdoc />
         public override void Write(string filePath, bool overwrite) {
 #if UNITY_EDITOR
             if (validAssetPath && GetFormatFromExtension(m_AssetPath)==format) {
@@ -114,6 +155,7 @@ namespace GLTFast.Export {
             }
         }
 
+        /// <inheritdoc />
         public override byte[] GetData() {
 #if UNITY_EDITOR
             if (validAssetPath && GetFormatFromExtension(m_AssetPath)==format) {
@@ -124,6 +166,10 @@ namespace GLTFast.Export {
             return imageData;
         }
 
+        /// <summary>
+        /// Default hash function.
+        /// </summary>
+        /// <returns>A hash code for the current object.</returns>
         [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
         public override int GetHashCode() {
             var hash = 13;
@@ -133,6 +179,11 @@ namespace GLTFast.Export {
             return hash;
         }
 
+        /// <summary>
+        /// Determines whether two object instances are equal.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current object.</param>
+        /// <returns>true if the specified object is equal to the current object; otherwise, false.</returns>
         public override bool Equals(object obj) {
             //Check for null and compare run-time types.
             if (obj == null || GetType() != obj.GetType()) {
@@ -145,6 +196,11 @@ namespace GLTFast.Export {
             return m_Texture == other.m_Texture;
         }
 
+        /// <summary>
+        /// Creates a blit material from a shader name
+        /// </summary>
+        /// <param name="shaderName">Name of the shader to be used (without the "Hidden/" prefix)</param>
+        /// <returns>Blit material with requested Shader or null, if Shader wasn't found</returns>
         protected static Material LoadBlitMaterial(string shaderName) {
             var shader = Shader.Find($"Hidden/{shaderName}");
             if (shader == null) {
