@@ -41,14 +41,29 @@ namespace GLTFast {
             OriginalUnique
         }
 
+        /// <summary>
+        /// Target animation system
+        /// </summary>
         public enum AnimationMethod
         {
+            /// <summary>
+            /// Don't target or import animation
+            /// </summary>
             None,
+            /// <summary>
+            /// <see href="https://docs.unity3d.com/Manual/Animations.html">Legacy Animation System</see>
+            /// </summary>
             Legacy,
+            /// <summary>
+            /// <see href="https://docs.unity3d.com/Manual/AnimationOverview.html">Default Animation System (Mecanim)</see>
+            /// </summary>
             Mecanim
         }
 
+        /// <inheritdoc cref="NameImportMethod"/>
         public NameImportMethod nodeNameMethod = NameImportMethod.Original;
+        
+        /// <inheritdoc cref="animationMethod"/>
         public AnimationMethod animationMethod = AnimationMethod.Legacy;
 
         /// <summary>
@@ -59,9 +74,13 @@ namespace GLTFast {
         public bool generateMipMaps;
 
         /// <summary>
-        /// These two properties define the default filtering mode for textures that have no such specification in data
+        /// Defines the default minification filter mode for textures that have no such specification in data
         /// </summary>
         public Sampler.MinFilterMode defaultMinFilterMode = Sampler.MinFilterMode.Linear;
+        
+        /// <summary>
+        /// Define the default magnification filter mode for textures that have no such specification in data
+        /// </summary>
         public Sampler.MagFilterMode defaultMagFilterMode = Sampler.MagFilterMode.Linear;
 
         /// <summary>
