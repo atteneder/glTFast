@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
 - Moved logging related code into `GLTFast.Logging` namespace
+### Removed
+- Obsolete code
+  - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
+  - `GLTFast.GltFast` (was renamed to `GltfImport`)
+  - `GltfImport.InstantiateGltf` (was replaced by `InstantiateMainScene` and `InstantiateScene`)
+  - `GltfImport.Destroy` (was renamed to `Dispose`)
+  - Remains of Basis Universal extension draft state
+    - `Schema.Image.extensions`
+    - `Schema.Image.ImageExtension`
+    - `Schema.Image.ImageKtx2`
 
 ## [Unreleased]
 ### Added

@@ -37,10 +37,6 @@ namespace GLTFast.Schema
         /// </summary>
         public int bufferView = -1;
 
-#if KTX_UNITY
-        public ImageExtension extensions;
-#endif
-        
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);

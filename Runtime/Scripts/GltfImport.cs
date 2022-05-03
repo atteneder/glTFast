@@ -406,39 +406,6 @@ namespace GLTFast {
         }
         
         /// <summary>
-        /// Creates an instance of the entire glTF (all scenes).
-        /// Please prefer to instantiate the main scene or selected scenes instead.
-        /// </summary>
-        /// <param name="parent">Transform that the scenes will get parented to</param>
-        /// <returns></returns>
-        [Obsolete("Replace with InstantiateMainScene or InstantiateScene")]
-        public bool InstantiateGltf(Transform parent) {
-            var instantiator = new GameObjectInstantiator(this, parent, new ConsoleLogger());
-            var success = InstantiateGltf(instantiator);
-            return success;
-        }
-
-        /// <summary>
-        /// Instantiates the entire glTF (all scenes).
-        /// Please prefer to instantiate the main scene or selected scenes instead.
-        /// </summary>
-        /// <param name="instantiator">Instantiator implementation; Receives and processes the scenes' data</param>
-        /// <returns></returns>
-        [Obsolete("Replace with InstantiateMainScene or InstantiateScene")]
-        public bool InstantiateGltf(IInstantiator instantiator) {
-            if (!loadingDone || loadingError) return false;
-            for (int sceneIndex = 0; sceneIndex < sceneCount; sceneIndex++) {
-                InstantiateScene(instantiator, sceneIndex);
-            }
-            return true;
-        }
-
-        [Obsolete("Use Dispose instead")]
-        public void Destroy() {
-            Dispose();
-        }
-
-        /// <summary>
         /// Frees up memory by disposing all sub assets.
         /// There can be no instantiation or other element access afterwards.
         /// </summary>
