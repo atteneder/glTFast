@@ -70,6 +70,8 @@ namespace GLTFast {
         /// <param name="mesh">The actual Mesh</param>
         /// <param name="materialIndices">Material indices. Should be used to query the material</param>
         /// <param name="joints">If a skin was attached, the joint indices. Null otherwise</param>
+        /// <param name="rootJoint">Root joint node index, if present</param>
+        /// <param name="morphTargetWeights">Morph target weights, if present</param>
         /// <param name="primitiveNumeration">Primitives are numerated per Node, starting with 0</param>
         void AddPrimitive(
             uint nodeIndex,
