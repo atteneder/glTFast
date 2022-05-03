@@ -23,17 +23,33 @@ namespace GLTFast
     using Logging;
     using Materials;
     
+    /// <summary>
+    /// Base component for code-less loading of glTF files
+    /// </summary>
     public class GltfAsset : GltfAssetBase
     {
-        [Tooltip("URL to load the glTF from.")]
+        /// <summary>
+        /// URL to load the glTF from
+        /// Loading local file paths works by prefixing them with "file://"
+        /// </summary>
+        [Tooltip("URL to load the glTF from. Loading local file paths works by prefixing them with \"file://\"")]
         public string url;
         
+        /// <summary>
+        /// Automatically load at start
+        /// </summary>
         [Tooltip("Automatically load at start.")]
         public bool loadOnStartup = true;
         
+        /// <summary>
+        /// Scene to load (-1 loads glTFs default scene)
+        /// </summary>
         [Tooltip("Override scene to load (-1 loads glTFs default scene)")]
         public int sceneId = -1;
         
+        /// <summary>
+        /// If true, url is treated as relative StreamingAssets path
+        /// </summary>
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
@@ -44,10 +60,17 @@ namespace GLTFast
         /// </summary>
         public GameObjectInstantiator.SceneInstance sceneInstance { get; protected set; }
         
-        public string FullUrl => streamingAsset
+        /// <summary>
+        /// Final URL, considering all options (like <seealso cref="streamingAsset"/>)
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
+        protected string FullUrl => streamingAsset
             ? Path.Combine(Application.streamingAssetsPath, url)
             : url;
 
+        /// <summary>
+        /// Called at initialization phase
+        /// </summary>
         protected virtual async void Start() {
             if(loadOnStartup && !string.IsNullOrEmpty(url)) {
                 // Automatic load on startup
@@ -55,6 +78,7 @@ namespace GLTFast
             }
         }
 
+        /// <inheritdoc />
         public override async Task<bool> Load(
             string url,
             IDownloadProvider downloadProvider=null,
@@ -77,18 +101,18 @@ namespace GLTFast
             return success;
         }
         
+        /// <inheritdoc />
         protected override IInstantiator GetDefaultInstantiator(ICodeLogger logger) {
             return new GameObjectInstantiator(importer, transform, logger, instantiationSettings);
         }
         
+        /// <inheritdoc />
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
             sceneInstance = (instantiator as GameObjectInstantiator).sceneInstance;
             base.PostInstantiation(instantiator, success);
         }
         
-        /// <summary>
-        /// Removes previously instantiated scene(s)
-        /// </summary>
+        /// <inheritdoc />
         public override void ClearScenes() {
             foreach (Transform child in transform) {
                 Destroy(child.gameObject);
