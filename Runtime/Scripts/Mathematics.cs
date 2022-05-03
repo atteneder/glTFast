@@ -108,12 +108,22 @@ namespace GLTFast {
             rotation = new quaternion(rotationMatrix).value;
         }
 
+        /// <summary>
+        /// Normalizes a vector
+        /// </summary>
+        /// <param name="input">Input vector</param>
+        /// <param name="output">Normalized output vector</param>
+        /// <returns>Length/magnitude of input vector</returns>
         static float normalize(float3 input,out float3 output) {
             var len = length(input);
             output = input/len;
             return len;
         }
 
+        /// <summary>
+        /// Normalizes columns of a 3 by 3 matrix
+        /// </summary>
+        /// <param name="m">Matrix to be normalized</param>
         static void normalize(ref float3x3 m) {
             m.c0 = math.normalize(m.c0);
             m.c1 = math.normalize(m.c1);
@@ -125,6 +135,12 @@ namespace GLTFast {
             return math.dot(cross,m.c2)<0f;
         }
         
+        /// <summary>
+        /// Normalizes a vector
+        /// </summary>
+        /// <param name="input">Input vector</param>
+        /// <param name="output">Normalized output vector</param>
+        /// <returns>Length/magnitude of input vector</returns>
         public static float normalize(float2 input,out float2 output) {
             float len = math.length(input);
             output = input/len;
