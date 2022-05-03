@@ -49,8 +49,17 @@ namespace GLTFast.Export {
         SeparateFile
     }
 
+    /// <summary>
+    /// Resolutions to existing file conflicts
+    /// </summary>
     public enum FileConflictResolution {
+        /// <summary>
+        /// Abort and keep existing files
+        /// </summary>
         Abort,
+        /// <summary>
+        /// Replace existing files with newly created ones
+        /// </summary>
         Overwrite
     }
     
@@ -58,8 +67,15 @@ namespace GLTFast.Export {
     /// glTF export settings
     /// </summary>
     public class ExportSettings {
+        /// <summary>
+        /// Export to JSON-based or binary format glTF files
+        /// </summary>
         public GltfFormat format = GltfFormat.Json;
+        
+        /// <inheritdoc cref="ImageDestination"/>
         public ImageDestination imageDestination = ImageDestination.Automatic;
+        
+        /// <inheritdoc cref="FileConflictResolution"/>
         public FileConflictResolution fileConflictResolution = FileConflictResolution.Abort;
     }
 }
