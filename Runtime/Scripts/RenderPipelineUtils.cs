@@ -47,10 +47,16 @@ namespace GLTFast {
         HighDefinition
     }
 
+	/// <summary>
+	/// Render Pipeline Utilities
+	/// </summary>
     public static class RenderPipelineUtils {
 
 	    static RenderPipeline s_RenderPipeline = RenderPipeline.Unknown;
 	    
+	    /// <summary>
+	    /// Currently used render pipeline
+	    /// </summary>
 	    public static RenderPipeline renderPipeline {
 		    get {
 			    if (s_RenderPipeline == RenderPipeline.Unknown) {
