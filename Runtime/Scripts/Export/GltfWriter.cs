@@ -25,7 +25,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using GLTFast.Schema;
-using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -55,6 +54,9 @@ namespace GLTFast.Export {
 
     using Logging;
     
+    /// <summary>
+    /// Provides glTF export independent of workflow (GameObjects/Entities)
+    /// </summary>
     public class GltfWriter : IGltfWritable {
 
         enum State {
@@ -121,16 +123,7 @@ namespace GLTFast.Export {
             m_DeferAgent = deferAgent ?? new UninterruptedDeferAgent();
         }
 
-        /// <summary>
-        /// Adds a node to the glTF
-        /// </summary>
-        /// <param name="translation">Local translation of the node (in Unity-space)</param>
-        /// <param name="rotation">Local rotation of the node (in Unity-space)</param>
-        /// <param name="scale">Local scale of the node (in Unity-space)</param>
-        /// <param name="children">Array of node indices that are parented to
-        /// this newly created node</param>
-        /// <param name="name">Name of the node</param>
-        /// <returns>glTF node index</returns>
+        /// <inheritdoc />
         public uint AddNode(
             float3? translation = null,
             quaternion? rotation = null,
@@ -159,14 +152,8 @@ namespace GLTFast.Export {
             return (uint) m_Nodes.Count - 1;
         }
         
-        /// <summary>
-        /// Assigns a mesh to a previously added node
-        /// </summary>
-        /// <param name="nodeId">Index of the node to add the mesh to</param>
-        /// <param name="uMesh">Unity mesh to be assigned and exported</param>
-        /// <param name="materialIds">glTF materials IDs to be assigned
-        /// (multiple in case of sub-meshes)</param>
-        public void AddMeshToNode(int nodeId, [NotNull] UnityEngine.Mesh uMesh, int[] materialIds) {
+        /// <inheritdoc />
+        public void AddMeshToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds) {
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
@@ -178,12 +165,7 @@ namespace GLTFast.Export {
             node.mesh = AddMesh(uMesh);
         }
 
-        /// <summary>
-        /// Adds a scene to the glTF
-        /// </summary>
-        /// <param name="nodes">Root level nodes</param>
-        /// <param name="name">Name of the scene</param>
-        /// <returns>glTF scene index</returns>
+        /// <inheritdoc />
         public uint AddScene(uint[] nodes, string name = null) {
             CertifyNotDisposed();
             m_Scenes = m_Scenes ?? new List<Scene>();
@@ -198,6 +180,7 @@ namespace GLTFast.Export {
             return (uint) m_Scenes.Count - 1;
         }
 
+        /// <inheritdoc />
         public int AddImage( ImageExportBase imageExport ) {
             CertifyNotDisposed();
             int imageId;
@@ -227,6 +210,7 @@ namespace GLTFast.Export {
             return imageId;
         }
 
+        /// <inheritdoc />
         public int AddTexture(int imageId, int samplerId) {
             CertifyNotDisposed();
             m_Textures = m_Textures ?? new List<Texture>();
@@ -245,6 +229,7 @@ namespace GLTFast.Export {
             return m_Textures.Count - 1;
         }
         
+        /// <inheritdoc />
         public int AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV) {
             if (filterMode == FilterMode.Bilinear && wrapModeU == TextureWrapMode.Repeat && wrapModeV == TextureWrapMode.Repeat) {
                 // This is the default, so no sampler needed
@@ -266,6 +251,7 @@ namespace GLTFast.Export {
             return m_Samplers.Count - 1;
         }
 
+        /// <inheritdoc />
         public void RegisterExtensionUsage(Extension extension, bool required = true) {
             CertifyNotDisposed();
             if (required) {
@@ -279,13 +265,7 @@ namespace GLTFast.Export {
             }
         }
         
-        /// <summary>
-        /// Exports the collected scenes/content as glTF, writes it to a file
-        /// and disposes this object.
-        /// After the export this instance cannot be re-used!
-        /// </summary>
-        /// <param name="path">glTF destination file path</param>
-        /// <returns>True if the glTF file was created successfully, false otherwise</returns>
+        /// <inheritdoc />
         public async Task<bool> SaveToFileAndDispose(string path) {
             
             CertifyNotDisposed();
@@ -307,13 +287,7 @@ namespace GLTFast.Export {
             return success;
         }
         
-        /// <summary>
-        /// Exports the collected scenes/content as glTF, writes it to a Stream
-        /// and disposes this object. Only works for self-contained glTF-Binary.
-        /// After the export this instance cannot be re-used!
-        /// </summary>
-        /// <param name="stream">glTF destination stream</param>
-        /// <returns>True if the glTF file was created successfully, false otherwise</returns>
+        /// <inheritdoc />
         public async Task<bool> SaveToStreamAndDispose(Stream stream) {
             
             CertifyNotDisposed();
@@ -449,13 +423,7 @@ namespace GLTFast.Export {
             return imageDest;
         }
 
-        /// <summary>
-        /// Adds a 
-        /// </summary>
-        /// <param name="uMaterial"></param>
-        /// <param name="materialId"></param>
-        /// <param name="materialExport"></param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport) {
 
             if (m_Materials!=null) {
@@ -1455,7 +1423,7 @@ namespace GLTFast.Export {
             }
         }
 
-        int AddMesh([NotNull] UnityEngine.Mesh uMesh) {
+        int AddMesh(UnityEngine.Mesh uMesh) {
             int meshId;
             
 #if !UNITY_EDITOR

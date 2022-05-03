@@ -13,11 +13,61 @@
 // limitations under the License.
 //
 
+using System.IO;
+using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GLTFast.Export {
+    
+    /// <summary>
+    /// Is able to receive asset resources and export them to glTF
+    /// </summary>
     public interface IGltfWritable {
 
+        /// <summary>
+        /// Adds a node to the glTF
+        /// </summary>
+        /// <param name="translation">Local translation of the node (in Unity-space)</param>
+        /// <param name="rotation">Local rotation of the node (in Unity-space)</param>
+        /// <param name="scale">Local scale of the node (in Unity-space)</param>
+        /// <param name="children">Array of node indices that are parented to
+        /// this newly created node</param>
+        /// <param name="name">Name of the node</param>
+        /// <returns>glTF node index</returns>
+        uint AddNode(
+            float3? translation = null,
+            quaternion? rotation = null,
+            float3? scale = null,
+            uint[] children = null,
+            string name = null
+        );
+
+        /// <summary>
+        /// Assigns a mesh to a previously added node
+        /// </summary>
+        /// <param name="nodeId">Index of the node to add the mesh to</param>
+        /// <param name="uMesh">Unity mesh to be assigned and exported</param>
+        /// <param name="materialIds">glTF materials IDs to be assigned
+        /// (multiple in case of sub-meshes)</param>
+        public void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds);
+
+        /// <summary>
+        /// Adds a Unity material 
+        /// </summary>
+        /// <param name="uMaterial">Unity material</param>
+        /// <param name="materialId">glTF material index</param>
+        /// <param name="materialExport">Material converter</param>
+        /// <returns>True if converting and adding material was successful, false otherwise</returns>
+        bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport);
+        
+        /// <summary>
+        /// Adds a scene to the glTF
+        /// </summary>
+        /// <param name="nodes">Root level nodes</param>
+        /// <param name="name">Name of the scene</param>
+        /// <returns>glTF scene index</returns>
+        uint AddScene(uint[] nodes, string name = null);
         
         /// <summary>
         /// Registers the use of a glTF extension
@@ -49,5 +99,23 @@ namespace GLTFast.Export {
         /// <param name="wrapModeV">Texture wrap mode in V direction</param>
         /// <returns>glTF sampler index or -1 if no sampler is required</returns>
         int AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV);
+
+        /// <summary>
+        /// Exports the collected scenes/content as glTF, writes it to a file
+        /// and disposes this object.
+        /// After the export this instance cannot be re-used!
+        /// </summary>
+        /// <param name="path">glTF destination file path</param>
+        /// <returns>True if the glTF file was created successfully, false otherwise</returns>
+        Task<bool> SaveToFileAndDispose(string path);
+
+        /// <summary>
+        /// Exports the collected scenes/content as glTF, writes it to a Stream
+        /// and disposes this object. Only works for self-contained glTF-Binary.
+        /// After the export this instance cannot be re-used!
+        /// </summary>
+        /// <param name="stream">glTF destination stream</param>
+        /// <returns>True if the glTF file was created successfully, false otherwise</returns>
+        Task<bool> SaveToStreamAndDispose(Stream stream);
     }
 }
