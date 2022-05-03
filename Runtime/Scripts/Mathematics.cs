@@ -15,7 +15,6 @@
 
 using UnityEngine;
 using static Unity.Mathematics.math;
-using static Unity.Mathematics.quaternion;
 
 namespace GLTFast {
 
