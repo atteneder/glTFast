@@ -557,6 +557,7 @@ namespace GLTFast {
             return result;
         }
 
+        /// <inheritdoc />
         public Camera GetSourceCamera(uint index) {
             if (gltfRoot?.cameras != null && index < gltfRoot.cameras.Length) {
                 return gltfRoot.cameras[index];
@@ -564,6 +565,7 @@ namespace GLTFast {
             return null;
         }
         
+        /// <inheritdoc />
         public LightPunctual GetSourceLightPunctual(uint index) {
             if (gltfRoot?.extensions?.KHR_lights_punctual.lights != null && index < gltfRoot.extensions.KHR_lights_punctual.lights.Length) {
                 return gltfRoot.extensions.KHR_lights_punctual.lights[index];
@@ -571,6 +573,7 @@ namespace GLTFast {
             return null;
         }
         
+        /// <inheritdoc />
         public Material GetSourceMaterial(int index = 0) {
             if (gltfRoot?.materials != null && index >= 0 && index < gltfRoot.materials.Length) {
                 return gltfRoot.materials[index];
@@ -578,6 +581,7 @@ namespace GLTFast {
             return null;
         }
 
+        /// <inheritdoc />
         public Texture GetSourceTexture(int index = 0) {
             if (gltfRoot?.textures != null && index >= 0 && index < gltfRoot.textures.Length) {
                 return gltfRoot.textures[index];
@@ -585,6 +589,7 @@ namespace GLTFast {
             return null;
         }
 
+        /// <inheritdoc />
         public Image GetSourceImage(int index = 0) {
             if (gltfRoot?.images != null && index >= 0 && index < gltfRoot.images.Length) {
                 return gltfRoot.images[index];
@@ -2970,6 +2975,13 @@ namespace GLTFast {
 #endif // UNITY_ANIMATION
 
 #region IGltfBuffers
+        /// <summary>
+        /// Get glTF accessor and its raw data
+        /// </summary>
+        /// <param name="index">glTF accessor index</param>
+        /// <param name="accessor">De-serialized glTF accessor</param>
+        /// <param name="data">Pointer to accessor's data in memory</param>
+        /// <param name="byteStride">Element byte stride</param>
         public unsafe void GetAccessor(int index, out Accessor accessor, out void* data, out int byteStride) {
             accessor = gltfRoot.accessors[index];
             if (accessor.bufferView < 0 || accessor.bufferView >= gltfRoot.bufferViews.Length) {
@@ -2999,6 +3011,11 @@ namespace GLTFast {
             // data =  (byte*)bufferViewData.GetUnsafeReadOnlyPtr() + accessor.byteOffset;
         }
         
+        /// <summary>
+        /// Get sparse indices raw data
+        /// </summary>
+        /// <param name="sparseIndices">glTF sparse indices accessor</param>
+        /// <param name="data">Pointer to accessor's data in memory</param>
         public unsafe void GetAccessorSparseIndices(AccessorSparseIndices sparseIndices, out void* data) {
             var bufferView = gltfRoot.bufferViews[sparseIndices.bufferView];
 #if MESHOPT
@@ -3017,6 +3034,11 @@ namespace GLTFast {
             }
         }
 
+        /// <summary>
+        /// Get sparse value raw data
+        /// </summary>
+        /// <param name="sparseValues">glTF sparse values accessor</param>
+        /// <param name="data">Pointer to accessor's data in memory</param>
         public unsafe void GetAccessorSparseValues(AccessorSparseValues sparseValues, out void* data) {
             var bufferView = gltfRoot.bufferViews[sparseValues.bufferView];
 #if MESHOPT

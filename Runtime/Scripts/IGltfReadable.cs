@@ -37,15 +37,59 @@ namespace GLTFast {
         /// </summary>
         int textureCount { get; }
 
+        /// <summary>
+        /// Fetch Material by index
+        /// </summary>
+        /// <param name="index">glTF index</param>
+        /// <returns>Unity Material</returns>
         Material GetMaterial(int index = 0);
+        
+        /// <summary>
+        /// Default material, supposed to be used when no material was assigned
+        /// </summary>
+        /// <returns>Default material</returns>
         Material GetDefaultMaterial();
         
+        /// <summary>
+        /// Get texture by glTF image index
+        /// </summary>
+        /// <param name="index">glTF image index</param>
+        /// <returns>Loaded Unity texture</returns>
         Texture2D GetImage(int index = 0);
+        
+        /// <summary>
+        /// Get texture by glTF texture index
+        /// </summary>
+        /// <param name="index">glTF texture index</param>
+        /// <returns>Loaded Unity texture</returns>
         Texture2D GetTexture(int index = 0);
 
+        /// <summary>
+        /// Get source (de-serialized glTF) camera
+        /// </summary>
+        /// <param name="index">glTF camera index</param>
+        /// <returns>De-serialized glTF camera</returns>
         Schema.Camera GetSourceCamera(uint index);
+        
+        /// <summary>
+        /// Get source (de-serialized glTF) material
+        /// </summary>
+        /// <param name="index">glTF material index</param>
+        /// <returns>De-serialized glTF material</returns>
         Schema.Material GetSourceMaterial(int index = 0);
+        
+        /// <summary>
+        /// Get source (de-serialized glTF) texture
+        /// </summary>
+        /// <param name="index">glTF texture index</param>
+        /// <returns>De-serialized glTF texture</returns>
         Schema.Texture GetSourceTexture(int index = 0);
+        
+        /// <summary>
+        /// Get source (de-serialized glTF) image
+        /// </summary>
+        /// <param name="index">glTF image index</param>
+        /// <returns>De-serialized glTF image</returns>
         Schema.Image GetSourceImage(int index = 0);
         Schema.LightPunctual GetSourceLightPunctual(uint index);
     }
