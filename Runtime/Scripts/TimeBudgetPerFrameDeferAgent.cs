@@ -19,6 +19,10 @@ using UnityEngine;
 
 namespace GLTFast {
     
+    /// <summary>
+    /// Claims a certain fraction of the target frame time and keeps track of
+    /// whether this time frame was surpassed.
+    /// </summary>
     [DefaultExecutionOrder(-10)]
     public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent {
 
@@ -60,10 +64,12 @@ namespace GLTFast {
             lastTime = Time.realtimeSinceStartup;
         }
 
+        /// <inheritdoc />
         public bool ShouldDefer() {
             return !FitsInCurrentFrame(0);
         }
         
+        /// <inheritdoc />
         public bool ShouldDefer( float duration ) {
             return !FitsInCurrentFrame(duration);
         }
@@ -72,12 +78,14 @@ namespace GLTFast {
             return duration <= timeBudget - (Time.realtimeSinceStartup - lastTime);
         }
 
+        /// <inheritdoc />
         public async Task BreakPoint() {
             if (ShouldDefer()) {
                 await Task.Yield();
             }
         }
         
+        /// <inheritdoc />
         public async Task BreakPoint( float duration ) {
             if (ShouldDefer(duration)) {
                 await Task.Yield();
