@@ -151,13 +151,32 @@ namespace GLTFast.Loading {
         }
     }
 
+    /// <summary>
+    /// Default <see cref="ITextureDownload"/> implementation that loads
+    /// texture URIs via <seealso cref="UnityWebRequest"/>.
+    /// </summary>
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
+        
+        /// <summary>
+        /// Parameter-less constructor, required for inheritance.
+        /// </summary>
         protected AwaitableTextureDownload() {}
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        /// <param name="url">Texture URI to request</param>
+        /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
         public AwaitableTextureDownload(Uri url, bool nonReadable) {
             Init(url,nonReadable);
         }
 
+        /// <summary>
+        /// Generates the UnityWebRequest used for sending the request.
+        /// </summary>
+        /// <param name="url">Texture URI to request</param>
+        /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
+        /// <returns>UnityWebRequest used for sending the request</returns>
         protected static UnityWebRequest CreateRequest(Uri url, bool nonReadable) {
             return UnityWebRequestTexture.GetTexture(url,nonReadable);
         }
@@ -167,6 +186,7 @@ namespace GLTFast.Loading {
             m_AsyncOperation = m_Request.SendWebRequest();
         }
 
+        /// <inheritdoc />
         public Texture2D texture {
             get {
                 return (m_Request.downloadHandler as  DownloadHandlerTexture ).texture;

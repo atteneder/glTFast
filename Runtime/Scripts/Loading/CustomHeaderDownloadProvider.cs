@@ -37,6 +37,10 @@ namespace GLTFast.Loading {
         public string value;
     }
 
+    /// <summary>
+    /// Delegate that allows to edit a <seealso cref="UnityWebRequest"/> before
+    /// its request is sent.
+    /// </summary>
     public delegate void EditUnityWebRequest( UnityWebRequest request );
 
     /// <summary>
@@ -54,11 +58,7 @@ namespace GLTFast.Loading {
             _headers = headers;
         }
 
-        /// <summary>
-        /// Sends a URI request
-        /// </summary>
-        /// <param name="url">URI to request</param>
-        /// <returns>Object representing the request</returns>
+        /// <inheritdoc />
         public async Task<IDownload> Request(Uri url) {
             var req = new CustomHeaderDownload(url,RegisterHttpHeaders);
             while (req.MoveNext()) {
@@ -67,6 +67,7 @@ namespace GLTFast.Loading {
             return req;
         }
 
+        /// <inheritdoc />
         public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
             var req = new CustomHeaderTextureDownload(url,nonReadable,RegisterHttpHeaders);
             while (req.MoveNext()) {

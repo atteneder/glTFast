@@ -30,6 +30,9 @@ namespace GLTFast.Export {
     using Logging;
     using Schema;
 
+    /// <summary>
+    /// Converts URP/HDRP Lit and Built-In Standard shader based materials to glTF materials 
+    /// </summary>
     public class StandardMaterialExport : MaterialExportBase {
 
         const string k_KeywordBumpMap = "_BUMPMAP";
