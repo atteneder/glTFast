@@ -23,6 +23,9 @@ namespace GLTFast.Export {
 
     using Logging;
     
+    /// <summary>
+    /// Creates glTF files from GameObject hierarchies 
+    /// </summary>
     public class GameObjectExport {
 
         GltfWriter m_Writer;

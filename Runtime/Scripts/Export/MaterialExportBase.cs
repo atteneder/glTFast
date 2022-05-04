@@ -24,19 +24,52 @@ namespace GLTFast.Export {
     using Logging;
     using Schema;
 
+    /// <inheritdoc />
     public abstract class MaterialExportBase : IMaterialExport {
         
+        /// <summary>
+        /// _BaseColor property
+        /// </summary>
         protected static readonly int k_BaseColor = Shader.PropertyToID("_BaseColor");
+        
+        /// <summary>
+        /// _MainTex property
+        /// </summary>
         protected static readonly int k_MainTex = Shader.PropertyToID("_MainTex");
+        
+        /// <summary>
+        /// _Color property
+        /// </summary>
         protected static readonly int k_Color = Shader.PropertyToID("_Color");
+        
+        /// <summary>
+        /// _Metallic property
+        /// </summary>
         protected static readonly int k_Metallic = Shader.PropertyToID("_Metallic");
+        
+        /// <summary>
+        /// _Smoothness property
+        /// </summary>
         protected static readonly int k_Smoothness = Shader.PropertyToID("_Smoothness");
 
         static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
         static readonly int k_Cull = Shader.PropertyToID("_Cull");
 
+        /// <summary>
+        /// Converts a Unity material into a glTF material
+        /// </summary>
+        /// <param name="uMaterial">Source material</param>
+        /// <param name="material">Resulting glTF material</param>
+        /// <param name="gltf">glTF to export material to. Will be used to add required texture images</param>
+        /// <param name="logger">Custom logger</param>
+        /// <returns>True if material was converted successfully, false otherwise</returns>
         public abstract bool ConvertMaterial(UnityEngine.Material uMaterial, out Material material, IGltfWritable gltf, ICodeLogger logger);
         
+        /// <summary>
+        /// Applies alpha mode and cutoff
+        /// </summary>
+        /// <param name="uMaterial">Source Unity Material</param>
+        /// <param name="material">glTF material to apply settings on</param>
         protected static void SetAlphaModeAndCutoff(UnityEngine.Material uMaterial, Material material) {
             switch (uMaterial.GetTag("RenderType", false, ""))
             {
@@ -57,16 +90,41 @@ namespace GLTFast.Export {
             }
         }
 
+        /// <summary>
+        /// Retrieves whether material is double-sided.
+        /// </summary>
+        /// <param name="uMaterial">Material to analyze.</param>
+        /// <returns>True if material is double-sided, false otherwise.</returns>
         protected static bool IsDoubleSided(UnityEngine.Material uMaterial) {
             return uMaterial.HasProperty(k_Cull) &&
                 uMaterial.GetInt(k_Cull) == (int) CullMode.Off;
         }
         
+        /// <summary>
+        /// Retrieves whether material is unlit
+        /// </summary>
+        /// <param name="material">Material to analyze</param>
+        /// <returns>True if material uses unlit shader, false otherwise</returns>
         protected static bool IsUnlit(UnityEngine.Material material) {
             return material.shader.name.ToLower().Contains("unlit");
         }
         
-        protected static void ExportUnlit(Material material, UnityEngine.Material uMaterial, int mainTexProperty, IGltfWritable gltf, ICodeLogger logger){
+        /// <summary>
+        /// Converts an unlit Unity material into a glTF material 
+        /// </summary>
+        /// <param name="material">Destination glTF material</param>
+        /// <param name="uMaterial">Source Unity material</param>
+        /// <param name="mainTexProperty">Main texture property ID</param>
+        /// <param name="gltf">Context glTF to export to</param>
+        /// <param name="logger">Custom logger</param>
+        protected static void ExportUnlit(
+            Material material,
+            UnityEngine.Material uMaterial,
+            int mainTexProperty,
+            IGltfWritable gltf,
+            ICodeLogger logger
+            )
+        {
 
             gltf.RegisterExtensionUsage(Extension.MaterialsUnlit);
             material.extensions = material.extensions ?? new MaterialExtension();
@@ -93,7 +151,19 @@ namespace GLTFast.Export {
             material.pbrMetallicRoughness = pbr;
         }
         
-        protected static TextureInfo ExportTextureInfo( UnityEngine.Texture texture, IGltfWritable gltf, ImageExportBase.Format format = ImageExportBase.Format.Unknown) {
+        /// <summary>
+        /// Export a Unity texture to a glTF.
+        /// </summary>
+        /// <param name="texture">Texture to export.</param>
+        /// <param name="gltf">Context glTF to expor to</param>
+        /// <param name="format">Desired image format</param>
+        /// <returns>glTF texture info</returns>
+        protected static TextureInfo ExportTextureInfo(
+            UnityEngine.Texture texture,
+            IGltfWritable gltf,
+            ImageExportBase.Format format = ImageExportBase.Format.Unknown
+            )
+        {
             var texture2d = texture as Texture2D;
             if (texture2d == null) {
                 return null;
@@ -108,6 +178,13 @@ namespace GLTFast.Export {
             return null;
         }
         
+        /// <summary>
+        /// Export a normal texture from Unity to glTF.
+        /// </summary>
+        /// <param name="texture">Normal texture to export</param>
+        /// <param name="material">Material the normal is used on</param>
+        /// <param name="gltf">Context glTF to export to</param>
+        /// <returns>glTF texture info</returns>
         protected static NormalTextureInfo ExportNormalTextureInfo(
             UnityEngine.Texture texture,
             UnityEngine.Material material,
@@ -153,6 +230,13 @@ namespace GLTFast.Export {
             return true;
         }
         
+        /// <summary>
+        /// Calculates a texture's transform and adds a KHR_texture_transform glTF extension, if required
+        /// </summary>
+        /// <param name="def">glTF TextureInfo to edit</param>
+        /// <param name="mat">Source Material</param>
+        /// <param name="texPropertyId">Texture property to fetch transformation from</param>
+        /// <param name="gltf">Context glTF to export to (for registering extension usage)</param>
         protected static void ExportTextureTransform(TextureInfo def, UnityEngine.Material mat, int texPropertyId, IGltfWritable gltf) {
             var offset = mat.GetTextureOffset(texPropertyId);
             var scale = mat.GetTextureScale(texPropertyId);

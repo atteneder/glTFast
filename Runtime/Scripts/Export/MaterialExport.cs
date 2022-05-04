@@ -13,14 +13,23 @@
 // limitations under the License.
 //
 
+using System;
 using UnityEngine;
 
 namespace GLTFast.Export {
 
+    /// <summary>
+    /// Provides the default material export
+    /// </summary>
     public static class MaterialExport {
 
         static IMaterialExport m_MaterialExport;
         
+        /// <summary>
+        /// Provides the default material exporter
+        /// </summary>
+        /// <returns>Default material export</returns>
+        /// <exception cref="Exception"></exception>
         public static IMaterialExport GetDefaultMaterialExport() {
             if (m_MaterialExport == null) {
 
