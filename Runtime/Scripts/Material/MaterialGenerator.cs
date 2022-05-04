@@ -37,57 +37,116 @@ namespace GLTFast.Materials {
     /// Common base class for implementations of IMaterialGenerator
     /// </summary>
     public abstract class MaterialGenerator : IMaterialGenerator {
+        
+        /// <summary>
+        /// Type of material
+        /// </summary>
         protected enum MaterialType {
-            // Unknown,
+            // Unknown
+            /// <summary>
+            /// Metallic-Roughness material
+            /// </summary>
             MetallicRoughness,
+            /// <summary>
+            /// Specular-Glossiness material
+            /// </summary>
             SpecularGlossiness,
+            /// <summary>
+            /// Unlit material
+            /// </summary>
             Unlit,
         }
         
+        /// <summary>Render type key</summary>
         public const string TAG_RENDER_TYPE = "RenderType";
+        /// <summary>Render type TransparentCutout value</summary>
         public const string TAG_RENDER_TYPE_CUTOUT = "TransparentCutout";
+        /// <summary>Render type Opaque value</summary>
         public const string TAG_RENDER_TYPE_OPAQUE = "Opaque";
+        /// <summary>Render type Fade value</summary>
         public const string TAG_RENDER_TYPE_FADE = "Fade";
+        /// <summary>Render type Transparent value</summary>
         public const string TAG_RENDER_TYPE_TRANSPARENT = "Transparent";
         
+        /// <summary>Shader keyword _ALPHATEST_ON</summary>
         public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
+        /// <summary>Shader keyword _UV_ROTATION</summary>
         public const string KW_UV_ROTATION = "_UV_ROTATION";
+        /// <summary>Shader keyword _UV_CHANNEL_SELECT</summary>
         public const string KW_UV_CHANNEL_SELECT = "_UV_CHANNEL_SELECT";
         
+        /// <summary>Shader property ID for property _BumpMap</summary>
         public static readonly int bumpMapPropId = Shader.PropertyToID("_BumpMap");
+        /// <summary>Shader property ID for property _BumpMapRotation</summary>
         public static readonly int bumpMapRotationPropId = Shader.PropertyToID("_BumpMapRotation");
+        /// <summary>Shader property ID for property _BumpMap_ST</summary>
         public static readonly int bumpMapScaleTransformPropId = Shader.PropertyToID("_BumpMap_ST");
+        /// <summary>Shader property ID for property _BumpMapUVChannel</summary>
         public static readonly int bumpMapUVChannelPropId = Shader.PropertyToID("_BumpMapUVChannel");
+        /// <summary>Shader property ID for property _BumpScale</summary>
         public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
+        /// <summary>Shader property ID for property _Cull</summary>
         public static readonly int cullPropId = Shader.PropertyToID("_Cull");
+        /// <summary>Shader property ID for property _CullMode</summary>
         public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
+        /// <summary>Shader property ID for property _Cutoff</summary>
         public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
+        /// <summary>Shader property ID for property _DstBlend</summary>
         public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
+        /// <summary>Shader property ID for property _EmissionColor</summary>
         public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
+        /// <summary>Shader property ID for property _EmissionMap</summary>
         public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
+        /// <summary>Shader property ID for property _EmissionMapRotation</summary>
         public static readonly int emissionMapRotationPropId = Shader.PropertyToID("_EmissionMapRotation");
+        /// <summary>Shader property ID for property _EmissionMap_ST</summary>
         public static readonly int emissionMapScaleTransformPropId = Shader.PropertyToID("_EmissionMap_ST");
+        /// <summary>Shader property ID for property _EmissionMapUVChannel</summary>
         public static readonly int emissionMapUVChannelPropId = Shader.PropertyToID("_EmissionMapUVChannel");
+        /// <summary>Shader property ID for property _MainTex</summary>
         public static readonly int mainTexPropId = Shader.PropertyToID("_MainTex");
+        /// <summary>Shader property ID for property _MainTexRotation</summary>
         public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
+        /// <summary>Shader property ID for property _MainTex_ST</summary>
         public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
+        /// <summary>Shader property ID for property _MainTexUVChannel</summary>
         public static readonly int mainTexUVChannelPropId = Shader.PropertyToID("_MainTexUVChannel");
+        /// <summary>Shader property ID for property _Metallic</summary>
         public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
+        /// <summary>Shader property ID for property _OcclusionMap</summary>
         public static readonly int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
+        /// <summary>Shader property ID for property _OcclusionStrength</summary>
         public static readonly int occlusionStrengthPropId = Shader.PropertyToID("_OcclusionStrength");
+        /// <summary>Shader property ID for property _OcclusionMapRotation</summary>
         public static readonly int occlusionMapRotationPropId = Shader.PropertyToID("_OcclusionMapRotation");
+        /// <summary>Shader property ID for property _OcclusionMap_ST</summary>
         public static readonly int occlusionMapScaleTransformPropId = Shader.PropertyToID("_OcclusionMap_ST");
+        /// <summary>Shader property ID for property _OcclusionMapUVChannel</summary>
         public static readonly int occlusionMapUVChannelPropId = Shader.PropertyToID("_OcclusionMapUVChannel");
+        /// <summary>Shader property ID for property _SpecColor</summary>
         public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
+        /// <summary>Shader property ID for property _SpecGlossMap</summary>
         public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
+        /// <summary>Shader property ID for property _SpecGlossMap_ST</summary>
         public static readonly int specGlossScaleTransformMapPropId = Shader.PropertyToID("_SpecGlossMap_ST"); // TODO: Support in shader!
+        /// <summary>Shader property ID for property _SpecGlossMapRotation</summary>
         public static readonly int specGlossMapRotationPropId = Shader.PropertyToID("_SpecGlossMapRotation"); // TODO: Support in shader!
+        /// <summary>Shader property ID for property _SpecGlossMapUVChannel</summary>
         public static readonly int specGlossMapUVChannelPropId = Shader.PropertyToID("_SpecGlossMapUVChannel"); // TODO: Support in shader!
+        /// <summary>Shader property ID for property _SrcBlend</summary>
         public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
+        /// <summary>Shader property ID for property _ZWrite</summary>
         public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
 
         static IMaterialGenerator defaultMaterialGenerator;
         
+        /// <summary>
+        /// Provides the default material generator that's being used if no
+        /// custom material generator was provided. The result depends on
+        /// the currently used render pipeline.
+        /// </summary>
+        /// <returns>The default material generator</returns>
+        /// <exception cref="Exception"></exception>
         public static IMaterialGenerator GetDefaultMaterialGenerator() {
 
             if (defaultMaterialGenerator != null) return defaultMaterialGenerator;
@@ -120,10 +179,19 @@ namespace GLTFast.Materials {
             }
         }
 
+        /// <summary>
+        /// Logger to be used for messaging. Can be null!
+        /// </summary>
         protected ICodeLogger logger;
 
+        /// <inheritdoc />
         public abstract UnityEngine.Material GetDefaultMaterial();
 
+        /// <summary>
+        /// Tries to load a shader and covers error handling.
+        /// </summary>
+        /// <param name="shaderName">The requested shader's name.</param>
+        /// <returns>Requested shader or null if it couldn't be loaded.</returns>
         protected Shader FindShader(string shaderName) {
             var shader = Shader.Find(shaderName);
             if(shader==null) {
@@ -131,12 +199,26 @@ namespace GLTFast.Materials {
             }
             return shader;
         }
+        
+        /// <inheritdoc />
         public abstract UnityEngine.Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf);
 
+        /// <inheritdoc />
         public void SetLogger(ICodeLogger logger) {
             this.logger = logger;
         }
 
+        /// <summary>
+        /// Attempts assigning a glTF texture to a Unity material.
+        /// </summary>
+        /// <param name="textureInfo">glTF source texture</param>
+        /// <param name="material">target material</param>
+        /// <param name="gltf">Context glTF</param>
+        /// <param name="texturePropertyId">Target texture property</param>
+        /// <param name="scaleTransformPropertyId">Scale/transform (_ST) property</param>
+        /// <param name="rotationPropertyId">Rotation property</param>
+        /// <param name="uvChannelPropertyId">UV channel selection property</param>
+        /// <returns>True if texture assignment was successful, false otherwise.</returns>
         protected bool TrySetTexture(
             TextureInfo textureInfo,
             UnityEngine.Material material,
@@ -176,9 +258,9 @@ namespace GLTFast.Materials {
             return false;
         }
         
-        protected static bool DifferentIndex(Schema.TextureInfo a, Schema.TextureInfo b) {
-            return a != null && b != null && a.index>=0 && b.index>=0 && a.index != b.index;
-        }
+        // protected static bool DifferentIndex(TextureInfo a, TextureInfo b) {
+        //     return a != null && b != null && a.index>=0 && b.index>=0 && a.index != b.index;
+        // }
 
         void TrySetTextureTransform(
             Schema.TextureInfo textureInfo,

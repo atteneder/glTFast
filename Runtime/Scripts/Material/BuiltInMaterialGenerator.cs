@@ -53,6 +53,9 @@ namespace GLTFast.Materials {
         Transparent = 3
     }
     
+    /// <summary>
+    /// Converts glTF materials to Unity materials for the Built-in Render Pipeline
+    /// </summary>
     public class BuiltInMaterialGenerator : MaterialGenerator {
 
         // Built-in Render Pipeline
@@ -86,10 +89,15 @@ namespace GLTFast.Materials {
         Shader pbrSpecularGlossinessShader;
         Shader unlitShader;
 
+        /// <inheritdoc />
         public override Material GetDefaultMaterial() {
             return GetPbrMetallicRoughnessMaterial();
         }
         
+        /// <summary>
+        /// Finds the shader required for metallic/roughness based materials.
+        /// </summary>
+        /// <returns>Metallic/Roughness shader</returns>
         protected virtual Shader FinderShaderMetallicRoughness() {
 #if UNITY_EDITOR
             return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_PBR_METALLIC_ROUGHNESS}");
@@ -98,6 +106,10 @@ namespace GLTFast.Materials {
 #endif
         }
         
+        /// <summary>
+        /// Finds the shader required for specular/glossiness based materials.
+        /// </summary>
+        /// <returns>Specular/Glossiness shader</returns>
         protected virtual Shader FinderShaderSpecularGlossiness() {
 #if UNITY_EDITOR
             return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_PBR_SPECULAR_GLOSSINESS}");
@@ -106,6 +118,10 @@ namespace GLTFast.Materials {
 #endif
         }
 
+        /// <summary>
+        /// Finds the shader required for unlit materials.
+        /// </summary>
+        /// <returns>Unlit shader</returns>
         protected virtual Shader FinderShaderUnlit() {
 #if UNITY_EDITOR
             return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_UNLIT}");
@@ -169,6 +185,7 @@ namespace GLTFast.Materials {
             return mat;
         }
 
+        /// <inheritdoc />
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
             IGltfReadable gltf
@@ -343,7 +360,12 @@ namespace GLTFast.Materials {
 
             return material;
         }
-        
+
+        /// <summary>
+        /// Configures material for alpha masking.
+        /// </summary>
+        /// <param name="material">Target material</param>
+        /// <param name="alphaCutoff">Threshold value for alpha masking</param>
         public static void SetAlphaModeMask(UnityEngine.Material material, float alphaCutoff)
         {
             material.EnableKeyword(KW_ALPHATEST_ON);
@@ -358,11 +380,20 @@ namespace GLTFast.Materials {
             material.DisableKeyword(KW_ALPHABLEND_ON);
         }
 
+        /// <summary>
+        /// Configures material for alpha masking.
+        /// </summary>
+        /// <param name="material">Target material</param>
+        /// <param name="gltfMaterial">Source material</param>
         public static void SetAlphaModeMask(UnityEngine.Material material, Schema.Material gltfMaterial)
         {
             SetAlphaModeMask(material, gltfMaterial.alphaCutoff);
         }
 
+        /// <summary>
+        /// Configures material for alpha blending.
+        /// </summary>
+        /// <param name="material">Target material</param>
         public static void SetAlphaModeBlend( UnityEngine.Material material ) {
             material.SetFloat(modePropId, (int)StandardShaderMode.Fade);
             material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_FADE);
@@ -375,6 +406,10 @@ namespace GLTFast.Materials {
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
         }
 
+        /// <summary>
+        /// Configures material for transparency.
+        /// </summary>
+        /// <param name="material">Target material</param>
         public static void SetAlphaModeTransparent( UnityEngine.Material material ) {
             material.SetFloat(modePropId, (int)StandardShaderMode.Fade);
             material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
@@ -387,6 +422,10 @@ namespace GLTFast.Materials {
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
         }
 
+        /// <summary>
+        /// Configures material to be opaque.
+        /// </summary>
+        /// <param name="material">Target material</param>
         public static void SetOpaqueMode(UnityEngine.Material material) {
             material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_OPAQUE);
             material.DisableKeyword(KW_ALPHABLEND_ON);
