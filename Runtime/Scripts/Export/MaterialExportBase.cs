@@ -24,7 +24,7 @@ namespace GLTFast.Export {
     using Logging;
     using Schema;
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IMaterialExport"/>
     public abstract class MaterialExportBase : IMaterialExport {
         
         /// <summary>

@@ -229,9 +229,9 @@ async Task CustomDeferAgentPerGltfImport() {
 
 [GameObjectInstantiator]: xref:GLTFast.GameObjectInstantiator
 [gltfasset_component]: Images/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
-[ICodeLogger]: xref:GLTFast.ICodeLogger
+[ICodeLogger]: xref:GLTFast.Logging.ICodeLogger
 [IDownload]: xref:GLTFast.Loading.IDownload
 [IInstantiator]: xref:GLTFast.IInstantiator
-[IMaterialGenerator]: xref:GLTFast.IMaterialGenerator
+[IMaterialGenerator]: xref:GLTFast.Materials.IMaterialGenerator
 [ImportSettings]: xref:GLTFast.ImportSettings
-[LogMessages]: xref:GLTFast.LogMessages
+[LogMessages]: xref:GLTFast.Logging.LogMessages
