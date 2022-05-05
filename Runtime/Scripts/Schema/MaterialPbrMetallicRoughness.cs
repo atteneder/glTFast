@@ -33,6 +33,9 @@ namespace GLTFast.Schema {
         /// </summary>
         public float[] baseColorFactor = {1,1,1,1};
 
+        /// <summary>
+        /// Base color of the material in linear color space.
+        /// </summary>
         public Color baseColor {
             get =>
                 new Color(

@@ -15,6 +15,7 @@
 
 namespace GLTFast.Schema {
 
+    /// <inheritdoc cref="Extension.TextureTransform"/>
     [System.Serializable]
     public class TextureTransform {
 

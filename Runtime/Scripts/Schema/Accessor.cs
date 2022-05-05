@@ -23,28 +23,90 @@ using UnityEngine.Rendering;
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// The datatype of an accessor's components
+    /// <seealso href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#accessor-data-types"/>
+    /// </summary>
     public enum GLTFComponentType
     {
+        /// <summary>
+        /// Signed byte (8-bit integer)
+        /// </summary>
         Byte = 5120,
+        /// <summary>
+        /// Unsigned byte (8-bit integer)
+        /// </summary>
         UnsignedByte = 5121,
+        /// <summary>
+        /// Signed short (16-bit integer)
+        /// </summary>
         Short = 5122,
+        /// <summary>
+        /// Unsigned short (16-bit integer)
+        /// </summary>
         UnsignedShort = 5123,
+        /// <summary>
+        /// Unsigned int (32-bit integer)
+        /// </summary>
         UnsignedInt = 5125,
+        /// <summary>
+        /// 32-bit floating point number
+        /// </summary>
         Float = 5126
     }
 
+    /// <summary>
+    /// Specifier for an accessor’s type
+    /// <seealso href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#accessor-data-types"/>
+    /// </summary>
     public enum GLTFAccessorAttributeType : byte
     {
+        // Names are identical to glTF specified strings, that's why
+        // inconsistent names are ignored.
+        // ReSharper disable InconsistentNaming
+        
+        /// <summary>
+        /// Unknown/undefined type
+        /// </summary>
         Undefined,
+        
+        /// <summary>
+        /// Scalar. single value.
+        /// </summary>
         SCALAR,
+        /// <summary>
+        /// Two component vector
+        /// </summary>
         VEC2,
+        /// <summary>
+        /// Three component vector
+        /// </summary>
         VEC3,
+        /// <summary>
+        /// Four component vector
+        /// </summary>
         VEC4,
+        /// <summary>
+        /// 2x2 matrix (4 values)
+        /// </summary>
         MAT2,
+        /// <summary>
+        /// 3x3 matrix (9 values)
+        /// </summary>
         MAT3,
+        /// <summary>
+        /// 4x4 matrix (16 values)
+        /// </summary>
         MAT4
+        // ReSharper restore InconsistentNaming
     }
 
+    /// <summary>
+    /// An accessor defines a method for retrieving data as typed arrays from
+    /// within a buffer view.
+    /// See <see href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#accessors">
+    /// accessor in the glTF 2.0 specification</see>
+    /// </summary>
     [System.Serializable]
     public class Accessor {
         /// <summary>
@@ -95,6 +157,9 @@ namespace GLTFast.Schema {
         [NonSerialized]
         GLTFAccessorAttributeType _typeEnum = GLTFAccessorAttributeType.Undefined;
         
+        /// <summary>
+        /// <see cref="GLTFAccessorAttributeType"/> typed view onto <see cref="type"/> string. 
+        /// </summary>
         public GLTFAccessorAttributeType typeEnum {
             get {
                 if (_typeEnum != GLTFAccessorAttributeType.Undefined) {
@@ -155,6 +220,12 @@ namespace GLTFast.Schema {
         /// </summary>
         public AccessorSparse sparse;
 
+        /// <summary>
+        /// Provides size of components by type
+        /// </summary>
+        /// <param name="componentType">glTF component type</param>
+        /// <returns>Component size in bytes</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static int GetComponentTypeSize( GLTFComponentType componentType ) {
             switch (componentType) {
                 case GLTFComponentType.Byte:
@@ -171,6 +242,12 @@ namespace GLTFast.Schema {
             }
         }
         
+        /// <summary>
+        /// Converts Unity vertex attribute format to glTF component type.  
+        /// </summary>
+        /// <param name="format">vertex attribute format</param>
+        /// <returns>glTF component type</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static GLTFComponentType GetComponentType(VertexAttributeFormat format) {
             switch (format) {
                 case VertexAttributeFormat.Float32:
@@ -196,6 +273,13 @@ namespace GLTFast.Schema {
             }
         }
 
+        /// <summary>
+        /// Get one-dimensional glTF attribute type by number of components per elements.
+        /// Note that this does not support matrix types.
+        /// </summary>
+        /// <param name="dimension">Number of components per element</param>
+        /// <returns>Corresponding one-dimensional glTF attribute type</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static GLTFAccessorAttributeType GetAccessorAttributeType(int dimension) {
             switch (dimension) {
                 case 1:
@@ -211,6 +295,12 @@ namespace GLTFast.Schema {
             }
         }
         
+        /// <summary>
+        /// Get number of components of glTF attribute type.
+        /// </summary>
+        /// <param name="type">glTF attribute type</param>
+        /// <returns>Number of components</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static int GetAccessorAttributeTypeLength( GLTFAccessorAttributeType type ) {
             switch (type)
             {
@@ -273,6 +363,9 @@ namespace GLTFast.Schema {
             return null;
         }
 
+        /// <summary>
+        /// True if the accessor is <see href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#sparse-accessors">sparse</see>
+        /// </summary>
         public bool isSparse => sparse != null;
 
         internal void GltfSerialize(JsonWriter writer) {

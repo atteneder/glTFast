@@ -20,6 +20,10 @@ using System.Runtime.CompilerServices;
 
 namespace GLTFast.Schema {
     
+    /// <summary>
+    /// The root object for a glTF asset.
+    /// <seealso href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#reference-gltf"/>
+    /// </summary>
     [System.Serializable]
     public class Root
     {
@@ -117,6 +121,12 @@ namespace GLTFast.Schema {
         public bool hasAnimation => animations != null && animations.Length > 0;
 #endif // UNITY_ANIMATION
         
+        /// <summary>
+        /// Looks up if a certain accessor points to interleaved data.
+        /// </summary>
+        /// <param name="accessorIndex">Accessor index</param>
+        /// <returns>True if accessor is interleaved, false if its data is
+        /// continuous.</returns>
         public bool IsAccessorInterleaved( int accessorIndex ) {
 			var accessor = accessors[accessorIndex];
 			var bufferView = bufferViews[accessor.bufferView];
@@ -125,6 +135,10 @@ namespace GLTFast.Schema {
 			return bufferView.byteStride > elementSize;
 		}
 
+        /// <summary>
+        /// Serialization to JSON
+        /// </summary>
+        /// <param name="stream">Stream the JSON string is being written to.</param>
         public void GltfSerialize(StreamWriter stream) {
             var writer = new JsonWriter(stream);
 

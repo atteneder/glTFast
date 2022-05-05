@@ -15,7 +15,11 @@
 
 using Unity.Mathematics;
 
-namespace GLTFast.Schema{ 
+namespace GLTFast.Schema{
+    
+    /// <summary>
+    /// Occlusion map specific texture info
+    /// </summary>
     [System.Serializable]
     public class OcclusionTextureInfo : TextureInfo {
 

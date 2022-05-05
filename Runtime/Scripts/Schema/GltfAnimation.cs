@@ -20,7 +20,7 @@ using System;
 namespace GLTFast.Schema {
     
     [Serializable]
-    public class GltfAnimation : RootChild
+    public class GltfAnimation : NamedObject
     {
         /// <summary>
 		/// An array of channels, each of which targets an animation's sampler at a

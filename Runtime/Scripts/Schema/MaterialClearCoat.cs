@@ -15,15 +15,37 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// This extension defines a clear coating that can be layered on top of an
+    /// existing glTF material definition.
+    /// <seealso href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_clearcoat/README.md"/>
+    /// </summary>
     [System.Serializable]
     public class ClearCoat {
 
+        /// <summary>
+        /// The clearcoat layer intensity.
+        /// </summary>
         public float clearcoatFactor = 0;
+        
+        /// <summary>
+        /// The clearcoat layer intensity texture.
+        /// </summary>
         public TextureInfo clearcoatTexture = null;
         
+        /// <summary>
+        /// The clearcoat layer roughness.
+        /// </summary>
         public float clearcoatRoughnessFactor = 0;
+        
+        /// <summary>
+        /// The clearcoat layer roughness texture.
+        /// </summary>
         public TextureInfo clearcoatRoughnessTexture = null;
 
+        /// <summary>
+        /// The clearcoat normal map texture.
+        /// </summary>
         public TextureInfo clearcoatNormalTexture = null;
         
         internal void GltfSerialize(JsonWriter writer) {

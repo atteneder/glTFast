@@ -18,11 +18,23 @@ using UnityEngine;
 
 namespace GLTFast.Schema {
     
+    /// <summary>
+    /// A camera’s projection
+    /// </summary>
     [Serializable]
-    public class Camera : RootChild {
+    public class Camera : NamedObject {
 
+        /// <summary>
+        /// Camera projection type
+        /// </summary>
         public enum Type {
+            /// <summary>
+            /// Orthogonal projection
+            /// </summary>
             Orthographic,
+            /// <summary>
+            ///  Perspective projection
+            /// </summary>
             Perspective
         }
         
@@ -31,6 +43,9 @@ namespace GLTFast.Schema {
 
         Type? _typeEnum;
         
+        /// <summary>
+        /// <see cref="Type"/> typed view onto <see cref="type"/> string. 
+        /// </summary>
         public Type typeEnum {
             get {
                 if (_typeEnum.HasValue) {
@@ -47,7 +62,10 @@ namespace GLTFast.Schema {
             }
         }
         
+        /// <inheritdoc cref="CameraOrthographic"/>
         public CameraOrthographic orthographic;
+        
+        /// <inheritdoc cref="CameraOrthographic"/>
         public CameraPerspective perspective;
         
         internal void GltfSerialize(JsonWriter writer) {
@@ -58,6 +76,9 @@ namespace GLTFast.Schema {
         }
     }
 
+    /// <summary>
+    /// An orthographic camera containing properties to create an orthographic projection matrix.
+    /// </summary>
     [Serializable]
     public class CameraOrthographic {
         
@@ -82,6 +103,9 @@ namespace GLTFast.Schema {
         public float znear;
     }
     
+    /// <summary>
+    /// A perspective camera containing properties to create a perspective projection matrix.
+    /// </summary>
     [Serializable]
     public class CameraPerspective {
         

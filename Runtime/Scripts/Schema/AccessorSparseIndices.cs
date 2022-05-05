@@ -15,6 +15,9 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// Sparse indices property of a glTF <seealso cref="AccessorSparse"/>
+    /// </summary>
     [System.Serializable]
     public class AccessorSparseIndices {
         /// <summary>

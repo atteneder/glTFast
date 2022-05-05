@@ -18,8 +18,11 @@ using UnityEngine;
 
 namespace GLTFast.Schema
 {
+    /// <summary>
+    /// Texture sampler properties for filtering and wrapping modes.
+    /// </summary>
     [System.Serializable]
-    public class Sampler : RootChild
+    public class Sampler : NamedObject
     {
 
         /// <summary>
@@ -27,8 +30,11 @@ namespace GLTFast.Schema
         /// </summary>
         public enum MagFilterMode
         {
+            /// <summary>No value</summary>
             None = 0,
+            /// <summary>Nearest pixel sampling</summary>
             Nearest = 9728,
+            /// <summary>Linear pixel interpolation sampling</summary>
             Linear = 9729,
         }
     
@@ -37,12 +43,19 @@ namespace GLTFast.Schema
         /// </summary>
         public enum MinFilterMode
         {
+            /// <summary>No value</summary>
             None = 0,
+            /// <summary>Nearest pixel sampling</summary>
             Nearest = 9728,
+            /// <summary>Linear pixel interpolation sampling</summary>
             Linear = 9729,
+            /// <summary>Nearest pixel and nearest mipmap sampling</summary>
             NearestMipmapNearest = 9984,
+            /// <summary>Linear pixel interpolation and nearest mipmap sampling</summary>
             LinearMipmapNearest = 9985,
+            /// <summary>Nearest pixel and linear mipmap interpolation sampling</summary>
             NearestMipmapLinear = 9986,
+            /// <summary>Linear pixel interpolation and linear mipmap interpolation sampling</summary>
             LinearMipmapLinear = 9987
         }
     
@@ -51,9 +64,13 @@ namespace GLTFast.Schema
         /// </summary>
         public enum WrapMode
         {
+            /// <summary>No value</summary>
             None = 0,
+            /// <summary>Clamp to edge</summary>
             ClampToEdge = 33071,
+            /// <summary>Mirrored repeat</summary>
             MirroredRepeat = 33648,
+            /// <summary>Repeat</summary>
             Repeat = 10497
         }
 
@@ -78,9 +95,22 @@ namespace GLTFast.Schema
         /// </summary>
         public WrapMode wrapT = WrapMode.Repeat;
 
+        /// <summary>
+        /// Unity filter mode, derived from glTF's
+        /// <see cref="minFilter"/> and <see cref="magFilter"/>.
+        /// </summary>
         public FilterMode filterMode => ConvertFilterMode(minFilter, magFilter);
 
+        /// <summary>
+        /// Unity texture wrap mode (horizontal), derived from glTF's
+        /// <see cref="wrapS"/> value.
+        /// </summary>
         public TextureWrapMode wrapU => ConvertWrapMode((WrapMode)wrapS);
+        
+        /// <summary>
+        /// Unity texture wrap mode (vertical), derived from glTF's
+        /// <see cref="wrapT"/> value.
+        /// </summary>
         public TextureWrapMode wrapV => ConvertWrapMode((WrapMode)wrapT);
 
         static FilterMode ConvertFilterMode(MinFilterMode minFilterToConvert, MagFilterMode magFilterToConvert)
@@ -129,8 +159,18 @@ namespace GLTFast.Schema
             }
         }
 
+        
+        /// <summary>
+        /// Parameter-less constructor
+        /// </summary>
         public Sampler() { }
 
+        /// <summary>
+        /// Constructs a Sampler with filter and wrap modes.
+        /// </summary>
+        /// <param name="filterMode">Unity texture filter mode</param>
+        /// <param name="wrapModeU">Unity texture wrap mode (horizontal)</param>
+        /// <param name="wrapModeV">Unity texture wrap mode (vertical)</param>
         public Sampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV) {
             switch (filterMode) {
                 case FilterMode.Point:
@@ -151,6 +191,12 @@ namespace GLTFast.Schema
             wrapT = ConvertWrapMode(wrapModeV);
         }
 
+        /// <summary>
+        /// Applies the Sampler's settings to a Unity texture.
+        /// </summary>
+        /// <param name="image">Texture to apply the settings to</param>
+        /// <param name="defaultMinFilter">Fallback minification filter</param>
+        /// <param name="defaultMagFilter">Fallback magnification filter</param>
         public void Apply(Texture2D image,
                           MinFilterMode defaultMinFilter = MinFilterMode.Linear,
                           MagFilterMode defaultMagFilter = MagFilterMode.Linear) {

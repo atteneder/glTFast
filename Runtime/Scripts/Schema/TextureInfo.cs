@@ -15,6 +15,9 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// Reference to a texture.
+    /// </summary>
     [System.Serializable]
     public class TextureInfo {
 
@@ -30,6 +33,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public int texCoord;
 
+        /// <inheritdoc cref="TextureInfoExtension"/>
         public TextureInfoExtension extensions;
         
         internal void GltfSerializeTextureInfo(JsonWriter writer) {

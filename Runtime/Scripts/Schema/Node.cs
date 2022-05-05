@@ -15,8 +15,12 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// An object defining the hierarchy relations and the local transform of
+    /// its content.
+    /// </summary>
     [System.Serializable]
-    public class Node : RootChild {
+    public class Node : NamedObject {
 
         /// <summary>
         /// The indices of this node's children.
@@ -64,6 +68,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public int camera = -1;
 
+        /// <inheritdoc cref="NodeExtensions"/>
         public NodeExtensions extensions;
         
         internal void GltfSerialize(JsonWriter writer) {
@@ -109,14 +114,24 @@ namespace GLTFast.Schema {
         }
     }
     
+    /// <summary>
+    /// Node extensions
+    /// </summary>
     [System.Serializable]
     public class NodeExtensions {
+        // Names are identical to glTF specified properties, that's why
+        // inconsistent names are ignored.
+        // ReSharper disable InconsistentNaming
+        
+        /// <inheritdoc cref="MeshGpuInstancing"/>
         public MeshGpuInstancing EXT_mesh_gpu_instancing;
         public NodeLightsPunctual KHR_lights_punctual;
+        
         // Whenever an extension is added, the JsonParser
         // (specifically step four of JsonParser.ParseJson)
         // needs to be updated!
 
+        // ReSharper restore InconsistentNaming
         internal void GltfSerialize(JsonWriter writer) {
             if (EXT_mesh_gpu_instancing != null) {
                 writer.AddProperty("EXT_mesh_gpu_instancing");

@@ -15,7 +15,11 @@
 
 using Unity.Mathematics;
 
-namespace GLTFast.Schema{ 
+namespace GLTFast.Schema{
+    
+    /// <summary>
+    /// Normal map specific texture info
+    /// </summary>
     [System.Serializable]
     public class NormalTextureInfo : TextureInfo {
 

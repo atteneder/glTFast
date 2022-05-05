@@ -15,8 +15,12 @@
 
 namespace GLTFast.Schema
 {
+    
+    /// <summary>
+    /// Image data used to create a texture.
+    /// </summary>
     [System.Serializable]
-    public class Image : RootChild
+    public class Image : NamedObject
     {
         /// <summary>
         /// The uri of the image.  Relative paths are relative to the .gltf file.

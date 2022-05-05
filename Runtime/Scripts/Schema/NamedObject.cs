@@ -15,8 +15,15 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// Base class for anything with a name property
+    /// </summary>
     [System.Serializable]
-    public class RootChild {
+    public abstract class NamedObject {
+        
+        /// <summary>
+        /// Object's name
+        /// </summary>
         public string name;
         
         internal void GltfSerializeRoot(JsonWriter writer) {

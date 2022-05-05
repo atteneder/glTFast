@@ -15,17 +15,31 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// Texture extensions
+    /// </summary>
     [System.Serializable]
     public class TextureExtension {
-        public TextureFormat KHR_texture_basisu = null;
+        
+        /// <inheritdoc cref="Extension.TextureBasisUniversal"/>
+        public TextureBasisUniversal KHR_texture_basisu = null;
 
         internal void GltfSerialize(JsonWriter writer) {
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
 
+    /// <summary>
+    /// Basis Universal texture extension
+    /// <seealso cref="Extension.TextureBasisUniversal"/>
+    /// </summary>
     [System.Serializable]
-    public class TextureFormat {
+    public class TextureBasisUniversal {
+        
+        /// <summary>
+        /// Index of the image which defines a reference to the KTX v2 image
+        /// with Basis Universal supercompression.
+        /// </summary>
         public int source = -1;
     }
 }

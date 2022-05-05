@@ -17,8 +17,12 @@ using System;
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// A texture is defined by an image and a sampler.
+    /// </summary>
     [System.Serializable]
-    public class Texture : RootChild {
+    public class Texture : NamedObject {
+        
         /// <summary>
         /// The index of the sampler used by this texture.
         /// </summary>
@@ -29,8 +33,13 @@ namespace GLTFast.Schema {
         /// </summary>
         public int source = -1;
 
+        /// <inheritdoc cref="TextureExtension"/>
         public TextureExtension extensions;
 
+        /// <summary>
+        /// Retrieves the final image index.
+        /// </summary>
+        /// <returns>Final image index</returns>
         public int GetImageIndex() {
             if(extensions!=null) {
                 if(extensions.KHR_texture_basisu!=null && extensions.KHR_texture_basisu.source >= 0 ) {
@@ -40,6 +49,9 @@ namespace GLTFast.Schema {
             return source;
         }
 
+        /// <summary>
+        /// True, if the texture is of the KTX format.
+        /// </summary>
         public bool isKtx {
             get {
                 return extensions!=null && extensions.KHR_texture_basisu!=null;
@@ -62,6 +74,11 @@ namespace GLTFast.Schema {
             writer.Close();
         }
 
+        /// <summary>
+        /// Determines whether two object instances are equal.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current object.</param>
+        /// <returns>true if the specified object is equal to the current object; otherwise, false.</returns>
         public override bool Equals(object obj) {
             //Check for null and compare run-time types.
             if (obj == null || ! GetType().Equals(obj.GetType())) {
@@ -79,6 +96,10 @@ namespace GLTFast.Schema {
                 );
         }
 
+        /// <summary>
+        /// Default hash function.
+        /// </summary>
+        /// <returns>A hash code for the current object.</returns>
         public override int GetHashCode() {
 #if NET_STANDARD
             return HashCode.Combine(source, sampler, extensions.GetHashCode());

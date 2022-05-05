@@ -15,9 +15,20 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// A buffer points to binary geometry, animation, or skins.
+    /// </summary>
     [System.Serializable]
     public class Buffer {
+        
+        /// <summary>
+        /// The length of the buffer in bytes.
+        /// </summary>
         public uint byteLength;
+        
+        /// <summary>
+        /// The URI (or IRI) of the buffer.
+        /// </summary>
         public string uri;
         
         internal void GltfSerialize(JsonWriter writer) {

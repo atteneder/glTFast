@@ -26,8 +26,11 @@ namespace GLTFast.Schema {
     //     ElementArrayBuffer = 34963,
     // }
 
+    /// <summary>
+    /// Base class; Consists of a byte size and offset
+    /// </summary>
     [System.Serializable]
-    public class BufferSlice {
+    public abstract class BufferSlice {
         /// <summary>
         /// The offset into the buffer in bytes.
         /// <minimum>0</minimum>
@@ -41,6 +44,9 @@ namespace GLTFast.Schema {
         public int byteLength;
     }
 
+    /// <summary>
+    /// Adds buffer index and byte stride to <seealso cref="BufferSlice"/>
+    /// </summary>
     [System.Serializable]
     public class BufferViewBase : BufferSlice {
         /// <summary>
@@ -57,7 +63,9 @@ namespace GLTFast.Schema {
         public int byteStride = -1;
     }
     
-
+    /// <summary>
+    /// A view into a buffer generally representing a subset of the buffer.
+    /// </summary>
     [System.Serializable]
     public class BufferView : BufferViewBase {
         /// <summary>

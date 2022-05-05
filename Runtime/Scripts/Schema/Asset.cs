@@ -15,6 +15,9 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// Metadata about the glTF asset.
+    /// </summary>
     [System.Serializable]
     public class Asset {
         /// <summary>
