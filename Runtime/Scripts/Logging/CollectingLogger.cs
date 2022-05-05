@@ -139,6 +139,10 @@ namespace GLTFast.Logging {
             Debug.LogFormat(type, LogOption.NoStacktrace,null,LogMessages.GetFullMessage(code,messages));
         }
 
+        /// <summary>
+        /// Returns the full log message
+        /// </summary>
+        /// <returns>Log message</returns>
         public override string ToString() {
             return LogMessages.GetFullMessage(code, messages);
         }
