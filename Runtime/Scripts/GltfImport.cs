@@ -594,7 +594,7 @@ namespace GLTFast {
             return null;
         }
         
-        public LightPunctual GetSourceCameraLightPunctual(uint index) {
+        public LightPunctual GetSourceLightPunctual(uint index) {
             if (gltfRoot?.extensions?.KHR_lights_punctual.lights != null && index < gltfRoot.extensions.KHR_lights_punctual.lights.Length) {
                 return gltfRoot.extensions.KHR_lights_punctual.lights[index];
             }

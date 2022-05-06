@@ -338,9 +338,18 @@ namespace GLTFast {
             uint nodeIndex,
             uint lightIndex
         ) {
-            var node = nodes[nodeIndex];
-            var lightSource = gltf.GetSourceCameraLightPunctual(lightIndex);
-            var light = node.AddComponent<Light>();
+            var lightGameObject = nodes[nodeIndex];
+            var lightSource = gltf.GetSourceLightPunctual(lightIndex);
+
+            if (lightSource.typeEnum != LightPunctual.Type.Point) {
+                // glTF lights' direction is flipped, compared with Unity's, so
+                // we're adding a rotated child GameObject to counter act.
+                var tmp = new GameObject($"{lightGameObject.name}_Reverted");
+                tmp.transform.SetParent(lightGameObject.transform,false);
+                tmp.transform.localEulerAngles = new Vector3(0, 180, 0);
+                lightGameObject = tmp;
+            }
+            var light = lightGameObject.AddComponent<Light>();
 
             switch (lightSource.typeEnum) {
                 case LightPunctual.Type.Unknown:
@@ -365,8 +374,8 @@ namespace GLTFast {
             }
 
             if (lightSource.typeEnum == LightPunctual.Type.Spot) {
-                light.innerSpotAngle = lightSource.spot.innerConeAngle;
-                light.spotAngle = lightSource.spot.outerConeAngle;
+                light.spotAngle = lightSource.spot.outerConeAngle * Mathf.Rad2Deg * 2f;
+                light.innerSpotAngle = lightSource.spot.innerConeAngle * Mathf.Rad2Deg * 2f;
             }
         }
         
