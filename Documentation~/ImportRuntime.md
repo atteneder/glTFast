@@ -23,9 +23,14 @@ In case you want to handle download/file loading yourself, you can load glTF bin
 
 ```csharp
 async void LoadGltfBinaryFromMemory() {
-    byte[] data = File.ReadAllBytes("/path/to/file.glb");
+    var filePath = "/path/to/file.glb";
+    byte[] data = File.ReadAllBytes(filePath);
     var gltf = new GltfImport();
-    bool success = await gltf.LoadGltfBinary(data, new Uri(m_Path));
+    bool success = await gltf.LoadGltfBinary(
+        data, 
+        // The URI of the original data is important for resolving relative URIs within the glTF
+        new Uri(filePath)
+        );
     if (success) {
         success = gltf.InstantiateMainScene(transform);
     }
