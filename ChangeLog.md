@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- A target layer can be defined for instantiated GameObjects via `GameObjectInstantiator.Settings.layer` (thanks [Krzysztof Lesiak][Holo-Krzysztof] for #393)
 ### Changed
 - Mecanim (non-legacy) is now the default for importing animation clips at design-time (thanks @hybridherbst][hybridherbst] for #388)
 ### Fixed
@@ -648,6 +650,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Battlehub0x]: https://github.com/Battlehub0x
 [Bersaelor]: https://github.com/Bersaelor
 [EricBeetsOfficial-Opuscope]: https://github.com/EricBeetsOfficial-Opuscope
+[Holo-Krzysztof]: https://github.com/Holo-Krzysztof
 [hybridherbst]: https://github.com/hybridherbst
 [mikejurka]: https://github.com/mikejurka
 [ReadyPlayerMe]: https://readyplayer.me
