@@ -26,6 +26,7 @@ namespace GLTFast {
 
         public class Settings {
             public bool skinUpdateWhenOffscreen = true;
+            public int layer;
         }
         
         public class SceneInstance {
@@ -82,6 +83,7 @@ namespace GLTFast {
             go.transform.localScale = scale;
             go.transform.localPosition = position;
             go.transform.localRotation = rotation;
+            go.layer = settings.layer;
             nodes[nodeIndex] = go;
         }
 
@@ -115,6 +117,7 @@ namespace GLTFast {
             } else {
                 meshGo = new GameObject(meshName);
                 meshGo.transform.SetParent(nodes[nodeIndex].transform,false);
+                meshGo.layer = settings.layer;
             }
 
             Renderer renderer;
@@ -179,6 +182,7 @@ namespace GLTFast {
 
             for (var i = 0; i < instanceCount; i++) {
                 var meshGo = new GameObject( $"{meshName}_i{i}" );
+                meshGo.layer = settings.layer;
                 var t = meshGo.transform;
                 t.SetParent(nodes[nodeIndex].transform,false);
                 t.localPosition = positions?[i] ?? Vector3.zero;
@@ -291,6 +295,7 @@ namespace GLTFast {
         Camera CreateCamera(uint nodeIndex,string cameraName, out float localScale) {
             var cameraParent = nodes[nodeIndex];
             var camGo = new GameObject(cameraName ?? $"{cameraParent.name}-Camera" ?? $"Camera-{nodeIndex}");
+            camGo.layer = settings.layer;
             var camTrans = camGo.transform;
             var parentTransform = cameraParent.transform;
             camTrans.SetParent(parentTransform,false);
@@ -334,6 +339,7 @@ namespace GLTFast {
         {
             var go = new GameObject(name ?? "Scene");
             go.transform.SetParent( parent, false);
+            go.layer = settings.layer;
 
             if (nodeIndices != null) {
                 foreach(var nodeIndex in nodeIndices) {
