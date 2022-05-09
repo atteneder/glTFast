@@ -34,6 +34,8 @@ namespace GLTFast
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
+        public GameObjectInstantiator.Settings instantiationSettings;
+        
         /// <summary>
         /// Latest scene's instance.  
         /// </summary>
@@ -73,7 +75,7 @@ namespace GLTFast
         }
         
         protected override IInstantiator GetDefaultInstantiator(ICodeLogger logger) {
-            return new GameObjectInstantiator(importer, transform, logger);
+            return new GameObjectInstantiator(importer, transform, logger, instantiationSettings);
         }
         
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {

@@ -32,16 +32,25 @@ namespace GLTFast {
         public class Settings {
             public bool skinUpdateWhenOffscreen = true;
             public int layer;
+            public ComponentType mask = ComponentType.Mesh | ComponentType.Camera;
         }
         
         public class SceneInstance {
             public List<Camera> cameras { get; private set; }
+            public List<Light> lights { get; private set; }
 
             public void AddCamera(Camera camera) {
                 if (cameras == null) {
                     cameras = new List<Camera>();
                 }
                 cameras.Add(camera);
+            }
+            
+            public void AddLight(Light light) {
+                if (lights == null) {
+                    lights = new List<Light>();
+                }
+                lights.Add(light);
             }
         }
         
@@ -114,6 +123,9 @@ namespace GLTFast {
             float[] morphTargetWeights = null,
             int primitiveNumeration = 0
         ) {
+            if ((settings.mask & ComponentType.Mesh) == 0) {
+                return;
+            }
 
             GameObject meshGo;
             if(primitiveNumeration==0) {
@@ -178,6 +190,10 @@ namespace GLTFast {
             NativeArray<Vector3>? scales,
             int primitiveNumeration = 0
         ) {
+            if ((settings.mask & ComponentType.Mesh) == 0) {
+                return;
+            }
+            
             var materials = new Material[materialIndices.Length];
             for (var index = 0; index < materials.Length; index++) {
                 var material = gltf.GetMaterial(materialIndices[index]) ?? gltf.GetDefaultMaterial();
@@ -202,6 +218,9 @@ namespace GLTFast {
         }
 
         public void AddCamera(uint nodeIndex, uint cameraIndex) {
+            if ((settings.mask & ComponentType.Camera) == 0) {
+                return;
+            }
             var camera = gltf.GetSourceCamera(cameraIndex);
             switch (camera.typeEnum) {
             case Schema.Camera.Type.Orthographic:
@@ -338,6 +357,9 @@ namespace GLTFast {
             uint nodeIndex,
             uint lightIndex
         ) {
+            if ((settings.mask & ComponentType.Light) == 0) {
+                return;
+            }
             var lightGameObject = nodes[nodeIndex];
             var lightSource = gltf.GetSourceLightPunctual(lightIndex);
 
@@ -377,6 +399,8 @@ namespace GLTFast {
                 light.spotAngle = lightSource.spot.outerConeAngle * Mathf.Rad2Deg * 2f;
                 light.innerSpotAngle = lightSource.spot.innerConeAngle * Mathf.Rad2Deg * 2f;
             }
+            
+            sceneInstance.AddLight(light);
         }
         
         public virtual void AddScene(

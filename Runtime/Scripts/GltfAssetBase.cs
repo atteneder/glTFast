@@ -22,8 +22,8 @@ namespace GLTFast
 
     public abstract class GltfAssetBase : MonoBehaviour
     {
-        protected GltfImport importer;
-        
+        public GltfImport importer { get; protected set; }
+
         /// <summary>
         /// Indicates wheter the glTF was loaded (no matter if successfully or not)
         /// </summary>
