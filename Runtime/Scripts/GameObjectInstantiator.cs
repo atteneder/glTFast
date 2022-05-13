@@ -85,6 +85,8 @@ namespace GLTFast {
             go.transform.localRotation = rotation;
             go.layer = settings.layer;
             nodes[nodeIndex] = go;
+            // TODO: Optimization: Re-size data structure upfront
+            // go.transform.hierarchyCapacity = ?
         }
 
         public void SetParent(uint nodeIndex, uint parentIndex) {
@@ -92,6 +94,8 @@ namespace GLTFast {
                 logger?.Error(LogCode.HierarchyInvalid);
                 return;
             }
+            // TODO: Optimization: Re-size data structure upfront
+            // go.transform.hierarchyCapacity = ?
             nodes[nodeIndex].transform.SetParent(nodes[parentIndex].transform,false);
         }
 
@@ -180,6 +184,11 @@ namespace GLTFast {
                 materials[index] = material;
             }
 
+            var targetTransform = nodes[nodeIndex].transform;
+
+            // Optimization: Re-size data structure upfront
+            targetTransform.hierarchyCapacity = targetTransform.hierarchyCount + (int)instanceCount;
+            
             for (var i = 0; i < instanceCount; i++) {
                 var meshGo = new GameObject( $"{meshName}_i{i}" );
                 meshGo.layer = settings.layer;
@@ -342,6 +351,8 @@ namespace GLTFast {
             go.layer = settings.layer;
 
             if (nodeIndices != null) {
+                // TODO: Optimization: Re-size data structure upfront
+                // go.transform.hierarchyCapacity = ?
                 foreach(var nodeIndex in nodeIndices) {
                     if (nodes[nodeIndex] != null) {
                         nodes[nodeIndex].transform.SetParent( go.transform, false );
