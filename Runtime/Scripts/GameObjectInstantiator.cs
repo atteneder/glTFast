@@ -344,7 +344,7 @@ namespace GLTFast {
             if (lightSource.typeEnum != LightPunctual.Type.Point) {
                 // glTF lights' direction is flipped, compared with Unity's, so
                 // we're adding a rotated child GameObject to counter act.
-                var tmp = new GameObject($"{lightGameObject.name}_Reverted");
+                var tmp = new GameObject($"{lightGameObject.name}_Orientation");
                 tmp.transform.SetParent(lightGameObject.transform,false);
                 tmp.transform.localEulerAngles = new Vector3(0, 180, 0);
                 lightGameObject = tmp;
