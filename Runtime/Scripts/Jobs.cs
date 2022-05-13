@@ -2107,7 +2107,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    struct SortJointsByWeightsJob : IJobParallelFor {
+    struct SortAndRenormalizeBoneWeightsJob : IJobParallelFor {
 
         public NativeArray<VBones> bones;
         
@@ -2122,36 +2122,52 @@ namespace GLTFast.Jobs {
 
             // Most joints/weights are already sorted by weight
             // Detect and early return if true
-            var asc = true;
+            var sortedAndNormalized = true;
             for (var i = 0; i < 3; i++) {
                 var a = v.weights[i];
                 var b = v.weights[i + 1];
                 if (a < b) {
-                    asc = false;
+                    sortedAndNormalized = false;
                     break;
                 }
             }
-            if (asc) return;
 
             // Sort otherwise
-            for (var i = 0; i < skinWeights; i++) {
-                var max = v.weights[i];
-                var maxI = i;
+            if (!sortedAndNormalized) {
+                for (var i = 0; i < skinWeights; i++) {
+                    var max = v.weights[i];
+                    var maxI = i;
 
-                for (var j = i+1; j < 4; j++) {
-                    var value = v.weights[j];
-                    if (v.weights[j] > max) {
-                        max = value;
-                        maxI = j;
+                    for (var j = i+1; j < 4; j++) {
+                        var value = v.weights[j];
+                        if (v.weights[j] > max) {
+                            max = value;
+                            maxI = j;
+                        }
+                    }
+
+                    if (maxI > i) {
+                        Swap(ref v, maxI, i);
                     }
                 }
-
-                if (maxI > i) {
-                    Swap(ref v, maxI, i);
+            }
+            
+            // Calculate the sum of weights
+            var weightSum = 0f;
+            for (var i = 0; i < skinWeights; i++) {
+                weightSum += v.weights[i];
+            }
+            if (abs(weightSum - 1.0f) > 2e-7f && weightSum > 0) {
+                sortedAndNormalized = false;
+                // Re-normalize the weight sum
+                for (var i = 0; i < skinWeights; i++) {
+                    v.weights[i] /= weightSum;
                 }
             }
 
-            bones[index] = v;
+            if (!sortedAndNormalized) {
+                bones[index] = v;
+            }
         }
 
         static unsafe void Swap(ref VBones v, int a, int b) {
@@ -2159,6 +2175,29 @@ namespace GLTFast.Jobs {
             (v.joints[a], v.joints[b]) = (v.joints[b], v.joints[a]);
         }
     }
+
+#if GLTFAST_SAFE
+    [BurstCompile]
+    struct RenormalizeBoneWeightsJob : IJobParallelFor {
+
+        public NativeArray<VBones> bones;
+        
+        public unsafe void Execute(int index) {
+            var v = bones[index];
+
+            // Calculate the sum of weights
+            var weightSum = v.weights[0] + v.weights[1] + v.weights[2] + v.weights[3];
+            if (abs(weightSum - 1.0f) > 2e-7f && weightSum > 0) {
+                // Re-normalize the weight sum
+                for (var i = 0; i < 4; i++) {
+                    v.weights[i] /= weightSum;
+                }
+            }
+
+            bones[index] = v;
+        }
+    }
+#endif
 
     [BurstCompile]
     public unsafe struct ConvertMatricesJob : IJobParallelFor  {
