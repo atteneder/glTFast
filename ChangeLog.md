@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fail more gracefully when parsing invalid JSON
 - Proper error handling on glTF-binary files with invalid chunks (unknown type or invalid length; #389)
+- Properly handle skins without inverse bind matrices
 
 ## [4.7.0] - 2022-04-25
 ### Added

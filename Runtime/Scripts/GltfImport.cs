@@ -1777,7 +1777,7 @@ namespace GLTFast {
                             if(node.skin>=0) {
                                 var skin = gltf.skins[node.skin];
                                 // TODO: see if this can be moved to mesh creation phase / before instantiation
-                                mesh.bindposes = skinsInverseBindMatrices[node.skin];
+                                mesh.bindposes = GetBindPoses(node.skin, (int)nodeIndex);
                                 if (skin.skeleton >= 0) {
                                     rootJoint = (uint) skin.skeleton;
                                 }
@@ -1882,6 +1882,21 @@ namespace GLTFast {
 #endif
 
             Profiler.EndSample();
+        }
+
+        Matrix4x4[] GetBindPoses(int skinId, int meshNode) {
+            if (skinsInverseBindMatrices == null) return null;
+            if (skinsInverseBindMatrices[skinId] != null) {
+                return skinsInverseBindMatrices[skinId];
+            }
+
+            var skin = gltfRoot.skins[skinId];
+            var result = new Matrix4x4[skin.joints.Length];
+            for (var i = 0; i < result.Length; i++) {
+                result[i] = Matrix4x4.identity;
+            }
+            skinsInverseBindMatrices[skinId] = result;
+            return result;
         }
 
         /// <summary>
@@ -2109,7 +2124,9 @@ namespace GLTFast {
             if(gltf.skins!=null) {
                 skinsInverseBindMatrices = new Matrix4x4[gltf.skins.Length][];
                 foreach(var skin in gltf.skins) {
-                    SetAccessorUsage(skin.inverseBindMatrices,AccessorUsage.InverseBindMatrix);
+                    if (skin.inverseBindMatrices >= 0) {
+                        SetAccessorUsage(skin.inverseBindMatrices,AccessorUsage.InverseBindMatrix);
+                    } 
                 }
             }
 
@@ -2487,7 +2504,9 @@ namespace GLTFast {
                 {
                     Profiler.BeginSample("AssignAllAccessorData.Skin");
                     var skin = gltf.skins[s];
-                    skinsInverseBindMatrices[s] = (accessorData[skin.inverseBindMatrices] as AccessorNativeData<Matrix4x4>).data.ToArray();
+                    if (skin.inverseBindMatrices >= 0) {
+                        skinsInverseBindMatrices[s] = (accessorData[skin.inverseBindMatrices] as AccessorNativeData<Matrix4x4>).data.ToArray();
+                    }
                     Profiler.EndSample();
                     await deferAgent.BreakPoint();
                 }
