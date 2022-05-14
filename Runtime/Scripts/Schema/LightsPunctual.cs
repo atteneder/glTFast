@@ -58,7 +58,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public Color lightColor {
             get =>
-                new(
+                new Color(
                     color[0],
                     color[1],
                     color[2]
