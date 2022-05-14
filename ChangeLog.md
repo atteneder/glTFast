@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Mecanim (non-legacy) is now the default for importing animation clips at design-time (thanks [@hybridherbst][hybridherbst] for #388)
 - All four bone weights are imported at design-time, regardless of quality setting
+- SkinnedMeshRenderer's rootBone property is now set to the lowest common ancestor node of all joints. This enables future culling optimization (see #301)
 ### Fixed
 - Fail more gracefully when parsing invalid JSON
 - Proper error handling on glTF-binary files with invalid chunks (unknown type or invalid length; #389)

@@ -1484,8 +1484,21 @@ namespace GLTFast {
 
             int[] parentIndex = null;
 
+            var skeletonMissing = gltfRoot.IsASkeletonMissing();
+            
             if (settings.nodeNameMethod == ImportSettings.NameImportMethod.OriginalUnique) {
                 parentIndex = CreateUniqueNames();
+            } else if (skeletonMissing) {
+                parentIndex = GetParentIndices();
+            }
+
+            if (skeletonMissing) {
+                for (int skinId = 0; skinId < gltfRoot.skins.Length; skinId++) {
+                    var skin = gltfRoot.skins[skinId];
+                    if (skin.skeleton < 0) {
+                        skin.skeleton = GetLowestCommonAncestorNode(skin.joints, parentIndex);
+                    }
+                }
             }
 
 #if UNITY_ANIMATION
@@ -1897,6 +1910,85 @@ namespace GLTFast {
             }
             skinsInverseBindMatrices[skinId] = result;
             return result;
+        }
+
+        /// <summary>
+        /// Given a set of nodes in a hierarchy, this method finds the
+        /// lowest common ancestor node.
+        /// </summary>
+        /// <param name="nodes">Set of nodes</param>
+        /// <param name="parentIndex">Dictionary of nodes' parent indices</param>
+        /// <returns>Lowest common ancestor node of all provided nodes. -1 if it was not found</returns>
+        static int GetLowestCommonAncestorNode(IEnumerable<uint> nodes, IReadOnlyList<int> parentIndex) {
+
+            List<int> chain = null;
+            var commonAncestor = -1;
+
+            bool CompareTo(int nodeId) {
+                var nodeChain = new List<int>();
+
+                var currNodeId = nodeId;
+
+                while (currNodeId >= 0) {
+                    if (currNodeId == commonAncestor) {
+                        return true;
+                    }
+                    nodeChain.Insert(0, currNodeId);
+                    currNodeId = parentIndex[currNodeId];
+                }
+
+                if (chain == null) {
+                    chain = nodeChain;
+                }
+                else {
+                    var depth = math.min(chain.Count, nodeChain.Count);
+                    for (var i = 0; i < depth; i++) {
+                        if (chain[i] != nodeChain[i]) {
+                            if (i > 0) {
+                                chain.RemoveRange(i, chain.Count - i);
+                                break;
+                            }
+                            return false;
+                        }
+                    }
+                }
+
+                commonAncestor = chain[chain.Count - 1];
+                return true;
+            }
+
+            foreach (var nodeId in nodes) {
+                if (!CompareTo((int)nodeId)) {
+                    return -1;
+                }
+            }
+
+            // foreach (var nodeId in nodes) {
+            //     if (commonAncestor == nodeId) {
+            //         // A joint cannot be the root, so use its parent instead
+            //         commonAncestor = parentIndex[commonAncestor];
+            //         break;
+            //     }
+            // }
+
+            return commonAncestor;
+        }
+
+        int[] GetParentIndices() {
+            var parentIndex = new int[gltfRoot.nodes.Length];
+            for (var i = 0; i < parentIndex.Length; i++) {
+                parentIndex[i] = -1;
+            }
+
+            for (var i = 0; i < gltfRoot.nodes.Length; i++) {
+                if (gltfRoot.nodes[i].children != null) {
+                    foreach (var child in gltfRoot.nodes[i].children) {
+                        parentIndex[child] = i;
+                    }
+                }
+            }
+
+            return parentIndex;
         }
 
         /// <summary>
