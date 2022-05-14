@@ -1777,7 +1777,7 @@ namespace GLTFast {
                             if(node.skin>=0) {
                                 var skin = gltf.skins[node.skin];
                                 // TODO: see if this can be moved to mesh creation phase / before instantiation
-                                mesh.bindposes = GetBindPoses(node.skin, (int)nodeIndex);
+                                mesh.bindposes = GetBindPoses(node.skin);
                                 if (skin.skeleton >= 0) {
                                     rootJoint = (uint) skin.skeleton;
                                 }
@@ -1884,7 +1884,7 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        Matrix4x4[] GetBindPoses(int skinId, int meshNode) {
+        Matrix4x4[] GetBindPoses(int skinId) {
             if (skinsInverseBindMatrices == null) return null;
             if (skinsInverseBindMatrices[skinId] != null) {
                 return skinsInverseBindMatrices[skinId];
