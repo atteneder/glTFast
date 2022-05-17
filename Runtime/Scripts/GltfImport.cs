@@ -2112,12 +2112,15 @@ namespace GLTFast {
             return string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
         }
 
-        private void SafeDestroy(UnityEngine.Object obj) {
-            if (Application.isPlaying) {
-                UnityEngine.Object.Destroy(obj);
+        static void SafeDestroy(Object obj) {
+#if UNITY_EDITOR
+            if (!Application.isPlaying) {
+                Object.DestroyImmediate(obj);
             }
-            else {
-                UnityEngine.Object.DestroyImmediate(obj);
+            else
+#endif
+            {
+                Object.Destroy(obj);
             }
         }
         
