@@ -208,6 +208,25 @@ async Task CustomDeferAgentPerGltfImport() {
 
 > Note2 : Using the `TimeBudgetPerFrameDeferAgent` does **not** guarantee a stutter free frame rate. This is because some sub tasks of the loading routine (like uploading a texture to the GPU) may take too long, cannot be interrupted and **have** to be done on the main thread.
 
+### Unloading/Destroying generated Meshes
+
+When removing or destroying `GameObject` imported via `glTFast` it's easy to forget that meshes are not deleted immediately. This information is buried somewhat deep in the [Unity documentation of `MeshFilter.mesh`](https://docs.unity3d.com/ScriptReference/MeshFilter-mesh.html):
+
+> It is your responsibility to destroy the automatically instantiated mesh when the game object is being destroyed. Resources.UnloadUnusedAssets also destroys the mesh but it is usually only called when loading a new level.
+
+In a scene that repeatedly loads and unloads models this would lead to high memory usage until the next scene is loaded.
+One way to prevent unnecessary memory usage would be to run the following:
+
+```C#
+private void unloadGltf() {
+    …
+    foreach (MeshFilter meshFilter in GetComponentsInChildren<MeshFilter>())
+    {
+        Destroy(meshFilter.sharedMesh);
+        Destroy(meshFilter.mesh);
+    }
+``` 
+
 [GameObjectInstantiator]: xref:GLTFast.GameObjectInstantiator
 [gltfasset_component]: Images/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
 [ICodeLogger]: xref:GLTFast.ICodeLogger
