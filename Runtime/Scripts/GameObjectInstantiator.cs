@@ -35,7 +35,7 @@ namespace GLTFast {
         public class Settings {
             public bool skinUpdateWhenOffscreen = true;
             public int layer;
-            public ComponentType mask = ComponentType.Mesh | ComponentType.Camera;
+            public ComponentType mask = ComponentType.All;
         }
         
         public class SceneInstance {
