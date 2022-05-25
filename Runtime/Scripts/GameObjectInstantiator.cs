@@ -18,6 +18,9 @@ using System.Collections.Generic;
 using GLTFast.Schema;
 using Unity.Collections;
 using UnityEngine;
+#if USING_HDRP
+using UnityEngine.Rendering.HighDefinition;
+#endif
 using Camera = UnityEngine.Camera;
 using Material = UnityEngine.Material;
 using Mesh = UnityEngine.Mesh;
@@ -390,7 +393,33 @@ namespace GLTFast {
             }
             
             light.color = lightSource.lightColor;
-            light.intensity = lightSource.intensity;
+            var renderPipeline = RenderPipelineUtils.DetectRenderPipeline();
+            switch (renderPipeline) {
+                case RenderPipeline.BuiltIn:
+                    light.intensity = lightSource.intensity / Mathf.PI;
+                    break;
+                case RenderPipeline.Universal:
+                    light.intensity = lightSource.intensity;
+                    break;
+                case RenderPipeline.HighDefinition:
+#if USING_HDRP
+                    var lightHd = lightGameObject.AddComponent<HDAdditionalLightData>();
+                    if (lightSource.typeEnum == LightPunctual.Type.Directional) {
+                        lightHd.lightUnit = LightUnit.Lux;
+                    }
+                    else {
+                        lightHd.lightUnit = LightUnit.Candela;
+                    }
+                    lightHd.intensity = lightSource.intensity;
+#else
+                    light.intensity = lightSource.intensity / Mathf.PI;
+#endif
+                    break;
+                default:
+                    light.intensity = lightSource.intensity / Mathf.PI;
+                    break;
+            }
+            
             if (lightSource.range > 0) {
                 light.range = lightSource.range;
             }
