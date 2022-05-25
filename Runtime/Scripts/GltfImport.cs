@@ -856,40 +856,40 @@ namespace GLTFast {
                 Profiler.EndSample();
                 List<Task> imageTasks = null;
 
-                for (int i = 0; i < gltfRoot.images.Length; i++) {
-                    var img = gltfRoot.images[i];
+                for (int imageIndex = 0; imageIndex < gltfRoot.images.Length; imageIndex++) {
+                    var img = gltfRoot.images[imageIndex];
 
                     if(!string.IsNullOrEmpty(img.uri) && img.uri.StartsWith("data:")) {
                         var decodedBufferTask = DecodeEmbedBufferAsync(img.uri);
                         if (imageTasks == null) {
                             imageTasks = new List<Task>();
                         }
-                        var imageTask = LoadImageFromBuffer(decodedBufferTask, i, img);
+                        var imageTask = LoadImageFromBuffer(decodedBufferTask, imageIndex, img);
                         imageTasks.Add(imageTask);
                     } else {
                         ImageFormat imgFormat;
-                        if(imageFormats[i]==ImageFormat.Unknown) {
+                        if(imageFormats[imageIndex]==ImageFormat.Unknown) {
                             if(string.IsNullOrEmpty(img.mimeType)) {
                                 imgFormat = UriHelper.GetImageFormatFromUri(img.uri);
                             } else {
                                 imgFormat = GetImageFormatFromMimeType(img.mimeType);
                             }
-                            imageFormats[i] = imgFormat;
+                            imageFormats[imageIndex] = imgFormat;
                         } else {
-                            imgFormat=imageFormats[i];
+                            imgFormat=imageFormats[imageIndex];
                         }
 
                         if (imgFormat!=ImageFormat.Unknown) {
                             if (img.bufferView < 0) {
                                 // Not Inside buffer
                                 if(!string.IsNullOrEmpty(img.uri)) {
-                                    LoadTexture(i,UriHelper.GetUriString(img.uri,baseUri), !imageReadable[i], imgFormat==ImageFormat.KTX);
+                                    LoadImage(imageIndex,UriHelper.GetUriString(img.uri,baseUri), !imageReadable[imageIndex], imgFormat==ImageFormat.KTX);
                                 } else {
                                     logger?.Error(LogCode.MissingImageURL);
                                 }
                             } 
                         } else {
-                            logger?.Error(LogCode.ImageFormatUnknown,i.ToString(),img.uri);
+                            logger?.Error(LogCode.ImageFormatUnknown,imageIndex.ToString(),img.uri);
                         }
                     }
                 }
@@ -1075,7 +1075,7 @@ namespace GLTFast {
             return new Tuple<byte[], string>(data, mimeType);
         }
 
-        void LoadTexture( int index, Uri url, bool nonReadable, bool isKtx ) {
+        void LoadImage( int imageIndex, Uri url, bool nonReadable, bool isKtx ) {
 
             Profiler.BeginSample("LoadTexture");
 
@@ -1085,7 +1085,7 @@ namespace GLTFast {
                 if(ktxDownloadTasks==null) {
                     ktxDownloadTasks = new Dictionary<int, Task<IDownload>>();
                 }
-                ktxDownloadTasks.Add(index, downloadTask);
+                ktxDownloadTasks.Add(imageIndex, downloadTask);
 #else
                 logger?.Error(LogCode.PackageMissing,"KtxUnity",Extensions.TextureBasisUniversal);
                 Profiler.EndSample();
@@ -1096,7 +1096,7 @@ namespace GLTFast {
                 if(textureDownloadTasks==null) {
                     textureDownloadTasks = new Dictionary<int, Task<ITextureDownload>>();
                 }
-                textureDownloadTasks.Add(index, downloadTask);
+                textureDownloadTasks.Add(imageIndex, downloadTask);
             }
             Profiler.EndSample();
         }
