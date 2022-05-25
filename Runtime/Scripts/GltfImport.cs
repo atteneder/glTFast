@@ -137,7 +137,7 @@ namespace GLTFast {
 #if KTX_UNITY
         Dictionary<int,Task<IDownload>> ktxDownloadTasks;
 #endif
-        Dictionary<int,Task<ITextureDownload>> textureDownloadTasks;
+        Dictionary<int,TextureDownloadBase> textureDownloadTasks;
 
         AccessorDataBase[] accessorData;
         AccessorUsage[] accessorUsage;
@@ -964,20 +964,22 @@ namespace GLTFast {
 
         async Task<bool> WaitForTextureDownloads() {
             foreach( var dl in textureDownloadTasks ) {
-                var www = await dl.Value;
+                await dl.Value.Load();
+                var www = dl.Value.download;
                 
                 if(www.success) {
                     var imageIndex = dl.Key;
-                    bool forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
                     Texture2D txt;
                     // TODO: Loading Jpeg/PNG textures like this creates major frame stalls. Main thread is waiting
                     // on Render thread, which is occupied by Gfx.UploadTextureData for 19 ms for a 2k by 2k texture
-                    if(forceSampleLinear || settings.generateMipMaps) {
+                    if(LoadImageFromBytes(imageIndex)) {
+                        var forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
                         txt = CreateEmptyTexture(gltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
                         txt.LoadImage(www.data,!imageReadable[imageIndex]);
                     } else {
-                        txt = www.texture;
+                        Assert.IsTrue(www is ITextureDownload);
+                        txt = ((ITextureDownload)www).texture;
                         txt.name = GetImageName(gltfRoot.images[imageIndex], imageIndex);
                     }
                     images[imageIndex] = txt;
@@ -1092,13 +1094,27 @@ namespace GLTFast {
                 return;
 #endif // KTX_UNITY
             } else {
-                var downloadTask = downloadProvider.RequestTexture(url,nonReadable);
+                TextureDownloadBase downloadTask = LoadImageFromBytes(imageIndex)
+                    ? new TextureDownload<IDownload>(downloadProvider.Request(url))
+                    : new TextureDownload<ITextureDownload>(downloadProvider.RequestTexture(url,nonReadable));
                 if(textureDownloadTasks==null) {
-                    textureDownloadTasks = new Dictionary<int, Task<ITextureDownload>>();
+                    textureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
                 }
                 textureDownloadTasks.Add(imageIndex, downloadTask);
             }
             Profiler.EndSample();
+        }
+
+        /// <summary>
+        /// UnityWebRequestTexture always loads Jpegs/PNGs in sRGB color space
+        /// without mipmaps. This method figures if this is not desired and the
+        /// texture data needs to be loaded from raw bytes. 
+        /// </summary>
+        /// <param name="imageIndex">glTF image index</param>
+        /// <returns>True if image texture had to be loaded manually from bytes, false otherwise.</returns>
+        bool LoadImageFromBytes(int imageIndex) {
+            var forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
+            return forceSampleLinear || settings.generateMipMaps;
         }
 
         async Task<bool> LoadGltfBinaryBuffer( byte[] bytes, Uri uri = null ) {
