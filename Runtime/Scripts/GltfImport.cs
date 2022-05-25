@@ -1094,9 +1094,9 @@ namespace GLTFast {
                 return;
 #endif // KTX_UNITY
             } else {
-                TextureDownloadBase downloadTask = LoadImageFromBytes(imageIndex)
-                    ? new TextureDownload<IDownload>(downloadProvider.Request(url))
-                    : new TextureDownload<ITextureDownload>(downloadProvider.RequestTexture(url,nonReadable));
+                var downloadTask = LoadImageFromBytes(imageIndex)
+                    ? (TextureDownloadBase) new TextureDownload<IDownload>(downloadProvider.Request(url))
+                    : (TextureDownloadBase) new TextureDownload<ITextureDownload>(downloadProvider.RequestTexture(url,nonReadable));
                 if(textureDownloadTasks==null) {
                     textureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
                 }
