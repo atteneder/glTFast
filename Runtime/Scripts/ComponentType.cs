@@ -22,8 +22,9 @@ namespace GLTFast {
     public enum ComponentType {
         None = 0,
         Mesh = 1<<1,
-        Camera = 1<<2,
-        Light = 1<<3,
-        All = 0x7,
+        Animation = 1<<2,
+        Camera = 1<<3,
+        Light = 1<<4,
+        All = ~0,
     }
 }

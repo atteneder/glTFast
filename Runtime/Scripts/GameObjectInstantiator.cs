@@ -424,7 +424,7 @@ namespace GLTFast {
             }
 
 #if UNITY_ANIMATION
-            if (animationClips != null) {
+            if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
                 // we want to create an Animator for non-legacy clips, and an Animation component for legacy clips.
                 var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
 // #if UNITY_EDITOR
