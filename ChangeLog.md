@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - A target layer can be defined for instantiated GameObjects via `GameObjectInstantiator.Settings.layer` (thanks [Krzysztof Lesiak][Holo-Krzysztof] for #393)
 - Re-normalize bone weights (always for design-time import and opt-in at runtime via `GLTFAST_SAFE` scripting define)
+- `GltfAssetBase.Dispose` for releasing resources
 ### Changed
 - Mecanim (non-legacy) is now the default for importing animation clips at design-time (thanks [@hybridherbst][hybridherbst] for #388)
 - All four bone weights are imported at design-time, regardless of quality setting

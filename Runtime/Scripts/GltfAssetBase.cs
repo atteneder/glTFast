@@ -135,12 +135,19 @@ namespace GLTFast
             currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
         }
 
-        protected virtual void OnDestroy()
-        {
+        /// <summary>
+        /// Releases previously allocated resources.
+        /// </summary>
+        public void Dispose() {
             if(importer!=null) {
                 importer.Dispose();
                 importer=null;
             }
+        }
+
+        protected virtual void OnDestroy()
+        {
+            Dispose();
         }
     }
 }
