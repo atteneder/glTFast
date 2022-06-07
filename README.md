@@ -54,7 +54,7 @@ Afterwards *glTFast* and further, optional packages are listed in the *Package M
 There are some related package that improve *glTFast* by extending its feature set.
 
 - [Draco 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
-- [KTX/Basis Texture Unity Package][KtxUnity] (in Beta; provides support for [KHR_texture_basisu][ExtBasisU])
+- [KTX/Basis Texture Unity Package][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
 - [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
 
 <details><summary>Alternative: Install via GIT URL</summary>
