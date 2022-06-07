@@ -13,7 +13,11 @@
 // limitations under the License.
 //
 
-#if KTX_UNITY
+#if KTX_UNITY_2_2_OR_NEWER || (!UNITY_2021_2_OR_NEWER && KTX_UNITY_1_3_OR_NEWER)
+#define KTX
+#endif
+
+#if KTX
 
 using System.Collections;
 using System.Threading.Tasks;
@@ -25,7 +29,8 @@ namespace GLTFast {
         public int imageIndex;
         protected KtxTexture ktxTexture;
         
-        public abstract Task<TextureResult> LoadKtx(bool linear);
+        public abstract Task<ErrorCode> LoadAndTranscode(bool linear);
+        public abstract TextureResult CreateTextureAndDispose();
     }
 }
 #endif // KTX_UNITY
