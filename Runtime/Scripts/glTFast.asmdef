@@ -28,8 +28,18 @@
         },
         {
             "name": "com.atteneder.ktx",
-            "expression": "1.1.0",
+            "expression": "",
             "define": "KTX_UNITY"
+        },
+        {
+            "name": "com.atteneder.ktx",
+            "expression": "1.3.0",
+            "define": "KTX_UNITY_1_3_OR_NEWER"
+        },
+        {
+            "name": "com.atteneder.ktx",
+            "expression": "2.2.0",
+            "define": "KTX_UNITY_2_2_OR_NEWER"
         },
         {
             "name": "com.unity.render-pipelines.universal",
