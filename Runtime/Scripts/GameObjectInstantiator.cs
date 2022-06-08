@@ -393,6 +393,22 @@ namespace GLTFast {
             }
             
             light.color = lightSource.lightColor;
+            
+            LightAssignIntensity(light, lightSource);
+
+            if (lightSource.range > 0) {
+                light.range = lightSource.range;
+            }
+
+            if (lightSource.typeEnum == LightPunctual.Type.Spot) {
+                light.spotAngle = lightSource.spot.outerConeAngle * Mathf.Rad2Deg * 2f;
+                light.innerSpotAngle = lightSource.spot.innerConeAngle * Mathf.Rad2Deg * 2f;
+            }
+            
+            sceneInstance.AddLight(light);
+        }
+        
+        protected virtual void LightAssignIntensity(Light light, LightPunctual lightSource) {
             var renderPipeline = RenderPipelineUtils.DetectRenderPipeline();
             switch (renderPipeline) {
                 case RenderPipeline.BuiltIn:
@@ -417,17 +433,6 @@ namespace GLTFast {
                     light.intensity = lightSource.intensity / Mathf.PI;
                     break;
             }
-            
-            if (lightSource.range > 0) {
-                light.range = lightSource.range;
-            }
-
-            if (lightSource.typeEnum == LightPunctual.Type.Spot) {
-                light.spotAngle = lightSource.spot.outerConeAngle * Mathf.Rad2Deg * 2f;
-                light.innerSpotAngle = lightSource.spot.innerConeAngle * Mathf.Rad2Deg * 2f;
-            }
-            
-            sceneInstance.AddLight(light);
         }
         
         public virtual void AddScene(
