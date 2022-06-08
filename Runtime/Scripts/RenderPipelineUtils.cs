@@ -32,7 +32,19 @@ namespace GLTFast {
     }
 
     public static class RenderPipelineUtils {
-        public static RenderPipeline DetectRenderPipeline() {
+
+	    static RenderPipeline s_RenderPipeline = RenderPipeline.Unknown;
+	    
+	    public static RenderPipeline renderPipeline {
+		    get {
+			    if (s_RenderPipeline == RenderPipeline.Unknown) {
+				    s_RenderPipeline = DetectRenderPipeline();
+			    }
+			    return s_RenderPipeline;
+		    }
+	    }
+
+        static RenderPipeline DetectRenderPipeline() {
 #if USING_URP || USING_HDRP
 	        // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
 	        var rpAsset = QualitySettings.renderPipeline ?? GraphicsSettings.defaultRenderPipeline;

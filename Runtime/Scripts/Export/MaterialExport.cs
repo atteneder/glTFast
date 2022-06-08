@@ -24,7 +24,7 @@ namespace GLTFast.Export {
         public static IMaterialExport GetDefaultMaterialExport() {
             if (m_MaterialExport == null) {
 
-                var renderPipeline = RenderPipelineUtils.DetectRenderPipeline();
+                var renderPipeline = RenderPipelineUtils.renderPipeline;
 
                 switch (renderPipeline) {
                     case RenderPipeline.BuiltIn:

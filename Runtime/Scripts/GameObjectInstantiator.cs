@@ -409,7 +409,7 @@ namespace GLTFast {
         }
         
         protected virtual void LightAssignIntensity(Light light, LightPunctual lightSource) {
-            var renderPipeline = RenderPipelineUtils.DetectRenderPipeline();
+            var renderPipeline = RenderPipelineUtils.renderPipeline;
             switch (renderPipeline) {
                 case RenderPipeline.BuiltIn:
                     light.intensity = lightSource.intensity / Mathf.PI;

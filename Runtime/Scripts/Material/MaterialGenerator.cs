@@ -90,7 +90,7 @@ namespace GLTFast.Materials {
 
             if (defaultMaterialGenerator != null) return defaultMaterialGenerator;
 
-            var renderPipeline = RenderPipelineUtils.DetectRenderPipeline();
+            var renderPipeline = RenderPipelineUtils.renderPipeline;
 
             switch (renderPipeline) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER && GLTFAST_BUILTIN_SHADER_GRAPH
