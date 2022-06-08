@@ -401,8 +401,8 @@ namespace GLTFast {
                 case RenderPipeline.Universal:
                     light.intensity = lightSource.intensity;
                     break;
-                case RenderPipeline.HighDefinition:
 #if USING_HDRP
+                case RenderPipeline.HighDefinition:
                     var lightHd = lightGameObject.AddComponent<HDAdditionalLightData>();
                     if (lightSource.typeEnum == LightPunctual.Type.Directional) {
                         lightHd.lightUnit = LightUnit.Lux;
@@ -411,10 +411,8 @@ namespace GLTFast {
                         lightHd.lightUnit = LightUnit.Candela;
                     }
                     lightHd.intensity = lightSource.intensity;
-#else
-                    light.intensity = lightSource.intensity / Mathf.PI;
-#endif
                     break;
+#endif
                 default:
                     light.intensity = lightSource.intensity / Mathf.PI;
                     break;
