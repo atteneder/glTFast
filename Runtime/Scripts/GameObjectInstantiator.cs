@@ -312,7 +312,7 @@ namespace GLTFast {
 
         /// <summary>
         /// Creates a camera component on the given node and returns an approximated
-        /// local-to-world scale factor, required to counter-act that Unity scales
+        /// local-to-world scale factor, required to counteract that Unity scales
         /// near- and far-clipping-planes via Transform.
         /// </summary>
         /// <param name="nodeIndex">Node's index</param>
@@ -368,7 +368,7 @@ namespace GLTFast {
 
             if (lightSource.typeEnum != LightPunctual.Type.Point) {
                 // glTF lights' direction is flipped, compared with Unity's, so
-                // we're adding a rotated child GameObject to counter act.
+                // we're adding a rotated child GameObject to counteract.
                 var tmp = new GameObject($"{lightGameObject.name}_Orientation");
                 tmp.transform.SetParent(lightGameObject.transform,false);
                 tmp.transform.localEulerAngles = new Vector3(0, 180, 0);
