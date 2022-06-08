@@ -182,7 +182,7 @@ namespace GLTFast {
             renderer.sharedMaterials = materials;
         }
 
-        public void AddPrimitiveInstanced(
+        public virtual void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,
             Mesh mesh,
@@ -220,7 +220,7 @@ namespace GLTFast {
             }
         }
 
-        public void AddCamera(uint nodeIndex, uint cameraIndex) {
+        public virtual void AddCamera(uint nodeIndex, uint cameraIndex) {
             if ((settings.mask & ComponentType.Camera) == 0) {
                 return;
             }
