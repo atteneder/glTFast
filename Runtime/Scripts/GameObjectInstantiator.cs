@@ -36,6 +36,7 @@ namespace GLTFast {
             public bool skinUpdateWhenOffscreen = true;
             public int layer;
             public ComponentType mask = ComponentType.All;
+            public float lightIntensityFactor = 1.0f;
         }
         
         public class SceneInstance {
@@ -409,17 +410,18 @@ namespace GLTFast {
         }
         
         protected virtual void LightAssignIntensity(Light light, LightPunctual lightSource) {
+            var intensity = lightSource.intensity * settings.lightIntensityFactor;
             var renderPipeline = RenderPipelineUtils.renderPipeline;
             switch (renderPipeline) {
                 case RenderPipeline.BuiltIn:
-                    light.intensity = lightSource.intensity / Mathf.PI;
+                    light.intensity = intensity / Mathf.PI;
                     break;
                 case RenderPipeline.Universal:
-                    light.intensity = lightSource.intensity;
+                    light.intensity = intensity;
                     break;
 #if USING_HDRP
                 case RenderPipeline.HighDefinition:
-                    var lightHd = lightGameObject.AddComponent<HDAdditionalLightData>();
+                    var lightHd = light.gameObject.AddComponent<HDAdditionalLightData>();
                     if (lightSource.typeEnum == LightPunctual.Type.Directional) {
                         lightHd.lightUnit = LightUnit.Lux;
                     }
@@ -430,7 +432,7 @@ namespace GLTFast {
                     break;
 #endif
                 default:
-                    light.intensity = lightSource.intensity / Mathf.PI;
+                    light.intensity = intensity;
                     break;
             }
         }
