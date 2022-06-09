@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped Burst dependency version to 1.6.6
 ### Fixed
 - UWP build (#400)
+- Shader compile errors in  2021.2 and later due to incorrectly named property in shader graph `glTF-pbrSpecularGlossiness-Opaque-double`
 
 ## [4.8.0] - 2022-05-30
 ### Added
