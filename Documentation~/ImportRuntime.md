@@ -139,6 +139,14 @@ Meshes that are skinned or have morph targets and are animated might move way ou
 
 You can disable this by setting `skinUpdateWhenOffscreen` to false.
 
+##### `layer`
+
+Instantated `GameObject`s will be assigned to this [layer](https://docs.unity3d.com/Manual/Layers.html).
+
+##### `mask`
+
+Allows you to filter components based on types (e.g. Meshes, Animation, Cameras or Lights).
+
 ### Logging
 
 When loading a glTF file, glTFast logs messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those log messages. Examples:
