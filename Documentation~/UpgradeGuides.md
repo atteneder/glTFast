@@ -4,6 +4,12 @@ uid: doc-upgrade-guides
 
 # Upgrade Guides
 
+## Upgrade to 5.0
+
+### API Changes
+
+`RenderPipelineUtils.DetectRenderPipeline()` turned to `RenderPipelineUtils.renderPipeline`
+
 ## Upgrade to 4.5
 
 New shader graphs are used with certain Universal and High Definition render pipeline versions, so projects that included *glTFast*'s shaders have to check and update their included shaders or shader variant collections (see [Materials and Shader Variants](ProjectSetup.md#materials-and-shader-variants) for details).

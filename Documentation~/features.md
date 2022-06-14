@@ -124,7 +124,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | KHR_texture_transform | ✅ | ✅
 | KHR_mesh_quantization | ✅ | 
 | KHR_texture_basisu | ✅ | 
-| KHR_lights_punctual | [ℹ️][PointLights] | 
+| KHR_lights_punctual | ✅ | 
 | KHR_materials_clearcoat | [ℹ️][ClearCoat] | 
 | KHR_materials_sheen | [ℹ️][Sheen] | 
 | KHR_materials_transmission | [ℹ️][Transmission] | 
@@ -247,6 +247,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 - Skinning
 - Morph targets
 - Cameras
+- Lights
 
 ### DOTS Setup
 
@@ -265,7 +266,6 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [MeshOpt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
 [MeshOptPkg]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [newIssue]: https://github.com/atteneder/glTFast/issues/new
-[PointLights]: https://github.com/atteneder/glTFast/issues/17
 [RuntimeExport]: https://github.com/atteneder/glTFast/issues/259
 [SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
 [Sheen]: https://github.com/atteneder/glTFast/issues/110
