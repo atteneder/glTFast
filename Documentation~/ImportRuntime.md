@@ -147,6 +147,17 @@ Instantated `GameObject`s will be assigned to this [layer](https://docs.unity3d.
 
 Allows you to filter components based on types (e.g. Meshes, Animation, Cameras or Lights).
 
+##### `lightIntensityFactor`
+
+Whenever glTF lights appear too bright or dim, you can use this setting to adjust their intensity, which are multiplied by this factor.
+
+Two common use-cases are
+
+1. Scale-down (physically correct) intensities to compensate for the missing exposure control (or high sensitivity) of a render pipeline (e.g. Universal or Built-in Render Pipeline)
+2. Boost implausibly low light intensities
+
+See [Physical Light Units in glTF](./LightUnitys.md) for a detailed explaination.
+
 ### Logging
 
 When loading a glTF file, glTFast logs messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those log messages. Examples:
