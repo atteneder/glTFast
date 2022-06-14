@@ -32,13 +32,6 @@ using Mesh = UnityEngine.Mesh;
 namespace GLTFast {
     public class GameObjectInstantiator : IInstantiator {
 
-        public class Settings {
-            public bool skinUpdateWhenOffscreen = true;
-            public int layer;
-            public ComponentType mask = ComponentType.All;
-            public float lightIntensityFactor = 1.0f;
-        }
-        
         public class SceneInstance {
             public List<Camera> cameras { get; private set; }
             public List<Light> lights { get; private set; }
@@ -58,7 +51,7 @@ namespace GLTFast {
             }
         }
         
-        protected Settings settings;
+        protected InstantiationSettings settings;
         
         protected ICodeLogger logger;
         
@@ -77,13 +70,13 @@ namespace GLTFast {
             IGltfReadable gltf,
             Transform parent,
             ICodeLogger logger = null,
-            Settings settings = null
+            InstantiationSettings settings = null
             )
         {
             this.gltf = gltf;
             this.parent = parent;
             this.logger = logger;
-            this.settings = settings ?? new Settings();
+            this.settings = settings ?? new InstantiationSettings();
         }
 
         public virtual void Init() {

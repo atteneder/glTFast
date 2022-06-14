@@ -34,7 +34,7 @@ namespace GLTFast
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
-        public GameObjectInstantiator.Settings instantiationSettings;
+        public InstantiationSettings instantiationSettings;
         
         /// <summary>
         /// Latest scene's instance.  
