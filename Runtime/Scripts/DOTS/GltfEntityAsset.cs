@@ -45,6 +45,8 @@ namespace GLTFast {
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
+        public InstantiationSettings instantiationSettings;
+        
         Entity sceneRoot;
 
         public string FullUrl => streamingAsset
@@ -97,7 +99,7 @@ namespace GLTFast {
             entityManager.SetComponentData(sceneRoot,new Rotation {Value = quaternion.identity});
             entityManager.SetComponentData(sceneRoot,new Scale {Value = 1});
             // entityManager.AddBuffer<LinkedEntityGroup>(sceneRoot);
-            return new EntityInstantiator(importer, sceneRoot, logger);
+            return new EntityInstantiator(importer, sceneRoot, logger, instantiationSettings);
         }
         
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {

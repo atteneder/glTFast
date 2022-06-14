@@ -36,14 +36,23 @@ namespace GLTFast {
 
         protected Dictionary<uint,Entity> nodes;
 
+        protected InstantiationSettings settings;
+        
         EntityManager entityManager;
         EntityArchetype nodeArcheType;
         EntityArchetype sceneArcheType;
 
-        public EntityInstantiator(IGltfReadable gltf, Entity parent, ICodeLogger logger = null) {
+        public EntityInstantiator(
+            IGltfReadable gltf,
+            Entity parent,
+            ICodeLogger logger = null,
+            InstantiationSettings settings = null
+            )
+        {
             this.gltf = gltf;
             this.parent = parent;
             this.logger = logger;
+            this.settings = settings ?? new InstantiationSettings();
         }
 
         public virtual void Init() {
@@ -122,7 +131,7 @@ namespace GLTFast {
             for (var index = 0; index < materialIndices.Length; index++) {
                 var material = gltf.GetMaterial(materialIndices[index]) ?? gltf.GetDefaultMaterial();
                  
-                RenderMeshUtility.AddComponents(node,entityManager,new RenderMeshDescription(mesh,material,subMeshIndex:index));
+                RenderMeshUtility.AddComponents(node,entityManager,new RenderMeshDescription(mesh,material,layer:settings.layer,subMeshIndex:index));
                  if(joints!=null || hasMorphTargets) {
                      if (joints != null) {
                          var bones = new Entity[joints.Length];
