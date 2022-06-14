@@ -115,6 +115,9 @@ namespace GLTFast {
             float[] morphTargetWeights = null,
             int primitiveNumeration = 0
         ) {
+            if ((settings.mask & ComponentType.Mesh) == 0) {
+                return;
+            }
             Entity node;
             if(primitiveNumeration==0) {
                 // Use Node GameObject for first Primitive
@@ -163,6 +166,9 @@ namespace GLTFast {
             NativeArray<Vector3>? scales,
             int primitiveNumeration = 0
         ) {
+            if ((settings.mask & ComponentType.Mesh) == 0) {
+                return;
+            }
             foreach (var materialIndex in materialIndices) {
                 var material = gltf.GetMaterial(materialIndex) ?? gltf.GetDefaultMaterial();
                 material.enableInstancing = true;
@@ -185,6 +191,9 @@ namespace GLTFast {
         }
 
         public void AddCamera(uint nodeIndex, uint cameraIndex) {
+            if ((settings.mask & ComponentType.Camera) == 0) {
+                return;
+            }
             var camera = gltf.GetSourceCamera(cameraIndex);
             // TODO: Add camera support
         }
@@ -193,6 +202,9 @@ namespace GLTFast {
             uint nodeIndex,
             uint lightIndex
         ) {
+            if ((settings.mask & ComponentType.Light) == 0) {
+                return;
+            }
             // TODO: Add lights support
         }
 
@@ -221,7 +233,7 @@ namespace GLTFast {
             }
 
 #if UNITY_ANIMATION
-            if (animationClips != null) {
+            if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
                 // TODO: Add animation support
             }
 #endif // UNITY_ANIMATION
