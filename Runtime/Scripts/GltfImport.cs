@@ -1502,17 +1502,18 @@ namespace GLTFast {
 
             var skeletonMissing = gltfRoot.IsASkeletonMissing();
             
-            if (settings.nodeNameMethod == ImportSettings.NameImportMethod.OriginalUnique) {
-                parentIndex = CreateUniqueNames();
-            } else if (skeletonMissing) {
-                parentIndex = GetParentIndices();
-            }
-
-            if (skeletonMissing) {
-                for (int skinId = 0; skinId < gltfRoot.skins.Length; skinId++) {
-                    var skin = gltfRoot.skins[skinId];
-                    if (skin.skeleton < 0) {
-                        skin.skeleton = GetLowestCommonAncestorNode(skin.joints, parentIndex);
+            if (gltfRoot.nodes != null && gltfRoot.nodes.Length > 0) {
+                if (settings.nodeNameMethod == ImportSettings.NameImportMethod.OriginalUnique) {
+                    parentIndex = CreateUniqueNames();
+                } else if (skeletonMissing) {
+                    parentIndex = GetParentIndices();
+                }
+                if (skeletonMissing) {
+                    for (int skinId = 0; skinId < gltfRoot.skins.Length; skinId++) {
+                        var skin = gltfRoot.skins[skinId];
+                        if (skin.skeleton < 0) {
+                            skin.skeleton = GetLowestCommonAncestorNode(skin.joints, parentIndex);
+                        }
                     }
                 }
             }
