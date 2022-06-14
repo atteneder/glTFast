@@ -180,6 +180,13 @@ namespace GLTFast {
             // TODO: Add camera support
         }
 
+        public void AddLightPunctual(
+            uint nodeIndex,
+            uint lightIndex
+        ) {
+            // TODO: Add lights support
+        }
+
         public void AddScene(
             string name,
             uint[] nodeIndices
