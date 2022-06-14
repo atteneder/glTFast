@@ -397,9 +397,10 @@ namespace GLTFast {
             
             LightAssignIntensity(light, lightSource);
 
-            if (lightSource.range > 0) {
-                light.range = lightSource.range;
-            }
+            light.range = lightSource.range > 0
+                ? lightSource.range
+                : 100_000; // glTF 2.0 spec says infinite, but float.MaxValue
+                           // breaks spot lights in URP.
 
             if (lightSource.typeEnum == LightPunctual.Type.Spot) {
                 light.spotAngle = lightSource.spot.outerConeAngle * Mathf.Rad2Deg * 2f;
