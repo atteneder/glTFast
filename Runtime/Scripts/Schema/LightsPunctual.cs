@@ -24,7 +24,7 @@ namespace GLTFast.Schema {
 
         public LightPunctual[] lights;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             writer.Close();
             throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
@@ -113,7 +113,7 @@ namespace GLTFast.Schema {
             }
         }
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             writer.Close();
             throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
@@ -137,7 +137,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public float outerConeAngle = math.PI/4f;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             writer.AddProperty("innerConeAngle", innerConeAngle);
             writer.AddProperty("outerConeAngle", outerConeAngle);

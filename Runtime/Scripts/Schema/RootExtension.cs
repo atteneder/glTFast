@@ -19,7 +19,7 @@ namespace GLTFast.Schema {
     public class RootExtension {
         public LightsPunctual KHR_lights_punctual;
         
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             if(KHR_lights_punctual!=null) {
                 writer.AddProperty("KHR_lights_punctual");

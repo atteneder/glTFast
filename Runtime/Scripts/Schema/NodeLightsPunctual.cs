@@ -22,7 +22,7 @@ namespace GLTFast.Schema {
 
         public int light = -1;
 
-        public void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             if (light >= 0) {
                 writer.AddProperty("light", light);
