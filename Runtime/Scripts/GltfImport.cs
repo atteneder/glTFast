@@ -790,7 +790,7 @@ namespace GLTFast {
 
         async Task LoadImages( Uri baseUri ) {
             
-            if (gltfRoot.textures != null && gltfRoot.images != null && gltfRoot.materials!=null) {
+            if (gltfRoot.textures != null && gltfRoot.images != null) {
                 
                 Profiler.BeginSample("LoadImages.Prepare");
                 
@@ -811,17 +811,19 @@ namespace GLTFast {
                             imageGamma[imageIndex] = true;
                         }
                     }
-                    
-                    for(int i=0;i<gltfRoot.materials.Length;i++) {
-                        var mat = gltfRoot.materials[i];
-                        if( mat.pbrMetallicRoughness != null ) {
-                            SetImageGamma(mat.pbrMetallicRoughness.baseColorTexture);
-                        }
-                        SetImageGamma(mat.emissiveTexture);
-                        if( mat.extensions?.KHR_materials_pbrSpecularGlossiness != null )
-                        {
-                            SetImageGamma(mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture);
-                            SetImageGamma(mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture);
+
+                    if (gltfRoot.materials != null) {
+                        for(int i=0;i<gltfRoot.materials.Length;i++) {
+                            var mat = gltfRoot.materials[i];
+                            if( mat.pbrMetallicRoughness != null ) {
+                                SetImageGamma(mat.pbrMetallicRoughness.baseColorTexture);
+                            }
+                            SetImageGamma(mat.emissiveTexture);
+                            if( mat.extensions?.KHR_materials_pbrSpecularGlossiness != null )
+                            {
+                                SetImageGamma(mat.extensions.KHR_materials_pbrSpecularGlossiness.diffuseTexture);
+                                SetImageGamma(mat.extensions.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture);
+                            }
                         }
                     }
                 }
