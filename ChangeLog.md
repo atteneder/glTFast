@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Converted  `GameObjectInstantiator.Settings` to `InstantiationSettings`
 - Removed `RenderPipelineUtils.DetectRenderPipeline` in favor of `RenderPipelineUtils.renderPipeline`
 - Additional methods/properties (e.g. from class `GameObjectInstantiator`) are virtual, so they can be overriden
+### Fixed
+- Shader graphs' BaseColor, BaseColorTexture and vertex color calculations are now in correct color space
 
 ## [4.8.2] - 2022-06-15
 ### Changed
