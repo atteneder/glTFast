@@ -32,7 +32,7 @@ namespace GLTFast {
             IGltfReadable gltf,
             Transform parent,
             ICodeLogger logger = null,
-            Settings settings = null
+            InstantiationSettings settings = null
             ) : base(gltf,parent,logger,settings) {}
         
         /// <inheritdoc />
