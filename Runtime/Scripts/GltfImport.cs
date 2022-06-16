@@ -359,21 +359,46 @@ namespace GLTFast {
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
         /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> LoadFile(string localPath, Uri uri = null, ImportSettings importSettings = null) {
-            var buffer = new byte[4];
-            await using var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
-            var bytesRead = fs.Read(buffer, 0, buffer.Length);
-            fs.Close();
+            var firstBytes = new byte[4];
 
-            if (bytesRead != buffer.Length) {
+#if UNITY_2021_3_OR_NEWER
+            await using
+#endif
+            var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
+            var bytesRead = fs.Read(firstBytes, 0, firstBytes.Length);
+            
+
+            if (bytesRead != firstBytes.Length) {
                 logger?.Error(LogCode.Download, "Failed reading first bytes", localPath);
                 return false;
             }
 
-            if (GltfGlobals.IsGltfBinary(buffer)) {
-                return await LoadGltfBinary(await File.ReadAllBytesAsync(localPath), uri, importSettings);
-            }
+            if (GltfGlobals.IsGltfBinary(firstBytes)) {
+                var data = new byte[fs.Length];
+                for (var i = 0; i < firstBytes.Length; i++) {
+                    data[i] = firstBytes[i];
+                }
+                var length = (int) fs.Length - 4;
+                var read = await fs.ReadAsync(data, 4, length);
+                fs.Close();
+                if (read != length) {
+                    logger?.Error(LogCode.Download, "Failed reading data", localPath);
+                    return false;
+                }
 
-            return await LoadGltfJson(await File.ReadAllTextAsync(localPath), uri, importSettings);
+                return await LoadGltfBinary(data, uri, importSettings);
+            }
+            fs.Close();
+
+            return await LoadGltfJson(
+#if UNITY_2021_3_OR_NEWER
+                await File.ReadAllTextAsync(localPath),
+#else
+                File.ReadAllText(localPath),
+#endif
+                uri,
+                importSettings
+                );
         }
         
         /// <summary>
