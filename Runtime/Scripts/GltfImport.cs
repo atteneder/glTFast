@@ -814,12 +814,12 @@ namespace GLTFast {
                     var supported = supportedExtensions.Contains(ext);
                     if(!supported) {
 #if !DRACO_UNITY
-                        if(ext==Extensions.DracoMeshCompression) {
+                        if(ext==ExtensionName.DracoMeshCompression) {
                             logger?.Error(LogCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
-                        if(ext==Extensions.TextureBasisUniversal) {
+                        if(ext==ExtensionName.TextureBasisUniversal) {
                             logger?.Error(LogCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
@@ -835,12 +835,12 @@ namespace GLTFast {
                     var supported = supportedExtensions.Contains(ext);
                     if(!supported) {
 #if !DRACO_UNITY
-                        if(ext==Extensions.DracoMeshCompression) {
+                        if(ext==ExtensionName.DracoMeshCompression) {
                             logger?.Warning(LogCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
-                        if(ext==Extensions.TextureBasisUniversal) {
+                        if(ext==ExtensionName.TextureBasisUniversal) {
                             logger?.Warning(LogCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
@@ -1163,7 +1163,7 @@ namespace GLTFast {
                 }
                 ktxDownloadTasks.Add(imageIndex, downloadTask);
 #else
-                logger?.Error(LogCode.PackageMissing,"KtxUnity",Extensions.TextureBasisUniversal);
+                logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtensionName.TextureBasisUniversal);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
@@ -2153,7 +2153,7 @@ namespace GLTFast {
                             Profiler.EndSample();
                             await deferAgent.BreakPoint();
 #else
-                            logger?.Error(LogCode.PackageMissing,"KtxUnity",Extensions.TextureBasisUniversal);
+                            logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtensionName.TextureBasisUniversal);
 #endif // KTX_UNITY
                         } else {
                             Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBuffer");
