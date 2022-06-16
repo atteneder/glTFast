@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) Support for lights via KHR_lights_punctual extension (#17)
 - (Import) Exclude/include certain features (e.g. camera, animation, lights) via `InstantiationSettings.mask` (of type `ComponentType`)
 - DOTS instantiation settings support
+- (Import) Additional load methods in `GltfImport` (#409)
+  - `Load` override to load from a `byte[]`
+  - `LoadFile` to load from local files
+  - `LoadGltfJson` to load a glTF JSON from string
 ### Changed
 - Converted  `GameObjectInstantiator.Settings` to `InstantiationSettings`
 - Removed `RenderPipelineUtils.DetectRenderPipeline` in favor of `RenderPipelineUtils.renderPipeline`

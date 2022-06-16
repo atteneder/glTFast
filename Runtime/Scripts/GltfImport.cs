@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -327,7 +328,52 @@ namespace GLTFast {
         /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> Load( Uri url, ImportSettings importSettings = null) {
             settings = importSettings ?? new ImportSettings();
-            return await LoadRoutine(url);
+            return await LoadFromUri(url);
+        }
+        
+        /// <summary>
+        /// Load a glTF from a byte array.
+        /// If the type (JSON or glTF-Binary) is know,
+        /// <see cref="LoadGltfJson"/> and <see cref="LoadGltfBinary"/>
+        /// should be preferred.
+        /// </summary>
+        /// <param name="data">Either glTF-Binary data or a glTF JSON</param>
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> Load(byte[] data, Uri uri = null, ImportSettings importSettings = null) {
+            if (GltfGlobals.IsGltfBinary(data)) {
+                return await LoadGltfBinary(data, uri, importSettings);
+            }
+
+            // Fallback interpreting data as string
+            var json = System.Text.Encoding.UTF8.GetString(data, 0, data.Length);
+            return await LoadGltfJson(json, uri, importSettings);
+        }
+        
+        /// <summary>
+        /// Load glTF from a local file path.
+        /// </summary>
+        /// <param name="localPath">Local path to glTF or glTF-Binary file.</param>
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadFile(string localPath, Uri uri = null, ImportSettings importSettings = null) {
+            var buffer = new byte[4];
+            await using var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
+            var bytesRead = fs.Read(buffer, 0, buffer.Length);
+            fs.Close();
+
+            if (bytesRead != buffer.Length) {
+                logger?.Error(LogCode.Download, "Failed reading first bytes", localPath);
+                return false;
+            }
+
+            if (GltfGlobals.IsGltfBinary(buffer)) {
+                return await LoadGltfBinary(await File.ReadAllBytesAsync(localPath), uri, importSettings);
+            }
+
+            return await LoadGltfJson(await File.ReadAllTextAsync(localPath), uri, importSettings);
         }
         
         /// <summary>
@@ -348,6 +394,24 @@ namespace GLTFast {
             return success;
         }
 
+        /// <summary>
+        /// Load a glTF JSON from a string
+        /// </summary>
+        /// <param name="json">glTF JSON</param>
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadGltfJson(string json, Uri uri = null, ImportSettings importSettings = null) {
+            settings = importSettings ?? new ImportSettings();
+            var success = await LoadGltf(json,uri);
+            if(success) await LoadContent();
+            success = success && await Prepare();
+            DisposeVolatileData();
+            loadingError = !success;
+            loadingDone = true;
+            return success;
+        }
+        
         /// <summary>
         /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="defaultSceneIndex"/>)
         /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
@@ -599,7 +663,7 @@ namespace GLTFast {
         
 #endregion Public
 
-        async Task<bool> LoadRoutine( Uri url ) {
+        async Task<bool> LoadFromUri( Uri url ) {
 
             var download = await downloadProvider.Request(url);
             var success = download.success;
