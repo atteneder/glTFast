@@ -50,7 +50,7 @@ namespace GLTFast.Export {
         /// <param name="uMesh">Unity mesh to be assigned and exported</param>
         /// <param name="materialIds">glTF materials IDs to be assigned
         /// (multiple in case of sub-meshes)</param>
-        public void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds);
+        void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds);
 
         /// <summary>
         /// Adds a Unity material 
