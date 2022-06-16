@@ -18,6 +18,8 @@
 using System.IO;
 using System.Threading.Tasks;
 using GLTFast.Loading;
+using GLTFast.Logging;
+using GLTFast.Materials;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;

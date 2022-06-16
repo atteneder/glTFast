@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using GLTFast.Logging;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
