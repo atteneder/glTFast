@@ -111,7 +111,7 @@ namespace GLTFast.Loading {
 #if UNITY_2020_1_OR_NEWER
         public bool success => m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
 #else
-        public bool success => request.isDone && !request.isNetworkError && !request.isHttpError;
+        public bool success => m_Request.isDone && !m_Request.isNetworkError && !m_Request.isHttpError;
 #endif
 
         /// <summary>
