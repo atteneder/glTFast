@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Converted  `GameObjectInstantiator.Settings` to `InstantiationSettings`
 - Removed `RenderPipelineUtils.DetectRenderPipeline` in favor of `RenderPipelineUtils.renderPipeline`
 - Additional methods/properties (e.g. from class `GameObjectInstantiator`) are virtual, so they can be overriden
+- `GltfImport` implements `IDisposable` now (#194)
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

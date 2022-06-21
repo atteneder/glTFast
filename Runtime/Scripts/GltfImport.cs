@@ -59,7 +59,7 @@ namespace GLTFast {
     /// Loads a glTF's content, converts it to Unity resources and is able to
     /// feed it to an <cref>IInstantiator</cref> for instantiation.
     /// </summary>
-    public class GltfImport : IGltfReadable, IGltfBuffers {
+    public class GltfImport : IGltfReadable, IGltfBuffers, IDisposable {
 
         /// <summary>
         /// JSON parse speed in bytes per second
