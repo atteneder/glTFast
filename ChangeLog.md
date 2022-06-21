@@ -4,14 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [5.0.0-pre]
+## [Unreleased]
 ### Added
 - `settings` parameter to `GameObjectBoundsInstantiator`'s constructor
+- (Import) Support for lights via KHR_lights_punctual extension (#17)
+- (Import) Exclude/include certain features (e.g. camera, animation, lights) via `InstantiationSettings.mask` (of type `ComponentType`)
+- DOTS instantiation settings support
+- (Import) Additional load methods in `GltfImport` (#409)
+  - `Load` override to load from a `byte[]`
+  - `LoadFile` to load from local files
+  - `LoadGltfJson` to load a glTF JSON from string
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
 - Moved logging related code into `GLTFast.Logging` namespace
 - Renamed `Schema.RootChild` to `Schema.NamedObject` and made it abstract
+- Converted  `GameObjectInstantiator.Settings` to `InstantiationSettings`
+- Removed `RenderPipelineUtils.DetectRenderPipeline` in favor of `RenderPipelineUtils.renderPipeline`
+- Additional methods/properties (e.g. from class `GameObjectInstantiator`) are virtual, so they can be overriden
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
@@ -22,20 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `Schema.Image.extensions`
     - `Schema.Image.ImageExtension`
     - `Schema.Image.ImageKtx2`
-
-## [Unreleased]
-### Added
-- (Import) Support for lights via KHR_lights_punctual extension (#17)
-- (Import) Exclude/include certain features (e.g. camera, animation, lights) via `InstantiationSettings.mask` (of type `ComponentType`)
-- DOTS instantiation settings support
-- (Import) Additional load methods in `GltfImport` (#409)
-  - `Load` override to load from a `byte[]`
-  - `LoadFile` to load from local files
-  - `LoadGltfJson` to load a glTF JSON from string
-### Changed
-- Converted  `GameObjectInstantiator.Settings` to `InstantiationSettings`
-- Removed `RenderPipelineUtils.DetectRenderPipeline` in favor of `RenderPipelineUtils.renderPipeline`
-- Additional methods/properties (e.g. from class `GameObjectInstantiator`) are virtual, so they can be overriden
 ### Fixed
 - Shader graphs' BaseColor, BaseColorTexture and vertex color calculations are now in correct color space
 
