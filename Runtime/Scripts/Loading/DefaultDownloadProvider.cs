@@ -45,12 +45,18 @@ namespace GLTFast.Loading {
         /// <param name="url">URI to request</param>
         /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
         /// <returns>Object representing the request</returns>
+#pragma warning disable CS1998
         public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+#pragma warning restore CS1998
+#if UNITY_WEBREQUEST_TEXTURE
             var req = new AwaitableTextureDownload(url,nonReadable);
             while (req.MoveNext()) {
                 await Task.Yield();
             }
             return req;
+#else
+            return null;
+#endif
         }
     }
 
@@ -151,6 +157,7 @@ namespace GLTFast.Loading {
         }
     }
 
+#if UNITY_WEBREQUEST_TEXTURE
     /// <summary>
     /// Default <see cref="ITextureDownload"/> implementation that loads
     /// texture URIs via <seealso cref="UnityWebRequest"/>.
@@ -193,4 +200,5 @@ namespace GLTFast.Loading {
             }
         }
     }
+#endif
 }

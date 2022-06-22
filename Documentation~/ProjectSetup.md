@@ -29,6 +29,12 @@ Depending on the Unity version and render pipeline in use, different shader grap
 - Shader graphs in folder `Runtime/Shader/Legacy` for older Universal / High-Definition render pipe versions
 - Shaders in folder `Runtime/Shader/Built-In` for the built-in render pipeline
 
+## Texture Support
+
+In order to be able to import and export PNG and Jpeg textures, the built-in packages [*Unity Web Request Texture*][uwrt] (for loading image URIs) and [*Image Conversion*][ImgConv] have to be enabled.
+
+So if you don't need PNG/Jpeg support (because you use only KTX 2.0 textures or no textures at all), you can disable those packages and reduce your build size a bit.
+
 ### Shader Graphs and the Built-In Render Pipeline
 
 > This approach is experimental and has know shading issues
@@ -58,5 +64,7 @@ By default, *glTFast* provides Editor import for all files ending with `.gltf` o
 If you experience conflicts with other packages that are offering `.gltf`/`.glb` import as well (e.g. [MixedRealityToolkit-Unity][MRTK]) or you simply want to disable Editor import,
 add `GLTFAST_EDITOR_IMPORT_OFF` to the *Scripting Define Symbols* in the *Player Settings* and this feature will be turned off. 
 
+[ImgConv]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.ImageConversionModule.html
 [MRTK]: https://github.com/microsoft/MixedRealityToolkit-Unity
 [shader-variants]: https://docs.unity3d.com/Manual/shader-variants.html
+[uwrt]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.UnityWebRequestTextureModule.html

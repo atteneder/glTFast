@@ -89,6 +89,7 @@ namespace GLTFast.Export {
         /// <returns>Encoded texture data</returns>
         protected static byte[] EncodeTexture(Texture2D texture, Format format, bool hasAlpha = true, Material blitMaterial = null) {
 
+#if UNITY_IMAGECONVERSION
             Texture2D exportTexture;
             if (texture.isReadable && blitMaterial==null) {
                 exportTexture = texture;
@@ -124,6 +125,9 @@ namespace GLTFast.Export {
                 : exportTexture.EncodeToJPG(60);
 
             return imageData;
+#else
+            return null;
+#endif
         }
     }
 }

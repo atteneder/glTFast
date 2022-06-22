@@ -250,7 +250,9 @@ namespace GLTFast.Materials {
                             );
                         return true;
                     }
+#if UNITY_IMAGECONVERSION
                     logger?.Error(LogCode.TextureLoadFailed,textureIndex.ToString());
+#endif
                 } else {
                     logger?.Error(LogCode.TextureNotFound,textureIndex.ToString());
                 }

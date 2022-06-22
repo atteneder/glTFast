@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `RenderPipelineUtils.DetectRenderPipeline` in favor of `RenderPipelineUtils.renderPipeline`
 - Additional methods/properties (e.g. from class `GameObjectInstantiator`) are virtual, so they can be overriden
 - `GltfImport` implements `IDisposable` now (#194)
+- Support for PNG/Jpeg textures (via built-in packages *Unity Web Request Texture* and *Image Conversion*) is now optional (#321)
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

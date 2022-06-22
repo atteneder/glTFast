@@ -195,6 +195,7 @@ namespace GLTFast.Export {
             Format format
         )
         {
+#if UNITY_IMAGECONVERSION
             Assert.IsTrue(metalGlossTexture!=null || occlusionTexture!=null || smoothnessTexture!=null);
             var blitMaterial = GetMetalGlossBlitMaterial();
 
@@ -256,6 +257,9 @@ namespace GLTFast.Export {
                 : exportTexture.EncodeToJPG(60);
 
             return imageData;
+#else
+            return null;
+#endif
         }
         
         /// <inheritdoc />

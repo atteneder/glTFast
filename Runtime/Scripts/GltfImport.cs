@@ -934,12 +934,16 @@ namespace GLTFast {
                     var img = gltfRoot.images[imageIndex];
 
                     if(!string.IsNullOrEmpty(img.uri) && img.uri.StartsWith("data:")) {
+#if UNITY_IMAGECONVERSION
                         var decodedBufferTask = DecodeEmbedBufferAsync(img.uri);
                         if (imageTasks == null) {
                             imageTasks = new List<Task>();
                         }
                         var imageTask = LoadImageFromBuffer(decodedBufferTask, imageIndex, img);
                         imageTasks.Add(imageTask);
+#else
+                        logger?.Warning(LogCode.ImageConversionNotEnabled);
+#endif
                     } else {
                         ImageFormat imgFormat;
                         if(imageFormats[imageIndex]==ImageFormat.Unknown) {
@@ -974,6 +978,7 @@ namespace GLTFast {
             }
         }
 
+#if UNITY_IMAGECONVERSION
         async Task LoadImageFromBuffer(Task<Tuple<byte[],string>> decodeBufferTask, int imageIndex, Image img) {
             var decodedBuffer = await decodeBufferTask;
             await deferAgent.BreakPoint();
@@ -1003,6 +1008,7 @@ namespace GLTFast {
             images[imageIndex] = txt;
             Profiler.EndSample();
         }
+#endif
 
         async Task<bool> WaitForBufferDownloads() {
             if(downloadTasks!=null) {
@@ -1047,10 +1053,15 @@ namespace GLTFast {
                     // TODO: Loading Jpeg/PNG textures like this creates major frame stalls. Main thread is waiting
                     // on Render thread, which is occupied by Gfx.UploadTextureData for 19 ms for a 2k by 2k texture
                     if(LoadImageFromBytes(imageIndex)) {
+#if UNITY_IMAGECONVERSION
                         var forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
                         txt = CreateEmptyTexture(gltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
                         txt.LoadImage(www.data,!imageReadable[imageIndex]);
+#else
+                        logger?.Warning(LogCode.ImageConversionNotEnabled);
+                        txt = null;
+#endif
                     } else {
                         Assert.IsTrue(www is ITextureDownload);
                         txt = ((ITextureDownload)www).texture;
@@ -1168,6 +1179,7 @@ namespace GLTFast {
                 return;
 #endif // KTX_UNITY
             } else {
+#if UNITY_IMAGECONVERSION
                 var downloadTask = LoadImageFromBytes(imageIndex)
                     ? (TextureDownloadBase) new TextureDownload<IDownload>(downloadProvider.Request(url))
                     : (TextureDownloadBase) new TextureDownload<ITextureDownload>(downloadProvider.RequestTexture(url,nonReadable));
@@ -1175,6 +1187,9 @@ namespace GLTFast {
                     textureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
                 }
                 textureDownloadTasks.Add(imageIndex, downloadTask);
+#else
+                logger?.Warning(LogCode.ImageConversionNotEnabled);
+#endif
             }
             Profiler.EndSample();
         }
@@ -1459,7 +1474,9 @@ namespace GLTFast {
                         var jh = imageCreateContexts[i];
                         if(jh.jobHandle.IsCompleted) {
                             jh.jobHandle.Complete();
+#if UNITY_IMAGECONVERSION
                             images[jh.imageIndex].LoadImage(jh.buffer,!imageReadable[jh.imageIndex]);
+#endif
                             jh.gcHandle.Free();
                             imageCreateContexts.RemoveAt(i);
                             loadedAny = true;

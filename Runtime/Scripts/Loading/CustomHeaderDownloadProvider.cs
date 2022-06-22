@@ -68,12 +68,18 @@ namespace GLTFast.Loading {
         }
 
         /// <inheritdoc />
+#pragma warning disable CS1998
         public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+#pragma warning restore CS1998
+#if UNITY_WEBREQUEST_TEXTURE
             var req = new CustomHeaderTextureDownload(url,nonReadable,RegisterHttpHeaders);
             while (req.MoveNext()) {
                 await Task.Yield();
             }
             return req;
+#else
+            return null;
+#endif
         }
 
         void RegisterHttpHeaders(UnityWebRequest request)
@@ -104,6 +110,7 @@ namespace GLTFast.Loading {
         }
     }
 
+#if UNITY_WEBREQUEST_TEXTURE
     /// <summary>
     /// Texture download that allows modifying the HTTP request before it's sent
     /// </summary>
@@ -121,4 +128,5 @@ namespace GLTFast.Loading {
             m_AsyncOperation = m_Request.SendWebRequest();
         }
     }
+#endif
 }

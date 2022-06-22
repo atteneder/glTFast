@@ -6,6 +6,15 @@ uid: doc-upgrade-guides
 
 ## Upgrade to 5.0
 
+### Texture Support
+
+The built-in packages [*Unity Web Request Texture*][uwrt] and [*Image Conversion*][ImgConv] provide support for PNG/Jpeg texture import and export. They are not a hard requirement anymore, so you…
+
+- …**can** disable them if you don't require PNG/Jpeg texture support
+- …**need to** enable them in the Package Manager if you require PNG/Jpeg texture support
+
+See [*Texture Support* in Project Setup](ProjectSetup.md#materials-and-shader-variants) for details.
+
 ### API Changes
 
 `RenderPipelineUtils.DetectRenderPipeline()` turned to `RenderPipelineUtils.renderPipeline`
@@ -88,3 +97,5 @@ Users of glTFast 1.x can read [the documentation for it](./gltfast-1.md).
 [gltfast3to4]: Images/gltfast3to4.png  "3D scene view showing BoomBoxWithAxes model twice. One with the legacy axis conversion and one with the new orientation"
 [GltfImport]: xref:GLTFast.GltfImport
 [IGltfReadable]: xref:GLTFast.IGltfReadable
+[ImgConv]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.ImageConversionModule.html
+[uwrt]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.UnityWebRequestTextureModule.html

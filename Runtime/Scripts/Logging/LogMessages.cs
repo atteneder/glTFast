@@ -127,6 +127,10 @@ namespace GLTFast.Logging {
         /// </summary>
         HierarchyInvalid,
         /// <summary>
+        /// Support for Jpeg/PNG texture decoding/encoding is not enabled
+        /// </summary>
+        ImageConversionNotEnabled,
+        /// <summary>
         /// Unknown image format 
         /// </summary>
         ImageFormatUnknown,
@@ -261,6 +265,7 @@ namespace GLTFast.Logging {
             { LogCode.GltfNotBinary, "Not a glTF-binary file" },
             { LogCode.GltfUnsupportedVersion, "Unsupported glTF version {0}" },
             { LogCode.HierarchyInvalid, "Invalid hierarchy" },
+            { LogCode.ImageConversionNotEnabled, "Jpeg/PNG textures failed because required built-in packages \"Image Conversion\"/\"Unity Web Request Texture\" are not enabled. See https://github.com/atteneder/glTFast/blob/main/Documentation~/ProjectSetup.md#texture-support for details." },
             { LogCode.ImageFormatUnknown, "Unknown image format (image {0};uri:{1})" },
             { LogCode.ImageMultipleSamplers, "Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory." },
             { LogCode.IndexFormatInvalid, "Invalid index format {0}" },

@@ -1,6 +1,5 @@
 {
     "name": "glTFast",
-    "rootNamespace": "",
     "references": [
         "glTFastSchema",
         "glTFastFakeSchema",
@@ -56,6 +55,16 @@
             "name": "com.unity.modules.animation",
             "expression": "1.0.0",
             "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.unity.modules.imageconversion",
+            "expression": "",
+            "define": "UNITY_IMAGECONVERSION"
+        },
+        {
+            "name": "com.unity.modules.unitywebrequesttexture",
+            "expression": "",
+            "define": "UNITY_WEBREQUEST_TEXTURE"
         },
         {
             "name": "com.unity.jobs",
