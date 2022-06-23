@@ -115,6 +115,10 @@ namespace GLTFast.Logging {
         /// </summary>
         ExtensionUnsupported,
         /// <summary>
+        /// Image could not get exported 
+        /// </summary>
+        ExportImageFailed,
+        /// <summary>
         /// Not a glTF-binary file 
         /// </summary>
         GltfNotBinary,
@@ -262,6 +266,7 @@ namespace GLTFast.Logging {
             { LogCode.EmbedImageUnsupportedType, "Unsupported embed image format {0}" },
             { LogCode.EmbedSlow, "JSON embed buffers are slow! consider using glTF binary" },
             { LogCode.ExtensionUnsupported, "glTF extension {0} is not supported" },
+            { LogCode.ExportImageFailed, "Export image failed" },
             { LogCode.GltfNotBinary, "Not a glTF-binary file" },
             { LogCode.GltfUnsupportedVersion, "Unsupported glTF version {0}" },
             { LogCode.HierarchyInvalid, "Invalid hierarchy" },

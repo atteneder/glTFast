@@ -71,7 +71,7 @@ namespace GLTFast.Export {
         /// </summary>
         /// <param name="filePath">Destination file path</param>
         /// <param name="overwrite">If true, existing files will be overwritten</param>
-        public abstract void Write(string filePath, bool overwrite);
+        public abstract bool Write(string filePath, bool overwrite);
         
         /// <summary>
         /// Returns the exported and encoded texture data

@@ -141,7 +141,9 @@ namespace GLTFast.Export {
                 if (mainTex != null) {
                     if(mainTex is Texture2D) {
                         pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf);
-                        ExportTextureTransform(pbr.baseColorTexture, uMaterial, mainTexProperty, gltf);
+                        if (pbr.baseColorTexture != null) {
+                            ExportTextureTransform(pbr.baseColorTexture, uMaterial, mainTexProperty, gltf);
+                        }
                     } else {
                         logger?.Error(LogCode.TextureInvalidType, "main", material.name );
                     }

@@ -137,22 +137,25 @@ namespace GLTFast.Export {
         protected virtual bool GenerateTexture(out byte[] imageData) {
             if (m_Texture != null) {
                 imageData = EncodeTexture(m_Texture, format, blitMaterial:GetColorBlitMaterial());
-                return true;
+                return imageData!=null;
             }
             imageData = null;
             return false;
         }
 
         /// <inheritdoc />
-        public override void Write(string filePath, bool overwrite) {
+        public override bool Write(string filePath, bool overwrite) {
 #if UNITY_EDITOR
             if (validAssetPath && GetFormatFromExtension(m_AssetPath)==format) {
                 File.Copy(m_AssetPath, filePath, overwrite);
-            } else
+                return true;
+            }
 #endif
             if(GenerateTexture(out var imageData)) {
                 File.WriteAllBytes(filePath,imageData);
+                return true;
             }
+            return false;
         }
 
         /// <inheritdoc />

@@ -97,7 +97,9 @@ namespace GLTFast.Export {
                     if (emissionTex != null) {
                         if(emissionTex is Texture2D) {
                             material.emissiveTexture = ExportTextureInfo(emissionTex, gltf);
-                            ExportTextureTransform(material.emissiveTexture, uMaterial, k_EmissionMap, gltf);
+                            if (material.emissiveTexture != null) {
+                                ExportTextureTransform(material.emissiveTexture, uMaterial, k_EmissionMap, gltf);
+                            }
                         } else {
                             logger?.Error(LogCode.TextureInvalidType, "emission", material.name );
                             success = false;
@@ -116,7 +118,9 @@ namespace GLTFast.Export {
                 if (normalTex != null) {
                     if(normalTex is Texture2D) {
                         material.normalTexture = ExportNormalTextureInfo(normalTex, uMaterial, gltf);
-                        ExportTextureTransform(material.normalTexture, uMaterial, k_BumpMap, gltf);
+                        if (material.normalTexture != null) {
+                            ExportTextureTransform(material.normalTexture, uMaterial, k_BumpMap, gltf);
+                        }
                     } else {
                         logger?.Error(LogCode.TextureInvalidType, "normal", uMaterial.name );
                         success = false;
@@ -171,7 +175,9 @@ namespace GLTFast.Export {
                 };
                 if (mainTex != null) {
                     material.pbrMetallicRoughness.baseColorTexture = ExportTextureInfo(mainTex, gltf);
-                    ExportTextureTransform(material.pbrMetallicRoughness.baseColorTexture, uMaterial, mainTexProperty, gltf);
+                    if (material.pbrMetallicRoughness.baseColorTexture != null) {
+                        ExportTextureTransform(material.pbrMetallicRoughness.baseColorTexture, uMaterial, mainTexProperty, gltf);
+                    }
                 }
                 if (uMaterial.HasProperty(k_TintColor)) {
                     //particles use _TintColor instead of _Color
@@ -190,12 +196,14 @@ namespace GLTFast.Export {
                             material.occlusionTexture = new OcclusionTextureInfo();
                             ormImageExport.SetOcclusionTexture(occTex2d);
                         }
-                        ExportTextureTransform(
-                            material.occlusionTexture,
-                            uMaterial,
-                            mainTexProperty, // Standard and Lit re-use main texture transform
-                            gltf
-                        );
+                        if (material.occlusionTexture != null) {
+                            ExportTextureTransform(
+                                material.occlusionTexture,
+                                uMaterial,
+                                mainTexProperty, // Standard and Lit re-use main texture transform
+                                gltf
+                            );
+                        }
                     } else {
                         logger?.Error(LogCode.TextureInvalidType, "occlusion", material.name );
                         success = false;
@@ -214,9 +222,11 @@ namespace GLTFast.Export {
                         material.occlusionTexture.index = ormTextureId;
                     }
                 }
+#if UNITY_IMAGECONVERSION
                 else {
-                    Debug.LogError("TODO: logger.?");
+                    logger?.Error(LogCode.ExportImageFailed);
                 }
+#endif
             }
 
             if (material.occlusionTexture != null) {
@@ -286,7 +296,9 @@ namespace GLTFast.Export {
                                 ? ImageExportBase.Format.Jpg
                                 : ImageExportBase.Format.Unknown
                         );
-                        ExportTextureTransform(pbr.baseColorTexture, uMaterial, mainTexProperty, gltf);
+                        if (pbr.baseColorTexture != null) {
+                            ExportTextureTransform(pbr.baseColorTexture, uMaterial, mainTexProperty, gltf);
+                        }
                     } else {
                         logger?.Error(LogCode.TextureInvalidType, "main", uMaterial.name );
                         success = false;

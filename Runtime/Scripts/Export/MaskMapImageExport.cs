@@ -53,10 +53,12 @@ namespace GLTFast.Export {
         }
         
         /// <inheritdoc />
-        public override void Write(string filePath, bool overwrite) {
+        public override bool Write(string filePath, bool overwrite) {
             if (GenerateTexture(out var imageData)) {
                 File.WriteAllBytes(filePath,imageData);
+                return true;
             }
+            return false;
         }
     }
 }

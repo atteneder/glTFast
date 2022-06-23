@@ -209,6 +209,7 @@ namespace GLTFast.Export {
 
         /// <inheritdoc />
         public int AddImage( ImageExportBase imageExport ) {
+#if UNITY_IMAGECONVERSION
             CertifyNotDisposed();
             int imageId;
             if (m_ImageExports != null) {
@@ -235,10 +236,15 @@ namespace GLTFast.Export {
             m_Images.Add(image);
 
             return imageId;
+#else
+            m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
+            return -1;
+#endif
         }
 
         /// <inheritdoc />
         public int AddTexture(int imageId, int samplerId) {
+#if UNITY_IMAGECONVERSION
             CertifyNotDisposed();
             m_Textures = m_Textures ?? new List<Texture>();
             
@@ -254,6 +260,9 @@ namespace GLTFast.Export {
             
             m_Textures.Add(texture);
             return m_Textures.Count - 1;
+#else
+            return -1;
+#endif
         }
         
         /// <inheritdoc />
@@ -1333,15 +1342,20 @@ namespace GLTFast.Export {
                     if (imageDest == ImageDestination.MainBuffer) {
                         // TODO: Write from file to buffer stream directly
                         var imageBytes = imageExport.GetData();
-                        m_Images[imageId].bufferView = WriteBufferViewToBuffer(imageBytes);
+                        if (imageBytes != null) {
+                            m_Images[imageId].bufferView = WriteBufferViewToBuffer(imageBytes);
+                        }
                     }
                     else if (imageDest == ImageDestination.SeparateFile) {
                         string fileName = null;
                         if (!(fileNameOverrides != null && fileNameOverrides.TryGetValue(imageId, out fileName))) {
                             fileName = imageExport.fileName;
                         }
-                        imageExport.Write( Path.Combine(directory, fileName), overwrite);
-                        m_Images[imageId].uri = fileName;
+                        if(imageExport.Write( Path.Combine(directory, fileName), overwrite)) {
+                            m_Images[imageId].uri = fileName;
+                        } else {
+                            m_Images[imageId] = null;
+                        }
                     }
                     await m_DeferAgent.BreakPoint();
                 }

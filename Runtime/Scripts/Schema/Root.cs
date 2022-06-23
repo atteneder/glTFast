@@ -207,7 +207,7 @@ namespace GLTFast.Schema {
             if (images!=null) {
                 writer.AddArray("images");
                 foreach( var image in images) {
-                    image.GltfSerialize(writer);
+                    image?.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
