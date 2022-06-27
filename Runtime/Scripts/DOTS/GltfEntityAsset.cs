@@ -95,11 +95,11 @@ namespace GLTFast {
             );
             sceneRoot = entityManager.CreateEntity(sceneArchetype);
 #if UNITY_EDITOR
-            entityManager.SetName(sceneRoot,"glTF");
+            entityManager.SetName(sceneRoot, string.IsNullOrEmpty(name) ? "glTF" : name);
 #endif
-            entityManager.SetComponentData(sceneRoot,new Translation {Value = new float3(0,0,0)});
-            entityManager.SetComponentData(sceneRoot,new Rotation {Value = quaternion.identity});
-            entityManager.SetComponentData(sceneRoot,new Scale {Value = 1});
+            entityManager.SetComponentData(sceneRoot,new Translation {Value = transform.position});
+            entityManager.SetComponentData(sceneRoot,new Rotation {Value = transform.rotation});
+            entityManager.SetComponentData(sceneRoot,new Scale {Value = transform.localScale.x});
             // entityManager.AddBuffer<LinkedEntityGroup>(sceneRoot);
             return new EntityInstantiator(importer, sceneRoot, logger, instantiationSettings);
         }
