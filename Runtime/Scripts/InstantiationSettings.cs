@@ -23,6 +23,12 @@ namespace GLTFast {
     [Serializable]
     public class InstantiationSettings {
         
+        public enum SceneObjectCreation {
+            Never,
+            Always,
+            WhenSingleRootNode
+        }
+        
         /// <summary>
         /// Can be used to exclude component instantiation based on type. 
         /// </summary>
@@ -44,5 +50,7 @@ namespace GLTFast {
         /// Light intensity values are multiplied by this factor.
         /// </summary>
         public float lightIntensityFactor = 1.0f;
+
+        public SceneObjectCreation sceneObjectCreation = SceneObjectCreation.WhenSingleRootNode;
     }
 }

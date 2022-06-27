@@ -215,19 +215,24 @@ namespace GLTFast {
 #if UNITY_ANIMATION
             ,AnimationClip[] animationClips
 #endif // UNITY_ANIMATION
-            )
-        {
-            var sceneEntity = entityManager.CreateEntity(parent==Entity.Null ? sceneArcheType : nodeArcheType);
-            entityManager.SetComponentData(sceneEntity,new Translation {Value = new float3(0,0,0)});
-            entityManager.SetComponentData(sceneEntity,new Rotation {Value = quaternion.identity});
-#if UNITY_EDITOR
-            entityManager.SetName(sceneEntity, name ?? "Scene");
-#endif
-            if (parent != Entity.Null) {
-                entityManager.SetComponentData(sceneEntity, new Parent { Value = parent });
+            ) {
+            Parent sceneParent;
+            if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
+                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenSingleRootNode && nodeIndices.Length == 1) {
+                sceneParent = new Parent { Value = parent };
             }
-
-            var sceneParent = new Parent { Value = sceneEntity };
+            else {
+                var sceneEntity = entityManager.CreateEntity(parent==Entity.Null ? sceneArcheType : nodeArcheType);
+                entityManager.SetComponentData(sceneEntity,new Translation {Value = new float3(0,0,0)});
+                entityManager.SetComponentData(sceneEntity,new Rotation {Value = quaternion.identity});
+#if UNITY_EDITOR
+                entityManager.SetName(sceneEntity, name ?? "Scene");
+#endif
+                if (parent != Entity.Null) {
+                    entityManager.SetComponentData(sceneEntity, new Parent { Value = parent });
+                }
+                sceneParent = new Parent { Value = sceneEntity };
+            }
             
             foreach(var nodeIndex in nodeIndices) {
                 entityManager.SetComponentData(nodes[nodeIndex], sceneParent);

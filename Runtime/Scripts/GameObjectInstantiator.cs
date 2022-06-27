@@ -478,12 +478,18 @@ namespace GLTFast {
 #if UNITY_ANIMATION
             ,AnimationClip[] animationClips
 #endif // UNITY_ANIMATION
-            )
-        {
-            var go = new GameObject(name ?? "Scene");
-            go.transform.SetParent( parent, false);
-            go.layer = settings.layer;
-
+            ) {
+            GameObject go;
+            if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
+                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenSingleRootNode && nodeIndices.Length == 1) {
+                go = parent.gameObject;
+            }
+            else {
+                go = new GameObject(name ?? "Scene");
+                go.transform.SetParent( parent, false);
+                go.layer = settings.layer;
+            }
+            
             if (nodeIndices != null) {
                 foreach(var nodeIndex in nodeIndices) {
                     if (nodes[nodeIndex] != null) {
