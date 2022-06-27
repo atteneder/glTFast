@@ -14,6 +14,7 @@
 //
 
 using System;
+using UnityEngine;
 
 namespace GLTFast {
 
@@ -64,9 +65,11 @@ namespace GLTFast {
         }
 
         /// <inheritdoc cref="NameImportMethod"/>
+        [Tooltip("Controls how node names are created.")]
         public NameImportMethod nodeNameMethod = NameImportMethod.Original;
         
         /// <inheritdoc cref="AnimationMethod"/>
+        [Tooltip("Target animation system.")]
         public AnimationMethod animationMethod = AnimationMethod.Legacy;
 
         /// <summary>
@@ -74,21 +77,25 @@ namespace GLTFast {
         /// Note: Creating mipmaps from Jpeg/PNG textures is very slow (at the moment).
         /// See https://github.com/atteneder/glTFast/issues/220 for details 
         /// </summary>
+        [Tooltip("Controls if mipmaps are created for imported textures.")]
         public bool generateMipMaps;
 
         /// <summary>
         /// Defines the default minification filter mode for textures that have no such specification in data
         /// </summary>
+        [Tooltip("Minification filter mode fallback if no mode was provided.")]
         public Sampler.MinFilterMode defaultMinFilterMode = Sampler.MinFilterMode.Linear;
         
         /// <summary>
         /// Define the default magnification filter mode for textures that have no such specification in data
         /// </summary>
+        [Tooltip("Magnification filter mode fallback if no mode was provided.")]
         public Sampler.MagFilterMode defaultMagFilterMode = Sampler.MagFilterMode.Linear;
 
         /// <summary>
-        /// This property defines the anisotropic filtering level for textures
+        /// This property defines the anisotropic filtering level for imported textures
         /// </summary>
+        [Tooltip("Anisotropic filtering level for imported textures.")]
         public int anisotropicFilterLevel = 1;
     }
 }

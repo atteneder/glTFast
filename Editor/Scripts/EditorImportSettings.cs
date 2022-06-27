@@ -14,6 +14,7 @@
 //
 
 using System;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace GLTFast.Editor {
@@ -28,6 +29,7 @@ namespace GLTFast.Editor {
         /// Creates a secondary UV set on all meshes, if there is none present already.
         /// Often used for lightmaps. 
         /// </summary>
+        [Tooltip("Generate Lightmap UVs")]
         public bool generateSecondaryUVSet;
     }
 }
