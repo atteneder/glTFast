@@ -66,7 +66,7 @@ namespace GLTFast {
         /// <inheritdoc cref="NameImportMethod"/>
         public NameImportMethod nodeNameMethod = NameImportMethod.Original;
         
-        /// <inheritdoc cref="animationMethod"/>
+        /// <inheritdoc cref="AnimationMethod"/>
         public AnimationMethod animationMethod = AnimationMethod.Legacy;
 
         /// <summary>
