@@ -168,12 +168,43 @@ namespace GLTFast {
             
             root.Bind(serializedObject);
             
+            var importSettingsRoot = root.Query<IMGUIContainer>(name: "ImportSettings").First();
+            var importSettingsProp = serializedObject.FindProperty("importSettings");
+            var instantSettingsProp = serializedObject.FindProperty("instantiationSettings");
+            importSettingsRoot.onGUIHandler = () => DrawImportSettings(
+                serializedObject,
+                // importSettingsProp.FindPropertyRelative("animationMethod"),
+                importSettingsProp.FindPropertyRelative("generateMipMaps"),
+                instantSettingsProp.FindPropertyRelative("sceneObjectCreation"),
+                importSettingsProp.FindPropertyRelative("nodeNameMethod"),
+                importSettingsProp.FindPropertyRelative("anisotropicFilterLevel"),
+                instantSettingsProp.FindPropertyRelative("mask"),
+                instantSettingsProp.FindPropertyRelative("layer"),
+                instantSettingsProp.FindPropertyRelative("skinUpdateWhenOffscreen"),
+                instantSettingsProp.FindPropertyRelative("lightIntensityFactor"),
+                importSettingsProp.FindPropertyRelative("defaultMinFilterMode"),
+                importSettingsProp.FindPropertyRelative("defaultMagFilterMode")
+                );
+            
             // Apply the changes so Undo/Redo is working
             serializedObject.ApplyModifiedProperties();
 
             root.Add(new IMGUIContainer(ApplyRevertGUI));
             
             return root;
+        }
+
+        static void DrawImportSettings(SerializedObject obj, params SerializedProperty[] properties)
+        {
+            EditorGUI.BeginChangeCheck();
+            obj.Update();
+
+            foreach (var property in properties) {
+                EditorGUILayout.PropertyField(property);
+            }
+
+            obj.ApplyModifiedProperties();
+            EditorGUI.EndChangeCheck();
         }
 
         static void FixTextureImportSettings(TextureImporter maliciousTextureImporter) {

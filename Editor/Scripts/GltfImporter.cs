@@ -61,6 +61,9 @@ namespace GLTFast.Editor {
         ImportSettings importSettings;
         
         [SerializeField]
+        InstantiationSettings instantiationSettings;
+        
+        [SerializeField]
         GltfAssetDependency[] assetDependencies;
         
         [SerializeField]
@@ -119,7 +122,7 @@ namespace GLTFast.Editor {
                 
                 var go = new GameObject("root");
                 instantiationLogger = new CollectingLogger();
-                instantiator = new GameObjectInstantiator(m_Gltf, go.transform, instantiationLogger);
+                instantiator = new GameObjectInstantiator(m_Gltf, go.transform, instantiationLogger, instantiationSettings);
                 for (var sceneIndex = 0; sceneIndex < m_Gltf.sceneCount; sceneIndex++) {
                     success = m_Gltf.InstantiateScene(instantiator,sceneIndex);
                     if (!success) break;
