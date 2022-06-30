@@ -479,21 +479,21 @@ namespace GLTFast {
             ,AnimationClip[] animationClips
 #endif // UNITY_ANIMATION
             ) {
-            GameObject go;
+            GameObject sceneGameObject;
             if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
-                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenSingleRootNode && nodeIndices.Length == 1) {
-                go = parent.gameObject;
+                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
+                sceneGameObject = parent.gameObject;
             }
             else {
-                go = new GameObject(name ?? "Scene");
-                go.transform.SetParent( parent, false);
-                go.layer = settings.layer;
+                sceneGameObject = new GameObject(name ?? "Scene");
+                sceneGameObject.transform.SetParent( parent, false);
+                sceneGameObject.layer = settings.layer;
             }
             
             if (nodeIndices != null) {
                 foreach(var nodeIndex in nodeIndices) {
                     if (nodes[nodeIndex] != null) {
-                        nodes[nodeIndex].transform.SetParent( go.transform, false );
+                        nodes[nodeIndex].transform.SetParent( sceneGameObject.transform, false );
                     }
                 }
             }
@@ -540,7 +540,7 @@ namespace GLTFast {
 // #endif // UNITY_EDITOR
 
                 if(isLegacyAnimation) {
-                    var animation = go.AddComponent<Animation>();
+                    var animation = sceneGameObject.AddComponent<Animation>();
                     
                     for (var index = 0; index < animationClips.Length; index++) {
                         var clip = animationClips[index];

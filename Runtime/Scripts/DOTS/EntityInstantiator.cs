@@ -218,7 +218,7 @@ namespace GLTFast {
             ) {
             Parent sceneParent;
             if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
-                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenSingleRootNode && nodeIndices.Length == 1) {
+                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
                 sceneParent = new Parent { Value = parent };
             }
             else {

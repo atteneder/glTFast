@@ -41,7 +41,7 @@ namespace GLTFast {
             /// Create a scene object if there is more than one root level node.
             /// Otherwise omit creating a scene object.
             /// </summary>
-            WhenSingleRootNode
+            WhenMultipleRootNodes
         }
         
         /// <summary>
@@ -72,6 +72,6 @@ namespace GLTFast {
 
         /// <inheritdoc cref="SceneObjectCreation"/>
         [Tooltip("Scene object creation method. Determines whether or when a GameObject/Entity representing the scene should get created.")]
-        public SceneObjectCreation sceneObjectCreation = SceneObjectCreation.WhenSingleRootNode;
+        public SceneObjectCreation sceneObjectCreation = SceneObjectCreation.WhenMultipleRootNodes;
     }
 }

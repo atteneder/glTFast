@@ -77,6 +77,13 @@ namespace GLTFast {
         /// <param name="index">glTF material index</param>
         /// <returns>De-serialized glTF material</returns>
         Schema.Material GetSourceMaterial(int index = 0);
+
+        /// <summary>
+        /// Get source (de-serialized glTF) scene
+        /// </summary>
+        /// <param name="index">glTF scene index</param>
+        /// <returns>De-serialized glTF scene</returns>
+        Schema.Scene GetSourceScene(int index = 0);
         
         /// <summary>
         /// Get source (de-serialized glTF) texture

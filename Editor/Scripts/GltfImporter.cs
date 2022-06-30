@@ -112,23 +112,60 @@ namespace GLTFast.Editor {
                 };
             }
             
-            var success = AsyncHelpers.RunSync<bool>(() => m_Gltf.Load(ctx.assetPath,importSettings));
+            var success = AsyncHelpers.RunSync(() => m_Gltf.Load(ctx.assetPath,importSettings));
 
-            GameObjectInstantiator instantiator = null;
             CollectingLogger instantiationLogger = null;
             if (success) {
                 m_ImportedNames = new HashSet<string>();
                 m_ImportedObjects = new HashSet<Object>();
+
+                if (instantiationSettings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never) {
+                    
+                    // There *has* to be a common parent GameObject that gets
+                    // added to the ScriptedImporter, so we overrule this
+                    // setting.
+                    
+                    instantiationSettings.sceneObjectCreation = InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes;
+                    Debug.LogWarning("SceneObjectCreation setting \"Never\" is not available for Editor (design-time) imports. Falling back to WhenMultipleRootNodes.", this);
+                }
                 
-                var go = new GameObject("root");
                 instantiationLogger = new CollectingLogger();
-                instantiator = new GameObjectInstantiator(m_Gltf, go.transform, instantiationLogger, instantiationSettings);
                 for (var sceneIndex = 0; sceneIndex < m_Gltf.sceneCount; sceneIndex++) {
+                    var scene = m_Gltf.GetSourceScene(sceneIndex);
+                    var sceneName = m_Gltf.GetSceneName(sceneIndex);
+                    var go = new GameObject(sceneName);
+                    var instantiator = new GameObjectInstantiator(m_Gltf, go.transform, instantiationLogger, instantiationSettings);
                     success = m_Gltf.InstantiateScene(instantiator,sceneIndex);
                     if (!success) break;
-                    var sceneTransform = go.transform.GetChild(sceneIndex);
+                    var useFirstChild = true;
+                    var multipleNodes = scene.nodes.Length > 1;
+                    var hasAnimation = false;
+                    if (importSettings.animationMethod != ImportSettings.AnimationMethod.None
+                        && (instantiationSettings.mask & ComponentType.Animation) != 0) {
+                        var animationClips = m_Gltf.GetAnimationClips();
+                        if (animationClips != null && animationClips.Length > 0) {
+                            hasAnimation = true;
+                        }
+                    }
+                    
+                    if (instantiationSettings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
+                        || instantiationSettings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && !multipleNodes ) {
+                        // No scene GameObject was created, so the first
+                        // child is the first (and in this case only) node.
+                        
+                        // If there's animation, its clips' paths are relative
+                        // to the root GameObject (which will also carry the
+                        // `Animation` component. If not, we can import the the
+                        // first and only node as root directly.
+                        
+                        useFirstChild = !hasAnimation;
+                    }
+
+                    var sceneTransform = useFirstChild 
+                        ? go.transform.GetChild(0)
+                        : go.transform;
                     var sceneGo = sceneTransform.gameObject;
-                    AddObjectToAsset(ctx,$"scenes/{sceneGo.name}", sceneGo);
+                    AddObjectToAsset(ctx,$"scenes/{sceneName}", sceneGo);
                     if (sceneIndex == m_Gltf.defaultSceneIndex) {
                         ctx.SetMainObject(sceneGo);
                     }
@@ -137,8 +174,8 @@ namespace GLTFast.Editor {
                 for (var i = 0; i < m_Gltf.textureCount; i++) {
                     var texture = m_Gltf.GetTexture(i);
                     if (texture != null) {
-                        var assetPath = AssetDatabase.GetAssetPath(texture);
-                        if (string.IsNullOrEmpty(assetPath)) {
+                        var textureAssetPath = AssetDatabase.GetAssetPath(texture);
+                        if (string.IsNullOrEmpty(textureAssetPath)) {
                             AddObjectToAsset(ctx, $"textures/{texture.name}", texture);
                         }
                     }

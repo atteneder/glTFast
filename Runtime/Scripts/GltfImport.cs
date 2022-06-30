@@ -663,6 +663,14 @@ namespace GLTFast {
         }
         
         /// <inheritdoc />
+        public Scene GetSourceScene(int index = 0) {
+            if (gltfRoot?.scenes != null && index >= 0 && index < gltfRoot.scenes.Length) {
+                return gltfRoot.scenes[index];
+            }
+            return null;
+        }
+        
+        /// <inheritdoc />
         public Material GetSourceMaterial(int index = 0) {
             if (gltfRoot?.materials != null && index >= 0 && index < gltfRoot.materials.Length) {
                 return gltfRoot.materials[index];
