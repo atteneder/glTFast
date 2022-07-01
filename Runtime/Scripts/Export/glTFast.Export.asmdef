@@ -26,6 +26,11 @@
             "name": "com.unity.render-pipelines.high-definition",
             "expression": "7.3.1",
             "define": "USING_HDRP"
+        },
+        {
+            "name": "com.unity.modules.imageconversion",
+            "expression": "",
+            "define": "UNITY_IMAGECONVERSION"
         }
     ],
     "noEngineReferences": false
