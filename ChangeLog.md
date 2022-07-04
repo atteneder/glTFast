@@ -40,6 +40,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Shader graphs' BaseColor, BaseColorTexture and vertex color calculations are now in correct color space
 
+## [4.8.3] - 2022-06-04
+### Fixed
+- Loading glTFs with nothing but accessors/bufferViews/buffers (#422)
+- Loading glTFs with invalid embed buffers (#422)
+- Corrected unsigned short joint weights import (#419)
+
 ## [4.8.2] - 2022-06-15
 ### Changed
 - Load textures/images, even when not referenced by material (#418)

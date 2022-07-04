@@ -797,7 +797,7 @@ namespace GLTFast {
                             buffer.uri,
                             true // usually there's just one buffer and it's time-critical
                             );
-                        buffers[i] = decodedBuffer.Item1;
+                        buffers[i] = decodedBuffer?.Item1;
                         if(buffers[i]==null) {
                             logger?.Error(LogCode.EmbedBufferLoadFailed);
                             return false;
@@ -2348,17 +2348,19 @@ namespace GLTFast {
                 }
             }
 
-            foreach (var node in gltf.nodes) {
-                var attr = node.extensions?.EXT_mesh_gpu_instancing?.attributes;
-                if ( attr != null) {
-                    if (attr.TRANSLATION >= 0) {
-                        SetAccessorUsage(attr.TRANSLATION,AccessorUsage.Translation | AccessorUsage.RequiredForInstantiation);
-                    }
-                    if (attr.ROTATION >= 0) {
-                        SetAccessorUsage(attr.ROTATION,AccessorUsage.Rotation | AccessorUsage.RequiredForInstantiation);
-                    }
-                    if (attr.SCALE >= 0) {
-                        SetAccessorUsage(attr.SCALE,AccessorUsage.Scale | AccessorUsage.RequiredForInstantiation);
+            if (gltf.nodes != null) {
+                foreach (var node in gltf.nodes) {
+                    var attr = node.extensions?.EXT_mesh_gpu_instancing?.attributes;
+                    if ( attr != null) {
+                        if (attr.TRANSLATION >= 0) {
+                            SetAccessorUsage(attr.TRANSLATION,AccessorUsage.Translation | AccessorUsage.RequiredForInstantiation);
+                        }
+                        if (attr.ROTATION >= 0) {
+                            SetAccessorUsage(attr.ROTATION,AccessorUsage.Rotation | AccessorUsage.RequiredForInstantiation);
+                        }
+                        if (attr.SCALE >= 0) {
+                            SetAccessorUsage(attr.SCALE,AccessorUsage.Scale | AccessorUsage.RequiredForInstantiation);
+                        }
                     }
                 }
             }
