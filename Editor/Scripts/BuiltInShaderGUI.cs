@@ -100,7 +100,7 @@ namespace GLTFast.Editor
                 }
 
                 EnsureKeywordForMap("_MetallicGlossMap", "_METALLICGLOSSMAP");
-                EnsureKeywordForMap("_OcclusionMap", "_OCCLUSION");
+                EnsureKeywordForMap("occlusionTexture", "_OCCLUSION");
             }
 
             base.OnGUI(materialEditor, properties);

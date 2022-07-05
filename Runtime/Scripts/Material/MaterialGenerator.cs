@@ -76,63 +76,63 @@ namespace GLTFast.Materials {
         public const string KW_UV_CHANNEL_SELECT = "_UV_CHANNEL_SELECT";
         
         /// <summary>Shader property ID for property _BumpMap</summary>
-        public static readonly int bumpMapPropId = Shader.PropertyToID("_BumpMap");
+        public static readonly int bumpMapPropId = Shader.PropertyToID("normalTexture");
         /// <summary>Shader property ID for property _BumpMapRotation</summary>
-        public static readonly int bumpMapRotationPropId = Shader.PropertyToID("_BumpMapRotation");
+        public static readonly int bumpMapRotationPropId = Shader.PropertyToID("normalTextureRotation");
         /// <summary>Shader property ID for property _BumpMap_ST</summary>
-        public static readonly int bumpMapScaleTransformPropId = Shader.PropertyToID("_BumpMap_ST");
+        public static readonly int bumpMapScaleTransformPropId = Shader.PropertyToID("normalTexture_ST");
         /// <summary>Shader property ID for property _BumpMapUVChannel</summary>
-        public static readonly int bumpMapUVChannelPropId = Shader.PropertyToID("_BumpMapUVChannel");
+        public static readonly int bumpMapUVChannelPropId = Shader.PropertyToID("normalTextureTexCoord");
         /// <summary>Shader property ID for property _BumpScale</summary>
-        public static readonly int bumpScalePropId = Shader.PropertyToID("_BumpScale");
+        public static readonly int bumpScalePropId = Shader.PropertyToID("normalTextureScale");
         /// <summary>Shader property ID for property _Cull</summary>
         public static readonly int cullPropId = Shader.PropertyToID("_Cull");
         /// <summary>Shader property ID for property _CullMode</summary>
         public static readonly int cullModePropId = Shader.PropertyToID("_CullMode");
         /// <summary>Shader property ID for property _Cutoff</summary>
-        public static readonly int cutoffPropId = Shader.PropertyToID("_Cutoff");
+        public static readonly int cutoffPropId = Shader.PropertyToID("alphaCutoff");
         /// <summary>Shader property ID for property _DstBlend</summary>
         public static readonly int dstBlendPropId = Shader.PropertyToID("_DstBlend");
         /// <summary>Shader property ID for property _EmissionColor</summary>
-        public static readonly int emissionColorPropId = Shader.PropertyToID("_EmissionColor");
+        public static readonly int emissionColorPropId = Shader.PropertyToID("emissiveFactor");
         /// <summary>Shader property ID for property _EmissionMap</summary>
-        public static readonly int emissionMapPropId = Shader.PropertyToID("_EmissionMap");
+        public static readonly int emissionMapPropId = Shader.PropertyToID("emissiveTexture");
         /// <summary>Shader property ID for property _EmissionMapRotation</summary>
-        public static readonly int emissionMapRotationPropId = Shader.PropertyToID("_EmissionMapRotation");
+        public static readonly int emissionMapRotationPropId = Shader.PropertyToID("emissiveTextureRotation");
         /// <summary>Shader property ID for property _EmissionMap_ST</summary>
-        public static readonly int emissionMapScaleTransformPropId = Shader.PropertyToID("_EmissionMap_ST");
+        public static readonly int emissionMapScaleTransformPropId = Shader.PropertyToID("emissiveTexture_ST");
         /// <summary>Shader property ID for property _EmissionMapUVChannel</summary>
-        public static readonly int emissionMapUVChannelPropId = Shader.PropertyToID("_EmissionMapUVChannel");
+        public static readonly int emissionMapUVChannelPropId = Shader.PropertyToID("emissiveTextureTexCoord");
         /// <summary>Shader property ID for property _MainTex</summary>
-        public static readonly int mainTexPropId = Shader.PropertyToID("_MainTex");
+        public static readonly int mainTexPropId = Shader.PropertyToID("baseColorTexture");
         /// <summary>Shader property ID for property _MainTexRotation</summary>
-        public static readonly int mainTexRotation = Shader.PropertyToID("_MainTexRotation");
+        public static readonly int mainTexRotation = Shader.PropertyToID("baseColorTextureRotation");
         /// <summary>Shader property ID for property _MainTex_ST</summary>
-        public static readonly int mainTexScaleTransform = Shader.PropertyToID("_MainTex_ST");
+        public static readonly int mainTexScaleTransform = Shader.PropertyToID("baseColorTexture_ST");
         /// <summary>Shader property ID for property _MainTexUVChannel</summary>
-        public static readonly int mainTexUVChannelPropId = Shader.PropertyToID("_MainTexUVChannel");
+        public static readonly int mainTexUVChannelPropId = Shader.PropertyToID("baseColorTextureTexCoord");
         /// <summary>Shader property ID for property _Metallic</summary>
-        public static readonly int metallicPropId = Shader.PropertyToID("_Metallic");
+        public static readonly int metallicPropId = Shader.PropertyToID("metallicFactor");
         /// <summary>Shader property ID for property _OcclusionMap</summary>
-        public static readonly int occlusionMapPropId = Shader.PropertyToID("_OcclusionMap");
+        public static readonly int occlusionMapPropId = Shader.PropertyToID("occlusionTexture");
         /// <summary>Shader property ID for property _OcclusionStrength</summary>
-        public static readonly int occlusionStrengthPropId = Shader.PropertyToID("_OcclusionStrength");
+        public static readonly int occlusionStrengthPropId = Shader.PropertyToID("occlusionTextureStrength");
         /// <summary>Shader property ID for property _OcclusionMapRotation</summary>
-        public static readonly int occlusionMapRotationPropId = Shader.PropertyToID("_OcclusionMapRotation");
+        public static readonly int occlusionMapRotationPropId = Shader.PropertyToID("occlusionTextureRotation");
         /// <summary>Shader property ID for property _OcclusionMap_ST</summary>
-        public static readonly int occlusionMapScaleTransformPropId = Shader.PropertyToID("_OcclusionMap_ST");
+        public static readonly int occlusionMapScaleTransformPropId = Shader.PropertyToID("occlusionTexture_ST");
         /// <summary>Shader property ID for property _OcclusionMapUVChannel</summary>
-        public static readonly int occlusionMapUVChannelPropId = Shader.PropertyToID("_OcclusionMapUVChannel");
+        public static readonly int occlusionMapUVChannelPropId = Shader.PropertyToID("occlusionTextureTexCoord");
         /// <summary>Shader property ID for property _SpecColor</summary>
-        public static readonly int specColorPropId = Shader.PropertyToID("_SpecColor");
+        public static readonly int specColorPropId = Shader.PropertyToID("specularFactor");
         /// <summary>Shader property ID for property _SpecGlossMap</summary>
-        public static readonly int specGlossMapPropId = Shader.PropertyToID("_SpecGlossMap");
+        public static readonly int specGlossMapPropId = Shader.PropertyToID("specularGlossinessTexture");
         /// <summary>Shader property ID for property _SpecGlossMap_ST</summary>
-        public static readonly int specGlossScaleTransformMapPropId = Shader.PropertyToID("_SpecGlossMap_ST"); // TODO: Support in shader!
+        public static readonly int specGlossScaleTransformMapPropId = Shader.PropertyToID("specularGlossinessTexture_ST"); // TODO: Support in shader!
         /// <summary>Shader property ID for property _SpecGlossMapRotation</summary>
-        public static readonly int specGlossMapRotationPropId = Shader.PropertyToID("_SpecGlossMapRotation"); // TODO: Support in shader!
+        public static readonly int specGlossMapRotationPropId = Shader.PropertyToID("specularGlossinessTextureRotation"); // TODO: Support in shader!
         /// <summary>Shader property ID for property _SpecGlossMapUVChannel</summary>
-        public static readonly int specGlossMapUVChannelPropId = Shader.PropertyToID("_SpecGlossMapUVChannel"); // TODO: Support in shader!
+        public static readonly int specGlossMapUVChannelPropId = Shader.PropertyToID("specularGlossinessTextureTexCoord"); // TODO: Support in shader!
         /// <summary>Shader property ID for property _SrcBlend</summary>
         public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
         /// <summary>Shader property ID for property _ZWrite</summary>

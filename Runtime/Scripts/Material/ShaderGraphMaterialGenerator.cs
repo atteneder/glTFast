@@ -98,22 +98,22 @@ namespace GLTFast.Materials {
         
         protected const string k_MotionVectorsPass = "MOTIONVECTORS";
         
-        static readonly int baseColorPropId = Shader.PropertyToID("_BaseColor");
-        static readonly int baseMapPropId = Shader.PropertyToID("_BaseMap");
-        static readonly int baseMapScaleTransformPropId = Shader.PropertyToID("_BaseMap_ST"); //TODO: support in shader!
-        static readonly int baseMapRotationPropId = Shader.PropertyToID("_BaseMapRotation"); //TODO; support in shader!
-        static readonly int baseMapUVChannelPropId = Shader.PropertyToID("_BaseMapUVChannel"); //TODO; support in shader!
+        static readonly int baseColorPropId = Shader.PropertyToID("baseColorFactor");
+        static readonly int baseMapPropId = Shader.PropertyToID("baseColorTexture");
+        static readonly int baseMapScaleTransformPropId = Shader.PropertyToID("baseColorTexture_ST"); //TODO: support in shader!
+        static readonly int baseMapRotationPropId = Shader.PropertyToID("baseColorTextureRotation"); //TODO; support in shader!
+        static readonly int baseMapUVChannelPropId = Shader.PropertyToID("baseColorTextureTexCoord"); //TODO; support in shader!
         static readonly int metallicRoughnessMapPropId = Shader.PropertyToID("metallicRoughnessTexture");
         static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("metallicRoughnessTexture_ST");
         static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("metallicRoughnessTextureRotation");
-        static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("metallicRoughnessTextureUVChannel");
-        static readonly int specularFactorPropId = Shader.PropertyToID("_SpecularFactor");
-        static readonly int smoothnessPropId = Shader.PropertyToID("_Smoothness");
+        static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("metallicRoughnessTextureTexCoord");
+        static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
+        static readonly int smoothnessPropId = Shader.PropertyToID("roughnessFactor");
         protected static readonly int transmissionFactorPropId = Shader.PropertyToID("transmissionFactor");
-        protected static readonly int transmissionTexturePropId = Shader.PropertyToID("_TransmittanceColorMap");
-        protected static readonly int transmissionTextureScaleTransformPropId = Shader.PropertyToID("_TransmittanceColorMap_ST");
-        protected static readonly int transmissionTextureRotationPropId = Shader.PropertyToID("_TransmittanceColorMapRotation");
-        protected static readonly int transmissionTextureUVChannelPropId = Shader.PropertyToID("_TransmittanceColorMapUVChannel");
+        protected static readonly int transmissionTexturePropId = Shader.PropertyToID("transmissionTexture");
+        protected static readonly int transmissionTextureScaleTransformPropId = Shader.PropertyToID("transmissionTextureTexCoord");
+        protected static readonly int transmissionTextureRotationPropId = Shader.PropertyToID("transmissionTextureRotation");
+        protected static readonly int transmissionTextureUVChannelPropId = Shader.PropertyToID("transmissionTextureTexCoord");
 
 #if USING_HDRP_10_OR_NEWER || USING_URP_12_OR_NEWER
         // const string KW_DISABLE_DECALS = "_DISABLE_DECALS";
