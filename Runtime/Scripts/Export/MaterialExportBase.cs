@@ -204,8 +204,8 @@ namespace GLTFast.Export {
                     // texCoord = 0 // TODO: figure out which UV set was used
                 };
 
-                if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
-                    info.scale = material.GetFloat(MaterialGenerator.bumpScalePropId);
+                if (material.HasProperty(MaterialGenerator.normalTextureScalePropId)) {
+                    info.scale = material.GetFloat(MaterialGenerator.normalTextureScalePropId);
                 }
                 return info;
             }

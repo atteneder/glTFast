@@ -35,8 +35,8 @@ namespace GLTFast.Editor
                 uvTransform = TextureRotationSlider(
                     material,
                     uvTransform,
-                    mainTexScaleTransform,
-                    mainTexRotation
+                    baseColorTextureScaleTransformPropId,
+                    baseColorTextureRotationPropId
                     );
 
                 if (GUI.changed) {

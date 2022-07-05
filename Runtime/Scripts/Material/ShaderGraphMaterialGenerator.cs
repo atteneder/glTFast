@@ -107,7 +107,6 @@ namespace GLTFast.Materials {
         static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("metallicRoughnessTexture_ST");
         static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("metallicRoughnessTextureRotation");
         static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("metallicRoughnessTextureTexCoord");
-        static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
         static readonly int smoothnessPropId = Shader.PropertyToID("roughnessFactor");
         protected static readonly int transmissionFactorPropId = Shader.PropertyToID("transmissionFactor");
         protected static readonly int transmissionTexturePropId = Shader.PropertyToID("transmissionTexture");
@@ -189,7 +188,7 @@ namespace GLTFast.Materials {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
                     material.SetVector(specularFactorPropId, specGloss.specularColor);
 #else
-                    material.SetVector(specColorPropId, specGloss.specularColor);
+                    material.SetVector(specularFactorPropId, specGloss.specularColor);
 #endif                    
                     material.SetFloat(smoothnessPropId, specGloss.glossinessFactor);
 
@@ -207,10 +206,10 @@ namespace GLTFast.Materials {
                         specGloss.specularGlossinessTexture,
                         material,
                         gltf,
-                        specGlossMapPropId,
-                        specGlossScaleTransformMapPropId,
-                        specGlossMapRotationPropId,
-                        specGlossMapUVChannelPropId
+                        specularGlossinessTexturePropId,
+                        specularGlossinessTextureScaleTransformPropId,
+                        specularGlossinessTextureRotationPropId,
+                        specularGlossinessTextureTexCoordPropId
                         ))
                     {
                         // material.EnableKeyword();
@@ -266,36 +265,36 @@ namespace GLTFast.Materials {
                 gltfMaterial.normalTexture,
                 material,
                 gltf,
-                bumpMapPropId,
-                bumpMapScaleTransformPropId,
-                bumpMapRotationPropId,
-                bumpMapUVChannelPropId
+                normalTexturePropId,
+                normalTextureScaleTransformPropId,
+                normalTextureRotationPropId,
+                normalTextureTexCoordPropId
                 )) {
                 // material.EnableKeyword(Constants.kwNormalMap);
-                material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
+                material.SetFloat(normalTextureScalePropId,gltfMaterial.normalTexture.scale);
             }
             
             if(TrySetTexture(
                 gltfMaterial.occlusionTexture,
                 material,
                 gltf,
-                occlusionMapPropId,
-                occlusionMapScaleTransformPropId,
-                occlusionMapRotationPropId,
-                occlusionMapUVChannelPropId
+                occlusionTexturePropId,
+                occlusionTextureScaleTransformPropId,
+                occlusionTextureRotationPropId,
+                occlusionTextureTexCoordPropId
                 )) {
                 material.EnableKeyword(KW_OCCLUSION);
-                material.SetFloat(occlusionStrengthPropId,gltfMaterial.occlusionTexture.strength);
+                material.SetFloat(occlusionTextureStrengthPropId,gltfMaterial.occlusionTexture.strength);
             }
 
             if(TrySetTexture(
                 gltfMaterial.emissiveTexture,
                 material,
                 gltf,
-                emissionMapPropId,
-                emissionMapScaleTransformPropId,
-                emissionMapRotationPropId,
-                emissionMapUVChannelPropId
+                emissiveTexturePropId,
+                emissiveTextureScaleTransformPropId,
+                emissiveTextureRotationPropId,
+                emissiveTextureTexCoordPropId
                 )) {
                 material.EnableKeyword(KW_EMISSION);
             }
@@ -318,7 +317,7 @@ namespace GLTFast.Materials {
 #endif
                 renderQueue = RenderQueue.AlphaTest;
             } else {
-                material.SetFloat(cutoffPropId, 0);
+                material.SetFloat(alphaCutoffPropId, 0);
                 // double sided opaque would make errors in HDRP 7.3 otherwise
                 material.SetOverrideTag(TAG_MOTION_VECTOR,TAG_MOTION_VECTOR_USER);
                 material.SetShaderPassEnabled(k_MotionVectorsPass,false);
@@ -354,7 +353,7 @@ namespace GLTFast.Materials {
             material.SetVector(baseColorPropId, baseColorLinear.gamma);
             
             if(gltfMaterial.emissive != Color.black) {
-                material.SetColor(emissionColorPropId, gltfMaterial.emissive);
+                material.SetColor(emissiveFactorPropId, gltfMaterial.emissive);
                 material.EnableKeyword(KW_EMISSION);
             }
 
@@ -470,7 +469,7 @@ namespace GLTFast.Materials {
         }
         
         protected virtual void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
-            material.SetFloat(cutoffPropId, gltfMaterial.alphaCutoff);
+            material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaCutoff);
 #if USING_HDRP_10_OR_NEWER || USING_URP_12_OR_NEWER
             material.EnableKeyword(KW_ALPHATEST_ON);
             material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_CUTOUT);

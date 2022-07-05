@@ -209,7 +209,7 @@ namespace GLTFast.Materials {
             Color baseColorLinear = Color.white;
 
             if(gltfMaterial.alphaModeEnum == AlphaMode.MASK) {
-                material.SetFloat(cutoffPropId, gltfMaterial.alphaCutoff);
+                material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaCutoff);
                 shaderMode = StandardShaderMode.Cutout;
             } else if(gltfMaterial.alphaModeEnum == AlphaMode.BLEND) {
                 SetAlphaModeBlend( material );
@@ -221,27 +221,27 @@ namespace GLTFast.Materials {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
                     baseColorLinear = specGloss.diffuseColor;
-                    material.SetVector(specColorPropId, specGloss.specularColor);
+                    material.SetVector(specularFactorPropId, specGloss.specularColor);
                     material.SetFloat(glossinessPropId,specGloss.glossinessFactor);
 
                     TrySetTexture(
                         specGloss.diffuseTexture,
                         material,
                         gltf,
-                        mainTexPropId,
-                        mainTexScaleTransform,
-                        mainTexRotation,
-                        mainTexUVChannelPropId
+                        baseColorTexturePropId,
+                        baseColorTextureScaleTransformPropId,
+                        baseColorTextureRotationPropId,
+                        baseColorTextureTexCoordPropId
                         );
 
                     if (TrySetTexture(
                         specGloss.specularGlossinessTexture,
                         material,
                         gltf,
-                        specGlossMapPropId,
-                        specGlossScaleTransformMapPropId,
-                        specGlossMapRotationPropId,
-                        specGlossMapUVChannelPropId
+                        specularGlossinessTexturePropId,
+                        specularGlossinessTextureScaleTransformPropId,
+                        specularGlossinessTextureRotationPropId,
+                        specularGlossinessTextureTexCoordPropId
                         )) {
                         material.EnableKeyword(KW_SPEC_GLOSS_MAP);
                     }
@@ -261,10 +261,10 @@ namespace GLTFast.Materials {
                     gltfMaterial.pbrMetallicRoughness.baseColorTexture,
                     material,
                     gltf,
-                    mainTexPropId,
-                    mainTexScaleTransform,
-                    mainTexRotation,
-                    mainTexUVChannelPropId
+                    baseColorTexturePropId,
+                    baseColorTextureScaleTransformPropId,
+                    baseColorTextureRotationPropId,
+                    baseColorTextureTexCoordPropId
                     );
                 
                 if(TrySetTexture(
@@ -284,36 +284,36 @@ namespace GLTFast.Materials {
                 gltfMaterial.normalTexture,
                 material,
                 gltf,
-                bumpMapPropId,
-                bumpMapScaleTransformPropId,
-                bumpMapRotationPropId,
-                bumpMapUVChannelPropId
+                normalTexturePropId,
+                normalTextureScaleTransformPropId,
+                normalTextureRotationPropId,
+                normalTextureTexCoordPropId
             )) {
                 material.EnableKeyword(Constants.kwNormalMap);
-                material.SetFloat(bumpScalePropId,gltfMaterial.normalTexture.scale);
+                material.SetFloat(normalTextureScalePropId,gltfMaterial.normalTexture.scale);
             }
 
             if(TrySetTexture(
                 gltfMaterial.occlusionTexture,
                 material,
                 gltf,
-                occlusionMapPropId,
-                occlusionMapScaleTransformPropId,
-                occlusionMapRotationPropId,
-                occlusionMapUVChannelPropId
+                occlusionTexturePropId,
+                occlusionTextureScaleTransformPropId,
+                occlusionTextureRotationPropId,
+                occlusionTextureTexCoordPropId
                 )) {
                 material.EnableKeyword(KW_OCCLUSION);
-                material.SetFloat(occlusionStrengthPropId,gltfMaterial.occlusionTexture.strength);
+                material.SetFloat(occlusionTextureStrengthPropId,gltfMaterial.occlusionTexture.strength);
             }
 
             if(TrySetTexture(
                 gltfMaterial.emissiveTexture,
                 material,
                 gltf,
-                emissionMapPropId,
-                emissionMapScaleTransformPropId,
-                emissionMapRotationPropId,
-                emissionMapUVChannelPropId
+                emissiveTexturePropId,
+                emissiveTextureScaleTransformPropId,
+                emissiveTextureRotationPropId,
+                emissiveTextureTexCoordPropId
                 )) {
                 material.EnableKeyword(KW_EMISSION);
             }
@@ -354,7 +354,7 @@ namespace GLTFast.Materials {
             material.color = baseColorLinear.gamma;
             
             if(gltfMaterial.emissive != Color.black) {
-                material.SetColor(emissionColorPropId, gltfMaterial.emissive.gamma);
+                material.SetColor(emissiveFactorPropId, gltfMaterial.emissive.gamma);
                 material.EnableKeyword(KW_EMISSION);
             }
 
@@ -372,7 +372,7 @@ namespace GLTFast.Materials {
             material.SetInt(zWritePropId, 1);
             material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;  //2450
-            material.SetFloat(cutoffPropId, alphaCutoff);
+            material.SetFloat(alphaCutoffPropId, alphaCutoff);
             material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
             material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_CUTOUT);
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);

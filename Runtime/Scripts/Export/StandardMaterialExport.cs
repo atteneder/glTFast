@@ -230,8 +230,8 @@ namespace GLTFast.Export {
             }
 
             if (material.occlusionTexture != null) {
-                if (uMaterial.HasProperty(MaterialGenerator.occlusionStrengthPropId)) {
-                    material.occlusionTexture.strength = uMaterial.GetFloat(MaterialGenerator.occlusionStrengthPropId);
+                if (uMaterial.HasProperty(MaterialGenerator.occlusionTextureStrengthPropId)) {
+                    material.occlusionTexture.strength = uMaterial.GetFloat(MaterialGenerator.occlusionTextureStrengthPropId);
                 }
             }
 
