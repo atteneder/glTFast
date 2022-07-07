@@ -1005,7 +1005,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DInputMaterialSlot",
     "m_ObjectId": "016398ca322944f784a94a9e45a7f9d6",
     "m_Id": -170433253,
-    "m_DisplayName": "Normal Tex",
+    "m_DisplayName": "normalTexture",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Texture2D_B4A7F700",
@@ -1056,7 +1056,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "01dff51c344cee8c9447c97de733cf4d",
     "m_Id": 120952686,
-    "m_DisplayName": "Transmission",
+    "m_DisplayName": "transmissionFactor",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Vector1_F68FE44C",
@@ -1097,7 +1097,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "0509384b970af68e85faa5c81b94fdef",
     "m_Id": 0,
-    "m_DisplayName": "emissionTexture_ST",
+    "m_DisplayName": "Emissive Tex ST",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -1180,7 +1180,8 @@
             "m_Id": "c49dfbcab1cc410a9d0fc0ed4d34d6c0"
         }
     ],
-    "m_CustomEditorGUI": ""
+    "m_CustomEditorGUI": "",
+    "m_SupportVFX": false
 }
 
 {
@@ -1296,7 +1297,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DInputMaterialSlot",
     "m_ObjectId": "0f62c8960eaf4f3481ad9b21c8e7f414",
     "m_Id": 1176174230,
-    "m_DisplayName": "Occlusion Tex",
+    "m_DisplayName": "occlusionTexture",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Texture2D_36068458",
@@ -1404,7 +1405,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "1b452fef8d1d17868b229f46a3a1ec64",
     "m_Id": 0,
-    "m_DisplayName": "baseColorTextureRotation",
+    "m_DisplayName": "Base Color Tex Rotation",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -1445,7 +1446,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "1d45b9a8d865f78a9d64feaf6972a608",
     "m_Id": 0,
-    "m_DisplayName": "emissionTextureRotation",
+    "m_DisplayName": "Emissive Tex Rotation",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -1471,11 +1472,11 @@
     "m_Guid": {
         "m_GuidSerialized": "01a86c44-4c21-442a-8ee1-a7eb77704c4f"
     },
-    "m_Name": "baseColorTextureUVChannel",
+    "m_Name": "Base Color Tex UV",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_435CB51C",
-    "m_OverrideReferenceName": "baseColorTextureTexCoord",
+    "m_OverrideReferenceName": "baseColorTexture_TexCoord",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -1498,7 +1499,7 @@
     "m_Guid": {
         "m_GuidSerialized": "0f8451d3-f402-45f1-80a0-90c8cfc3c5a1"
     },
-    "m_Name": "normalScale",
+    "m_Name": "Normal Scale",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_97BB6A5",
@@ -1525,7 +1526,7 @@
     "m_Guid": {
         "m_GuidSerialized": "974a34fd-0dc8-4d00-9979-0519802e7a73"
     },
-    "m_Name": "metallicRoughnessTexture_ST",
+    "m_Name": "Metallic-Roughness Tex ST",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector4_B4780DDF",
@@ -1720,7 +1721,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "24a37f59ff2ec984975bb1f56617607f",
     "m_Id": 0,
-    "m_DisplayName": "metallicRoughnessTexture_ST",
+    "m_DisplayName": "Metallic-Roughness Tex ST",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -1775,7 +1776,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "28e1d2df1a3f6883bd41f2f3ceadffab",
     "m_Id": 0,
-    "m_DisplayName": "smoothness",
+    "m_DisplayName": "Roughness",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -1853,11 +1854,11 @@
     "m_Guid": {
         "m_GuidSerialized": "415b99f8-047a-4116-a162-7a2c1dee6d2c"
     },
-    "m_Name": "occlusionTextureRotation",
+    "m_Name": "Occlusion Tex Rotation",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector2_F9266676",
-    "m_OverrideReferenceName": "occlusionTextureRotation",
+    "m_OverrideReferenceName": "occlusionTexture_Rotation",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -1878,7 +1879,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DInputMaterialSlot",
     "m_ObjectId": "2bb99e48c76c442f955621e4878336ce",
     "m_Id": -908648287,
-    "m_DisplayName": "Metallic-Roughness Tex",
+    "m_DisplayName": "metallicRoughnessTexture",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Texture2D_2BD19CD4",
@@ -1902,6 +1903,7 @@
     "m_TransparentWritesMotionVec": false,
     "m_AlphaToMask": false,
     "m_DepthOffset": false,
+    "m_ConservativeDepthOffset": false,
     "m_TransparencyFog": true,
     "m_AlphaTestShadow": false,
     "m_BackThenFrontRendering": false,
@@ -1955,10 +1957,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 336.5000305175781,
-            "y": 62.99999237060547,
+            "x": 799.0,
+            "y": 122.5,
             "width": 366.0,
-            "height": 974.0000610351563
+            "height": 974.0
         }
     },
     "m_Slots": [
@@ -2175,7 +2177,7 @@
     "m_Guid": {
         "m_GuidSerialized": "b1be9b39-b105-4087-985e-f6eb003f06d1"
     },
-    "m_Name": "emissionTexture_ST",
+    "m_Name": "Emissive Tex ST",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector4_44682D9",
@@ -2409,7 +2411,7 @@
     "m_Guid": {
         "m_GuidSerialized": "81ffbc91-537c-4248-9442-5b1679781096"
     },
-    "m_Name": "occlusionTexture_ST",
+    "m_Name": "Occlusion Tex ST",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector4_6F76CAE",
@@ -2482,7 +2484,7 @@
     "m_Guid": {
         "m_GuidSerialized": "d1e9d72e-fd9f-444e-9d70-c1504e8fe681"
     },
-    "m_Name": "normalTexture_ST",
+    "m_Name": "Normal Tex ST",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector4_795CA5AE",
@@ -2555,7 +2557,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "424849f8ae9fd582a2386e5316968a72",
     "m_Id": 0,
-    "m_DisplayName": "occlusionTextureUVChannel",
+    "m_DisplayName": "Occlusion Tex UV",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2574,11 +2576,11 @@
     "m_Guid": {
         "m_GuidSerialized": "602ab477-8f72-4df8-9191-288cd6c5e4d5"
     },
-    "m_Name": "normalTextureRotation",
+    "m_Name": "Normal Tex Rotation",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector2_9110BE9A",
-    "m_OverrideReferenceName": "normalTextureRotation",
+    "m_OverrideReferenceName": "normalTexture_Rotation",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -2619,7 +2621,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "4719243196904bfc9bede6ec53131112",
     "m_Id": -1324895555,
-    "m_DisplayName": "Metallic",
+    "m_DisplayName": "metallicFactor",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Vector1_6633F151",
@@ -2806,7 +2808,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DInputMaterialSlot",
     "m_ObjectId": "5324d037ee03598693389aa966088918",
     "m_Id": 109598298,
-    "m_DisplayName": "Transmission Tex",
+    "m_DisplayName": "transmissionTexture",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Texture2D_746CA73",
@@ -2824,7 +2826,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "536be0048d4f4c6ab2faf0ac138e3d55",
     "m_Id": -1438624126,
-    "m_DisplayName": "Base Color",
+    "m_DisplayName": "baseColorFactor",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Vector4_8743F3C3",
@@ -2849,7 +2851,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "555fe68a6b00aa8aaa14ee15363c00d1",
     "m_Id": 0,
-    "m_DisplayName": "occlusionTexture_ST",
+    "m_DisplayName": "Occlusion Tex ST",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -2889,11 +2891,11 @@
     "m_Guid": {
         "m_GuidSerialized": "8c960e31-f89f-41e6-958a-5a8561a5d8c4"
     },
-    "m_Name": "baseColorTextureRotation",
+    "m_Name": "Base Color Tex Rotation",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector2_DC752BB",
-    "m_OverrideReferenceName": "baseColorTextureRotation",
+    "m_OverrideReferenceName": "baseColorTexture_Rotation",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -2983,11 +2985,11 @@
     "m_Guid": {
         "m_GuidSerialized": "aa0c7a44-774f-4810-b9c3-cf7ac3b7e153"
     },
-    "m_Name": "occlusionTextureUVChannel",
+    "m_Name": "Occlusion Tex UV",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_F2B689AA",
-    "m_OverrideReferenceName": "occlusionTextureTexCoord",
+    "m_OverrideReferenceName": "occlusionTexture_TexCoord",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -3068,7 +3070,7 @@
     "m_Guid": {
         "m_GuidSerialized": "9dba0444-5255-46c6-b45b-d7758fb87c92"
     },
-    "m_Name": "smoothness",
+    "m_Name": "Roughness",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_BB0292F7",
@@ -3161,7 +3163,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "60bef61e78c948a9acde1cd3ff8e662c",
     "m_Id": 0,
-    "m_DisplayName": "emissiveExposureWeight",
+    "m_DisplayName": "Emissive Exposure Weight",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -3211,7 +3213,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "61f3943ce814bf88876770f0996e8706",
     "m_Id": 0,
-    "m_DisplayName": "normalTexture_ST",
+    "m_DisplayName": "Normal Tex ST",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -3332,7 +3334,7 @@
     "m_Guid": {
         "m_GuidSerialized": "10d76b91-eaaf-4eb7-8331-d7e8f7615734"
     },
-    "m_Name": "occlusionStrength",
+    "m_Name": "Occlusion Strength",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_DDDD754",
@@ -3461,7 +3463,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "753fb07641eea7818e4dcc32516f2a98",
     "m_Id": 0,
-    "m_DisplayName": "emissionTextureUVChannel",
+    "m_DisplayName": "Emissive Tex UV",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -3538,11 +3540,11 @@
     "m_Guid": {
         "m_GuidSerialized": "fb975e48-ec42-4639-a2cf-f59e9e19e088"
     },
-    "m_Name": "emissiveExposureWeight",
+    "m_Name": "Emissive Exposure Weight",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_7acb966753fd4e58865a76802fcda775",
-    "m_OverrideReferenceName": "_EmissiveExposureWeight",
+    "m_OverrideReferenceName": "emissiveExposureWeight",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -3644,7 +3646,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DInputMaterialSlot",
     "m_ObjectId": "7fe3e39442ed4f839f818ab7485ddbf2",
     "m_Id": 129475646,
-    "m_DisplayName": "Emissive Tex",
+    "m_DisplayName": "emissiveTexture",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Texture2D_8F96C631",
@@ -3662,7 +3664,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "8140a63da13a9e8a9823bbc2dc624026",
     "m_Id": 0,
-    "m_DisplayName": "occlusionStrength",
+    "m_DisplayName": "Occlusion Strength",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -3679,7 +3681,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector4MaterialSlot",
     "m_ObjectId": "81c1a74cc3bc3b8dbe19ec41d726349d",
     "m_Id": 0,
-    "m_DisplayName": "baseColorTexture_ST",
+    "m_DisplayName": "Base Color Tex ST",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -3706,11 +3708,11 @@
     "m_Guid": {
         "m_GuidSerialized": "e29fdde6-03d7-4303-a706-e86a76dc3344"
     },
-    "m_Name": "emissionTextureUVChannel",
+    "m_Name": "Emissive Tex UV",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_BFF96238",
-    "m_OverrideReferenceName": "emissiveTextureTexCoord",
+    "m_OverrideReferenceName": "emissiveTexture_TexCoord",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -3972,7 +3974,7 @@
     "m_Guid": {
         "m_GuidSerialized": "069f0a9f-bab9-4025-81ea-0b6976eec3c5"
     },
-    "m_Name": "baseColorTexture_ST",
+    "m_Name": "Base Color Tex ST",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector4_BAFF3CA9",
@@ -4012,7 +4014,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector3MaterialSlot",
     "m_ObjectId": "978d5e2f938e4485897e6828d677c95c",
     "m_Id": 366981793,
-    "m_DisplayName": "Emissive",
+    "m_DisplayName": "emissiveFactor",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Vector3_E344F397",
@@ -4346,11 +4348,11 @@
     "m_Guid": {
         "m_GuidSerialized": "743c7b72-9601-4582-92b7-a9e09e4eeabb"
     },
-    "m_Name": "metallicRoughnessTextureUVChannel",
+    "m_Name": "Metallic-Roughness Tex UV",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_604660D9",
-    "m_OverrideReferenceName": "metallicRoughnessTextureTexCoord",
+    "m_OverrideReferenceName": "metallicRoughnessTexture_TexCoord",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -4394,7 +4396,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "a768ceca7b3342bf9022397321df3558",
     "m_Id": 0,
-    "m_DisplayName": "emissiveIntensity",
+    "m_DisplayName": "Emissive Intensity",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -4409,7 +4411,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "aa8d47bebb39298ca2a48aca11c213d3",
     "m_Id": 0,
-    "m_DisplayName": "metallicRoughnessTextureUVChannel",
+    "m_DisplayName": "Metallic-Roughness Tex UV",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -4577,7 +4579,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "c1aa87673dd70980887f3d977cdd84d5",
     "m_Id": 0,
-    "m_DisplayName": "normalTextureRotation",
+    "m_DisplayName": "Normal Tex Rotation",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -4603,11 +4605,11 @@
     "m_Guid": {
         "m_GuidSerialized": "011cbe40-7a2c-4d20-9bb1-89c1cc2e3473"
     },
-    "m_Name": "emissiveIntensity",
+    "m_Name": "Emissive Intensity",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_c2c53ba4ffb14e51b82150d5443d9f17",
-    "m_OverrideReferenceName": "_EmissiveIntensity",
+    "m_OverrideReferenceName": "emissiveIntensity",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -4712,8 +4714,16 @@
     "m_SupportLodCrossFade": false,
     "m_DoubleSidedMode": 0,
     "m_DOTSInstancing": false,
-    "m_Version": 0,
-    "m_FirstTimeMigrationExecuted": true,
+    "m_CustomVelocity": false,
+    "m_Tessellation": false,
+    "m_TessellationMode": 0,
+    "m_TessellationFactorMinDistance": 20.0,
+    "m_TessellationFactorMaxDistance": 50.0,
+    "m_TessellationFactorTriangleSize": 100.0,
+    "m_TessellationShapeFactor": 0.75,
+    "m_TessellationBackFaceCullEpsilon": -0.25,
+    "m_TessellationMaxDisplacement": 0.009999999776482582,
+    "m_Version": 1,
     "inspectorFoldoutMask": 9
 }
 
@@ -4829,7 +4839,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "cb2b7b50d0e00d80a4364565f36ca7cc",
     "m_Id": 0,
-    "m_DisplayName": "baseColorTextureUVChannel",
+    "m_DisplayName": "Base Color Tex UV",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -4925,7 +4935,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "d111b6a178386286b51ba0af5987ccc6",
     "m_Id": 0,
-    "m_DisplayName": "normalTextureUVChannel",
+    "m_DisplayName": "Normal Tex UV",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -4971,7 +4981,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "d2c1a52fa712a680b17e3338fff524e3",
     "m_Id": 0,
-    "m_DisplayName": "occlusionTextureRotation",
+    "m_DisplayName": "Occlusion Tex Rotation",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -5108,7 +5118,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Texture2DInputMaterialSlot",
     "m_ObjectId": "da9a0123fb30486e850f844772da3c53",
     "m_Id": 1050676157,
-    "m_DisplayName": "Base Color Tex",
+    "m_DisplayName": "baseColorTexture",
     "m_SlotType": 0,
     "m_Hidden": false,
     "m_ShaderOutputName": "Texture2D_EBF077FA",
@@ -5181,6 +5191,9 @@
             "m_Id": "42805d03ab3cfa8ca5c990cd739e743a"
         },
         {
+            "m_Id": "fc270d63be17888fbff1de30bd431580"
+        },
+        {
             "m_Id": "1f55baf5967a1b898aedcbffddb2766c"
         },
         {
@@ -5190,6 +5203,15 @@
             "m_Id": "bc4a7fc139010e82a5b753aa9e8046c7"
         },
         {
+            "m_Id": "3cce739126f978859f57b89157d28091"
+        },
+        {
+            "m_Id": "2a71e3bdfe879b82adf1b17cb09d62ae"
+        },
+        {
+            "m_Id": "59b7fe8ca5ff938b97a07bbf2bf863cc"
+        },
+        {
             "m_Id": "5ea3569ce1a7f88888f3caafeaf29306"
         },
         {
@@ -5197,6 +5219,15 @@
         },
         {
             "m_Id": "ec56455c57f6018fb01158a531abb2d5"
+        },
+        {
+            "m_Id": "1fa800b6bd0b068691da095d7ac136cf"
+        },
+        {
+            "m_Id": "f712045ae1e39d8f8476f4d1726d0c20"
+        },
+        {
+            "m_Id": "a21604c8e41eb28e9a72ba0eb65e6992"
         },
         {
             "m_Id": "880de3d4012e6d859e6a893d73fb6eac"
@@ -5209,6 +5240,9 @@
         },
         {
             "m_Id": "f56f9dd03d7b0b808a4d2228bbdc1258"
+        },
+        {
+            "m_Id": "83bc766d1ee1278c8a92bd17e183cbda"
         },
         {
             "m_Id": "c2c53ba4ffb14e51b82150d5443d9f17"
@@ -5224,30 +5258,6 @@
         },
         {
             "m_Id": "ae87895ed8545c8381ba49d598959dcd"
-        },
-        {
-            "m_Id": "83bc766d1ee1278c8a92bd17e183cbda"
-        },
-        {
-            "m_Id": "fc270d63be17888fbff1de30bd431580"
-        },
-        {
-            "m_Id": "59b7fe8ca5ff938b97a07bbf2bf863cc"
-        },
-        {
-            "m_Id": "3cce739126f978859f57b89157d28091"
-        },
-        {
-            "m_Id": "2a71e3bdfe879b82adf1b17cb09d62ae"
-        },
-        {
-            "m_Id": "a21604c8e41eb28e9a72ba0eb65e6992"
-        },
-        {
-            "m_Id": "1fa800b6bd0b068691da095d7ac136cf"
-        },
-        {
-            "m_Id": "f712045ae1e39d8f8476f4d1726d0c20"
         },
         {
             "m_Id": "4118916bea134d5d98b77090b6944d7a"
@@ -5653,11 +5663,11 @@
     "m_Guid": {
         "m_GuidSerialized": "e9170e04-da87-484d-96ad-897c059300e0"
     },
-    "m_Name": "emissionTextureRotation",
+    "m_Name": "Emissive Tex Rotation",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector2_7FC41406",
-    "m_OverrideReferenceName": "emissiveTextureRotation",
+    "m_OverrideReferenceName": "emissiveTexture_Rotation",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -5695,11 +5705,11 @@
     "m_Guid": {
         "m_GuidSerialized": "dd9b0745-38e2-4c14-9fab-5a098929fd43"
     },
-    "m_Name": "metallicRoughnessTextureRotation",
+    "m_Name": "Metallic-Roughness Tex Rotation",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector2_A20661FD",
-    "m_OverrideReferenceName": "metallicRoughnessTextureRotation",
+    "m_OverrideReferenceName": "metallicRoughnessTexture_Rotation",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -5743,7 +5753,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector2MaterialSlot",
     "m_ObjectId": "f7f0cf92d7efc1809d668bda5426b265",
     "m_Id": 0,
-    "m_DisplayName": "metallicRoughnessTextureRotation",
+    "m_DisplayName": "Metallic-Roughness Tex Rotation",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -5767,7 +5777,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "f85e84100d2c648fb3760c1251c1f9ed",
     "m_Id": 0,
-    "m_DisplayName": "normalScale",
+    "m_DisplayName": "Normal Scale",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -5857,11 +5867,11 @@
     "m_Guid": {
         "m_GuidSerialized": "99601d2a-dea4-43c7-a834-04f9af6f05fa"
     },
-    "m_Name": "normalTextureUVChannel",
+    "m_Name": "Normal Tex UV",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_BA73988E",
-    "m_OverrideReferenceName": "normalTextureTexCoord",
+    "m_OverrideReferenceName": "normalTexture_TexCoord",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
