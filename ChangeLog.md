@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `Schema.Image.ImageKtx2`
 ### Fixed
 - Shader graphs' BaseColor, BaseColorTexture and vertex color calculations are now in correct color space
+- Export MeshRenderer wherre number of materials does not match number of submeshes (thanks [Dan Dando ][DanDovi] for #428)
 
 ## [4.8.3] - 2022-06-04
 ### Fixed
@@ -709,6 +710,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.3.0]: https://github.com/atteneder/glTFast/compare/v0.3.0...v0.2.0
 [0.2.0]: https://github.com/atteneder/glTFast/compare/v0.2.0...v0.1.0
 [KtxUnity]: https://github.com/atteneder/KtxUnity
+[DanDovi]: https://github.com/DanDovi
 [DracoUnity]: https://github.com/atteneder/DracoUnity
 [aurorahcx]: https://github.com/aurorahcx
 [Battlehub0x]: https://github.com/Battlehub0x
