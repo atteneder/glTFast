@@ -1,5 +1,5 @@
 {
-    "m_SGVersion": 2,
+    "m_SGVersion": 3,
     "m_Type": "UnityEditor.ShaderGraph.GraphData",
     "m_ObjectId": "22f4cf26a81a446ab3e256d94a5b8930",
     "m_Properties": [
@@ -22,6 +22,12 @@
     "m_Keywords": [
         {
             "m_Id": "92615af80d5e462e8062954c14a537b4"
+        }
+    ],
+    "m_Dropdowns": [],
+    "m_CategoryData": [
+        {
+            "m_Id": "bb77feeb1e43422db8658300f0760391"
         }
     ],
     "m_Nodes": [
@@ -321,10 +327,11 @@
         "serializedMesh": {
             "m_SerializedMesh": "{\"mesh\":{\"instanceID\":0}}",
             "m_Guid": ""
-        }
+        },
+        "preventRotation": false
     },
     "m_Path": "Sub Graphs",
-    "m_ConcretePrecision": 0,
+    "m_GraphPrecision": 0,
     "m_PreviewMode": 2,
     "m_OutputNode": {
         "m_Id": "3737ffa37379ae87b587a3972b904b05"
@@ -553,9 +560,13 @@
         "m_GuidSerialized": "92c6bdd4-ca31-4b5a-bc1c-6794cd65d522"
     },
     "m_Name": "emissiveTexture",
+    "m_DefaultRefNameVersion": 0,
+    "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Texture2D_8C55BE6",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
     "m_Precision": 0,
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
@@ -564,6 +575,8 @@
         "m_SerializedTexture": "{\"texture\":{\"instanceID\":0}}",
         "m_Guid": ""
     },
+    "isMainTexture": false,
+    "useTilingAndOffset": false,
     "m_Modifiable": true,
     "m_DefaultType": 0
 }
@@ -1098,7 +1111,7 @@
     "m_Group": {
         "m_Id": "46f893b4df34477bad8026a8627a446a"
     },
-    "m_Name": "EMISSION",
+    "m_Name": "EMISSIVE",
     "m_DrawState": {
         "m_Expanded": true,
         "m_Position": {
@@ -1163,9 +1176,13 @@
         "m_GuidSerialized": "4a9d9167-db8f-4234-b477-bd2175918ed0"
     },
     "m_Name": "UV",
+    "m_DefaultRefNameVersion": 0,
+    "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector2_2269B91D",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
     "m_Precision": 0,
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
@@ -1248,9 +1265,13 @@
         "m_GuidSerialized": "2aeda480-f326-411d-99b0-402df07a52e6"
     },
     "m_Name": "intensity",
+    "m_DefaultRefNameVersion": 0,
+    "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_92666670",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
     "m_Precision": 0,
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
@@ -1312,13 +1333,18 @@
     "m_Guid": {
         "m_GuidSerialized": "94352154-e4c5-42ab-9109-5ba44b6e670f"
     },
-    "m_Name": "EMISSION",
+    "m_Name": "EMISSIVE",
+    "m_DefaultRefNameVersion": 0,
+    "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "",
-    "m_OverrideReferenceName": "EMISSION",
+    "m_OverrideReferenceName": "_EMISSIVE",
     "m_GeneratePropertyBlock": false,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
     "m_KeywordType": 0,
     "m_KeywordDefinition": 0,
     "m_KeywordScope": 0,
+    "m_KeywordStages": 63,
     "m_Entries": [],
     "m_Value": 0,
     "m_IsEditable": true
@@ -1408,6 +1434,33 @@
         "e32": 0.0,
         "e33": 1.0
     }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "bb77feeb1e43422db8658300f0760391",
+    "m_Name": "",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "e8c2953e3a3a1d88bec823091a269ccc"
+        },
+        {
+            "m_Id": "2413f29fc4bfc28ab3f24ea650d93042"
+        },
+        {
+            "m_Id": "84cd41d18a890081a8905c3217f9fdce"
+        },
+        {
+            "m_Id": "8b7640fb0e4bd584b32b9968977c6e87"
+        },
+        {
+            "m_Id": "ebe21fbba1783e84a0d5dbfaa05bf5ab"
+        },
+        {
+            "m_Id": "92615af80d5e462e8062954c14a537b4"
+        }
+    ]
 }
 
 {
@@ -1765,9 +1818,13 @@
         "m_GuidSerialized": "c75fdb25-0e31-46d0-b09b-f0f3505da651"
     },
     "m_Name": "emissiveFactor",
+    "m_DefaultRefNameVersion": 0,
+    "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector3_BDA4AC8B",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
     "m_Precision": 0,
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
@@ -1788,9 +1845,13 @@
         "m_GuidSerialized": "10cf4f3e-02c3-47e9-a182-4c8c9de5deb4"
     },
     "m_Name": "exposureWeight",
+    "m_DefaultRefNameVersion": 0,
+    "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_AC5B6513",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
     "m_Precision": 0,
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
@@ -1801,33 +1862,6 @@
         "x": 0.0,
         "y": 1.0
     }
-}
-
-{
-    "m_SGVersion": 0,
-    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
-    "m_ObjectId": "f436dd0b2b174d2db580b132479429e6",
-    "m_Name": "",
-    "m_ChildObjectList": [
-        {
-            "m_Id": "e8c2953e3a3a1d88bec823091a269ccc"
-        },
-        {
-            "m_Id": "2413f29fc4bfc28ab3f24ea650d93042"
-        },
-        {
-            "m_Id": "84cd41d18a890081a8905c3217f9fdce"
-        },
-        {
-            "m_Id": "8b7640fb0e4bd584b32b9968977c6e87"
-        },
-        {
-            "m_Id": "ebe21fbba1783e84a0d5dbfaa05bf5ab"
-        },
-        {
-            "m_Id": "92615af80d5e462e8062954c14a537b4"
-        }
-    ]
 }
 
 {
@@ -1882,7 +1916,8 @@
         "m_SerializableColors": []
     },
     "m_TextureType": 0,
-    "m_NormalMapSpace": 0
+    "m_NormalMapSpace": 0,
+    "m_EnableGlobalMipBias": true
 }
 
 {

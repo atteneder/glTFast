@@ -48,7 +48,7 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.ShaderKeyword"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"275cc275-19d7-43e3-840e-3189c5498fc2\"\n    },\n    \"m_Name\": \"_UV_ROTATION\",\n    \"m_DefaultReferenceName\": \"BOOLEAN_E9D55AE1_ON\",\n    \"m_OverrideReferenceName\": \"_UV_ROTATION\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_KeywordType\": 0,\n    \"m_KeywordDefinition\": 0,\n    \"m_KeywordScope\": 0,\n    \"m_Entries\": [],\n    \"m_Value\": 0,\n    \"m_IsEditable\": true,\n    \"m_IsExposable\": true\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"275cc275-19d7-43e3-840e-3189c5498fc2\"\n    },\n    \"m_Name\": \"UV_ROTATION\",\n    \"m_DefaultReferenceName\": \"BOOLEAN_E9D55AE1_ON\",\n    \"m_OverrideReferenceName\": \"_UV_ROTATION\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_KeywordType\": 0,\n    \"m_KeywordDefinition\": 0,\n    \"m_KeywordScope\": 0,\n    \"m_Entries\": [],\n    \"m_Value\": 0,\n    \"m_IsEditable\": true,\n    \"m_IsExposable\": true\n}"
         }
     ],
     "m_SerializableNodes": [

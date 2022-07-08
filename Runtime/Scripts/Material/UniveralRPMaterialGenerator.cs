@@ -28,6 +28,9 @@ namespace GLTFast.Materials {
 
     public class UniversalRPMaterialGenerator : ShaderGraphMaterialGenerator {
 
+        // Keywords
+        const string KW_TRANSMISSION = "_TRANSMISSION";
+        
         static bool supportsCameraOpaqueTexture;
         
         static readonly int k_AlphaClip = Shader.PropertyToID("_AlphaClip");
@@ -106,7 +109,7 @@ namespace GLTFast.Materials {
         ) {
             if (supportsCameraOpaqueTexture) {
                 if (transmission.transmissionFactor > 0f) {
-                    material.EnableKeyword("TRANSMISSION");
+                    material.EnableKeyword(KW_TRANSMISSION);
                     material.SetFloat(transmissionFactorPropId, transmission.transmissionFactor);
                     renderQueue = RenderQueue.Transparent;
                     if (TrySetTexture(

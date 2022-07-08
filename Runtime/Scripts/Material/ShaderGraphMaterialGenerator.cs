@@ -90,8 +90,8 @@ namespace GLTFast.Materials {
 
         
         // Keywords
-        const string KW_OCCLUSION = "OCCLUSION";
-        const string KW_EMISSION = "EMISSION";
+        const string KW_OCCLUSION = "_OCCLUSION";
+        const string KW_EMISSIVE = "_EMISSIVE";
         
         protected const string TAG_MOTION_VECTOR = "MotionVector";
         protected const string TAG_MOTION_VECTOR_USER = "User";
@@ -296,7 +296,7 @@ namespace GLTFast.Materials {
                 emissiveTextureRotationPropId,
                 emissiveTextureTexCoordPropId
                 )) {
-                material.EnableKeyword(KW_EMISSION);
+                material.EnableKeyword(KW_EMISSIVE);
             }
             
             if (gltfMaterial.extensions != null) {
@@ -354,7 +354,7 @@ namespace GLTFast.Materials {
             
             if(gltfMaterial.emissive != Color.black) {
                 material.SetColor(emissiveFactorPropId, gltfMaterial.emissive);
-                material.EnableKeyword(KW_EMISSION);
+                material.EnableKeyword(KW_EMISSIVE);
             }
 
             return material;

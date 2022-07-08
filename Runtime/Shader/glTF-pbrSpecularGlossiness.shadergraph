@@ -915,11 +915,11 @@
     "m_Guid": {
         "m_GuidSerialized": "a7d905c3-7492-4341-bcc1-99dd0b856891"
     },
-    "m_Name": "EMISSION",
+    "m_Name": "EMISSIVE",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "BOOLEAN_81A09341_ON",
-    "m_OverrideReferenceName": "_EMISSION",
+    "m_OverrideReferenceName": "_EMISSIVE",
     "m_GeneratePropertyBlock": false,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
