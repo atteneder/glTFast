@@ -28,7 +28,7 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"c88ceb4f-145c-4ab6-ba62-5c9f70d859d2\"\n    },\n    \"m_Name\": \"Diffuse Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_4282EC36\",\n    \"m_OverrideReferenceName\": \"diffuseTexture_TexCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 2,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"c88ceb4f-145c-4ab6-ba62-5c9f70d859d2\"\n    },\n    \"m_Name\": \"Diffuse Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_4282EC36\",\n    \"m_OverrideReferenceName\": \"diffuseTexture_texCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 2,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
@@ -52,13 +52,13 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"25816708-e6c6-4dd1-8def-0a0fbef3a9c1\"\n    },\n    \"m_Name\": \"Normal Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_8694DE1A\",\n    \"m_OverrideReferenceName\": \"normalTexture_TexCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"25816708-e6c6-4dd1-8def-0a0fbef3a9c1\"\n    },\n    \"m_Name\": \"Normal Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_8694DE1A\",\n    \"m_OverrideReferenceName\": \"normalTexture_texCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"0f8451d3-f402-45f1-80a0-90c8cfc3c5a1\"\n    },\n    \"m_Name\": \"Normal Scale\",\n    \"m_DefaultReferenceName\": \"Vector1_97BB6A5\",\n    \"m_OverrideReferenceName\": \"normalTextureScale\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 1.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"0f8451d3-f402-45f1-80a0-90c8cfc3c5a1\"\n    },\n    \"m_Name\": \"Normal Scale\",\n    \"m_DefaultReferenceName\": \"Vector1_97BB6A5\",\n    \"m_OverrideReferenceName\": \"normalTexture_scale\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 1.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
@@ -82,13 +82,13 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"f0f0d422-68fb-4004-816d-69e407020379\"\n    },\n    \"m_Name\": \"Occlusion Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_D4B353B\",\n    \"m_OverrideReferenceName\": \"occlusionTexture_TexCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 2,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"f0f0d422-68fb-4004-816d-69e407020379\"\n    },\n    \"m_Name\": \"Occlusion Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_D4B353B\",\n    \"m_OverrideReferenceName\": \"occlusionTexture_texCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 2,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"10d76b91-eaaf-4eb7-8331-d7e8f7615734\"\n    },\n    \"m_Name\": \"Occlusion Strength\",\n    \"m_DefaultReferenceName\": \"Vector1_DDDD754\",\n    \"m_OverrideReferenceName\": \"occlusionTextureStrength\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 1.0,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"10d76b91-eaaf-4eb7-8331-d7e8f7615734\"\n    },\n    \"m_Name\": \"Occlusion Strength\",\n    \"m_DefaultReferenceName\": \"Vector1_DDDD754\",\n    \"m_OverrideReferenceName\": \"occlusionTexture_strength\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 1.0,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
@@ -124,7 +124,7 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"9c329eac-e343-4605-ae35-437866e28b03\"\n    },\n    \"m_Name\": \"Specular-Glossiness Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_3042F7AA\",\n    \"m_OverrideReferenceName\": \"specularGlossinessTexture_TexCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"9c329eac-e343-4605-ae35-437866e28b03\"\n    },\n    \"m_Name\": \"Specular-Glossiness Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_3042F7AA\",\n    \"m_OverrideReferenceName\": \"specularGlossinessTexture_texCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
@@ -154,7 +154,7 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"89b96f54-cb4f-4cfa-84fd-ad5eeb32b5c9\"\n    },\n    \"m_Name\": \"Emissive Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_D30039BA\",\n    \"m_OverrideReferenceName\": \"emissiveTexture_TexCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"89b96f54-cb4f-4cfa-84fd-ad5eeb32b5c9\"\n    },\n    \"m_Name\": \"Emissive Tex UV\",\n    \"m_DefaultReferenceName\": \"Vector1_D30039BA\",\n    \"m_OverrideReferenceName\": \"emissiveTexture_texCoord\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {

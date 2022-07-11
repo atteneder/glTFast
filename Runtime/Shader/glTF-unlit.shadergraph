@@ -792,7 +792,7 @@
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "Vector1_855863D0",
-    "m_OverrideReferenceName": "baseColorTexture_TexCoord",
+    "m_OverrideReferenceName": "baseColorTexture_texCoord",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",

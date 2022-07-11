@@ -78,13 +78,13 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property normalTexture</summary>
         public static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
         /// <summary>Shader property ID for property normalTextureRotation</summary>
-        public static readonly int normalTextureRotationPropId = Shader.PropertyToID("normalTextureRotation");
+        public static readonly int normalTextureRotationPropId = Shader.PropertyToID("normalTexture_Rotation");
         /// <summary>Shader property ID for property normalTexture_ST</summary>
         public static readonly int normalTextureScaleTransformPropId = Shader.PropertyToID("normalTexture_ST");
         /// <summary>Shader property ID for property normalTextureTexCoord</summary>
-        public static readonly int normalTextureTexCoordPropId = Shader.PropertyToID("normalTextureTexCoord");
+        public static readonly int normalTextureTexCoordPropId = Shader.PropertyToID("normalTexture_texCoord");
         /// <summary>Shader property ID for property normalTextureScale</summary>
-        public static readonly int normalTextureScalePropId = Shader.PropertyToID("normalTextureScale");
+        public static readonly int normalTextureScalePropId = Shader.PropertyToID("normalTexture_scale");
         /// <summary>Shader property ID for property _Cull</summary>
         public static readonly int cullPropId = Shader.PropertyToID("_Cull");
         /// <summary>Shader property ID for property _CullMode</summary>
@@ -98,19 +98,19 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property emissiveTexture</summary>
         public static readonly int emissiveTexturePropId = Shader.PropertyToID("emissiveTexture");
         /// <summary>Shader property ID for property emissiveTextureRotation</summary>
-        public static readonly int emissiveTextureRotationPropId = Shader.PropertyToID("emissiveTextureRotation");
+        public static readonly int emissiveTextureRotationPropId = Shader.PropertyToID("emissiveTexture_Rotation");
         /// <summary>Shader property ID for property emissiveTexture_ST</summary>
         public static readonly int emissiveTextureScaleTransformPropId = Shader.PropertyToID("emissiveTexture_ST");
         /// <summary>Shader property ID for property emissiveTextureTexCoord</summary>
-        public static readonly int emissiveTextureTexCoordPropId = Shader.PropertyToID("emissiveTextureTexCoord");
+        public static readonly int emissiveTextureTexCoordPropId = Shader.PropertyToID("emissiveTexture_texCoord");
         /// <summary>Shader property ID for property baseColorTexture</summary>
         public static readonly int baseColorTexturePropId = Shader.PropertyToID("baseColorTexture");
         /// <summary>Shader property ID for property baseColorTextureRotation</summary>
-        public static readonly int baseColorTextureRotationPropId = Shader.PropertyToID("baseColorTextureRotation");
+        public static readonly int baseColorTextureRotationPropId = Shader.PropertyToID("baseColorTexture_Rotation");
         /// <summary>Shader property ID for property baseColorTexture_ST</summary>
         public static readonly int baseColorTextureScaleTransformPropId = Shader.PropertyToID("baseColorTexture_ST");
         /// <summary>Shader property ID for property baseColorTextureTexCoord</summary>
-        public static readonly int baseColorTextureTexCoordPropId = Shader.PropertyToID("baseColorTextureTexCoord");
+        public static readonly int baseColorTextureTexCoordPropId = Shader.PropertyToID("baseColorTexture_texCoord");
         /// <summary>Shader property ID for property diffuseFactor</summary>
         public static readonly int diffuseFactorPropId = Shader.PropertyToID("diffuseFactor");
         /// <summary>Shader property ID for property diffuseTexture</summary>
@@ -118,9 +118,9 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property diffuseTexture</summary>
         public static readonly int diffuseTextureScaleTransformPropId = Shader.PropertyToID("diffuseTexture_ST");
         /// <summary>Shader property ID for property diffuseTexture</summary>
-        public static readonly int diffuseTextureRotationPropId = Shader.PropertyToID("diffuseTextureRotation");
+        public static readonly int diffuseTextureRotationPropId = Shader.PropertyToID("diffuseTexture_Rotation");
         /// <summary>Shader property ID for property diffuseTexture</summary>
-        public static readonly int diffuseTextureTexCoordPropId = Shader.PropertyToID("diffuseTextureTexCoord");
+        public static readonly int diffuseTextureTexCoordPropId = Shader.PropertyToID("diffuseTexture_texCoord");
         /// <summary>Shader property ID for property glossinessFactor</summary>
         public static readonly int glossinessFactorPropId = Shader.PropertyToID("glossinessFactor");
         /// <summary>Shader property ID for property metallicFactor</summary>
@@ -128,13 +128,13 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property occlusionTexture</summary>
         public static readonly int occlusionTexturePropId = Shader.PropertyToID("occlusionTexture");
         /// <summary>Shader property ID for property occlusionTextureStrength</summary>
-        public static readonly int occlusionTextureStrengthPropId = Shader.PropertyToID("occlusionTextureStrength");
+        public static readonly int occlusionTextureStrengthPropId = Shader.PropertyToID("occlusionTexture_strength");
         /// <summary>Shader property ID for property occlusionTextureRotation</summary>
-        public static readonly int occlusionTextureRotationPropId = Shader.PropertyToID("occlusionTextureRotation");
+        public static readonly int occlusionTextureRotationPropId = Shader.PropertyToID("occlusionTexture_Rotation");
         /// <summary>Shader property ID for property occlusionTexture_ST</summary>
         public static readonly int occlusionTextureScaleTransformPropId = Shader.PropertyToID("occlusionTexture_ST");
         /// <summary>Shader property ID for property occlusionTextureTexCoord</summary>
-        public static readonly int occlusionTextureTexCoordPropId = Shader.PropertyToID("occlusionTextureTexCoord");
+        public static readonly int occlusionTextureTexCoordPropId = Shader.PropertyToID("occlusionTexture_texCoord");
         /// <summary>Shader property ID for property specularFactor</summary>
         public static readonly int specularFactorPropId = Shader.PropertyToID("specularFactor");
         /// <summary>Shader property ID for property specularGlossinessTexture</summary>
@@ -142,9 +142,9 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property specularGlossinessTexture_ST</summary>
         public static readonly int specularGlossinessTextureScaleTransformPropId = Shader.PropertyToID("specularGlossinessTexture_ST"); // TODO: Support in shader!
         /// <summary>Shader property ID for property specularGlossinessTextureRotation</summary>
-        public static readonly int specularGlossinessTextureRotationPropId = Shader.PropertyToID("specularGlossinessTextureRotation"); // TODO: Support in shader!
+        public static readonly int specularGlossinessTextureRotationPropId = Shader.PropertyToID("specularGlossinessTexture_Rotation"); // TODO: Support in shader!
         /// <summary>Shader property ID for property specularGlossinessTextureTexCoord</summary>
-        public static readonly int specularGlossinessTextureTexCoordPropId = Shader.PropertyToID("specularGlossinessTextureTexCoord"); // TODO: Support in shader!
+        public static readonly int specularGlossinessTextureTexCoordPropId = Shader.PropertyToID("specularGlossinessTexture_texCoord"); // TODO: Support in shader!
         /// <summary>Shader property ID for property _SrcBlend</summary>
         public static readonly int srcBlendPropId = Shader.PropertyToID("_SrcBlend");
         /// <summary>Shader property ID for property _ZWrite</summary>
