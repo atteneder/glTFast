@@ -563,6 +563,17 @@ namespace GLTFast {
         public int sceneCount => gltfRoot?.scenes?.Length ?? 0;
 
         /// <summary>
+        /// Gets the root of the parsed JSON object.
+        /// From this, all the parsable data contained within the glTF JSON is available.
+        /// <b>The returned value should not be modified</b>
+        /// </summary>
+        /// <returns>JSON schema root object</returns>
+        public Root GetSchemaRoot()
+        {
+            return gltfRoot;
+        }
+
+        /// <summary>
         /// Get a glTF's scene's name by its index
         /// </summary>
         /// <param name="sceneIndex">glTF scene index</param>
