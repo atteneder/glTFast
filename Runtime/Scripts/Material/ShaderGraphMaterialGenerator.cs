@@ -185,6 +185,7 @@ namespace GLTFast.Materials {
                 Schema.PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
                     baseColorLinear = specGloss.diffuseColor;
+                    material.SetVector( diffuseFactorPropId, specGloss.diffuseColor.gamma);
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
                     material.SetVector(specularFactorPropId, specGloss.specularColor);
 #else
@@ -196,10 +197,10 @@ namespace GLTFast.Materials {
                         specGloss.diffuseTexture,
                         material,
                         gltf,
-                        baseMapPropId,
-                        baseMapScaleTransformPropId,
-                        baseMapRotationPropId,
-                        baseMapUVChannelPropId
+                        diffuseTexturePropId,
+                        diffuseTextureScaleTransformPropId,
+                        diffuseTextureRotationPropId,
+                        diffuseTextureTexCoordPropId
                         );
 
                     if (TrySetTexture(

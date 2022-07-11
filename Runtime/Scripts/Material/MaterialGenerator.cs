@@ -111,6 +111,18 @@ namespace GLTFast.Materials {
         public static readonly int baseColorTextureScaleTransformPropId = Shader.PropertyToID("baseColorTexture_ST");
         /// <summary>Shader property ID for property baseColorTextureTexCoord</summary>
         public static readonly int baseColorTextureTexCoordPropId = Shader.PropertyToID("baseColorTextureTexCoord");
+        /// <summary>Shader property ID for property diffuseFactor</summary>
+        public static readonly int diffuseFactorPropId = Shader.PropertyToID("diffuseFactor");
+        /// <summary>Shader property ID for property diffuseTexture</summary>
+        public static readonly int diffuseTexturePropId = Shader.PropertyToID("diffuseTexture");
+        /// <summary>Shader property ID for property diffuseTexture</summary>
+        public static readonly int diffuseTextureScaleTransformPropId = Shader.PropertyToID("diffuseTexture_ST");
+        /// <summary>Shader property ID for property diffuseTexture</summary>
+        public static readonly int diffuseTextureRotationPropId = Shader.PropertyToID("diffuseTextureRotation");
+        /// <summary>Shader property ID for property diffuseTexture</summary>
+        public static readonly int diffuseTextureTexCoordPropId = Shader.PropertyToID("diffuseTextureTexCoord");
+        /// <summary>Shader property ID for property glossinessFactor</summary>
+        public static readonly int glossinessFactorPropId = Shader.PropertyToID("glossinessFactor");
         /// <summary>Shader property ID for property metallicFactor</summary>
         public static readonly int metallicPropId = Shader.PropertyToID("metallicFactor");
         /// <summary>Shader property ID for property occlusionTexture</summary>
