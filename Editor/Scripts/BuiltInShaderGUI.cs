@@ -73,7 +73,13 @@ namespace GLTFast.Editor
                     ConfigureBlendMode(material, blend);
                 }
 
-                uvTransform = TextureRotationSlider(material, uvTransform, baseColorTextureScaleTransformPropId, baseColorTextureRotationPropId,true);
+                uvTransform = TextureRotationSlider(
+                    material,
+                    uvTransform,
+                    baseColorTextureScaleTransformPropId,
+                    baseColorTextureRotationPropId,
+                    true,
+                    "Base Color Tex Rotation");
                 if (uvTransform.HasValue)
                 {
                     if (uvTransform.Value.rotation != 0) {

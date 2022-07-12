@@ -36,7 +36,8 @@ namespace GLTFast.Editor
                     material,
                     uvTransform,
                     baseColorTextureScaleTransformPropId,
-                    baseColorTextureRotationPropId
+                    baseColorTextureRotationPropId,
+                    label:"Base Color Tex Rotation"
                     );
 
                 if (GUI.changed) {

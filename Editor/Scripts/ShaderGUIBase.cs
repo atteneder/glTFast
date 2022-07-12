@@ -36,7 +36,8 @@ namespace GLTFast.Editor
             UvTransform? uvTransform,
             int scaleTransformPropertyId,
             int rotationPropertyId,
-            bool freezeScale = false
+            bool freezeScale = false,
+            string label = "Texture Rotation"
             )
         {
             UvTransform oldUvTransform;
@@ -51,7 +52,7 @@ namespace GLTFast.Editor
             }
             
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Texture Rotation");
+            GUILayout.Label(label);
             var newUvRotation = EditorGUILayout.Slider(oldUvTransform.rotation,0,360);
             GUILayout.EndHorizontal();
 
