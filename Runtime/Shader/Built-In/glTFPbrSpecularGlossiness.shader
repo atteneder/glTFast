@@ -19,41 +19,41 @@ Shader "glTF/PbrSpecularGlossiness"
 {
     Properties
     {
-        _Color("Color", Color) = (1,1,1,1)
-        _MainTex("Albedo", 2D) = "white" {}
-        _MainTexRotation ("Texture rotation", Vector) = (0,0,0,0)
-        [Enum(UV0,0,UV1,1)] _MainTexUVChannel ("Base Color Map UV Set", Float) = 0
+        baseColorFactor("Diffuse", Color) = (1,1,1,1)
+        baseColorTexture("Diffuse Tex", 2D) = "white" {}
+        baseColorTexture_Rotation ("Diffuse Tex Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] baseColorTexture_texCoord ("Diffuse Tex UV", Float) = 0
 
-        _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
+        alphaCutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
-        _Glossiness("Glossiness", Range(0.0, 1.0)) = 1
+        glossinessFactor("Glossiness", Range(0.0, 1.0)) = 1
         // _GlossMapScale("Smoothness Factor", Range(0.0, 1.0)) = 1.0
         // [Enum(Specular Alpha,0,Albedo Alpha,1)] _SmoothnessTextureChannel ("Smoothness texture channel", Float) = 0
 
-        _SpecColor("Specular", Color) = (1,1,1)
-        _SpecGlossMap("Specular/Glossiness Map", 2D) = "white" {}
-        _SpecGlossMapRotation ("Specular/Glossiness Map Rotation", Vector) = (0,0,0,0)
-        [Enum(UV0,0,UV1,1)] _SpecGlossMapUVChannel ("Specular/Glossiness Map UV Set", Float) = 0
+        specularFactor("Specular", Color) = (1,1,1)
+        specularGlossinessTexture("Specular-Glossiness Tex", 2D) = "white" {}
+        specularGlossinessTexture_Rotation ("Specular-Glossiness Tex Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] specularGlossinessTexture_texCoord ("Specular-Glossiness Tex UV", Float) = 0
         // [ToggleOff] _SpecularHighlights("Specular Highlights", Float) = 1.0
         // [ToggleOff] _GlossyReflections("Glossy Reflections", Float) = 1.0
 
-        _BumpScale("Scale", Float) = 1.0
-        [Normal] _BumpMap("Normal Map", 2D) = "bump" {}
-        _BumpMapRotation ("Normal Map Rotation", Vector) = (0,0,0,0)
-        [Enum(UV0,0,UV1,1)] _BumpMapUVChannel ("Normal Map UV Set", Float) = 0
+        normalTexture_scale("Normal Scale", Float) = 1.0
+        [Normal] normalTexture("Normal Tex", 2D) = "bump" {}
+        normalTexture_Rotation ("Normal Tex Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] normalTexture_texCoord ("Normal Tex UV Set", Float) = 0
 
         // _Parallax ("Height Scale", Range (0.005, 0.08)) = 0.02
         // _ParallaxMap ("Height Map", 2D) = "black" {}
 
-        _OcclusionStrength("Occlusion Strength", Range(0.0, 1.0)) = 1.0
-        _OcclusionMap("Occlusion", 2D) = "white" {}
-        _OcclusionMapRotation ("Occlusion Map Rotation", Vector) = (0,0,0,0)
-        [Enum(UV0,0,UV1,1)] _OcclusionMapUVChannel ("Occlusion Map UV Set", Float) = 0
+        occlusionTexture_strength("Occlusion Strength", Range(0.0, 1.0)) = 1.0
+        occlusionTexture("Occlusion Tex", 2D) = "white" {}
+        occlusionTexture_Rotation ("Occlusion Tex Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] occlusionTexture_texCoord ("Occlusion Tex UV Set", Float) = 0
 
-        _EmissionColor("Color", Color) = (0,0,0)
-        _EmissionMap("Emission", 2D) = "white" {}
-        _EmissionMapRotation ("Emission Map Rotation", Vector) = (0,0,0,0)
-        [Enum(UV0,0,UV1,1)] _EmissionMapUVChannel ("Emission Map UV Set", Float) = 0
+        emissiveFactor("Emissive", Color) = (0,0,0)
+        emissiveTexture("Emissive Tex", 2D) = "white" {}
+        emissiveTexture_Rotation ("Emissive Tex Rotation", Vector) = (0,0,0,0)
+        [Enum(UV0,0,UV1,1)] emissiveTexture_texCoord ("Emissive Tex UV", Float) = 0
         
         // _DetailMask("Detail Mask", 2D) = "white" {}
 

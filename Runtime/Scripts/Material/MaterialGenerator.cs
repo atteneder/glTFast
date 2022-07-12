@@ -150,6 +150,13 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property _ZWrite</summary>
         public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
 
+        protected static readonly int baseColorPropId = Shader.PropertyToID("baseColorFactor");
+        protected static readonly int metallicRoughnessMapPropId = Shader.PropertyToID("metallicRoughnessTexture");
+        protected static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("metallicRoughnessTexture_ST");
+        protected static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("metallicRoughnessTexture_Rotation");
+        protected static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("metallicRoughnessTexture_texCoord");
+        protected static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
+        
         static IMaterialGenerator defaultMaterialGenerator;
         
         /// <summary>

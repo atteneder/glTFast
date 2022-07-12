@@ -307,7 +307,7 @@ inline FragmentCommonData FragmentSetup (
 
     half alpha = Alpha(i_tex.xy);
     #if defined(_ALPHATEST_ON)
-        clip (alpha - _Cutoff);
+        clip (alpha - alphaCutoff);
     #endif
 
 #if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
@@ -463,20 +463,20 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     #endif
     o.pos = UnityObjectToClipPos(v.vertex);
 
-    o.tex.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);
+    o.tex.xy = TexCoordsSingle((baseColorTexture_texCoord==0)?v.uv0:v.uv1,baseColorTexture);
     #ifdef _NORMALMAP
-    o.tex.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+    o.tex.zw = TexCoordsSingle((normalTexture_texCoord==0)?v.uv0:v.uv1,normalTexture);
     #endif
     #ifdef _OCCLUSION
-    o.texORM.xy = TexCoordsSingle((_OcclusionMapUVChannel==0)?v.uv0:v.uv1,_OcclusionMap);
+    o.texORM.xy = TexCoordsSingle((occlusionTexture_texCoord==0)?v.uv0:v.uv1,occlusionTexture);
     #endif
     #ifdef _METALLICGLOSSMAP
-    o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    o.texORM.zw = TexCoordsSingle((metallicRoughnessTexture_texCoord==0)?v.uv0:v.uv1,metallicRoughnessTexture);
     #elif defined(_SPECGLOSSMAP)
-    o.texORM.zw = TexCoordsSingle((_SpecGlossMapUVChannel==0)?v.uv0:v.uv1,_SpecGlossMap);    
+    o.texORM.zw = TexCoordsSingle((specularGlossinessTexture_texCoord==0)?v.uv0:v.uv1,specularGlossinessTexture);    
     #endif
     #ifdef _EMISSION
-    o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
+    o.texEmission = TexCoordsSingle((emissiveTexture_texCoord==0)?v.uv0:v.uv1,emissiveTexture);
     #endif
 
     o.eyeVec.xyz = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
@@ -594,20 +594,20 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     float4 posWorld = mul(unity_ObjectToWorld, v.vertex);
     o.pos = UnityObjectToClipPos(v.vertex);
 
-    o.tex.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);
+    o.tex.xy = TexCoordsSingle((baseColorTexture_texCoord==0)?v.uv0:v.uv1,baseColorTexture);
     #ifdef _NORMALMAP
-    o.tex.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+    o.tex.zw = TexCoordsSingle((normalTexture_texCoord==0)?v.uv0:v.uv1,normalTexture);
     #endif
     #ifdef _OCCLUSION
-    o.texORM.xy = TexCoordsSingle((_OcclusionMapUVChannel==0)?v.uv0:v.uv1,_OcclusionMap);
+    o.texORM.xy = TexCoordsSingle((occlusionTexture_texCoord==0)?v.uv0:v.uv1,occlusionTexture);
     #endif
     #ifdef _METALLICGLOSSMAP
-    o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    o.texORM.zw = TexCoordsSingle((metallicRoughnessTexture_texCoord==0)?v.uv0:v.uv1,metallicRoughnessTexture);
     #elif defined(_SPECGLOSSMAP)
-    o.texORM.zw = TexCoordsSingle((_SpecGlossMapUVChannel==0)?v.uv0:v.uv1,_SpecGlossMap);    
+    o.texORM.zw = TexCoordsSingle((specularGlossinessTexture_texCoord==0)?v.uv0:v.uv1,specularGlossinessTexture);    
     #endif
     #ifdef _EMISSION
-    o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
+    o.texEmission = TexCoordsSingle((emissiveTexture_texCoord==0)?v.uv0:v.uv1,emissiveTexture);
     #endif
 
     o.eyeVec.xyz = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);
@@ -726,20 +726,20 @@ VertexOutputDeferred vertDeferred (VertexInput v)
     o.pos = UnityObjectToClipPos(v.vertex);
 
     
-    o.tex.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);
+    o.tex.xy = TexCoordsSingle((baseColorTexture_texCoord==0)?v.uv0:v.uv1,baseColorTexture);
     #ifdef _NORMALMAP
-    o.tex.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+    o.tex.zw = TexCoordsSingle((normalTexture_texCoord==0)?v.uv0:v.uv1,normalTexture);
     #endif
     #ifdef _OCCLUSION
-    o.texORM.xy = TexCoordsSingle((_OcclusionMapUVChannel==0)?v.uv0:v.uv1,_OcclusionMap);
+    o.texORM.xy = TexCoordsSingle((occlusionTexture_texCoord==0)?v.uv0:v.uv1,occlusionTexture);
     #endif
     #ifdef _METALLICGLOSSMAP
-    o.texORM.zw = TexCoordsSingle((_MetallicGlossMapUVChannel==0)?v.uv0:v.uv1,_MetallicGlossMap);
+    o.texORM.zw = TexCoordsSingle((metallicRoughnessTexture_texCoord==0)?v.uv0:v.uv1,metallicRoughnessTexture);
     #elif defined(_SPECGLOSSMAP)
-    o.texORM.zw = TexCoordsSingle((_SpecGlossMapUVChannel==0)?v.uv0:v.uv1,_SpecGlossMap);
+    o.texORM.zw = TexCoordsSingle((specularGlossinessTexture_texCoord==0)?v.uv0:v.uv1,specularGlossinessTexture);
     #endif
     #ifdef _EMISSION
-    o.texEmission = TexCoordsSingle((_EmissionMapUVChannel==0)?v.uv0:v.uv1,_EmissionMap);
+    o.texEmission = TexCoordsSingle((emissiveTexture_texCoord==0)?v.uv0:v.uv1,emissiveTexture);
     #endif
 
     o.eyeVec = NormalizePerVertexNormal(posWorld.xyz - _WorldSpaceCameraPos);

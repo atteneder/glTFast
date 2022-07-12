@@ -35,55 +35,57 @@
 #endif
 
 //---------------------------------------
-half4       _Color;
-half        _Cutoff;
+half4       baseColorFactor;
+half        alphaCutoff;
 
-sampler2D   _MainTex;
-float4      _MainTex_ST;
-float2      _MainTexRotation;
-half        _MainTexUVChannel;
+sampler2D   baseColorTexture;
+float4      baseColorTexture_ST;
+float2      baseColorTexture_Rotation;
+half        baseColorTexture_texCoord;
 
 sampler2D   _DetailAlbedoMap;
 float4      _DetailAlbedoMap_ST;
 
-sampler2D   _BumpMap;
-float4      _BumpMap_ST;
-float2      _BumpMapRotation;
-half        _BumpMapUVChannel;
-half        _BumpScale;
+sampler2D   normalTexture;
+float4      normalTexture_ST;
+float2      normalTexture_Rotation;
+half        normalTexture_texCoord;
+half        normalTexture_scale;
 
 sampler2D   _DetailMask;
 sampler2D   _DetailNormalMap;
 half        _DetailNormalMapScale;
 
-sampler2D   _SpecGlossMap;
-float4      _SpecGlossMap_ST;
-float2      _SpecGlossMapRotation;
-half        _SpecGlossMapUVChannel;
+sampler2D   specularGlossinessTexture;
+float4      specularGlossinessTexture_ST;
+float2      specularGlossinessTexture_Rotation;
+half        specularGlossinessTexture_texCoord;
 
-sampler2D   _MetallicGlossMap;
-float4      _MetallicGlossMap_ST;
-float2      _MetallicGlossMapRotation;
-half        _MetallicGlossMapUVChannel;
-half        _Metallic;
-float       _Glossiness;
-float       _Roughness;
+sampler2D   metallicRoughnessTexture;
+float4      metallicRoughnessTexture_ST;
+float2      metallicRoughnessTexture_Rotation;
+half        metallicRoughnessTexture_texCoord;
+half        metallicFactor;
+float       glossinessFactor;
+float       roughnessFactor;
 
-sampler2D   _OcclusionMap;
-float4      _OcclusionMap_ST;
-float2      _OcclusionMapRotation;
-half        _OcclusionMapUVChannel;
-half        _OcclusionStrength;
+sampler2D   occlusionTexture;
+float4      occlusionTexture_ST;
+float2      occlusionTexture_Rotation;
+half        occlusionTexture_texCoord;
+half        occlusionTexture_strength;
 
 sampler2D   _ParallaxMap;
 half        _Parallax;
 half        _UVSec;
 
-half4       _EmissionColor;
-sampler2D   _EmissionMap;
-float4      _EmissionMap_ST;
-float2      _EmissionMapRotation;
-half        _EmissionMapUVChannel;
+half4       emissiveFactor;
+sampler2D   emissiveTexture;
+float4      emissiveTexture_ST;
+float2      emissiveTexture_Rotation;
+half        emissiveTexture_texCoord;
+
+half4       specularFactor;
 
 //-------------------------------------------------------------------------------------
 // Input functions
@@ -110,22 +112,22 @@ float4 TexCoords(VertexInput v)
 #ifdef _UV_ROTATION
 
     // Scale and Rotation: 2x2 matrix multiplication
-    texcoord.z = v.uv0.x * _MainTex_ST.x + v.uv0.y * _MainTexRotation.y;
-    texcoord.w = v.uv0.x * _MainTexRotation.x + v.uv0.y * _MainTex_ST.y;
+    texcoord.z = v.uv0.x * baseColorTexture_ST.x + v.uv0.y * baseColorTexture_Rotation.y;
+    texcoord.w = v.uv0.x * baseColorTexture_Rotation.x + v.uv0.y * baseColorTexture_ST.y;
 
     // Transform/Offset
-    texcoord.xy = texcoord.zw + _MainTex_ST.zw;
+    texcoord.xy = texcoord.zw + baseColorTexture_ST.zw;
 
     texcoord.zw = TRANSFORM_TEX(((_UVSec == 0) ? v.uv0 : v.uv1), _DetailAlbedoMap);
 #else
-    texcoord.xy = TRANSFORM_TEX(v.uv0, _MainTex); // Always source from uv0
+    texcoord.xy = TRANSFORM_TEX(v.uv0, baseColorTexture); // Always source from uv0
     texcoord.zw = TRANSFORM_TEX(((_UVSec == 0) ? v.uv0 : v.uv1), _DetailAlbedoMap);
 #endif
     return texcoord;
 }
 
 #ifdef _UV_ROTATION
-#define TexCoordsSingle(uv,map) TexCoordsSingleIntern(uv,map##_ST,map##Rotation);
+#define TexCoordsSingle(uv,map) TexCoordsSingleIntern(uv,map##_ST,map##_Rotation);
 #else
 #define TexCoordsSingle(uv,map) TexCoordsSingleSimple(uv,map##_ST);
 #endif
@@ -154,16 +156,16 @@ half DetailMask(float2 uv)
 
 half3 Albedo(float2 texcoords)
 {
-    half3 albedo = _Color.rgb * tex2D (_MainTex, texcoords).rgb;
+    half3 albedo = baseColorFactor.rgb * tex2D (baseColorTexture, texcoords).rgb;
     return albedo;
 }
 
 half Alpha(float2 uv)
 {
 #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
-    return _Color.a;
+    return baseColorFactor.a;
 #else
-    return tex2D(_MainTex, uv).a * _Color.a;
+    return tex2D(baseColorTexture, uv).a * baseColorFactor.a;
 #endif
 }
 
@@ -172,10 +174,10 @@ half Occlusion(float2 uv)
 #if (SHADER_TARGET < 30)
     // SM20: instruction count limitation
     // SM20: simpler occlusion
-    return tex2D(_OcclusionMap, uv).r;
+    return tex2D(occlusionTexture, uv).r;
 #else
-    half occ = tex2D(_OcclusionMap, uv).r;
-    return LerpOneTo (occ, _OcclusionStrength);
+    half occ = tex2D(occlusionTexture, uv).r;
+    return LerpOneTo (occ, occlusionTexture_strength);
 #endif
 }
 
@@ -183,12 +185,12 @@ half4 SpecularGloss(float2 uv)
 {
     half4 sg;
 #ifdef _SPECGLOSSMAP
-    sg = tex2D(_SpecGlossMap, uv);
-    sg.rgb = sg.rgb * _SpecColor.rgb;
-    sg.a *= _Glossiness;
+    sg = tex2D(specularGlossinessTexture, uv);
+    sg.rgb = sg.rgb * specularFactor.rgb;
+    sg.a *= glossinessFactor;
 #else
-    sg.rgb = _SpecColor.rgb;
-    sg.a = _Glossiness;
+    sg.rgb = specularFactor.rgb;
+    sg.a = glossinessFactor;
 #endif
     return sg;
 }
@@ -198,12 +200,12 @@ half2 MetallicGloss(float2 uv)
     half2 mg;
 
 #ifdef _METALLICGLOSSMAP
-    mg.rg = tex2D(_MetallicGlossMap, uv).bg;
-    mg.r *= _Metallic;
-    mg.g = 1-(mg.g*_Roughness);
+    mg.rg = tex2D(metallicRoughnessTexture, uv).bg;
+    mg.r *= metallicFactor;
+    mg.g = 1-(mg.g*roughnessFactor);
 #else
-    mg.r = _Metallic;
-    mg.g = 1-_Roughness;
+    mg.r = metallicFactor;
+    mg.g = 1-roughnessFactor;
 #endif
     return mg;
 }
@@ -212,15 +214,15 @@ half2 MetallicRough(float2 uv)
 {
     half2 mg;
 #ifdef _METALLICGLOSSMAP
-    mg.r = tex2D(_MetallicGlossMap, uv).b * _Metallic;
+    mg.r = tex2D(metallicRoughnessTexture, uv).b * metallicFactor;
 #else
-    mg.r = _Metallic;
+    mg.r = metallicFactor;
 #endif
 
 #ifdef _SPECGLOSSMAP
-    mg.g = 1.0f - (tex2D(_SpecGlossMap, uv).a*_Glossiness);
+    mg.g = 1.0f - (tex2D(specularGlossinessTexture, uv).a*glossinessFactor);
 #else
-    mg.g = 1.0f - _Glossiness;
+    mg.g = 1.0f - glossinessFactor;
 #endif
     return mg;
 }
@@ -230,14 +232,14 @@ half3 Emission(float2 uv)
 #ifndef _EMISSION
     return 0;
 #else
-    return tex2D(_EmissionMap, uv).rgb * _EmissionColor.rgb;
+    return tex2D(emissiveTexture, uv).rgb * emissiveFactor.rgb;
 #endif
 }
 
 #ifdef _NORMALMAP
 half3 NormalInTangentSpace(float2 texcoords)
 {
-    half3 normalTangent = UnpackScaleNormal(tex2D (_BumpMap, texcoords), _BumpScale);
+    half3 normalTangent = UnpackScaleNormal(tex2D (normalTexture, texcoords), normalTexture_scale);
     return normalTangent;
 }
 #endif

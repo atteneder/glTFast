@@ -66,13 +66,7 @@ namespace GLTFast.Materials {
         const string KW_OCCLUSION = "_OCCLUSION";
         const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
 
-        static readonly int glossinessPropId = Shader.PropertyToID("_Glossiness");
-        static readonly int metallicGlossMapPropId = Shader.PropertyToID("_MetallicGlossMap");
-        static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("_MetallicGlossMap_ST");
-        static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("_MetallicGlossMapRotation");
-        static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("_MetallicGlossMapUVChannel");
         static readonly int modePropId = Shader.PropertyToID("_Mode");
-        static readonly int roughnessPropId = Shader.PropertyToID("_Roughness");
 
 #if UNITY_EDITOR
         const string SHADER_PATH_PREFIX = "Packages/com.atteneder.gltfast/Runtime/Shader/Built-In/";
@@ -222,7 +216,7 @@ namespace GLTFast.Materials {
                 if (specGloss != null) {
                     baseColorLinear = specGloss.diffuseColor;
                     material.SetVector(specularFactorPropId, specGloss.specularColor);
-                    material.SetFloat(glossinessPropId,specGloss.glossinessFactor);
+                    material.SetFloat(glossinessFactorPropId,specGloss.glossinessFactor);
 
                     TrySetTexture(
                         specGloss.diffuseTexture,
@@ -255,7 +249,7 @@ namespace GLTFast.Materials {
             {
                 baseColorLinear = gltfMaterial.pbrMetallicRoughness.baseColor;
                 material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
-                material.SetFloat(roughnessPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
+                material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
                 TrySetTexture(
                     gltfMaterial.pbrMetallicRoughness.baseColorTexture,
@@ -271,7 +265,7 @@ namespace GLTFast.Materials {
                     gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,
                     material,
                     gltf,
-                    metallicGlossMapPropId,
+                    metallicRoughnessMapPropId,
                     metallicRoughnessMapScaleTransformPropId,
                     metallicRoughnessMapRotationPropId,
                     metallicRoughnessMapUVChannelPropId
@@ -351,7 +345,7 @@ namespace GLTFast.Materials {
                     break;
             }
 
-            material.color = baseColorLinear.gamma;
+            material.SetVector(baseColorPropId, baseColorLinear.gamma);
             
             if(gltfMaterial.emissive != Color.black) {
                 material.SetColor(emissiveFactorPropId, gltfMaterial.emissive.gamma);

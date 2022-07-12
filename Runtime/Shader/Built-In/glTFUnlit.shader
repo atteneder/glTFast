@@ -22,11 +22,11 @@
 
 Shader "glTF/Unlit" {
 Properties {
-    _Color ("Main Color", Color) = (1,1,1,1)
-    _MainTex ("Base (RGB)", 2D) = "white" {}
-    _MainTexRotation ("Texture rotation", Vector) = (0,0,0,0)
-    [Enum(UV0,0,UV1,1)] _MainTexUVChannel ("Base Color Map UV Set", Float) = 0
-    _Cutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
+    baseColorFactor ("Main Color", Color) = (1,1,1,1)
+    baseColorTexture ("Base (RGB)", 2D) = "white" {}
+    baseColorTexture_Rotation ("Texture rotation", Vector) = (0,0,0,0)
+    [Enum(UV0,0,UV1,1)] baseColorTexture_texCoord ("Base Color Map UV Set", Float) = 0
+    alphaCutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
     [HideInInspector] _Mode ("__mode", Float) = 0.0
     [HideInInspector] _SrcBlend ("__src", Float) = 1.0
     [HideInInspector] _DstBlend ("__dst", Float) = 0.0
@@ -77,7 +77,7 @@ SubShader {
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.texcoord = TexCoordsSingle((_MainTexUVChannel==0)?v.texcoord0:v.texcoord1, _MainTex);
+                o.texcoord = TexCoordsSingle((baseColorTexture_texCoord==0)?v.texcoord0:v.texcoord1, baseColorTexture);
 
                 UNITY_TRANSFER_FOG(o,o.vertex);
 #ifdef UNITY_COLORSPACE_GAMMA
@@ -92,10 +92,10 @@ SubShader {
 
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_MainTex, i.texcoord) * _Color;
+                fixed4 col = tex2D(baseColorTexture, i.texcoord) * baseColorFactor;
                 col *= i.color;
 #ifdef _ALPHATEST_ON
-                clip(col.a - _Cutoff);
+                clip(col.a - alphaCutoff);
 #endif
                 UNITY_APPLY_FOG(i.fogCoord, col);
 #if !defined(_ALPHATEST_ON) &&  !defined(_ALPHABLEND_ON) && !defined(_ALPHAPREMULTIPLY_ON)

@@ -98,16 +98,10 @@ namespace GLTFast.Materials {
         
         protected const string k_MotionVectorsPass = "MOTIONVECTORS";
         
-        static readonly int baseColorPropId = Shader.PropertyToID("baseColorFactor");
         static readonly int baseMapPropId = Shader.PropertyToID("baseColorTexture");
         static readonly int baseMapScaleTransformPropId = Shader.PropertyToID("baseColorTexture_ST"); //TODO: support in shader!
         static readonly int baseMapRotationPropId = Shader.PropertyToID("baseColorTexture_Rotation"); //TODO; support in shader!
         static readonly int baseMapUVChannelPropId = Shader.PropertyToID("baseColorTexture_texCoord"); //TODO; support in shader!
-        static readonly int metallicRoughnessMapPropId = Shader.PropertyToID("metallicRoughnessTexture");
-        static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("metallicRoughnessTexture_ST");
-        static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("metallicRoughnessTexture_Rotation");
-        static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("metallicRoughnessTexture_texCoord");
-        static readonly int smoothnessPropId = Shader.PropertyToID("roughnessFactor");
         protected static readonly int transmissionFactorPropId = Shader.PropertyToID("transmissionFactor");
         protected static readonly int transmissionTexturePropId = Shader.PropertyToID("transmissionTexture");
         protected static readonly int transmissionTextureScaleTransformPropId = Shader.PropertyToID("transmissionTexture_texCoord");
@@ -191,7 +185,7 @@ namespace GLTFast.Materials {
 #else
                     material.SetVector(specularFactorPropId, specGloss.specularColor);
 #endif                    
-                    material.SetFloat(smoothnessPropId, specGloss.glossinessFactor);
+                    material.SetFloat(glossinessFactorPropId, specGloss.glossinessFactor);
 
                     TrySetTexture(
                         specGloss.diffuseTexture,
@@ -241,7 +235,7 @@ namespace GLTFast.Materials {
                 if (materialType==MaterialType.MetallicRoughness)
                 {
                     material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
-                    material.SetFloat(smoothnessPropId, 1-gltfMaterial.pbrMetallicRoughness.roughnessFactor );
+                    material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
                     if(TrySetTexture(
                         gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,

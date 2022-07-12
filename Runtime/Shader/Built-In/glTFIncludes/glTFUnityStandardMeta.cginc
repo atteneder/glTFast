@@ -49,9 +49,9 @@ v2f_meta vert_meta (VertexInput v)
 #endif
     o.pos = UnityMetaVertexPosition(v.vertex, v.uv1.xy, v.uv2.xy, unity_LightmapST, unity_DynamicLightmapST);
 
-    o.uv.xy = TexCoordsSingle((_MainTexUVChannel==0)?v.uv0:v.uv1,_MainTex);
+    o.uv.xy = TexCoordsSingle((baseColorTexture_texCoord==0)?v.uv0:v.uv1,baseColorTexture);
 #ifdef _NORMALMAP
-    o.uv.zw = TexCoordsSingle((_BumpMapUVChannel==0)?v.uv0:v.uv1,_BumpMap);
+    o.uv.zw = TexCoordsSingle((normalTexture_texCoord==0)?v.uv0:v.uv1,normalTexture);
 #else
     o.uv.zw = float2(0,0);
 #endif

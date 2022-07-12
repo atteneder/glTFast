@@ -65,12 +65,12 @@ struct VertexOutputBaseSimple
 // UNIFORM_REFLECTIVITY(): workaround to get (uniform) reflecivity based on UNITY_SETUP_BRDF_INPUT
 half MetallicSetup_Reflectivity()
 {
-    return 1.0h - OneMinusReflectivityFromMetallic(_Metallic);
+    return 1.0h - OneMinusReflectivityFromMetallic(metallicFactor);
 }
 
 half SpecularSetup_Reflectivity()
 {
-    return SpecularStrength(_SpecColor.rgb);
+    return SpecularStrength(specularFactor.rgb);
 }
 
 half RoughnessSetup_Reflectivity()
@@ -146,7 +146,7 @@ VertexOutputBaseSimple vertForwardBaseSimple (VertexInput v)
 
     o.normalWorld.w = Pow4(1 - saturate(dot(normalWorld, -eyeVec))); // fresnel term
     #if !GLOSSMAP
-        o.eyeVec.w = saturate(_Glossiness + UNIFORM_REFLECTIVITY()); // grazing term
+        o.eyeVec.w = saturate(glossinessFactor + UNIFORM_REFLECTIVITY()); // grazing term
     #endif
     o.pointSize = 1;
 
@@ -159,7 +159,7 @@ FragmentCommonData FragmentSetupSimple(VertexOutputBaseSimple i)
 {
     half alpha = Alpha(i.tex.xy);
     #if defined(_ALPHATEST_ON)
-        clip (alpha - _Cutoff);
+        clip (alpha - alphaCutoff);
     #endif
 
     
@@ -362,7 +362,7 @@ FragmentCommonData FragmentSetupSimpleAdd(VertexOutputForwardAddSimple i)
 {
     half alpha = Alpha(i.tex.xy);
     #if defined(_ALPHATEST_ON)
-        clip (alpha - _Cutoff);
+        clip (alpha - alphaCutoff);
     #endif
    
 #if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
