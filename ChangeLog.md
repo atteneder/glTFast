@@ -16,9 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `LoadGltfJson` to load a glTF JSON from string
 - (Import) `sceneObjectCreation` instantiation setting. It controls whether/when a GameObject/Entity should be created for the scene. Options: `Always`, `Never`, `WhenSingleRootNode`. (#320)
 - (Import) Design-time import inspector now offers many more settings (feature parity with run-time settings)
-- Extended access to de-serialized glTF JSON
-  - `IGltfReadable.GetSourceRoot`
-  - `IGltfReadable.GetSourceNode`
+- Extended access to `IGltfReadable`
+  - `GetSourceRoot`
+  - `GetSourceNode`
+  - `GetBindPoses`
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
