@@ -707,6 +707,29 @@ namespace GLTFast {
             return null;
         }
         
+        /// <summary>
+        /// Returns an array of inverse bone matrices representing a skin's bind pose suitable for use with UnityEngine.Mesh.bindposes by glTF skin index.
+        /// </summary>
+        /// <param name="skinId">glTF skin index</param>
+        /// <returns>Corresponding bind poses</returns>
+        public Matrix4x4[] GetBindPoses(int skinId)
+        {
+            if (skinsInverseBindMatrices == null) return null;
+            if (skinsInverseBindMatrices[skinId] != null)
+            {
+                return skinsInverseBindMatrices[skinId];
+            }
+
+            var skin = gltfRoot.skins[skinId];
+            var result = new Matrix4x4[skin.joints.Length];
+            for (var i = 0; i < result.Length; i++)
+            {
+                result[i] = Matrix4x4.identity;
+            }
+            skinsInverseBindMatrices[skinId] = result;
+            return result;
+        }
+
 #endregion Public
 
         async Task<bool> LoadFromUri( Uri url ) {
@@ -2031,21 +2054,6 @@ namespace GLTFast {
 #endif
 
             Profiler.EndSample();
-        }
-
-        Matrix4x4[] GetBindPoses(int skinId) {
-            if (skinsInverseBindMatrices == null) return null;
-            if (skinsInverseBindMatrices[skinId] != null) {
-                return skinsInverseBindMatrices[skinId];
-            }
-
-            var skin = gltfRoot.skins[skinId];
-            var result = new Matrix4x4[skin.joints.Length];
-            for (var i = 0; i < result.Length; i++) {
-                result[i] = Matrix4x4.identity;
-            }
-            skinsInverseBindMatrices[skinId] = result;
-            return result;
         }
 
         /// <summary>
