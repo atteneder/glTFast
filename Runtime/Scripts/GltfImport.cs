@@ -647,6 +647,11 @@ namespace GLTFast {
         }
 
         /// <inheritdoc />
+        public Root GetSourceRoot() {
+            return gltfRoot;
+        }
+        
+        /// <inheritdoc />
         public Camera GetSourceCamera(uint index) {
             if (gltfRoot?.cameras != null && index < gltfRoot.cameras.Length) {
                 return gltfRoot.cameras[index];
@@ -674,6 +679,14 @@ namespace GLTFast {
         public Material GetSourceMaterial(int index = 0) {
             if (gltfRoot?.materials != null && index >= 0 && index < gltfRoot.materials.Length) {
                 return gltfRoot.materials[index];
+            }
+            return null;
+        }
+
+        /// <inheritdoc />
+        public Node GetSourceNode(int index = 0) {
+            if (gltfRoot?.nodes != null && index >= 0 && index < gltfRoot.nodes.Length) {
+                return gltfRoot.nodes[index];
             }
             return null;
         }

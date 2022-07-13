@@ -65,6 +65,14 @@ namespace GLTFast {
         Texture2D GetTexture(int index = 0);
 
         /// <summary>
+        /// Get source root (de-serialized glTF JSON).
+        /// This is intended for read-only access. Changes might corrupt data
+        /// and break subsequent scene instantiation.
+        /// </summary>
+        /// <returns>De-serialized glTF root object</returns>
+        Root GetSourceRoot();
+        
+        /// <summary>
         /// Get source (de-serialized glTF) camera
         /// </summary>
         /// <param name="index">glTF camera index</param>
@@ -78,6 +86,13 @@ namespace GLTFast {
         /// <returns>De-serialized glTF material</returns>
         Schema.Material GetSourceMaterial(int index = 0);
 
+        /// <summary>
+        /// Get source (de-serialized glTF) node
+        /// </summary>
+        /// <param name="index">glTF node index</param>
+        /// <returns>De-serialized glTF node</returns>
+        Schema.Node GetSourceNode(int index = 0);
+        
         /// <summary>
         /// Get source (de-serialized glTF) scene
         /// </summary>
