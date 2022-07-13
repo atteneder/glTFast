@@ -13,6 +13,16 @@
 // limitations under the License.
 //
 
+#if NEWTONSOFT_JSON && GLTFAST_USE_NEWTONSOFT_JSON
+#define JSON_NEWTONSOFT
+#else
+#define JSON_UTILITY
+#endif
+
+#if JSON_NEWTONSOFT
+using Newtonsoft.Json.Linq;
+#endif
+
 namespace GLTFast.Schema
 {
 
@@ -72,6 +82,10 @@ namespace GLTFast.Schema
 
         /// <inheritdoc cref="NodeExtensions"/>
         public NodeExtensions extensions;
+
+#if JSON_NEWTONSOFT
+        public JToken extras;
+#endif
 
         internal void GltfSerialize(JsonWriter writer)
         {

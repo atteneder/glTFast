@@ -93,6 +93,11 @@
             "name": "com.unity.shadergraph",
             "expression": "12",
             "define": "UNITY_SHADER_GRAPH_12_OR_NEWER"
+        },
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "3",
+            "define": "NEWTONSOFT_JSON"
         }
     ],
     "noEngineReferences": false
