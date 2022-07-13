@@ -114,5 +114,14 @@ namespace GLTFast {
         /// <returns>De-serialized glTF image</returns>
         Schema.Image GetSourceImage(int index = 0);
         Schema.LightPunctual GetSourceLightPunctual(uint index);
+
+        /// <summary>
+        /// Returns an array of inverse bone matrices representing a skin's
+        /// bind pose suitable for use with UnityEngine.Mesh.bindposes by glTF
+        /// skin index.
+        /// </summary>
+        /// <param name="skinId">glTF skin index</param>
+        /// <returns>Corresponding bind poses</returns>
+        Matrix4x4[] GetBindPoses(int skinId);
     }
 }

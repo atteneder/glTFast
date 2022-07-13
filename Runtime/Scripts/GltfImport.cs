@@ -707,11 +707,7 @@ namespace GLTFast {
             return null;
         }
         
-        /// <summary>
-        /// Returns an array of inverse bone matrices representing a skin's bind pose suitable for use with UnityEngine.Mesh.bindposes by glTF skin index.
-        /// </summary>
-        /// <param name="skinId">glTF skin index</param>
-        /// <returns>Corresponding bind poses</returns>
+        /// <inheritdoc />
         public Matrix4x4[] GetBindPoses(int skinId)
         {
             if (skinsInverseBindMatrices == null) return null;
