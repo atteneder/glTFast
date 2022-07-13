@@ -70,7 +70,7 @@ namespace GLTFast {
         /// and break subsequent scene instantiation.
         /// </summary>
         /// <returns>De-serialized glTF root object</returns>
-        Root GetSourceRoot();
+        Schema.Root GetSourceRoot();
         
         /// <summary>
         /// Get source (de-serialized glTF) camera
