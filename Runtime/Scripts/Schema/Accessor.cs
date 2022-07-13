@@ -238,7 +238,7 @@ namespace GLTFast.Schema {
                 case GLTFComponentType.UnsignedInt:
                     return 4;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type), componentType, null);
+                    throw new ArgumentOutOfRangeException(nameof(componentType), componentType, null);
             }
         }
         
