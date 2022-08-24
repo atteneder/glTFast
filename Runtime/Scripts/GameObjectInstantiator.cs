@@ -402,6 +402,9 @@ namespace GLTFast {
                     }
                     animation.Play();
                 }
+                else {
+                    go.AddComponent<Animator>();
+                }
             }
 #endif // UNITY_ANIMATION
         }
