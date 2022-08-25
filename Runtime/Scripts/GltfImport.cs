@@ -3115,7 +3115,7 @@ namespace GLTFast {
         /// <param name="accessor">De-serialized glTF accessor</param>
         /// <param name="data">Pointer to accessor's data in memory</param>
         /// <param name="byteStride">Element byte stride</param>
-        public unsafe void GetAccessor(int index, out Accessor accessor, out void* data, out int byteStride) {
+        unsafe void IGltfBuffers.GetAccessor(int index, out Accessor accessor, out void* data, out int byteStride) {
             accessor = gltfRoot.accessors[index];
             if (accessor.bufferView < 0 || accessor.bufferView >= gltfRoot.bufferViews.Length) {
                 data = null;
