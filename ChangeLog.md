@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - Diffuse texture transform on specular glossiness materials (#454)
+- Corrected pointer math in normalized short texture coordinate conversion (#439)
 
 ## [4.8.3] - 2022-06-04
 ### Fixed
