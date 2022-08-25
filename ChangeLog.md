@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `GetSourceRoot`
   - `GetSourceNode`
   - `GetBindPoses`
+- `GltfAsset` component got new properties for code-less setup
+  - Import Settings
+  - Instantiation Settings
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator

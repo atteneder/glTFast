@@ -27,6 +27,9 @@ namespace GLTFast
     /// </summary>
     public abstract class GltfAssetBase : MonoBehaviour
     {
+        /// <inheritdoc cref="ImportSettings"/>
+        public ImportSettings importSettings;
+        
         /// <summary>
         /// Instance used for loading the glTF's content
         /// </summary>
@@ -63,7 +66,7 @@ namespace GLTFast
             )
         {
             importer = new GltfImport(downloadProvider,deferAgent, materialGenerator, logger);
-            return await importer.Load(url);
+            return await importer.Load(url,importSettings);
         }
 
         /// <summary>

@@ -53,6 +53,7 @@ namespace GLTFast
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset = false;
 
+        /// <inheritdoc cref="InstantiationSettings"/>
         public InstantiationSettings instantiationSettings;
         
         /// <summary>
