@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - Diffuse texture transform on specular glossiness materials (#454)
-- Corrected pointer math in normalized short texture coordinate conversion (#439)
-
+- Corrected pointer math in accessor conversions
+  - Int16 texture coordinates
+  - Normalized Int16 texture coordinates (#439)
+  - Normalized Int16 tangents
 ## [4.8.3] - 2022-06-04
 ### Fixed
 - Loading glTFs with nothing but accessors/bufferViews/buffers (#422)
