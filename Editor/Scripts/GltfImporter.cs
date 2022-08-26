@@ -141,6 +141,12 @@ namespace GLTFast.Editor {
                 
                 for (var i = 0; i < m_Gltf.materialCount; i++) {
                     var mat = m_Gltf.GetMaterial(i);
+                    
+                    // Overriding double-sided for GI baking
+                    // Resolves problems with meshes that are not a closed
+                    // volume at a potential minor cost of baking speed. 
+                    mat.doubleSidedGI = true;
+                    
                     if (mat != null) {
                         AddObjectToAsset(ctx, $"materials/{mat.name}", mat);
                     }

@@ -5,12 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- (Import) Double-sided GI is enabled on all materials for Editor imports (#452)
 ### Fixed
 - Diffuse texture transform on specular glossiness materials (#454)
 - Corrected pointer math in accessor conversions
   - Int16 texture coordinates
   - Normalized Int16 texture coordinates (#439)
   - Normalized Int16 tangents
+
 ## [4.8.3] - 2022-06-04
 ### Fixed
 - Loading glTFs with nothing but accessors/bufferViews/buffers (#422)
