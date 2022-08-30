@@ -158,7 +158,7 @@ namespace GLTFast.Schema {
                 writer.AddProperty("material", material);
             }
             if( mode != DrawMode.Triangles) {
-                writer.AddProperty("mode",mode.ToString());
+                writer.AddProperty("mode",(int)mode);
             }
             if(targets!=null) {
                 writer.AddArray("targets");

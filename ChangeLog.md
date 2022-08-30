@@ -49,6 +49,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shader graphs' BaseColor, BaseColorTexture and vertex color calculations are now in correct color space
 - Export MeshRenderer wherre number of materials does not match number of submeshes (thanks [Dan Dando ][DanDovi] for #428)
 
+## [4.8.5] - 2022-08-30
+### Fixed
+- (Export) Meshes with point topology are exported correctly now (#434)
+- Incorrect texture transform calculation when using rotation (#413)
+
+## [4.8.4] - 2022-08-26
+### Changed
+- (Import) Double-sided GI is enabled on all materials for Editor imports (#452)
+### Fixed
+- Diffuse texture transform on specular glossiness materials (#454)
+- Corrected pointer math in accessor conversions
+  - Int16 texture coordinates
+  - Normalized Int16 texture coordinates (#439)
+  - Normalized Int16 tangents
+
 ## [4.8.3] - 2022-06-04
 ### Fixed
 - Loading glTFs with nothing but accessors/bufferViews/buffers (#422)

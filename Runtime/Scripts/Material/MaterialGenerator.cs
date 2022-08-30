@@ -319,7 +319,7 @@ namespace GLTFast.Materials {
                     material.SetVector(rotationPropertyId, Vector4.zero);
                 }
 
-                textureST.w -= textureST.y * cos; // move offset to move flip axis point (vertically)
+                textureST.w -= textureST.y; // move offset to move flip axis point (vertically)
             }
 
             if(texCoord!=0) {

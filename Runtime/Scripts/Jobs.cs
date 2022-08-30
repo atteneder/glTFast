@@ -694,7 +694,7 @@ namespace GLTFast.Jobs {
 #if UNITY_JOBS
         public void Execute(int i, int count) {
             var resultV = (float2*) ((byte*)result + i*outputByteStride);
-            var uv = (short*) (input + i*inputByteStride);
+            var uv = (short*) ((byte*)input + i*inputByteStride);
             
             for (var x = 0; x < count; x++) {
                 *resultV = new float2(uv[0],1 - uv[1]);
@@ -737,7 +737,7 @@ namespace GLTFast.Jobs {
 #if UNITY_JOBS
         public void Execute(int i, int count) {
             var resultV = (float2*) ((byte*)result + i*outputByteStride);
-            var uv = (short*) (input + i*inputByteStride);
+            var uv = (short*) ((byte*)input + i*inputByteStride);
             
             for (var x = 0; x < count; x++) {
                 var tmp = new float2(uv[0], uv[1]) / short.MaxValue;
@@ -1487,7 +1487,7 @@ namespace GLTFast.Jobs {
 #if UNITY_JOBS
         public void Execute(int i, int count) {
             var resultV = (float4*) ((byte*)result + i*outputByteStride);
-            var off = (short*) (input + i*inputByteStride);
+            var off = (short*) ((byte*)input + i*inputByteStride);
             
             for (var x = 0; x < count; x++) {
                 var tmp = new float4(off[0],off[1],off[2],off[3]) / short.MaxValue;
