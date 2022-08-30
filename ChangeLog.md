@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Fixed
 - (Export) Meshes with point topology are exported correctly now (#434)
+- Incorrect texture transform calculation when using rotation (#413)
 
 ## [4.8.4] - 2022-08-26
 ### Changed
