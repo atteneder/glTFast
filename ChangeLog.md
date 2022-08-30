@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `GltfAsset` component got new properties for code-less setup
   - Import Settings
   - Instantiation Settings
+- Warning when trying to load the main scene if it is not defined (Editor and development builds only; #450)
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator

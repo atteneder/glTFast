@@ -442,7 +442,7 @@ namespace GLTFast {
         /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
         /// </summary>
         /// <param name="parent">Transform that the scene will get parented to</param>
-        /// <returns></returns>
+        /// <returns>True if the main scene was instantiated or was not set. False in case of errors.</returns>
         public bool InstantiateMainScene( Transform parent ) {
             var instantiator = new GameObjectInstantiator(this, parent);
             var success = InstantiateMainScene(instantiator);
@@ -454,12 +454,17 @@ namespace GLTFast {
         /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
         /// </summary>
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
-        /// <returns></returns>
+        /// <returns>True if the main scene was instantiated or was not set. False in case of errors.</returns>
         public bool InstantiateMainScene(IInstantiator instantiator) {
             if (!loadingDone || loadingError) return false;
             // According to glTF specification, loading nothing is
             // the correct behavior
-            if (gltfRoot.scene < 0) return true;
+            if (gltfRoot.scene < 0) {
+#if DEBUG
+                Debug.LogWarning("glTF has no (main) scene defined. No scene will be instantiated.");
+#endif
+                return true;
+            }
             return InstantiateScene(instantiator, gltfRoot.scene);
         }
 
@@ -470,7 +475,7 @@ namespace GLTFast {
         /// </summary>
         /// <param name="parent">Transform that the scene will get parented to</param>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
-        /// <returns></returns>
+        /// <returns>True if the scene was instantiated. False in case of errors.</returns>
         public bool InstantiateScene( Transform parent, int sceneIndex = 0) {
             if (!loadingDone || loadingError) return false;
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
@@ -486,7 +491,7 @@ namespace GLTFast {
         /// </summary>
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
-        /// <returns></returns>
+        /// <returns>True if the scene was instantiated. False in case of errors.</returns>
         public bool InstantiateScene( IInstantiator instantiator, int sceneIndex = 0 ) {
             if (!loadingDone || loadingError) return false;
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
