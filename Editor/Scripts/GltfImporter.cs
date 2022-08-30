@@ -111,7 +111,11 @@ namespace GLTFast.Editor {
                     animationMethod = ImportSettings.AnimationMethod.Mecanim,
                 };
             }
-            
+
+            if (instantiationSettings == null) {
+                instantiationSettings = new InstantiationSettings();
+            }
+
             var success = AsyncHelpers.RunSync(() => m_Gltf.Load(ctx.assetPath,importSettings));
 
             CollectingLogger instantiationLogger = null;
