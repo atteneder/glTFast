@@ -109,7 +109,7 @@ struct VertexInput
 float4 TexCoords(VertexInput v)
 {
     float4 texcoord;
-#ifdef _UV_ROTATION
+#ifdef _TEXTURE_TRANSFORM
 
     // Scale and Rotation: 2x2 matrix multiplication
     texcoord.z = v.uv0.x * baseColorTexture_ST.x + v.uv0.y * baseColorTexture_Rotation.y;
@@ -126,10 +126,10 @@ float4 TexCoords(VertexInput v)
     return texcoord;
 }
 
-#ifdef _UV_ROTATION
+#ifdef _TEXTURE_TRANSFORM
 #define TexCoordsSingle(uv,map) TexCoordsSingleIntern(uv,map##_ST,map##_Rotation);
 #else
-#define TexCoordsSingle(uv,map) TexCoordsSingleSimple(uv,map##_ST);
+#define TexCoordsSingle(uv,map) uv
 #endif
 
 float2 TexCoordsSingleSimple(float2 uv, float4 st)

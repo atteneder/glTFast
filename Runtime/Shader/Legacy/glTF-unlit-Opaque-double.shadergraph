@@ -36,7 +36,7 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.ShaderKeyword"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"a45d88f0-fa3f-4966-bd99-e06b592b261a\"\n    },\n    \"m_Name\": \"UV_ROTATION\",\n    \"m_DefaultReferenceName\": \"BOOLEAN_431D6D3_ON\",\n    \"m_OverrideReferenceName\": \"_UV_ROTATION\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_KeywordType\": 0,\n    \"m_KeywordDefinition\": 0,\n    \"m_KeywordScope\": 0,\n    \"m_Entries\": [],\n    \"m_Value\": 0,\n    \"m_IsEditable\": true,\n    \"m_IsExposable\": true\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"a45d88f0-fa3f-4966-bd99-e06b592b261a\"\n    },\n    \"m_Name\": \"TEXTURE_TRANSFORM\",\n    \"m_DefaultReferenceName\": \"BOOLEAN_431D6D3_ON\",\n    \"m_OverrideReferenceName\": \"_TEXTURE_TRANSFORM\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_KeywordType\": 0,\n    \"m_KeywordDefinition\": 0,\n    \"m_KeywordScope\": 0,\n    \"m_Entries\": [],\n    \"m_Value\": 0,\n    \"m_IsEditable\": true,\n    \"m_IsExposable\": true\n}"
         }
     ],
     "m_SerializableNodes": [

@@ -4107,11 +4107,11 @@
     "m_Guid": {
         "m_GuidSerialized": "be212c58-284e-4b0e-ac76-8dafbc9e09bc"
     },
-    "m_Name": "_UV_ROTATION",
+    "m_Name": "TEXTURE_TRANSFORM",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "BOOLEAN_D5F9AE1C_ON",
-    "m_OverrideReferenceName": "_UV_ROTATION",
+    "m_OverrideReferenceName": "_TEXTURE_TRANSFORM",
     "m_GeneratePropertyBlock": false,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",

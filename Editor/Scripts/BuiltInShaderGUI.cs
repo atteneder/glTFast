@@ -83,9 +83,9 @@ namespace GLTFast.Editor
                 if (uvTransform.HasValue)
                 {
                     if (uvTransform.Value.rotation != 0) {
-                        material.EnableKeyword(KW_UV_ROTATION);
+                        material.EnableKeyword(KW_TEXTURE_TRANSFORM);
                     } else {
-                        material.DisableKeyword(KW_UV_ROTATION);
+                        material.DisableKeyword(KW_TEXTURE_TRANSFORM);
                     }
                 }
                 

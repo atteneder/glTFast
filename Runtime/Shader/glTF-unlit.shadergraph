@@ -1691,11 +1691,11 @@
     "m_Guid": {
         "m_GuidSerialized": "2dd73bf1-62d3-4019-80d3-5abf47047084"
     },
-    "m_Name": "UV_ROTATION",
+    "m_Name": "TEXTURE_TRANSFORM",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "BOOLEAN_A63F3133_ON",
-    "m_OverrideReferenceName": "_UV_ROTATION",
+    "m_OverrideReferenceName": "_TEXTURE_TRANSFORM",
     "m_GeneratePropertyBlock": false,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",

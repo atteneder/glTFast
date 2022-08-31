@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Root entity created by `GltfEntityAsset` will inherit its GameObject's name, position, rotation and scale (at instantiation time)
 - Removed `GltfImport.GetAccessor` from public API (to be replace by a better API; see #426 for details)
 - Converted `emissiveFactor` shader property from low to high dynamic range (HDR) and removed the now obsolete `emissiveIntensity` shader property (float)
+- Shader keyword `_UV_ROTATION` was replaced by `_TEXTURE_TRANSFORM`, which now controls tiling, offset and rotation all together
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

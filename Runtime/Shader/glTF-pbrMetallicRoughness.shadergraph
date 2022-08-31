@@ -1937,10 +1937,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 799.0,
-            "y": 105.99999237060547,
-            "width": 365.9998779296875,
-            "height": 974.0
+            "x": 804.0000610351563,
+            "y": 119.0,
+            "width": 365.99993896484377,
+            "height": 950.0001220703125
         }
     },
     "m_Slots": [
@@ -3877,11 +3877,11 @@
     "m_Guid": {
         "m_GuidSerialized": "108fbca7-4236-4cd0-91b0-91284d981583"
     },
-    "m_Name": "UV_ROTATION",
+    "m_Name": "TEXTURE_TRANSFORM",
     "m_DefaultRefNameVersion": 0,
     "m_RefNameGeneratedByDisplayName": "",
     "m_DefaultReferenceName": "BOOLEAN_B94C4E3A_ON",
-    "m_OverrideReferenceName": "_UV_ROTATION",
+    "m_OverrideReferenceName": "_TEXTURE_TRANSFORM",
     "m_GeneratePropertyBlock": false,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",

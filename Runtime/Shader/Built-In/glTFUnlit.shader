@@ -48,7 +48,7 @@ SubShader {
             #pragma fragment frag
             #pragma target 2.0
             #pragma multi_compile_fog
-            #pragma shader_feature_local _UV_ROTATION
+            #pragma shader_feature_local _TEXTURE_TRANSFORM
             #pragma shader_feature_local _ _ALPHATEST_ON _ALPHABLEND_ON _ALPHAPREMULTIPLY_ON
 
             #include "UnityCG.cginc"

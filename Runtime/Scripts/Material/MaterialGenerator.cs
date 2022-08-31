@@ -70,8 +70,8 @@ namespace GLTFast.Materials {
         
         /// <summary>Shader keyword _ALPHATEST_ON</summary>
         public const string KW_ALPHATEST_ON = "_ALPHATEST_ON";
-        /// <summary>Shader keyword _UV_ROTATION</summary>
-        public const string KW_UV_ROTATION = "_UV_ROTATION";
+        /// <summary>Shader keyword _TEXTURE_TRANSFORM</summary>
+        public const string KW_TEXTURE_TRANSFORM = "_TEXTURE_TRANSFORM";
         /// <summary>Shader keyword _UV_CHANNEL_SELECT</summary>
         public const string KW_UV_CHANNEL_SELECT = "_UV_CHANNEL_SELECT";
         
@@ -302,6 +302,9 @@ namespace GLTFast.Materials {
             var texCoord = textureInfo.texCoord;
 
             if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
+                
+                material.EnableKeyword(KW_TEXTURE_TRANSFORM);
+                
                 var tt = textureInfo.extensions.KHR_texture_transform;
                 if (tt.texCoord >= 0) {
                     texCoord = tt.texCoord;
@@ -330,11 +333,9 @@ namespace GLTFast.Materials {
                     textureST.x *= cos;
                     textureST.y *= cos;
 
-                    material.EnableKeyword(KW_UV_ROTATION);
                     textureST.z -= newRot.y; // move offset to move rotation point (horizontally) 
                 } else {
-                    // In case _UV_ROTATION keyword is set (because another texture is rotated),
-                    // make sure the rotation is properly nulled
+                    // Make sure the rotation is properly nulled
                     material.SetVector(rotationPropertyId, Vector4.zero);
                 }
 
