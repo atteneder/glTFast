@@ -19,8 +19,8 @@ Shader "glTF/PbrSpecularGlossiness"
 {
     Properties
     {
-        baseColorFactor("Diffuse", Color) = (1,1,1,1)
-        baseColorTexture("Diffuse Tex", 2D) = "white" {}
+        [MainColor] baseColorFactor("Diffuse", Color) = (1,1,1,1)
+        [MainTexture] baseColorTexture("Diffuse Tex", 2D) = "white" {}
         baseColorTexture_Rotation ("Diffuse Tex Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] baseColorTexture_texCoord ("Diffuse Tex UV", Float) = 0
 

@@ -22,8 +22,8 @@
 
 Shader "glTF/Unlit" {
 Properties {
-    baseColorFactor ("Main Color", Color) = (1,1,1,1)
-    baseColorTexture ("Base (RGB)", 2D) = "white" {}
+    [MainColor] baseColorFactor ("Main Color", Color) = (1,1,1,1)
+    [MainTexture] baseColorTexture ("Base (RGB)", 2D) = "white" {}
     baseColorTexture_Rotation ("Texture rotation", Vector) = (0,0,0,0)
     [Enum(UV0,0,UV1,1)] baseColorTexture_texCoord ("Base Color Map UV Set", Float) = 0
     alphaCutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
