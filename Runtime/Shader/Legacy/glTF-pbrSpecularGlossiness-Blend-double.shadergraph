@@ -128,21 +128,21 @@
         },
         {
             "typeInfo": {
+                "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
+            },
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"7b92f262-febd-4fdf-89f4-2f0dbbe3c19e\"\n    },\n    \"m_Name\": \"Alpha Cutoff\",\n    \"m_DefaultReferenceName\": \"Vector1_C94E19E6\",\n    \"m_OverrideReferenceName\": \"alphaCutoff\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.5,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+        },
+        {
+            "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.ColorShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"1f801b95-1898-44f4-a056-0e179cd2290f\"\n    },\n    \"m_Name\": \"Emissive\",\n    \"m_DefaultReferenceName\": \"Color_DDF6DA04\",\n    \"m_OverrideReferenceName\": \"emissiveFactor\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"r\": 0.0,\n        \"g\": 0.0,\n        \"b\": 0.0,\n        \"a\": 1.0\n    },\n    \"m_ColorMode\": 0\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"1f801b95-1898-44f4-a056-0e179cd2290f\"\n    },\n    \"m_Name\": \"Emissive\",\n    \"m_DefaultReferenceName\": \"Color_DDF6DA04\",\n    \"m_OverrideReferenceName\": \"emissiveFactor\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"r\": 0.0,\n        \"g\": 0.0,\n        \"b\": 0.0,\n        \"a\": 1.0\n    },\n    \"m_ColorMode\": 1\n}"
         },
         {
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Texture2DShaderProperty"
             },
             "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"26a0e850-f4b7-4172-9e6d-ebd076aa12f4\"\n    },\n    \"m_Name\": \"Emissive Tex\",\n    \"m_DefaultReferenceName\": \"Texture2D_C0C78D41\",\n    \"m_OverrideReferenceName\": \"emissiveTexture\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"m_SerializedTexture\": \"{\\\"texture\\\":{\\\"instanceID\\\":0}}\",\n        \"m_Guid\": \"\"\n    },\n    \"m_Modifiable\": true,\n    \"m_DefaultType\": 0\n}"
-        },
-        {
-            "typeInfo": {
-                "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
-            },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"7b92f262-febd-4fdf-89f4-2f0dbbe3c19e\"\n    },\n    \"m_Name\": \"Alpha Cutoff\",\n    \"m_DefaultReferenceName\": \"Vector1_C94E19E6\",\n    \"m_OverrideReferenceName\": \"alphaCutoff\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.5,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {

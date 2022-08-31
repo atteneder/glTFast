@@ -130,7 +130,7 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.ColorShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"1f801b95-1898-44f4-a056-0e179cd2290f\"\n    },\n    \"m_Name\": \"Emissive\",\n    \"m_DefaultReferenceName\": \"Color_DDF6DA04\",\n    \"m_OverrideReferenceName\": \"emissiveFactor\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"r\": 0.0,\n        \"g\": 0.0,\n        \"b\": 0.0,\n        \"a\": 1.0\n    },\n    \"m_ColorMode\": 0\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"1f801b95-1898-44f4-a056-0e179cd2290f\"\n    },\n    \"m_Name\": \"Emissive\",\n    \"m_DefaultReferenceName\": \"Color_DDF6DA04\",\n    \"m_OverrideReferenceName\": \"emissiveFactor\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"r\": 0.0,\n        \"g\": 0.0,\n        \"b\": 0.0,\n        \"a\": 1.0\n    },\n    \"m_ColorMode\": 1\n}"
         },
         {
             "typeInfo": {

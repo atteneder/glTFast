@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for PNG/Jpeg textures (via built-in packages *Unity Web Request Texture* and *Image Conversion*) is now optional (#321)
 - Root entity created by `GltfEntityAsset` will inherit its GameObject's name, position, rotation and scale (at instantiation time)
 - Removed `GltfImport.GetAccessor` from public API (to be replace by a better API; see #426 for details)
+- Converted `emissiveFactor` shader property from low to high dynamic range (HDR) and removed the now obsolete `emissiveIntensity` shader property (float)
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

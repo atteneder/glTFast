@@ -50,7 +50,7 @@ Shader "glTF/PbrSpecularGlossiness"
         occlusionTexture_Rotation ("Occlusion Tex Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] occlusionTexture_texCoord ("Occlusion Tex UV Set", Float) = 0
 
-        emissiveFactor("Emissive", Color) = (0,0,0)
+        [HDR] emissiveFactor("Emissive", Color) = (0,0,0)
         emissiveTexture("Emissive Tex", 2D) = "white" {}
         emissiveTexture_Rotation ("Emissive Tex Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] emissiveTexture_texCoord ("Emissive Tex UV", Float) = 0
