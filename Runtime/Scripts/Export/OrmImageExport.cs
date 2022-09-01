@@ -44,8 +44,13 @@ namespace GLTFast.Export {
         public override string fileName {
             get {
                 if (m_Texture != null) return base.fileName;
-                if (m_OccTexture != null) return $"{m_OccTexture.name}.{fileExtension}";
-                return $"{m_SmoothnessTexture.name}ORM.{fileExtension}";
+                if (m_OccTexture != null && !string.IsNullOrEmpty(m_OccTexture.name)) {
+                    return $"{m_OccTexture.name}.{fileExtension}";
+                }
+                if (m_SmoothnessTexture != null && !string.IsNullOrEmpty(m_SmoothnessTexture.name)) {
+                    return $"{m_SmoothnessTexture.name}ORM.{fileExtension}";
+                }
+                return $"ORM.{fileExtension}";
             }
         }
         
