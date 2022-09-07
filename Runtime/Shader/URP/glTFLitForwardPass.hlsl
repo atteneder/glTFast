@@ -1,7 +1,16 @@
+// Based on Unity LitForwardPass.hlsl shader source from com.unity.render-pipelines.universal v12.1.7.
+
+// com.unity.render-pipelines.universal copyright © 2020 Unity Technologies ApS
+// Licensed under the Unity Companion License for Unity-dependent projects--see [Unity Companion License](http://www.unity3d.com/legal/licenses/Unity_Companion_License).
+// Unless expressly provided otherwise, the Software under this license is made available strictly on an “AS IS” BASIS WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. Please review the license for details on these and other terms and conditions.
+
+// Modifications Copyright 2022 Spatial
+
 #ifndef UNIVERSAL_FORWARD_LIT_PASS_INCLUDED
 #define UNIVERSAL_FORWARD_LIT_PASS_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#include "./glTFURPShaderUtilities.hlsl"
 
 // GLES2 has limited amount of interpolators
 #if defined(_PARALLAXMAP) && !defined(SHADER_API_GLES)
@@ -22,12 +31,15 @@ struct Attributes
     float2 texcoord     : TEXCOORD0;
     float2 staticLightmapUV   : TEXCOORD1;
     float2 dynamicLightmapUV  : TEXCOORD2;
+    float3 color        : COLOR;
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct Varyings
 {
-    float2 uv                       : TEXCOORD0;
+    float4 uv                       : TEXCOORD0; // albedo, metallicGloss
+    float4 uv2                      : TEXCOORD10; // occlusion, emission
+    float2 uv3                      : TEXCOORD11; // transmission
 
 #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
     float3 positionWS               : TEXCOORD1;
@@ -57,6 +69,9 @@ struct Varyings
 #ifdef DYNAMICLIGHTMAP_ON
     float2  dynamicLightmapUV : TEXCOORD9; // Dynamic lightmap UVs
 #endif
+
+    float3 vertexColor              : COLOR;
+    float pointSize                 : PSIZE;
 
     float4 positionCS               : SV_POSITION;
     UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -150,7 +165,11 @@ Varyings LitPassVertex(Attributes input)
         fogFactor = ComputeFogFactor(vertexInput.positionCS.z);
     #endif
 
-    output.uv = TRANSFORM_TEX(input.texcoord, _BaseMap);
+    output.uv.xy = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _BaseMap);
+    output.uv.zw = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _MetallicGlossMap);
+    output.uv2.xy = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _OcclusionMap);
+    output.uv2.zw = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _EmissionMap);
+    output.uv3.xy = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _TransmissionMap);
 
     // already normalized from normal transform to WS.
     output.normalWS = normalInput.normalWS;
@@ -187,9 +206,20 @@ Varyings LitPassVertex(Attributes input)
     output.shadowCoord = GetShadowCoord(vertexInput);
 #endif
 
+    output.vertexColor = input.color;
+    output.pointSize = 1;
+
     output.positionCS = vertexInput.positionCS;
 
     return output;
+}
+
+// Multiply vertex color to Albedo.
+// The original UniversalFragmentPBR() is in "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+half4 UniversalFragmentPBR(InputData inputData, SurfaceData surfaceData, float3 vertexColor)
+{
+    surfaceData.albedo *= vertexColor;
+    return UniversalFragmentPBR(inputData, surfaceData);
 }
 
 // Used in Standard (Physically Based) shader
@@ -209,7 +239,7 @@ half4 LitPassFragment(Varyings input) : SV_Target
 #endif
 
     SurfaceData surfaceData;
-    InitializeStandardLitSurfaceData(input.uv, surfaceData);
+    InitializeStandardLitSurfaceData(input.uv, input.uv2, input.uv3, surfaceData);
 
     InputData inputData;
     InitializeInputData(input, surfaceData.normalTS, inputData);
@@ -219,7 +249,7 @@ half4 LitPassFragment(Varyings input) : SV_Target
     ApplyDecalToSurfaceData(input.positionCS, surfaceData, inputData);
 #endif
 
-    half4 color = UniversalFragmentPBR(inputData, surfaceData);
+    half4 color = UniversalFragmentPBR(inputData, surfaceData, input.vertexColor);
 
     color.rgb = MixFog(color.rgb, inputData.fogCoord);
     color.a = OutputAlpha(color.a, _Surface);

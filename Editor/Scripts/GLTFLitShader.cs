@@ -1,3 +1,11 @@
+// Based on Unity LitShader.cs shader gui from com.unity.render-pipelines.universal v12.1.7.
+
+// com.unity.render-pipelines.universal copyright © 2020 Unity Technologies ApS
+// Licensed under the Unity Companion License for Unity-dependent projects--see [Unity Companion License](http://www.unity3d.com/legal/licenses/Unity_Companion_License).
+// Unless expressly provided otherwise, the Software under this license is made available strictly on an “AS IS” BASIS WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. Please review the license for details on these and other terms and conditions.
+
+// Modifications Copyright 2022 Spatial
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,6 +18,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
 
         private LitGUI.LitProperties litProperties;
         // private LitDetailGUI.LitProperties litDetailProperties;
+        private GLTFLitGUI.GLTFLitProperties glTFLitProperties;
 
         // public override void FillAdditionalFoldouts(MaterialHeaderScopeList materialScopesList)
         // {
@@ -22,13 +31,15 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
             base.FindProperties(properties);
             litProperties = new LitGUI.LitProperties(properties);
             // litDetailProperties = new LitDetailGUI.LitProperties(properties);
+            glTFLitProperties = new GLTFLitGUI.GLTFLitProperties(properties);
         }
 
         // material changed check
-        // public override void ValidateMaterial(Material material)
-        // {
-        //     SetMaterialKeywords(material, LitGUI.SetMaterialKeywords, LitDetailGUI.SetMaterialKeywords);
-        // }
+        public override void ValidateMaterial(Material material)
+        {
+            // SetMaterialKeywords(material, LitGUI.SetMaterialKeywords, LitDetailGUI.SetMaterialKeywords);
+            SetMaterialKeywords(material, LitGUI.SetMaterialKeywords, GLTFLitGUI.SetMaterialKeywords);
+        }
 
         // material main surface options
         public override void DrawSurfaceOptions(Material material)
@@ -47,6 +58,7 @@ namespace UnityEditor.Rendering.Universal.ShaderGUI
         {
             base.DrawSurfaceInputs(material);
             LitGUI.Inputs(litProperties, materialEditor, material);
+            GLTFLitGUI.Inputs(glTFLitProperties, materialEditor, material);
             DrawEmissionProperties(material, true);
             DrawTileOffset(materialEditor, baseMapProp);
         }

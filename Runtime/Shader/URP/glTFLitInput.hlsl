@@ -1,3 +1,11 @@
+// Based on Unity LitInput.hlsl shader source from com.unity.render-pipelines.universal v12.1.7.
+
+// com.unity.render-pipelines.universal copyright © 2020 Unity Technologies ApS
+// Licensed under the Unity Companion License for Unity-dependent projects--see [Unity Companion License](http://www.unity3d.com/legal/licenses/Unity_Companion_License).
+// Unless expressly provided otherwise, the Software under this license is made available strictly on an “AS IS” BASIS WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. Please review the license for details on these and other terms and conditions.
+
+// Modifications Copyright 2022 Spatial
+
 #ifndef UNIVERSAL_LIT_INPUT_INCLUDED
 #define UNIVERSAL_LIT_INPUT_INCLUDED
 
@@ -14,6 +22,21 @@
 // NOTE: Do not ifdef the properties here as SRP batcher can not handle different layouts.
 CBUFFER_START(UnityPerMaterial)
 float4 _BaseMap_ST;
+float _BaseMapUVChannel;
+float2 _BaseMapRotation;
+
+float4 _MetallicGlossMap_ST;
+float _MetallicGlossMapUVChannel;
+float2 _MetallicGlossMapRotation;
+
+float4 _OcclusionMap_ST;
+float _OcclusionMapUVChannel;
+float2 _OcclusionMapRotation;
+
+float4 _EmissionMap_ST;
+float _EmissionMapUVChannel;
+float2 _EmissionMapRotation;
+
 float4 _DetailAlbedoMap_ST;
 half4 _BaseColor;
 half4 _SpecColor;
@@ -29,44 +52,13 @@ half _ClearCoatSmoothness;
 half _DetailAlbedoMapScale;
 half _DetailNormalMapScale;
 half _Surface;
+
+float _Transmission;
+float _TransmissionFactor;
+float4 _TransmissionMap_ST;
+float _TransmissionMapUVChannel;
+float2 _TransmissionMapRotation;
 CBUFFER_END
-
-// NOTE: Do not ifdef the properties for dots instancing, but ifdef the actual usage.
-// Otherwise you might break CPU-side as property constant-buffer offsets change per variant.
-// NOTE: Dots instancing is orthogonal to the constant buffer above.
-#ifdef UNITY_DOTS_INSTANCING_ENABLED
-UNITY_DOTS_INSTANCING_START(MaterialPropertyMetadata)
-    UNITY_DOTS_INSTANCED_PROP(float4, _BaseColor)
-    UNITY_DOTS_INSTANCED_PROP(float4, _SpecColor)
-    UNITY_DOTS_INSTANCED_PROP(float4, _EmissionColor)
-    UNITY_DOTS_INSTANCED_PROP(float , _Cutoff)
-    UNITY_DOTS_INSTANCED_PROP(float , _Smoothness)
-    UNITY_DOTS_INSTANCED_PROP(float , _Metallic)
-    UNITY_DOTS_INSTANCED_PROP(float , _BumpScale)
-    UNITY_DOTS_INSTANCED_PROP(float , _Parallax)
-    UNITY_DOTS_INSTANCED_PROP(float , _OcclusionStrength)
-    UNITY_DOTS_INSTANCED_PROP(float , _ClearCoatMask)
-    UNITY_DOTS_INSTANCED_PROP(float , _ClearCoatSmoothness)
-    UNITY_DOTS_INSTANCED_PROP(float , _DetailAlbedoMapScale)
-    UNITY_DOTS_INSTANCED_PROP(float , _DetailNormalMapScale)
-    UNITY_DOTS_INSTANCED_PROP(float , _Surface)
-UNITY_DOTS_INSTANCING_END(MaterialPropertyMetadata)
-
-#define _BaseColor              UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float4 , Metadata_BaseColor)
-#define _SpecColor              UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float4 , Metadata_SpecColor)
-#define _EmissionColor          UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float4 , Metadata_EmissionColor)
-#define _Cutoff                 UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_Cutoff)
-#define _Smoothness             UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_Smoothness)
-#define _Metallic               UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_Metallic)
-#define _BumpScale              UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_BumpScale)
-#define _Parallax               UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_Parallax)
-#define _OcclusionStrength      UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_OcclusionStrength)
-#define _ClearCoatMask          UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_ClearCoatMask)
-#define _ClearCoatSmoothness    UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_ClearCoatSmoothness)
-#define _DetailAlbedoMapScale   UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_DetailAlbedoMapScale)
-#define _DetailNormalMapScale   UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_DetailNormalMapScale)
-#define _Surface                UNITY_ACCESS_DOTS_INSTANCED_PROP_FROM_MACRO(float  , Metadata_Surface)
-#endif
 
 TEXTURE2D(_ParallaxMap);        SAMPLER(sampler_ParallaxMap);
 TEXTURE2D(_OcclusionMap);       SAMPLER(sampler_OcclusionMap);
@@ -76,6 +68,7 @@ TEXTURE2D(_DetailNormalMap);    SAMPLER(sampler_DetailNormalMap);
 TEXTURE2D(_MetallicGlossMap);   SAMPLER(sampler_MetallicGlossMap);
 TEXTURE2D(_SpecGlossMap);       SAMPLER(sampler_SpecGlossMap);
 TEXTURE2D(_ClearCoatMap);       SAMPLER(sampler_ClearCoatMap);
+TEXTURE2D(_TransmissionMap);    SAMPLER(sampler_TransmissionMap);
 
 #ifdef _SPECULAR_SETUP
     #define SAMPLE_METALLICSPECULAR(uv) SAMPLE_TEXTURE2D(_SpecGlossMap, sampler_SpecGlossMap, uv)
@@ -88,11 +81,24 @@ half4 SampleMetallicSpecGloss(float2 uv, half albedoAlpha)
     half4 specGloss;
 
 #ifdef _METALLICSPECGLOSSMAP
-    specGloss = half4(SAMPLE_METALLICSPECULAR(uv));
+    half4  specGlossTex = SAMPLE_METALLICSPECULAR(uv);
+
+    // Specular / Metallic
+    #if _SPECULAR_SETUP
+        specGloss.rgb = specGlossTex.rgb;
+    #else
+        specGloss.rgb = specGlossTex.bbb; // glTF uses blue channel for metallic
+    #endif
+
+    // Glossiness
     #ifdef _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
         specGloss.a = albedoAlpha * _Smoothness;
     #else
-        specGloss.a *= _Smoothness;
+        #if _SPECULAR_SETUP
+            specGloss.a = (1-specGlossTex.a) * _Smoothness;
+        #else
+            specGloss.a = (1-specGlossTex.g) * _Smoothness; // glTF uses green channel for smoothness
+        #endif
     #endif
 #else // _METALLICSPECGLOSSMAP
     #if _SPECULAR_SETUP
@@ -203,12 +209,24 @@ half3 ApplyDetailNormal(float2 detailUv, half3 normalTS, half detailMask)
 #endif
 }
 
-inline void InitializeStandardLitSurfaceData(float2 uv, out SurfaceData outSurfaceData)
+// uv: albedo, metallic, uv2: occlusion, emission, uv3: transmission
+inline void InitializeStandardLitSurfaceData(float4 uv, float4 uv2, float2 uv3, out SurfaceData outSurfaceData)
 {
-    half4 albedoAlpha = SampleAlbedoAlpha(uv, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
+    half4 albedoAlpha = SampleAlbedoAlpha(uv.xy, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
     outSurfaceData.alpha = Alpha(albedoAlpha.a, _BaseColor, _Cutoff);
 
-    half4 specGloss = SampleMetallicSpecGloss(uv, albedoAlpha.a);
+    // glTF extension - Transmission
+    // Instead of using a keyword, use property value directly. (There are many variants)
+    if(_Transmission > 0.0)
+    {
+        half transmission = SAMPLE_TEXTURE2D(_TransmissionMap, sampler_TransmissionMap, uv3).r * _TransmissionFactor;
+        // Dial down transmissionFactor by 50% to avoid material completely disappearing and shows at least some color tinting.
+        transmission = saturate(transmission) * 0.5;
+        outSurfaceData.alpha *= 1.0 - transmission;
+        // TODO: blur CameraOpaqueTexture along with the roughness (smoothness).
+    }
+
+    half4 specGloss = SampleMetallicSpecGloss(uv.zw, albedoAlpha.a);
     outSurfaceData.albedo = albedoAlpha.rgb * _BaseColor.rgb;
 
 #if _SPECULAR_SETUP
@@ -221,8 +239,8 @@ inline void InitializeStandardLitSurfaceData(float2 uv, out SurfaceData outSurfa
 
     outSurfaceData.smoothness = specGloss.a;
     outSurfaceData.normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
-    outSurfaceData.occlusion = SampleOcclusion(uv);
-    outSurfaceData.emission = SampleEmission(uv, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
+    outSurfaceData.occlusion = SampleOcclusion(uv2.xy);
+    outSurfaceData.emission = SampleEmission(uv2.zw, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
 
 #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
     half2 clearCoat = SampleClearCoat(uv);
