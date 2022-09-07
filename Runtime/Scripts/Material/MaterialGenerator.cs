@@ -158,7 +158,8 @@ namespace GLTFast.Materials {
         protected static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
         
         static IMaterialGenerator defaultMaterialGenerator;
-        
+        static UniversalRPMaterialConfig universalRPMaterialConfig;
+
         /// <summary>
         /// Provides the default material generator that's being used if no
         /// custom material generator was provided. The result depends on
@@ -185,7 +186,16 @@ namespace GLTFast.Materials {
 #if USING_URP
                 case RenderPipeline.Universal:
                     var urpAsset = (UniversalRenderPipelineAsset) (QualitySettings.renderPipeline ? QualitySettings.renderPipeline : GraphicsSettings.defaultRenderPipeline);
-                    defaultMaterialGenerator = new UniversalRPMaterialGenerator(urpAsset);
+                    if (universalRPMaterialConfig == null)
+                        universalRPMaterialConfig = Resources.Load<UniversalRPMaterialConfig>("glTFastUniversalRPMaterialConfig");
+                    if (universalRPMaterialConfig != null && !universalRPMaterialConfig.useShaderGraphMaterial)
+                    {
+                        defaultMaterialGenerator = new UniversalRPLitShaderMaterialGenerator(urpAsset);
+                    }
+                    else
+                    {
+                        defaultMaterialGenerator = new UniversalRPMaterialGenerator(urpAsset);
+                    }
                     return defaultMaterialGenerator;
 #endif
                 case RenderPipeline.HighDefinition:
