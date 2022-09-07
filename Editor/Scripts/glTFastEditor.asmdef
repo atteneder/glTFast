@@ -9,7 +9,11 @@
         "glTFastTests",
         "UnityEngine.TestTools.Graphics",
         "Unity.RenderPipelines.HighDefinition.Runtime",
-        "com.unity.formats.gltf.validator.Editor"
+        "com.unity.formats.gltf.validator.Editor",
+        "Unity.RenderPipelines.Core.Editor",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Editor",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [
         "Editor"
