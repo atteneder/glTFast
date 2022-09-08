@@ -48,6 +48,12 @@ namespace GLTFast
         public int sceneId = -1;
         
         /// <summary>
+        /// If true, the first animation clip starts playing right after instantiation. 
+        /// </summary>
+        [Tooltip("If true, the first animation clip starts playing right after instantiation")]
+        public bool playAutomatically = true;
+        
+        /// <summary>
         /// If true, url is treated as relative StreamingAssets path
         /// </summary>
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
@@ -110,6 +116,11 @@ namespace GLTFast
         /// <inheritdoc />
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
             sceneInstance = (instantiator as GameObjectInstantiator).sceneInstance;
+#if UNITY_ANIMATION
+            if (playAutomatically) {
+                sceneInstance.legacyAnimation.Play();
+            }
+#endif
             base.PostInstantiation(instantiator, success);
         }
         

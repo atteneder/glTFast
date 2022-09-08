@@ -19,6 +19,39 @@ See [*Texture Support* in Project Setup](ProjectSetup.md#materials-and-shader-va
 
 `RenderPipelineUtils.DetectRenderPipeline()` turned to `RenderPipelineUtils.renderPipeline`
 
+### Play Animation
+
+Previously the first animation clip would start playing by default, which is not the case anymore. There is a way to restore animation auto-play, depending on how you load glTFs.
+
+#### Play Automatically with the `GltfAsset` component
+
+There's a new property `Play Automatically`, which is checked by default. You shouldn't experience change in behavior, unless you disable this setting.
+
+#### Play Automatically when loading from script
+
+You have to explicitely use a [`GameObjectInstantiator`][GameObjectInstantiator]. It provides a [`SceneInstance`][SceneInstance] object which has a `legacyAnimation` property, referencing the `Animation` component. Use it to start or stop playback of any of the animation clips it holds.
+
+```csharp
+async void Start() {
+
+    var gltfImport = new GltfImport();
+    await gltfImport.Load("test.gltf");
+    var instantiator = new GameObjectInstantiator(gltfImport,transform);
+    var success = gltfImport.InstantiateMainScene(instantiator);
+    if (success) {
+        
+        // Get the SceneInstance to access the instance's properties
+        var sceneInstance = instantiator.sceneInstance;
+
+        // Play the default (i.e. the first) animation clip
+        var legacyAnimation = instantiator.sceneInstance.legacyAnimation;
+        if (legacyAnimation != null) {
+            legacyAnimation.Play();
+        }
+    }
+}
+```
+
 ## Upgrade to 4.5
 
 New shader graphs are used with certain Universal and High Definition render pipeline versions, so projects that included *glTFast*'s shaders have to check and update their included shaders or shader variant collections (see [Materials and Shader Variants](ProjectSetup.md#materials-and-shader-variants) for details).
@@ -92,10 +125,12 @@ In the future materials can be created before textures are available/downloaded 
 
 Users of glTFast 1.x can read [the documentation for it](./gltfast-1.md).
 
+[GameObjectInstantiator]: xref:GLTFast.GameObjectInstantiator
 [gltf-spec-coords]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#coordinate-system-and-units
 [GltfAsset]: xref:GLTFast.GltfAsset
 [gltfast3to4]: Images/gltfast3to4.png  "3D scene view showing BoomBoxWithAxes model twice. One with the legacy axis conversion and one with the new orientation"
 [GltfImport]: xref:GLTFast.GltfImport
 [IGltfReadable]: xref:GLTFast.IGltfReadable
 [ImgConv]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.ImageConversionModule.html
+[SceneInstance]: xref:GLTFast.GameObjectInstantiator.SceneInstance
 [uwrt]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.UnityWebRequestTextureModule.html

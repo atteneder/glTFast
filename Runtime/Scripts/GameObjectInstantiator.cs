@@ -44,7 +44,17 @@ namespace GLTFast {
             /// List of instantiated cameras
             /// </summary>
             public List<Camera> cameras { get; private set; }
+            /// <summary>
+            /// List of instantiated lights
+            /// </summary>
             public List<Light> lights { get; private set; }
+            
+#if UNITY_ANIMATION
+            /// <summary>
+            /// List of instantiated lights
+            /// </summary>
+            public Animation legacyAnimation { get; private set; }
+#endif
 
             /// <summary>
             /// Adds a camera
@@ -57,11 +67,15 @@ namespace GLTFast {
                 cameras.Add(camera);
             }
             
-            public void AddLight(Light light) {
+            internal void AddLight(Light light) {
                 if (lights == null) {
                     lights = new List<Light>();
                 }
                 lights.Add(light);
+            }
+
+            internal void SetLegacyAnimation(Animation animation) {
+                legacyAnimation = animation;
             }
         }
         
@@ -549,7 +563,8 @@ namespace GLTFast {
                             animation.clip = clip;
                         }
                     }
-                    animation.Play();
+
+                    sceneInstance.SetLegacyAnimation(animation);
                 }
             }
 #endif // UNITY_ANIMATION

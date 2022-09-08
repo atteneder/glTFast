@@ -158,6 +158,49 @@ Two common use-cases are
 
 See [Physical Light Units in glTF](./LightUnitys.md) for a detailed explaination.
 
+#### Instance Access
+
+After a glTF scene was instanced, you can access selected components for further adjustments. Some of those are:
+
+- Animation
+- Cameras
+- Lights
+
+[`GameObjectInstantiator`][GameObjectInstantiator] provides a [`SceneInstance`][SceneInstance] for that purpose. Here's some code that demonstrates how to access it
+
+```csharp
+async void Start() {
+
+    var gltfImport = new GltfImport();
+    await gltfImport.Load("test.gltf");
+    var instantiator = new GameObjectInstantiator(gltfImport,transform);
+    var success = gltfImport.InstantiateMainScene(instantiator);
+    if (success) {
+        
+        // Get the SceneInstance to access the instance's properties
+        var sceneInstance = instantiator.sceneInstance;
+
+        // Enable the first imported camera (which are disabled by default)
+        if (sceneInstance.cameras is { Count: > 0 }) {
+            sceneInstance.cameras[0].enabled = true;
+        }
+        
+        // Decrease lights' ranges
+        if (sceneInstance.lights != null) {
+            foreach (var glTFLight in sceneInstance.lights) {
+                glTFLight.range *= 0.1f;
+            }
+        }
+        
+        // Play the default (i.e. the first) animation clip
+        var legacyAnimation = instantiator.sceneInstance.legacyAnimation;
+        if (legacyAnimation != null) {
+            legacyAnimation.Play();
+        }
+    }
+}
+```
+
 ### Logging
 
 When loading a glTF file, glTFast logs messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those log messages. Examples:
@@ -235,3 +278,4 @@ async Task CustomDeferAgentPerGltfImport() {
 [IMaterialGenerator]: xref:GLTFast.Materials.IMaterialGenerator
 [ImportSettings]: xref:GLTFast.ImportSettings
 [LogMessages]: xref:GLTFast.Logging.LogMessages
+[SceneInstance]: xref:GLTFast.GameObjectInstantiator.SceneInstance
