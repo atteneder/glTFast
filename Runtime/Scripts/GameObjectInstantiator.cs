@@ -144,6 +144,7 @@ namespace GLTFast {
             Vector3 scale
         ) {
             var go = new GameObject();
+            go.SetActive(false);
             go.transform.localScale = scale;
             go.transform.localPosition = position;
             go.transform.localRotation = rotation;
@@ -513,6 +514,12 @@ namespace GLTFast {
                         nodes[nodeIndex].transform.SetParent( sceneGameObject.transform, false );
                         Profiler.EndSample();
                     }
+                }
+
+                foreach (var node in nodes.Values) {
+                    Profiler.BeginSample("NodeSetActive");
+                    node.SetActive(true);
+                    Profiler.EndSample();
                 }
             }
 
