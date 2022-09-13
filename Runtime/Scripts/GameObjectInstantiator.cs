@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using GLTFast.Schema;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Profiling;
 #if USING_HDRP
 using UnityEngine.Rendering.HighDefinition;
 #endif
@@ -493,6 +494,7 @@ namespace GLTFast {
             ,AnimationClip[] animationClips
 #endif // UNITY_ANIMATION
             ) {
+            Profiler.BeginSample("AddScene");
             GameObject sceneGameObject;
             if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
                 || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
@@ -507,7 +509,9 @@ namespace GLTFast {
             if (nodeIndices != null) {
                 foreach(var nodeIndex in nodeIndices) {
                     if (nodes[nodeIndex] != null) {
+                        Profiler.BeginSample("RootNodeSetParent");
                         nodes[nodeIndex].transform.SetParent( sceneGameObject.transform, false );
+                        Profiler.EndSample();
                     }
                 }
             }
@@ -566,6 +570,7 @@ namespace GLTFast {
 
                     sceneInstance.SetLegacyAnimation(animation);
                 }
+                Profiler.EndSample();
             }
 #endif // UNITY_ANIMATION
         }

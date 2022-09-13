@@ -1911,6 +1911,7 @@ namespace GLTFast {
             }
 
             void CreateHierarchy(uint nodeIndex, uint? parentIndex) {
+                Profiler.BeginSample("CreateHierarchy");
                 var node = gltfRoot.nodes[nodeIndex];
                 node.GetTransform(out var position, out var rotation, out var scale);
 
@@ -1919,10 +1920,11 @@ namespace GLTFast {
                 if (parentIndex.HasValue) {
                     instantiator.SetParent(nodeIndex, parentIndex.Value);
                 }
+                Profiler.EndSample();
             }
 
             void PopulateHierarchy(uint nodeIndex, uint? parentIndex) {
-                
+                Profiler.BeginSample("PopulateHierarchy");
                 var node = gltfRoot.nodes[nodeIndex];
                 
                 var goName = nodeNames==null ? node.name : nodeNames[nodeIndex];
@@ -2030,10 +2032,10 @@ namespace GLTFast {
                         instantiator.AddLightPunctual(nodeIndex,(uint)lightIndex);
                     }
                 }
+                
+                Profiler.EndSample();
             }
             
-            Profiler.BeginSample("CreateGameObjects");
-
             var scene = gltfRoot.scenes[sceneId];
             instantiator.Init();
 
@@ -2053,8 +2055,6 @@ namespace GLTFast {
 #else
             instantiator.AddScene(scene.name,scene.nodes);
 #endif
-
-            Profiler.EndSample();
         }
 
         /// <summary>
