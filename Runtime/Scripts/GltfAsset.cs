@@ -117,7 +117,7 @@ namespace GLTFast
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
             sceneInstance = (instantiator as GameObjectInstantiator).sceneInstance;
 #if UNITY_ANIMATION
-            if (playAutomatically) {
+            if (playAutomatically && sceneInstance?.legacyAnimation!=null) {
                 sceneInstance.legacyAnimation.Play();
             }
 #endif
