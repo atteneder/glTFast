@@ -26,10 +26,13 @@ namespace GLTFast.Schema {
         
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
+            writer.AddArray("lights");
+            foreach (var light in lights) {
+                light.GltfSerialize(writer);
+            }
+            writer.CloseArray();
             writer.Close();
-            throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
-
     }
     
     [Serializable]
@@ -115,8 +118,19 @@ namespace GLTFast.Schema {
         
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
+            writer.AddProperty("type",type.ToLowerInvariant());
+            writer.AddArrayProperty("color", color);
+            writer.AddProperty("intensity", intensity);
+
+            if (typeEnum != Type.Directional) {
+                writer.AddProperty("range", range);
+            }
+
+            if (spot != null) {
+                writer.AddProperty("spot");
+                spot.GltfSerialize(writer);    
+            }
             writer.Close();
-            throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
 
     }

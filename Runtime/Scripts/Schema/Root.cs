@@ -146,6 +146,12 @@ namespace GLTFast.Schema {
                 writer.AddProperty("asset");
                 asset.GltfSerialize(writer);
             }
+            
+            if (extensions != null) {
+                writer.AddProperty("extensions");
+                extensions.GltfSerialize(writer);
+            }
+            
             if (nodes != null) {
                 writer.AddArray("nodes");
                 foreach (var node in nodes) {
@@ -256,7 +262,7 @@ namespace GLTFast.Schema {
                 }
                 writer.CloseArray();
             }
-            
+
             writer.Close();
         }
     }

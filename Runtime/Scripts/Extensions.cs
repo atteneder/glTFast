@@ -51,6 +51,10 @@ namespace GLTFast {
         /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_transform/README.md">KHR_texture_transform</see> glTF extension
         /// </summary>
         TextureTransform,
+        /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> glTF extension
+        /// </summary>
+        LightsPunctual,
     }
     
     /// <summary>
@@ -121,6 +125,8 @@ namespace GLTFast {
                     return TextureBasisUniversal;
                 case Extension.TextureTransform:
                     return TextureTransform;
+                case Extension.LightsPunctual:
+                    return LightsPunctual;
                 default:
                     return null;
             }

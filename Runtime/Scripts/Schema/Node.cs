@@ -108,6 +108,7 @@ namespace GLTFast.Schema {
             }
 
             if (extensions != null) {
+                writer.AddProperty("extensions");
                 extensions.GltfSerialize(writer);
             }
             writer.Close();
@@ -133,6 +134,7 @@ namespace GLTFast.Schema {
 
         // ReSharper restore InconsistentNaming
         internal void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
             if (EXT_mesh_gpu_instancing != null) {
                 writer.AddProperty("EXT_mesh_gpu_instancing");
                 EXT_mesh_gpu_instancing.GltfSerialize(writer);
@@ -141,6 +143,7 @@ namespace GLTFast.Schema {
                 writer.AddProperty("KHR_lights_punctual");
                 KHR_lights_punctual.GltfSerialize(writer);
             }
+            writer.Close();
         }
     }
 }

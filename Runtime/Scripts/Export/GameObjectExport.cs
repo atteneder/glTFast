@@ -178,6 +178,15 @@ namespace GLTFast.Export {
             if (mesh != null) {
                 m_Writer.AddMeshToNode(nodeId,mesh,materialIds);
             }
+            
+            if (gameObject.TryGetComponent(out Light light)) {
+                if (light.type == LightType.Point || 
+                    light.type == LightType.Spot || 
+                    light.type == LightType.Directional) {
+                    m_Writer.AddLightToNode(nodeId, light);
+                }
+            }
+            
             return success;
         }
     }

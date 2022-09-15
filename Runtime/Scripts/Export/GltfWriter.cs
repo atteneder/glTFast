@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -97,7 +98,9 @@ namespace GLTFast.Export {
         List<Sampler> m_Samplers;
         List<Accessor> m_Accessors;
         List<BufferView> m_BufferViews;
-
+        List<LightPunctual> m_Lights;
+        List<Light> m_UnityLights;
+        
         List<ImageExportBase> m_ImageExports;
         List<SamplerKey> m_SamplerKeys;
         List<UnityEngine.Material> m_UnityMaterials;
@@ -491,6 +494,9 @@ namespace GLTFast.Export {
 
             var success = await BakeImages(directory);
 
+            if (success)
+                success = await BakeLights();
+
             if (!success) return false;
             
             if (m_BufferStream != null && m_BufferStream.Length > 0) {
@@ -512,6 +518,13 @@ namespace GLTFast.Export {
             m_Gltf.textures = m_Textures?.ToArray();
             m_Gltf.samplers = m_Samplers?.ToArray();
 
+            if (m_Lights != null && m_Lights.Any()) {
+                RegisterExtensionUsage(Extension.LightsPunctual);
+                m_Gltf.extensions = m_Gltf.extensions ?? new Schema.RootExtension();
+                m_Gltf.extensions.KHR_lights_punctual = m_Gltf.extensions.KHR_lights_punctual ?? new LightsPunctual();
+                m_Gltf.extensions.KHR_lights_punctual.lights = m_Lights.ToArray();
+            }
+
             m_Gltf.asset = new Asset {
                 version = "2.0",
                 generator = $"Unity {Application.unityVersion} glTFast {Constants.version}"
@@ -529,6 +542,7 @@ namespace GLTFast.Export {
                 var i = 0;
                 foreach (var extension in m_ExtensionsRequired) {
                     var name = extension.GetName();
+                    Assert.IsFalse(string.IsNullOrEmpty(name));
                     m_Gltf.extensionsRequired[i] = name;
                     m_Gltf.extensionsUsed[i] = name;
                     i++;
@@ -1604,6 +1618,42 @@ namespace GLTFast.Export {
                 default:
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
+        }
+
+        public void AddLightToNode(int nodeId, Light uLight) {
+            CertifyNotDisposed();
+
+            var light = new LightPunctual() {
+                name = uLight.name
+            };
+
+            m_Lights = m_Lights ?? new List<LightPunctual>();
+            m_UnityLights = m_UnityLights ?? new List<Light>();
+            m_Lights.Add(light);
+            m_UnityLights.Add(uLight);
+            
+            var node = m_Nodes[nodeId];
+            node.extensions = node.extensions ?? new NodeExtensions();
+            node.extensions.KHR_lights_punctual = node.extensions.KHR_lights_punctual ?? new NodeLightsPunctual();
+            node.extensions.KHR_lights_punctual.light = m_Lights.Count - 1;
+        }
+
+        /// <summary>
+        /// Convert UnityEngine.Light to LightPunctual
+        /// </summary>
+        async Task<bool> BakeLights() {
+            Profiler.BeginSample("BakeLights");
+            
+            for (var lightId = 0; lightId < m_Lights.Count; lightId++) {
+                var light = m_Lights[lightId];
+                var uLight = m_UnityLights[lightId];
+                uLight.ToLightPunctual(light, m_Settings.lightIntensityFactor);
+                await m_DeferAgent.BreakPoint();
+            }
+            
+            Profiler.EndSample();
+            
+            return true;
         }
     }
 }
