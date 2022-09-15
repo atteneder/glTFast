@@ -205,7 +205,9 @@ namespace GLTFast.Export {
         /// <inheritdoc />
         public bool AddLight(Light uLight, out int lightId) {
             CertifyNotDisposed();
-            var light = new LightPunctual();
+            var light = new LightPunctual {
+                name = uLight.name
+            };
 
             switch (uLight.type) {
                 case LightType.Spot:
@@ -232,7 +234,6 @@ namespace GLTFast.Export {
                     break;
             }
 
-            light.intensity = uLight.intensity;
             light.lightColor = uLight.color.linear;
             light.range = uLight.range;
             
@@ -284,6 +285,8 @@ namespace GLTFast.Export {
                     light.intensity = uLight.intensity;
                     break;
             }
+
+            light.intensity *= m_Settings.lightIntensityFactor;
             
             if (m_Lights == null) {
                 m_Lights = new List<LightPunctual>();
@@ -319,9 +322,7 @@ namespace GLTFast.Export {
                 //       lossless round-trips
                 node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name:$"{node.name}_Orientation");
             }
-            if (node.extensions == null) {
-                node.extensions = new NodeExtensions();
-            }
+            node.extensions = node.extensions ?? new NodeExtensions();
             node.extensions.KHR_lights_punctual = new NodeLightsPunctual {
                 light = lightId
             };
@@ -671,11 +672,9 @@ namespace GLTFast.Export {
 
             if (m_Lights != null && m_Lights.Count > 0) {
                 RegisterExtensionUsage(Extension.LightsPunctual);
-                m_Gltf.extensions = new Schema.RootExtension {
-                    KHR_lights_punctual = new LightsPunctual {
-                        lights = m_Lights.ToArray()
-                    }
-                };
+                m_Gltf.extensions = m_Gltf.extensions ?? new Schema.RootExtension();
+                m_Gltf.extensions.KHR_lights_punctual = m_Gltf.extensions.KHR_lights_punctual ?? new LightsPunctual();
+                m_Gltf.extensions.KHR_lights_punctual.lights = m_Lights.ToArray();
             }
             
             m_Gltf.asset = new Asset {
@@ -695,6 +694,7 @@ namespace GLTFast.Export {
                 var i = 0;
                 foreach (var extension in m_ExtensionsRequired) {
                     var name = extension.GetName();
+                    Assert.IsFalse(string.IsNullOrEmpty(name));
                     m_Gltf.extensionsRequired[i] = name;
                     m_Gltf.extensionsUsed[i] = name;
                     i++;

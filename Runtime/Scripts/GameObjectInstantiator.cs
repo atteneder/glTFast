@@ -19,9 +19,6 @@ using GLTFast.Schema;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Profiling;
-#if USING_HDRP
-using UnityEngine.Rendering.HighDefinition;
-#endif
 using Camera = UnityEngine.Camera;
 using Material = UnityEngine.Material;
 using Mesh = UnityEngine.Mesh;
@@ -506,66 +503,8 @@ namespace GLTFast {
                 lightGameObject = tmp;
             }
             var light = lightGameObject.AddComponent<Light>();
-
-            switch (lightSource.typeEnum) {
-                case LightPunctual.Type.Unknown:
-                    break;
-                case LightPunctual.Type.Spot:
-                    light.type = LightType.Spot;
-                    break;
-                case LightPunctual.Type.Directional:
-                    light.type = LightType.Directional;
-                    break;
-                case LightPunctual.Type.Point:
-                    light.type = LightType.Point;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-            
-            light.color = lightSource.lightColor.gamma;
-            
-            LightAssignIntensity(light, lightSource);
-
-            light.range = lightSource.range > 0
-                ? lightSource.range
-                : 100_000; // glTF 2.0 spec says infinite, but float.MaxValue
-                           // breaks spot lights in URP.
-
-            if (lightSource.typeEnum == LightPunctual.Type.Spot) {
-                light.spotAngle = lightSource.spot.outerConeAngle * Mathf.Rad2Deg * 2f;
-                light.innerSpotAngle = lightSource.spot.innerConeAngle * Mathf.Rad2Deg * 2f;
-            }
-            
+            lightSource.ToUnityLight(light, settings.lightIntensityFactor);
             sceneInstance.AddLight(light);
-        }
-        
-        protected virtual void LightAssignIntensity(Light light, LightPunctual lightSource) {
-            var intensity = lightSource.intensity * settings.lightIntensityFactor;
-            var renderPipeline = RenderPipelineUtils.renderPipeline;
-            switch (renderPipeline) {
-                case RenderPipeline.BuiltIn:
-                    light.intensity = intensity / Mathf.PI;
-                    break;
-                case RenderPipeline.Universal:
-                    light.intensity = intensity;
-                    break;
-#if USING_HDRP
-                case RenderPipeline.HighDefinition:
-                    var lightHd = light.gameObject.AddComponent<HDAdditionalLightData>();
-                    if (lightSource.typeEnum == LightPunctual.Type.Directional) {
-                        lightHd.lightUnit = LightUnit.Lux;
-                    }
-                    else {
-                        lightHd.lightUnit = LightUnit.Candela;
-                    }
-                    lightHd.intensity = lightSource.intensity;
-                    break;
-#endif
-                default:
-                    light.intensity = intensity;
-                    break;
-            }
         }
         
         /// <inheritdoc />

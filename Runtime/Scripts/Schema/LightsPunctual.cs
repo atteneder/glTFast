@@ -112,7 +112,7 @@ namespace GLTFast.Schema {
             }
             set {
                 m_TypeEnum = value;
-                type = value.ToString().ToLower();
+                type = value.ToString().ToLowerInvariant();
             }
         }
         
@@ -128,7 +128,7 @@ namespace GLTFast.Schema {
             if (Math.Abs(intensity - 1.0) > Constants.epsilon) {
                 writer.AddProperty("intensity",intensity);
             }
-            if (range > 0) {
+            if (range > 0 && typeEnum != Type.Directional) {
                 writer.AddProperty("range",range);
             }
             if (spot != null) {

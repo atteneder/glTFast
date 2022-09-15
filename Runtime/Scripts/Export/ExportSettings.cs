@@ -77,5 +77,11 @@ namespace GLTFast.Export {
         
         /// <inheritdoc cref="FileConflictResolution"/>
         public FileConflictResolution fileConflictResolution = FileConflictResolution.Abort;
+        
+        /// <summary>
+        /// Light intensity values are multiplied by this factor.
+        /// </summary>
+        [Tooltip("Light intensity values are multiplied by this factor")]
+        public float lightIntensityFactor = 1.0f;
     }
 }
