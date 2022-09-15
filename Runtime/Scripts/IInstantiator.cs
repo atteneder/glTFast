@@ -27,31 +27,37 @@ namespace GLTFast {
     public interface IInstantiator {
 
         /// <summary>
-        /// Used to initialize instantiators. Always called first.
+        /// Starts creating a scene instance.
+        /// Has to be called at first and concluded by calling
+        /// <see cref="EndScene"/>.
         /// </summary>
-        void Init();
+        /// <param name="name">Name of the scene</param>
+        /// <param name="rootNodeIndices">Indices of root level nodes in scene</param>
+        /// <param name="animationClips">Animation clips</param>
+        void BeginScene(
+            string name
+            ,uint[] rootNodeIndices
+#if UNITY_ANIMATION
+            ,AnimationClip[] animationClips
+#endif
+        );
 
         /// <summary>
         /// Called for every Node in the glTF file
         /// </summary>
         /// <param name="nodeIndex">Index of node. Serves as identifier.</param>
+        /// <param name="parentIndex">Index of the parent's node. If it's null,
+        /// the node's a root-level node</param>
         /// <param name="position">Node's local position in hierarchy</param>
         /// <param name="rotation">Node's local rotation in hierarchy</param>
         /// <param name="scale">Node's local scale in hierarchy</param>
         void CreateNode(
             uint nodeIndex,
+            uint? parentIndex,
             Vector3 position,
             Quaternion rotation,
             Vector3 scale
             );
-
-        /// <summary>
-        /// Is called to set up hierarchical parent-child relations between nodes.
-        /// Always called after both nodes have been created via CreateNode before.
-        /// </summary>
-        /// <param name="nodeIndex">Index of child node.</param>
-        /// <param name="parentIndex">Index of parent node.</param>
-        void SetParent(uint nodeIndex, uint parentIndex);
 
         /// <summary>
         /// Sets the name of a node.
@@ -131,16 +137,13 @@ namespace GLTFast {
         );
         
         /// <summary>
-        /// Called for adding a glTF scene.
+        /// Is called at last, after all scene content has been created.
+        /// Immediately afterwards the scene will be rendered, so use it to
+        /// finally prepare the instance. 
         /// </summary>
-        /// <param name="name">Name of the scene</param>
-        /// <param name="nodeIndices">Indices of root level nodes in scene</param>
-        void AddScene(
-            string name
-            ,uint[] nodeIndices
-#if UNITY_ANIMATION
-            ,AnimationClip[] animationClips
-#endif
-            );
+        /// <param name="rootNodeIndices">Indices of root level nodes in scene</param>
+        void EndScene(
+            uint[] rootNodeIndices
+        );
     }
 }

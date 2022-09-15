@@ -76,9 +76,9 @@ namespace GLTFast {
                 if (deferAgent != null) await deferAgent.BreakPoint();
                 // Auto-Instantiate
                 if (sceneId>=0) {
-                    InstantiateScene(sceneId,logger);
+                    await InstantiateScene(sceneId,logger);
                 } else {
-                    Instantiate(logger);
+                    await Instantiate(logger);
                 }
             }
             return success;
