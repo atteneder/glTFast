@@ -52,7 +52,8 @@ namespace GLTFast {
             
 #if UNITY_ANIMATION
             /// <summary>
-            /// List of instantiated lights
+            /// <see cref="Animation" /> component. Is null if scene has no 
+			/// animation clips.
             /// </summary>
             public Animation legacyAnimation { get; private set; }
 #endif
@@ -75,9 +76,11 @@ namespace GLTFast {
                 lights.Add(light);
             }
 
+#if UNITY_ANIMATION
             internal void SetLegacyAnimation(Animation animation) {
                 legacyAnimation = animation;
             }
+#endif
         }
         
         /// <summary>

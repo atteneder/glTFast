@@ -145,6 +145,7 @@ namespace GLTFast.Editor {
                     var useFirstChild = true;
                     var multipleNodes = scene.nodes.Length > 1;
                     var hasAnimation = false;
+#if UNITY_ANIMATION
                     if (importSettings.animationMethod != ImportSettings.AnimationMethod.None
                         && (instantiationSettings.mask & ComponentType.Animation) != 0) {
                         var animationClips = m_Gltf.GetAnimationClips();
@@ -152,6 +153,7 @@ namespace GLTFast.Editor {
                             hasAnimation = true;
                         }
                     }
+#endif
                     
                     if (instantiationSettings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
                         || instantiationSettings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && !multipleNodes ) {
