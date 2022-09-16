@@ -1910,17 +1910,14 @@ namespace GLTFast {
             }
 
             void CreateHierarchy(uint nodeIndex, uint? parentIndex) {
+                
                 Profiler.BeginSample("CreateHierarchy");
                 var node = gltfRoot.nodes[nodeIndex];
                 node.GetTransform(out var position, out var rotation, out var scale);
                 instantiator.CreateNode(nodeIndex, parentIndex, position, rotation, scale);
                 Profiler.EndSample();
-            }
-
-            void PopulateHierarchy(uint nodeIndex, uint? parentIndex) {
+            
                 Profiler.BeginSample("PopulateHierarchy");
-                var node = gltfRoot.nodes[nodeIndex];
-                
                 var goName = nodeNames==null ? node.name : nodeNames[nodeIndex];
 
                 if(node.mesh>=0) {
@@ -2041,10 +2038,6 @@ namespace GLTFast {
             if (scene.nodes != null) {
                 foreach (var nodeId in scene.nodes) {
                     await IterateNodes(nodeId,null,CreateHierarchy);
-                }
-            
-                foreach (var nodeId in scene.nodes) {
-                    await IterateNodes(nodeId,null,PopulateHierarchy);
                 }
             }
             
