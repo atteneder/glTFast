@@ -71,6 +71,7 @@ namespace GLTFast {
             nodes = new Dictionary<uint, Entity>();
             entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             nodeArcheType = entityManager.CreateArchetype(
+                typeof(Disabled),
                 typeof(Translation),
                 typeof(Rotation),
                 typeof(Parent),
@@ -78,6 +79,7 @@ namespace GLTFast {
                 typeof(LocalToWorld)
             );
             sceneArcheType = entityManager.CreateArchetype(
+                typeof(Disabled),
                 typeof(Translation),
                 typeof(Rotation),
                 typeof(LocalToWorld)
@@ -261,6 +263,12 @@ namespace GLTFast {
         
         /// <inheritdoc />
         public virtual void EndScene(uint[] rootNodeIndices) {
+            Profiler.BeginSample("EndScene");
+            entityManager.SetEnabled(sceneParent.Value, true);
+            foreach (var entity in nodes.Values) {
+                entityManager.SetEnabled(entity, true);
+            }
+            Profiler.EndSample();
         }
     }
 }
