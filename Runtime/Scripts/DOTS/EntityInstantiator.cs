@@ -23,6 +23,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace GLTFast {
     public class EntityInstantiator : IInstantiator {
@@ -66,7 +67,7 @@ namespace GLTFast {
             ,AnimationClip[] animationClips
 #endif // UNITY_ANIMATION
         ) {
-            
+            Profiler.BeginSample("BeginScene");
             nodes = new Dictionary<uint, Entity>();
             entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             nodeArcheType = entityManager.CreateArchetype(
@@ -104,6 +105,8 @@ namespace GLTFast {
                 // TODO: Add animation support
             }
 #endif // UNITY_ANIMATION
+            
+            Profiler.EndSample();
         }
 
         /// <inheritdoc />
@@ -114,6 +117,7 @@ namespace GLTFast {
             Quaternion rotation,
             Vector3 scale
         ) {
+            Profiler.BeginSample("CreateNode");
             var node = entityManager.CreateEntity(nodeArcheType);
             entityManager.SetComponentData(node,new Translation {Value = position});
             entityManager.SetComponentData(node,new Rotation {Value = rotation});
@@ -125,6 +129,7 @@ namespace GLTFast {
             else {
                 entityManager.SetComponentData(node, sceneParent);
             }
+            Profiler.EndSample();
         }
 
         void SetEntityScale(Entity node, Vector3 scale) {
@@ -157,6 +162,7 @@ namespace GLTFast {
             if ((settings.mask & ComponentType.Mesh) == 0) {
                 return;
             }
+            Profiler.BeginSample("AddPrimitive");
             Entity node;
             if(primitiveNumeration==0) {
                 // Use Node GameObject for first Primitive
@@ -192,6 +198,7 @@ namespace GLTFast {
                      }
                  }
             }
+            Profiler.EndSample();
         }
 
         /// <inheritdoc />
@@ -209,6 +216,7 @@ namespace GLTFast {
             if ((settings.mask & ComponentType.Mesh) == 0) {
                 return;
             }
+            Profiler.BeginSample("AddPrimitiveInstanced");
             foreach (var materialIndex in materialIndices) {
                 var material = gltf.GetMaterial(materialIndex) ?? gltf.GetDefaultMaterial();
                 material.enableInstancing = true;
@@ -228,6 +236,7 @@ namespace GLTFast {
                     }
                 }
             }
+            Profiler.EndSample();
         }
 
         /// <inheritdoc />
