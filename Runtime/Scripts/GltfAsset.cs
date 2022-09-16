@@ -118,7 +118,7 @@ namespace GLTFast
             sceneInstance = (instantiator as GameObjectInstantiator).sceneInstance;
 #if UNITY_ANIMATION
             if (playAutomatically) {
-                var legacyAnimation = sceneInstance.legacyAnimation;
+                var legacyAnimation = sceneInstance?.legacyAnimation;
                 if (legacyAnimation != null) {
                     sceneInstance.legacyAnimation.Play();
                 }
