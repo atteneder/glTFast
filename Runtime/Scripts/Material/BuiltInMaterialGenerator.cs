@@ -83,9 +83,16 @@ namespace GLTFast.Materials {
         Shader pbrSpecularGlossinessShader;
         Shader unlitShader;
 
+        static bool defaultMaterialGenerated;
+        static Material defaultMaterial;
+
         /// <inheritdoc />
-        public override Material GetDefaultMaterial() {
-            return GetPbrMetallicRoughnessMaterial();
+        protected override Material GenerateDefaultMaterial() {
+            if (!defaultMaterialGenerated) {
+                defaultMaterial = GetPbrMetallicRoughnessMaterial();
+                defaultMaterialGenerated = true;
+            }
+            return defaultMaterial;
         }
         
         /// <summary>

@@ -159,6 +159,9 @@ namespace GLTFast.Materials {
         
         static IMaterialGenerator defaultMaterialGenerator;
         
+        static bool defaultMaterialGenerated;
+        static UnityEngine.Material defaultMaterial;
+        
         /// <summary>
         /// Provides the default material generator that's being used if no
         /// custom material generator was provided. The result depends on
@@ -204,7 +207,19 @@ namespace GLTFast.Materials {
         protected ICodeLogger logger;
 
         /// <inheritdoc />
-        public abstract UnityEngine.Material GetDefaultMaterial();
+        public UnityEngine.Material GetDefaultMaterial() {
+            if (!defaultMaterialGenerated) {
+                defaultMaterial = GenerateDefaultMaterial();
+                defaultMaterialGenerated = true;
+            }
+            return defaultMaterial;
+        }
+
+        /// <summary>
+        /// Creates a fallback material to be assigned to nodes without a material.
+        /// </summary>
+        /// <returns>fallback material</returns>
+        protected abstract UnityEngine.Material GenerateDefaultMaterial();
 
         /// <summary>
         /// Tries to load a shader and covers error handling.

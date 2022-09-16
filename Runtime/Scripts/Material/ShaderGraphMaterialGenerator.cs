@@ -134,10 +134,12 @@ namespace GLTFast.Materials {
         static Shader s_UnlitShader;
 #endif
 
-        public override Material GetDefaultMaterial() {
+        /// <inheritdoc />
+        protected override Material GenerateDefaultMaterial() {
             return GetMetallicMaterial(MetallicShaderFeatures.Default);
         }
 
+        /// <inheritdoc />
         public override Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf) {
 
             Material material;

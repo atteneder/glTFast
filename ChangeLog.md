@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shader graphs' BaseColor, BaseColorTexture and vertex color calculations are now in correct color space
 - Export MeshRenderer wherre number of materials does not match number of submeshes (thanks [Dan Dando ][DanDovi] for #428)
 - Shaders and shader graphs now have a proper main color and main texture assigned (except legacy shader graphs where this is not supported)
+- No more redundant default (fallback) materials are being generated
 
 ## [4.8.5] - 2022-08-30
 ### Fixed
