@@ -105,6 +105,9 @@ namespace GLTFast {
         /// </summary>
         protected Dictionary<uint,GameObject> nodes;
 
+        
+        protected Transform sceneTransform;
+        
         /// <summary>
         /// Contains information about the latest instance of a glTF scene
         /// </summary>
@@ -131,33 +134,109 @@ namespace GLTFast {
         }
 
         /// <inheritdoc />
-        public virtual void Init() {
+        public virtual void BeginScene(
+            string name,
+            uint[] rootNodeIndices
+#if UNITY_ANIMATION
+            ,AnimationClip[] animationClips
+#endif // UNITY_ANIMATION
+            ) {
+            Profiler.BeginSample("BeginScene");
+            
             nodes = new Dictionary<uint, GameObject>();
             sceneInstance = new SceneInstance();
+            
+            GameObject sceneGameObject;
+            if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
+                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && rootNodeIndices.Length == 1) {
+                sceneGameObject = parent.gameObject;
+            }
+            else {
+                sceneGameObject = new GameObject(name ?? "Scene");
+                sceneGameObject.transform.SetParent( parent, false);
+                sceneGameObject.layer = settings.layer;
+            }
+            sceneTransform = sceneGameObject.transform;
+            
+#if UNITY_ANIMATION
+            if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
+                // we want to create an Animator for non-legacy clips, and an Animation component for legacy clips.
+                var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
+// #if UNITY_EDITOR
+//                 // This variant creates a Mecanim Animator and AnimationController
+//                 // which does not work at runtime. It's kept for potential Editor import usage
+//                 if(!isLegacyAnimation) {
+//                     var animator = go.AddComponent<Animator>();
+//                     var controller = new UnityEditor.Animations.AnimatorController();
+//                     controller.name = animator.name;
+//                     controller.AddLayer("Default");
+//                     controller.layers[0].defaultWeight = 1;
+//                     for (var index = 0; index < animationClips.Length; index++) {
+//                         var clip = animationClips[index];
+//                         // controller.AddLayer(clip.name);
+//                         // controller.layers[index].defaultWeight = 1;
+//                         var state = controller.AddMotion(clip, 0);
+//                         controller.AddParameter("Test", AnimatorControllerParameterType.Bool);
+//                         // var stateMachine = controller.layers[0].stateMachine;
+//                         // UnityEditor.Animations.AnimatorState entryState = null;
+//                         // var state = stateMachine.AddState(clip.name);
+//                         // state.motion = clip;
+//                         // var loopTransition = state.AddTransition(state);
+//                         // loopTransition.hasExitTime = true;
+//                         // loopTransition.duration = 0;
+//                         // loopTransition.exitTime = 0;
+//                         // entryState = state;
+//                         // stateMachine.AddEntryTransition(entryState);
+//                         // UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath
+//                     }
+//                     
+//                     animator.runtimeAnimatorController = controller;
+//                     
+//                     // for (var index = 0; index < animationClips.Length; index++) {
+//                     //     controller.layers[index].blendingMode = UnityEditor.Animations.AnimatorLayerBlendingMode.Additive;
+//                     //     animator.SetLayerWeight(index,1);
+//                     // }
+//                 }
+// #endif // UNITY_EDITOR
+
+                if(isLegacyAnimation) {
+                    var animation = sceneGameObject.AddComponent<Animation>();
+                    
+                    for (var index = 0; index < animationClips.Length; index++) {
+                        var clip = animationClips[index];
+                        animation.AddClip(clip,clip.name);
+                        if (index < 1) {
+                            animation.clip = clip;
+                        }
+                    }
+
+                    sceneInstance.SetLegacyAnimation(animation);
+                }
+            }
+            Profiler.EndSample();
+#endif // UNITY_ANIMATION
         }
 
         /// <inheritdoc />
         public void CreateNode(
             uint nodeIndex,
+            uint? parentIndex,
             Vector3 position,
             Quaternion rotation,
             Vector3 scale
         ) {
             var go = new GameObject();
+            // Deactivate root-level nodes, so half-loaded scenes won't render.
+            go.SetActive(parentIndex.HasValue);
             go.transform.localScale = scale;
             go.transform.localPosition = position;
             go.transform.localRotation = rotation;
             go.layer = settings.layer;
             nodes[nodeIndex] = go;
-        }
-
-        /// <inheritdoc />
-        public void SetParent(uint nodeIndex, uint parentIndex) {
-            if(nodes[nodeIndex]==null || nodes[parentIndex]==null ) {
-                logger?.Error(LogCode.HierarchyInvalid);
-                return;
-            }
-            nodes[nodeIndex].transform.SetParent(nodes[parentIndex].transform,false);
+            
+            go.transform.SetParent(
+                parentIndex.HasValue ? nodes[parentIndex.Value].transform : sceneTransform,
+                false);
         }
 
         /// <inheritdoc />
@@ -487,92 +566,14 @@ namespace GLTFast {
         }
         
         /// <inheritdoc />
-        public virtual void AddScene(
-            string name,
-            uint[] nodeIndices
-#if UNITY_ANIMATION
-            ,AnimationClip[] animationClips
-#endif // UNITY_ANIMATION
-            ) {
-            Profiler.BeginSample("AddScene");
-            GameObject sceneGameObject;
-            if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
-                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
-                sceneGameObject = parent.gameObject;
-            }
-            else {
-                sceneGameObject = new GameObject(name ?? "Scene");
-                sceneGameObject.transform.SetParent( parent, false);
-                sceneGameObject.layer = settings.layer;
-            }
-            
-            if (nodeIndices != null) {
-                foreach(var nodeIndex in nodeIndices) {
-                    if (nodes[nodeIndex] != null) {
-                        Profiler.BeginSample("RootNodeSetParent");
-                        nodes[nodeIndex].transform.SetParent( sceneGameObject.transform, false );
-                        Profiler.EndSample();
-                    }
+        public virtual void EndScene(uint[] rootNodeIndices) {
+            Profiler.BeginSample("EndScene");
+            if (rootNodeIndices != null) {
+                foreach (var nodeIndex in rootNodeIndices) {
+                    nodes[nodeIndex].SetActive(true);
                 }
             }
-
-#if UNITY_ANIMATION
-            if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
-                // we want to create an Animator for non-legacy clips, and an Animation component for legacy clips.
-                var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
-// #if UNITY_EDITOR
-//                 // This variant creates a Mecanim Animator and AnimationController
-//                 // which does not work at runtime. It's kept for potential Editor import usage
-//                 if(!isLegacyAnimation) {
-//                     var animator = go.AddComponent<Animator>();
-//                     var controller = new UnityEditor.Animations.AnimatorController();
-//                     controller.name = animator.name;
-//                     controller.AddLayer("Default");
-//                     controller.layers[0].defaultWeight = 1;
-//                     for (var index = 0; index < animationClips.Length; index++) {
-//                         var clip = animationClips[index];
-//                         // controller.AddLayer(clip.name);
-//                         // controller.layers[index].defaultWeight = 1;
-//                         var state = controller.AddMotion(clip, 0);
-//                         controller.AddParameter("Test", AnimatorControllerParameterType.Bool);
-//                         // var stateMachine = controller.layers[0].stateMachine;
-//                         // UnityEditor.Animations.AnimatorState entryState = null;
-//                         // var state = stateMachine.AddState(clip.name);
-//                         // state.motion = clip;
-//                         // var loopTransition = state.AddTransition(state);
-//                         // loopTransition.hasExitTime = true;
-//                         // loopTransition.duration = 0;
-//                         // loopTransition.exitTime = 0;
-//                         // entryState = state;
-//                         // stateMachine.AddEntryTransition(entryState);
-//                         // UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPath
-//                     }
-//                     
-//                     animator.runtimeAnimatorController = controller;
-//                     
-//                     // for (var index = 0; index < animationClips.Length; index++) {
-//                     //     controller.layers[index].blendingMode = UnityEditor.Animations.AnimatorLayerBlendingMode.Additive;
-//                     //     animator.SetLayerWeight(index,1);
-//                     // }
-//                 }
-// #endif // UNITY_EDITOR
-
-                if(isLegacyAnimation) {
-                    var animation = sceneGameObject.AddComponent<Animation>();
-                    
-                    for (var index = 0; index < animationClips.Length; index++) {
-                        var clip = animationClips[index];
-                        animation.AddClip(clip,clip.name);
-                        if (index < 1) {
-                            animation.clip = clip;
-                        }
-                    }
-
-                    sceneInstance.SetLegacyAnimation(animation);
-                }
-                Profiler.EndSample();
-            }
-#endif // UNITY_ANIMATION
+            Profiler.EndSample();
         }
     }
 }

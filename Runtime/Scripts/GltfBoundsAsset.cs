@@ -57,10 +57,10 @@ namespace GLTFast
                 var insta = (GameObjectBoundsInstantiator) GetDefaultInstantiator(logger);
                 // Auto-Instantiate
                 if (sceneId>=0) {
-                    success = importer.InstantiateScene(insta, sceneId);
+                    success = await importer.InstantiateScene(insta, sceneId);
                     currentSceneId = success ? sceneId : (int?)null;
                 } else {
-                    success = importer.InstantiateMainScene(insta);
+                    success = await importer.InstantiateMainScene(insta);
                     currentSceneId = importer.defaultSceneIndex;
                 }
 
@@ -74,10 +74,9 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
-        public override bool InstantiateScene(int sceneIndex, ICodeLogger logger = null) {
-            base.InstantiateScene(sceneIndex, logger);
+        public override async Task<bool> InstantiateScene(int sceneIndex, ICodeLogger logger = null) {
             var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
-            var success = base.InstantiateScene(sceneIndex, instantiator);
+            var success = await base.InstantiateScene(sceneIndex, instantiator);
             currentSceneId = success ? sceneIndex : (int?)null;
             sceneInstance = instantiator.sceneInstance;
             if (success) {

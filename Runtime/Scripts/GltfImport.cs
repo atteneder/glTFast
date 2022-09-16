@@ -443,9 +443,9 @@ namespace GLTFast {
         /// </summary>
         /// <param name="parent">Transform that the scene will get parented to</param>
         /// <returns>True if the main scene was instantiated or was not set. False in case of errors.</returns>
-        public bool InstantiateMainScene( Transform parent ) {
+        public async Task<bool> InstantiateMainScene( Transform parent ) {
             var instantiator = new GameObjectInstantiator(this, parent);
-            var success = InstantiateMainScene(instantiator);
+            var success = await InstantiateMainScene(instantiator);
             return success;
         }
 
@@ -455,7 +455,7 @@ namespace GLTFast {
         /// </summary>
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
         /// <returns>True if the main scene was instantiated or was not set. False in case of errors.</returns>
-        public bool InstantiateMainScene(IInstantiator instantiator) {
+        public async Task<bool> InstantiateMainScene(IInstantiator instantiator) {
             if (!loadingDone || loadingError) return false;
             // According to glTF specification, loading nothing is
             // the correct behavior
@@ -465,7 +465,7 @@ namespace GLTFast {
 #endif
                 return true;
             }
-            return InstantiateScene(instantiator, gltfRoot.scene);
+            return await InstantiateScene(instantiator, gltfRoot.scene);
         }
 
         /// <summary>
@@ -476,11 +476,11 @@ namespace GLTFast {
         /// <param name="parent">Transform that the scene will get parented to</param>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <returns>True if the scene was instantiated. False in case of errors.</returns>
-        public bool InstantiateScene( Transform parent, int sceneIndex = 0) {
+        public async Task<bool> InstantiateScene( Transform parent, int sceneIndex = 0) {
             if (!loadingDone || loadingError) return false;
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
             var instantiator = new GameObjectInstantiator(this, parent);
-            var success = InstantiateScene(instantiator,sceneIndex);
+            var success = await InstantiateScene(instantiator,sceneIndex);
             return success;
         }
 
@@ -492,10 +492,10 @@ namespace GLTFast {
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <returns>True if the scene was instantiated. False in case of errors.</returns>
-        public bool InstantiateScene( IInstantiator instantiator, int sceneIndex = 0 ) {
+        public async Task<bool> InstantiateScene( IInstantiator instantiator, int sceneIndex = 0 ) {
             if (!loadingDone || loadingError) return false;
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
-            InstantiateSceneInternal( gltfRoot, instantiator, sceneIndex );
+            await InstantiateSceneInternal( gltfRoot, instantiator, sceneIndex );
             return true;
         }
         
@@ -1896,37 +1896,28 @@ namespace GLTFast {
 #endif
         }
 
-        void InstantiateSceneInternal( Root gltf, IInstantiator instantiator, int sceneId ) {
-            
-            // TODO: Make instantiation preemptive (via deferAgent) as well!
+        async Task InstantiateSceneInternal( Root gltf, IInstantiator instantiator, int sceneId ) {
 
-            void IterateNodes(uint nodeIndex, uint? parentIndex, Action<uint,uint?> callback) {
+            async Task IterateNodes(uint nodeIndex, uint? parentIndex, Action<uint,uint?> callback) {
                 var node = gltfRoot.nodes[nodeIndex];
                 callback(nodeIndex,parentIndex);
+                await deferAgent.BreakPoint();
                 if (node.children != null) {
                     foreach (var child in node.children) {
-                        IterateNodes(child,nodeIndex,callback);
+                        await IterateNodes(child,nodeIndex,callback);
                     }
                 }
             }
 
             void CreateHierarchy(uint nodeIndex, uint? parentIndex) {
+                
                 Profiler.BeginSample("CreateHierarchy");
                 var node = gltfRoot.nodes[nodeIndex];
                 node.GetTransform(out var position, out var rotation, out var scale);
-
-                instantiator.CreateNode(nodeIndex, position, rotation, scale);
-
-                if (parentIndex.HasValue) {
-                    instantiator.SetParent(nodeIndex, parentIndex.Value);
-                }
+                instantiator.CreateNode(nodeIndex, parentIndex, position, rotation, scale);
                 Profiler.EndSample();
-            }
-
-            void PopulateHierarchy(uint nodeIndex, uint? parentIndex) {
+            
                 Profiler.BeginSample("PopulateHierarchy");
-                var node = gltfRoot.nodes[nodeIndex];
-                
                 var goName = nodeNames==null ? node.name : nodeNames[nodeIndex];
 
                 if(node.mesh>=0) {
@@ -2037,24 +2028,20 @@ namespace GLTFast {
             }
             
             var scene = gltfRoot.scenes[sceneId];
-            instantiator.Init();
-
-            if (scene.nodes != null) {
-                foreach (var nodeId in scene.nodes) {
-                    IterateNodes(nodeId,null,CreateHierarchy);
-                }
-            
-            
-                foreach (var nodeId in scene.nodes) {
-                    IterateNodes(nodeId,null,PopulateHierarchy);
-                }
-            }
 
 #if UNITY_ANIMATION
-            instantiator.AddScene(scene.name,scene.nodes,animationClips);
+            instantiator.BeginScene(scene.name,scene.nodes,animationClips);
 #else
-            instantiator.AddScene(scene.name,scene.nodes);
+            instantiator.BeginScene(scene.name,scene.nodes);
 #endif
+            
+            if (scene.nodes != null) {
+                foreach (var nodeId in scene.nodes) {
+                    await IterateNodes(nodeId,null,CreateHierarchy);
+                }
+            }
+            
+            instantiator.EndScene(scene.nodes);
         }
 
         /// <summary>

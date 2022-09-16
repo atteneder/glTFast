@@ -36,8 +36,8 @@ namespace GLTFast {
             ) : base(gltf,parent,logger,settings) {}
         
         /// <inheritdoc />
-        public override void Init() {
-            base.Init();
+        public override void BeginScene(string name, uint[] rootNodeIndices, AnimationClip[] animationClips) {
+            base.BeginScene(name, rootNodeIndices, animationClips);
             nodeBounds = new Dictionary<uint, Bounds>();
         }
 

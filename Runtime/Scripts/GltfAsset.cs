@@ -100,9 +100,9 @@ namespace GLTFast
                 if (deferAgent != null) await deferAgent.BreakPoint();
                 // Auto-Instantiate
                 if (sceneId>=0) {
-                    InstantiateScene(sceneId,logger);
+                    await InstantiateScene(sceneId,logger);
                 } else {
-                    Instantiate(logger);
+                    await Instantiate(logger);
                 }
             }
             return success;
@@ -117,8 +117,11 @@ namespace GLTFast
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
             sceneInstance = (instantiator as GameObjectInstantiator).sceneInstance;
 #if UNITY_ANIMATION
-            if (playAutomatically && sceneInstance?.legacyAnimation!=null) {
-                sceneInstance.legacyAnimation.Play();
+            if (playAutomatically) {
+                var legacyAnimation = sceneInstance.legacyAnimation;
+                if (legacyAnimation != null) {
+                    sceneInstance.legacyAnimation.Play();
+                }
             }
 #endif
             base.PostInstantiation(instantiator, success);

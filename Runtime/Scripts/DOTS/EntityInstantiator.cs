@@ -23,6 +23,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace GLTFast {
     public class EntityInstantiator : IInstantiator {
@@ -43,6 +44,8 @@ namespace GLTFast {
         EntityArchetype nodeArcheType;
         EntityArchetype sceneArcheType;
 
+        Parent sceneParent;
+        
         public EntityInstantiator(
             IGltfReadable gltf,
             Entity parent,
@@ -55,11 +58,20 @@ namespace GLTFast {
             this.logger = logger;
             this.settings = settings ?? new InstantiationSettings();
         }
-
-        public virtual void Init() {
+        
+        /// <inheritdoc />
+        public void BeginScene(
+            string name,
+            uint[] nodeIndices
+#if UNITY_ANIMATION
+            ,AnimationClip[] animationClips
+#endif // UNITY_ANIMATION
+        ) {
+            Profiler.BeginSample("BeginScene");
             nodes = new Dictionary<uint, Entity>();
             entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             nodeArcheType = entityManager.CreateArchetype(
+                typeof(Disabled),
                 typeof(Translation),
                 typeof(Rotation),
                 typeof(Parent),
@@ -67,23 +79,59 @@ namespace GLTFast {
                 typeof(LocalToWorld)
             );
             sceneArcheType = entityManager.CreateArchetype(
+                typeof(Disabled),
                 typeof(Translation),
                 typeof(Rotation),
                 typeof(LocalToWorld)
             );
+            
+            if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
+                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
+                sceneParent = new Parent { Value = parent };
+            }
+            else {
+                var sceneEntity = entityManager.CreateEntity(parent==Entity.Null ? sceneArcheType : nodeArcheType);
+                entityManager.SetComponentData(sceneEntity,new Translation {Value = new float3(0,0,0)});
+                entityManager.SetComponentData(sceneEntity,new Rotation {Value = quaternion.identity});
+#if UNITY_EDITOR
+                entityManager.SetName(sceneEntity, name ?? "Scene");
+#endif
+                if (parent != Entity.Null) {
+                    entityManager.SetComponentData(sceneEntity, new Parent { Value = parent });
+                }
+                sceneParent = new Parent { Value = sceneEntity };
+            }
+
+#if UNITY_ANIMATION
+            if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
+                // TODO: Add animation support
+            }
+#endif // UNITY_ANIMATION
+            
+            Profiler.EndSample();
         }
 
+        /// <inheritdoc />
         public void CreateNode(
             uint nodeIndex,
+            uint? parentIndex,
             Vector3 position,
             Quaternion rotation,
             Vector3 scale
         ) {
+            Profiler.BeginSample("CreateNode");
             var node = entityManager.CreateEntity(nodeArcheType);
             entityManager.SetComponentData(node,new Translation {Value = position});
             entityManager.SetComponentData(node,new Rotation {Value = rotation});
             SetEntityScale(node, scale);
             nodes[nodeIndex] = node;
+            if (parentIndex.HasValue) {
+                entityManager.SetComponentData(node,new Parent{Value = nodes[parentIndex.Value]} );
+            }
+            else {
+                entityManager.SetComponentData(node, sceneParent);
+            }
+            Profiler.EndSample();
         }
 
         void SetEntityScale(Entity node, Vector3 scale) {
@@ -96,16 +144,13 @@ namespace GLTFast {
             }
         }
 
-        public void SetParent(uint nodeIndex, uint parentIndex) {
-            entityManager.SetComponentData(nodes[nodeIndex],new Parent{Value = nodes[parentIndex]} );
-        }
-
         public void SetNodeName(uint nodeIndex, string name) {
 #if UNITY_EDITOR
             entityManager.SetName(nodes[nodeIndex], name ?? $"Node-{nodeIndex}");
 #endif
         }
 
+        /// <inheritdoc />
         public virtual void AddPrimitive(
             uint nodeIndex,
             string meshName,
@@ -119,6 +164,7 @@ namespace GLTFast {
             if ((settings.mask & ComponentType.Mesh) == 0) {
                 return;
             }
+            Profiler.BeginSample("AddPrimitive");
             Entity node;
             if(primitiveNumeration==0) {
                 // Use Node GameObject for first Primitive
@@ -154,8 +200,10 @@ namespace GLTFast {
                      }
                  }
             }
+            Profiler.EndSample();
         }
 
+        /// <inheritdoc />
         public void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,
@@ -170,6 +218,7 @@ namespace GLTFast {
             if ((settings.mask & ComponentType.Mesh) == 0) {
                 return;
             }
+            Profiler.BeginSample("AddPrimitiveInstanced");
             foreach (var materialIndex in materialIndices) {
                 var material = gltf.GetMaterial(materialIndex) ?? gltf.GetDefaultMaterial();
                 material.enableInstancing = true;
@@ -189,8 +238,10 @@ namespace GLTFast {
                     }
                 }
             }
+            Profiler.EndSample();
         }
 
+        /// <inheritdoc />
         public void AddCamera(uint nodeIndex, uint cameraIndex) {
             if ((settings.mask & ComponentType.Camera) == 0) {
                 return;
@@ -199,6 +250,7 @@ namespace GLTFast {
             // TODO: Add camera support
         }
 
+        /// <inheritdoc />
         public void AddLightPunctual(
             uint nodeIndex,
             uint lightIndex
@@ -208,41 +260,15 @@ namespace GLTFast {
             }
             // TODO: Add lights support
         }
-
-        public void AddScene(
-            string name,
-            uint[] nodeIndices
-#if UNITY_ANIMATION
-            ,AnimationClip[] animationClips
-#endif // UNITY_ANIMATION
-            ) {
-            Parent sceneParent;
-            if (settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
-                || settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
-                sceneParent = new Parent { Value = parent };
+        
+        /// <inheritdoc />
+        public virtual void EndScene(uint[] rootNodeIndices) {
+            Profiler.BeginSample("EndScene");
+            entityManager.SetEnabled(sceneParent.Value, true);
+            foreach (var entity in nodes.Values) {
+                entityManager.SetEnabled(entity, true);
             }
-            else {
-                var sceneEntity = entityManager.CreateEntity(parent==Entity.Null ? sceneArcheType : nodeArcheType);
-                entityManager.SetComponentData(sceneEntity,new Translation {Value = new float3(0,0,0)});
-                entityManager.SetComponentData(sceneEntity,new Rotation {Value = quaternion.identity});
-#if UNITY_EDITOR
-                entityManager.SetName(sceneEntity, name ?? "Scene");
-#endif
-                if (parent != Entity.Null) {
-                    entityManager.SetComponentData(sceneEntity, new Parent { Value = parent });
-                }
-                sceneParent = new Parent { Value = sceneEntity };
-            }
-            
-            foreach(var nodeIndex in nodeIndices) {
-                entityManager.SetComponentData(nodes[nodeIndex], sceneParent);
-            }
-
-#if UNITY_ANIMATION
-            if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
-                // TODO: Add animation support
-            }
-#endif // UNITY_ANIMATION
+            Profiler.EndSample();
         }
     }
 }

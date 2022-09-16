@@ -74,10 +74,10 @@ namespace GLTFast
         /// </summary>
         /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
-        public bool Instantiate(ICodeLogger logger = null) {
+        public async Task<bool> Instantiate(ICodeLogger logger = null) {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
-            var success = importer.InstantiateMainScene(instantiator);
+            var success = await importer.InstantiateMainScene(instantiator);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -88,10 +88,10 @@ namespace GLTFast
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
-        public virtual bool InstantiateScene(int sceneIndex, ICodeLogger logger = null) {
+        public virtual async Task<bool> InstantiateScene(int sceneIndex, ICodeLogger logger = null) {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
-            var success = importer.InstantiateScene(instantiator,sceneIndex);
+            var success = await importer.InstantiateScene(instantiator,sceneIndex);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -102,9 +102,9 @@ namespace GLTFast
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <param name="instantiator">Receives scene construction calls</param>
         /// <returns>True if instantiation was successful.</returns>
-        protected bool InstantiateScene(int sceneIndex, GameObjectInstantiator instantiator) {
+        protected async Task<bool> InstantiateScene(int sceneIndex, GameObjectInstantiator instantiator) {
             if (importer == null) return false;
-            var success = importer.InstantiateScene(instantiator,sceneIndex);
+            var success = await importer.InstantiateScene(instantiator,sceneIndex);
             PostInstantiation(instantiator, success);
             return success;
         }
