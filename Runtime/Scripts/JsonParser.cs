@@ -176,8 +176,17 @@ namespace GLTFast {
                 for (int i = 0; i < root.nodes.Length; i++) {
                     var e = root.nodes[i].extensions;
                     if (e != null) {
-                        if (e.EXT_mesh_gpu_instancing?.attributes == null && 
-                            (e.KHR_lights_punctual == null || e.KHR_lights_punctual.light < 0 ) ) {
+                        // Check if GPU instancing extension is valid
+                        if (e.EXT_mesh_gpu_instancing?.attributes == null) {
+                            e.EXT_mesh_gpu_instancing = null;
+                        }
+                        // Check if Lights extension is valid
+                        if ((e.KHR_lights_punctual?.light ?? -1) < 0) {
+                            e.KHR_lights_punctual = null;
+                        }
+                        // Unset `extension` if none of them was valid
+                        if (e.EXT_mesh_gpu_instancing == null && 
+                            e.KHR_lights_punctual == null ) {
                             root.nodes[i].extensions = null;
                         }
                     }

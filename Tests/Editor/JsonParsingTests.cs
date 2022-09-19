@@ -389,6 +389,27 @@ namespace GLTFast.Tests
                 }
             },
             ""name"": ""Node3""
+        },
+        {
+            ""extensions"": {
+                ""KHR_lights_punctual"": {
+                    ""light"": 42
+                }
+            },
+            ""name"": ""Node4""
+        },
+        {
+            ""extensions"": {
+                ""EXT_mesh_gpu_instancing"": {
+                    ""attributes"": {
+                        ""TRANSLATION"": 13
+                    }
+                },
+                ""KHR_lights_punctual"": {
+                    ""light"": 42
+                }
+            },
+            ""name"": ""Node5""
         }
     ]
 }
@@ -397,7 +418,7 @@ namespace GLTFast.Tests
             
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.nodes,"No nodes");
-            Assert.AreEqual(4, gltf.nodes.Length, "Invalid nodes quantity");
+            Assert.AreEqual(6, gltf.nodes.Length, "Invalid nodes quantity");
 
             var node0 = gltf.nodes[0];
             Assert.NotNull(node0);
@@ -417,6 +438,23 @@ namespace GLTFast.Tests
             Assert.NotNull(node3.extensions.EXT_mesh_gpu_instancing);
             Assert.NotNull(node3.extensions.EXT_mesh_gpu_instancing.attributes);
             Assert.AreEqual(42,node3.extensions.EXT_mesh_gpu_instancing.attributes.TRANSLATION);
+            Assert.IsNull(node3.extensions.KHR_lights_punctual);
+            
+            var node4 = gltf.nodes[4];
+            Assert.NotNull(node4);
+            Assert.NotNull(node4.extensions);
+            Assert.IsNull(node4.extensions.EXT_mesh_gpu_instancing);
+            Assert.NotNull(node4.extensions.KHR_lights_punctual);
+            Assert.AreEqual(42,node4.extensions.KHR_lights_punctual.light);
+            
+            var node5 = gltf.nodes[5];
+            Assert.NotNull(node5);
+            Assert.NotNull(node5.extensions);
+            Assert.NotNull(node5.extensions.EXT_mesh_gpu_instancing);
+            Assert.NotNull(node5.extensions.EXT_mesh_gpu_instancing.attributes);
+            Assert.AreEqual(13,node5.extensions.EXT_mesh_gpu_instancing.attributes.TRANSLATION);
+            Assert.NotNull(node5.extensions.KHR_lights_punctual);
+            Assert.AreEqual(42,node5.extensions.KHR_lights_punctual.light);
         }
 
         [Test]
