@@ -25,6 +25,10 @@ float4 _BaseMap_ST;
 float _BaseMapUVChannel;
 float2 _BaseMapRotation;
 
+float4 _BumpMap_ST;
+float _BumpMapUVChannel;
+float2 _BumpMapRotation;
+
 float4 _MetallicGlossMap_ST;
 float _MetallicGlossMapUVChannel;
 float2 _MetallicGlossMapRotation;
@@ -209,8 +213,8 @@ half3 ApplyDetailNormal(float2 detailUv, half3 normalTS, half detailMask)
 #endif
 }
 
-// uv: albedo, metallic, uv2: occlusion, emission, uv3: transmission
-inline void InitializeStandardLitSurfaceData(float4 uv, float4 uv2, float2 uv3, out SurfaceData outSurfaceData)
+// uv: albedo, normal, uv2: metallic, occlusion, uv3: emission, transmission
+inline void InitializeStandardLitSurfaceData(float4 uv, float4 uv2, float4 uv3, out SurfaceData outSurfaceData)
 {
     half4 albedoAlpha = SampleAlbedoAlpha(uv.xy, TEXTURE2D_ARGS(_BaseMap, sampler_BaseMap));
     outSurfaceData.alpha = Alpha(albedoAlpha.a, _BaseColor, _Cutoff);
@@ -219,14 +223,14 @@ inline void InitializeStandardLitSurfaceData(float4 uv, float4 uv2, float2 uv3, 
     // Instead of using a keyword, use property value directly. (There are many variants)
     if(_Transmission > 0.0)
     {
-        half transmission = SAMPLE_TEXTURE2D(_TransmissionMap, sampler_TransmissionMap, uv3).r * _TransmissionFactor;
+        half transmission = SAMPLE_TEXTURE2D(_TransmissionMap, sampler_TransmissionMap, uv3.zw).r * _TransmissionFactor;
         // Dial down transmissionFactor by 50% to avoid material completely disappearing and shows at least some color tinting.
         transmission = saturate(transmission) * 0.5;
         outSurfaceData.alpha *= 1.0 - transmission;
         // TODO: blur CameraOpaqueTexture along with the roughness (smoothness).
     }
 
-    half4 specGloss = SampleMetallicSpecGloss(uv.zw, albedoAlpha.a);
+    half4 specGloss = SampleMetallicSpecGloss(uv2.xy, albedoAlpha.a);
     outSurfaceData.albedo = albedoAlpha.rgb * _BaseColor.rgb;
 
 #if _SPECULAR_SETUP
@@ -238,9 +242,9 @@ inline void InitializeStandardLitSurfaceData(float4 uv, float4 uv2, float2 uv3, 
 #endif
 
     outSurfaceData.smoothness = specGloss.a;
-    outSurfaceData.normalTS = SampleNormal(uv, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
-    outSurfaceData.occlusion = SampleOcclusion(uv2.xy);
-    outSurfaceData.emission = SampleEmission(uv2.zw, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
+    outSurfaceData.normalTS = SampleNormal(uv.zw, TEXTURE2D_ARGS(_BumpMap, sampler_BumpMap), _BumpScale);
+    outSurfaceData.occlusion = SampleOcclusion(uv2.zw);
+    outSurfaceData.emission = SampleEmission(uv3.xy, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
 
 #if defined(_CLEARCOAT) || defined(_CLEARCOATMAP)
     half2 clearCoat = SampleClearCoat(uv);

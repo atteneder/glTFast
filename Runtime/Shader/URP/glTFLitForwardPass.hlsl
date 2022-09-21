@@ -37,9 +37,9 @@ struct Attributes
 
 struct Varyings
 {
-    float4 uv                       : TEXCOORD0; // albedo, metallicGloss
-    float4 uv2                      : TEXCOORD10; // occlusion, emission
-    float2 uv3                      : TEXCOORD11; // transmission
+    float4 uv                       : TEXCOORD0; // albedo, normal
+    float4 uv2                      : TEXCOORD10; // metallicGloss, occlusion
+    float4 uv3                      : TEXCOORD11; // emission, transmission
 
 #if defined(REQUIRES_WORLD_SPACE_POS_INTERPOLATOR)
     float3 positionWS               : TEXCOORD1;
@@ -166,10 +166,11 @@ Varyings LitPassVertex(Attributes input)
     #endif
 
     output.uv.xy = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _BaseMap);
-    output.uv.zw = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _MetallicGlossMap);
-    output.uv2.xy = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _OcclusionMap);
-    output.uv2.zw = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _EmissionMap);
-    output.uv3.xy = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _TransmissionMap);
+    output.uv.zw = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _BumpMap);
+    output.uv2.xy = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _MetallicGlossMap);
+    output.uv2.zw = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _OcclusionMap);
+    output.uv3.xy = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _EmissionMap);
+    output.uv3.zw = TRANSFORM_TEX_GLTF(input.texcoord, input.staticLightmapUV, _TransmissionMap);
 
     // already normalized from normal transform to WS.
     output.normalWS = normalInput.normalWS;

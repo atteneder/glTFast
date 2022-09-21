@@ -38,6 +38,8 @@ Shader "glTF/Universal/Lit"
 
         _BumpScale("Scale", Float) = 1.0
         _BumpMap("Normal Map", 2D) = "bump" {}
+        [Enum(UV0,0,UV1,1)] _BumpMapUVChannel ("Bump Map UV Channel", Float) = 0
+        _BumpMapRotation ("Bump Map UV Rotation", Vector) = (0,0,0,0)
 
         _Parallax("Scale", Range(0.005, 0.08)) = 0.005
         _ParallaxMap("Height Map", 2D) = "black" {}
