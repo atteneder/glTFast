@@ -60,6 +60,10 @@ namespace GLTFast.Schema {
                 if (perspective != null) _typeEnum = Type.Perspective;
                 return _typeEnum.Value;
             }
+            set {
+                type = null;
+                _typeEnum = value;
+            }
         }
         
         /// <inheritdoc cref="CameraOrthographic"/>
@@ -71,8 +75,16 @@ namespace GLTFast.Schema {
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
+            writer.AddProperty("type", _typeEnum.ToString().ToLower());
+            if(perspective!=null) {
+                writer.AddProperty("perspective");
+                perspective.GltfSerialize(writer);
+            }
+            if(orthographic!=null) {
+                writer.AddProperty("orthographic");
+                orthographic.GltfSerialize(writer);
+            }
             writer.Close();
-            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
 
@@ -101,6 +113,15 @@ namespace GLTFast.Schema {
         /// The floating-point distance to the near clipping plane.
         /// </summary>
         public float znear;
+        
+        internal void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            writer.AddProperty("xmag", xmag);
+            writer.AddProperty("ymag", ymag);
+            writer.AddProperty("zfar", zfar);
+            writer.AddProperty("znear", znear);
+            writer.Close();
+        }
     }
     
     /// <summary>
@@ -128,5 +149,18 @@ namespace GLTFast.Schema {
         /// The floating-point distance to the near clipping plane.
         /// </summary>
         public float znear;
+        
+        internal void GltfSerialize(JsonWriter writer) {
+            writer.AddObject();
+            if (aspectRatio > 0) {
+                writer.AddProperty("aspectRatio", aspectRatio);
+            }
+            writer.AddProperty("yfov", yfov);
+            if (zfar < float.MaxValue) {
+                writer.AddProperty("zfar", zfar);
+            }
+            writer.AddProperty("znear", znear);
+            writer.Close();
+        }
     }
 }

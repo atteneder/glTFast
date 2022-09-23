@@ -104,7 +104,7 @@ namespace GLTFast.Schema {
             }
             
             if (camera >= 0) {
-                writer.AddProperty("camera", skin);
+                writer.AddProperty("camera", camera);
             }
 
             if (extensions != null) {

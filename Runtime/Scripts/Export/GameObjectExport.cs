@@ -178,6 +178,12 @@ namespace GLTFast.Export {
             if (mesh != null) {
                 m_Writer.AddMeshToNode(nodeId,mesh,materialIds);
             }
+
+            if (gameObject.TryGetComponent(out Camera camera)) {
+                if (m_Writer.AddCamera(camera, out var cameraId)) {
+                    m_Writer.AddCameraToNode(nodeId,cameraId);
+                }
+            }
             return success;
         }
     }

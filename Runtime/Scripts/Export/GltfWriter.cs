@@ -34,6 +34,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Buffer = GLTFast.Schema.Buffer;
+using Camera = GLTFast.Schema.Camera;
 using Debug = UnityEngine.Debug;
 using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
@@ -94,6 +95,7 @@ namespace GLTFast.Export {
         List<Material> m_Materials;
         List<Texture> m_Textures;
         List<Image> m_Images;
+        List<Schema.Camera> m_Cameras;
         List<Sampler> m_Samplers;
         List<Accessor> m_Accessors;
         List<BufferView> m_BufferViews;
@@ -140,19 +142,8 @@ namespace GLTFast.Export {
         {
             CertifyNotDisposed();
             m_State = State.ContentAdded;
-            var node = new Node {
-                name = name,
-                children = children,
-            };
-            if( translation.HasValue && !translation.Equals(float3.zero) ) {
-                node.translation = new[] { -translation.Value.x, translation.Value.y, translation.Value.z };
-            }
-            if( rotation.HasValue && !rotation.Equals(quaternion.identity) ) {
-                node.rotation = new[] { rotation.Value.value.x, -rotation.Value.value.y, -rotation.Value.value.z, rotation.Value.value.w };
-            }
-            if( scale.HasValue && !scale.Equals(new float3(1f)) ) {
-                node.scale = new[] { scale.Value.x, scale.Value.y, scale.Value.z };
-            }
+            var node = CreateNode(translation, rotation, scale, name);
+            node.children = children;
             m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
             return (uint) m_Nodes.Count - 1;
@@ -171,6 +162,52 @@ namespace GLTFast.Export {
             node.mesh = AddMesh(uMesh);
         }
 
+        public bool AddCamera(UnityEngine.Camera uCamera, out int cameraId) {
+            CertifyNotDisposed();
+
+            var camera = new Camera();
+
+            if (uCamera.orthographic) {
+                camera.typeEnum = Camera.Type.Orthographic;
+                var oSize = uCamera.orthographicSize;
+                camera.orthographic = new CameraOrthographic {
+                    ymag = oSize,
+                    xmag = oSize * Screen.width / Screen.height,
+                    // TODO: Check if local scale should be applied to near/far
+                    znear = uCamera.nearClipPlane,
+                    zfar = uCamera.farClipPlane
+                };
+            }
+            else {
+                camera.typeEnum = Camera.Type.Perspective;
+                camera.perspective = new CameraPerspective {
+                    yfov = uCamera.fieldOfView * Mathf.Deg2Rad,
+                    // TODO: Check if local scale should be applied to near/far
+                    znear = uCamera.nearClipPlane,
+                    zfar = uCamera.farClipPlane
+                };
+            }
+            
+            if (m_Cameras == null) {
+                m_Cameras = new List<Camera>();
+            }
+            cameraId = m_Cameras.Count;
+            m_Cameras.Add(camera);
+            return true;
+        }
+        
+        /// <inheritdoc />
+        public void AddCameraToNode(int nodeId, int cameraId) {
+            CertifyNotDisposed();
+            // glTF cameras face in the opposite direction, so we create a
+            // helper node that applies the correct rotation.
+            // TODO: Detect if this is node is already a helper node
+            //       (from glTF import) and discard it (if possible) to enable
+            //       lossless round-trips
+            var node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name:"camera");
+            node.camera = cameraId;
+        }
+        
         /// <inheritdoc />
         public uint AddScene(uint[] nodes, string name = null) {
             CertifyNotDisposed();
@@ -511,6 +548,7 @@ namespace GLTFast.Export {
             m_Gltf.images = m_Images?.ToArray();
             m_Gltf.textures = m_Textures?.ToArray();
             m_Gltf.samplers = m_Samplers?.ToArray();
+            m_Gltf.cameras = m_Cameras?.ToArray();
 
             m_Gltf.asset = new Asset {
                 version = "2.0",
@@ -1443,6 +1481,52 @@ namespace GLTFast.Export {
             }
         }
 
+        Node AddChildNode(
+            int parentId,
+            float3? translation = null,
+            quaternion? rotation = null,
+            float3? scale = null,
+            string name = null
+        ) {
+            var parent = m_Nodes[parentId];
+            var node = CreateNode(translation, rotation, scale, name);
+            m_Nodes.Add(node);
+            var nodeId = (uint) m_Nodes.Count - 1;
+            if (parent.children == null) {
+                parent.children = new[] { nodeId };
+            }
+            else {
+                var newChildren = new uint[parent.children.Length + 1];
+                newChildren[0] = nodeId;
+                parent.children.CopyTo(newChildren,1);
+                parent.children = newChildren;
+            }
+            return node;
+        }
+        
+        Node CreateNode(
+            float3? translation = null,
+            quaternion? rotation = null,
+            float3? scale = null,
+            string name = null
+        )
+        {
+            var node = new Node {
+                name = name,
+            };
+            if( translation.HasValue && !translation.Equals(float3.zero) ) {
+                node.translation = new[] { -translation.Value.x, translation.Value.y, translation.Value.z };
+            }
+            if( rotation.HasValue && !rotation.Equals(quaternion.identity) ) {
+                node.rotation = new[] { rotation.Value.value.x, -rotation.Value.value.y, -rotation.Value.value.z, rotation.Value.value.w };
+            }
+            if( scale.HasValue && !scale.Equals(new float3(1f)) ) {
+                node.scale = new[] { scale.Value.x, scale.Value.y, scale.Value.z };
+            }
+
+            return node;
+        }
+        
         int AddMesh(UnityEngine.Mesh uMesh) {
             int meshId;
             
