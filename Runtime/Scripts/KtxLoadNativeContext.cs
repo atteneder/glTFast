@@ -28,7 +28,7 @@ namespace GLTFast {
         NativeSlice<byte> slice;
 
         public KtxLoadNativeContext(int index,NativeSlice<byte> slice) {
-            this.imageIndex = index;
+            layer = index;
             this.slice = slice;
             ktxTexture = new KtxTexture();
         }
@@ -43,8 +43,8 @@ namespace GLTFast {
             return result;
         }
 
-        public override TextureResult CreateTextureAndDispose() {
-            var result = ktxTexture.CreateTexture();
+        public override async Task<TextureResult> CreateTextureAndDispose() {
+            var result = await ktxTexture.CreateTexture();
             ktxTexture.Dispose();
             return result;
         }
