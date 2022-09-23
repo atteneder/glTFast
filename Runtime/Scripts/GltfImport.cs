@@ -1154,7 +1154,7 @@ namespace GLTFast {
                 var forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
                 var transcodeResult = await ktxContext.LoadAndTranscode(forceSampleLinear);
                 if (transcodeResult == ErrorCode.Success) {
-                    var textureResult = ktxContext.CreateTextureAndDispose();
+                    var textureResult = await ktxContext.CreateTextureAndDispose();
                     images[imageIndex] = textureResult.texture;
                     return textureResult.errorCode == ErrorCode.Success;
                 }
@@ -3245,7 +3245,7 @@ namespace GLTFast {
             while (startedCount < totalCount || ktxTasks.Count>0) {
                 while (ktxTasks.Count < maxCount && startedCount < totalCount) {
                     var ktx = ktxLoadContextsBuffer[startedCount];
-                    var forceSampleLinear = imageGamma != null && !imageGamma[ktx.imageIndex];
+                    var forceSampleLinear = imageGamma != null && !imageGamma[ktx.layer];
                     ktxTasks.Add(KtxLoadAndTranscode(startedCount, ktx, forceSampleLinear));
                     startedCount++;
                     await deferAgent.BreakPoint();
@@ -3255,8 +3255,8 @@ namespace GLTFast {
                 var i = kTask.Result.index;
                 if (kTask.Result.errorCode == ErrorCode.Success) {
                     var ktx = ktxLoadContextsBuffer[i];
-                    var result = ktx.CreateTextureAndDispose();
-                    images[ktx.imageIndex] = result.texture;
+                    var result = await ktx.CreateTextureAndDispose();
+                    images[ktx.layer] = result.texture;
                     await deferAgent.BreakPoint();
                 }
                 ktxTasks.Remove(kTask);

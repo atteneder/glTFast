@@ -26,11 +26,11 @@ using UnityEngine;
 
 namespace GLTFast {
     abstract class KtxLoadContextBase {
-        public int imageIndex;
+        public int layer;
         protected KtxTexture ktxTexture;
         
         public abstract Task<ErrorCode> LoadAndTranscode(bool linear);
-        public abstract TextureResult CreateTextureAndDispose();
+        public abstract Task<TextureResult> CreateTextureAndDispose();
     }
 }
 #endif // KTX_UNITY
