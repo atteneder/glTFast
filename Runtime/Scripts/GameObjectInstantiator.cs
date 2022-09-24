@@ -523,7 +523,7 @@ namespace GLTFast {
                     throw new ArgumentOutOfRangeException();
             }
             
-            light.color = lightSource.lightColor;
+            light.color = lightSource.lightColor.gamma;
             
             LightAssignIntensity(light, lightSource);
 
