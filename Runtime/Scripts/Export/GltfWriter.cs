@@ -301,7 +301,8 @@ namespace GLTFast.Export {
             // TODO: Detect if this is node is already a helper node
             //       (from glTF import) and discard it (if possible) to enable
             //       lossless round-trips
-            var node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name:"camera");
+            var parent = m_Nodes[nodeId];
+            var node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name:$"{parent.name}_Orientation");
             node.camera = cameraId;
         }
         
