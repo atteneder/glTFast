@@ -167,6 +167,7 @@ namespace GLTFast.Export {
             node.mesh = AddMesh(uMesh);
         }
 
+        /// <inheritdoc />
         public bool AddCamera(UnityEngine.Camera uCamera, out int cameraId) {
             CertifyNotDisposed();
 
