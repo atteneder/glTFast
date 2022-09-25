@@ -41,6 +41,10 @@ using Mesh = GLTFast.Schema.Mesh;
 using Sampler = GLTFast.Schema.Sampler;
 using Texture = GLTFast.Schema.Texture;
 
+#if USING_HDRP
+using UnityEngine.Rendering.HighDefinition;
+#endif
+
 #if DEBUG
 using System.Text;
 #endif
@@ -96,6 +100,7 @@ namespace GLTFast.Export {
         List<Texture> m_Textures;
         List<Image> m_Images;
         List<Schema.Camera> m_Cameras;
+        List<LightPunctual> m_Lights;
         List<Sampler> m_Samplers;
         List<Accessor> m_Accessors;
         List<BufferView> m_BufferViews;
@@ -195,6 +200,97 @@ namespace GLTFast.Export {
             m_Cameras.Add(camera);
             return true;
         }
+
+        /// <inheritdoc />
+        public bool AddLight(Light uLight, out int lightId) {
+            CertifyNotDisposed();
+            var light = new LightPunctual();
+
+            switch (uLight.type) {
+                case LightType.Spot:
+                    light.typeEnum = LightPunctual.Type.Spot;
+                    light.spot = new SpotLight {
+                        outerConeAngle = uLight.spotAngle * Mathf.Deg2Rad * .5f,
+                        innerConeAngle = uLight.innerSpotAngle * Mathf.Deg2Rad * .5f
+                    };
+                    break;
+                case LightType.Directional:
+                    light.typeEnum = LightPunctual.Type.Directional;
+                    break;
+                case LightType.Point:
+                    light.typeEnum = LightPunctual.Type.Point;
+                    break;
+                case LightType.Area:
+                case LightType.Disc:
+                default:
+                    light.typeEnum = LightPunctual.Type.Spot;
+                    light.spot = new SpotLight {
+                        outerConeAngle = 45 * Mathf.Deg2Rad * .5f,
+                        innerConeAngle = 35 * Mathf.Deg2Rad * .5f
+                    };
+                    break;
+            }
+
+            light.intensity = uLight.intensity;
+            light.lightColor = uLight.color.linear;
+            light.range = uLight.range;
+            
+            var renderPipeline = RenderPipelineUtils.renderPipeline;
+            switch (renderPipeline) {
+                case RenderPipeline.BuiltIn:
+                    light.intensity = uLight.intensity * Mathf.PI;
+                    break;
+                case RenderPipeline.Universal:
+                    light.intensity = uLight.intensity;
+                    break;
+#if USING_HDRP
+                case RenderPipeline.HighDefinition:
+                    var lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
+
+                    float GetIntensity(LightUnit unit) {
+                        if (lightHd.lightUnit == unit) {
+                            return lightHd.intensity;
+                        }
+                        // Workaround to get intensity in candela
+                        var oldUnit = lightHd.lightUnit;
+                        lightHd.lightUnit = unit;
+                        var result = lightHd.intensity;
+                        lightHd.lightUnit = oldUnit;
+                        return result;
+                    }
+
+                    if (lightHd == null) {
+                        light.intensity = uLight.intensity;
+                    }
+                    else {
+                        switch (lightHd.type) {
+                            case HDLightType.Spot:
+                            case HDLightType.Point:
+                                light.intensity = GetIntensity(LightUnit.Candela);
+                                break;
+                            case HDLightType.Directional:
+                                light.intensity = GetIntensity(LightUnit.Lux);
+                                break;
+                            case HDLightType.Area:
+                            default:
+                                light.intensity = lightHd.intensity;
+                                break;
+                        }
+                    }
+                    break;
+#endif
+                default:
+                    light.intensity = uLight.intensity;
+                    break;
+            }
+            
+            if (m_Lights == null) {
+                m_Lights = new List<LightPunctual>();
+            }
+            lightId = m_Lights.Count;
+            m_Lights.Add(light);
+            return true;
+        }
         
         /// <inheritdoc />
         public void AddCameraToNode(int nodeId, int cameraId) {
@@ -206,6 +302,27 @@ namespace GLTFast.Export {
             //       lossless round-trips
             var node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name:"camera");
             node.camera = cameraId;
+        }
+        
+        /// <inheritdoc />
+        public void AddLightToNode(int nodeId, int lightId) {
+            CertifyNotDisposed();
+            var node = m_Nodes[nodeId];
+            var light = m_Lights[lightId];
+            if (light.typeEnum != LightPunctual.Type.Point) {
+                // glTF lights face in the opposite direction, so we create a
+                // helper node that applies the correct rotation.
+                // TODO: Detect if this is node is already a helper node
+                //       (from glTF import) and discard it (if possible) to enable
+                //       lossless round-trips
+                node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name:$"{node.name}_Orientation");
+            }
+            if (node.extensions == null) {
+                node.extensions = new NodeExtensions();
+            }
+            node.extensions.KHR_lights_punctual = new NodeLightsPunctual {
+                light = lightId
+            };
         }
         
         /// <inheritdoc />
@@ -550,6 +667,15 @@ namespace GLTFast.Export {
             m_Gltf.samplers = m_Samplers?.ToArray();
             m_Gltf.cameras = m_Cameras?.ToArray();
 
+            if (m_Lights != null && m_Lights.Count > 0) {
+                RegisterExtensionUsage(Extension.LightsPunctual);
+                m_Gltf.extensions = new Schema.RootExtension {
+                    KHR_lights_punctual = new LightsPunctual {
+                        lights = m_Lights.ToArray()
+                    }
+                };
+            }
+            
             m_Gltf.asset = new Asset {
                 version = "2.0",
                 generator = $"Unity {Application.unityVersion} glTFast {Constants.version}"

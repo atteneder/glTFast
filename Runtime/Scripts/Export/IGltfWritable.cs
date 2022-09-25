@@ -60,6 +60,13 @@ namespace GLTFast.Export {
         void AddCameraToNode(int nodeId, int cameraId);
         
         /// <summary>
+        /// Assigns a light to a previously added node
+        /// </summary>
+        /// <param name="nodeId">Index of the node to add the mesh to</param>
+        /// <param name="lightId">glTF light ID to be assigned</param>
+        void AddLightToNode(int nodeId, int lightId);
+        
+        /// <summary>
         /// Adds a Unity material 
         /// </summary>
         /// <param name="uMaterial">Unity material</param>
@@ -100,6 +107,15 @@ namespace GLTFast.Export {
         /// <returns>True if camera was successfully created, false otherwise</returns>
         bool AddCamera(Camera uCamera, out int cameraId);
         
+        /// <summary>
+        /// Creates a glTF light based on a Unity light
+        /// Uses the KHR_lights_punctual extension.
+        /// </summary>
+        /// <param name="uLight">Unity light</param>
+        /// <param name="lightId">glTF light index</param>
+        /// <returns>True if light was successfully created, false otherwise</returns>
+        bool AddLight(Light uLight, out int lightId);
+
         /// <summary>
         /// Adds a scene to the glTF
         /// </summary>

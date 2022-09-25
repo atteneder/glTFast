@@ -256,6 +256,11 @@ namespace GLTFast.Schema {
                 }
                 writer.CloseArray();
             }
+
+            if (extensions != null) {
+                writer.AddProperty("extensions");
+                extensions.GltfSerialize(writer);
+            }
             
             writer.Close();
         }

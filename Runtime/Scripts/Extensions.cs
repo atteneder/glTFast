@@ -24,6 +24,10 @@ namespace GLTFast {
         /// </summary>
         DracoMeshCompression,
         /// <summary>
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_lights_punctual/README.md">KHR_lights_punctual</see> glTF extension 
+        /// </summary>
+        LightsPunctual,
+        /// <summary>
         /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness">KHR_materials_pbrSpecularGlossiness</see> glTF extension
         /// </summary>
         MaterialsPbrSpecularGlossiness,
@@ -107,6 +111,8 @@ namespace GLTFast {
             switch (extension) {
                 case Extension.DracoMeshCompression:
                     return DracoMeshCompression;
+                case Extension.LightsPunctual:
+                    return LightsPunctual;
                 case Extension.MaterialsPbrSpecularGlossiness:
                     return MaterialsPbrSpecularGlossiness;
                 case Extension.MaterialsTransmission:

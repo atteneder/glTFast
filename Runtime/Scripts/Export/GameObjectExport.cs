@@ -184,6 +184,12 @@ namespace GLTFast.Export {
                     m_Writer.AddCameraToNode(nodeId,cameraId);
                 }
             }
+            
+            if (gameObject.TryGetComponent(out Light light)) {
+                if (m_Writer.AddLight(light, out var lightId)) {
+                    m_Writer.AddLightToNode(nodeId,lightId);
+                }
+            }
             return success;
         }
     }
