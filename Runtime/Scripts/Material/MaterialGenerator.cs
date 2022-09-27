@@ -308,6 +308,7 @@ namespace GLTFast.Materials {
             bool flipY = false
             )
         {
+            var hasTransform = false;
             // Scale (x,y) and Transform (z,w)
             float4 textureST = new float4(
                 1,1,// scale
@@ -316,10 +317,8 @@ namespace GLTFast.Materials {
 
             var texCoord = textureInfo.texCoord;
 
-            if(textureInfo.extensions != null && textureInfo.extensions.KHR_texture_transform!=null) {
-                
-                material.EnableKeyword(KW_TEXTURE_TRANSFORM);
-                
+            if(textureInfo.extensions?.KHR_texture_transform != null) {
+                hasTransform = true;
                 var tt = textureInfo.extensions.KHR_texture_transform;
                 if (tt.texCoord >= 0) {
                     texCoord = tt.texCoord;
@@ -367,10 +366,15 @@ namespace GLTFast.Materials {
             }
             
             if(flipY) {
+                hasTransform = true;
                 textureST.w = 1-textureST.w; // flip offset in Y
                 textureST.y = -textureST.y; // flip scale in Y
             }
 
+            if (hasTransform) {
+                material.EnableKeyword(KW_TEXTURE_TRANSFORM);
+            }
+            
             material.SetTextureOffset(texturePropertyId, textureST.zw);
             material.SetTextureScale(texturePropertyId, textureST.xy);
             Assert.IsTrue(scaleTransformPropertyId >= 0,"Texture scale/transform property invalid!");
