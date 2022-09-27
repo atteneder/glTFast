@@ -34,21 +34,18 @@ namespace GLTFast {
         }
 
         public override async Task<TextureResult> LoadTexture2D(bool linear) {
-            // TODO: pin data and don't create a copy
-            var slice = new NativeArray<byte>(data,KtxNativeInstance.defaultAllocator);
-            
-            var errorCode = ktxTexture.Open(slice);
-            if (errorCode != ErrorCode.Success) {
-                return new TextureResult(errorCode);
-            }
+            using (var array = new ManagedNativeArray(data)) {
+                
+                var errorCode = ktxTexture.Open(array.nativeArray);
+                if (errorCode != ErrorCode.Success) {
+                    return new TextureResult(errorCode);
+                }
 
-            var result = await ktxTexture.LoadTexture2D(linear);
-            
-            slice.Dispose();
-            data = null;
-            
-            ktxTexture.Dispose();
-            return result;
+                var result = await ktxTexture.LoadTexture2D(linear);
+                
+                ktxTexture.Dispose();
+                return result;
+            }
         }
     }
 }
