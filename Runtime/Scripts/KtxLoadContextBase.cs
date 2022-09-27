@@ -19,18 +19,16 @@
 
 #if KTX
 
-using System.Collections;
 using System.Threading.Tasks;
 using KtxUnity;
 using UnityEngine;
 
 namespace GLTFast {
     abstract class KtxLoadContextBase {
-        public int layer;
+        public int imageIndex;
         protected KtxTexture ktxTexture;
         
-        public abstract Task<ErrorCode> LoadAndTranscode(bool linear);
-        public abstract Task<TextureResult> CreateTextureAndDispose();
+        public abstract Task<TextureResult> LoadTexture2D(bool linear);
     }
 }
 #endif // KTX_UNITY
