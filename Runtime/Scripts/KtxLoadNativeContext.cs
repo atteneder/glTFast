@@ -28,23 +28,18 @@ namespace GLTFast {
         NativeSlice<byte> slice;
 
         public KtxLoadNativeContext(int index,NativeSlice<byte> slice) {
-            layer = index;
+            imageIndex = index;
             this.slice = slice;
             ktxTexture = new KtxTexture();
         }
 
-        public override async Task<ErrorCode> LoadAndTranscode(bool linear) {
-            var result = ktxTexture.Load(slice);
-            if (result != ErrorCode.Success) {
-                return result;
+        public override async Task<TextureResult> LoadTexture2D(bool linear) {
+            var errorCode = ktxTexture.Open(slice);
+            if (errorCode != ErrorCode.Success) {
+                return new TextureResult(errorCode);
             }
 
-            result = await ktxTexture.Transcode(linear);
-            return result;
-        }
-
-        public override async Task<TextureResult> CreateTextureAndDispose() {
-            var result = await ktxTexture.CreateTexture();
+            var result = await ktxTexture.LoadTexture2D(linear);
             ktxTexture.Dispose();
             return result;
         }
