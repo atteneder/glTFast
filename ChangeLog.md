@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shader keyword `_UV_ROTATION` was replaced by `_TEXTURE_TRANSFORM`, which now controls tiling, offset and rotation all together
 - Animation is not played by default anymore (check the upgrade guide on how to restore this behavior; #339)
 - Instantiation is async now. This helps to ensure a stable frame rate when loading bigger glTF scenes (#205)
+- KTX textures load much smoother thanks to bumping KtxUnity to 1.3.0 or 2.2.1
 - Sped up loading of external KTX textures by avoid making a redundant memory copy.
 ### Removed
 - Obsolete code
