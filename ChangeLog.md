@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+This release contains multiple breaking changes. Please read the [upgrade guide](xref:doc-upgrade-guides#upgrade-to-50) for details.
 ### Added
 - `settings` parameter to `GameObjectBoundsInstantiator`'s constructor
 - (Import) Support for lights via KHR_lights_punctual extension (#17)
