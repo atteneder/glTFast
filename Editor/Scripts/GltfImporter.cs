@@ -52,7 +52,7 @@ namespace GLTFast.Editor {
 #else
     [ScriptedImporter(1, null, overrideExts: new[] { "gltf","glb" })]
 #endif
-    class GltfImporter : ScriptedImporter {
+    public class GltfImporter : ScriptedImporter {
 
         [SerializeField]
         EditorImportSettings editorImportSettings;
