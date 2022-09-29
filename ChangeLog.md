@@ -27,7 +27,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - Warning when trying to load the main scene if it is not defined (Editor and development builds only; #450)
 - (Export) Support for camera export
 - (Export) Support for lights export
-- glTF icon assigned to `GltfAsset*` components and and various setting classes
+- glTF icon assigned to imported glTF assets, `GltfAsset*` components and and various setting classes
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
