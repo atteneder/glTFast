@@ -73,7 +73,7 @@ namespace GLTFast.Editor {
 
         HashSet<string> m_ImportedNames;
         HashSet<Object> m_ImportedObjects;
-        private static Func<string,string> dependencyMapping;
+        private static Func<Uri,Uri> dependencyMapping;
 
         // static string[] GatherDependenciesFromSourceFile(string path) {
         //     // Called before actual import for each changed asset that is imported by this importer type
@@ -84,7 +84,7 @@ namespace GLTFast.Editor {
         //     return null;
         // }
 
-        public static void SetupExternalDependencies(Func<string, string> urlConversion)
+        public static void SetupExternalDependencies(Func<Uri, Uri> urlConversion)
         {
             dependencyMapping = urlConversion;
         }
