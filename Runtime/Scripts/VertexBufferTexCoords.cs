@@ -83,12 +83,9 @@ namespace GLTFast {
         }
 
         public override void AddDescriptors(VertexAttributeDescriptor[] dst, ref int offset, int stream) {
-            VertexAttribute vatt = VertexAttribute.TexCoord0;
             for (int i = 0; i < uvSetCount; i++) {
-                if (i == 1) {
-                    vatt = VertexAttribute.TexCoord1;
-                }
-                dst[offset] = new VertexAttributeDescriptor(vatt, VertexAttributeFormat.Float32, 2, stream);
+                var vertexAttribute = (VertexAttribute)((int)VertexAttribute.TexCoord0+i);
+                dst[offset] = new VertexAttributeDescriptor(vertexAttribute, VertexAttributeFormat.Float32, 2, stream);
                 offset++;
             }
         }

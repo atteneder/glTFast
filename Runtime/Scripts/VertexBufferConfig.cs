@@ -106,15 +106,33 @@ namespace GLTFast
             if (uvAccessorIndices!=null && uvAccessorIndices.Length>0) {
                 
                 // More than two UV sets are not supported yet
-                Assert.IsTrue(uvAccessorIndices.Length<3);
+                Assert.IsTrue(uvAccessorIndices.Length<9);
                 
                 jobCount += uvAccessorIndices.Length;
                 switch (uvAccessorIndices.Length) {
                     case 1:
                         texCoords = new VertexBufferTexCoords<VTexCoord1>(logger);
                         break;
-                    default:
+                    case 2:
                         texCoords = new VertexBufferTexCoords<VTexCoord2>(logger);
+                        break;
+                    case 3:
+                        texCoords = new VertexBufferTexCoords<VTexCoord3>(logger);
+                        break;
+                    case 4:
+                        texCoords = new VertexBufferTexCoords<VTexCoord4>(logger);
+                        break;
+                    case 5:
+                        texCoords = new VertexBufferTexCoords<VTexCoord5>(logger);
+                        break;
+                    case 6:
+                        texCoords = new VertexBufferTexCoords<VTexCoord6>(logger);
+                        break;
+                    case 7:
+                        texCoords = new VertexBufferTexCoords<VTexCoord7>(logger);
+                        break;
+                    default:
+                        texCoords = new VertexBufferTexCoords<VTexCoord8>(logger);
                         break;
                 }
             }

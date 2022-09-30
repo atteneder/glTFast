@@ -2411,12 +2411,36 @@ namespace GLTFast {
                 if (att.TEXCOORD_0 >= 0) {
                     int uvCount = 1;
                     if (att.TEXCOORD_1 >= 0) uvCount++;
+                    if (att.TEXCOORD_2 >= 0) uvCount++;
+                    if (att.TEXCOORD_3 >= 0) uvCount++;
+                    if (att.TEXCOORD_4 >= 0) uvCount++;
+                    if (att.TEXCOORD_5 >= 0) uvCount++;
+                    if (att.TEXCOORD_6 >= 0) uvCount++;
+                    if (att.TEXCOORD_7 >= 0) uvCount++;
                     uvInputs = new int[uvCount];
                     uvInputs[0] = att.TEXCOORD_0;
                     if (att.TEXCOORD_1 >= 0) {
                         uvInputs[1] = att.TEXCOORD_1;
                     }
                     if (att.TEXCOORD_2 >= 0) {
+                        uvInputs[2] = att.TEXCOORD_2;
+                    }
+                    if (att.TEXCOORD_3 >= 0) {
+                        uvInputs[3] = att.TEXCOORD_3;
+                    }
+                    if (att.TEXCOORD_4 >= 0) {
+                        uvInputs[4] = att.TEXCOORD_4;
+                    }
+                    if (att.TEXCOORD_5 >= 0) {
+                        uvInputs[5] = att.TEXCOORD_5;
+                    }
+                    if (att.TEXCOORD_6 >= 0) {
+                        uvInputs[6] = att.TEXCOORD_6;
+                    }
+                    if (att.TEXCOORD_7 >= 0) {
+                        uvInputs[7] = att.TEXCOORD_7;
+                    }
+                    if (att.TEXCOORD_8 >= 0) {
                         logger?.Warning(LogCode.UVLimit);
                     }
                 }

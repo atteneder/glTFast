@@ -229,7 +229,7 @@ namespace GLTFast.Logging {
         /// </summary>
         TypeUnsupported,
         /// <summary>
-        /// Only two UV sets will get imported
+        /// Only eight UV sets will get imported
         /// </summary>
         UVLimit,
         /// <summary>
@@ -295,7 +295,7 @@ namespace GLTFast.Logging {
             { LogCode.TextureNotFound, "Texture #{0} not found" },
             { LogCode.TopologyUnsupported, "Unsupported topology {0}" },
             { LogCode.TypeUnsupported, "Unsupported {0} type {1}" },
-            { LogCode.UVLimit, "Only two UV sets will get imported" },
+            { LogCode.UVLimit, "Only eight UV sets will get imported" },
             { LogCode.UVMulti, "UV set index {0} is not supported in current render pipeline" },
         };
 #endif

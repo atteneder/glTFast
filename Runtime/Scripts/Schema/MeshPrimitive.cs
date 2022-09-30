@@ -207,6 +207,8 @@ namespace GLTFast.Schema {
         public int TEXCOORD_6 = -1;
         /// <summary>Texture coordinates accessor index (eighth UV set).</summary>
         public int TEXCOORD_7 = -1;
+        /// <summary>Texture coordinates accessor index (ninth UV set).</summary>
+        public int TEXCOORD_8 = -1;
         /// <summary>Vertex color accessor index.</summary>
         public int COLOR_0 = -1;
         /// <summary>Bone joints accessor index.</summary>
