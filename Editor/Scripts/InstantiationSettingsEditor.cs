@@ -34,7 +34,7 @@ namespace GLTFast.Editor {
 
         internal static void CreateUI(SerializedObject serializedObject, VisualElement container, string pathPrefix="") {
             var prop = serializedObject.FindProperty($"{pathPrefix}mask");
-            Utils.CreateProperty(container, prop,"Component Mask");
+            Utils.CreateProperty(container, prop,"Components");
 
             prop = serializedObject.FindProperty($"{pathPrefix}layer");
             var layerField = new LayerField("Destination Layer");

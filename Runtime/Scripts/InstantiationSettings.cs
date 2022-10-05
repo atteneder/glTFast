@@ -47,7 +47,7 @@ namespace GLTFast {
         /// <summary>
         /// Can be used to exclude component instantiation based on type. 
         /// </summary>
-        [Tooltip("Can be used to exclude component instantiation based on type")]
+        [Tooltip("Filter component instantiation based on type")]
         public ComponentType mask = ComponentType.All;
         
         /// <summary>
