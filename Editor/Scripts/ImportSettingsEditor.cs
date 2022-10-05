@@ -31,16 +31,15 @@ namespace GLTFast.Editor {
             return m_Container;
         }
 
-        internal static void CreateUI(SerializedObject serializedObject, VisualElement container, string pathPrefix = "") {
-            var properties = new[] {
-                serializedObject.FindProperty($"{pathPrefix}nodeNameMethod"),
-                serializedObject.FindProperty($"{pathPrefix}animationMethod"),
-            };
+        internal static void CreateUI(SerializedObject serializedObject, VisualElement container, string pathPrefix = "", bool importerContext = false) {
             
-            Utils.CreateProperties(container, properties);
+            Utils.CreateProperty(container, serializedObject.FindProperty($"{pathPrefix}nodeNameMethod"));
+            if (!importerContext) {
+                Utils.CreateProperty(container, serializedObject.FindProperty($"{pathPrefix}animationMethod"));
+            }
 
             // Group texture related properties in a foldout
-            properties = new[] {
+            var properties = new[] {
                 serializedObject.FindProperty($"{pathPrefix}generateMipMaps"),
                 serializedObject.FindProperty($"{pathPrefix}defaultMinFilterMode"),
                 serializedObject.FindProperty($"{pathPrefix}defaultMagFilterMode"),

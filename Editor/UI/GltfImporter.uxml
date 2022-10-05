@@ -1,16 +1,15 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:VisualElement name="ImportSettings" class="section">
-        <Style src="GltfImporter-style.uss" />
-        <ui:Label text="glTF Import Settings" name="Headline" class="h1" />
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Packages/com.atteneder.gltfast/Editor/UI/GltfImporter-style.uss?fileID=7433441132597879392&amp;guid=3f6f1f186c9e446d880d267adc629f1b&amp;type=3#GltfImporter-style" />
+    <ui:VisualElement name="Header" style="flex-direction: row; align-items: center; margin-bottom: 8px; margin-top: 5px;">
+        <ui:VisualElement style="background-image: url(&apos;project://database/Packages/com.atteneder.gltfast/Editor/UI/gltf-logo.png?fileID=21300000&amp;guid=dfde62efb4ba642ea968adab4e674d01&amp;type=3#gltf-logo&apos;); width: 48px; height: 24px; -unity-background-scale-mode: stretch-to-fill; -unity-background-image-tint-color: rgb(210, 210, 210);" />
+        <ui:Label text="Settings" name="Headline" class="h1" style="margin-bottom: 1px;" />
+    </ui:VisualElement>
+    <ui:VisualElement name="ImportSettings" class="section" style="flex-direction: column;">
         <uie:EnumField label="Animation" value="Legacy" binding-path="importSettings.animationMethod" type="GLTFast.ImportSettings+AnimationMethod, glTFast" name="Animation" focusable="true" tooltip="Target animation system" />
         <ui:Toggle label="Generate Lightmap UVs" name="SecondaryUVSet" binding-path="editorImportSettings.generateSecondaryUVSet" text="&#x9;" tooltip="Generate lightmap texture coordinates into the second UV channel (if not present)" />
     </ui:VisualElement>
-    <ui:Foldout text="Advanced Settings" name="AdvancedSettings">
-        <Style src="GltfImporter-style.uss" />
-        <ui:IMGUIContainer name="ImportSettings" />
-    </ui:Foldout>
+    <ui:VisualElement name="AdvancedSettings" />
     <ui:VisualElement name="Dependencies" class="dependencies section">
-        <Style src="GltfImporter-style.uss" />
         <ui:VisualElement name="DepsHeader" style="flex-direction: row; align-items: center;">
             <ui:VisualElement name="Icon" class="icon error" />
             <ui:Label text="Some dependencies couldn&apos;t be resolved&#10;" style="-unity-font-style: bold;" />
@@ -19,7 +18,6 @@
         <ui:Button name="fixall" text="Fix All Errors" />
     </ui:VisualElement>
     <ui:VisualElement name="Report" class="report section">
-        <Style src="GltfImporter-style.uss" />
         <ui:Label text="Import Report" name="Headline" class="h1" />
         <ui:ListView focusable="true" binding-path="reportItems" item-height="20" class="report-list" />
     </ui:VisualElement>
