@@ -97,7 +97,7 @@ namespace GLTFast.Editor {
                 logger
                 );
 
-            var gltfIcon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.atteneder.gltfast/Editor/UI/gltf.png");
+            var gltfIcon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.atteneder.gltfast/Editor/UI/gltf-icon-bug.png");
             
             if (editorImportSettings == null) {
                 // Design-time import specific settings
