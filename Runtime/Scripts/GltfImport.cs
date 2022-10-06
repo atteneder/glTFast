@@ -199,12 +199,6 @@ namespace GLTFast {
         JobHandle meshoptJobHandle;
 #endif
 
-        /// <summary>
-        /// Unity's animation system addresses target GameObjects by hierarchical name.
-        /// To make sure names are consistent and have no conflicts they are precalculated
-        /// and stored in this array.
-        /// </summary>
-        string[] nodeNames;
         
 #endregion VolatileData
 
@@ -221,6 +215,13 @@ namespace GLTFast {
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
 
+        /// <summary>
+        /// Unity's animation system addresses target GameObjects by hierarchical name.
+        /// To make sure names are consistent and have no conflicts they are precalculated
+        /// and stored in this array.
+        /// </summary>
+        string[] nodeNames;
+        
         Primitive[] primitives;
         int[] meshPrimitiveIndex;
         Matrix4x4[][] skinsInverseBindMatrices;
@@ -513,6 +514,9 @@ namespace GLTFast {
         /// There can be no instantiation or other element access afterwards.
         /// </summary>
         public void Dispose() {
+
+            nodeNames = null;
+            
             if(materials!=null) {
                 foreach( var material in materials ) {
                     SafeDestroy(material);
