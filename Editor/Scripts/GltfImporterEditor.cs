@@ -82,7 +82,7 @@ namespace GLTFast {
                 // reportList.bindingPath = nameof(m_ReportItems);
                 reportList.makeItem = () => reportItemMarkup.CloneTree();
                 reportList.bindItem = (element, i) => {
-                    if (i >= reportItemCount || i >= m_ReportItems.arraySize) {
+                    if (i >= reportItemCount) {
                         element.style.display = DisplayStyle.None;
                         return;
                     }
