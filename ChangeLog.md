@@ -48,6 +48,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - KTX textures load much smoother thanks to bumping KtxUnity to 1.3.0 or 2.2.1
 - Sped up loading of external KTX textures by avoid making a redundant memory copy.
 - `IDownload` does not derive from `IEnumartor` anymore
+- (Import) Successfully tested mesh primitive draw mode `lines` and removed error message about it being untested
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

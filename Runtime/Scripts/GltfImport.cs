@@ -2784,7 +2784,6 @@ namespace GLTFast {
                 c.topology = MeshTopology.Points;
                 break;
             case DrawMode.Lines:
-                logger?.Error(LogCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Lines;
                 break;
             case DrawMode.LineLoop:
