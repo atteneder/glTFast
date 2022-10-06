@@ -207,7 +207,10 @@ namespace GLTFast.Materials {
         protected ICodeLogger logger;
 
         /// <inheritdoc />
-        public UnityEngine.Material GetDefaultMaterial() {
+        public UnityEngine.Material GetDefaultMaterial(MeshTopology topology = MeshTopology.Triangles) {
+            if(topology!=MeshTopology.Triangles) {
+                logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
+            }
             if (!defaultMaterialGenerated) {
                 defaultMaterial = GenerateDefaultMaterial();
                 defaultMaterialGenerated = true;
@@ -219,7 +222,7 @@ namespace GLTFast.Materials {
         /// Creates a fallback material to be assigned to nodes without a material.
         /// </summary>
         /// <returns>fallback material</returns>
-        protected abstract UnityEngine.Material GenerateDefaultMaterial();
+        protected abstract UnityEngine.Material GenerateDefaultMaterial(MeshTopology topology = MeshTopology.Triangles);
 
         /// <summary>
         /// Tries to load a shader and covers error handling.
@@ -235,7 +238,7 @@ namespace GLTFast.Materials {
         }
         
         /// <inheritdoc />
-        public abstract UnityEngine.Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf);
+        public abstract UnityEngine.Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf, MeshTopology topology = MeshTopology.Triangles);
 
         /// <inheritdoc />
         public void SetLogger(ICodeLogger logger) {

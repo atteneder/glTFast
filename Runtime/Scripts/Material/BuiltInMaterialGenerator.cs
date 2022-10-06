@@ -87,7 +87,10 @@ namespace GLTFast.Materials {
         static Material defaultMaterial;
 
         /// <inheritdoc />
-        protected override Material GenerateDefaultMaterial() {
+        protected override Material GenerateDefaultMaterial(MeshTopology topology = MeshTopology.Triangles) {
+            if(topology!=MeshTopology.Triangles) {
+                logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
+            }
             if (!defaultMaterialGenerated) {
                 defaultMaterial = GetPbrMetallicRoughnessMaterial();
                 defaultMaterialGenerated = true;
@@ -189,8 +192,12 @@ namespace GLTFast.Materials {
         /// <inheritdoc />
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
-            IGltfReadable gltf
+            IGltfReadable gltf,
+            MeshTopology topology = MeshTopology.Triangles
         ) {
+            if(topology!=MeshTopology.Triangles) {
+                logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
+            }
             Material material;
             
             if (gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness != null) {

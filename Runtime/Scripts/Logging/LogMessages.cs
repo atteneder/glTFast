@@ -221,6 +221,10 @@ namespace GLTFast.Logging {
         /// </summary>
         TextureNotFound,
         /// <summary>
+        /// Could not find material that supports a certain topology
+        /// </summary>
+        TopologyMaterialUnsupported,
+        /// <summary>
         /// Unsupported topology
         /// </summary>
         TopologyUnsupported,
@@ -293,6 +297,7 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             { LogCode.TextureInvalidType, "Invalid {0} texture type (material: {1})" },
             { LogCode.TextureLoadFailed, "Texture #{0} not loaded" },
             { LogCode.TextureNotFound, "Texture #{0} not found" },
+            { LogCode.TopologyMaterialUnsupported, "Could not find material that supports topology {0}" },
             { LogCode.TopologyUnsupported, "Unsupported topology {0}" },
             { LogCode.TypeUnsupported, "Unsupported {0} type {1}" },
             { LogCode.UVLimit, "Only eight UV sets will get imported" },

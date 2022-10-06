@@ -199,6 +199,7 @@ namespace GLTFast {
         JobHandle meshoptJobHandle;
 #endif
 
+        MeshTopology[] materialTopologies;
         
 #endregion VolatileData
 
@@ -605,14 +606,14 @@ namespace GLTFast {
         /// Returns a fallback default material that is provided by the IMaterialGenerator
         /// </summary>
         /// <returns></returns>
-        public UnityEngine.Material GetDefaultMaterial() {
+        public UnityEngine.Material GetDefaultMaterial(MeshTopology topology = MeshTopology.Triangles) {
 #if UNITY_EDITOR
             if (defaultMaterial == null) {
-                defaultMaterial = materialGenerator.GetDefaultMaterial();
+                defaultMaterial = materialGenerator.GetDefaultMaterial(topology);
             }
             return defaultMaterial;
 #else
-            return materialGenerator.GetDefaultMaterial();
+            return materialGenerator.GetDefaultMaterial(topology);
 #endif
         }
         
@@ -1586,7 +1587,7 @@ namespace GLTFast {
                     await deferAgent.BreakPoint(.0001f);
                     Profiler.BeginSample("GenerateMaterial");
                     materialGenerator.SetLogger(logger);
-                    materials[i] = materialGenerator.GenerateMaterial(gltfRoot.materials[i],this);
+                    materials[i] = materialGenerator.GenerateMaterial(gltfRoot.materials[i],this, GetMaterialTopology(i));
                     materialGenerator.SetLogger(null);
                     Profiler.EndSample();
                 }
@@ -1760,6 +1761,30 @@ namespace GLTFast {
             return success;
         }
 
+        void SetMaterialTopology(int materialIndex, MeshTopology topology) {
+            if (topology == MeshTopology.Triangles) {
+                // Is the default anyways
+                return;
+            }
+            Assert.IsNotNull(gltfRoot?.materials);
+            Assert.IsTrue(materialIndex>=0);
+            Assert.IsTrue(materialIndex<gltfRoot.materials.Length);
+            if (materialTopologies == null) {
+                materialTopologies = new MeshTopology[gltfRoot.materials.Length];
+            }
+            materialTopologies[materialIndex] = topology;
+        }
+
+        MeshTopology GetMaterialTopology(int materialIndex) {
+            if (materialTopologies != null) {
+                Assert.IsNotNull(gltfRoot?.materials);
+                Assert.IsTrue(materialIndex>=0);
+                Assert.IsTrue(materialIndex<gltfRoot.materials.Length);
+                return materialTopologies[materialIndex];
+            }
+            return MeshTopology.Triangles;
+        }
+        
         /// <summary>
         /// glTF nodes have no requirement to be named or have specific names.
         /// Some Unity systems like animation and importers require unique
@@ -1883,6 +1908,7 @@ namespace GLTFast {
             imageReadable = null;
             imageGamma = null;
             glbBinChunk = null;
+            materialTopologies = null;
             
 #if MESHOPT
             if(meshoptBufferViews!=null) {
@@ -2351,6 +2377,20 @@ namespace GLTFast {
                     }
                     attributeMesh.Add(meshIndex);
 #endif
+
+                    if (gltf.materials != null && primitive.material >= 0) {
+                        switch (primitive.mode) {
+                            case DrawMode.Points:
+                                SetMaterialTopology(primitive.material, MeshTopology.Points);
+                                break;
+                            case DrawMode.Lines:
+                            case DrawMode.LineLoop:
+                            case DrawMode.LineStrip:
+                                SetMaterialTopology(primitive.material, MeshTopology.Lines);
+                                break;
+                        }
+                        
+                    }
                 }
                 meshPrimitiveCluster[meshIndex] = cluster;
                 totalPrimitives += cluster.Count;

@@ -47,8 +47,9 @@ namespace GLTFast {
         /// <summary>
         /// Default material, supposed to be used when no material was assigned
         /// </summary>
+        /// <param name="topology">Topology type this material has to work with</param>
         /// <returns>Default material</returns>
-        Material GetDefaultMaterial();
+        Material GetDefaultMaterial(MeshTopology topology = MeshTopology.Triangles);
         
         /// <summary>
         /// Get texture by glTF image index

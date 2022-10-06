@@ -135,12 +135,23 @@ namespace GLTFast.Materials {
 #endif
 
         /// <inheritdoc />
-        protected override Material GenerateDefaultMaterial() {
+        protected override Material GenerateDefaultMaterial(MeshTopology topology = MeshTopology.Triangles) {
+            if(topology!=MeshTopology.Triangles) {
+                logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
+            }
             return GetMetallicMaterial(MetallicShaderFeatures.Default);
         }
 
         /// <inheritdoc />
-        public override Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf) {
+        public override Material GenerateMaterial(
+            Schema.Material gltfMaterial,
+            IGltfReadable gltf,
+            MeshTopology topology = MeshTopology.Triangles
+            )
+        {
+            if(topology!=MeshTopology.Triangles) {
+                logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
+            }
 
             Material material;
 
