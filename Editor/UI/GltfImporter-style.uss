@@ -1,8 +1,13 @@
 .dependencies {
 }
 
-.report {
+.header {
     margin-top: 5px;
+    align-items: center;
+    flex-direction: row;
+}
+
+.report {
     flex-grow: 1;
 }
 
