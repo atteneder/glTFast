@@ -47,18 +47,18 @@ using Object = UnityEngine.Object;
 
 namespace GLTFast.Editor {
 
-#if ENABLE_DEFAULT_GLB_IMPORTER
-    [ScriptedImporter(1,new [] {"gltf","glb"})] 
-#else
-    [ScriptedImporter(1, null, overrideExts: new[] { "gltf","glb" })]
-#endif
-    class GltfImporter : ScriptedImporter {
+//#if ENABLE_DEFAULT_GLB_IMPORTER
+//    [ScriptedImporter(1,new [] {"gltf","glb"})] 
+//#else
+//    [ScriptedImporter(1, null, overrideExts: new[] { "gltf","glb" })]
+//#endif
+    public class GltfImporter : ScriptedImporter {
 
         [SerializeField]
-        EditorImportSettings editorImportSettings;
+        public EditorImportSettings editorImportSettings;
         
         [SerializeField]
-        ImportSettings importSettings;
+        public ImportSettings importSettings;
         
         [SerializeField]
         InstantiationSettings instantiationSettings;
@@ -82,8 +82,24 @@ namespace GLTFast.Editor {
         //     // TODO: Texture files with relative URIs should be included here
         //     return null;
         // }
-        
-        public override void OnImportAsset(AssetImportContext ctx) {
+
+        public class ImportResult
+        {
+            public AnimationClip[] animationClips;
+            public AnimationClip resetClip;
+
+            public ImportResult(AnimationClip[] acs, AnimationClip rst)
+            {
+                animationClips = acs;
+                resetClip = rst;
+            }
+        }
+
+        public override void OnImportAsset(AssetImportContext ctx)
+        {
+            throw new Exception("This importer should be disabled. Use Didimo's importer (GLTFImporter.cs) instead.");
+        }
+        public /* override */ ImportResult OnImportAsset(AssetImportContext ctx, bool importMaterialsAndImages = true) {
 
             reportItems = null;
 
@@ -132,7 +148,7 @@ namespace GLTFast.Editor {
                     // setting.
                     
                     instantiationSettings.sceneObjectCreation = InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes;
-                    Debug.LogWarning("SceneObjectCreation setting \"Never\" is not available for Editor (design-time) imports. Falling back to WhenMultipleRootNodes.", this);
+                    Debug.LogWarning("SceneObjectCreation setting \"Never\" is not available for Editor (design-time) imports. Falling back to WhenMultipleRootNodes.", ctx.mainObject);
                 }
                 
                 instantiationLogger = new CollectingLogger();
@@ -180,6 +196,10 @@ namespace GLTFast.Editor {
                     }
                 }
                 
+                // This is a change needed by Didimo
+                // Don't ident the following lines, so we don't get merge conflicts in case upstream has updates 
+                if (importMaterialsAndImages) {
+                    
                 for (var i = 0; i < m_Gltf.textureCount; i++) {
                     var texture = m_Gltf.GetTexture(i);
                     if (texture != null) {
@@ -209,6 +229,7 @@ namespace GLTFast.Editor {
                     var mat = m_Gltf.defaultMaterial;
                     AddObjectToAsset(ctx, $"materials/{mat.name}", mat);
                 }
+                }
                 
                 var meshes = m_Gltf.GetMeshes();
                 if (meshes != null) {
@@ -225,7 +246,9 @@ namespace GLTFast.Editor {
                 
 #if UNITY_ANIMATION
                 var clips = m_Gltf.GetAnimationClips();
-                if (clips != null) {
+                if (clips != null)
+                {
+                    clips = clips.Append(m_Gltf.GetResetClip()).ToArray();
                     foreach (var animationClip in clips) {
                         if (animationClip == null) {
                             continue;
@@ -290,9 +313,11 @@ namespace GLTFast.Editor {
             }
 
             if (reportItemList.Any(x => x.type == LogType.Error || x.type == LogType.Exception)) {
-                Debug.LogError($"Failed to import {assetPath} (see inspector for details)", this);
+                Debug.LogError($"Failed to import {ctx.assetPath} (see inspector for details)", ctx.mainObject);
             }
             reportItems = reportItemList.ToArray();
+
+            return new ImportResult( m_Gltf.GetAnimationClips(), m_Gltf.GetResetClip());
         }
 
         void AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj, Texture2D thumbnail = null) {
