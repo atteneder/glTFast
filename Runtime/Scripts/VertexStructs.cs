@@ -49,6 +49,63 @@ namespace GLTFast.Vertex
     }
     
     [StructLayout(LayoutKind.Sequential)]
+    struct VTexCoord3 {
+        public float2 uv0;
+        public float2 uv1;
+        public float2 uv2;
+    }
+    
+    [StructLayout(LayoutKind.Sequential)]
+    struct VTexCoord4 {
+        public float2 uv0;
+        public float2 uv1;
+        public float2 uv2;
+        public float2 uv3;
+    }
+    
+    [StructLayout(LayoutKind.Sequential)]
+    struct VTexCoord5 {
+        public float2 uv0;
+        public float2 uv1;
+        public float2 uv2;
+        public float2 uv3;
+        public float2 uv4;
+    }
+    
+    [StructLayout(LayoutKind.Sequential)]
+    struct VTexCoord6 {
+        public float2 uv0;
+        public float2 uv1;
+        public float2 uv2;
+        public float2 uv3;
+        public float2 uv4;
+        public float2 uv5;
+    }
+    
+    [StructLayout(LayoutKind.Sequential)]
+    struct VTexCoord7 {
+        public float2 uv0;
+        public float2 uv1;
+        public float2 uv2;
+        public float2 uv3;
+        public float2 uv4;
+        public float2 uv5;
+        public float2 uv6;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct VTexCoord8 {
+        public float2 uv0;
+        public float2 uv1;
+        public float2 uv2;
+        public float2 uv3;
+        public float2 uv4;
+        public float2 uv5;
+        public float2 uv6;
+        public float2 uv7;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     unsafe struct VBones {
         public fixed float weights[4];
         public fixed uint joints[4];

@@ -229,7 +229,7 @@ namespace GLTFast.Logging {
         /// </summary>
         TypeUnsupported,
         /// <summary>
-        /// Only two UV sets will get imported
+        /// Only eight UV sets will get imported
         /// </summary>
         UVLimit,
         /// <summary>
@@ -247,8 +247,8 @@ namespace GLTFast.Logging {
             { LogCode.AccessorAttributeTypeUnknown, "Unknown GLTFAccessorAttributeType" },
             { LogCode.AccessorInconsistentUsage, "Inconsistent accessor usage {0} != {1}" },
             { LogCode.AccessorsShared, @"glTF file uses certain vertex attributes/accessors across multiple meshes!
-                    This may result in low performance and high memory usage. Try optimizing the glTF file.
-                    See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52" },
+This may result in low performance and high memory usage. Try optimizing the glTF file.
+See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52" },
             { LogCode.AnimationChannelNodeInvalid, "Animation channel {0} has invalid node id" },
             { LogCode.AnimationChannelSamplerInvalid, "Animation channel {0} has invalid sampler id" },
             { LogCode.AnimationFormatInvalid, "Invalid animation format {0}" },
@@ -276,8 +276,8 @@ namespace GLTFast.Logging {
             { LogCode.IndexFormatInvalid, "Invalid index format {0}" },
             { LogCode.JsonParsingFailed, "Parsing JSON failed" },
             { LogCode.MaterialTransmissionApprox, "Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!" },
-            { LogCode.MaterialTransmissionApproxURP, "Chance of incorrect materials! glTF transmission"
-                + " is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
+            { LogCode.MaterialTransmissionApproxURP, @"Chance of incorrect materials! glTF transmission
+is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             { LogCode.MeshBoundsMissing, "No bounds for mesh {0} => calculating them." },
             { LogCode.MeshNotReadable, "Skipping non-readable mesh {0}" },
             { LogCode.MissingImageURL, "Image URL missing" },
@@ -295,7 +295,7 @@ namespace GLTFast.Logging {
             { LogCode.TextureNotFound, "Texture #{0} not found" },
             { LogCode.TopologyUnsupported, "Unsupported topology {0}" },
             { LogCode.TypeUnsupported, "Unsupported {0} type {1}" },
-            { LogCode.UVLimit, "Only two UV sets will get imported" },
+            { LogCode.UVLimit, "Only eight UV sets will get imported" },
             { LogCode.UVMulti, "UV set index {0} is not supported in current render pipeline" },
         };
 #endif

@@ -82,7 +82,7 @@ namespace GLTFast {
                 // reportList.bindingPath = nameof(m_ReportItems);
                 reportList.makeItem = () => reportItemMarkup.CloneTree();
                 reportList.bindItem = (element, i) => {
-                    if (i >= reportItemCount || i >= m_ReportItems.arraySize) {
+                    if (i >= reportItemCount) {
                         element.style.display = DisplayStyle.None;
                         return;
                     }
@@ -168,23 +168,9 @@ namespace GLTFast {
             
             root.Bind(serializedObject);
             
-            var importSettingsRoot = root.Query<IMGUIContainer>(name: "ImportSettings").First();
-            var importSettingsProp = serializedObject.FindProperty("importSettings");
-            var instantSettingsProp = serializedObject.FindProperty("instantiationSettings");
-            importSettingsRoot.onGUIHandler = () => DrawImportSettings(
-                serializedObject,
-                // importSettingsProp.FindPropertyRelative("animationMethod"),
-                importSettingsProp.FindPropertyRelative("generateMipMaps"),
-                instantSettingsProp.FindPropertyRelative("sceneObjectCreation"),
-                importSettingsProp.FindPropertyRelative("nodeNameMethod"),
-                importSettingsProp.FindPropertyRelative("anisotropicFilterLevel"),
-                instantSettingsProp.FindPropertyRelative("mask"),
-                instantSettingsProp.FindPropertyRelative("layer"),
-                instantSettingsProp.FindPropertyRelative("skinUpdateWhenOffscreen"),
-                instantSettingsProp.FindPropertyRelative("lightIntensityFactor"),
-                importSettingsProp.FindPropertyRelative("defaultMinFilterMode"),
-                importSettingsProp.FindPropertyRelative("defaultMagFilterMode")
-                );
+            var settings = root.Query<VisualElement>(name: "AdvancedSettings").First();
+            ImportSettingsEditor.CreateUI(serializedObject,settings.contentContainer,"importSettings.", true);
+            InstantiationSettingsEditor.CreateUI(serializedObject,settings.contentContainer,"instantiationSettings.");
             
             // Apply the changes so Undo/Redo is working
             serializedObject.ApplyModifiedProperties();

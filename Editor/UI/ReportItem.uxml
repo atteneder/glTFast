@@ -2,6 +2,6 @@
     <ui:VisualElement name="ReportItem" class="report-item">
         <Style src="ReportItem-style.uss" />
         <ui:VisualElement name="Icon" class="icon info" />
-        <ui:Label text="Message" name="Message" />
+        <ui:Label text="Message" name="Message" class="report-message"/>
     </ui:VisualElement>
 </ui:UXML>

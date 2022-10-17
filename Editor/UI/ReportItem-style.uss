@@ -1,6 +1,14 @@
 .report-item {
-    align-items: center;
+    align-items: flex-start;
     flex-direction: row;
+    min-width: 100px;
+}
+
+.report-message {
+    flex-shrink: 1;
+    flex-grow: 1;
+    white-space: normal;
+    padding-top: 2px;
 }
 
 .icon {

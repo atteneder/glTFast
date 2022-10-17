@@ -27,15 +27,13 @@ namespace GLTFast.Loading {
     public class DefaultDownloadProvider : IDownloadProvider {
         
         /// <summary>
-        /// Sends a URI request
+        /// Sends a URI request and waits for its completion.
         /// </summary>
         /// <param name="url">URI to request</param>
         /// <returns>Object representing the request</returns>
-        public async  Task<IDownload> Request(Uri url) {
+        public async Task<IDownload> Request(Uri url) {
             var req = new AwaitableDownload(url);
-            while (req.MoveNext()) {
-                await Task.Yield();
-            }
+            await req.WaitAsync();
             return req;
         }
 
@@ -50,9 +48,7 @@ namespace GLTFast.Loading {
 #pragma warning restore CS1998
 #if UNITY_WEBREQUEST_TEXTURE
             var req = new AwaitableTextureDownload(url,nonReadable);
-            while (req.MoveNext()) {
-                await Task.Yield();
-            }
+            await req.WaitAsync();
             return req;
 #else
             return null;
@@ -96,20 +92,13 @@ namespace GLTFast.Loading {
         }
 
         /// <summary>
-        /// Part of <see cref="IEnumerator"/>, the mechanism that is used for async download
+        /// Waits until the URI request is completed.
         /// </summary>
-        public object Current { get { return m_AsyncOperation; } }
-        
-        /// <summary>
-        /// Part of <see cref="IEnumerator"/>, the mechanism that is used for async download
-        /// </summary>
-        /// <returns>True if the download is still pending; false if the download has finished.</returns>
-        public bool MoveNext() { return !m_AsyncOperation.isDone; }
-        
-        /// <summary>
-        /// Not used. Part of <see cref="IEnumerator"/>, the mechanism that is used for async download.
-        /// </summary>
-        public void Reset() {}
+        public async Task WaitAsync() {
+            while (!m_AsyncOperation.isDone) {
+                await Task.Yield();
+            }
+        }
 
         /// <summary>
         /// True if the download finished and was successful

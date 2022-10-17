@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+This release contains multiple breaking changes. Please read the [upgrade guide](xref:doc-upgrade-guides#upgrade-to-50) for details.
 ### Added
 - `settings` parameter to `GameObjectBoundsInstantiator`'s constructor
 - (Import) Support for lights via KHR_lights_punctual extension (#17)
@@ -26,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Warning when trying to load the main scene if it is not defined (Editor and development builds only; #450)
 - (Export) Support for camera export
 - (Export) Support for lights export
+- glTF icon assigned to imported glTF assets, `GltfAsset*` components and and various setting classes
+- (Import) Support for up to 8 UV sets (note: glTF shaders still support only two sets; part of #206)
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
@@ -44,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Instantiation is async now. This helps to ensure a stable frame rate when loading bigger glTF scenes (#205)
 - KTX textures load much smoother thanks to bumping KtxUnity to 1.3.0 or 2.2.1
 - Sped up loading of external KTX textures by avoid making a redundant memory copy.
+- `IDownload` does not derive from `IEnumartor` anymore
+- (Import) Successfully tested mesh primitive draw mode `lines` and removed error message about it being untested
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
@@ -390,7 +395,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Import glTF files at design-time in the Editor
 - Custom inspector for imported glTF files, featuring import log messages
-- `ImportSettings` can be provided to `GltfImporter.Load` (optionally) to customize the loading behaviour (quite limited at the moment, but gives room to grow)
+- `ImportSettings` can be provided to `GltfImport.Load` (optionally) to customize the loading behaviour (quite limited at the moment, but gives room to grow)
   - `ImportSettings.nodeNameMethod` to allow customizing Node/GameObject naming convention
 - `IGltfReadable` interface for `GltfImporter`
 - Import and instantiation logging customization (see `ILogger`). Allows users to analyze log messages and/or opt out of logging all messages to the console (which is still done by default if you're using `GltfAsset`).

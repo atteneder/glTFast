@@ -199,12 +199,6 @@ namespace GLTFast {
         JobHandle meshoptJobHandle;
 #endif
 
-        /// <summary>
-        /// Unity's animation system addresses target GameObjects by hierarchical name.
-        /// To make sure names are consistent and have no conflicts they are precalculated
-        /// and stored in this array.
-        /// </summary>
-        string[] nodeNames;
         
 #endregion VolatileData
 
@@ -221,6 +215,13 @@ namespace GLTFast {
         UnityEngine.Material[] materials;
         List<UnityEngine.Object> resources;
 
+        /// <summary>
+        /// Unity's animation system addresses target GameObjects by hierarchical name.
+        /// To make sure names are consistent and have no conflicts they are precalculated
+        /// and stored in this array.
+        /// </summary>
+        string[] nodeNames;
+        
         Primitive[] primitives;
         int[] meshPrimitiveIndex;
         Matrix4x4[][] skinsInverseBindMatrices;
@@ -513,6 +514,9 @@ namespace GLTFast {
         /// There can be no instantiation or other element access afterwards.
         /// </summary>
         public void Dispose() {
+
+            nodeNames = null;
+            
             if(materials!=null) {
                 foreach( var material in materials ) {
                     SafeDestroy(material);
@@ -2411,12 +2415,36 @@ namespace GLTFast {
                 if (att.TEXCOORD_0 >= 0) {
                     int uvCount = 1;
                     if (att.TEXCOORD_1 >= 0) uvCount++;
+                    if (att.TEXCOORD_2 >= 0) uvCount++;
+                    if (att.TEXCOORD_3 >= 0) uvCount++;
+                    if (att.TEXCOORD_4 >= 0) uvCount++;
+                    if (att.TEXCOORD_5 >= 0) uvCount++;
+                    if (att.TEXCOORD_6 >= 0) uvCount++;
+                    if (att.TEXCOORD_7 >= 0) uvCount++;
                     uvInputs = new int[uvCount];
                     uvInputs[0] = att.TEXCOORD_0;
                     if (att.TEXCOORD_1 >= 0) {
                         uvInputs[1] = att.TEXCOORD_1;
                     }
                     if (att.TEXCOORD_2 >= 0) {
+                        uvInputs[2] = att.TEXCOORD_2;
+                    }
+                    if (att.TEXCOORD_3 >= 0) {
+                        uvInputs[3] = att.TEXCOORD_3;
+                    }
+                    if (att.TEXCOORD_4 >= 0) {
+                        uvInputs[4] = att.TEXCOORD_4;
+                    }
+                    if (att.TEXCOORD_5 >= 0) {
+                        uvInputs[5] = att.TEXCOORD_5;
+                    }
+                    if (att.TEXCOORD_6 >= 0) {
+                        uvInputs[6] = att.TEXCOORD_6;
+                    }
+                    if (att.TEXCOORD_7 >= 0) {
+                        uvInputs[7] = att.TEXCOORD_7;
+                    }
+                    if (att.TEXCOORD_8 >= 0) {
                         logger?.Warning(LogCode.UVLimit);
                     }
                 }
@@ -2756,7 +2784,6 @@ namespace GLTFast {
                 c.topology = MeshTopology.Points;
                 break;
             case DrawMode.Lines:
-                logger?.Error(LogCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Lines;
                 break;
             case DrawMode.LineLoop:

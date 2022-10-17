@@ -106,6 +106,8 @@ namespace GLTFast.Editor {
             // we clean the urlConversion override to avoid future imports with incorrect dependency mappings
             dependencyMapping = null;
 
+            var gltfIcon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.atteneder.gltfast/Editor/UI/gltf-icon-bug.png");
+            
             if (editorImportSettings == null) {
                 // Design-time import specific settings
                 editorImportSettings = new EditorImportSettings();
@@ -181,7 +183,7 @@ namespace GLTFast.Editor {
                         ? go.transform.GetChild(0)
                         : go.transform;
                     var sceneGo = sceneTransform.gameObject;
-                    AddObjectToAsset(ctx,$"scenes/{sceneName}", sceneGo);
+                    AddObjectToAsset(ctx,$"scenes/{sceneName}", sceneGo, gltfIcon);
                     if (sceneIndex == m_Gltf.defaultSceneIndex) {
                         ctx.SetMainObject(sceneGo);
                     }
@@ -302,12 +304,12 @@ namespace GLTFast.Editor {
             reportItems = reportItemList.ToArray();
         }
 
-        void AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj) {
+        void AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj, Texture2D thumbnail = null) {
             if (m_ImportedObjects.Contains(obj)) {
                 return;
             }
             var uniqueAssetName = GetUniqueAssetName(originalName);
-            ctx.AddObjectToAsset(uniqueAssetName, obj);
+            ctx.AddObjectToAsset(uniqueAssetName, obj, thumbnail);
             m_ImportedNames.Add(uniqueAssetName);
             m_ImportedObjects.Add(obj);
         }
