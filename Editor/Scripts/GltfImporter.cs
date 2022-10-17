@@ -74,8 +74,10 @@ namespace GLTFast.Editor {
 
         HashSet<string> m_ImportedNames;
         HashSet<Object> m_ImportedObjects;
+        
+        // static fields ensure that they dont get deleted after saving the importer
         private static Func<Uri,Uri> dependencyMapping;
-        private IMaterialGenerator customMaterialGenerator;
+        private static IMaterialGenerator customMaterialGenerator;
 
         // static string[] GatherDependenciesFromSourceFile(string path) {
         //     // Called before actual import for each changed asset that is imported by this importer type
@@ -110,8 +112,9 @@ namespace GLTFast.Editor {
                 logger
                 );
             
-            // we clean the urlConversion override to avoid future imports with incorrect dependency mappings
+            // we clean the overrides to avoid future imports with incorrect data
             dependencyMapping = null;
+            customMaterialGenerator = null;
 
             var gltfIcon = AssetDatabase.LoadAssetAtPath<Texture2D>("Packages/com.atteneder.gltfast/Editor/UI/gltf-icon-bug.png");
             
