@@ -517,29 +517,24 @@ namespace GLTFast {
         public void Dispose() {
 
             nodeNames = null;
-            
-            if(materials!=null) {
-                foreach( var material in materials ) {
-                    SafeDestroy(material);
+
+            void DisposeArray(  IEnumerable<Object> objects) {
+                if(objects!=null) {
+                    foreach( var obj in objects ) {
+                        SafeDestroy(obj);
+                    }
                 }
-                materials = null;
             }
             
+            DisposeArray(materials);
+            materials = null;
 #if UNITY_ANIMATION
-            if (animationClips != null) {
-                foreach( var clip in animationClips ) {
-                    SafeDestroy(clip);
-                }
-                animationClips = null;
-            }
+            DisposeArray(animationClips);
+            animationClips = null;
 #endif
 
-            if(textures!=null) {
-                foreach( var texture in textures ) {
-                    SafeDestroy(texture);
-                }
-                textures = null;
-            }
+            DisposeArray(textures);
+            textures = null;
 
             if (accessorData != null) {
                 foreach (var ad in accessorData) {
@@ -548,12 +543,8 @@ namespace GLTFast {
                 accessorData = null;
             }
             
-            if(resources!=null) {
-                foreach( var resource in resources ) {
-                    SafeDestroy(resource);
-                }
-                resources = null;
-            }
+            DisposeArray(resources);
+            resources = null;
         }
 
         /// <summary>
