@@ -198,15 +198,14 @@ namespace GLTFast.Materials {
             IGltfReadable gltf,
             bool pointsSupport = false
         ) {
-            if(pointsSupport) {
-                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
-            }
             Material material;
+
+            var isUnlit = gltfMaterial.extensions?.KHR_materials_unlit != null;
             
             if (gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness != null) {
                 material = GetPbrSpecularGlossinessMaterial(gltfMaterial.doubleSided);
             } else
-            if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
+            if (isUnlit) {
                 material = GetUnlitMaterial(gltfMaterial.doubleSided);
             } else {
                 material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);
@@ -214,6 +213,10 @@ namespace GLTFast.Materials {
 
             if(material==null) return null;
 
+            if (!isUnlit && pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
+            }
+            
             material.name = gltfMaterial.name;
 
             StandardShaderMode shaderMode = StandardShaderMode.Opaque;
