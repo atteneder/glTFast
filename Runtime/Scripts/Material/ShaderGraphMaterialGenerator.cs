@@ -135,11 +135,10 @@ namespace GLTFast.Materials {
 #endif
 
         /// <inheritdoc />
-        protected override Material GenerateDefaultMaterial(MaterialTopology topology, out MaterialTopology supportedTopologies) {
-            if((topology & MaterialTopology.Points)!=0) {
-                logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
+        protected override Material GenerateDefaultMaterial(bool pointsSupport = false) {
+            if(pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
             }
-            supportedTopologies = MaterialTopology.All;
             return GetMetallicMaterial(MetallicShaderFeatures.Default);
         }
 
@@ -147,12 +146,11 @@ namespace GLTFast.Materials {
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
             IGltfReadable gltf,
-            MaterialTopology topology,
-            out MaterialTopology supportedTopologies
+            bool pointsSupport = false
             )
         {
-            if(topology == MaterialTopology.Points) {
-                logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
+            if(pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
             }
 
             Material material;
@@ -181,10 +179,6 @@ namespace GLTFast.Materials {
                     }
                 }
             }
-            
-            // TODO: Create dedicated point cloud material (#246)
-            // Hack: Pretending here it works with Points
-            supportedTopologies = MaterialTopology.All;
 
             if(material==null) return null;
 

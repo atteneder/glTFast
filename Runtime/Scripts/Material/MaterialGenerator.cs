@@ -161,7 +161,7 @@ namespace GLTFast.Materials {
         
         static bool defaultMaterialGenerated;
         static UnityEngine.Material defaultMaterial;
-        static MaterialTopology defaultMaterialTopologies;
+        static bool defaultMaterialPointsSupported;
         
         /// <summary>
         /// Provides the default material generator that's being used if no
@@ -208,15 +208,14 @@ namespace GLTFast.Materials {
         protected ICodeLogger logger;
 
         /// <inheritdoc />
-        public UnityEngine.Material GetDefaultMaterial(MaterialTopology topology, out MaterialTopology supportedTopologies) {
-            if((topology & MaterialTopology.Points)!=0) {
-                logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
+        public UnityEngine.Material GetDefaultMaterial(bool pointsSupport = false) {
+            if(pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
             }
             if (!defaultMaterialGenerated) {
-                defaultMaterial = GenerateDefaultMaterial(topology, out defaultMaterialTopologies);
+                defaultMaterial = GenerateDefaultMaterial(pointsSupport);
                 defaultMaterialGenerated = true;
             }
-            supportedTopologies = defaultMaterialTopologies;
             return defaultMaterial;
         }
 
@@ -224,7 +223,7 @@ namespace GLTFast.Materials {
         /// Creates a fallback material to be assigned to nodes without a material.
         /// </summary>
         /// <returns>fallback material</returns>
-        protected abstract UnityEngine.Material GenerateDefaultMaterial(MaterialTopology topology, out MaterialTopology supportedTopologies);
+        protected abstract UnityEngine.Material GenerateDefaultMaterial(bool pointsSupport = false);
 
         /// <summary>
         /// Tries to load a shader and covers error handling.
@@ -243,8 +242,7 @@ namespace GLTFast.Materials {
         public abstract UnityEngine.Material GenerateMaterial(
             Schema.Material gltfMaterial,
             IGltfReadable gltf,
-            MaterialTopology topology,
-            out MaterialTopology supportedTopologies
+            bool pointsSupport = false
             );
 
         /// <inheritdoc />

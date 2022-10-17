@@ -199,7 +199,11 @@ namespace GLTFast {
         JobHandle meshoptJobHandle;
 #endif
 
-        MaterialTopology[] materialTopologies;
+        /// <summary>
+        /// Material IDs of materials that require points topology support.
+        /// </summary>
+        HashSet<int> materialPointsSupport;
+        bool defaultMaterialPointsSupport;
         
 #endregion VolatileData
 
@@ -214,9 +218,7 @@ namespace GLTFast {
         /// Main glTF data structure
         Root gltfRoot;
         UnityEngine.Material[] materials;
-        UnityEngine.Material[] materialsPoints;
-        UnityEngine.Material[] materialsLines;
-        List<UnityEngine.Object> resources;
+        List<Object> resources;
 
         /// <summary>
         /// Unity's animation system addresses target GameObjects by hierarchical name.
@@ -531,10 +533,6 @@ namespace GLTFast {
             
             DisposeArray(materials);
             materials = null;
-            DisposeArray(materialsPoints);
-            materialsPoints = null;
-            DisposeArray(materialsLines);
-            materialsLines = null;
             
 #if UNITY_ANIMATION
             DisposeArray(animationClips);
@@ -589,61 +587,27 @@ namespace GLTFast {
             return gltfRoot?.scenes?[sceneIndex]?.name;
         }
         
-        /// <summary>
-        /// Get a Unity Material by its glTF material index 
-        /// </summary>
-        /// <param name="index">glTF material index</param>
-        /// <returns>Corresponding Unity Material</returns>
-        public UnityEngine.Material GetMaterial( int index = 0, MeshTopology meshTopology = MeshTopology.Triangles ) {
-            switch (meshTopology) {
-                case MeshTopology.Lines:
-                case MeshTopology.LineStrip:
-                    if(materialsLines!=null && index >= 0 && index < materialsLines.Length ) {
-                        return materialsLines[index];
-                    }
-                    break;
-                case MeshTopology.Points:
-                    if(materialsPoints!=null && index >= 0 && index < materialsPoints.Length ) {
-                        return materialsPoints[index];
-                    }
-                    break;
-                case MeshTopology.Triangles:
-                case MeshTopology.Quads:
-                default:
-                    if(materials!=null && index >= 0 && index < materials.Length ) {
-                        return materials[index];
-                    }
-                    break;
+        /// <inheritdoc />
+        public UnityEngine.Material GetMaterial(int index = 0) {
+            if (materials != null && index >= 0 && index < materials.Length) {
+                return materials[index];
             }
             return null;
         }
 
         /// <inheritdoc />
-        public UnityEngine.Material GetDefaultMaterial(MeshTopology meshTopology = MeshTopology.Triangles) {
-            var topology = meshTopology.GetMaterialTopology();
+        public UnityEngine.Material GetDefaultMaterial() {
 #if UNITY_EDITOR
-            if ((topology & MaterialTopology.Points) != 0) {
-                if (defaultPointMaterial == null) {
-                    defaultPointMaterial = materialGenerator.GetDefaultMaterial(topology, out var supportedTopologies);
-                    if ((supportedTopologies & MaterialTopology.PolygonsAndLines) == MaterialTopology.PolygonsAndLines) {
-                        // Supports Polygons and Lines as well
-                        defaultMaterial = defaultPointMaterial;
-                    }
-                }
-                return defaultPointMaterial;
-            }
-            Assert.IsTrue((topology & MaterialTopology.PolygonsAndLines) != 0, $"GetDefaultMaterial received invalid topology {topology}"); 
             if (defaultMaterial == null) {
-                defaultMaterial = materialGenerator.GetDefaultMaterial(topology, out var supportedTopologies);
-                if ((supportedTopologies & MaterialTopology.Points) != 0) {
-                    // Supports Points as well
-                    defaultPointMaterial = defaultMaterial;
-                }
+                materialGenerator.SetLogger(logger);
+                defaultMaterial = materialGenerator.GetDefaultMaterial(defaultMaterialPointsSupport);
+                materialGenerator.SetLogger(null);
             }
-
             return defaultMaterial;
 #else
-            return materialGenerator.GetDefaultMaterial(topology);
+            materialGenerator.SetLogger(logger);
+            return materialGenerator.GetDefaultMaterial(defaultMaterialPointsSupport);
+            materialGenerator.SetLogger(null);
 #endif
         }
         
@@ -1612,45 +1576,18 @@ namespace GLTFast {
             }
 
             if(gltfRoot.materials!=null) {
+                materials = new UnityEngine.Material[gltfRoot.materials.Length];
                 for(var i=0;i<gltfRoot.materials.Length;i++) {
                     await deferAgent.BreakPoint(.0001f);
                     Profiler.BeginSample("GenerateMaterial");
                     materialGenerator.SetLogger(logger);
-                    var topology = GetMaterialTopology(i);
-                    while (topology != MaterialTopology.None) {
-                        var material = materialGenerator.GenerateMaterial(
-                            gltfRoot.materials[i],
-                            this,
-                            topology,
-                            out var supportedTopologies
-                        );
-                        if ((topology & supportedTopologies & MaterialTopology.Polygons) != 0) {
-                            if (materials == null) {
-                                materials = new UnityEngine.Material[gltfRoot.materials.Length];
-                            }
-
-                            materials[i] = material;
-                        }
-
-                        if ((topology & supportedTopologies & MaterialTopology.Lines) != 0) {
-                            if (materialsLines == null) {
-                                materialsLines = new UnityEngine.Material[gltfRoot.materials.Length];
-                            }
-
-                            materialsLines[i] = material;
-                        }
-
-                        if ((topology & supportedTopologies & MaterialTopology.Points) != 0) {
-                            if (materialsPoints == null) {
-                                materialsPoints = new UnityEngine.Material[gltfRoot.materials.Length];
-                            }
-
-                            materialsPoints[i] = material;
-                        }
-
-                        topology &= ~supportedTopologies;
-                    }
-
+                    var pointsSupport = GetMaterialPointsSupport(i);
+                    var material = materialGenerator.GenerateMaterial(
+                        gltfRoot.materials[i],
+                        this,
+                        pointsSupport
+                    );
+                    materials[i] = material;
                     materialGenerator.SetLogger(null);
                     Profiler.EndSample();
                 }
@@ -1824,28 +1761,24 @@ namespace GLTFast {
             return success;
         }
 
-        void SetMaterialTopology(int materialIndex, MaterialTopology topology) {
-            if (topology == MaterialTopology.Polygons && materialTopologies == null) {
-                // Is the default anyways
-                return;
-            }
+        void SetMaterialPointsSupport(int materialIndex) {
             Assert.IsNotNull(gltfRoot?.materials);
             Assert.IsTrue(materialIndex>=0);
             Assert.IsTrue(materialIndex<gltfRoot.materials.Length);
-            if (materialTopologies == null) {
-                materialTopologies = new MaterialTopology[gltfRoot.materials.Length];
+            if (materialPointsSupport == null) {
+                materialPointsSupport = new HashSet<int>();
             }
-            materialTopologies[materialIndex] |= topology;
+            materialPointsSupport.Add(materialIndex);
         }
 
-        MaterialTopology GetMaterialTopology(int materialIndex) {
-            if (materialTopologies != null) {
+        bool GetMaterialPointsSupport(int materialIndex) {
+            if (materialPointsSupport != null) {
                 Assert.IsNotNull(gltfRoot?.materials);
                 Assert.IsTrue(materialIndex>=0);
                 Assert.IsTrue(materialIndex<gltfRoot.materials.Length);
-                return materialTopologies[materialIndex];
+                return materialPointsSupport.Contains(materialIndex);
             }
-            return MaterialTopology.Polygons;
+            return false;
         }
         
         /// <summary>
@@ -1971,7 +1904,7 @@ namespace GLTFast {
             imageReadable = null;
             imageGamma = null;
             glbBinChunk = null;
-            materialTopologies = null;
+            materialPointsSupport = null;
             
 #if MESHOPT
             if(meshoptBufferViews!=null) {
@@ -2441,23 +2374,13 @@ namespace GLTFast {
                     attributeMesh.Add(meshIndex);
 #endif
 
-                    if (gltf.materials != null && primitive.material >= 0) {
-                        switch (primitive.mode) {
-                            case DrawMode.Points:
-                                SetMaterialTopology(primitive.material, MaterialTopology.Points);
-                                break;
-                            case DrawMode.Lines:
-                            case DrawMode.LineLoop:
-                            case DrawMode.LineStrip:
-                                SetMaterialTopology(primitive.material, MaterialTopology.Lines);
-                                break;
-                            case DrawMode.Triangles:
-                            case DrawMode.TriangleStrip:
-                            case DrawMode.TriangleFan:
-                            default:
-                                SetMaterialTopology(primitive.material, MaterialTopology.Polygons);
-                                break;
+                    if (primitive.material >= 0) {
+                        if (gltf.materials != null && primitive.mode == DrawMode.Points) {
+                            SetMaterialPointsSupport(primitive.material);
                         }
+                    }
+                    else {
+                        defaultMaterialPointsSupport |= primitive.mode == DrawMode.Points;
                     }
                 }
                 meshPrimitiveCluster[meshIndex] = cluster;

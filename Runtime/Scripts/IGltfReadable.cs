@@ -42,16 +42,14 @@ namespace GLTFast {
         /// Fetch Material by index
         /// </summary>
         /// <param name="index">glTF index</param>
-        /// <param name="topology"></param>
         /// <returns>Unity Material</returns>
-        Material GetMaterial(int index = 0, MeshTopology topology = MeshTopology.Triangles);
+        Material GetMaterial(int index = 0);
         
         /// <summary>
         /// Default material, supposed to be used when no material was assigned
         /// </summary>
-        /// <param name="topology">Topology type this material has to work with</param>
         /// <returns>Default material</returns>
-        Material GetDefaultMaterial(MeshTopology topology = MeshTopology.Triangles);
+        Material GetDefaultMaterial();
         
         /// <summary>
         /// Get texture by glTF image index
