@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GLTFast.Logging;
+using GLTFast.Materials;
 using GLTFast.Utils;
 using UnityEditor;
 #if UNITY_2020_2_OR_NEWER
@@ -74,6 +75,7 @@ namespace GLTFast.Editor {
         HashSet<string> m_ImportedNames;
         HashSet<Object> m_ImportedObjects;
         private static Func<Uri,Uri> dependencyMapping;
+        private IMaterialGenerator customMaterialGenerator;
 
         // static string[] GatherDependenciesFromSourceFile(string path) {
         //     // Called before actual import for each changed asset that is imported by this importer type
@@ -84,9 +86,14 @@ namespace GLTFast.Editor {
         //     return null;
         // }
 
-        public static void SetupExternalDependencies(Func<Uri, Uri> urlConversion)
+        public void SetupExternalDependencies(Func<Uri, Uri> urlConversion)
         {
             dependencyMapping = urlConversion;
+        }
+
+        public void SetupCustomMaterialGenerator(IMaterialGenerator materialGenerator)
+        {
+            customMaterialGenerator = materialGenerator;
         }
         
         public override void OnImportAsset(AssetImportContext ctx) {
@@ -99,7 +106,7 @@ namespace GLTFast.Editor {
             m_Gltf = new GltfImport(
                 downloadProvider,
                 new UninterruptedDeferAgent(),
-                null,
+                customMaterialGenerator,
                 logger
                 );
             
