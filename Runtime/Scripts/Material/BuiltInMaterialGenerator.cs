@@ -87,14 +87,18 @@ namespace GLTFast.Materials {
         static Material defaultMaterial;
 
         /// <inheritdoc />
-        protected override Material GenerateDefaultMaterial(MeshTopology topology = MeshTopology.Triangles) {
-            if(topology!=MeshTopology.Triangles) {
+        protected override Material GenerateDefaultMaterial(MaterialTopology topology, out MaterialTopology supportedTopologies) {
+            if((topology & MaterialTopology.Points)!=0) {
                 logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
             }
             if (!defaultMaterialGenerated) {
                 defaultMaterial = GetPbrMetallicRoughnessMaterial();
                 defaultMaterialGenerated = true;
+                // Material works on lines as well
+                // TODO: Create dedicated point cloud material
             }
+
+            supportedTopologies = MaterialTopology.All;
             return defaultMaterial;
         }
         
@@ -193,9 +197,10 @@ namespace GLTFast.Materials {
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
             IGltfReadable gltf,
-            MeshTopology topology = MeshTopology.Triangles
+            MaterialTopology topology,
+            out MaterialTopology supportedTopologies
         ) {
-            if(topology!=MeshTopology.Triangles) {
+            if(topology == MaterialTopology.Points) {
                 logger?.Warning(LogCode.TopologyMaterialUnsupported, topology.ToString());
             }
             Material material;
@@ -209,6 +214,10 @@ namespace GLTFast.Materials {
                 material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);
             }
 
+            // TODO: Create dedicated point cloud material (#246)
+            // Hack: Pretending here it works with Points
+            supportedTopologies = MaterialTopology.All;
+            
             if(material==null) return null;
 
             material.name = gltfMaterial.name;

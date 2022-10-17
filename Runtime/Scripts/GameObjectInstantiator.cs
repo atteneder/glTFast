@@ -304,7 +304,8 @@ namespace GLTFast {
 
             var materials = new Material[materialIndices.Length];
             for (var index = 0; index < materials.Length; index++) {
-                var material = gltf.GetMaterial(materialIndices[index]) ?? gltf.GetDefaultMaterial(mesh.GetTopology(0));
+                var topology = mesh.GetTopology(0);
+                var material = gltf.GetMaterial(materialIndices[index],topology) ?? gltf.GetDefaultMaterial(topology);
                 materials[index] = material;
             }
 

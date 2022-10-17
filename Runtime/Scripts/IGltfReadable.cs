@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using GLTFast.Materials;
 using UnityEngine;
 
 namespace GLTFast {
@@ -41,8 +42,9 @@ namespace GLTFast {
         /// Fetch Material by index
         /// </summary>
         /// <param name="index">glTF index</param>
+        /// <param name="topology"></param>
         /// <returns>Unity Material</returns>
-        Material GetMaterial(int index = 0);
+        Material GetMaterial(int index = 0, MeshTopology topology = MeshTopology.Triangles);
         
         /// <summary>
         /// Default material, supposed to be used when no material was assigned
