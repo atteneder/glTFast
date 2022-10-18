@@ -161,7 +161,6 @@ namespace GLTFast.Materials {
         
         static bool defaultMaterialGenerated;
         static UnityEngine.Material defaultMaterial;
-        static bool defaultMaterialPointsSupported;
         
         /// <summary>
         /// Provides the default material generator that's being used if no

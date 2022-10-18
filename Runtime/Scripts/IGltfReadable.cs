@@ -13,7 +13,6 @@
 // limitations under the License.
 //
 
-using GLTFast.Materials;
 using UnityEngine;
 
 namespace GLTFast {

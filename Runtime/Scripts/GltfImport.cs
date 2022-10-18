@@ -218,7 +218,7 @@ namespace GLTFast {
         /// Main glTF data structure
         Root gltfRoot;
         UnityEngine.Material[] materials;
-        List<Object> resources;
+        List<UnityEngine.Object> resources;
 
         /// <summary>
         /// Unity's animation system addresses target GameObjects by hierarchical name.
@@ -239,7 +239,6 @@ namespace GLTFast {
         /// Required for Editor import only to preserve default/fallback materials
         /// </summary>
         public UnityEngine.Material defaultMaterial;
-        public UnityEngine.Material defaultPointMaterial;
 #endif
         
 #endregion VolatileDataInstantiation
@@ -556,7 +555,7 @@ namespace GLTFast {
         /// <summary>
         /// Number of materials
         /// </summary>
-        public int materialCount => gltfRoot?.materials?.Length ?? 0;
+        public int materialCount => materials?.Length ?? 0;
         
         /// <summary>
         /// Number of images
@@ -1577,7 +1576,7 @@ namespace GLTFast {
 
             if(gltfRoot.materials!=null) {
                 materials = new UnityEngine.Material[gltfRoot.materials.Length];
-                for(var i=0;i<gltfRoot.materials.Length;i++) {
+                for(var i=0;i<materials.Length;i++) {
                     await deferAgent.BreakPoint(.0001f);
                     Profiler.BeginSample("GenerateMaterial");
                     materialGenerator.SetLogger(logger);
