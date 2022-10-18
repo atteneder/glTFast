@@ -304,8 +304,8 @@ namespace GLTFast {
 
             var materials = new Material[materialIndices.Length];
             for (var index = 0; index < materials.Length; index++) {
-                 var material = gltf.GetMaterial(materialIndices[index]) ?? gltf.GetDefaultMaterial();
-                 materials[index] = material;
+                var material = gltf.GetMaterial(materialIndices[index]) ?? gltf.GetDefaultMaterial();
+                materials[index] = material;
             }
 
             renderer.sharedMaterials = materials;

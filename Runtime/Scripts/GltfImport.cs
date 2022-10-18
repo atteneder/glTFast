@@ -199,6 +199,11 @@ namespace GLTFast {
         JobHandle meshoptJobHandle;
 #endif
 
+        /// <summary>
+        /// Material IDs of materials that require points topology support.
+        /// </summary>
+        HashSet<int> materialPointsSupport;
+        bool defaultMaterialPointsSupport;
         
 #endregion VolatileData
 
@@ -516,29 +521,25 @@ namespace GLTFast {
         public void Dispose() {
 
             nodeNames = null;
-            
-            if(materials!=null) {
-                foreach( var material in materials ) {
-                    SafeDestroy(material);
+
+            void DisposeArray(  IEnumerable<Object> objects) {
+                if(objects!=null) {
+                    foreach( var obj in objects ) {
+                        SafeDestroy(obj);
+                    }
                 }
-                materials = null;
             }
+            
+            DisposeArray(materials);
+            materials = null;
             
 #if UNITY_ANIMATION
-            if (animationClips != null) {
-                foreach( var clip in animationClips ) {
-                    SafeDestroy(clip);
-                }
-                animationClips = null;
-            }
+            DisposeArray(animationClips);
+            animationClips = null;
 #endif
 
-            if(textures!=null) {
-                foreach( var texture in textures ) {
-                    SafeDestroy(texture);
-                }
-                textures = null;
-            }
+            DisposeArray(textures);
+            textures = null;
 
             if (accessorData != null) {
                 foreach (var ad in accessorData) {
@@ -547,12 +548,8 @@ namespace GLTFast {
                 accessorData = null;
             }
             
-            if(resources!=null) {
-                foreach( var resource in resources ) {
-                    SafeDestroy(resource);
-                }
-                resources = null;
-            }
+            DisposeArray(resources);
+            resources = null;
         }
 
         /// <summary>
@@ -589,30 +586,27 @@ namespace GLTFast {
             return gltfRoot?.scenes?[sceneIndex]?.name;
         }
         
-        /// <summary>
-        /// Get a Unity Material by its glTF material index 
-        /// </summary>
-        /// <param name="index">glTF material index</param>
-        /// <returns>Corresponding Unity Material</returns>
-        public UnityEngine.Material GetMaterial( int index = 0 ) {
-            if(materials!=null && index >= 0 && index < materials.Length ) {
+        /// <inheritdoc />
+        public UnityEngine.Material GetMaterial(int index = 0) {
+            if (materials != null && index >= 0 && index < materials.Length) {
                 return materials[index];
             }
             return null;
         }
 
-        /// <summary>
-        /// Returns a fallback default material that is provided by the IMaterialGenerator
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         public UnityEngine.Material GetDefaultMaterial() {
 #if UNITY_EDITOR
             if (defaultMaterial == null) {
-                defaultMaterial = materialGenerator.GetDefaultMaterial();
+                materialGenerator.SetLogger(logger);
+                defaultMaterial = materialGenerator.GetDefaultMaterial(defaultMaterialPointsSupport);
+                materialGenerator.SetLogger(null);
             }
             return defaultMaterial;
 #else
-            return materialGenerator.GetDefaultMaterial();
+            materialGenerator.SetLogger(logger);
+            return materialGenerator.GetDefaultMaterial(defaultMaterialPointsSupport);
+            materialGenerator.SetLogger(null);
 #endif
         }
         
@@ -1582,11 +1576,17 @@ namespace GLTFast {
 
             if(gltfRoot.materials!=null) {
                 materials = new UnityEngine.Material[gltfRoot.materials.Length];
-                for(int i=0;i<materials.Length;i++) {
+                for(var i=0;i<materials.Length;i++) {
                     await deferAgent.BreakPoint(.0001f);
                     Profiler.BeginSample("GenerateMaterial");
                     materialGenerator.SetLogger(logger);
-                    materials[i] = materialGenerator.GenerateMaterial(gltfRoot.materials[i],this);
+                    var pointsSupport = GetMaterialPointsSupport(i);
+                    var material = materialGenerator.GenerateMaterial(
+                        gltfRoot.materials[i],
+                        this,
+                        pointsSupport
+                    );
+                    materials[i] = material;
                     materialGenerator.SetLogger(null);
                     Profiler.EndSample();
                 }
@@ -1760,6 +1760,26 @@ namespace GLTFast {
             return success;
         }
 
+        void SetMaterialPointsSupport(int materialIndex) {
+            Assert.IsNotNull(gltfRoot?.materials);
+            Assert.IsTrue(materialIndex>=0);
+            Assert.IsTrue(materialIndex<gltfRoot.materials.Length);
+            if (materialPointsSupport == null) {
+                materialPointsSupport = new HashSet<int>();
+            }
+            materialPointsSupport.Add(materialIndex);
+        }
+
+        bool GetMaterialPointsSupport(int materialIndex) {
+            if (materialPointsSupport != null) {
+                Assert.IsNotNull(gltfRoot?.materials);
+                Assert.IsTrue(materialIndex>=0);
+                Assert.IsTrue(materialIndex<gltfRoot.materials.Length);
+                return materialPointsSupport.Contains(materialIndex);
+            }
+            return false;
+        }
+        
         /// <summary>
         /// glTF nodes have no requirement to be named or have specific names.
         /// Some Unity systems like animation and importers require unique
@@ -1883,6 +1903,7 @@ namespace GLTFast {
             imageReadable = null;
             imageGamma = null;
             glbBinChunk = null;
+            materialPointsSupport = null;
             
 #if MESHOPT
             if(meshoptBufferViews!=null) {
@@ -2351,6 +2372,15 @@ namespace GLTFast {
                     }
                     attributeMesh.Add(meshIndex);
 #endif
+
+                    if (primitive.material >= 0) {
+                        if (gltf.materials != null && primitive.mode == DrawMode.Points) {
+                            SetMaterialPointsSupport(primitive.material);
+                        }
+                    }
+                    else {
+                        defaultMaterialPointsSupport |= primitive.mode == DrawMode.Points;
+                    }
                 }
                 meshPrimitiveCluster[meshIndex] = cluster;
                 totalPrimitives += cluster.Count;

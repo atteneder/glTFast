@@ -38,14 +38,15 @@ namespace GLTFast {
         int textureCount { get; }
 
         /// <summary>
-        /// Fetch Material by index
+        /// Get a Unity Material by its glTF material index 
         /// </summary>
-        /// <param name="index">glTF index</param>
-        /// <returns>Unity Material</returns>
+        /// <param name="index">glTF material index</param>
+        /// <returns>Corresponding Unity Material</returns>
         Material GetMaterial(int index = 0);
         
         /// <summary>
-        /// Default material, supposed to be used when no material was assigned
+        /// Returns a fallback material to be used when no material was
+        /// assigned (provided by the <see cref="IMaterialGenerator"/>)
         /// </summary>
         /// <returns>Default material</returns>
         Material GetDefaultMaterial();

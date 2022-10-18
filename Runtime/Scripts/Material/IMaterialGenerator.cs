@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+using UnityEngine;
+
 namespace GLTFast.Materials {
     using Logging;
     using Schema;
@@ -25,8 +27,9 @@ namespace GLTFast.Materials {
         /// <summary>
         /// Get fallback material that is assigned to nodes without a material.
         /// </summary>
+        /// <param name="pointsSupport">If true, material has to support meshes with points topology <seealso cref="MeshTopology.Points"/></param>
         /// <returns>fallback material</returns>
-        UnityEngine.Material GetDefaultMaterial();
+        UnityEngine.Material GetDefaultMaterial(bool pointsSupport = false);
 
         /// <summary>
         /// Converts a glTF material into a Unity <see cref="Material"/>.
@@ -34,8 +37,13 @@ namespace GLTFast.Materials {
         /// </summary>
         /// <param name="gltfMaterial">Source glTF material</param>
         /// <param name="gltf">Interface to a loaded glTF's resources (e.g. textures)</param>
+        /// <param name="pointsSupport">If true, material has to support meshes with points topology <seealso cref="MeshTopology.Points"/></param>
         /// <returns>Generated Unity Material</returns>
-        UnityEngine.Material GenerateMaterial(Material gltfMaterial, IGltfReadable gltf);
+        UnityEngine.Material GenerateMaterial(
+            Material gltfMaterial,
+            IGltfReadable gltf,
+            bool pointsSupport = false
+            );
 
         /// <summary>
         /// Is called prior to <seealso cref="GenerateMaterial"/>. The logger should be used

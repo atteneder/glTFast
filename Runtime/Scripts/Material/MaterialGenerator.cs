@@ -207,9 +207,12 @@ namespace GLTFast.Materials {
         protected ICodeLogger logger;
 
         /// <inheritdoc />
-        public UnityEngine.Material GetDefaultMaterial() {
+        public UnityEngine.Material GetDefaultMaterial(bool pointsSupport = false) {
+            if(pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
+            }
             if (!defaultMaterialGenerated) {
-                defaultMaterial = GenerateDefaultMaterial();
+                defaultMaterial = GenerateDefaultMaterial(pointsSupport);
                 defaultMaterialGenerated = true;
             }
             return defaultMaterial;
@@ -219,7 +222,7 @@ namespace GLTFast.Materials {
         /// Creates a fallback material to be assigned to nodes without a material.
         /// </summary>
         /// <returns>fallback material</returns>
-        protected abstract UnityEngine.Material GenerateDefaultMaterial();
+        protected abstract UnityEngine.Material GenerateDefaultMaterial(bool pointsSupport = false);
 
         /// <summary>
         /// Tries to load a shader and covers error handling.
@@ -235,7 +238,11 @@ namespace GLTFast.Materials {
         }
         
         /// <inheritdoc />
-        public abstract UnityEngine.Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf);
+        public abstract UnityEngine.Material GenerateMaterial(
+            Schema.Material gltfMaterial,
+            IGltfReadable gltf,
+            bool pointsSupport = false
+            );
 
         /// <inheritdoc />
         public void SetLogger(ICodeLogger logger) {

@@ -135,12 +135,23 @@ namespace GLTFast.Materials {
 #endif
 
         /// <inheritdoc />
-        protected override Material GenerateDefaultMaterial() {
+        protected override Material GenerateDefaultMaterial(bool pointsSupport = false) {
+            if(pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
+            }
             return GetMetallicMaterial(MetallicShaderFeatures.Default);
         }
 
         /// <inheritdoc />
-        public override Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf) {
+        public override Material GenerateMaterial(
+            Schema.Material gltfMaterial,
+            IGltfReadable gltf,
+            bool pointsSupport = false
+            )
+        {
+            if(pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
+            }
 
             Material material;
 

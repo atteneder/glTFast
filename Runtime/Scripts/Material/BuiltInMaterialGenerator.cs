@@ -87,11 +87,17 @@ namespace GLTFast.Materials {
         static Material defaultMaterial;
 
         /// <inheritdoc />
-        protected override Material GenerateDefaultMaterial() {
+        protected override Material GenerateDefaultMaterial(bool pointsSupport = false) {
+            if(pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
+            }
             if (!defaultMaterialGenerated) {
                 defaultMaterial = GetPbrMetallicRoughnessMaterial();
                 defaultMaterialGenerated = true;
+                // Material works on lines as well
+                // TODO: Create dedicated point cloud material
             }
+
             return defaultMaterial;
         }
         
@@ -189,14 +195,17 @@ namespace GLTFast.Materials {
         /// <inheritdoc />
         public override Material GenerateMaterial(
             Schema.Material gltfMaterial,
-            IGltfReadable gltf
+            IGltfReadable gltf,
+            bool pointsSupport = false
         ) {
             Material material;
+
+            var isUnlit = gltfMaterial.extensions?.KHR_materials_unlit != null;
             
             if (gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness != null) {
                 material = GetPbrSpecularGlossinessMaterial(gltfMaterial.doubleSided);
             } else
-            if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
+            if (isUnlit) {
                 material = GetUnlitMaterial(gltfMaterial.doubleSided);
             } else {
                 material = GetPbrMetallicRoughnessMaterial(gltfMaterial.doubleSided);
@@ -204,6 +213,10 @@ namespace GLTFast.Materials {
 
             if(material==null) return null;
 
+            if (!isUnlit && pointsSupport) {
+                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
+            }
+            
             material.name = gltfMaterial.name;
 
             StandardShaderMode shaderMode = StandardShaderMode.Opaque;

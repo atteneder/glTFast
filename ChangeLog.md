@@ -29,6 +29,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Export) Support for lights export
 - glTF icon assigned to imported glTF assets, `GltfAsset*` components and and various setting classes
 - (Import) Support for up to 8 UV sets (note: glTF shaders still support only two sets; part of #206)
+- `IMaterialGenerator` was extended with support for points topology
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
