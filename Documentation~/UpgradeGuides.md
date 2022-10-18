@@ -15,10 +15,6 @@ The built-in packages [*Unity Web Request Texture*][uwrt] and [*Image Conversion
 
 See [*Texture Support* in Project Setup](ProjectSetup.md#materials-and-shader-variants) for details.
 
-### API Changes
-
-`RenderPipelineUtils.DetectRenderPipeline()` turned to `RenderPipelineUtils.renderPipeline`
-
 ### Play Animation
 
 Previously the first animation clip would start playing by default, which is not the case anymore. There is a way to restore animation auto-play, depending on how you load glTFs.
@@ -64,6 +60,10 @@ If `pointsSupport` is true, the generated material has to support meshes with po
 The bundled default material generators don't support point cloud rendering yet (with the exception of the built-in unlit shader), but this change will allow implementing that in the future (or in custom implementations).
 
 If a material is used on mesh primitives with different draw modes (e.g. on triangles as well as points), still just one Unity material with points support will be created and used for all of them.
+
+### Misc. API Changes
+
+`RenderPipelineUtils.DetectRenderPipeline()` turned to `RenderPipelineUtils.renderPipeline`
 
 ## Upgrade to 4.5
 
