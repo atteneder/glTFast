@@ -52,6 +52,19 @@ async void Start() {
 }
 ```
 
+### `IMaterialGenerator` API change
+
+Rendering meshes with points topology/draw mode (Point clouds) requires special shaders (with a `PSIZE` vertex output). For that reason the `pointsSupport` parameter (`bool`; optional) was added to
+
+- `IMaterialGenerator.GetDefaultMaterial` 
+- `IMaterialGenerator.GenerateMaterial` 
+
+If `pointsSupport` is true, the generated material has to support meshes with points topology.
+
+The bundled default material generators don't support point cloud rendering yet (with the exception of the built-in unlit shader), but this change will allow implementing that in the future (or in custom implementations).
+
+If a material is used on mesh primitives with different draw modes (e.g. on triangles as well as points), still just one Unity material with points support will be created and used for all of them.
+
 ## Upgrade to 4.5
 
 New shader graphs are used with certain Universal and High Definition render pipeline versions, so projects that included *glTFast*'s shaders have to check and update their included shaders or shader variant collections (see [Materials and Shader Variants](ProjectSetup.md#materials-and-shader-variants) for details).

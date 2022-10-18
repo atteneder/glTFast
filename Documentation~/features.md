@@ -184,6 +184,7 @@ Not investigated yet:
 | IOR                           | [ℹ️][IOR]      | [ℹ️][IOR]      | [⛔️][IOR]      |
 | Specular                      | [ℹ️][Specular] | [ℹ️][Specular] | [⛔️][Specular] |
 | Volume                        | [ℹ️][Volume]   | [ℹ️][Volume]   | [⛔️][Volume]   |
+| Point clouds                  |      |     | Unlit only |
 
 <sup>1</sup>: Physically-Based Rendering (PBR) material model
 
