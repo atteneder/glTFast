@@ -162,7 +162,7 @@ namespace GLTFast {
         /// Array of dictionaries, indexed by mesh ID
         /// The dictionary contains all the mesh's primitives, clustered
         /// by Vertex Attribute and Morph Target usage (Primitives with identical vertex
-        /// data will be clustered; see MeshPrimitive.Equals).
+        /// data will be clustered; <see cref="MeshPrimitive.Equals"/>).
         /// </summary>
         Dictionary<MeshPrimitive,List<MeshPrimitive>>[] meshPrimitiveCluster;
         List<ImageCreateContext> imageCreateContexts;
@@ -2297,7 +2297,7 @@ namespace GLTFast {
             var perAttributeMeshCollection = new Dictionary<Attributes,HashSet<int>>();
 #endif
             
-            /// Iterate all primitive vertex attributes and remember the accessors usage.
+            // Iterate all primitive vertex attributes and remember the accessors usage.
             accessorUsage = new AccessorUsage[gltf.accessors.Length];
             int totalPrimitives = 0;
             for (int meshIndex = 0; meshIndex < meshCount; meshIndex++)
