@@ -70,7 +70,7 @@ namespace GLTFast.Editor {
         [SerializeField]
         LogItem[] reportItems;
         
-        GltfImport m_Gltf;
+        protected GltfImport m_Gltf;
 
         HashSet<string> m_ImportedNames;
         HashSet<Object> m_ImportedObjects;
