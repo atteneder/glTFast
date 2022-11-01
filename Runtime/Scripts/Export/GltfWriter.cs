@@ -1525,9 +1525,12 @@ namespace GLTFast.Export {
                     }
                     await m_DeferAgent.BreakPoint();
                 }
+                for (var imageId = 0; imageId < m_ImageExports.Count; imageId++)
+                {
+                    m_ImageExports[imageId].Dispose();
+                }
+                m_ImageExports = null;
             }
-
-            m_ImageExports = null;
             return true;
         }
         
