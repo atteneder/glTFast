@@ -21,7 +21,7 @@ namespace GLTFast.Export {
     /// <summary>
     /// Wrapper to export a glTF image from one or more Unity textures
     /// </summary>
-    public abstract class ImageExportBase {
+    public abstract class ImageExportBase : IDisposable {
 
         /// <summary>
         /// Exported image file format
@@ -128,6 +128,10 @@ namespace GLTFast.Export {
 #else
             return null;
 #endif
+        }
+        
+        public virtual void Dispose()
+        {
         }
     }
 }
