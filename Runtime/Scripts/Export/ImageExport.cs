@@ -18,6 +18,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using Object = UnityEngine.Object;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -229,6 +230,16 @@ namespace GLTFast.Export {
             return Format.Unknown;
         }
 #endif
+        
+        public override void Dispose()
+        {
+            base.Dispose();
+            if (m_Texture != null)
+            {
+                Object.DestroyImmediate(m_Texture, true);
+            }
+        }
+
         
         static Material GetColorBlitMaterial() {
             if (s_ColorBlitMaterial == null) {
