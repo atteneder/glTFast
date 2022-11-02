@@ -19,6 +19,7 @@ using System.IO;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Experimental.Rendering;
 using Object = UnityEngine.Object;
 
 namespace GLTFast.Export {
@@ -212,9 +213,18 @@ namespace GLTFast.Export {
             var exportTexture = new Texture2D(
                 width,
                 height,
+#if UNITY_2022_1_OR_NEWER
+                // ~20 times faster texture construction
+                SystemInfo.IsFormatSupported(GraphicsFormat.R8G8B8_UNorm, FormatUsage.Sample)
+                    ? GraphicsFormat.R8G8B8_UNorm
+                    : GraphicsFormat.R8G8B8A8_UNorm,
+                TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate
+#else
                 TextureFormat.RGB24,
                 false,
-                true);
+                true
+#endif
+            );
             exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
             RenderTexture.ReleaseTemporary(destRenderTexture);
             exportTexture.Apply();
