@@ -19,6 +19,7 @@ using System.IO;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Object = UnityEngine.Object;
 
 namespace GLTFast.Export {
     public class OrmImageExport : ImageExport {
@@ -213,11 +214,19 @@ namespace GLTFast.Export {
                 false,
                 true);
             exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
+            RenderTexture.ReleaseTemporary(destRenderTexture);
             exportTexture.Apply();
             
             var imageData = format == Format.Png 
                 ? exportTexture.EncodeToPNG()
                 : exportTexture.EncodeToJPG(60);
+
+            // Release temporary texture
+#if UNITY_EDITOR
+            Object.DestroyImmediate(exportTexture);
+#else
+            Object.Destroy(exportTexture);
+#endif
 
             return imageData;
         }

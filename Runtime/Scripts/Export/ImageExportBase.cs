@@ -15,6 +15,8 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using Object = UnityEngine.Object;
 
 namespace GLTFast.Export {
     public abstract class ImageExportBase {
@@ -42,6 +44,8 @@ namespace GLTFast.Export {
         protected static byte[] EncodeTexture(Texture2D texture, Format format, bool hasAlpha = true, Material blitMaterial = null) {
 
             Texture2D exportTexture;
+            var tmpTexture = false;
+            
             if (texture.isReadable && blitMaterial==null) {
                 exportTexture = texture;
                 if (exportTexture == null) {
@@ -68,13 +72,23 @@ namespace GLTFast.Export {
                     false,
                     true);
                 exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
+                RenderTexture.ReleaseTemporary(destRenderTexture);
                 exportTexture.Apply();
+                tmpTexture = true;
             }
             
             var imageData = format == Format.Png 
                 ? exportTexture.EncodeToPNG()
                 : exportTexture.EncodeToJPG(60);
 
+            if (tmpTexture) {
+                // Release temporary texture
+#if UNITY_EDITOR
+                Object.DestroyImmediate(exportTexture);
+#else
+                Object.Destroy(exportTexture);
+#endif
+            }
             return imageData;
         }
     }
