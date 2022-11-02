@@ -58,7 +58,9 @@ namespace GLTFast.Export {
                     texture.height,
                     0,
                     RenderTextureFormat.ARGB32,
-                    RenderTextureReadWrite.Linear
+                    RenderTextureReadWrite.Linear,
+                    1,
+                    RenderTextureMemoryless.Depth
                 );
                 if (blitMaterial == null) {
                     Graphics.Blit(texture, destRenderTexture);

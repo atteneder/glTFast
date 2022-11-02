@@ -186,7 +186,9 @@ namespace GLTFast.Export {
                 height,
                 0,
                 RenderTextureFormat.ARGB32,
-                RenderTextureReadWrite.Linear
+                RenderTextureReadWrite.Linear,
+                1,
+                RenderTextureMemoryless.Depth
             );
 
             if (metalGlossTexture == null) {
