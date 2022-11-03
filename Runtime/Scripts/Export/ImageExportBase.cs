@@ -72,7 +72,7 @@ namespace GLTFast.Export {
                     texture.height,
 #if UNITY_2022_1_OR_NEWER
                     // ~20 times faster texture construction
-                    hasAlpha ? GraphicsFormat.R8G8B8A8_UNorm : GraphicsFormat.R8G8B8_UNorm,
+                    !hasAlpha && SystemInfo.IsFormatSupported(GraphicsFormat.R8G8B8_UNorm, FormatUsage.Sample) ?  GraphicsFormat.R8G8B8_UNorm : GraphicsFormat.R8G8B8A8_UNorm,
                     TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate
 #else
                     hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24,
