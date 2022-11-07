@@ -2124,16 +2124,25 @@ namespace GLTFast {
             return job;
         }
 
-        Texture2D CreateEmptyTexture(Schema.Image img, int index, bool forceSampleLinear) {
-            Texture2D txt;
-            if(forceSampleLinear) {
-                TextureCreationFlags mipmapFlags = settings.generateMipMaps ? TextureCreationFlags.MipChain : TextureCreationFlags.None;
-                txt = new Texture2D(4, 4, GraphicsFormat.R8G8B8A8_UNorm, mipmapFlags);
-            } else {
-                txt = new Texture2D(4, 4, UnityEngine.TextureFormat.RGBA32, mipChain: settings.generateMipMaps);
+        Texture2D CreateEmptyTexture(Image img, int index, bool forceSampleLinear) {
+#if UNITY_2022_1_OR_NEWER
+            var textureCreationFlags = TextureCreationFlags.DontUploadUponCreate | TextureCreationFlags.DontInitializePixels;
+#else
+            var textureCreationFlags = TextureCreationFlags.None;
+#endif
+            if (settings.generateMipMaps) {
+                textureCreationFlags |= TextureCreationFlags.MipChain;
             }
-            txt.anisoLevel = settings.anisotropicFilterLevel;
-            txt.name = GetImageName(img, index);
+            var txt = new Texture2D(
+                4, 4,
+                forceSampleLinear 
+                    ? GraphicsFormat.R8G8B8A8_UNorm 
+                    : GraphicsFormat.R8G8B8A8_SRGB,
+                textureCreationFlags
+            ) {
+                anisoLevel = settings.anisotropicFilterLevel,
+                name = GetImageName(img, index)
+            };
             return txt;
         }
 
