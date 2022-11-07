@@ -36,6 +36,9 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 #if MESHOPT
 using Meshoptimizer;
 #endif
@@ -1115,6 +1118,13 @@ namespace GLTFast {
         /// <param name="imageIndex">glTF image index</param>
         /// <returns>True if image texture had to be loaded manually from bytes, false otherwise.</returns>
         bool LoadImageFromBytes(int imageIndex) {
+            
+#if UNITY_EDITOR
+            if (isEditorImport) {
+                // Use the original texture at Editor (asset database) import 
+                return false;
+            }
+#endif
             var forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
             return forceSampleLinear || settings.generateMipMaps;
         }
@@ -3086,5 +3096,13 @@ namespace GLTFast {
                     return ImageFormat.Unknown;
             }
         }
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Returns true if this import is for an asset, in contraast to
+        /// runtime loading.
+        /// </summary>
+        bool isEditorImport => !EditorApplication.isPlaying;
+#endif
     }
 }
