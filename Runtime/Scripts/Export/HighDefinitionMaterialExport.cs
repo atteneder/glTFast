@@ -152,20 +152,20 @@ namespace GLTFast.Export {
                 if (maskMap != null) {
                     ormImageExport = new MaskMapImageExport(maskMap);
 
-                    var smoothnessUnused = false;
-                    if (uMaterial.HasProperty(k_SmoothnessRemapMax)) {
-                        var smoothnessRemapMax = uMaterial.GetFloat(k_SmoothnessRemapMax);
-                        pbr.roughnessFactor = 1-smoothnessRemapMax;
-                        if (uMaterial.HasProperty(k_SmoothnessRemapMin)) {
-                            var smoothnessRemapMin = uMaterial.GetFloat(k_SmoothnessRemapMin);
-                            smoothnessUnused = Math.Abs(smoothnessRemapMin - smoothnessRemapMax) <= math.EPSILON;
-                            if (smoothnessRemapMin > 0 && !smoothnessUnused) {
-                                logger?.Warning(LogCode.RemapUnsupported,"Smoothness");
+                    if (AddImageExport(gltf, ormImageExport, out var ormTextureId)) {
+                        
+                        var smoothnessUnused = false;
+                        if (uMaterial.HasProperty(k_SmoothnessRemapMax)) {
+                            var smoothnessRemapMax = uMaterial.GetFloat(k_SmoothnessRemapMax);
+                            pbr.roughnessFactor = 1-smoothnessRemapMax;
+                            if (uMaterial.HasProperty(k_SmoothnessRemapMin)) {
+                                var smoothnessRemapMin = uMaterial.GetFloat(k_SmoothnessRemapMin);
+                                smoothnessUnused = Math.Abs(smoothnessRemapMin - smoothnessRemapMax) <= math.EPSILON;
+                                if (smoothnessRemapMin > 0 && !smoothnessUnused) {
+                                    logger?.Warning(LogCode.RemapUnsupported,"Smoothness");
+                                }
                             }
                         }
-                    }
-                    
-                    if (AddImageExport(gltf, ormImageExport, out var ormTextureId)) {
                         
                         if (pbr.metallicFactor > 0 && smoothnessUnused) {
                             // TODO: smartly detect if metallic/smoothness
