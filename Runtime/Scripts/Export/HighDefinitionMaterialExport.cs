@@ -33,6 +33,7 @@ namespace GLTFast.Export {
         static readonly int k_EmissiveColor = Shader.PropertyToID("_EmissiveColor");
         static readonly int k_EmissionColorMap = Shader.PropertyToID("_EmissiveColorMap");
         static readonly int k_NormalMap = Shader.PropertyToID("_NormalMap");
+        static readonly int k_NormalScale = Shader.PropertyToID("_NormalScale");
         static readonly int k_BaseColorMap = Shader.PropertyToID("_BaseColorMap");
         static readonly int k_MaskMap = Shader.PropertyToID("_MaskMap");
         static readonly int k_SmoothnessRemapMax = Shader.PropertyToID("_SmoothnessRemapMax");
@@ -103,7 +104,7 @@ namespace GLTFast.Export {
 
                 if (normalTex != null) {
                     if(normalTex is Texture2D) {
-                        material.normalTexture = ExportNormalTextureInfo(normalTex, uMaterial, gltf);
+                        material.normalTexture = ExportNormalTextureInfo(normalTex, uMaterial, gltf, k_NormalScale);
                         ExportTextureTransform(material.normalTexture, uMaterial, k_NormalMap, gltf);
                     } else {
                         logger?.Error(LogCode.TextureInvalidType, "normal", uMaterial.name );

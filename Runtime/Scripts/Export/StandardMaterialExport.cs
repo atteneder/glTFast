@@ -111,7 +111,7 @@ namespace GLTFast.Export {
 
                 if (normalTex != null) {
                     if(normalTex is Texture2D) {
-                        material.normalTexture = ExportNormalTextureInfo(normalTex, uMaterial, gltf);
+                        material.normalTexture = ExportNormalTextureInfo(normalTex, uMaterial, gltf, MaterialGenerator.bumpScalePropId);
                         ExportTextureTransform(material.normalTexture, uMaterial, k_BumpMap, gltf);
                     } else {
                         logger?.Error(LogCode.TextureInvalidType, "normal", uMaterial.name );

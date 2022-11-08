@@ -110,7 +110,8 @@ namespace GLTFast.Export {
         protected static NormalTextureInfo ExportNormalTextureInfo(
             UnityEngine.Texture texture,
             UnityEngine.Material material,
-            IGltfWritable gltf
+            IGltfWritable gltf,
+            int normalScalePropId
         )
         {
             var texture2d = texture as Texture2D;
@@ -124,8 +125,8 @@ namespace GLTFast.Export {
                     // texCoord = 0 // TODO: figure out which UV set was used
                 };
 
-                if (material.HasProperty(MaterialGenerator.bumpScalePropId)) {
-                    info.scale = material.GetFloat(MaterialGenerator.bumpScalePropId);
+                if (material.HasProperty(normalScalePropId)) {
+                    info.scale = material.GetFloat(normalScalePropId);
                 }
                 return info;
             }
