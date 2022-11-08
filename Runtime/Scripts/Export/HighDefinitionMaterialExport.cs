@@ -142,19 +142,40 @@ namespace GLTFast.Export {
             var success = true;
             var pbr = new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
 
+            if (uMaterial.HasProperty(k_Metallic)) {
+                pbr.metallicFactor = uMaterial.GetFloat(k_Metallic);
+            }
+            
             MaskMapImageExport ormImageExport = null;
             if (uMaterial.IsKeywordEnabled(k_KeywordMaskMap) && uMaterial.HasProperty(k_MaskMap)) {
                 var maskMap =  uMaterial.GetTexture(k_MaskMap) as Texture2D;
                 if (maskMap != null) {
                     ormImageExport = new MaskMapImageExport(maskMap);
+
+                    var smoothnessUnused = false;
+                    if (uMaterial.HasProperty(k_SmoothnessRemapMax)) {
+                        var smoothnessRemapMax = uMaterial.GetFloat(k_SmoothnessRemapMax);
+                        pbr.roughnessFactor = 1-smoothnessRemapMax;
+                        if (uMaterial.HasProperty(k_SmoothnessRemapMin)) {
+                            var smoothnessRemapMin = uMaterial.GetFloat(k_SmoothnessRemapMin);
+                            smoothnessUnused = Math.Abs(smoothnessRemapMin - smoothnessRemapMax) <= math.EPSILON;
+                            if (smoothnessRemapMin > 0 && !smoothnessUnused) {
+                                logger?.Warning(LogCode.RemapUnsupported,"Smoothness");
+                            }
+                        }
+                    }
+                    
                     if (AddImageExport(gltf, ormImageExport, out var ormTextureId)) {
                         
-                        // TODO: smartly detect if metallic roughness channels are used and not create the
-                        // texture info if not. 
-                        pbr.metallicRoughnessTexture = new TextureInfo {
-                            index = ormTextureId
-                        };
-                        ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, k_MaskMap, gltf);
+                        if (pbr.metallicFactor > 0 && smoothnessUnused) {
+                            // TODO: smartly detect if metallic/smoothness
+                            // channels are used (i.e. have non-white pixels)
+                            // and not assign the texture info if not. 
+                            pbr.metallicRoughnessTexture = new TextureInfo {
+                                index = ormTextureId
+                            };
+                            ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, k_MaskMap, gltf);
+                        }
                         
                         // TODO: smartly detect if occlusion channel is used and not create the
                         // texture info if not.
@@ -170,6 +191,12 @@ namespace GLTFast.Export {
                                 logger?.Warning(LogCode.RemapUnsupported, "AO");
                             }
                         }
+                        ExportTextureTransform(
+                            material.occlusionTexture,
+                            uMaterial,
+                            k_BaseColorMap, // HDRP Lit always re-uses baseColorMap transform
+                            gltf
+                        );
                     }
                 }
             }
@@ -198,17 +225,7 @@ namespace GLTFast.Export {
                 }
             }
 
-            if (uMaterial.HasProperty(k_Metallic)) {
-                pbr.metallicFactor = uMaterial.GetFloat(k_Metallic);
-            }
-
-            if (ormImageExport != null && uMaterial.HasProperty(k_SmoothnessRemapMax)) {
-                pbr.roughnessFactor = uMaterial.GetFloat(k_SmoothnessRemapMax);
-                if (uMaterial.HasProperty(k_SmoothnessRemapMin) && uMaterial.GetFloat(k_SmoothnessRemapMin) > 0) {
-                    logger?.Warning(LogCode.RemapUnsupported,"Smoothness");
-                }
-            } else
-            if(uMaterial.HasProperty(k_Smoothness)) {
+            if(ormImageExport == null && uMaterial.HasProperty(k_Smoothness)) {
                 pbr.roughnessFactor = 1f - uMaterial.GetFloat(k_Smoothness);
             }
 
