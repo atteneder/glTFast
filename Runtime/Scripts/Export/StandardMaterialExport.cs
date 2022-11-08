@@ -39,6 +39,7 @@ namespace GLTFast.Export {
 #endif
         const string k_KeywordSmoothnessTextureAlbedoChannelA = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A";
 		    
+        static readonly int k_Cull = Shader.PropertyToID("_Cull");
         static readonly int k_EmissionColor = Shader.PropertyToID("_EmissionColor");
         static readonly int k_EmissionMap = Shader.PropertyToID("_EmissionMap");
         static readonly int k_BumpMap = Shader.PropertyToID("_BumpMap");
@@ -69,7 +70,7 @@ namespace GLTFast.Export {
             };
 
             SetAlphaModeAndCutoff(uMaterial, material);
-            material.doubleSided = IsDoubleSided(uMaterial);
+            material.doubleSided = IsDoubleSided(uMaterial, k_Cull);
 
             if(uMaterial.IsKeywordEnabled(k_KeywordEmission)) {
                 if (uMaterial.HasProperty(k_EmissionColor)) {

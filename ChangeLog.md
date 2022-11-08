@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) Don't duplicate texture assets (textures referenced by relative URI; #508)
 - (Shader) Built-in pbrMetallicRougness shader's metallicFactor property defaults to 1.0, according to the glTF spec
 - (Export) HDRP Lit shader's normal scale is exported correctly now
+- (Export) HDRP Lit shader's double sided property is exported correctly now
 ## [4.8.5] - 2022-08-30
 ### Fixed
 - (Export) Meshes with point topology are exported correctly now (#434)

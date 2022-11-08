@@ -32,7 +32,6 @@ namespace GLTFast.Export {
         protected static readonly int k_Smoothness = Shader.PropertyToID("_Smoothness");
 
         static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
-        static readonly int k_Cull = Shader.PropertyToID("_Cull");
 
         public abstract bool ConvertMaterial(UnityEngine.Material uMaterial, out Material material, IGltfWritable gltf, ICodeLogger logger);
         
@@ -56,9 +55,9 @@ namespace GLTFast.Export {
             }
         }
 
-        protected static bool IsDoubleSided(UnityEngine.Material uMaterial) {
-            return uMaterial.HasProperty(k_Cull) &&
-                uMaterial.GetInt(k_Cull) == (int) CullMode.Off;
+        protected static bool IsDoubleSided(UnityEngine.Material uMaterial, int cullPropId) {
+            return uMaterial.HasProperty(cullPropId) &&
+                uMaterial.GetInt(cullPropId) == (int) CullMode.Off;
         }
         
         protected static bool IsUnlit(UnityEngine.Material material) {

@@ -16,6 +16,7 @@
 #if USING_HDRP
 
 using System;
+using GLTFast.Materials;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -58,7 +59,7 @@ namespace GLTFast.Export {
             };
 
             SetAlphaModeAndCutoff(uMaterial, material);
-            material.doubleSided = IsDoubleSided(uMaterial);
+            material.doubleSided = IsDoubleSided(uMaterial, MaterialGenerator.cullModePropId);
 
             //
             // Emission
