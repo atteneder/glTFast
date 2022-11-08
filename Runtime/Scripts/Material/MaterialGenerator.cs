@@ -41,6 +41,8 @@ namespace GLTFast.Materials {
             SpecularGlossiness,
             Unlit,
         }
+
+        public const string DEFAULT_MATERIAL_NAME = "glTF-Default-Material";
         
         public const string TAG_RENDER_TYPE = "RenderType";
         public const string TAG_RENDER_TYPE_CUTOUT = "TransparentCutout";

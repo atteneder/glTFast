@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Reduced memory footprint when exporting textures
 - (Export) Faster temporary texture construction in Unity 2022 and newer
 - (Import) Faster texture creation in Unity 2022 and newer
+- (Import) Default (fallback) material now gets named `glTF-Default-Material` instead of shader's name, which is deterministic across render pipelines
 ### Fixed
 - (Export) No empty filename for textures with no valid name (e.g. `.jpg`;#458)
 - (Export) Memory leak: Temporary textures are properly destroyed (happened on non-readable or ORM textures; fixes #502)

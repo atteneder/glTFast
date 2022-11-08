@@ -141,7 +141,9 @@ namespace GLTFast.Materials {
 #endif
 
         public override Material GetDefaultMaterial() {
-            return GetMetallicMaterial(MetallicShaderFeatures.Default);
+            var defaultMaterial = GetMetallicMaterial(MetallicShaderFeatures.Default);
+            defaultMaterial.name = DEFAULT_MATERIAL_NAME;
+            return defaultMaterial;
         }
 
         public override Material GenerateMaterial(Schema.Material gltfMaterial, IGltfReadable gltf) {

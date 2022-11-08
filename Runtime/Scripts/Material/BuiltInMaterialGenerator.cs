@@ -88,7 +88,9 @@ namespace GLTFast.Materials {
         Shader unlitShader;
 
         public override Material GetDefaultMaterial() {
-            return GetPbrMetallicRoughnessMaterial();
+            var defaultMaterial = GetPbrMetallicRoughnessMaterial();
+            defaultMaterial.name = DEFAULT_MATERIAL_NAME;
+            return defaultMaterial;
         }
         
         protected virtual Shader FinderShaderMetallicRoughness() {
