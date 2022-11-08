@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) No empty filename for textures with no valid name (e.g. `.jpg`;#458)
 - (Export) Memory leak: Temporary textures are properly destroyed (happened on non-readable or ORM textures; fixes #502)
 - (Import) Don't duplicate texture assets (textures referenced by relative URI; #508)
-
+- (Shader) Built-in pbrMetallicRougness shader's metallicFactor property defaults to 1.0, according to the glTF spec
 ## [4.8.5] - 2022-08-30
 ### Fixed
 - (Export) Meshes with point topology are exported correctly now (#434)
