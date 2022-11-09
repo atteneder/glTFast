@@ -39,6 +39,7 @@ namespace GLTFast.Export {
         static readonly int k_MaskMap = Shader.PropertyToID("_MaskMap");
         static readonly int k_SmoothnessRemapMax = Shader.PropertyToID("_SmoothnessRemapMax");
         static readonly int k_SmoothnessRemapMin = Shader.PropertyToID("_SmoothnessRemapMin");
+        static readonly int k_UnlitColor = Shader.PropertyToID("_UnlitColor");
 
         /// <summary>
         /// Converts a Unity material to a glTF material. 
@@ -250,6 +251,14 @@ namespace GLTFast.Export {
 
             material.pbrMetallicRoughness = pbr;
             return success;
+        }
+        
+        protected override bool GetUnlitColor(UnityEngine.Material uMaterial, out Color baseColor) {
+            if (uMaterial.HasProperty(k_UnlitColor)) {
+                baseColor = uMaterial.GetColor(k_UnlitColor);
+                return true;
+            }
+            return base.GetUnlitColor(uMaterial, out baseColor);
         }
     }
 }

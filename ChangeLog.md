@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) HDRP Lit shader's double sided property is exported correctly now
 - (Export) HDRP Lit shader's smoothness remap property is exported correctly now
 - (Export) HDRP Lit shader's occlusion texture has correct transform now (was vertically inverted before)
+- (Export) HDRP Unlit color is exported correctly
 
 ## [4.8.5] - 2022-08-30
 ### Fixed

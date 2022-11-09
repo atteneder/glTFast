@@ -64,7 +64,7 @@ namespace GLTFast.Export {
             return material.shader.name.ToLower().Contains("unlit");
         }
         
-        protected static void ExportUnlit(Material material, UnityEngine.Material uMaterial, int mainTexProperty, IGltfWritable gltf, ICodeLogger logger){
+        protected void ExportUnlit(Material material, UnityEngine.Material uMaterial, int mainTexProperty, IGltfWritable gltf, ICodeLogger logger){
 
             gltf.RegisterExtensionUsage(Extension.MaterialsUnlit);
             material.extensions = material.extensions ?? new MaterialExtension();
@@ -72,8 +72,8 @@ namespace GLTFast.Export {
 	        
             var pbr = material.pbrMetallicRoughness ?? new PbrMetallicRoughness();
 
-            if (uMaterial.HasProperty(k_Color)) {
-                pbr.baseColor = uMaterial.GetColor(k_Color);
+            if (GetUnlitColor(uMaterial, out var baseColor)) {
+                pbr.baseColor = baseColor;
             }
 
             if (uMaterial.HasProperty(mainTexProperty)) {
@@ -90,7 +90,20 @@ namespace GLTFast.Export {
 
             material.pbrMetallicRoughness = pbr;
         }
-        
+
+        protected virtual bool GetUnlitColor(UnityEngine.Material uMaterial, out Color baseColor) {
+            if (uMaterial.HasProperty(k_BaseColor)) {
+                baseColor = uMaterial.GetColor(k_BaseColor);
+                return true;
+            }
+            if (uMaterial.HasProperty(k_Color)) {
+                baseColor = uMaterial.GetColor(k_Color);
+                return true;
+            }
+            baseColor = Color.magenta;
+            return false;
+        }
+
         protected static TextureInfo ExportTextureInfo( UnityEngine.Texture texture, IGltfWritable gltf, ImageExportBase.Format format = ImageExportBase.Format.Unknown) {
             var texture2d = texture as Texture2D;
             if (texture2d == null) {
