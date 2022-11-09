@@ -148,6 +148,26 @@ namespace GLTFast.Export {
                 metallicUsed = pbr.metallicFactor > 0;
             }
             
+            if (uMaterial.HasProperty(k_BaseColorMap)) {
+                // TODO if additive particle, render black into alpha
+                // TODO use private Material.GetFirstPropertyNameIdByAttribute here, supported from 2020.1+
+                var mainTex = uMaterial.GetTexture(k_BaseColorMap);
+
+                if (mainTex) {
+                    if(mainTex is Texture2D) {
+                        pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf,
+                            material.alphaModeEnum == Material.AlphaMode.OPAQUE
+                                ? ImageExportBase.Format.Jpg
+                                : ImageExportBase.Format.Unknown
+                            );
+                        ExportTextureTransform(pbr.baseColorTexture, uMaterial, k_BaseColorMap, gltf);
+                    } else {
+                        logger?.Error(LogCode.TextureInvalidType, "main", uMaterial.name );
+                        success = false;
+                    }
+                }
+            }
+
             MaskMapImageExport ormImageExport = null;
             if (uMaterial.IsKeywordEnabled(k_KeywordMaskMap) && uMaterial.HasProperty(k_MaskMap)) {
                 var maskMap =  uMaterial.GetTexture(k_MaskMap) as Texture2D;
@@ -222,26 +242,6 @@ namespace GLTFast.Export {
             } else
             if (uMaterial.HasProperty(k_Color)) {
                 pbr.baseColor = uMaterial.GetColor(k_Color);
-            }
-
-            if (uMaterial.HasProperty(k_BaseColorMap)) {
-                // TODO if additive particle, render black into alpha
-                // TODO use private Material.GetFirstPropertyNameIdByAttribute here, supported from 2020.1+
-                var mainTex = uMaterial.GetTexture(k_BaseColorMap);
-
-                if (mainTex) {
-                    if(mainTex is Texture2D) {
-                        pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf,
-                            material.alphaModeEnum == Material.AlphaMode.OPAQUE
-                                ? ImageExportBase.Format.Jpg
-                                : ImageExportBase.Format.Unknown
-                            );
-                        ExportTextureTransform(pbr.baseColorTexture, uMaterial, k_BaseColorMap, gltf);
-                    } else {
-                        logger?.Error(LogCode.TextureInvalidType, "main", uMaterial.name );
-                        success = false;
-                    }
-                }
             }
 
             if(ormImageExport == null && uMaterial.HasProperty(k_Smoothness)) {
