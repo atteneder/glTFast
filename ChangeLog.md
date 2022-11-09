@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Feature
+- (Export) HDRP metallic/roughness texture assignment can be omitted by setting the corresponding smoothness remap range min equal to max and metallic factor to 0. Useful for only exporting the ambient occlusion channel of a mask map.
+- (Export) HDRP occlusion texture assignment can be omitted by setting the corresponding AO remap minimum to 1.0. Useful for only exporting the metallic/smoothness channels of a mask map.
 ### Changed
 - (Export) Reduced memory footprint when exporting textures
 - (Export) Faster temporary texture construction in Unity 2022 and newer
@@ -21,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) HDRP Lit shader's double sided property is exported correctly now
 - (Export) HDRP Lit shader's smoothness remap property is exported correctly now
 - (Export) HDRP Lit shader's occlusion texture has correct transform now (was vertically inverted before)
+
 ## [4.8.5] - 2022-08-30
 ### Fixed
 - (Export) Meshes with point topology are exported correctly now (#434)

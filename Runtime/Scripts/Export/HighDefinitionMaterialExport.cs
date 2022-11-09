@@ -142,61 +142,76 @@ namespace GLTFast.Export {
             var success = true;
             var pbr = new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
 
+            var metallicUsed = false;
             if (uMaterial.HasProperty(k_Metallic)) {
                 pbr.metallicFactor = uMaterial.GetFloat(k_Metallic);
+                metallicUsed = pbr.metallicFactor > 0;
             }
             
             MaskMapImageExport ormImageExport = null;
             if (uMaterial.IsKeywordEnabled(k_KeywordMaskMap) && uMaterial.HasProperty(k_MaskMap)) {
                 var maskMap =  uMaterial.GetTexture(k_MaskMap) as Texture2D;
                 if (maskMap != null) {
-                    ormImageExport = new MaskMapImageExport(maskMap);
 
-                    if (AddImageExport(gltf, ormImageExport, out var ormTextureId)) {
-                        
-                        var smoothnessUnused = false;
+                    var smoothnessUsed = false;
+                    if (uMaterial.HasProperty(k_SmoothnessRemapMin)) {
+                        var smoothnessRemapMin = uMaterial.GetFloat(k_SmoothnessRemapMin);
+                        pbr.roughnessFactor = 1-smoothnessRemapMin;
                         if (uMaterial.HasProperty(k_SmoothnessRemapMax)) {
                             var smoothnessRemapMax = uMaterial.GetFloat(k_SmoothnessRemapMax);
-                            pbr.roughnessFactor = 1-smoothnessRemapMax;
-                            if (uMaterial.HasProperty(k_SmoothnessRemapMin)) {
-                                var smoothnessRemapMin = uMaterial.GetFloat(k_SmoothnessRemapMin);
-                                smoothnessUnused = Math.Abs(smoothnessRemapMin - smoothnessRemapMax) <= math.EPSILON;
-                                if (smoothnessRemapMin > 0 && !smoothnessUnused) {
-                                    logger?.Warning(LogCode.RemapUnsupported,"Smoothness");
-                                }
+                            smoothnessUsed = math.abs(smoothnessRemapMin - smoothnessRemapMax) > math.EPSILON;
+                            if (smoothnessRemapMax < 1 && smoothnessUsed) {
+                                logger?.Warning(LogCode.RemapUnsupported,"Smoothness");
                             }
                         }
-                        
-                        if (pbr.metallicFactor > 0 && smoothnessUnused) {
-                            // TODO: smartly detect if metallic/smoothness
-                            // channels are used (i.e. have non-white pixels)
-                            // and not assign the texture info if not. 
-                            pbr.metallicRoughnessTexture = new TextureInfo {
-                                index = ormTextureId
-                            };
-                            ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, k_MaskMap, gltf);
-                        }
-                        
-                        // TODO: smartly detect if occlusion channel is used and not create the
-                        // texture info if not.
-                        material.occlusionTexture = new OcclusionTextureInfo {
-                            index = ormTextureId
-                        };
-                        if (uMaterial.HasProperty(k_AORemapMin) ) {
-                            var occMin = uMaterial.GetFloat(k_AORemapMin);
-                            material.occlusionTexture.strength =  math.clamp(1-occMin,0,1);
+                    }
+                    
+                    var occStrength = 1f;
+                    if (uMaterial.HasProperty(k_AORemapMin)) {
+                        var occMin = uMaterial.GetFloat(k_AORemapMin);
+                        occStrength =  math.clamp(1f-occMin,0,1);
+                        if (uMaterial.HasProperty(k_AORemapMax)) {
                             var occMax = uMaterial.GetFloat(k_AORemapMax);
-                            if (occMax < 1f) {
-                                // TODO: remap texture values
-                                logger?.Warning(LogCode.RemapUnsupported, "AO");
+                            if (occMax < 1f && occStrength > 0) {
+                                logger?.Warning(LogCode.RemapUnsupported,"AO");
                             }
                         }
-                        ExportTextureTransform(
-                            material.occlusionTexture,
-                            uMaterial,
-                            k_BaseColorMap, // HDRP Lit always re-uses baseColorMap transform
-                            gltf
-                        );
+                    }
+
+                    var occUsed = occStrength > 0;
+                    
+                    // TODO: Detect if metallic/smoothness/occlusion channels
+                    // are used based on pixel values (i.e. have non-white
+                    // pixels) on top of parameter evaluation
+
+                    if ( metallicUsed || occUsed || smoothnessUsed ) {
+                        ormImageExport = new MaskMapImageExport(maskMap);
+                        if (AddImageExport(gltf, ormImageExport, out var ormTextureId)) {
+
+                            if (metallicUsed || smoothnessUsed) {
+                                pbr.metallicRoughnessTexture = new TextureInfo {
+                                    index = ormTextureId
+                                };
+                                ExportTextureTransform(pbr.metallicRoughnessTexture, uMaterial, k_MaskMap, gltf);
+                            }
+
+                            if (occStrength > 0) {
+                                // TODO: Detect if occlusion channel is used based
+                                // on pixel values
+                                // (i.e. have non-white pixels) and not assign the
+                                // texture info if not.
+                                material.occlusionTexture = new OcclusionTextureInfo {
+                                    index = ormTextureId,
+                                    strength = occStrength
+                                };
+                                ExportTextureTransform(
+                                    material.occlusionTexture,
+                                    uMaterial,
+                                    k_BaseColorMap, // HDRP Lit always re-uses baseColorMap transform
+                                    gltf
+                                );
+                            }
+                        }
                     }
                 }
             }
