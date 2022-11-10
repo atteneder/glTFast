@@ -37,7 +37,7 @@ namespace GLTFast.Loading {
     /// Provides a mechanism to inspect the progress and result of a download
     /// or file access request
     /// </summary>
-    public interface IDownload : IEnumerator {
+    public interface IDownload : IEnumerator, IDisposable {
         /// <summary>
         /// True, if the request was successful
         /// </summary>

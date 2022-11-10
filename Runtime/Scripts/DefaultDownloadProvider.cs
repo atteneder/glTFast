@@ -61,14 +61,14 @@ namespace GLTFast.Loading {
         public void Reset() {}
 
 #if UNITY_2020_1_OR_NEWER
-        public bool success => request.isDone && request.result == UnityWebRequest.Result.Success;
+        public bool success => request!=null && request.isDone && request.result == UnityWebRequest.Result.Success;
 #else
-        public bool success => request.isDone && !request.isNetworkError && !request.isHttpError;
+        public bool success => request!=null && request.isDone && !request.isNetworkError && !request.isHttpError;
 #endif
 
-        public string error { get { return request.error; } }
-        public byte[] data { get { return request.downloadHandler.data; } }
-        public string text { get { return request.downloadHandler.text; } }
+        public string error { get { return request==null ? "Request disposed" : request.error; } }
+        public byte[] data { get { return request?.downloadHandler.data; } }
+        public string text { get { return request?.downloadHandler.text; } }
         public bool? isBinary
         {
             get
@@ -84,11 +84,16 @@ namespace GLTFast.Loading {
                 return null;
             }
         }
+
+        public void Dispose() {
+            request.Dispose();
+            request = null;
+        }
     }
 
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
 
-        public AwaitableTextureDownload():base() {}
+        public AwaitableTextureDownload() {}
         public AwaitableTextureDownload(Uri url):base(url) {}
 
         public AwaitableTextureDownload(Uri url, bool nonReadable) {
@@ -104,10 +109,6 @@ namespace GLTFast.Loading {
             asynOperation = request.SendWebRequest();
         }
 
-        public Texture2D texture {
-            get {
-                return (request.downloadHandler as  DownloadHandlerTexture ).texture;
-            }
-        }
+        public Texture2D texture => (request?.downloadHandler as DownloadHandlerTexture )?.texture;
     }
 }

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) Default (fallback) material now gets named `glTF-Default-Material` instead of shader's name, which is deterministic across render pipelines
 - (Export) Don't use HDRP Lit MaskMap metallic/smoothness channels if they are not used (i.e. metallicFactor is zero and smoothness remap range is zero)
 - (Export) HDRP Lit base color map is exported as Jpeg, if alpha channel is not used (similar to other render pipelines)
+- `IDownload` now has to implement `IDisposable` as well which ensures resources are disposed correctly.
 ### Fixed
 - (Export) No empty filename for textures with no valid name (e.g. `.jpg`;#458)
 - (Export) Memory leak: Temporary textures are properly destroyed (happened on non-readable or ORM textures; fixes #502)
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) HDRP Lit shader's smoothness remap property is exported correctly now
 - (Export) HDRP Lit shader's occlusion texture has correct transform now (was vertically inverted before)
 - (Export) HDRP Unlit color is exported correctly
+- (Import) Unity 2020+ crash in Editor and builds due to undisposed `DownloadHandler`s
 
 ## [4.8.5] - 2022-08-30
 ### Fixed

@@ -633,9 +633,13 @@ namespace GLTFast {
                 }
 
                 if (gltfBinary ?? false) {
-                    success = await LoadGltfBinaryBuffer(download.data,url);
+                    var data = download.data;
+                    download.Dispose();
+                    success = await LoadGltfBinaryBuffer(data,url);
                 } else {
-                    success = await LoadGltf(download.text,url);
+                    var text = download.text;
+                    download.Dispose();
+                    success = await LoadGltf(text,url);
                 }
                 if(success) {
                     success = await LoadContent();
@@ -942,6 +946,7 @@ namespace GLTFast {
                     if (download.success) {
                         Profiler.BeginSample("GetData");
                         buffers[downloadPair.Key] = download.data;
+                        download.Dispose();
                         Profiler.EndSample();
                     } else {
                         logger?.Error(LogCode.BufferLoadFailed,download.error,downloadPair.Key.ToString());
@@ -982,9 +987,13 @@ namespace GLTFast {
                         txt = CreateEmptyTexture(gltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
                         txt.LoadImage(www.data,!imageReadable[imageIndex]);
+                        www.Dispose();
                     } else {
                         Assert.IsTrue(www is ITextureDownload);
-                        txt = ((ITextureDownload)www).texture;
+                        var textureDownload = (ITextureDownload)www; 
+                        txt = textureDownload.texture;
+                        textureDownload.Dispose();
+                        
                         txt.name = GetImageName(gltfRoot.images[imageIndex], imageIndex);
                     }
                     images[imageIndex] = txt;
@@ -1017,6 +1026,7 @@ namespace GLTFast {
             var www = await downloadTask;
             if(www.success) {
                 var ktxContext = new KtxLoadContext(index,www.data);
+                www.Dispose();
                 var forceSampleLinear = imageGamma!=null && !imageGamma[ktxContext.imageIndex];
                 var textureResult = await ktxContext.LoadKtx(forceSampleLinear);
                 images[ktxContext.imageIndex] = textureResult.texture;
