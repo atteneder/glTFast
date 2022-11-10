@@ -1616,7 +1616,7 @@ namespace GLTFast.Export {
             }
         }
         
-        internal struct MeshMaterialCombination {
+        internal readonly struct MeshMaterialCombination {
             readonly int m_MeshId;
             readonly int[] m_MaterialIds;
             
@@ -1657,7 +1657,14 @@ namespace GLTFast.Export {
 
             public override int GetHashCode() {
 #if NET_STANDARD
-                return HashCode.Combine(m_MeshId, m_MaterialIds);
+                var hash = new HashCode();
+                hash.Add(m_MeshId);
+                if (m_MaterialIds != null) {
+                    foreach (var id in m_MaterialIds) {
+                        hash.Add(id);
+                    }
+                }
+                return hash.ToHashCode();
 #else
                 var hash = 17;
                 hash = hash * 31 + m_MeshId.GetHashCode();

@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) HDRP Lit shader's occlusion texture has correct transform now (was vertically inverted before)
 - (Export) HDRP Unlit color is exported correctly
 - (Import) Unity 2020+ crash in Editor and builds due to undisposed `DownloadHandler`s
+- (Export) Case of duplicate meshes (even with identical primitives/attributes/indices/materials) when using .NET Standard in your project
 
 ## [4.8.5] - 2022-08-30
 ### Fixed
