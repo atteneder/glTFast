@@ -67,6 +67,31 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - No more redundant default (fallback) materials are being generated
 - (JSON parsing) Potential NPDR when just one of many node extensions is present (#464)
 
+## [4.9.0] - 2022-11-11
+### Added
+- (Export) HDRP metallic/roughness texture assignment can be omitted by setting the corresponding smoothness remap range min equal to max and metallic factor to 0. Useful for only exporting the ambient occlusion channel of a mask map.
+- (Export) HDRP occlusion texture assignment can be omitted by setting the corresponding AO remap minimum to 1.0. Useful for only exporting the metallic/smoothness channels of a mask map.
+### Changed
+- (Export) Reduced memory footprint when exporting textures
+- (Export) Faster temporary texture construction in Unity 2022 and newer
+- (Import) Faster texture creation in Unity 2022 and newer
+- (Import) Default (fallback) material now gets named `glTF-Default-Material` instead of shader's name, which is deterministic across render pipelines
+- (Export) Don't use HDRP Lit MaskMap metallic/smoothness channels if they are not used (i.e. metallicFactor is zero and smoothness remap range is zero)
+- (Export) HDRP Lit base color map is exported as Jpeg, if alpha channel is not used (similar to other render pipelines)
+- `IDownload` now has to implement `IDisposable` as well which ensures resources are disposed correctly.
+### Fixed
+- (Export) No empty filename for textures with no valid name (e.g. `.jpg`;#458)
+- (Export) Memory leak: Temporary textures are properly destroyed (happened on non-readable or ORM textures; fixes #502)
+- (Import) Don't duplicate texture assets (textures referenced by relative URI; #508)
+- (Shader) Built-in pbrMetallicRougness shader's metallicFactor property defaults to 1.0, according to the glTF spec
+- (Export) HDRP Lit shader's normal scale is exported correctly now
+- (Export) HDRP Lit shader's double sided property is exported correctly now
+- (Export) HDRP Lit shader's smoothness remap property is exported correctly now
+- (Export) HDRP Lit shader's occlusion texture has correct transform now (was vertically inverted before)
+- (Export) HDRP Unlit color is exported correctly
+- (Import) Unity 2020+ crash in Editor and builds due to undisposed `DownloadHandler`s
+- (Export) Case of duplicate meshes (even with identical primitives/attributes/indices/materials) when using .NET Standard in your project
+
 ## [4.8.5] - 2022-08-30
 ### Fixed
 - (Export) Meshes with point topology are exported correctly now (#434)

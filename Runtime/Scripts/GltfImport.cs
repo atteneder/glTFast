@@ -43,6 +43,9 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 #if KTX
 using KtxUnity;
 #endif
@@ -754,9 +757,13 @@ namespace GLTFast {
                 }
 
                 if (gltfBinary ?? false) {
-                    success = await LoadGltfBinaryBuffer(download.data,url);
+                    var data = download.data;
+                    download.Dispose();
+                    success = await LoadGltfBinaryBuffer(data,url);
                 } else {
-                    success = await LoadGltf(download.text,url);
+                    var text = download.text;
+                    download.Dispose();
+                    success = await LoadGltf(text,url);
                 }
                 if(success) {
                     success = await LoadContent();
@@ -1069,6 +1076,7 @@ namespace GLTFast {
                     if (download.success) {
                         Profiler.BeginSample("GetData");
                         buffers[downloadPair.Key] = download.data;
+                        download.Dispose();
                         Profiler.EndSample();
                     } else {
                         logger?.Error(LogCode.BufferLoadFailed,download.error,downloadPair.Key.ToString());
@@ -1119,10 +1127,12 @@ namespace GLTFast {
                         txt = ((ITextureDownload)www).texture;
                         txt.name = GetImageName(gltfRoot.images[imageIndex], imageIndex);
                     }
+                    www.Dispose();
                     images[imageIndex] = txt;
                     await deferAgent.BreakPoint();
                 } else {
                     logger?.Error(LogCode.TextureDownloadFailed,www.error,dl.Key.ToString());
+                    www.Dispose();
                     return false;
                 }
             }
@@ -1149,6 +1159,7 @@ namespace GLTFast {
             var www = await downloadTask;
             if(www.success) {
                 var ktxContext = new KtxLoadContext(imageIndex,www.data);
+                www.Dispose();
                 var forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
                 var result = await ktxContext.LoadTexture2D(forceSampleLinear);
                 if (result.errorCode == ErrorCode.Success) {
@@ -1157,6 +1168,7 @@ namespace GLTFast {
                 }
             } else {
                 logger?.Error(LogCode.TextureDownloadFailed,www.error,imageIndex.ToString());
+                www.Dispose();
             }
             return false;
         }
@@ -1256,6 +1268,13 @@ namespace GLTFast {
         /// <param name="imageIndex">glTF image index</param>
         /// <returns>True if image texture had to be loaded manually from bytes, false otherwise.</returns>
         bool LoadImageFromBytes(int imageIndex) {
+            
+#if UNITY_EDITOR
+            if (isEditorImport) {
+                // Use the original texture at Editor (asset database) import 
+                return false;
+            }
+#endif
             var forceSampleLinear = imageGamma!=null && !imageGamma[imageIndex];
             return forceSampleLinear || settings.generateMipMaps;
         }
@@ -2256,16 +2275,25 @@ namespace GLTFast {
             return job;
         }
 
-        Texture2D CreateEmptyTexture(Schema.Image img, int index, bool forceSampleLinear) {
-            Texture2D txt;
-            if(forceSampleLinear) {
-                TextureCreationFlags mipmapFlags = settings.generateMipMaps ? TextureCreationFlags.MipChain : TextureCreationFlags.None;
-                txt = new Texture2D(4, 4, GraphicsFormat.R8G8B8A8_UNorm, mipmapFlags);
-            } else {
-                txt = new Texture2D(4, 4, UnityEngine.TextureFormat.RGBA32, mipChain: settings.generateMipMaps);
+        Texture2D CreateEmptyTexture(Image img, int index, bool forceSampleLinear) {
+#if UNITY_2022_1_OR_NEWER
+            var textureCreationFlags = TextureCreationFlags.DontUploadUponCreate | TextureCreationFlags.DontInitializePixels;
+#else
+            var textureCreationFlags = TextureCreationFlags.None;
+#endif
+            if (settings.generateMipMaps) {
+                textureCreationFlags |= TextureCreationFlags.MipChain;
             }
-            txt.anisoLevel = settings.anisotropicFilterLevel;
-            txt.name = GetImageName(img, index);
+            var txt = new Texture2D(
+                4, 4,
+                forceSampleLinear 
+                    ? GraphicsFormat.R8G8B8A8_UNorm 
+                    : GraphicsFormat.R8G8B8A8_SRGB,
+                textureCreationFlags
+            ) {
+                anisoLevel = settings.anisotropicFilterLevel,
+                name = GetImageName(img, index)
+            };
             return txt;
         }
 
@@ -3319,6 +3347,14 @@ namespace GLTFast {
             
             ktxLoadContextsBuffer.Clear();
         }
-#endif
+#endif // KTX
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Returns true if this import is for an asset, in contraast to
+        /// runtime loading.
+        /// </summary>
+        bool isEditorImport => !EditorApplication.isPlaying;
+#endif // UNITY_EDITOR
     }
 }

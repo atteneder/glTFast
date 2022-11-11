@@ -56,6 +56,8 @@ namespace GLTFast.Materials {
             /// </summary>
             Unlit,
         }
+
+        public const string DEFAULT_MATERIAL_NAME = "glTF-Default-Material";
         
         /// <summary>Render type key</summary>
         public const string TAG_RENDER_TYPE = "RenderType";

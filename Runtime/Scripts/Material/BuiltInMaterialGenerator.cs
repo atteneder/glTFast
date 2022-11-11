@@ -93,6 +93,7 @@ namespace GLTFast.Materials {
             }
             if (!defaultMaterialGenerated) {
                 defaultMaterial = GetPbrMetallicRoughnessMaterial();
+                defaultMaterial.name = DEFAULT_MATERIAL_NAME;
                 defaultMaterialGenerated = true;
                 // Material works on lines as well
                 // TODO: Create dedicated point cloud material

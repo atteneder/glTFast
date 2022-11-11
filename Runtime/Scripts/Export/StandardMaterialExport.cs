@@ -43,10 +43,13 @@ namespace GLTFast.Export {
 #endif
         const string k_KeywordSmoothnessTextureAlbedoChannelA = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A";
 		    
+        static readonly int k_Cull = Shader.PropertyToID("_Cull");
         static readonly int k_EmissionColor = Shader.PropertyToID("_EmissionColor");
         static readonly int k_EmissionMap = Shader.PropertyToID("_EmissionMap");
         static readonly int k_BumpMap = Shader.PropertyToID("_BumpMap");
+        static readonly int k_BumpScale = Shader.PropertyToID("_BumpScale");
         static readonly int k_OcclusionMap = Shader.PropertyToID("_OcclusionMap");
+        static readonly int k_OcclusionStrength = Shader.PropertyToID("_OcclusionStrength");
         static readonly int k_BaseMap = Shader.PropertyToID("_BaseMap");
         static readonly int k_ColorTexture = Shader.PropertyToID("_ColorTexture");
         static readonly int k_TintColor = Shader.PropertyToID("_TintColor");
@@ -73,7 +76,7 @@ namespace GLTFast.Export {
             };
 
             SetAlphaModeAndCutoff(uMaterial, material);
-            material.doubleSided = IsDoubleSided(uMaterial);
+            material.doubleSided = IsDoubleSided(uMaterial, k_Cull);
 
             if(uMaterial.IsKeywordEnabled(k_KeywordEmission)) {
                 if (uMaterial.HasProperty(k_EmissionColor)) {
@@ -117,7 +120,7 @@ namespace GLTFast.Export {
 
                 if (normalTex != null) {
                     if(normalTex is Texture2D) {
-                        material.normalTexture = ExportNormalTextureInfo(normalTex, uMaterial, gltf);
+                        material.normalTexture = ExportNormalTextureInfo(normalTex, uMaterial, gltf, k_BumpScale);
                         if (material.normalTexture != null) {
                             ExportTextureTransform(material.normalTexture, uMaterial, k_BumpMap, gltf);
                         }
@@ -230,8 +233,8 @@ namespace GLTFast.Export {
             }
 
             if (material.occlusionTexture != null) {
-                if (uMaterial.HasProperty(MaterialGenerator.occlusionTextureStrengthPropId)) {
-                    material.occlusionTexture.strength = uMaterial.GetFloat(MaterialGenerator.occlusionTextureStrengthPropId);
+                if (uMaterial.HasProperty(k_OcclusionStrength)) {
+                    material.occlusionTexture.strength = uMaterial.GetFloat(k_OcclusionStrength);
                 }
             }
 
@@ -239,7 +242,7 @@ namespace GLTFast.Export {
         }
 
         static bool IsPbrMetallicRoughness(UnityEngine.Material material) {
-            return material.HasProperty(MaterialGenerator.metallicPropId)
+            return material.HasProperty(k_Metallic)
                 && (
                     HasMetallicGlossMap(material)
                     || material.HasProperty(k_Glossiness)

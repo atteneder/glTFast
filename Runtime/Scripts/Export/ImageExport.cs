@@ -83,7 +83,11 @@ namespace GLTFast.Export {
                     return $"{nameWithoutExtension}.{fileExtension}";
                 }
 #endif
-                return $"{m_Texture.name}.{fileExtension}";
+                var name = m_Texture.name;
+                if (string.IsNullOrEmpty(name)) {
+                    name = "texture";
+                }
+                return $"{name}.{fileExtension}";
             }
         }
 

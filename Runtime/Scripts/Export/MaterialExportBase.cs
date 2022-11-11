@@ -53,7 +53,6 @@ namespace GLTFast.Export {
         protected static readonly int k_Smoothness = Shader.PropertyToID("_Smoothness");
 
         static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
-        static readonly int k_Cull = Shader.PropertyToID("_Cull");
 
         /// <summary>
         /// Converts a Unity material into a glTF material
@@ -94,10 +93,11 @@ namespace GLTFast.Export {
         /// Retrieves whether material is double-sided.
         /// </summary>
         /// <param name="uMaterial">Material to analyze.</param>
+        /// <param name="cullPropId">CullMode property id.</param>
         /// <returns>True if material is double-sided, false otherwise.</returns>
-        protected static bool IsDoubleSided(UnityEngine.Material uMaterial) {
-            return uMaterial.HasProperty(k_Cull) &&
-                uMaterial.GetInt(k_Cull) == (int) CullMode.Off;
+        protected static bool IsDoubleSided(UnityEngine.Material uMaterial, int cullPropId) {
+            return uMaterial.HasProperty(cullPropId) &&
+                uMaterial.GetInt(cullPropId) == (int) CullMode.Off;
         }
         
         /// <summary>
@@ -117,7 +117,7 @@ namespace GLTFast.Export {
         /// <param name="mainTexProperty">Main texture property ID</param>
         /// <param name="gltf">Context glTF to export to</param>
         /// <param name="logger">Custom logger</param>
-        protected static void ExportUnlit(
+        protected void ExportUnlit(
             Material material,
             UnityEngine.Material uMaterial,
             int mainTexProperty,
@@ -132,8 +132,8 @@ namespace GLTFast.Export {
 	        
             var pbr = material.pbrMetallicRoughness ?? new PbrMetallicRoughness();
 
-            if (uMaterial.HasProperty(k_Color)) {
-                pbr.baseColor = uMaterial.GetColor(k_Color);
+            if (GetUnlitColor(uMaterial, out var baseColor)) {
+                pbr.baseColor = baseColor;
             }
 
             if (uMaterial.HasProperty(mainTexProperty)) {
@@ -152,7 +152,20 @@ namespace GLTFast.Export {
 
             material.pbrMetallicRoughness = pbr;
         }
-        
+
+        protected virtual bool GetUnlitColor(UnityEngine.Material uMaterial, out Color baseColor) {
+            if (uMaterial.HasProperty(k_BaseColor)) {
+                baseColor = uMaterial.GetColor(k_BaseColor);
+                return true;
+            }
+            if (uMaterial.HasProperty(k_Color)) {
+                baseColor = uMaterial.GetColor(k_Color);
+                return true;
+            }
+            baseColor = Color.magenta;
+            return false;
+        }
+
         /// <summary>
         /// Export a Unity texture to a glTF.
         /// </summary>
@@ -190,7 +203,8 @@ namespace GLTFast.Export {
         protected static NormalTextureInfo ExportNormalTextureInfo(
             UnityEngine.Texture texture,
             UnityEngine.Material material,
-            IGltfWritable gltf
+            IGltfWritable gltf,
+            int normalScalePropId
         )
         {
             var texture2d = texture as Texture2D;
@@ -204,8 +218,8 @@ namespace GLTFast.Export {
                     // texCoord = 0 // TODO: figure out which UV set was used
                 };
 
-                if (material.HasProperty(MaterialGenerator.normalTextureScalePropId)) {
-                    info.scale = material.GetFloat(MaterialGenerator.normalTextureScalePropId);
+                if (material.HasProperty(normalScalePropId)) {
+                    info.scale = material.GetFloat(normalScalePropId);
                 }
                 return info;
             }

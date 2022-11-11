@@ -73,7 +73,7 @@ namespace GLTFast.Editor {
         public virtual bool success => data!=null;
 
         public string error { get; protected set; }
-        public byte[] data { get; }
+        public byte[] data { get; private set; }
 
         public string text => System.Text.Encoding.UTF8.GetString(data);
 
@@ -85,11 +85,15 @@ namespace GLTFast.Editor {
                 return null;
             }
         }
+
+        public virtual void Dispose() {
+            data = null;
+        }
     }
     
     class SyncTextureLoader : SyncFileLoader, ITextureDownload {
         
-        public Texture2D texture { get; }
+        public Texture2D texture { get; private set; }
 
         public override bool success => texture!=null;
         
@@ -99,6 +103,11 @@ namespace GLTFast.Editor {
             if (texture == null) {
                 error = $"Couldn't load texture at {url.OriginalString}";
             }
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+            texture = null;
         }
     }
 }

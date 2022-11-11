@@ -104,25 +104,25 @@ namespace GLTFast.Loading {
         /// True if the download finished and was successful
         /// </summary>
 #if UNITY_2020_1_OR_NEWER
-        public bool success => m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
+        public bool success => m_Request!=null && m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
 #else
-        public bool success => m_Request.isDone && !m_Request.isNetworkError && !m_Request.isHttpError;
+        public bool success => m_Request!=null && m_Request.isDone && !m_Request.isNetworkError && !m_Request.isHttpError;
 #endif
 
         /// <summary>
         /// If the download failed, error description
         /// </summary>
-        public string error { get { return m_Request.error; } }
+        public string error { get { return m_Request==null ? "Request disposed" : m_Request.error; } }
         
         /// <summary>
         /// Downloaded data as byte array
         /// </summary>
-        public byte[] data { get { return m_Request.downloadHandler.data; } }
+        public byte[] data { get { return m_Request?.downloadHandler.data; } }
         
         /// <summary>
         /// Downloaded data as string
         /// </summary>
-        public string text { get { return m_Request.downloadHandler.text; } }
+        public string text { get { return m_Request?.downloadHandler.text; } }
         
         /// <summary>
         /// True if the requested download is a glTF-Binary file.
@@ -143,6 +143,12 @@ namespace GLTFast.Loading {
                 }
                 return null;
             }
+        }
+
+        /// <inheritdoc />
+        public void Dispose() {
+            m_Request.Dispose();
+            m_Request = null;
         }
     }
 
@@ -185,7 +191,7 @@ namespace GLTFast.Loading {
         /// <inheritdoc />
         public Texture2D texture {
             get {
-                return (m_Request.downloadHandler as  DownloadHandlerTexture ).texture;
+                return (m_Request?.downloadHandler as  DownloadHandlerTexture )?.texture;
             }
         }
     }

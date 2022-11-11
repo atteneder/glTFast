@@ -15,6 +15,8 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using Object = UnityEngine.Object;
 
 namespace GLTFast.Export {
     
@@ -91,6 +93,8 @@ namespace GLTFast.Export {
 
 #if UNITY_IMAGECONVERSION
             Texture2D exportTexture;
+            var tmpTexture = false;
+            
             if (texture.isReadable && blitMaterial==null) {
                 exportTexture = texture;
                 if (exportTexture == null) {
@@ -103,7 +107,9 @@ namespace GLTFast.Export {
                     texture.height,
                     0,
                     RenderTextureFormat.ARGB32,
-                    RenderTextureReadWrite.Linear
+                    RenderTextureReadWrite.Linear,
+                    1,
+                    RenderTextureMemoryless.Depth
                 );
                 if (blitMaterial == null) {
                     Graphics.Blit(texture, destRenderTexture);
@@ -113,17 +119,34 @@ namespace GLTFast.Export {
                 exportTexture = new Texture2D(
                     texture.width,
                     texture.height,
+#if UNITY_2022_1_OR_NEWER
+                    // ~20 times faster texture construction
+                    !hasAlpha && SystemInfo.IsFormatSupported(GraphicsFormat.R8G8B8_UNorm, FormatUsage.Sample) ?  GraphicsFormat.R8G8B8_UNorm : GraphicsFormat.R8G8B8A8_UNorm,
+                    TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate
+#else
                     hasAlpha ? TextureFormat.ARGB32 : TextureFormat.RGB24,
                     false,
-                    true);
+                    true
+#endif
+                );
                 exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
+                RenderTexture.ReleaseTemporary(destRenderTexture);
                 exportTexture.Apply();
+                tmpTexture = true;
             }
             
             var imageData = format == Format.Png 
                 ? exportTexture.EncodeToPNG()
                 : exportTexture.EncodeToJPG(60);
 
+            if (tmpTexture) {
+                // Release temporary texture
+#if UNITY_EDITOR
+                Object.DestroyImmediate(exportTexture);
+#else
+                Object.Destroy(exportTexture);
+#endif
+            }
             return imageData;
 #else
             return null;

@@ -30,7 +30,7 @@ Shader "glTF/PbrMetallicRoughness"
         // _GlossMapScale("Smoothness Scale", Range(0.0, 1.0)) = 1.0
         // [Enum(Metallic Alpha,0,Albedo Alpha,1)] _SmoothnessTextureChannel ("Smoothness texture channel", Float) = 0
 
-        [Gamma] metallicFactor("Metallic", Range(0.0, 1.0)) = 0.0
+        [Gamma] metallicFactor("Metallic", Range(0.0, 1.0)) = 1.0
         metallicRoughnessTexture("Metallic-Roughness Tex", 2D) = "white" {}
         metallicRoughnessTexture_Rotation ("Metallic-Roughness Map Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] metallicRoughnessTexture_texCoord ("Metallic-Roughness Tex UV", Float) = 0
