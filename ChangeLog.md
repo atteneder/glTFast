@@ -4,8 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-### Feature
+## [4.9.0] - 2022-11-11
+### Added
 - (Export) HDRP metallic/roughness texture assignment can be omitted by setting the corresponding smoothness remap range min equal to max and metallic factor to 0. Useful for only exporting the ambient occlusion channel of a mask map.
 - (Export) HDRP occlusion texture assignment can be omitted by setting the corresponding AO remap minimum to 1.0. Useful for only exporting the metallic/smoothness channels of a mask map.
 ### Changed
