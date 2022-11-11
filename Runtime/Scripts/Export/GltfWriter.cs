@@ -209,7 +209,20 @@ namespace GLTFast.Export {
                 name = uLight.name
             };
 
-            switch (uLight.type) {
+            var lightType = uLight.type;
+            
+            var renderPipeline = RenderPipelineUtils.renderPipeline;
+#if USING_HDRP
+            HDAdditionalLightData lightHd = null;
+            if (renderPipeline == RenderPipeline.HighDefinition) {
+                lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
+                if (lightHd.type == HDLightType.Area) {
+                    lightType = LightType.Area;
+                }
+            }
+#endif
+            
+            switch (lightType) {
                 case LightType.Spot:
                     light.typeEnum = LightPunctual.Type.Spot;
                     light.spot = new SpotLight {
@@ -237,7 +250,6 @@ namespace GLTFast.Export {
             light.lightColor = uLight.color.linear;
             light.range = uLight.range;
             
-            var renderPipeline = RenderPipelineUtils.renderPipeline;
             switch (renderPipeline) {
                 case RenderPipeline.BuiltIn:
                     light.intensity = uLight.intensity * Mathf.PI;
@@ -247,7 +259,6 @@ namespace GLTFast.Export {
                     break;
 #if USING_HDRP
                 case RenderPipeline.HighDefinition:
-                    var lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
 
                     float GetIntensity(LightUnit unit) {
                         if (lightHd.lightUnit == unit) {
