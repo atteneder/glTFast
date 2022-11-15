@@ -30,6 +30,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - glTF icon assigned to imported glTF assets, `GltfAsset*` components and and various setting classes
 - (Import) Support for up to 8 UV sets (note: glTF shaders still support only two sets; part of #206)
 - `IMaterialGenerator` was extended with support for points topology
+- (Export) `GameObjectExportSettings.disabledComponents` to explicitely enable export of disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`)
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
@@ -50,6 +51,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - Sped up loading of external KTX textures by avoid making a redundant memory copy.
 - `IDownload` does not derive from `IEnumartor` anymore
 - (Import) Successfully tested mesh primitive draw mode `lines` and removed error message about it being untested
+- (Export) Disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`) are not exported by default (see also: new `GameObjectExportSettings.disabledComponents` setting to get old behavior)
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

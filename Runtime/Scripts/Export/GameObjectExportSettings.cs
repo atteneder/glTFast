@@ -26,5 +26,11 @@ namespace GLTFast.Export {
         /// When true, only GameObjects that are active (in a hierarchy) are exported
         /// </summary>
         public bool onlyActiveInHierarchy = true;
+        
+        /// <summary>
+        /// When true, components will get exported regardless whether they're
+        /// enabled or not.
+        /// </summary>
+        public bool disabledComponents;
     }
 }

@@ -155,14 +155,18 @@ namespace GLTFast.Export {
             tempMaterials.Clear();
             
             if (gameObject.TryGetComponent(out MeshFilter meshFilter)) {
-                mesh = meshFilter.sharedMesh;
                 if (gameObject.TryGetComponent(out Renderer renderer)) {
-                    renderer.GetSharedMaterials(tempMaterials);
+                    if (renderer.enabled || m_Settings.disabledComponents) {
+                        mesh = meshFilter.sharedMesh;
+                        renderer.GetSharedMaterials(tempMaterials);
+                    }
                 }
             } else
             if (gameObject.TryGetComponent(out SkinnedMeshRenderer smr)) {
-                mesh = smr.sharedMesh;
-                smr.GetSharedMaterials(tempMaterials);
+                if (smr.enabled || m_Settings.disabledComponents) {
+                    mesh = smr.sharedMesh;
+                    smr.GetSharedMaterials(tempMaterials);
+                }
             }
 
             var materialIds = new int[tempMaterials.Count];
@@ -180,14 +184,18 @@ namespace GLTFast.Export {
             }
 
             if (gameObject.TryGetComponent(out Camera camera)) {
-                if (m_Writer.AddCamera(camera, out var cameraId)) {
-                    m_Writer.AddCameraToNode(nodeId,cameraId);
+                if (camera.enabled || m_Settings.disabledComponents) {
+                    if (m_Writer.AddCamera(camera, out var cameraId)) {
+                        m_Writer.AddCameraToNode(nodeId,cameraId);
+                    }
                 }
             }
             
             if (gameObject.TryGetComponent(out Light light)) {
-                if (m_Writer.AddLight(light, out var lightId)) {
-                    m_Writer.AddLightToNode(nodeId,lightId);
+                if (camera.enabled || m_Settings.disabledComponents) {
+                    if (m_Writer.AddLight(light, out var lightId)) {
+                        m_Writer.AddLightToNode(nodeId, lightId);
+                    }
                 }
             }
             return success;
