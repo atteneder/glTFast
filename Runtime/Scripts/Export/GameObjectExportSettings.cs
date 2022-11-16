@@ -37,6 +37,6 @@ namespace GLTFast.Export {
         /// <summary>
         /// Only GameObjects on layers contained in this mask are going to get exported.
         /// </summary>
-        public LayerMask layerMask;
+        public LayerMask layerMask = ~0;
     }
 }

@@ -32,6 +32,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - `IMaterialGenerator` was extended with support for points topology
 - (Export) `GameObjectExportSettings.disabledComponents` to explicitely enable export of disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`)
 - (Export) `ExportSettings.componentMask` to include or exclude components from export based on type
+- (Export) `GameObjectExportSettings.layerMask` to include or exclude GameObjects from export based on their layer
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator

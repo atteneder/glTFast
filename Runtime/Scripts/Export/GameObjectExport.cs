@@ -142,17 +142,32 @@ namespace GLTFast.Export {
             }
 
             var transform = gameObject.transform;
-            nodeId = (int) m_Writer.AddNode(
-                transform.localPosition,
-                transform.localRotation,
-                transform.localScale,
-                children,
-                gameObject.name
-                );
-            Mesh mesh = null;
+
+            var onIncludedLayer = ( (1<<gameObject.layer) & m_Settings.layerMask) != 0;
             
+            if (onIncludedLayer || children != null) {
+                nodeId = (int) m_Writer.AddNode(
+                    transform.localPosition,
+                    transform.localRotation,
+                    transform.localScale,
+                    children,
+                    gameObject.name
+                    );
+                
+                if (onIncludedLayer) {
+                    AddNodeComponents(gameObject, tempMaterials, nodeId);
+                }
+            }
+            else {
+                nodeId = -1;
+            }
+            
+            return success;
+        }
+
+        void AddNodeComponents(GameObject gameObject, List<Material> tempMaterials, int nodeId) {
             tempMaterials.Clear();
-            
+            Mesh mesh = null;
             if (gameObject.TryGetComponent(out MeshFilter meshFilter)) {
                 if (gameObject.TryGetComponent(out Renderer renderer)) {
                     if (renderer.enabled || m_Settings.disabledComponents) {
@@ -197,7 +212,6 @@ namespace GLTFast.Export {
                     }
                 }
             }
-            return success;
         }
     }
 }
