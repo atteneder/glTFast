@@ -192,7 +192,7 @@ namespace GLTFast.Export {
             }
             
             if (gameObject.TryGetComponent(out Light light)) {
-                if (camera.enabled || m_Settings.disabledComponents) {
+                if (light.enabled || m_Settings.disabledComponents) {
                     if (m_Writer.AddLight(light, out var lightId)) {
                         m_Writer.AddLightToNode(nodeId, lightId);
                     }
