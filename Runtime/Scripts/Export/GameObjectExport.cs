@@ -73,7 +73,6 @@ namespace GLTFast.Export {
             var success = true;
             for (var index = 0; index < gameObjects.Length; index++) {
                 var gameObject = gameObjects[index];
-                if(m_Settings.onlyActiveInHierarchy && !gameObject.activeInHierarchy) continue;
                 success &= AddGameObject(gameObject,tempMaterials, out var nodeId);
                 if (nodeId >= 0) {
                     rootNodes.Add((uint)nodeId);
