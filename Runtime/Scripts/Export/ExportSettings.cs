@@ -83,5 +83,11 @@ namespace GLTFast.Export {
         /// </summary>
         [Tooltip("Light intensity values are multiplied by this factor")]
         public float lightIntensityFactor = 1.0f;
+
+        /// <summary>
+        /// Component type flags to include or exclude components from export
+        /// based on type. 
+        /// </summary>
+        public ComponentType componentMask = ComponentType.All;
     }
 }

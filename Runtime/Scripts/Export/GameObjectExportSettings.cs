@@ -14,6 +14,7 @@
 //
 
 using System;
+using UnityEngine;
 
 namespace GLTFast.Export {
     
@@ -31,6 +32,11 @@ namespace GLTFast.Export {
         /// When true, components will get exported regardless whether they're
         /// enabled or not.
         /// </summary>
-        public bool disabledComponents;
+        public bool disabledComponents = false;
+        
+        /// <summary>
+        /// Only GameObjects on layers contained in this mask are going to get exported.
+        /// </summary>
+        public LayerMask layerMask;
     }
 }

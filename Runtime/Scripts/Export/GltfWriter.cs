@@ -156,6 +156,7 @@ namespace GLTFast.Export {
         
         /// <inheritdoc />
         public void AddMeshToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds) {
+            if ((m_Settings.componentMask & ComponentType.Mesh) == 0) return;
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
@@ -169,6 +170,10 @@ namespace GLTFast.Export {
 
         /// <inheritdoc />
         public bool AddCamera(UnityEngine.Camera uCamera, out int cameraId) {
+            if ((m_Settings.componentMask & ComponentType.Camera) == 0) {
+                cameraId = -1;
+                return false;
+            }
             CertifyNotDisposed();
 
             var camera = new Camera();
@@ -204,6 +209,10 @@ namespace GLTFast.Export {
 
         /// <inheritdoc />
         public bool AddLight(Light uLight, out int lightId) {
+            if ((m_Settings.componentMask & ComponentType.Light) == 0) {
+                lightId = -1;
+                return false;
+            }
             CertifyNotDisposed();
             var light = new LightPunctual {
                 name = uLight.name
