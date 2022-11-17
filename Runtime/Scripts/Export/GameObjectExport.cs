@@ -119,7 +119,8 @@ namespace GLTFast.Export {
             }
         }
         bool AddGameObject(GameObject gameObject, List<Material> tempMaterials, out int nodeId ) {
-            if (m_Settings.onlyActiveInHierarchy && !gameObject.activeInHierarchy) {
+            if (m_Settings.onlyActiveInHierarchy && !gameObject.activeInHierarchy
+                || gameObject.CompareTag("EditorOnly")) {
                 nodeId = -1;
                 return true;
             }
