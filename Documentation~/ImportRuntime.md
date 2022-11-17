@@ -32,7 +32,7 @@ async void LoadGltfBinaryFromMemory() {
         new Uri(filePath)
         );
     if (success) {
-        success = gltf.InstantiateMainScene(transform);
+        success = await gltf.InstantiateMainSceneAsync(transform);
     }
 }
 ```
@@ -71,7 +71,7 @@ async void Start() {
     var success = await gltf.Load("file:///path/to/file.gltf", settings);
 
     if (success) {
-        gltf.InstantiateMainScene(new GameObject("glTF").transform);
+        success = await gltf.InstantiateMainSceneAsync(new GameObject("glTF").transform);
     }
     else {
         Debug.LogError("Loading glTF failed!");
@@ -97,13 +97,13 @@ async void Start() {
         Debug.LogFormat("The first material is called {0}", material.name);
 
         // Instantiate the glTF's main scene
-        gltf.InstantiateMainScene( new GameObject("Instance 1").transform );
+        await gltf.InstantiateMainSceneAsync( new GameObject("Instance 1").transform );
         // Instantiate the glTF's main scene
-        gltf.InstantiateMainScene( new GameObject("Instance 2").transform );
+        await gltf.InstantiateMainSceneAsync( new GameObject("Instance 2").transform );
 
         // Instantiate each of the glTF's scenes
         for (int sceneId = 0; sceneId < gltf.sceneCount; sceneId++) {
-            gltf.InstantiateScene(transform, sceneId);
+            await gltf.InstantiateSceneAsync(transform, sceneId);
         }
     } else {
         Debug.LogError("Loading glTF failed!");
@@ -126,7 +126,7 @@ public class YourCustomInstantiator : GLTFast.IInstantiator {
 …
 
   // In your custom post-loading script, use it like this
-  gltfAsset.InstantiateMainScene( new YourCustomInstantiator() );
+  bool success = await gltfAsset.InstantiateMainSceneAsync( new YourCustomInstantiator() );
 ```
 
 #### GameObjectInstantiator Setup
@@ -174,7 +174,7 @@ async void Start() {
     var gltfImport = new GltfImport();
     await gltfImport.Load("test.gltf");
     var instantiator = new GameObjectInstantiator(gltfImport,transform);
-    var success = gltfImport.InstantiateMainScene(instantiator);
+    var success = await gltfImport.InstantiateMainSceneAsync(instantiator);
     if (success) {
         
         // Get the SceneInstance to access the instance's properties
@@ -252,9 +252,9 @@ async Task CustomDeferAgentPerGltfImport() {
     foreach( var url in manyUrls) {
         var gltf = new GLTFast.GltfImport(null,deferAgent);
         var task = gltf.Load(url).ContinueWith(
-            t => {
+            async t => {
                 if (t.Result) {
-                    gltf.InstantiateMainScene(transform);
+                    await gltf.InstantiateMainSceneAsync(transform);
                 }
             },
             TaskScheduler.FromCurrentSynchronizationContext()
