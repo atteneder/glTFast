@@ -6,6 +6,40 @@ uid: doc-upgrade-guides
 
 ## Upgrade to 5.0
 
+### Async Scene Instantiation
+
+The addition of `GltfImport.InstantiateSceneAsync` and `GltfImport.InstantiateMainSceneAsync` now provides an asynchronos way of instantiating glTF scenes. For large scenes this means that the instantiation can be spread over multiple frames, resulting in a smoother frame rate.
+
+The existing, synchronos instantiation methods `GltfImport.InstantiateScene` and `GltfImport.InstantiateMainScene` (including overloads) have been marked obsolete and will be removed eventually. Though they still work, it's recommended to update your code to use the async variants.
+
+Since loading a glTF (the step before instantiation) has been async before, chances are high your enclosing method is already async, as it should be. 
+
+```csharp
+async void Start() {
+    var gltf = new GltfImport();
+    var success = await gltf.Load("file:///path/to/file.gltf");
+    if(!success) return;
+
+    // Old, sync instantiation
+    success = gltf.InstantiateMainScene(transform);
+    if(success) Debug.Log("glTF instantiated successfully!");
+}
+```
+
+All you now have to do is switch to the async method and await it.
+
+```csharp
+async void Start() {
+    var gltf = new GltfImport();
+    var success = await gltf.Load("file:///path/to/file.gltf");
+    if(!success) return;
+
+    // New, async instantiation
+    success = await gltf.InstantiateMainSceneAsync(transform);
+    if(success) Debug.Log("glTF instantiated successfully!");
+}
+```
+
 ### Texture Support
 
 The built-in packages [*Unity Web Request Texture*][uwrt] and [*Image Conversion*][ImgConv] provide support for PNG/Jpeg texture import and export. They are not a hard requirement anymore, so you…
