@@ -142,7 +142,7 @@ namespace GLTFast.Editor {
                     var go = new GameObject(sceneName);
                     var instantiator = new GameObjectInstantiator(m_Gltf, go.transform, instantiationLogger, instantiationSettings);
                     var index = sceneIndex;
-                    success = AsyncHelpers.RunSync<bool>(() => m_Gltf.InstantiateScene(instantiator,index));
+                    success = AsyncHelpers.RunSync(() => m_Gltf.InstantiateSceneAsync(instantiator,index));
                     if (!success) break;
                     var useFirstChild = true;
                     var multipleNodes = scene.nodes.Length > 1;

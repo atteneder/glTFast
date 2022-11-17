@@ -33,6 +33,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Export) `GameObjectExportSettings.disabledComponents` to explicitely enable export of disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`)
 - (Export) `ExportSettings.componentMask` to include or exclude components from export based on type
 - (Export) `GameObjectExportSettings.layerMask` to include or exclude GameObjects from export based on their layer
+- (Import) Async instantiation methods. This helps to ensure a stable frame rate when loading bigger glTF scenes (#205)
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
@@ -48,7 +49,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - Converted `emissiveFactor` shader property from low to high dynamic range (HDR) and removed the now obsolete `emissiveIntensity` shader property (float)
 - Shader keyword `_UV_ROTATION` was replaced by `_TEXTURE_TRANSFORM`, which now controls tiling, offset and rotation all together
 - Animation is not played by default anymore (check the upgrade guide on how to restore this behavior; #339)
-- Instantiation is async now. This helps to ensure a stable frame rate when loading bigger glTF scenes (#205)
+- (Import) Deprecated existing, sync instantiation methods in favor of new async ones
 - KTX textures load much smoother thanks to bumping KtxUnity to 1.3.0 or 2.2.1
 - Sped up loading of external KTX textures by avoid making a redundant memory copy.
 - `IDownload` does not derive from `IEnumartor` anymore

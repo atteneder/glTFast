@@ -455,15 +455,43 @@ namespace GLTFast {
             return success;
         }
         
+#region ObsoleteSyncInstantiation
+
+        /// <inheritdoc cref="InstantiateMainSceneAsync(Transform)"/>
+        [Obsolete("Use InstantiateMainSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
+        public bool InstantiateMainScene( Transform parent ) {
+            return InstantiateMainSceneAsync(parent).Result;
+        }
+
+        /// <inheritdoc cref="InstantiateMainSceneAsync(IInstantiator)"/>
+        [Obsolete("Use InstantiateMainSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
+        public bool InstantiateMainScene(IInstantiator instantiator) {
+            return InstantiateMainSceneAsync(instantiator).Result;
+        }
+
+        /// <inheritdoc cref="InstantiateSceneAsync(Transform,int)"/>
+        [Obsolete("Use InstantiateSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
+        public bool InstantiateScene(Transform parent, int sceneIndex = 0) {
+            return InstantiateSceneAsync(parent, sceneIndex).Result;
+        }
+
+        /// <inheritdoc cref="InstantiateSceneAsync(IInstantiator,int)"/>
+        [Obsolete("Use InstantiateSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
+        public bool InstantiateScene(IInstantiator instantiator, int sceneIndex = 0) {
+            return InstantiateSceneAsync(instantiator, sceneIndex).Result;
+        }
+
+#endregion ObsoleteSyncInstantiation
+        
         /// <summary>
         /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="defaultSceneIndex"/>)
         /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
         /// </summary>
         /// <param name="parent">Transform that the scene will get parented to</param>
         /// <returns>True if the main scene was instantiated or was not set. False in case of errors.</returns>
-        public async Task<bool> InstantiateMainScene( Transform parent ) {
+        public async Task<bool> InstantiateMainSceneAsync( Transform parent ) {
             var instantiator = new GameObjectInstantiator(this, parent);
-            var success = await InstantiateMainScene(instantiator);
+            var success = await InstantiateMainSceneAsync(instantiator);
             return success;
         }
 
@@ -473,7 +501,7 @@ namespace GLTFast {
         /// </summary>
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
         /// <returns>True if the main scene was instantiated or was not set. False in case of errors.</returns>
-        public async Task<bool> InstantiateMainScene(IInstantiator instantiator) {
+        public async Task<bool> InstantiateMainSceneAsync(IInstantiator instantiator) {
             if (!loadingDone || loadingError) return false;
             // According to glTF specification, loading nothing is
             // the correct behavior
@@ -483,7 +511,7 @@ namespace GLTFast {
 #endif
                 return true;
             }
-            return await InstantiateScene(instantiator, gltfRoot.scene);
+            return await InstantiateSceneAsync(instantiator, gltfRoot.scene);
         }
 
         /// <summary>
@@ -494,11 +522,11 @@ namespace GLTFast {
         /// <param name="parent">Transform that the scene will get parented to</param>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <returns>True if the scene was instantiated. False in case of errors.</returns>
-        public async Task<bool> InstantiateScene( Transform parent, int sceneIndex = 0) {
+        public async Task<bool> InstantiateSceneAsync( Transform parent, int sceneIndex = 0) {
             if (!loadingDone || loadingError) return false;
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
             var instantiator = new GameObjectInstantiator(this, parent);
-            var success = await InstantiateScene(instantiator,sceneIndex);
+            var success = await InstantiateSceneAsync(instantiator,sceneIndex);
             return success;
         }
 
@@ -510,7 +538,7 @@ namespace GLTFast {
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <returns>True if the scene was instantiated. False in case of errors.</returns>
-        public async Task<bool> InstantiateScene( IInstantiator instantiator, int sceneIndex = 0 ) {
+        public async Task<bool> InstantiateSceneAsync( IInstantiator instantiator, int sceneIndex = 0 ) {
             if (!loadingDone || loadingError) return false;
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
             await InstantiateSceneInternal( gltfRoot, instantiator, sceneIndex );

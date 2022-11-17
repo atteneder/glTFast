@@ -77,7 +77,7 @@ namespace GLTFast
         public async Task<bool> Instantiate(ICodeLogger logger = null) {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
-            var success = await importer.InstantiateMainScene(instantiator);
+            var success = await importer.InstantiateMainSceneAsync(instantiator);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -91,7 +91,7 @@ namespace GLTFast
         public virtual async Task<bool> InstantiateScene(int sceneIndex, ICodeLogger logger = null) {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
-            var success = await importer.InstantiateScene(instantiator,sceneIndex);
+            var success = await importer.InstantiateSceneAsync(instantiator,sceneIndex);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -104,7 +104,7 @@ namespace GLTFast
         /// <returns>True if instantiation was successful.</returns>
         protected async Task<bool> InstantiateScene(int sceneIndex, GameObjectInstantiator instantiator) {
             if (importer == null) return false;
-            var success = await importer.InstantiateScene(instantiator,sceneIndex);
+            var success = await importer.InstantiateSceneAsync(instantiator,sceneIndex);
             PostInstantiation(instantiator, success);
             return success;
         }
