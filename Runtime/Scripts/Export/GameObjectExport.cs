@@ -32,7 +32,6 @@ namespace GLTFast.Export {
         GltfWriter m_Writer;
         IMaterialExport m_MaterialExport;
         GameObjectExportSettings m_Settings;
-        ICodeLogger m_Logger;
 
         /// <summary>
         /// Provides glTF export of GameObject based scenes and hierarchies.
@@ -54,7 +53,6 @@ namespace GLTFast.Export {
             m_Settings = gameObjectExportSettings ?? new GameObjectExportSettings();
             m_Writer = new GltfWriter(exportSettings, deferAgent, logger);
             m_MaterialExport = materialExport ?? MaterialExport.GetDefaultMaterialExport();
-            m_Logger = logger;
         }
 
         /// <summary>
