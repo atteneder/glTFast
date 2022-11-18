@@ -56,6 +56,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Import) Successfully tested mesh primitive draw mode `lines` and removed error message about it being untested
 - (Export) Disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`) are not exported by default (see also: new `GameObjectExportSettings.disabledComponents` setting to get old behavior)
 - (Export) GameObjects with tag `EditorOnly` (including children) don't get exported (similar to building a scene)
+- (Import) Added optional `CancellationToken` parameter to async methods for loading and instantiation. This is preparation work for proper cancellation. Don't expect it to work just yet.
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

@@ -37,6 +37,7 @@ using UnityEngine.Profiling;
 using Unity.Collections;
 using Unity.Jobs;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using GLTFast.Jobs;
 using Unity.Collections.LowLevel.Unsafe;
@@ -332,9 +333,15 @@ namespace GLTFast {
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> Load( string url, ImportSettings importSettings = null ) {
-            return await Load(new Uri(url,UriKind.RelativeOrAbsolute), importSettings);
+        public async Task<bool> Load( 
+            string url,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+            ) 
+        {
+            return await Load(new Uri(url,UriKind.RelativeOrAbsolute), importSettings, cancellationToken);
         }
         
         /// <summary>
@@ -343,10 +350,16 @@ namespace GLTFast {
         /// </summary>
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> Load( Uri url, ImportSettings importSettings = null) {
+        public async Task<bool> Load( 
+            Uri url,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+            ) 
+        {
             settings = importSettings ?? new ImportSettings();
-            return await LoadFromUri(url);
+            return await LoadFromUri(url, cancellationToken);
         }
         
         /// <summary>
@@ -358,8 +371,15 @@ namespace GLTFast {
         /// <param name="data">Either glTF-Binary data or a glTF JSON</param>
         /// <param name="uri">Base URI for relative paths of external buffers or images</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> Load(byte[] data, Uri uri = null, ImportSettings importSettings = null) {
+        public async Task<bool> Load(
+            byte[] data,
+            Uri uri = null,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+            )
+        {
             if (GltfGlobals.IsGltfBinary(data)) {
                 return await LoadGltfBinary(data, uri, importSettings);
             }
@@ -375,21 +395,29 @@ namespace GLTFast {
         /// <param name="localPath">Local path to glTF or glTF-Binary file.</param>
         /// <param name="uri">Base URI for relative paths of external buffers or images</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> LoadFile(string localPath, Uri uri = null, ImportSettings importSettings = null) {
+        public async Task<bool> LoadFile(
+            string localPath,
+            Uri uri = null,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+            )
+        {
             var firstBytes = new byte[4];
 
 #if UNITY_2021_3_OR_NEWER
             await using
 #endif
             var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
-            var bytesRead = fs.Read(firstBytes, 0, firstBytes.Length);
-            
+            var bytesRead = await fs.ReadAsync(firstBytes, 0, firstBytes.Length, cancellationToken);
 
             if (bytesRead != firstBytes.Length) {
                 logger?.Error(LogCode.Download, "Failed reading first bytes", localPath);
                 return false;
             }
+
+            if (cancellationToken.IsCancellationRequested) return false;
 
             if (GltfGlobals.IsGltfBinary(firstBytes)) {
                 var data = new byte[fs.Length];
@@ -397,26 +425,25 @@ namespace GLTFast {
                     data[i] = firstBytes[i];
                 }
                 var length = (int) fs.Length - 4;
-                var read = await fs.ReadAsync(data, 4, length);
+                var read = await fs.ReadAsync(data, 4, length, cancellationToken);
                 fs.Close();
                 if (read != length) {
                     logger?.Error(LogCode.Download, "Failed reading data", localPath);
                     return false;
                 }
 
-                return await LoadGltfBinary(data, uri, importSettings);
+                return await LoadGltfBinary(data, uri, importSettings, cancellationToken);
             }
             fs.Close();
 
             return await LoadGltfJson(
 #if UNITY_2021_3_OR_NEWER
-                await File.ReadAllTextAsync(localPath),
+                await File.ReadAllTextAsync(localPath,cancellationToken),
 #else
                 File.ReadAllText(localPath),
 #endif
                 uri,
-                importSettings
-                );
+                importSettings, cancellationToken);
         }
         
         /// <summary>
@@ -425,8 +452,15 @@ namespace GLTFast {
         /// <param name="bytes">byte array containing glTF-binary</param>
         /// <param name="uri">Base URI for relative paths of external buffers or images</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> LoadGltfBinary(byte[] bytes, Uri uri = null, ImportSettings importSettings = null) {
+        public async Task<bool> LoadGltfBinary(
+            byte[] bytes,
+            Uri uri = null,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+            )
+        {
             settings = importSettings ?? new ImportSettings();
             var success = await LoadGltfBinaryBuffer(bytes,uri);
             if(success) await LoadContent();
@@ -443,8 +477,15 @@ namespace GLTFast {
         /// <param name="json">glTF JSON</param>
         /// <param name="uri">Base URI for relative paths of external buffers or images</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if loading was successful, false otherwise</returns>
-        public async Task<bool> LoadGltfJson(string json, Uri uri = null, ImportSettings importSettings = null) {
+        public async Task<bool> LoadGltfJson(
+            string json,
+            Uri uri = null,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+            )
+        {
             settings = importSettings ?? new ImportSettings();
             var success = await LoadGltf(json,uri);
             if(success) await LoadContent();
@@ -488,8 +529,13 @@ namespace GLTFast {
         /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
         /// </summary>
         /// <param name="parent">Transform that the scene will get parented to</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the main scene was instantiated or was not set. False in case of errors.</returns>
-        public async Task<bool> InstantiateMainSceneAsync( Transform parent ) {
+        public async Task<bool> InstantiateMainSceneAsync(
+            Transform parent,
+            CancellationToken cancellationToken = default
+            )
+        {
             var instantiator = new GameObjectInstantiator(this, parent);
             var success = await InstantiateMainSceneAsync(instantiator);
             return success;
@@ -500,8 +546,13 @@ namespace GLTFast {
         /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
         /// </summary>
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the main scene was instantiated or was not set. False in case of errors.</returns>
-        public async Task<bool> InstantiateMainSceneAsync(IInstantiator instantiator) {
+        public async Task<bool> InstantiateMainSceneAsync(
+            IInstantiator instantiator,
+            CancellationToken cancellationToken = default
+            )
+        {
             if (!loadingDone || loadingError) return false;
             // According to glTF specification, loading nothing is
             // the correct behavior
@@ -521,8 +572,14 @@ namespace GLTFast {
         /// </summary>
         /// <param name="parent">Transform that the scene will get parented to</param>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the scene was instantiated. False in case of errors.</returns>
-        public async Task<bool> InstantiateSceneAsync( Transform parent, int sceneIndex = 0) {
+        public async Task<bool> InstantiateSceneAsync(
+            Transform parent,
+            int sceneIndex = 0,
+            CancellationToken cancellationToken = default
+            )
+        {
             if (!loadingDone || loadingError) return false;
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
             var instantiator = new GameObjectInstantiator(this, parent);
@@ -537,8 +594,14 @@ namespace GLTFast {
         /// </summary>
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the scene was instantiated. False in case of errors.</returns>
-        public async Task<bool> InstantiateSceneAsync( IInstantiator instantiator, int sceneIndex = 0 ) {
+        public async Task<bool> InstantiateSceneAsync(
+            IInstantiator instantiator, 
+            int sceneIndex = 0,
+            CancellationToken cancellationToken = default
+            )
+        {
             if (!loadingDone || loadingError) return false;
             if (sceneIndex < 0 || sceneIndex > gltfRoot.scenes.Length) return false;
             await InstantiateSceneInternal( gltfRoot, instantiator, sceneIndex );
@@ -771,7 +834,7 @@ namespace GLTFast {
 
 #endregion Public
 
-        async Task<bool> LoadFromUri( Uri url ) {
+        async Task<bool> LoadFromUri( Uri url, CancellationToken cancellationToken ) {
 
             var download = await downloadProvider.Request(url);
             var success = download.success;
