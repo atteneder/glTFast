@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -91,8 +92,13 @@ namespace GLTFast.Export {
         /// After the export this instance cannot be re-used!
         /// </summary>
         /// <param name="path">glTF destination file path</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
-        public async Task<bool> SaveToFileAndDispose(string path) {
+        public async Task<bool> SaveToFileAndDispose(
+            string path,
+            CancellationToken cancellationToken = default
+            ) 
+        {
             CertifyNotDisposed();
             var success = await m_Writer.SaveToFileAndDispose(path);
             m_Writer = null;
@@ -105,8 +111,13 @@ namespace GLTFast.Export {
         /// After the export this instance cannot be re-used!
         /// </summary>
         /// <param name="stream">glTF destination stream</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the glTF file was written successfully, false otherwise</returns>
-        public async Task<bool> SaveToStreamAndDispose(Stream stream) {
+        public async Task<bool> SaveToStreamAndDispose(
+            Stream stream,
+            CancellationToken cancellationToken = default
+            )
+        {
             CertifyNotDisposed();
             var success = await m_Writer.SaveToStreamAndDispose(stream);
             m_Writer = null;
