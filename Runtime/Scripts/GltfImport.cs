@@ -328,9 +328,9 @@ namespace GLTFast {
 
         /// <summary>
         /// Load a glTF file (JSON or binary)
-        /// The URL can be a file path (using the "file://" scheme) or a web adress.
+        /// The URL can be a file path (using the "file://" scheme) or a web address.
         /// </summary>
-        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
+        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
         /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> Load( string url, ImportSettings importSettings = null ) {
@@ -339,9 +339,9 @@ namespace GLTFast {
         
         /// <summary>
         /// Load a glTF file (JSON or binary)
-        /// The URL can be a file path (using the "file://" scheme) or a web adress.
+        /// The URL can be a file path (using the "file://" scheme) or a web address.
         /// </summary>
-        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web adress.</param>
+        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
         /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> Load( Uri url, ImportSettings importSettings = null) {
