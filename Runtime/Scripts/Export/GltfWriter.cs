@@ -1163,8 +1163,6 @@ namespace GLTFast.Export {
                 AttributeData indicesAttrData = default;
                 uint weightsByteStride = 0;
                 uint indicesByteStride = 0;
-                int weightsOffset = 0;
-                int indicesOffset = 0;
                 NativeArray<byte> input = default;
                 NativeArray<byte > output = default;
                     
@@ -1196,31 +1194,35 @@ namespace GLTFast.Export {
                             indicesAttrData = attrData;
                             indicesByteStride = (uint) strides[attrData.stream];
                             input = inputStreams[attrData.stream];
+                            outputStreams[attrData.stream].Dispose();
+                            // gltf data will be smaller, as it uses ushort instead of uint for skin indices
+                            // Note that this implementation assumes unity skin indices and weights are int he same stream
+                            outputStreams[attrData.stream] = new NativeArray<byte>(vertexCount * (16 + 8), Allocator.TempJob);
                             output = outputStreams[attrData.stream];
-                            indicesOffset = attrData.offset;
 
                             break;
                         case VertexAttribute.BlendWeight:
                             weightsAttrData = attrData;
                             weightsByteStride = (uint) strides[attrData.stream];
-                            weightsOffset = attrData.offset;
                             break;
                     }
                 }
 
                 if (weightsByteStride != 0)
                 {
-                    await ConvertSkinningAttribute(
+                    // Convert skinning attributes
+                    // Note that this implementation assumes unity skin indices and weights are int he same stream
+                    await ConvertSkinningAttributes(
                         weightsAttrData,
                         indicesAttrData,
                         weightsByteStride,
                         indicesByteStride,
-                        weightsOffset,
-                        indicesOffset,
                         vertexCount,
                         input,
                         output
                     );
+
+                    strides[weightsAttrData.stream] = 16 + 8;
                 }
             }
             var bufferViewIds = new int[streamCount];
@@ -1725,33 +1727,28 @@ namespace GLTFast.Export {
             return job;
         }
 
-        static async Task ConvertSkinningAttribute(
+        static async Task ConvertSkinningAttributes(
             AttributeData weightsAttrData,
             AttributeData indicesAttrData,
             uint weightsByteStride,
             uint indicesByteStride,
-            int weightsOffset,
-            int indicesOffset,
             int vertexCount,
             NativeArray<byte> input,
             NativeArray<byte> output
         )
         {
-            var job = CreateConvertSkinningAttributeJob(weightsAttrData, indicesAttrData, weightsByteStride, indicesByteStride, 
-                weightsOffset, indicesOffset, vertexCount, input, output);
+            var job = CreateConvertSkinningAttributesJob(weightsAttrData, indicesAttrData, weightsByteStride, indicesByteStride, vertexCount, input, output);
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
             job.Complete(); // TODO: Wait until thread is finished
         }
         
-        static unsafe JobHandle CreateConvertSkinningAttributeJob(
+        static unsafe JobHandle CreateConvertSkinningAttributesJob(
             AttributeData weightsAttrData,
             AttributeData indicesAttrData,
             uint weightsByteStride,
             uint indicesByteStride,
-            int weightsOffset,
-            int indicesOffset,
             int vertexCount,
             NativeArray<byte> input,
             NativeArray<byte> output
@@ -1760,8 +1757,8 @@ namespace GLTFast.Export {
                 input = (byte*)input.GetUnsafeReadOnlyPtr(),
                 weightsByteStride = weightsByteStride,
                 indicesByteStride = indicesByteStride,
-                weightsOffset = weightsOffset,
-                indicesOffset = indicesOffset,
+                weightsOffset = weightsAttrData.offset,
+                indicesOffset = indicesAttrData.offset,
                 output = (byte*)output.GetUnsafePtr()
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;

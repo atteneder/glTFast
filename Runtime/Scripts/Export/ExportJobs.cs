@@ -118,7 +118,7 @@ namespace GLTFast.Export {
         [BurstCompile]
         public unsafe struct ConvertSkinningJob : IJobParallelFor {
 
-            public struct ushort4
+            struct ushort4
             {
                 public ushort4(uint x, uint y, uint z, uint w)
                 {
@@ -126,20 +126,12 @@ namespace GLTFast.Export {
                     this.y = (ushort)y;
                     this.z = (ushort)z;
                     this.w = (ushort)w;
-                    x1 = (ushort)x;
-                    y1 = (ushort)y;
-                    z1 = (ushort)z;
-                    w1 = (ushort)w;
                 }
                 
                 ushort x;
                 ushort y;
                 ushort z;
                 ushort w;
-                ushort x1;
-                ushort y1;
-                ushort z1;
-                ushort w1;
             }
             
             public uint weightsByteStride;
@@ -155,25 +147,18 @@ namespace GLTFast.Export {
             [NativeDisableUnsafePtrRestriction]
             public byte* output;
 
-            public void Execute(int i) {
-
+            public void Execute(int i)
+            {
+                const int gltfSkinByteStride = 16 + 8; // 16 bytes for the weights (float4) plus 8 for the indices (ushort4)
                 var inputWeightPtr = (float4*)(weightsOffset + input + i * weightsByteStride);
-                var inputIndextPtr = (uint4*)(indicesOffset + input + i * indicesByteStride);
-                var outWeightPtr = (float4*)(weightsOffset + output + i * weightsByteStride);
-                var outIndexPtr = (ushort4*)(indicesOffset + output + i * indicesByteStride);
+                var inputIndexPtr = (uint4*)(indicesOffset + input + i * indicesByteStride);
+                var outWeightPtr = (float4*)(weightsOffset + output + i * gltfSkinByteStride);
+                var outIndexPtr = (ushort4*)(indicesOffset + output + i * gltfSkinByteStride);
 
-                var tmpIndex = *inputIndextPtr;
+                var tmpIndex = *inputIndexPtr;
                 ushort4 tmpOut = new ushort4(tmpIndex[0], tmpIndex[1], tmpIndex[2], tmpIndex[3]);
-                // var tmp = *inputWeightPtr;
-                // if (tmp == -1)
-                // {
-                //     *outPtr = 0;
-                // }
-                // else
-                // {
-                    *outIndexPtr = tmpOut;
-                    *outWeightPtr = *inputWeightPtr;
-                    // }
+                *outIndexPtr = tmpOut;
+                *outWeightPtr = *inputWeightPtr;
             }
         }
         
