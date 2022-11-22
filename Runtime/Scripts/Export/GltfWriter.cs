@@ -817,6 +817,27 @@ namespace GLTFast.Export {
             var uMesh = m_UnityMeshes[meshId];
 
             var vertexAttributes = uMesh.GetVertexAttributes();
+            //
+            // {
+            //     var blendIndicesAttributes =
+            //         vertexAttributes.Where(va => va.attribute == VertexAttribute.BlendIndices).ToArray();
+            //     Assert.IsTrue(blendIndicesAttributes.Length <= 1);
+            //     if (blendIndicesAttributes.Length  == 1)
+            //     {
+            //         var blendIndicesAttribute = blendIndicesAttributes[0];
+            //
+            //         var blendWeightsAttributes =
+            //             vertexAttributes.First(va => va.attribute == VertexAttribute.BlendWeight);
+            //
+            //         // glTF skin indices are ushort, but unity's skin indices are uint
+            //         // if unity's skin indices and weights stream is the same, split them up so we can export the glTF
+            //         if (blendIndicesAttribute.stream == blendWeightsAttributes.stream)
+            //         {
+            //             blendIndicesAttribute.format = 
+            //         }
+            //
+            //     }
+            // }
 
             // for (int i = 0; i < uMesh.boneWeights.Length; i++)
             // {
@@ -828,31 +849,6 @@ namespace GLTFast.Export {
             //     }
             // }
             
-            
-            // VertexAttributeDescriptor weightsAttribute =
-            //     vertexAttributes.FirstOrDefault(va => va.attribute == VertexAttribute.BlendWeight);
-            //
-            // if (weightsAttribute != null)
-            // {
-            //     VertexAttributeDescriptor indicesAttribute =
-            //         vertexAttributes.FirstOrDefault(va => va.attribute == VertexAttribute.BlendIndices);
-            //     
-            //     var weightsStream = meshData.GetVertexData<byte>(weightsAttribute.stream).Reinterpret<float>(UnsafeUtility.SizeOf<byte>());
-            //     var weightStreamMod = new NativeArray<float>(weightsStream.Length, Allocator.Temp);
-            //     var indicesStream = meshData.GetVertexData<byte>(indicesAttribute.stream).Reinterpret<uint>(UnsafeUtility.SizeOf<byte>());
-            //
-            //     for (int i = 0; i < weightsStream.Length; i++)
-            //     {
-            //         if (weightsStream[i] == 0)
-            //         {
-            //             weightStreamMod[i] = 0;
-            //         }
-            //         else
-            //         {
-            //             weightStreamMod[i] = weightsStream[i];
-            //         }
-            //     }
-            // }
             
             var strides = new int[k_MAXStreamCount];
             var alignments = new int[k_MAXStreamCount];
@@ -891,6 +887,7 @@ namespace GLTFast.Export {
                     case VertexAttribute.Position:
                         Assert.AreEqual(VertexAttributeFormat.Float32,attribute.format);
                         Assert.AreEqual(3,attribute.dimension);
+                        // uMesh.RecalculateBounds();
                         var bounds = uMesh.bounds;
                         var max = bounds.max;
                         var min = bounds.min;
@@ -1166,9 +1163,10 @@ namespace GLTFast.Export {
                 AttributeData indicesAttrData = default;
                 uint weightsByteStride = 0;
                 uint indicesByteStride = 0;
-                NativeArray<byte> inputWeights = default;
-                NativeArray<byte> inputIndices = default;
-                NativeArray<byte > outputIndices = default;
+                int weightsOffset = 0;
+                int indicesOffset = 0;
+                NativeArray<byte> input = default;
+                NativeArray<byte > output = default;
                     
                 foreach (var pair in attrDataDict) {
                     var vertexAttribute = pair.Key;
@@ -1197,30 +1195,33 @@ namespace GLTFast.Export {
                         case VertexAttribute.BlendIndices:
                             indicesAttrData = attrData;
                             indicesByteStride = (uint) strides[attrData.stream];
-                            inputIndices = inputStreams[attrData.stream];
-                            outputIndices = outputStreams[attrData.stream];
+                            input = inputStreams[attrData.stream];
+                            output = outputStreams[attrData.stream];
+                            indicesOffset = attrData.offset;
+
                             break;
                         case VertexAttribute.BlendWeight:
                             weightsAttrData = attrData;
                             weightsByteStride = (uint) strides[attrData.stream];
-                            inputWeights = inputStreams[attrData.stream];
+                            weightsOffset = attrData.offset;
                             break;
                     }
                 }
 
-                // if (weightsByteStride != 0)
-                // {
-                //     await ConvertSkinningAttribute(
-                //         weightsAttrData,
-                //         indicesAttrData,
-                //         weightsByteStride,
-                //         indicesByteStride,
-                //         vertexCount,
-                //         inputWeights,
-                //         inputIndices,
-                //         outputIndices
-                //     );
-                // }
+                if (weightsByteStride != 0)
+                {
+                    await ConvertSkinningAttribute(
+                        weightsAttrData,
+                        indicesAttrData,
+                        weightsByteStride,
+                        indicesByteStride,
+                        weightsOffset,
+                        indicesOffset,
+                        vertexCount,
+                        input,
+                        output
+                    );
+                }
             }
             var bufferViewIds = new int[streamCount];
             for (var stream = 0; stream < streamCount; stream++) {
@@ -1729,13 +1730,15 @@ namespace GLTFast.Export {
             AttributeData indicesAttrData,
             uint weightsByteStride,
             uint indicesByteStride,
+            int weightsOffset,
+            int indicesOffset,
             int vertexCount,
-            NativeArray<byte> inputWeights,
-            NativeArray<byte> inputIndices,
-            NativeArray<byte> outputIndices
+            NativeArray<byte> input,
+            NativeArray<byte> output
         )
         {
-            var job = CreateConvertSkinningAttributeJob(weightsAttrData, indicesAttrData, weightsByteStride, indicesByteStride, vertexCount, inputWeights, inputIndices, outputIndices);
+            var job = CreateConvertSkinningAttributeJob(weightsAttrData, indicesAttrData, weightsByteStride, indicesByteStride, 
+                weightsOffset, indicesOffset, vertexCount, input, output);
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
@@ -1747,17 +1750,19 @@ namespace GLTFast.Export {
             AttributeData indicesAttrData,
             uint weightsByteStride,
             uint indicesByteStride,
+            int weightsOffset,
+            int indicesOffset,
             int vertexCount,
-            NativeArray<byte> inputWeights,
-            NativeArray<byte> inputIndices,
-            NativeArray<byte> outputIndices
+            NativeArray<byte> input,
+            NativeArray<byte> output
         ) {
             var job = new ExportJobs.ConvertSkinningJob {
-                inputWeights = (byte*)inputWeights.GetUnsafeReadOnlyPtr() + weightsAttrData.offset,
-                inputIndices =  (byte*)inputIndices.GetUnsafeReadOnlyPtr() + indicesAttrData.offset,
+                input = (byte*)input.GetUnsafeReadOnlyPtr(),
                 weightsByteStride = weightsByteStride,
                 indicesByteStride = indicesByteStride,
-                outputIndices = (byte*)outputIndices.GetUnsafePtr() + indicesAttrData.offset
+                weightsOffset = weightsOffset,
+                indicesOffset = indicesOffset,
+                output = (byte*)output.GetUnsafePtr()
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
         }

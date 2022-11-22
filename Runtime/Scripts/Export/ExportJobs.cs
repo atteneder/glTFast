@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System.Security.Permissions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -117,31 +118,52 @@ namespace GLTFast.Export {
         [BurstCompile]
         public unsafe struct ConvertSkinningJob : IJobParallelFor {
 
+            public struct ushort4
+            {
+                public ushort4(uint x, uint y, uint z, uint w)
+                {
+                    this.x = (ushort)x;
+                    this.y = (ushort)y;
+                    this.z = (ushort)z;
+                    this.w = (ushort)w;
+                    x1 = (ushort)x;
+                    y1 = (ushort)y;
+                    z1 = (ushort)z;
+                    w1 = (ushort)w;
+                }
+                
+                ushort x;
+                ushort y;
+                ushort z;
+                ushort w;
+                ushort x1;
+                ushort y1;
+                ushort z1;
+                ushort w1;
+            }
+            
             public uint weightsByteStride;
             public uint indicesByteStride;
+            public int weightsOffset;
+            public int indicesOffset;
             
             [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
-            public byte* inputWeights;
+            public byte* input;
             
-            [ReadOnly]
-            [NativeDisableUnsafePtrRestriction]
-            public byte* inputIndices;
-            
-            // [WriteOnly]
-            // [NativeDisableUnsafePtrRestriction]
-            // public NativeArray<float> outputWeights;
-                  
             [WriteOnly]
             [NativeDisableUnsafePtrRestriction]
-            public byte* outputIndices;
+            public byte* output;
 
             public void Execute(int i) {
 
-                var inputWeightPtr = (float*)(inputWeights + i * weightsByteStride);
-                var inputIndextPtr = (int*)(inputIndices + i * indicesByteStride);
-                var outPtr = (int*)(outputIndices + i * indicesByteStride);
-                
+                var inputWeightPtr = (float4*)(weightsOffset + input + i * weightsByteStride);
+                var inputIndextPtr = (uint4*)(indicesOffset + input + i * indicesByteStride);
+                var outWeightPtr = (float4*)(weightsOffset + output + i * weightsByteStride);
+                var outIndexPtr = (ushort4*)(indicesOffset + output + i * indicesByteStride);
+
+                var tmpIndex = *inputIndextPtr;
+                ushort4 tmpOut = new ushort4(tmpIndex[0], tmpIndex[1], tmpIndex[2], tmpIndex[3]);
                 // var tmp = *inputWeightPtr;
                 // if (tmp == -1)
                 // {
@@ -149,8 +171,9 @@ namespace GLTFast.Export {
                 // }
                 // else
                 // {
-                    *outPtr = *inputIndextPtr;
-                // }
+                    *outIndexPtr = tmpOut;
+                    *outWeightPtr = *inputWeightPtr;
+                    // }
             }
         }
         
