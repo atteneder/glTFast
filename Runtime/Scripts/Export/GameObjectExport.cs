@@ -178,6 +178,7 @@ namespace GLTFast.Export {
         void AddNodeComponents(GameObject gameObject, List<Material> tempMaterials, int nodeId) {
             tempMaterials.Clear();
             Mesh mesh = null;
+            Transform[] bones = null;
             if (gameObject.TryGetComponent(out MeshFilter meshFilter)) {
                 if (gameObject.TryGetComponent(out Renderer renderer)) {
                     if (renderer.enabled || m_Settings.disabledComponents) {
@@ -187,7 +188,9 @@ namespace GLTFast.Export {
                 }
             } else
             if (gameObject.TryGetComponent(out SkinnedMeshRenderer smr)) {
-                if (smr.enabled || m_Settings.disabledComponents) {
+                if (smr.enabled || m_Settings.disabledComponents)
+                {
+                    bones = smr.bones;
                     mesh = smr.sharedMesh;
                     smr.GetSharedMaterials(tempMaterials);
                 }
@@ -204,7 +207,7 @@ namespace GLTFast.Export {
             }
 
             if (mesh != null) {
-                m_Writer.AddMeshToNode(nodeId,mesh,materialIds);
+                m_Writer.AddMeshAndSkinToNode(nodeId,mesh,materialIds, bones);
             }
 
             if (gameObject.TryGetComponent(out Camera camera)) {

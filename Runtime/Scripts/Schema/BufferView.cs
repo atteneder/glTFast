@@ -19,12 +19,12 @@ using Meshoptimizer;
 
 namespace GLTFast.Schema {
 
-    // public enum BufferViewTarget
-    // {
-    //     None = 0,
-    //     ArrayBuffer = 34962,
-    //     ElementArrayBuffer = 34963,
-    // }
+    public enum BufferViewTarget
+    {
+        None = 0,
+        ArrayBuffer = 34962,
+        ElementArrayBuffer = 34963,
+    }
 
     /// <summary>
     /// Base class; Consists of a byte size and offset

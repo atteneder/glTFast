@@ -86,6 +86,75 @@ namespace GLTFast.Export {
         }
         
         [BurstCompile]
+        public unsafe struct ConvertMatrixJob : IJobParallelFor {
+
+            public uint byteStride;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public NativeArray<float4x4> input;
+            
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public NativeArray<float4x4> output;
+
+            public void Execute(int i) {
+                
+                var tmp = input[i];
+                tmp.c0.y *= -1;
+                tmp.c0.z *= -1;
+                
+                tmp.c1.x *= -1;
+            
+                tmp.c2.x *= -1;
+            
+                tmp.c3.x *= -1;
+
+                output[i] = tmp;
+            }
+        }
+        
+        [BurstCompile]
+        public unsafe struct ConvertSkinningJob : IJobParallelFor {
+
+            public uint weightsByteStride;
+            public uint indicesByteStride;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* inputWeights;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* inputIndices;
+            
+            // [WriteOnly]
+            // [NativeDisableUnsafePtrRestriction]
+            // public NativeArray<float> outputWeights;
+                  
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* outputIndices;
+
+            public void Execute(int i) {
+
+                var inputWeightPtr = (float*)(inputWeights + i * weightsByteStride);
+                var inputIndextPtr = (int*)(inputIndices + i * indicesByteStride);
+                var outPtr = (int*)(outputIndices + i * indicesByteStride);
+                
+                // var tmp = *inputWeightPtr;
+                // if (tmp == -1)
+                // {
+                //     *outPtr = 0;
+                // }
+                // else
+                // {
+                    *outPtr = *inputIndextPtr;
+                // }
+            }
+        }
+        
+        [BurstCompile]
         public unsafe struct ConvertTangentFloatJob : IJobParallelFor {
 
             public uint byteStride;

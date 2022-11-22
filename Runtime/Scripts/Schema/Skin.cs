@@ -40,8 +40,17 @@ namespace GLTFast.Schema {
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
+            if (joints != null) {
+                writer.AddArrayProperty("joints", joints);
+            }
+            if (skeleton != -1) {
+                writer.AddProperty("skeleton", skeleton);
+            }
+            
+            if (inverseBindMatrices != -1) {
+                writer.AddProperty("inverseBindMatrices", inverseBindMatrices);
+            }
             writer.Close();
-            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
 }
