@@ -1,8 +1,6 @@
 {
     "name": "glTFast",
     "references": [
-        "glTFastSchema",
-        "glTFastFakeSchema",
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.Collections",

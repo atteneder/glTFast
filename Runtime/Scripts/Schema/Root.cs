@@ -16,7 +16,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("glTFastEditorTests")]
+[assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
 
 namespace GLTFast.Schema {
     
