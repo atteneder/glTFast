@@ -134,10 +134,9 @@ namespace GLTFast.Export {
                 ushort w;
             }
             
-            public uint weightsByteStride;
-            public uint indicesByteStride;
-            public int weightsOffset;
+            public uint byteStride;
             public int indicesOffset;
+            public int outputByteStride;
             
             [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
@@ -149,16 +148,20 @@ namespace GLTFast.Export {
 
             public void Execute(int i)
             {
-                const int gltfSkinByteStride = 16 + 8; // 16 bytes for the weights (float4) plus 8 for the indices (ushort4)
-                var inputWeightPtr = (float4*)(weightsOffset + input + i * weightsByteStride);
-                var inputIndexPtr = (uint4*)(indicesOffset + input + i * indicesByteStride);
-                var outWeightPtr = (float4*)(weightsOffset + output + i * gltfSkinByteStride);
-                var outIndexPtr = (ushort4*)(indicesOffset + output + i * gltfSkinByteStride);
+                var inputIndex = input + i * byteStride;
+                var outputIndex = output + i * outputByteStride;
 
+                // Copy the whole data, minus the difference between unity and gltf. 
+                // In case the input buffer has more than one stream
+                UnsafeUtility.MemCpy(outputIndex,inputIndex, outputByteStride);
+
+                var inputIndexPtr = (uint4*)(indicesOffset + input + i * byteStride);
+                var outIndexPtr = (ushort4*)(indicesOffset + output + i * outputByteStride);
+
+                // Set the correct values for the indices
                 var tmpIndex = *inputIndexPtr;
                 ushort4 tmpOut = new ushort4(tmpIndex[0], tmpIndex[1], tmpIndex[2], tmpIndex[3]);
                 *outIndexPtr = tmpOut;
-                *outWeightPtr = *inputWeightPtr;
             }
         }
         
