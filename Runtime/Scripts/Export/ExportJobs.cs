@@ -13,7 +13,6 @@
 // limitations under the License.
 //
 
-using System.Security.Permissions;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
