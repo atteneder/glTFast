@@ -30,19 +30,19 @@ namespace GLTFast {
 
         const float k_TimeEpsilon = 0.00001f;
 
-        public static void AddTranslationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType, AnimationClip resetClip) {
+        public static void AddTranslationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType) {
             // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
             var values = translations.Reinterpret<float3>();
-            AddVec3Curves(clip, animationPath, "localPosition.", times, values, interpolationType, resetClip);
+            AddVec3Curves(clip, animationPath, "localPosition.", times, values, interpolationType);
         }
 
-        public static void AddScaleCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType, AnimationClip resetClip) {
+        public static void AddScaleCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType) {
             // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
             var values = translations.Reinterpret<float3>();
-            AddVec3Curves(clip, animationPath, "localScale.", times, values, interpolationType, resetClip);
+            AddVec3Curves(clip, animationPath, "localScale.", times, values, interpolationType);
         }
 
-        public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Quaternion> quaternions, InterpolationType interpolationType, AnimationClip resetClip) {
+        public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Quaternion> quaternions, InterpolationType interpolationType) {
             Profiler.BeginSample("AnimationUtils.AddRotationCurves");
             var rotX = new AnimationCurve();
             var rotY = new AnimationCurve();
@@ -139,15 +139,6 @@ namespace GLTFast {
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.y", rotY);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.w", rotW);
-
-            if (rotX.length > 0 && rotY.length > 0 && rotZ.length > 0 && rotW.length > 0)
-            {
-                resetClip.SetCurve(animationPath, typeof(Transform), "localRotation.x", rotX);
-                resetClip.SetCurve(animationPath, typeof(Transform), "localRotation.y", rotY);
-                resetClip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
-                resetClip.SetCurve(animationPath, typeof(Transform), "localRotation.w", rotW);
-            }
-
             Profiler.EndSample();
 
 #if DEBUG
@@ -177,7 +168,6 @@ namespace GLTFast {
             NativeArray<float> times,
             NativeArray<float> values,
             InterpolationType interpolationType,
-            AnimationClip resetClip,
             string[] morphTargetNames = null
             )
         {
@@ -204,14 +194,13 @@ namespace GLTFast {
                     morphTargetCount,
                     times,
                     values,
-                    interpolationType,
-                    resetClip
+                    interpolationType
                     );
             }
             Profiler.EndSample();
         }
 
-        static void AddVec3Curves(AnimationClip clip, string animationPath, string propertyPrefix, NativeArray<float> times, NativeArray<float3> values, InterpolationType interpolationType, AnimationClip resetClip) {
+        static void AddVec3Curves(AnimationClip clip, string animationPath, string propertyPrefix, NativeArray<float> times, NativeArray<float3> values, InterpolationType interpolationType) {
             Profiler.BeginSample("AnimationUtils.AddVec3Curves");
             var curveX = new AnimationCurve();
             var curveY = new AnimationCurve();
@@ -293,14 +282,6 @@ namespace GLTFast {
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}x", curveX);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}y", curveY);
             clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}z", curveZ);
-            if (curveX.length > 0 && curveY.length > 0 && curveZ.length > 0)
-            {
-                // Rest Pose is the 1st keyframe of each clip
-                resetClip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}x", curveX);
-                resetClip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}y", curveY);
-                resetClip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}z", curveZ);
-            }
-            
             Profiler.EndSample();
 #if DEBUG
             if (duplicates > 0) {
@@ -309,7 +290,7 @@ namespace GLTFast {
 #endif
         }
         
-        static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyPrefix, int curveIndex, int valueStride, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType, AnimationClip resetClip) {
+        static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyPrefix, int curveIndex, int valueStride, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
             Profiler.BeginSample("AnimationUtils.AddScalarCurve");
             var curve = new AnimationCurve();
             
@@ -380,11 +361,6 @@ namespace GLTFast {
             }
             
             clip.SetCurve(animationPath, typeof(SkinnedMeshRenderer), $"blendShape.{propertyPrefix}", curve);
-            if (curve.length > 0)
-            {
-                resetClip.SetCurve(animationPath, typeof(SkinnedMeshRenderer), $"blendShape.{propertyPrefix}", curve);
-            }
-            
             Profiler.EndSample();
 #if DEBUG
             if (duplicates > 0) {

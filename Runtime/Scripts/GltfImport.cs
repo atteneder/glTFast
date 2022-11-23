@@ -236,7 +236,6 @@ namespace GLTFast {
         Matrix4x4[][] skinsInverseBindMatrices;
 #if UNITY_ANIMATION
         AnimationClip[] animationClips;
-        AnimationClip resetClip;
 #endif
 
 #if UNITY_EDITOR
@@ -736,10 +735,6 @@ namespace GLTFast {
         /// <returns>All imported animation clips</returns>
         public AnimationClip[] GetAnimationClips() {
             return animationClips;
-        }
-        
-        public AnimationClip GetResetClip() {
-            return resetClip;
         }
 #endif
 
@@ -1771,12 +1766,6 @@ namespace GLTFast {
             }
 
 #if UNITY_ANIMATION
-            resetClip = new AnimationClip
-            {
-                name = "RESET_POSE",
-                legacy = true
-            };
-
             if (gltfRoot.hasAnimation && settings.animationMethod != ImportSettings.AnimationMethod.None) {
                 
                 animationClips = new AnimationClip[gltfRoot.animations.Length];
@@ -1808,17 +1797,17 @@ namespace GLTFast {
                         switch (channel.target.pathEnum) {
                             case AnimationChannel.Path.translation: {
                                 var values= ((AccessorNativeData<Vector3>) accessorData[sampler.output]).data;
-                                AnimationUtils.AddTranslationCurves(animationClips[i], path, times, values, sampler.interpolationEnum, resetClip);
+                                AnimationUtils.AddTranslationCurves(animationClips[i], path, times, values, sampler.interpolationEnum);
                                 break;
                             }
                             case AnimationChannel.Path.rotation: {
                                 var values= ((AccessorNativeData<Quaternion>) accessorData[sampler.output]).data;
-                                AnimationUtils.AddRotationCurves(animationClips[i], path, times, values, sampler.interpolationEnum, resetClip);
+                                AnimationUtils.AddRotationCurves(animationClips[i], path, times, values, sampler.interpolationEnum);
                                 break;
                             }
                             case AnimationChannel.Path.scale: {
                                 var values= ((AccessorNativeData<Vector3>) accessorData[sampler.output]).data;
-                                AnimationUtils.AddScaleCurves(animationClips[i], path, times, values, sampler.interpolationEnum, resetClip);
+                                AnimationUtils.AddScaleCurves(animationClips[i], path, times, values, sampler.interpolationEnum);
                                 break;
                             }
                             case AnimationChannel.Path.weights: {
@@ -1834,7 +1823,6 @@ namespace GLTFast {
                                     times,
                                     values,
                                     sampler.interpolationEnum,
-                                    resetClip,
                                     mesh.extras?.targetNames
                                     );
                                 
@@ -1855,7 +1843,6 @@ namespace GLTFast {
                                         times,
                                         values,
                                         sampler.interpolationEnum,
-                                        resetClip,
                                         mesh.extras?.targetNames
                                     );                                    
                                 }
@@ -2946,7 +2933,6 @@ namespace GLTFast {
                 c.topology = MeshTopology.Points;
                 break;
             case DrawMode.Lines:
-                logger?.Error(LogCode.PrimitiveModeUnsupported,primitive.mode.ToString());
                 c.topology = MeshTopology.Lines;
                 break;
             case DrawMode.LineLoop:
