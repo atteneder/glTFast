@@ -1159,7 +1159,7 @@ namespace GLTFast.Export {
                         outputStreams[attrData.stream] = new NativeArray<byte>(previousArraySize - strideDifference * vertexCount, Allocator.TempJob);
                         await ConvertSkinningAttributes(
                             attrData,
-                            (uint) strides[attrData.stream],
+                            strides[attrData.stream],
                             strides[attrData.stream] - strideDifference,
                             vertexCount,
                             inputStreams[attrData.stream],
@@ -1675,7 +1675,7 @@ namespace GLTFast.Export {
 
         static async Task ConvertSkinningAttributes(
             AttributeData indicesAttrData,
-            uint byteStride,
+            int byteStride,
             int outputByteStride,
             int vertexCount,
             NativeArray<byte> input,
@@ -1691,7 +1691,7 @@ namespace GLTFast.Export {
         
         static unsafe JobHandle CreateConvertSkinningAttributesJob(
             AttributeData indicesAttrData,
-            uint byteStride,
+            int byteStride,
             int outputByteStride,
             int vertexCount,
             NativeArray<byte> input,
@@ -1699,7 +1699,7 @@ namespace GLTFast.Export {
         ) {
             var job = new ExportJobs.ConvertSkinningJob {
                 input = (byte*)input.GetUnsafeReadOnlyPtr(),
-                byteStride = byteStride,
+                inputByteStride = byteStride,
                 indicesOffset = indicesAttrData.offset,
                 output = (byte*)output.GetUnsafePtr(),
                 outputByteStride =  outputByteStride

@@ -133,7 +133,7 @@ namespace GLTFast.Export {
                 ushort w;
             }
             
-            public uint byteStride;
+            public int inputByteStride;
             public int indicesOffset;
             public int outputByteStride;
             
@@ -145,16 +145,29 @@ namespace GLTFast.Export {
             [NativeDisableUnsafePtrRestriction]
             public byte* output;
 
+            private const int unityIndicesSize = sizeof(uint) * 4;
+            private const int gltfIndicesSize = sizeof(short) * 4;
+            
             public void Execute(int i)
             {
-                var inputIndex = input + i * byteStride;
+                var inputIndex = input + i * inputByteStride;
                 var outputIndex = output + i * outputByteStride;
+    
+                // if there is non-indices data before the indices data, copy it
+                if(indicesOffset > 0)
+                {
+                    UnsafeUtility.MemCpy(outputIndex,inputIndex, indicesOffset);
+                }
 
-                // Copy the whole data, minus the difference between unity and gltf. 
-                // In case the input buffer has more than one stream
-                UnsafeUtility.MemCpy(outputIndex,inputIndex, outputByteStride);
+                // if there is non-indices data after the indices data, copy it
+                if (indicesOffset < inputByteStride - unityIndicesSize)
+                {
+                    UnsafeUtility.MemCpy(outputIndex + indicesOffset + gltfIndicesSize,
+                        inputIndex + indicesOffset + unityIndicesSize, 
+                        inputByteStride - indicesOffset - unityIndicesSize);
+                }
 
-                var inputIndexPtr = (uint4*)(indicesOffset + input + i * byteStride);
+                var inputIndexPtr = (uint4*)(indicesOffset + input + i * inputByteStride);
                 var outIndexPtr = (ushort4*)(indicesOffset + output + i * outputByteStride);
 
                 // Set the correct values for the indices
