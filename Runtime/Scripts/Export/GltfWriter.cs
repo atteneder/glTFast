@@ -225,7 +225,7 @@ namespace GLTFast.Export {
             HDAdditionalLightData lightHd = null;
             if (renderPipeline == RenderPipeline.HighDefinition) {
                 lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
-                if (lightHd.type == HDLightType.Area) {
+                if (lightHd!=null && lightHd.type == HDLightType.Area) {
                     lightType = LightType.Area;
                 }
             }
