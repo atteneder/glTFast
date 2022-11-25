@@ -115,6 +115,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public Texture[] textures;
 
+        /// <inheritdoc cref="RootExtension"/>
         public RootExtension extensions;
         
 #if UNITY_ANIMATION

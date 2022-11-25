@@ -19,9 +19,16 @@ using UnityEngine;
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// Extension for adding punctual lights.
+    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_lights_punctual"/>
+    /// </summary>
     [Serializable]
     public class LightsPunctual {
 
+        /// <summary>
+        /// Collection of lights
+        /// </summary>
         public LightPunctual[] lights;
         
         internal void GltfSerialize(JsonWriter writer) {
@@ -35,13 +42,23 @@ namespace GLTFast.Schema {
         }
     }
     
+    /// <summary>
+    /// glTF light
+    /// </summary>
     [Serializable]
     public class LightPunctual {
 
+        /// <summary>
+        /// glTF light type
+        /// </summary>
         public enum Type {
+            /// <summary>Unknown light type</summary>
             Unknown,
+            /// <summary>Spot light</summary>
             Spot,
+            /// <summary>Directional light</summary>
             Directional,
+            /// <summary>Point light</summary>
             Point,
         }
         
@@ -87,6 +104,9 @@ namespace GLTFast.Schema {
         /// </summary>
         public float range = -1;
 
+        /// <summary>
+        /// Spot light properties (only set on spot lights).
+        /// </summary>
         public SpotLight spot;
         
         [SerializeField]
@@ -140,6 +160,9 @@ namespace GLTFast.Schema {
 
     }
     
+    /// <summary>
+    /// glTF spot light properties
+    /// </summary>
     [Serializable]
     public class SpotLight {
         

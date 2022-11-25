@@ -36,6 +36,9 @@ namespace GLTFast {
     /// </summary>
     public class GameObjectInstantiator : IInstantiator {
 
+        /// <summary>
+        /// Descriptor of a glTF scene instance
+        /// </summary>
         public class SceneInstance {
             
             /// <summary>
@@ -105,7 +108,10 @@ namespace GLTFast {
         /// </summary>
         protected Dictionary<uint,GameObject> nodes;
 
-        
+        /// <summary>
+        /// Transform representing the scene.
+        /// Root nodes will get parented to it.
+        /// </summary>
         protected Transform sceneTransform;
         
         /// <summary>
@@ -484,6 +490,7 @@ namespace GLTFast {
         //     }
         // }
 
+        /// <inheritdoc />
         public void AddLightPunctual(
             uint nodeIndex,
             uint lightIndex

@@ -153,6 +153,12 @@ namespace GLTFast.Export {
             material.pbrMetallicRoughness = pbr;
         }
 
+        /// <summary>
+        /// Returns the color of an unlit material
+        /// </summary>
+        /// <param name="uMaterial">Unity material</param>
+        /// <param name="baseColor">Resulting unlit color</param>
+        /// <returns>True if the unlit color was retrieved, false otherwise</returns>
         protected virtual bool GetUnlitColor(UnityEngine.Material uMaterial, out Color baseColor) {
             if (uMaterial.HasProperty(k_BaseColor)) {
                 baseColor = uMaterial.GetColor(k_BaseColor);
@@ -199,6 +205,7 @@ namespace GLTFast.Export {
         /// <param name="texture">Normal texture to export</param>
         /// <param name="material">Material the normal is used on</param>
         /// <param name="gltf">Context glTF to export to</param>
+        /// <param name="normalScalePropId">Normal scale property ID</param>
         /// <returns>glTF texture info</returns>
         protected static NormalTextureInfo ExportNormalTextureInfo(
             UnityEngine.Texture texture,
