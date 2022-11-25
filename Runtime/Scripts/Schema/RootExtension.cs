@@ -15,8 +15,13 @@
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// glTF root extensions 
+    /// </summary>
     [System.Serializable]
     public class RootExtension {
+        
+        /// <inheritdoc cref="LightsPunctual"/>
         public LightsPunctual KHR_lights_punctual;
         
         internal void GltfSerialize(JsonWriter writer) {

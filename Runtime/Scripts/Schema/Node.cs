@@ -126,6 +126,7 @@ namespace GLTFast.Schema {
         
         /// <inheritdoc cref="MeshGpuInstancing"/>
         public MeshGpuInstancing EXT_mesh_gpu_instancing;
+        /// <inheritdoc cref="LightsPunctual"/>
         public NodeLightsPunctual KHR_lights_punctual;
         
         // Whenever an extension is added, the JsonParser

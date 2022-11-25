@@ -17,9 +17,15 @@ using UnityEngine;
 
 namespace GLTFast.Schema {
 
+    /// <summary>
+    /// Assigns a light to a node
+    /// </summary>
     [System.Serializable]
     public class NodeLightsPunctual {
 
+        /// <summary>
+        /// Light index
+        /// </summary>
         public int light = -1;
 
         internal void GltfSerialize(JsonWriter writer) {

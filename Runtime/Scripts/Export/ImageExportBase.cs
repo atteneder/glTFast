@@ -73,6 +73,7 @@ namespace GLTFast.Export {
         /// </summary>
         /// <param name="filePath">Destination file path</param>
         /// <param name="overwrite">If true, existing files will be overwritten</param>
+        /// <returns>True if writing succeeded, false otherwise</returns>
         public abstract bool Write(string filePath, bool overwrite);
         
         /// <summary>

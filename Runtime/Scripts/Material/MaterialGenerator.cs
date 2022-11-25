@@ -57,6 +57,7 @@ namespace GLTFast.Materials {
             Unlit,
         }
 
+        /// <summary>glTF default material name</summary>
         public const string DEFAULT_MATERIAL_NAME = "glTF-Default-Material";
         
         /// <summary>Render type key</summary>
@@ -152,11 +153,17 @@ namespace GLTFast.Materials {
         /// <summary>Shader property ID for property _ZWrite</summary>
         public static readonly int zWritePropId = Shader.PropertyToID("_ZWrite");
 
+        /// <summary>Shader property ID for property </summary>
         protected static readonly int baseColorPropId = Shader.PropertyToID("baseColorFactor");
+        /// <summary>Shader property ID for property metallicRoughnessTexture</summary>
         protected static readonly int metallicRoughnessMapPropId = Shader.PropertyToID("metallicRoughnessTexture");
+        /// <summary>Shader property ID for property metallicRoughnessTexture_ST</summary>
         protected static readonly int metallicRoughnessMapScaleTransformPropId = Shader.PropertyToID("metallicRoughnessTexture_ST");
+        /// <summary>Shader property ID for property metallicRoughnessTexture_Rotation</summary>
         protected static readonly int metallicRoughnessMapRotationPropId = Shader.PropertyToID("metallicRoughnessTexture_Rotation");
+        /// <summary>Shader property ID for property metallicRoughnessTexture_texCoord</summary>
         protected static readonly int metallicRoughnessMapUVChannelPropId = Shader.PropertyToID("metallicRoughnessTexture_texCoord");
+        /// <summary>Shader property ID for property roughnessFactor</summary>
         protected static readonly int roughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
         
         static IMaterialGenerator defaultMaterialGenerator;
@@ -223,6 +230,7 @@ namespace GLTFast.Materials {
         /// <summary>
         /// Creates a fallback material to be assigned to nodes without a material.
         /// </summary>
+        /// <param name="pointsSupport">If true, material has to support meshes with points topology <seealso cref="MeshTopology.Points"/></param>
         /// <returns>fallback material</returns>
         protected abstract UnityEngine.Material GenerateDefaultMaterial(bool pointsSupport = false);
 
