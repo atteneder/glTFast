@@ -1,10 +1,9 @@
 {
-    "name": "glTFastEditorTests",
+    "name": "glTFast.Editor.Tests",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "glTFast",
-        "glTFastSchema",
         "Unity.Mathematics"
     ],
     "includePlatforms": [

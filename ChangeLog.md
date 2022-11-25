@@ -57,6 +57,10 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Export) Disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`) are not exported by default (see also: new `GameObjectExportSettings.disabledComponents` setting to get old behavior)
 - (Export) GameObjects with tag `EditorOnly` (including children) don't get exported (similar to building a scene)
 - Added optional `CancellationToken` parameter to async import/export methods. This is preparation work for proper cancellation. Does not work as expected just yet.
+- Refactored Assembly Definitions
+  - `glTFastSchema` was merged into `glTFast` and thus removed
+  - `glTFastEditor` was renamed to `glTFast.Editor`
+  - `glTFastEditorTests` was renamed to `glTFast.Editor.Tests`
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
