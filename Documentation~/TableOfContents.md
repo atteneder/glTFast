@@ -9,4 +9,4 @@
     * [Project Setup](ProjectSetup.md)
     * [Upgrade Guides](UpgradeGuides.md)
     * [Known Issues](KnownIssues.md)
-    * [More Information](MoreInfo.md)
+    * [Implementation Details](ImplementationDetails.md)
