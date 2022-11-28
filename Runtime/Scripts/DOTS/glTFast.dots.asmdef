@@ -3,7 +3,6 @@
     "rootNamespace": "",
     "references": [
         "glTFast",
-        "glTFastSchema",
         "Unity.Entities",
         "Unity.Collections",
         "Unity.Transforms",
