@@ -137,9 +137,6 @@ namespace GLTFast {
         public virtual void BeginScene(
             string name,
             uint[] rootNodeIndices
-#if UNITY_ANIMATION
-            ,AnimationClip[] animationClips
-#endif // UNITY_ANIMATION
             ) {
             Profiler.BeginSample("BeginScene");
             
@@ -157,8 +154,12 @@ namespace GLTFast {
                 sceneGameObject.layer = settings.layer;
             }
             sceneTransform = sceneGameObject.transform;
-            
+            Profiler.EndSample();
+        }
+
 #if UNITY_ANIMATION
+        /// <inheritdoc />
+        public void AddAnimation(AnimationClip[] animationClips) {
             if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
                 // we want to create an Animator for non-legacy clips, and an Animation component for legacy clips.
                 var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
@@ -200,7 +201,7 @@ namespace GLTFast {
 // #endif // UNITY_EDITOR
 
                 if(isLegacyAnimation) {
-                    var animation = sceneGameObject.AddComponent<Animation>();
+                    var animation = sceneTransform.gameObject.AddComponent<Animation>();
                     
                     for (var index = 0; index < animationClips.Length; index++) {
                         var clip = animationClips[index];
@@ -213,9 +214,8 @@ namespace GLTFast {
                     sceneInstance.SetLegacyAnimation(animation);
                 }
             }
-            Profiler.EndSample();
-#endif // UNITY_ANIMATION
         }
+#endif // UNITY_ANIMATION
 
         /// <inheritdoc />
         public void CreateNode(

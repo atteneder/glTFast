@@ -63,9 +63,6 @@ namespace GLTFast {
         public void BeginScene(
             string name,
             uint[] nodeIndices
-#if UNITY_ANIMATION
-            ,AnimationClip[] animationClips
-#endif // UNITY_ANIMATION
         ) {
             Profiler.BeginSample("BeginScene");
             nodes = new Dictionary<uint, Entity>();
@@ -101,15 +98,17 @@ namespace GLTFast {
                 }
                 sceneParent = new Parent { Value = sceneEntity };
             }
-
+            Profiler.EndSample();
+        }
+        
 #if UNITY_ANIMATION
+        /// <inheritdoc />
+        public void AddAnimation(AnimationClip[] animationClips) {
             if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
                 // TODO: Add animation support
             }
-#endif // UNITY_ANIMATION
-            
-            Profiler.EndSample();
         }
+#endif // UNITY_ANIMATION
 
         /// <inheritdoc />
         public void CreateNode(
