@@ -62,6 +62,9 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
   - `glTFastEditor` was renamed to `glTFast.Editor`
   - `glTFastEditorTests` was renamed to `glTFast.Editor.Tests`
 - `GltfAsset.FullUrl` is public now (convenient for some tests)
+- `IInstantiator` changes
+  - `IInstantiator.BeginScene` signature dropped third parameter `AnimationClip[] animationClips` that was depending on built-in Animation module to be enabled.
+  - `IInstantiator.AddAnimation` was added. Only available when built-in Animation module is enabled.
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

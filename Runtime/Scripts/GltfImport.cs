@@ -2165,10 +2165,9 @@ namespace GLTFast {
             
             var scene = gltfRoot.scenes[sceneId];
 
-#if UNITY_ANIMATION
-            instantiator.BeginScene(scene.name,scene.nodes,animationClips);
-#else
             instantiator.BeginScene(scene.name,scene.nodes);
+#if UNITY_ANIMATION
+            instantiator.AddAnimation(animationClips);
 #endif
             
             if (scene.nodes != null) {
