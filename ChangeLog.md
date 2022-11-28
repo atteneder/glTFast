@@ -61,6 +61,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
   - `glTFastSchema` was merged into `glTFast` and thus removed
   - `glTFastEditor` was renamed to `glTFast.Editor`
   - `glTFastEditorTests` was renamed to `glTFast.Editor.Tests`
+- `GltfAsset.FullUrl` is public now (convenient for some tests)
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
