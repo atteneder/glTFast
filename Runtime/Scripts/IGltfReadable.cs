@@ -46,7 +46,7 @@ namespace GLTFast {
         
         /// <summary>
         /// Returns a fallback material to be used when no material was
-        /// assigned (provided by the <see cref="IMaterialGenerator"/>)
+        /// assigned (provided by the <see cref="Materials.IMaterialGenerator"/>)
         /// </summary>
         /// <returns>Default material</returns>
         Material GetDefaultMaterial();

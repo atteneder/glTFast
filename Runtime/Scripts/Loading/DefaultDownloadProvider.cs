@@ -146,7 +146,9 @@ namespace GLTFast.Loading {
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Releases previously allocated resources.
+        /// </summary>
         public void Dispose() {
             m_Request.Dispose();
             m_Request = null;

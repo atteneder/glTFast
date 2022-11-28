@@ -54,6 +54,7 @@ namespace GLTFast {
             /// <summary>
             /// <see cref="Animation" /> component. Is null if scene has no 
 			/// animation clips.
+            /// Only available if the built-in Animation module is enabled.
             /// </summary>
             public Animation legacyAnimation { get; private set; }
 #endif

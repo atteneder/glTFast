@@ -156,7 +156,7 @@ Two common use-cases are
 1. Scale-down (physically correct) intensities to compensate for the missing exposure control (or high sensitivity) of a render pipeline (e.g. Universal or Built-in Render Pipeline)
 2. Boost implausibly low light intensities
 
-See [Physical Light Units in glTF](./LightUnitys.md) for a detailed explaination.
+See [Physical Light Units in glTF](./LightUnits.md) for a detailed explaination.
 
 #### Instance Access
 
