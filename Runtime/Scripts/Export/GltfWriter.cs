@@ -1831,17 +1831,20 @@ namespace GLTFast.Export {
                 meshId = m_Meshes.Count - 1;
             }
 
+            if (m_SkinMap != null && m_SkinMap.TryGetValue(uMesh, out var skin))
+            {
+                skinId = m_Skins.IndexOf(skin);
+                if (skinId != -1) return;
+            }
+            
+            m_SkinMap = m_SkinMap ?? new Dictionary<UnityEngine.Mesh, Skin>();
             m_Skins = m_Skins ?? new List<Skin>();
             m_uBones = m_uBones ?? new List<Transform[]>();
-            m_SkinMap = m_SkinMap ?? new Dictionary<UnityEngine.Mesh, Skin>();
-            if (!m_SkinMap.ContainsKey(uMesh))
-            {
-                m_Skins.Add(new Skin());
-                m_SkinMap[uMesh] = m_Skins.Last();
-                m_uBones.Add(bones);
-            }
-
-            skinId = m_Skins.IndexOf(m_SkinMap[uMesh]);
+            skinId = m_Skins.Count; 
+            var newSkin = new Skin();
+            m_Skins.Add(newSkin);
+            m_SkinMap[uMesh] = newSkin;
+            m_uBones.Add(bones);
         }
 
         unsafe int WriteBufferViewToBuffer( byte[] bufferViewData, BufferViewTarget target, int? byteStride = null) {
