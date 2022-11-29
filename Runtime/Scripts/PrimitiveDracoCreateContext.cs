@@ -26,22 +26,36 @@ namespace GLTFast {
 
     class PrimitiveDracoCreateContext : PrimitiveCreateContextBase {
 
-        DracoMeshLoader draco;
-        Task<Mesh> dracoTask;
-        Bounds? bounds;
+        DracoMeshLoader m_Draco;
+        Task<Mesh> m_DracoTask;
+        Bounds? m_Bounds;
 
-        public override bool IsCompleted => dracoTask!=null && dracoTask.IsCompleted;
+        bool m_NeedsNormals;
+        bool m_NeedsTangents;
+        
+        public override bool IsCompleted => m_DracoTask!=null && m_DracoTask.IsCompleted;
 
-        public PrimitiveDracoCreateContext(Bounds? bounds) {
-            this.bounds = bounds;
+        public PrimitiveDracoCreateContext(
+            int primitiveIndex,
+            int materialCount,
+            bool needsNormals,
+            bool needsTangents,
+            string meshName,
+            Bounds? bounds
+            ) 
+            : base(primitiveIndex, materialCount, meshName) 
+        {
+            m_NeedsNormals = needsNormals;
+            m_NeedsTangents = needsTangents;
+            m_Bounds = bounds;
         }
 
         public void StartDecode(NativeSlice<byte> data, int weightsAttributeId, int jointsAttributeId) {
-            draco = new DracoMeshLoader();
-            dracoTask = draco.ConvertDracoMeshToUnity(
+            m_Draco = new DracoMeshLoader();
+            m_DracoTask = m_Draco.ConvertDracoMeshToUnity(
                 data,
-                needsNormals,
-                needsTangents,
+                m_NeedsNormals,
+                m_NeedsTangents,
                 weightsAttributeId,
                 jointsAttributeId,
                 morphTargetsContext!=null
@@ -50,24 +64,26 @@ namespace GLTFast {
         
         public override async Task<Primitive?> CreatePrimitive() {
 
-            var mesh = dracoTask.Result;
-            dracoTask.Dispose();
+            var mesh = m_DracoTask.Result;
+            m_DracoTask.Dispose();
 
             if (mesh == null) {
                 return null;
             }
 
-            if (bounds.HasValue) {
-                mesh.bounds = bounds.Value;
+            mesh.name = m_MeshName;
+            
+            if (m_Bounds.HasValue) {
+                mesh.bounds = m_Bounds.Value;
                 
-                // Setting the submeshes' bounds to the overall bounds
+                // Setting the sub-meshes' bounds to the overall bounds
                 // Calculating the actual sub-mesh bounds (by iterating the verts referenced
                 // by the sub-mesh indices) would be slow. Also, hardly any glTFs re-use
                 // the same vertex buffer across primitives of a node (which is the
                 // only way a mesh can have sub-meshes)
                 for (var i = 0; i < mesh.subMeshCount; i++) {
                     var subMeshDescriptor = mesh.GetSubMesh(i);
-                    subMeshDescriptor.bounds = bounds.Value;
+                    subMeshDescriptor.bounds = m_Bounds.Value;
                     mesh.SetSubMesh(i, subMeshDescriptor, MeshUpdateFlags.DontValidateIndices | MeshUpdateFlags.DontResetBoneBounds | MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds );
                 }
             } else {
@@ -83,14 +99,14 @@ namespace GLTFast {
             mesh.UploadMeshData(false);
             UnityEngine.Profiling.Profiler.EndSample();
 #else
-            /// Don't upload explicitely. Unity takes care of upload on demand/deferred
+            // Don't upload explicitly. Unity takes care of upload on demand/deferred
 
             // Profiler.BeginSample("UploadMeshData");
             // mesh.UploadMeshData(true);
             // Profiler.EndSample();
 #endif
 
-            return new Primitive(mesh,materials);
+            return new Primitive(mesh,m_Materials);
         }
     }
 }

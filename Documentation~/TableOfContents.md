@@ -1,12 +1,14 @@
-* glTFast Documentation
-    * Import
-        * [Editor Import](ImportEditor.md)
-        * [Runtime Import](ImportRuntime.md)
-    * Export
-        * [Editor Export](ExportEditor.md)
-        * [Runtime Export](ExportRuntime.md)
-    * [Features](features.md)
-    * [Project Setup](ProjectSetup.md)
+* [Overview](index.md)
+* [Features](features.md)
+* Runtime
+    * [Import](ImportRuntime.md)
+    * [Export](ExportRuntime.md)
+* Editor
+    * [Import](ImportEditor.md)
+    * [Export](ExportEditor.md)        
+* [Project Setup](ProjectSetup.md)
+* More Information
     * [Upgrade Guides](UpgradeGuides.md)
     * [Known Issues](KnownIssues.md)
-    * [More Information](MoreInfo.md)
+    * [Physical Light Units in glTF](LightUnits.md)
+    * [Implementation Details](ImplementationDetails.md)

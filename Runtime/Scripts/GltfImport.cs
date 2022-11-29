@@ -57,8 +57,8 @@ using Meshoptimizer;
 using GLTFast.Tests;
 #endif
 
-[assembly: InternalsVisibleTo("glTFastEditor")]
-[assembly: InternalsVisibleTo("glTFastEditorTests")]
+[assembly: InternalsVisibleTo("glTFast.Editor")]
+[assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
 [assembly: InternalsVisibleTo("glTFast.Export")]
 
 namespace GLTFast {
@@ -1725,7 +1725,7 @@ namespace GLTFast {
                     // await defaultDeferAgent.BreakPoint();
 
                     if(primitive.HasValue) {
-                        primitives[primitiveContext.primtiveIndex] = primitive.Value;
+                        primitives[primitiveContext.primitiveIndex] = primitive.Value;
                         resources.Add(primitive.Value.mesh);
                     } else {
                         success = false;
@@ -2165,10 +2165,9 @@ namespace GLTFast {
             
             var scene = gltfRoot.scenes[sceneId];
 
-#if UNITY_ANIMATION
-            instantiator.BeginScene(scene.name,scene.nodes,animationClips);
-#else
             instantiator.BeginScene(scene.name,scene.nodes);
+#if UNITY_ANIMATION
+            instantiator.AddAnimation(animationClips);
 #endif
             
             if (scene.nodes != null) {
@@ -2777,19 +2776,24 @@ namespace GLTFast {
                             if (!bounds.HasValue) {
                                 logger.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
                             }
-                            context = new PrimitiveDracoCreateContext(bounds);
-                            context.materials = new int[1];
+                            var dracoContext = new PrimitiveDracoCreateContext(
+                                primitiveIndex,
+                                1,
+                                primitive.material<0 || gltf.materials[primitive.material].requiresNormals,
+                                primitive.material>=0 && gltf.materials[primitive.material].requiresTangents,
+                                mesh.name,
+                                bounds
+                                );
+                            context = dracoContext;
                         }
                         else
 #endif
                         {
                             PrimitiveCreateContext c;
                             if(context==null) {
-                                c = new PrimitiveCreateContext();
-                                c.indices = new int[cluster.Count][];
-                                c.materials = new int[cluster.Count];
+                                c = new PrimitiveCreateContext(primitiveIndex, cluster.Count, mesh.name);
                             } else {
-                                c = (context as PrimitiveCreateContext);
+                                c = context as PrimitiveCreateContext;
                             }
                             // PreparePrimitiveIndices(gltf,mesh,primitive,ref c,primIndex);
                             context = c;
@@ -2799,11 +2803,7 @@ namespace GLTFast {
                             context.morphTargetsContext = morphTargetsContexts[primitive];
                         }
                         
-                        context.primtiveIndex = primitiveIndex;
-                        context.materials[primIndex] = primitive.material;
-
-                        context.needsNormals |= primitive.material<0 || gltf.materials[primitive.material].requiresNormals;
-                        context.needsTangents |= primitive.material>=0 && gltf.materials[primitive.material].requiresTangents;
+                        context.SetMaterial(primIndex, primitive.material);
                     }
 
                     primitiveContexts[primitiveIndex] = context;
@@ -2857,7 +2857,7 @@ namespace GLTFast {
                 var mesh = gltf.meshes[meshIndex];
                 foreach( var kvp in meshPrimitiveCluster[meshIndex]) {
                     var cluster = kvp.Value;
-                    Profiler.BeginSample( "CreatePrimitiveContext");
+                    
                     PrimitiveCreateContextBase context = primitiveContexts[i];
 
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++) {
@@ -2865,17 +2865,21 @@ namespace GLTFast {
 #if DRACO_UNITY
                         if( primitive.isDracoCompressed ) {
                             var c = (PrimitiveDracoCreateContext) context;
+                            await deferAgent.BreakPoint();
+                            Profiler.BeginSample( "CreatePrimitiveContext");
                             PreparePrimitiveDraco(gltf,mesh,primitive,ref c);
+                            Profiler.EndSample();
                             schedule = true;
                         } else
 #endif
                         {
                             PrimitiveCreateContext c = (PrimitiveCreateContext) context;
                             c.vertexData = vertexAttributes[kvp.Key];
+                            Profiler.BeginSample( "CreatePrimitiveContext");
                             PreparePrimitiveIndices(gltf,mesh,primitive,ref c,primIndex);
+                            Profiler.EndSample();
                         }
                     }   
-                    Profiler.EndSample();
                     await deferAgent.BreakPoint();
                     i++;
                 }
@@ -2888,27 +2892,6 @@ namespace GLTFast {
         }
 
         async Task AssignAllAccessorData( Root gltf ) {
-            if (gltf.meshes != null) {
-                Profiler.BeginSample("AssignAllAccessorData.Primitive");
-                int i=0;
-                for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
-                    var mesh = gltf.meshes[meshIndex];
-
-                    foreach( var cluster in meshPrimitiveCluster[meshIndex]) {
-    #if DRACO_UNITY
-                        if( !cluster.Value[0].isDracoCompressed )
-    #endif
-                        {
-                            // Create one PrimitiveCreateContext per Primitive cluster
-                            PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
-                            c.mesh = mesh;
-                        }
-                        i++;
-                    }
-                }
-                Profiler.EndSample();
-            }
-            
             if(gltf.skins!=null) {
                 for (int s = 0; s < gltf.skins.Length; s++)
                 {
@@ -2923,7 +2906,7 @@ namespace GLTFast {
             }
         }
 
-        void PreparePrimitiveIndices( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c, int submeshIndex = 0 ) {
+        void PreparePrimitiveIndices( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c, int subMesh = 0 ) {
             Profiler.BeginSample("PreparePrimitiveIndices");
             switch(primitive.mode) {
             case DrawMode.Triangles:
@@ -2951,11 +2934,12 @@ namespace GLTFast {
             }
 
             if(primitive.indices >= 0) {
-                c.indices[submeshIndex] = (accessorData[primitive.indices] as AccessorData<int>).data;
+                c.SetIndices(subMesh, ((AccessorData<int>)accessorData[primitive.indices]).data);
             } else {
                 int vertexCount = gltf.accessors[primitive.attributes.POSITION].count;
                 JobHandle? jh;
-                CalculateIndicesJob(gltf,primitive, vertexCount, c.topology, out c.indices[submeshIndex], out jh, out c.calculatedIndicesHandle );
+                CalculateIndicesJob(gltf, primitive, vertexCount, c.topology, out var indices, out jh, out c.calculatedIndicesHandle);
+                c.SetIndices(subMesh, indices);
                 c.jobHandle = jh.Value;
             }
             Profiler.EndSample();

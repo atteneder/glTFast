@@ -46,7 +46,7 @@ namespace GLTFast {
         
         /// <summary>
         /// Returns a fallback material to be used when no material was
-        /// assigned (provided by the <see cref="IMaterialGenerator"/>)
+        /// assigned (provided by the <see cref="Materials.IMaterialGenerator"/>)
         /// </summary>
         /// <returns>Default material</returns>
         Material GetDefaultMaterial();
@@ -114,6 +114,12 @@ namespace GLTFast {
         /// <param name="index">glTF image index</param>
         /// <returns>De-serialized glTF image</returns>
         Schema.Image GetSourceImage(int index = 0);
+        
+        /// <summary>
+        /// Get source (de-serialized glTF) light
+        /// </summary>
+        /// <param name="index">glTF light index</param>
+        /// <returns>De-serialized glTF light</returns>
         Schema.LightPunctual GetSourceLightPunctual(uint index);
 
         /// <summary>

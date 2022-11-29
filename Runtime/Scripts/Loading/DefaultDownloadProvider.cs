@@ -94,6 +94,7 @@ namespace GLTFast.Loading {
         /// <summary>
         /// Waits until the URI request is completed.
         /// </summary>
+        /// <returns>A task that represents the completion of the download</returns>
         public async Task WaitAsync() {
             while (!m_AsyncOperation.isDone) {
                 await Task.Yield();
@@ -145,7 +146,9 @@ namespace GLTFast.Loading {
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Releases previously allocated resources.
+        /// </summary>
         public void Dispose() {
             m_Request.Dispose();
             m_Request = null;

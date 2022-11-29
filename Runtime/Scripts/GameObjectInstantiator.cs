@@ -36,6 +36,9 @@ namespace GLTFast {
     /// </summary>
     public class GameObjectInstantiator : IInstantiator {
 
+        /// <summary>
+        /// Descriptor of a glTF scene instance
+        /// </summary>
         public class SceneInstance {
             
             /// <summary>
@@ -51,6 +54,7 @@ namespace GLTFast {
             /// <summary>
             /// <see cref="Animation" /> component. Is null if scene has no 
 			/// animation clips.
+            /// Only available if the built-in Animation module is enabled.
             /// </summary>
             public Animation legacyAnimation { get; private set; }
 #endif
@@ -105,8 +109,11 @@ namespace GLTFast {
         /// </summary>
         protected Dictionary<uint,GameObject> nodes;
 
-        
-        protected Transform sceneTransform;
+        /// <summary>
+        /// Transform representing the scene.
+        /// Root nodes will get parented to it.
+        /// </summary>
+        public Transform sceneTransform { get; protected set; }
         
         /// <summary>
         /// Contains information about the latest instance of a glTF scene
@@ -137,9 +144,6 @@ namespace GLTFast {
         public virtual void BeginScene(
             string name,
             uint[] rootNodeIndices
-#if UNITY_ANIMATION
-            ,AnimationClip[] animationClips
-#endif // UNITY_ANIMATION
             ) {
             Profiler.BeginSample("BeginScene");
             
@@ -157,8 +161,12 @@ namespace GLTFast {
                 sceneGameObject.layer = settings.layer;
             }
             sceneTransform = sceneGameObject.transform;
-            
+            Profiler.EndSample();
+        }
+
 #if UNITY_ANIMATION
+        /// <inheritdoc />
+        public void AddAnimation(AnimationClip[] animationClips) {
             if ((settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
                 // we want to create an Animator for non-legacy clips, and an Animation component for legacy clips.
                 var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
@@ -200,7 +208,7 @@ namespace GLTFast {
 // #endif // UNITY_EDITOR
 
                 if(isLegacyAnimation) {
-                    var animation = sceneGameObject.AddComponent<Animation>();
+                    var animation = sceneTransform.gameObject.AddComponent<Animation>();
                     
                     for (var index = 0; index < animationClips.Length; index++) {
                         var clip = animationClips[index];
@@ -212,10 +220,12 @@ namespace GLTFast {
 
                     sceneInstance.SetLegacyAnimation(animation);
                 }
+                else {
+                    sceneTransform.gameObject.AddComponent<Animator>();
+                }
             }
-            Profiler.EndSample();
-#endif // UNITY_ANIMATION
         }
+#endif // UNITY_ANIMATION
 
         /// <inheritdoc />
         public void CreateNode(
@@ -352,6 +362,9 @@ namespace GLTFast {
 
         /// <inheritdoc />
         public virtual void AddCamera(uint nodeIndex, uint cameraIndex) {
+            if ((settings.mask & ComponentType.Camera) == 0) {
+                return;
+            }
             var camera = gltf.GetSourceCamera(cameraIndex);
             switch (camera.typeEnum) {
             case Schema.Camera.Type.Orthographic:
@@ -484,6 +497,7 @@ namespace GLTFast {
         //     }
         // }
 
+        /// <inheritdoc />
         public void AddLightPunctual(
             uint nodeIndex,
             uint lightIndex

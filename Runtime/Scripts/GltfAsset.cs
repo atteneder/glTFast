@@ -71,7 +71,7 @@ namespace GLTFast
         /// Final URL, considering all options (like <seealso cref="streamingAsset"/>)
         /// </summary>
         // ReSharper disable once MemberCanBePrivate.Global
-        protected string FullUrl => streamingAsset
+        public string FullUrl => streamingAsset
             ? Path.Combine(Application.streamingAssetsPath, url)
             : url;
 

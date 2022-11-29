@@ -30,7 +30,8 @@ namespace GLTFast
     public class GltfBoundsAsset : GltfAsset {
 
         /// <summary>
-        /// If true, a box collider encapsulating the glTF asset is created
+        /// If true, a box collider encapsulating the glTF scene is created
+        /// (only if the built-in Physics module is enabled).
         /// </summary>
         [Tooltip("If true, a box collider encapsulating the glTF asset is created")]
         public bool createBoxCollider = true;

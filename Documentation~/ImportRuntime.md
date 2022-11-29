@@ -156,7 +156,7 @@ Two common use-cases are
 1. Scale-down (physically correct) intensities to compensate for the missing exposure control (or high sensitivity) of a render pipeline (e.g. Universal or Built-in Render Pipeline)
 2. Boost implausibly low light intensities
 
-See [Physical Light Units in glTF](./LightUnitys.md) for a detailed explaination.
+See [Physical Light Units in glTF](./LightUnits.md) for a detailed explaination.
 
 #### Instance Access
 
@@ -270,6 +270,12 @@ async Task CustomDeferAgentPerGltfImport() {
 
 > Note2 : Using the `TimeBudgetPerFrameDeferAgent` does **not** guarantee a stutter free frame rate. This is because some sub tasks of the loading routine (like uploading a texture to the GPU) may take too long, cannot be interrupted and **have** to be done on the main thread.
 
+### Disposing Resources
+
+When you no longer need a loaded instance of a glTF scene you might want to remove it and free up all its resources (mainly memory). For that purpose [`GltfImport`][GltfImport] implements `IDisposable`. Calling [`GltfImport.Dispose`][GltfImportDispose] will destroy all its resources, regardless whether there's still an instance that might references them.
+
+[GltfImport]: xref:GLTFast.GltfImport
+[GltfImportDispose]: xref:GLTFast.GltfImport.Dispose
 [GameObjectInstantiator]: xref:GLTFast.GameObjectInstantiator
 [gltfasset_component]: Images/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
 [ICodeLogger]: xref:GLTFast.Logging.ICodeLogger

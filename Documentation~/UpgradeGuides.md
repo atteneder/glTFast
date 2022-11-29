@@ -40,6 +40,10 @@ async void Start() {
 }
 ```
 
+### `IInstantiator` Changes
+
+`IInstantiator.BeginScene` signature dropped third parameter `AnimationClip[] animationClips`. As replacement `IInstantiator.AddAnimation` was added. It's only available when built-in Animation module is enabled.
+
 ### Texture Support
 
 The built-in packages [*Unity Web Request Texture*][uwrt] and [*Image Conversion*][ImgConv] provide support for PNG/Jpeg texture import and export. They are not a hard requirement anymore, so you…

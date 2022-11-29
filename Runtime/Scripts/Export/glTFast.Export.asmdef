@@ -1,9 +1,7 @@
 {
     "name": "glTFast.Export",
-    "rootNamespace": "",
     "references": [
         "glTFast",
-        "glTFastSchema",
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.RenderPipelines.Universal.Runtime",

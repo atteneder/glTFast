@@ -16,7 +16,7 @@
 using System.IO;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("glTFastEditorTests")]
+[assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
 
 namespace GLTFast.Schema {
     
@@ -115,6 +115,7 @@ namespace GLTFast.Schema {
         /// </summary>
         public Texture[] textures;
 
+        /// <inheritdoc cref="RootExtension"/>
         public RootExtension extensions;
         
 #if UNITY_ANIMATION

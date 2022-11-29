@@ -34,6 +34,8 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Export) `ExportSettings.componentMask` to include or exclude components from export based on type
 - (Export) `GameObjectExportSettings.layerMask` to include or exclude GameObjects from export based on their layer
 - (Import) Async instantiation methods. This helps to ensure a stable frame rate when loading bigger glTF scenes (#205)
+- `GltfGlobals` is public now
+- `GameObjectInstantiator.sceneTransform` is public now
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
@@ -57,6 +59,14 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Export) Disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`) are not exported by default (see also: new `GameObjectExportSettings.disabledComponents` setting to get old behavior)
 - (Export) GameObjects with tag `EditorOnly` (including children) don't get exported (similar to building a scene)
 - Added optional `CancellationToken` parameter to async import/export methods. This is preparation work for proper cancellation. Does not work as expected just yet.
+- Refactored Assembly Definitions
+  - `glTFastSchema` was merged into `glTFast` and thus removed
+  - `glTFastEditor` was renamed to `glTFast.Editor`
+  - `glTFastEditorTests` was renamed to `glTFast.Editor.Tests`
+- `GltfAsset.FullUrl` is public now (convenient for some tests)
+- `IInstantiator` changes
+  - `IInstantiator.BeginScene` signature dropped third parameter `AnimationClip[] animationClips` that was depending on built-in Animation module to be enabled.
+  - `IInstantiator.AddAnimation` was added. Only available when built-in Animation module is enabled.
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
@@ -73,6 +83,12 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - Shaders and shader graphs now have a proper main color and main texture assigned (except legacy shader graphs where this is not supported)
 - No more redundant default (fallback) materials are being generated
 - (JSON parsing) Potential NPDR when just one of many node extensions is present (#464)
+- (Import) Draco meshes are correctly named (#527)
+
+## [4.9.1] - 2022-11-28
+### Changed
+- (Import) An `Animator` component is added to the scene root GameObject when Mecanim is used as animation method (thanks [@hybridherbst][hybridherbst] for #519). This is convenient at design-time and a preparation for Playable API support.
+- (Import) Frame rate improvement when using Draco compression (thanks [@hybridherbst][hybridherbst] for #520).
 
 ## [4.9.0] - 2022-11-11
 ### Added

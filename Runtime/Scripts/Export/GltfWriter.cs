@@ -53,7 +53,7 @@ using System.Text;
 using UnityEditor;
 #endif
 
-[assembly: InternalsVisibleTo("glTFastEditor")]
+[assembly: InternalsVisibleTo("glTFast.Editor")]
 [assembly: InternalsVisibleTo("glTF-test-framework.Tests")]
 
 namespace GLTFast.Export {
@@ -190,9 +190,17 @@ namespace GLTFast.Export {
             if (uCamera.orthographic) {
                 camera.typeEnum = Camera.Type.Orthographic;
                 var oSize = uCamera.orthographicSize;
+                var aspectRatio = 1f;
+                var targetTexture = uCamera.targetTexture;
+                if (targetTexture == null) {
+                    aspectRatio = Screen.width / (float) Screen.height; 
+                }
+                else {
+                    aspectRatio = targetTexture.width / (float) targetTexture.height;
+                }
                 camera.orthographic = new CameraOrthographic {
                     ymag = oSize,
-                    xmag = oSize * Screen.width / Screen.height,
+                    xmag = oSize * aspectRatio,
                     // TODO: Check if local scale should be applied to near/far
                     znear = uCamera.nearClipPlane,
                     zfar = uCamera.farClipPlane
@@ -234,7 +242,7 @@ namespace GLTFast.Export {
             HDAdditionalLightData lightHd = null;
             if (renderPipeline == RenderPipeline.HighDefinition) {
                 lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
-                if (lightHd.type == HDLightType.Area) {
+                if (lightHd!=null && lightHd.type == HDLightType.Area) {
                     lightType = LightType.Area;
                 }
             }

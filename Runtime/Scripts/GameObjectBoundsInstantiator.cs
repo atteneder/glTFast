@@ -39,17 +39,11 @@ namespace GLTFast {
         public override void BeginScene(
             string name,
             uint[] rootNodeIndices
-#if UNITY_ANIMATION
-            ,AnimationClip[] animationClips
-#endif
             ) 
         {
             base.BeginScene(
 				name,
 				rootNodeIndices
-#if UNITY_ANIMATION
-				,animationClips
-#endif
 				);
             nodeBounds = new Dictionary<uint, Bounds>();
         }

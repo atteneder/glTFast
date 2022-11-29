@@ -33,15 +33,20 @@ namespace GLTFast {
         /// </summary>
         /// <param name="name">Name of the scene</param>
         /// <param name="rootNodeIndices">Indices of root level nodes in scene</param>
-        /// <param name="animationClips">Animation clips</param>
         void BeginScene(
             string name
             ,uint[] rootNodeIndices
-#if UNITY_ANIMATION
-            ,AnimationClip[] animationClips
-#endif
         );
 
+#if UNITY_ANIMATION
+        /// <summary>
+        /// Adds animation clips to the current scene.
+        /// Only available if the built-in Animation module is enabled.
+        /// </summary>
+        /// <param name="animationClips">Animation clips</param>
+        void AddAnimation(AnimationClip[] animationClips);
+#endif
+        
         /// <summary>
         /// Called for every Node in the glTF file
         /// </summary>
