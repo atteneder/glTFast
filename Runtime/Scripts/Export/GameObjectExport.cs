@@ -157,9 +157,7 @@ namespace GLTFast.Export {
             
             if (onIncludedLayer || children != null) {
                 nodeId = (int) m_Writer.AddNode(
-                    transform.localPosition,
-                    transform.localRotation,
-                    transform.localScale,
+                    transform,
                     children,
                     gameObject.name
                     );

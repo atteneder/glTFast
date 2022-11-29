@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -96,6 +95,7 @@ namespace GLTFast.Export {
         
         List<Scene> m_Scenes;
         List<Node> m_Nodes;
+        Dictionary<Transform, int> m_transformToNodeId;
         List<Mesh> m_Meshes;
         List<Skin> m_Skins;
         List<Transform[]> m_uBones;
@@ -142,25 +142,25 @@ namespace GLTFast.Export {
 
         /// <inheritdoc />
         public uint AddNode(
-            float3? translation = null,
-            quaternion? rotation = null,
-            float3? scale = null,
+            Transform transform,
             uint[] children = null,
             string name = null
         )
         {
             CertifyNotDisposed();
             m_State = State.ContentAdded;
-            var node = CreateNode(translation, rotation, scale, name);
+            var node = CreateNode(transform.localPosition, transform.localRotation, transform.localScale, name);
             node.children = children;
             m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
+            m_transformToNodeId = m_transformToNodeId ?? new Dictionary<Transform, int>();
             return (uint) m_Nodes.Count - 1;
         }
 
+        /// <inheritdoc />
         public void AddMeshAndSkinToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds)
         {
-            throw new NotImplementedException();
+            AddMeshAndSkinToNode(nodeId, uMesh, materialIds, null);
         }
 
         /// <inheritdoc />
@@ -967,7 +967,7 @@ namespace GLTFast.Export {
                     await Task.Yield();
                 }
                 Profiler.BeginSample("BindPoseMatricesJobSchedule");
-                job.Complete(); // TODO: Wait until thread is finished
+                job.Complete();
                 
                 accessor.bufferView = WriteBufferViewToBuffer(
                     resultMatrices.Reinterpret<byte>(sizeof(float)*4*4), BufferViewTarget.None
@@ -1670,7 +1670,7 @@ namespace GLTFast.Export {
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
-            job.Complete(); // TODO: Wait until thread is finished
+            job.Complete();
         }
 
         static unsafe JobHandle CreateConvertPositionAttributeJob(
@@ -1702,7 +1702,7 @@ namespace GLTFast.Export {
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
-            job.Complete(); // TODO: Wait until thread is finished
+            job.Complete();
         }
         
         static unsafe JobHandle CreateConvertSkinningAttributesJob(
@@ -1816,14 +1816,14 @@ namespace GLTFast.Export {
             return node;
         }
         
-        void AddMeshAndSkin(UnityEngine.Mesh uMesh, Transform[] bones, out int meshId, out int skinId)
+        bool AddMeshAndSkin(UnityEngine.Mesh uMesh, Transform[] bones, out int meshId, out int skinId)
         {
             meshId = -1;
             skinId = -1;
 #if !UNITY_EDITOR
             if (!uMesh.isReadable) {
                 m_Logger?.Error(LogCode.MeshNotReadable, uMesh.name);
-                return;
+                return false;
             }
 #endif
        
@@ -1842,7 +1842,7 @@ namespace GLTFast.Export {
             if (m_SkinMap != null && m_SkinMap.TryGetValue(uMesh, out var skin))
             {
                 skinId = m_Skins.IndexOf(skin);
-                if (skinId != -1) return;
+                if (skinId != -1) return true;
             }
             
             m_SkinMap = m_SkinMap ?? new Dictionary<UnityEngine.Mesh, Skin>();
@@ -1853,6 +1853,8 @@ namespace GLTFast.Export {
             m_Skins.Add(newSkin);
             m_SkinMap[uMesh] = newSkin;
             m_uBones.Add(bones);
+
+            return true;
         }
 
         unsafe int WriteBufferViewToBuffer( byte[] bufferViewData, BufferViewTarget target, int? byteStride = null) {
