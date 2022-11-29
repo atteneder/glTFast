@@ -844,11 +844,7 @@ namespace GLTFast {
             
             if(success) {
 
-                bool? gltfBinary = download.isBinary;
-                if (!gltfBinary.HasValue)
-                {
-                    gltfBinary = UriHelper.IsGltfBinary(url);
-                }
+                var gltfBinary = download.isBinary ?? UriHelper.IsGltfBinary(url);
 
                 if (gltfBinary ?? false) {
                     var data = download.data;
@@ -1103,11 +1099,9 @@ namespace GLTFast {
                     } else {
                         ImageFormat imgFormat;
                         if(m_ImageFormats[imageIndex]==ImageFormat.Unknown) {
-                            if(string.IsNullOrEmpty(img.mimeType)) {
-                                imgFormat = UriHelper.GetImageFormatFromUri(img.uri);
-                            } else {
-                                imgFormat = GetImageFormatFromMimeType(img.mimeType);
-                            }
+                            imgFormat = string.IsNullOrEmpty(img.mimeType)
+                                ? UriHelper.GetImageFormatFromUri(img.uri)
+                                : GetImageFormatFromMimeType(img.mimeType);
                             m_ImageFormats[imageIndex] = imgFormat;
                         } else {
                             imgFormat=m_ImageFormats[imageIndex];
@@ -1183,7 +1177,7 @@ namespace GLTFast {
             }
 
             if(m_Buffers!=null) {
-                Profiler.BeginSample("CreateGlbBinChungs");
+                Profiler.BeginSample("CreateGlbBinChunks");
                 for( int i=0; i<m_Buffers.Length; i++ ) {
                     if(i==0 && m_GlbBinChunk.HasValue) {
                         // Already assigned in LoadGltfBinary
@@ -1681,7 +1675,7 @@ namespace GLTFast {
                             var newImg = UnityEngine.Object.Instantiate(img);
                             m_Resources.Add(newImg);
 #if DEBUG
-                            newImg.name = string.Format("{0}_sampler{1}",img.name,txt.sampler);
+                            newImg.name = $"{img.name}_sampler{txt.sampler}";
                             m_Logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
                             sampler?.Apply(newImg, m_Settings.defaultMinFilterMode, m_Settings.defaultMagFilterMode);
@@ -2310,13 +2304,11 @@ namespace GLTFast {
                 var img = srcImages[i];
                 ImageFormat imgFormat = m_ImageFormats[i];
                 if(imgFormat==ImageFormat.Unknown) {
-                    if(string.IsNullOrEmpty(img.mimeType)) {
+                    imgFormat = string.IsNullOrEmpty(img.mimeType)
                         // Image is missing mime type
                         // try to determine type by file extension
-                        imgFormat = UriHelper.GetImageFormatFromUri(img.uri);
-                    } else {
-                        imgFormat = GetImageFormatFromMimeType(img.mimeType);
-                    }
+                        ? UriHelper.GetImageFormatFromUri(img.uri)
+                        : GetImageFormatFromMimeType(img.mimeType);
                 }
                 Profiler.EndSample();
 
@@ -2397,7 +2389,7 @@ namespace GLTFast {
         }
 
         static string GetImageName(Image img, int index) {
-            return string.IsNullOrEmpty(img.name) ? string.Format("image_{0}",index) : img.name;
+            return string.IsNullOrEmpty(img.name) ? $"image_{index}" : img.name;
         }
 
         static void SafeDestroy(UnityEngine.Object obj) {
@@ -2417,7 +2409,7 @@ namespace GLTFast {
             Profiler.BeginSample("LoadAccessorData.Init");
 
             var mainBufferTypes = new Dictionary<MeshPrimitive,MainBufferType>();
-            var meshCount = gltf.meshes == null ? 0 : gltf.meshes.Length;
+            var meshCount = gltf.meshes?.Length ?? 0;
             m_MeshPrimitiveCluster = gltf.meshes==null ? null : new Dictionary<MeshPrimitive,List<MeshPrimitive>>[meshCount];
             Dictionary<MeshPrimitive, MorphTargetsContext> morphTargetsContexts = null;
 #if DEBUG
@@ -3362,7 +3354,7 @@ namespace GLTFast {
         }
 #endregion IGltfBuffers
 
-        ImageFormat GetImageFormatFromMimeType(string mimeType) {
+        static ImageFormat GetImageFormatFromMimeType(string mimeType) {
             if(!mimeType.StartsWith("image/")) return ImageFormat.Unknown;
             var sub = mimeType.Substring(6);
             switch(sub) {
@@ -3423,10 +3415,10 @@ namespace GLTFast {
 
 #if UNITY_EDITOR
         /// <summary>
-        /// Returns true if this import is for an asset, in contraast to
+        /// Returns true if this import is for an asset, in contrast to
         /// runtime loading.
         /// </summary>
-        bool isEditorImport => !EditorApplication.isPlaying;
+        static bool isEditorImport => !EditorApplication.isPlaying;
 #endif // UNITY_EDITOR
     }
 }
