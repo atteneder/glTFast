@@ -83,6 +83,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - Shaders and shader graphs now have a proper main color and main texture assigned (except legacy shader graphs where this is not supported)
 - No more redundant default (fallback) materials are being generated
 - (JSON parsing) Potential NPDR when just one of many node extensions is present (#464)
+- (Import) Draco meshes are correctly named (#527)
 
 ## [4.9.1] - 2022-11-28
 ### Changed
