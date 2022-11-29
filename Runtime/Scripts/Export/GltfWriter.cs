@@ -93,6 +93,7 @@ namespace GLTFast.Export {
         HashSet<Extension> m_ExtensionsUsedOnly;
         HashSet<Extension> m_ExtensionsRequired;
         
+
         List<Scene> m_Scenes;
         List<Node> m_Nodes;
         Dictionary<Transform, int> m_transformToNodeId;
@@ -825,7 +826,6 @@ namespace GLTFast.Export {
             var uMesh = m_UnityMeshes[meshId];
 
             var vertexAttributes = uMesh.GetVertexAttributes();
-            
             var strides = new int[k_MAXStreamCount];
             var alignments = new int[k_MAXStreamCount];
 
@@ -1144,7 +1144,7 @@ namespace GLTFast.Export {
                     outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
                 }
             }
-
+            
             foreach (var pair in attrDataDict) {
                 var vertexAttribute = pair.Key;
                 var attrData = pair.Value;
@@ -1157,7 +1157,7 @@ namespace GLTFast.Export {
                             vertexCount,
                             inputStreams[attrData.stream],
                             outputStreams[attrData.stream]
-                        );
+                            );
                         break;
                     case VertexAttribute.Tangent:
                         await ConvertTangentAttribute(
@@ -1166,7 +1166,7 @@ namespace GLTFast.Export {
                             vertexCount,
                             inputStreams[attrData.stream],
                             outputStreams[attrData.stream]
-                        );
+                            );
                         break;
                     
                     case VertexAttribute.BlendIndices:
@@ -1180,13 +1180,14 @@ namespace GLTFast.Export {
                             vertexCount,
                             inputStreams[attrData.stream],
                             outputStreams[attrData.stream]
-                        );
+                            );
                         Profiler.EndSample();
 
                         strides[attrData.stream] -= strideDifference;
                         break;
                 }
             }
+
             var bufferViewIds = new int[streamCount];
             for (var stream = 0; stream < streamCount; stream++) {
                 bufferViewIds[stream] = WriteBufferViewToBuffer(
@@ -1670,7 +1671,7 @@ namespace GLTFast.Export {
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
-            job.Complete();
+            job.Complete(); // TODO: Wait until thread is finished
         }
 
         static unsafe JobHandle CreateConvertPositionAttributeJob(
