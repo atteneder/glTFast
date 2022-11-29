@@ -188,8 +188,7 @@ namespace GLTFast.Export {
                 }
             } else
             if (gameObject.TryGetComponent(out SkinnedMeshRenderer smr)) {
-                if (smr.enabled || m_Settings.disabledComponents)
-                {
+                if (smr.enabled || m_Settings.disabledComponents) {
                     bones = smr.bones;
                     mesh = smr.sharedMesh;
                     smr.GetSharedMaterials(tempMaterials);
