@@ -26,7 +26,6 @@ namespace GLTFast {
 
     class PrimitiveCreateContext : PrimitiveCreateContextBase {
 
-        public Mesh mesh;
         public VertexBufferConfigBase vertexData;
 
         public JobHandle jobHandle;
@@ -36,13 +35,17 @@ namespace GLTFast {
 
         public MeshTopology topology;
 
+        public PrimitiveCreateContext(string meshName) : base(meshName)
+        {
+        }
+        
         public override bool IsCompleted => jobHandle.IsCompleted;
 
         public override async Task<Primitive?> CreatePrimitive() {
             Profiler.BeginSample("CreatePrimitive");
             jobHandle.Complete();
             var msh = new UnityEngine.Mesh();
-            msh.name = mesh.name;
+            msh.name = m_MeshName;
 
             vertexData.ApplyOnMesh(msh,defaultMeshUpdateFlags);
 

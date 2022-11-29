@@ -32,7 +32,7 @@ namespace GLTFast {
 
         public override bool IsCompleted => dracoTask!=null && dracoTask.IsCompleted;
 
-        public PrimitiveDracoCreateContext(Bounds? bounds) {
+        public PrimitiveDracoCreateContext(string meshName, Bounds? bounds) : base(meshName) {
             this.bounds = bounds;
         }
 
@@ -57,6 +57,8 @@ namespace GLTFast {
                 return null;
             }
 
+            mesh.name = m_MeshName;
+            
             if (bounds.HasValue) {
                 mesh.bounds = bounds.Value;
                 

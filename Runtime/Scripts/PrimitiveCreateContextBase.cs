@@ -27,12 +27,18 @@ namespace GLTFast {
             | MeshUpdateFlags.DontRecalculateBounds
             | MeshUpdateFlags.DontResetBoneBounds
             | MeshUpdateFlags.DontValidateIndices;
+
+        protected string m_MeshName;
         
         public int primtiveIndex;
         public int[] materials;
         public bool needsNormals;
         public bool needsTangents;
         public abstract bool IsCompleted {get;}
+
+        protected PrimitiveCreateContextBase(string meshName) {
+            m_MeshName = meshName;
+        }
         
         public MorphTargetsContext morphTargetsContext;
         

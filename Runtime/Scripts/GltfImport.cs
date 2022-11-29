@@ -2776,7 +2776,7 @@ namespace GLTFast {
                             if (!bounds.HasValue) {
                                 logger.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
                             }
-                            context = new PrimitiveDracoCreateContext(bounds);
+                            context = new PrimitiveDracoCreateContext(mesh.name, bounds);
                             context.materials = new int[1];
                         }
                         else
@@ -2784,7 +2784,7 @@ namespace GLTFast {
                         {
                             PrimitiveCreateContext c;
                             if(context==null) {
-                                c = new PrimitiveCreateContext();
+                                c = new PrimitiveCreateContext(mesh.name);
                                 c.indices = new int[cluster.Count][];
                                 c.materials = new int[cluster.Count];
                             } else {
@@ -2891,27 +2891,6 @@ namespace GLTFast {
         }
 
         async Task AssignAllAccessorData( Root gltf ) {
-            if (gltf.meshes != null) {
-                Profiler.BeginSample("AssignAllAccessorData.Primitive");
-                int i=0;
-                for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
-                    var mesh = gltf.meshes[meshIndex];
-
-                    foreach( var cluster in meshPrimitiveCluster[meshIndex]) {
-    #if DRACO_UNITY
-                        if( !cluster.Value[0].isDracoCompressed )
-    #endif
-                        {
-                            // Create one PrimitiveCreateContext per Primitive cluster
-                            PrimitiveCreateContext c = (PrimitiveCreateContext) primitiveContexts[i];
-                            c.mesh = mesh;
-                        }
-                        i++;
-                    }
-                }
-                Profiler.EndSample();
-            }
-            
             if(gltf.skins!=null) {
                 for (int s = 0; s < gltf.skins.Length; s++)
                 {
