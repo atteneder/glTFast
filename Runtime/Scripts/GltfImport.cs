@@ -926,29 +926,32 @@ namespace GLTFast {
                 return false;
             }
 
-            var bufferCount = m_GltfRoot.buffers?.Length ?? 0;
-            if(bufferCount>0) {
-                m_Buffers = new byte[bufferCount][];
-                m_BufferHandles = new GCHandle?[bufferCount];
-                m_NativeBuffers = new NativeArray<byte>[bufferCount];
-                m_BinChunks = new GlbBinChunk[bufferCount];
-            }
+            if (m_GltfRoot.buffers != null) {
+                var bufferCount = m_GltfRoot.buffers.Length;
+                if (bufferCount > 0) {
+                    m_Buffers = new byte[bufferCount][];
+                    m_BufferHandles = new GCHandle?[bufferCount];
+                    m_NativeBuffers = new NativeArray<byte>[bufferCount];
+                    m_BinChunks = new GlbBinChunk[bufferCount];
+                }
 
-            for( int i=0; i<bufferCount;i++) {
-                var buffer = m_GltfRoot.buffers[i];
-                if( !string.IsNullOrEmpty(buffer.uri) ) {
-                    if(buffer.uri.StartsWith("data:")) {
-                        var decodedBuffer = await DecodeEmbedBufferAsync(
-                            buffer.uri,
-                            true // usually there's just one buffer and it's time-critical
+                for (var i = 0; i < bufferCount; i++) {
+                    var buffer = m_GltfRoot.buffers[i];
+                    if (!string.IsNullOrEmpty(buffer.uri)) {
+                        if (buffer.uri.StartsWith("data:")) {
+                            var decodedBuffer = await DecodeEmbedBufferAsync(
+                                buffer.uri,
+                                true // usually there's just one buffer and it's time-critical
                             );
-                        m_Buffers[i] = decodedBuffer?.Item1;
-                        if(m_Buffers[i]==null) {
-                            m_Logger?.Error(LogCode.EmbedBufferLoadFailed);
-                            return false;
+                            m_Buffers[i] = decodedBuffer?.Item1;
+                            if (m_Buffers[i] == null) {
+                                m_Logger?.Error(LogCode.EmbedBufferLoadFailed);
+                                return false;
+                            }
                         }
-                    } else {
-                        LoadBuffer( i, UriHelper.GetUriString(buffer.uri,baseUri) );
+                        else {
+                            LoadBuffer(i, UriHelper.GetUriString(buffer.uri, baseUri));
+                        }
                     }
                 }
             }
