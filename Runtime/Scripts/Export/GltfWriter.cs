@@ -154,8 +154,10 @@ namespace GLTFast.Export {
             node.children = children;
             m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
-            m_transformToNodeId = m_transformToNodeId ?? new Dictionary<Transform, int>();
-            return (uint) m_Nodes.Count - 1;
+            m_transformToNodeId = m_transformToNodeId ?? new Dictionary<Transform, uint>();
+            var nodeId = (uint) m_Nodes.Count - 1;
+            m_transformToNodeId.Add(transform, nodeId);
+            return nodeId;
         }
 
         /// <inheritdoc />
@@ -942,8 +944,7 @@ namespace GLTFast.Export {
                 List<uint> joints = new List<uint>();
                 for (int i = 0; i < uBones.Length; i++)
                 {
-                    uint boneIdx = (uint) m_Nodes.FindIndex(node => node.name == uBones[i].name);
-                    joints.Add(boneIdx);
+                    joints.Add(m_transformToNodeId[uBones[i]]);
                 }
 
                 skin.joints = joints.ToArray();
