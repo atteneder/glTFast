@@ -84,6 +84,11 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - No more redundant default (fallback) materials are being generated
 - (JSON parsing) Potential NPDR when just one of many node extensions is present (#464)
 
+## [4.9.1] - 2022-11-28
+### Changed
+- (Import) An `Animator` component is added to the scene root GameObject when Mecanim is used as animation method (thanks [@hybridherbst][hybridherbst] for #519). This is convenient at design-time and a preparation for Playable API support.
+- (Import) Frame rate improvement when using Draco compression (thanks [@hybridherbst][hybridherbst] for #520).
+
 ## [4.9.0] - 2022-11-11
 ### Added
 - (Export) HDRP metallic/roughness texture assignment can be omitted by setting the corresponding smoothness remap range min equal to max and metallic factor to 0. Useful for only exporting the ambient occlusion channel of a mask map.

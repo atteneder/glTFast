@@ -220,6 +220,9 @@ namespace GLTFast {
 
                     sceneInstance.SetLegacyAnimation(animation);
                 }
+                else {
+                    sceneTransform.gameObject.AddComponent<Animator>();
+                }
             }
         }
 #endif // UNITY_ANIMATION
