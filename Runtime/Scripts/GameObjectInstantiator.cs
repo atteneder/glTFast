@@ -359,6 +359,9 @@ namespace GLTFast {
 
         /// <inheritdoc />
         public virtual void AddCamera(uint nodeIndex, uint cameraIndex) {
+            if ((settings.mask & ComponentType.Camera) == 0) {
+                return;
+            }
             var camera = gltf.GetSourceCamera(cameraIndex);
             switch (camera.typeEnum) {
             case Schema.Camera.Type.Orthographic:
