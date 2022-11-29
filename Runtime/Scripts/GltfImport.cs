@@ -25,27 +25,18 @@
 
 // #define MEASURE_TIMINGS
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
-using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.Profiling;
-using Unity.Collections;
-using Unity.Jobs;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
+using System.Threading;
+using System;
+
 using GLTFast.Jobs;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Mathematics;
-using Debug = UnityEngine.Debug;
-using Object = UnityEngine.Object;
-#if UNITY_EDITOR
-using UnityEditor;
+#if MEASURE_TIMINGS
+using GLTFast.Tests;
 #endif
 #if KTX
 using KtxUnity;
@@ -53,9 +44,20 @@ using KtxUnity;
 #if MESHOPT
 using Meshoptimizer;
 #endif
-#if MEASURE_TIMINGS
-using GLTFast.Tests;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
+#if UNITY_EDITOR
+using UnityEditor;
 #endif
+using UnityEngine.Assertions;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Profiling;
+using UnityEngine;
+
+using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 [assembly: InternalsVisibleTo("glTFast.Editor")]
 [assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
