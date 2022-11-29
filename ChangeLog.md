@@ -35,6 +35,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Export) `GameObjectExportSettings.layerMask` to include or exclude GameObjects from export based on their layer
 - (Import) Async instantiation methods. This helps to ensure a stable frame rate when loading bigger glTF scenes (#205)
 - `GltfGlobals` is public now
+- `GameObjectInstantiator.sceneTransform` is public now
 ### Changed
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator

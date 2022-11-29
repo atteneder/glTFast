@@ -113,7 +113,7 @@ namespace GLTFast {
         /// Transform representing the scene.
         /// Root nodes will get parented to it.
         /// </summary>
-        protected Transform sceneTransform;
+        public Transform sceneTransform { get; protected set; }
         
         /// <summary>
         /// Contains information about the latest instance of a glTF scene
