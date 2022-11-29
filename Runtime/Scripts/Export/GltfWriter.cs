@@ -833,6 +833,9 @@ namespace GLTFast.Export {
             var vertexCount = uMesh.vertexCount;
             var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
             
+
+            var blendIndicesStream = -1;
+
             foreach (var attribute in vertexAttributes) {
                 var attrData = new AttributeData {
                     offset = strides[attribute.stream],
@@ -912,6 +915,7 @@ namespace GLTFast.Export {
                         break;
                     case VertexAttribute.BlendIndices:
                         attributes.JOINTS_0 = accessorId;
+                        blendIndicesStream = attribute.stream;
                         accessor.componentType = GLTFComponentType.UnsignedShort;
                         break;
                     default:
@@ -1130,7 +1134,15 @@ namespace GLTFast.Export {
             
             for (var stream = 0; stream < streamCount; stream++) {
                 inputStreams[stream] = meshData.GetVertexData<byte>(stream);
-                outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
+
+                if (stream == blendIndicesStream) {
+                    // indices are uint*4 in Unity, and ushort*4 in glTF
+                    var strideDifference = (sizeof(uint) - sizeof(ushort)) * 4; 
+                    outputStreams[stream] = new NativeArray<byte>(inputStreams[stream].Length - strideDifference * vertexCount, Allocator.TempJob);
+                }
+                else {
+                    outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
+                }
             }
 
             foreach (var pair in attrDataDict) {
@@ -1159,12 +1171,8 @@ namespace GLTFast.Export {
                     
                     case VertexAttribute.BlendIndices:
                         Profiler.BeginSample("ConvertSkinningAttributesJob");
-                        var previousArraySize = outputStreams[attrData.stream].Length;
                         // indices are uint*4 in Unity, and ushort*4 in glTF
                         var strideDifference = (sizeof(uint) - sizeof(ushort)) * 4; 
-                        outputStreams[attrData.stream].Dispose();
-                        // gltf data will be smaller, resize the native array
-                        outputStreams[attrData.stream] = new NativeArray<byte>(previousArraySize - strideDifference * vertexCount, Allocator.TempJob);
                         await ConvertSkinningAttributes(
                             attrData,
                             strides[attrData.stream],
