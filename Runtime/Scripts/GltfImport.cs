@@ -837,6 +837,10 @@ namespace GLTFast {
 
             var download = await m_DownloadProvider.Request(url);
             var success = download.success;
+
+            if (cancellationToken.IsCancellationRequested) {
+                return true;
+            }
             
             if(success) {
 
