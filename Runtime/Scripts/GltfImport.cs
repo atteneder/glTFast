@@ -380,12 +380,12 @@ namespace GLTFast {
             )
         {
             if (GltfGlobals.IsGltfBinary(data)) {
-                return await LoadGltfBinary(data, uri, importSettings);
+                return await LoadGltfBinary(data, uri, importSettings, cancellationToken);
             }
 
             // Fallback interpreting data as string
             var json = System.Text.Encoding.UTF8.GetString(data, 0, data.Length);
-            return await LoadGltfJson(json, uri, importSettings);
+            return await LoadGltfJson(json, uri, importSettings, cancellationToken);
         }
         
         /// <summary>
@@ -536,7 +536,7 @@ namespace GLTFast {
             )
         {
             var instantiator = new GameObjectInstantiator(this, parent);
-            var success = await InstantiateMainSceneAsync(instantiator);
+            var success = await InstantiateMainSceneAsync(instantiator, cancellationToken);
             return success;
         }
 
@@ -561,7 +561,7 @@ namespace GLTFast {
 #endif
                 return true;
             }
-            return await InstantiateSceneAsync(instantiator, m_GltfRoot.scene);
+            return await InstantiateSceneAsync(instantiator, m_GltfRoot.scene, cancellationToken);
         }
 
         /// <summary>
@@ -582,7 +582,7 @@ namespace GLTFast {
             if (!LoadingDone || LoadingError) return false;
             if (sceneIndex < 0 || sceneIndex > m_GltfRoot.scenes.Length) return false;
             var instantiator = new GameObjectInstantiator(this, parent);
-            var success = await InstantiateSceneAsync(instantiator,sceneIndex);
+            var success = await InstantiateSceneAsync(instantiator,sceneIndex, cancellationToken);
             return success;
         }
 
