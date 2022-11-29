@@ -1345,7 +1345,7 @@ namespace GLTFast {
 #if UNITY_IMAGECONVERSION
                 var downloadTask = LoadImageFromBytes(imageIndex)
                     ? (TextureDownloadBase) new TextureDownload<IDownload>(m_DownloadProvider.Request(url))
-                    : (TextureDownloadBase) new TextureDownload<ITextureDownload>(m_DownloadProvider.RequestTexture(url,nonReadable));
+                    : new TextureDownload<ITextureDownload>(m_DownloadProvider.RequestTexture(url,nonReadable));
                 if(m_TextureDownloadTasks==null) {
                     m_TextureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
                 }
@@ -1519,7 +1519,7 @@ namespace GLTFast {
                 for (var i = 0; i < m_GltfRoot.bufferViews.Length; i++) {
                     var bufferView = m_GltfRoot.bufferViews[i];
                     if (bufferView.extensions?.EXT_meshopt_compression != null) {
-                        var meshopt = bufferView.extensions?.EXT_meshopt_compression;
+                        var meshopt = bufferView.extensions.EXT_meshopt_compression;
                         if (jobHandlesList == null) {
                             m_MeshoptBufferViews = new Dictionary<int, NativeArray<byte>>();
                             jobHandlesList = new List<JobHandle>(m_GltfRoot.bufferViews.Length);
@@ -1591,6 +1591,8 @@ namespace GLTFast {
             }
             await m_DeferAgent.BreakPoint();
 
+            // RedundantAssignment potentially becomes necessary when MESHOPT is not available
+            // ReSharper disable once RedundantAssignment
             var success = true;
 
 #if MESHOPT
@@ -2268,11 +2270,12 @@ namespace GLTFast {
         }
 
         /// <summary>
-        /// Reinterprets a NativeSlice<byte> to another type of NativeArray.
+        /// Reinterprets a NativeSlice&lt;byte&gt; to another type of NativeArray.
         /// TODO: Remove once Unity.Collections supports this for NativeSlice (NativeArray only atm)
         /// </summary>
         /// <param name="slice"></param>
         /// <param name="count">Target type element count</param>
+        /// <param name="offset">Byte offset into the slice</param>
         /// <typeparam name="T">Target type</typeparam>
         /// <returns></returns>
         static unsafe NativeArray<T> Reinterpret<T>(NativeSlice<byte> slice, int count, int offset = 0 ) where T : struct {
@@ -2685,7 +2688,7 @@ namespace GLTFast {
             }
 #endif
 
-            /// Retrieve indices data jobified
+            // Retrieve indices data jobified
             m_AccessorData = new AccessorDataBase[gltf.accessors.Length];
 
             for(int i=0; i<m_AccessorData.Length; i++) {
@@ -2801,7 +2804,7 @@ namespace GLTFast {
                             } else {
                                 c = context as PrimitiveCreateContext;
                             }
-                            // PreparePrimitiveIndices(gltf,mesh,primitive,ref c,primIndex);
+                            // PreparePrimitiveIndices(gltf,primitive,ref c,primIndex);
                             context = c;
                         }
 
@@ -2860,7 +2863,6 @@ namespace GLTFast {
             int i=0;
             bool schedule = false;
             for( int meshIndex = 0; meshIndex<gltf.meshes.Length; meshIndex++ ) {
-                var mesh = gltf.meshes[meshIndex];
                 foreach( var kvp in m_MeshPrimitiveCluster[meshIndex]) {
                     var cluster = kvp.Value;
                     
@@ -2873,7 +2875,7 @@ namespace GLTFast {
                             var c = (PrimitiveDracoCreateContext) context;
                             await m_DeferAgent.BreakPoint();
                             Profiler.BeginSample( "CreatePrimitiveContext");
-                            PreparePrimitiveDraco(gltf,mesh,primitive,ref c);
+                            PreparePrimitiveDraco(gltf,primitive,ref c);
                             Profiler.EndSample();
                             schedule = true;
                         } else
@@ -2882,7 +2884,7 @@ namespace GLTFast {
                             PrimitiveCreateContext c = (PrimitiveCreateContext) context;
                             c.vertexData = m_VertexAttributes[kvp.Key];
                             Profiler.BeginSample( "CreatePrimitiveContext");
-                            PreparePrimitiveIndices(gltf,mesh,primitive,ref c,primIndex);
+                            PreparePrimitiveIndices(gltf,primitive,ref c,primIndex);
                             Profiler.EndSample();
                         }
                     }   
@@ -2904,7 +2906,7 @@ namespace GLTFast {
                     Profiler.BeginSample("AssignAllAccessorData.Skin");
                     var skin = gltf.skins[s];
                     if (skin.inverseBindMatrices >= 0) {
-                        m_SkinsInverseBindMatrices[s] = (m_AccessorData[skin.inverseBindMatrices] as AccessorNativeData<Matrix4x4>).data.ToArray();
+                        m_SkinsInverseBindMatrices[s] = ((AccessorNativeData<Matrix4x4>)m_AccessorData[skin.inverseBindMatrices]).data.ToArray();
                     }
                     Profiler.EndSample();
                     await m_DeferAgent.BreakPoint();
@@ -2912,7 +2914,7 @@ namespace GLTFast {
             }
         }
 
-        void PreparePrimitiveIndices( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c, int subMesh = 0 ) {
+        void PreparePrimitiveIndices(Root gltf, MeshPrimitive primitive, ref PrimitiveCreateContext c, int subMesh = 0) {
             Profiler.BeginSample("PreparePrimitiveIndices");
             switch(primitive.mode) {
             case DrawMode.Triangles:
@@ -2943,16 +2945,14 @@ namespace GLTFast {
                 c.SetIndices(subMesh, ((AccessorData<int>)m_AccessorData[primitive.indices]).data);
             } else {
                 int vertexCount = gltf.accessors[primitive.attributes.POSITION].count;
-                JobHandle? jh;
-                CalculateIndicesJob(gltf, primitive, vertexCount, c.topology, out var indices, out jh, out c.calculatedIndicesHandle);
+                CalculateIndicesJob(primitive, vertexCount, c.topology, out var indices, out c.jobHandle, out c.calculatedIndicesHandle);
                 c.SetIndices(subMesh, indices);
-                c.jobHandle = jh.Value;
             }
             Profiler.EndSample();
         }
         
 #if DRACO_UNITY
-        void PreparePrimitiveDraco( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveDracoCreateContext c ) {
+        void PreparePrimitiveDraco( Root gltf, MeshPrimitive primitive, ref PrimitiveDracoCreateContext c ) {
             var dracoExt = primitive.extensions.KHR_draco_mesh_compression;
             
             var bufferView = gltf.bufferViews[dracoExt.bufferView];
@@ -2962,7 +2962,15 @@ namespace GLTFast {
         }
 #endif
 
-        unsafe void CalculateIndicesJob(Root gltf, MeshPrimitive primitive, int vertexCount, MeshTopology topology, out int[] indices, out JobHandle? jobHandle, out GCHandle resultHandle ) {
+        static unsafe void CalculateIndicesJob(
+            MeshPrimitive primitive,
+            int vertexCount,
+            MeshTopology topology,
+            out int[] indices,
+            out JobHandle jobHandle,
+            out GCHandle resultHandle
+            )
+        {
             Profiler.BeginSample("CalculateIndicesJob");
             // No indices: calculate them
             bool lineLoop = primitive.mode == DrawMode.LineLoop;
@@ -3120,27 +3128,28 @@ namespace GLTFast {
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
-            case GLTFComponentType.Float when flip: {
-                var job = new ConvertVector3FloatToFloatJob {
-                    input = (float3*)bufferView.GetUnsafeReadOnlyPtr(),
-                    result = (float3*)vectors.GetUnsafePtr()
-                };
-                jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
-                break;
-            }
-            case GLTFComponentType.Float when !flip: {
-                var job = new MemCopyJob {
-                    input = (float*)bufferView.GetUnsafeReadOnlyPtr(),
-                    bufferSize = accessor.count * 12,
-                    result = (float*)vectors.GetUnsafePtr()
-                };
-                jobHandle = job.Schedule();
-                break;
-            }
-            default:
-                m_Logger?.Error(LogCode.IndexFormatInvalid, accessor.componentType.ToString());
-                jobHandle = null;
-                break;
+                case GLTFComponentType.Float: {
+                    if (flip) {
+                        var job = new ConvertVector3FloatToFloatJob {
+                            input = (float3*)bufferView.GetUnsafeReadOnlyPtr(),
+                            result = (float3*)vectors.GetUnsafePtr()
+                        };
+                        jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
+                    }
+                    else {
+                        var job = new MemCopyJob {
+                            input = (float*)bufferView.GetUnsafeReadOnlyPtr(),
+                            bufferSize = accessor.count * 12,
+                            result = (float*)vectors.GetUnsafePtr()
+                        };
+                        jobHandle = job.Schedule();    
+                    }
+                    break;
+                }
+                default:
+                    m_Logger?.Error(LogCode.IndexFormatInvalid, accessor.componentType.ToString());
+                    jobHandle = null;
+                    break;
             }
             Profiler.EndSample();
             Profiler.EndSample();
@@ -3352,24 +3361,6 @@ namespace GLTFast {
             }
         }
 #endregion IGltfBuffers
-
-        /// <summary>
-        /// Determines whether color accessor data can be retrieved as Color[] (floats) or Color32[] (unsigned bytes)
-        /// </summary>
-        /// <param name="gltf"></param>
-        /// <param name="accessorIndex"></param>
-        /// <returns>True if unsinged byte based colors are sufficient, false otherwise.</returns>
-        bool IsColorAccessorByte( Accessor colorAccessor ) {
-            return colorAccessor.componentType == GLTFComponentType.UnsignedByte;
-        }
-
-        bool IsKnownImageMimeType(string mimeType) {
-            return GetImageFormatFromMimeType(mimeType) != ImageFormat.Unknown;
-        }
-        
-        bool IsKnownImageFileExtension(string path) {
-            return UriHelper.GetImageFormatFromUri(path) != ImageFormat.Unknown;
-        }
 
         ImageFormat GetImageFormatFromMimeType(string mimeType) {
             if(!mimeType.StartsWith("image/")) return ImageFormat.Unknown;
