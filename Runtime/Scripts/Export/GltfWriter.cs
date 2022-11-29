@@ -836,7 +836,8 @@ namespace GLTFast.Export {
             var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
             
 
-            var blendIndicesStream = -1;
+            var blendWeightsStream = -1;
+            var skinIndicesStream = -1;
 
             foreach (var attribute in vertexAttributes) {
                 var attrData = new AttributeData {
@@ -914,10 +915,11 @@ namespace GLTFast.Export {
                         break;
                     case VertexAttribute.BlendWeight:
                         attributes.WEIGHTS_0 = accessorId;
+                        blendWeightsStream = attribute.stream;
                         break;
                     case VertexAttribute.BlendIndices:
                         attributes.JOINTS_0 = accessorId;
-                        blendIndicesStream = attribute.stream;
+                        skinIndicesStream = attribute.stream;
                         accessor.componentType = GLTFComponentType.UnsignedShort;
                         break;
                     default:
@@ -1133,28 +1135,42 @@ namespace GLTFast.Export {
             var inputStreams = new NativeArray<byte>[streamCount];
             var outputStreams = new NativeArray<byte>[streamCount];
             
+            // indices are uint*4 in Unity, and ushort*4 in glTF
+            var skinIndicesStrideDifference = (sizeof(uint) - sizeof(ushort)) * 4; 
+   
             for (var stream = 0; stream < streamCount; stream++) {
                 inputStreams[stream] = meshData.GetVertexData<byte>(stream);
 
-                if (stream == blendIndicesStream) {
-                    // indices are uint*4 in Unity, and ushort*4 in glTF
-                    var strideDifference = (sizeof(uint) - sizeof(ushort)) * 4; 
-                    outputStreams[stream] = new NativeArray<byte>(inputStreams[stream].Length - strideDifference * vertexCount, Allocator.TempJob);
+                if (stream == blendWeightsStream) {
+                    outputStreams[stream] = new NativeArray<byte>(inputStreams[stream].Length - skinIndicesStrideDifference * vertexCount, Allocator.TempJob);
                 }
                 else {
                     outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
                 }
             }
+
             
             foreach (var pair in attrDataDict) {
                 var vertexAttribute = pair.Key;
                 var attrData = pair.Value;
+                var strideDifference = attrData.stream == skinIndicesStream ? skinIndicesStrideDifference : 0;
                 switch (vertexAttribute) {
                     case VertexAttribute.Position:
                     case VertexAttribute.Normal:
                         await ConvertPositionAttribute(
                             attrData,
                             (uint)strides[attrData.stream],
+                            (uint)strides[attrData.stream] - (uint)strideDifference,
+                            vertexCount,
+                            inputStreams[attrData.stream],
+                            outputStreams[attrData.stream]
+                        );
+                        break;
+                    case VertexAttribute.BlendWeight:
+                        await ConvertSkinWeightsAttribute(
+                            attrData,
+                            (uint)strides[attrData.stream],
+                            (uint)strides[attrData.stream] - (uint)strideDifference,
                             vertexCount,
                             inputStreams[attrData.stream],
                             outputStreams[attrData.stream]
@@ -1173,22 +1189,23 @@ namespace GLTFast.Export {
                     case VertexAttribute.BlendIndices:
                         Profiler.BeginSample("ConvertSkinningAttributesJob");
                         // indices are uint*4 in Unity, and ushort*4 in glTF
-                        var strideDifference = (sizeof(uint) - sizeof(ushort)) * 4; 
-                        await ConvertSkinningAttributes(
+                        await ConvertSkinIndicesAttributes(
                             attrData,
                             strides[attrData.stream],
-                            strides[attrData.stream] - strideDifference,
+                            strides[attrData.stream] - skinIndicesStrideDifference,
                             vertexCount,
                             inputStreams[attrData.stream],
                             outputStreams[attrData.stream]
                             );
                         Profiler.EndSample();
-
-                        strides[attrData.stream] -= strideDifference;
                         break;
                 }
             }
 
+            if (skinIndicesStream != -1) {
+                strides[skinIndicesStream] -= skinIndicesStrideDifference;
+            }
+            
             var bufferViewIds = new int[streamCount];
             for (var stream = 0; stream < streamCount; stream++) {
                 bufferViewIds[stream] = WriteBufferViewToBuffer(
@@ -1660,24 +1677,60 @@ namespace GLTFast.Export {
             return true;
         }
         
+        static async Task ConvertSkinWeightsAttribute(
+            AttributeData attrData,
+            uint inputByteStride,
+            uint outputByteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+        )
+        {
+            var job = ConvertSkinWeightsAttributeJob(attrData, inputByteStride, outputByteStride, vertexCount, inputStream, outputStream);
+            while (!job.IsCompleted) {
+                await Task.Yield();
+            }
+            job.Complete(); // TODO: Wait until thread is finished
+        }
+        
         static async Task ConvertPositionAttribute(
             AttributeData attrData,
-            uint byteStride,
+            uint inputByteStride,
+            uint outputByteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
             )
         {
-            var job = CreateConvertPositionAttributeJob(attrData, byteStride, vertexCount, inputStream, outputStream);
+            var job = CreateConvertPositionAttributeJob(attrData, inputByteStride, outputByteStride, vertexCount, inputStream, outputStream);
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
             job.Complete(); // TODO: Wait until thread is finished
         }
 
+        static unsafe JobHandle ConvertSkinWeightsAttributeJob(
+            AttributeData attrData,
+            uint inputByteStride,
+            uint outputByteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+        ) 
+        {
+            var job = new ExportJobs.ConvertSkinWeightsJob {
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
+                inputByteStride = inputByteStride,
+                outputByteStride = outputByteStride,
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+            }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
+            return job;
+        }
+        
         static unsafe JobHandle CreateConvertPositionAttributeJob(
             AttributeData attrData,
-            uint byteStride,
+            uint inputByteStride,
+            uint outputByteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
@@ -1685,29 +1738,30 @@ namespace GLTFast.Export {
         {
             var job = new ExportJobs.ConvertPositionFloatJob {
                 input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
-                byteStride = byteStride,
+                inputByteStride = inputByteStride,
+                outputByteStride = outputByteStride,
                 output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
         }
 
-        static async Task ConvertSkinningAttributes(
+        static async Task ConvertSkinIndicesAttributes(
             AttributeData indicesAttrData,
-            int byteStride,
+            int inputByteStride,
             int outputByteStride,
             int vertexCount,
             NativeArray<byte> input,
             NativeArray<byte> output
         )
         {
-            var job = CreateConvertSkinningAttributesJob(indicesAttrData, byteStride, outputByteStride, vertexCount, input, output);
+            var job = CreateConvertSkinIndicesAttributesJob(indicesAttrData, inputByteStride, outputByteStride, vertexCount, input, output);
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
             job.Complete();
         }
         
-        static unsafe JobHandle CreateConvertSkinningAttributesJob(
+        static unsafe JobHandle CreateConvertSkinIndicesAttributesJob(
             AttributeData indicesAttrData,
             int byteStride,
             int outputByteStride,
@@ -1715,12 +1769,12 @@ namespace GLTFast.Export {
             NativeArray<byte> input,
             NativeArray<byte> output
         ) {
-            var job = new ExportJobs.ConvertSkinningJob {
+            var job = new ExportJobs.ConvertSkinIndicesJob {
                 input = (byte*)input.GetUnsafeReadOnlyPtr(),
                 inputByteStride = byteStride,
+                outputByteStride =  outputByteStride,
                 indicesOffset = indicesAttrData.offset,
-                output = (byte*)output.GetUnsafePtr(),
-                outputByteStride =  outputByteStride
+                output = (byte*)output.GetUnsafePtr()
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
         }

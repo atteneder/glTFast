@@ -65,7 +65,8 @@ namespace GLTFast.Export {
         [BurstCompile]
         public unsafe struct ConvertPositionFloatJob : IJobParallelFor {
 
-            public uint byteStride;
+            public uint inputByteStride;
+            public uint outputByteStride;
             
             [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
@@ -76,12 +77,34 @@ namespace GLTFast.Export {
             public byte* output;
 
             public void Execute(int i) {
-                var inPtr = (float3*)(input + i * byteStride);
-                var outPtr = (float3*)(output + i * byteStride);
+                var inPtr = (float3*)(input + i * inputByteStride);
+                var outPtr = (float3*)(output + i * outputByteStride);
 
                 var tmp = *inPtr;
                 tmp.x *= -1;
                 *outPtr = tmp;
+            }
+        }
+        
+        [BurstCompile]
+        public unsafe struct ConvertSkinWeightsJob : IJobParallelFor {
+
+            public uint inputByteStride;
+            public uint outputByteStride;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+            
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i) {
+                var inPtr = (float4*)(input + i * inputByteStride);
+                var outPtr = (float4*)(output + i * outputByteStride);
+
+                *outPtr = *inPtr;
             }
         }
         
@@ -115,7 +138,7 @@ namespace GLTFast.Export {
         }
         
         [BurstCompile]
-        public unsafe struct ConvertSkinningJob : IJobParallelFor {
+        public unsafe struct ConvertSkinIndicesJob : IJobParallelFor {
 
             struct ushort4
             {
@@ -145,28 +168,8 @@ namespace GLTFast.Export {
             [NativeDisableUnsafePtrRestriction]
             public byte* output;
 
-            private const int unityIndicesSize = sizeof(uint) * 4;
-            private const int gltfIndicesSize = sizeof(short) * 4;
-            
             public void Execute(int i)
             {
-                var inputIndex = input + i * inputByteStride;
-                var outputIndex = output + i * outputByteStride;
-    
-                // if there is non-indices data before the indices data, copy it
-                if(indicesOffset > 0)
-                {
-                    UnsafeUtility.MemCpy(outputIndex,inputIndex, indicesOffset);
-                }
-
-                // if there is non-indices data after the indices data, copy it
-                if (indicesOffset < inputByteStride - unityIndicesSize)
-                {
-                    UnsafeUtility.MemCpy(outputIndex + indicesOffset + gltfIndicesSize,
-                        inputIndex + indicesOffset + unityIndicesSize, 
-                        inputByteStride - indicesOffset - unityIndicesSize);
-                }
-
                 var inputIndexPtr = (uint4*)(indicesOffset + input + i * inputByteStride);
                 var outIndexPtr = (ushort4*)(indicesOffset + output + i * outputByteStride);
 
