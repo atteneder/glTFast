@@ -1725,7 +1725,7 @@ namespace GLTFast {
                     // await defaultDeferAgent.BreakPoint();
 
                     if(primitive.HasValue) {
-                        primitives[primitiveContext.primtiveIndex] = primitive.Value;
+                        primitives[primitiveContext.primitiveIndex] = primitive.Value;
                         resources.Add(primitive.Value.mesh);
                     } else {
                         success = false;
@@ -2776,19 +2776,24 @@ namespace GLTFast {
                             if (!bounds.HasValue) {
                                 logger.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
                             }
-                            context = new PrimitiveDracoCreateContext(mesh.name, bounds);
-                            context.materials = new int[1];
+                            var dracoContext = new PrimitiveDracoCreateContext(
+                                primitiveIndex,
+                                1,
+                                primitive.material<0 || gltf.materials[primitive.material].requiresNormals,
+                                primitive.material>=0 && gltf.materials[primitive.material].requiresTangents,
+                                mesh.name,
+                                bounds
+                                );
+                            context = dracoContext;
                         }
                         else
 #endif
                         {
                             PrimitiveCreateContext c;
                             if(context==null) {
-                                c = new PrimitiveCreateContext(mesh.name);
-                                c.indices = new int[cluster.Count][];
-                                c.materials = new int[cluster.Count];
+                                c = new PrimitiveCreateContext(primitiveIndex, cluster.Count, mesh.name);
                             } else {
-                                c = (context as PrimitiveCreateContext);
+                                c = context as PrimitiveCreateContext;
                             }
                             // PreparePrimitiveIndices(gltf,mesh,primitive,ref c,primIndex);
                             context = c;
@@ -2798,11 +2803,7 @@ namespace GLTFast {
                             context.morphTargetsContext = morphTargetsContexts[primitive];
                         }
                         
-                        context.primtiveIndex = primitiveIndex;
-                        context.materials[primIndex] = primitive.material;
-
-                        context.needsNormals |= primitive.material<0 || gltf.materials[primitive.material].requiresNormals;
-                        context.needsTangents |= primitive.material>=0 && gltf.materials[primitive.material].requiresTangents;
+                        context.SetMaterial(primIndex, primitive.material);
                     }
 
                     primitiveContexts[primitiveIndex] = context;
@@ -2905,7 +2906,7 @@ namespace GLTFast {
             }
         }
 
-        void PreparePrimitiveIndices( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c, int submeshIndex = 0 ) {
+        void PreparePrimitiveIndices( Root gltf, Mesh mesh, MeshPrimitive primitive, ref PrimitiveCreateContext c, int subMesh = 0 ) {
             Profiler.BeginSample("PreparePrimitiveIndices");
             switch(primitive.mode) {
             case DrawMode.Triangles:
@@ -2933,11 +2934,12 @@ namespace GLTFast {
             }
 
             if(primitive.indices >= 0) {
-                c.indices[submeshIndex] = (accessorData[primitive.indices] as AccessorData<int>).data;
+                c.SetIndices(subMesh, ((AccessorData<int>)accessorData[primitive.indices]).data);
             } else {
                 int vertexCount = gltf.accessors[primitive.attributes.POSITION].count;
                 JobHandle? jh;
-                CalculateIndicesJob(gltf,primitive, vertexCount, c.topology, out c.indices[submeshIndex], out jh, out c.calculatedIndicesHandle );
+                CalculateIndicesJob(gltf, primitive, vertexCount, c.topology, out var indices, out jh, out c.calculatedIndicesHandle);
+                c.SetIndices(subMesh, indices);
                 c.jobHandle = jh.Value;
             }
             Profiler.EndSample();

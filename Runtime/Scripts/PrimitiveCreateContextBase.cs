@@ -18,8 +18,6 @@ using System.Threading.Tasks;
 
 namespace GLTFast {
     
-    using Schema;
-    
     abstract class PrimitiveCreateContextBase {
         
         public const MeshUpdateFlags defaultMeshUpdateFlags =
@@ -29,15 +27,20 @@ namespace GLTFast {
             | MeshUpdateFlags.DontValidateIndices;
 
         protected string m_MeshName;
-        
-        public int primtiveIndex;
-        public int[] materials;
-        public bool needsNormals;
-        public bool needsTangents;
+        protected int[] m_Materials;
+
+        public int primitiveIndex { get; }
+
         public abstract bool IsCompleted {get;}
 
-        protected PrimitiveCreateContextBase(string meshName) {
+        protected PrimitiveCreateContextBase(int primitiveIndex, int materialCount, string meshName) {
+            this.primitiveIndex = primitiveIndex;
+            m_Materials = new int[materialCount];
             m_MeshName = meshName;
+        }
+
+        public void SetMaterial(int subMesh, int materialIndex) {
+            m_Materials[subMesh] = materialIndex;
         }
         
         public MorphTargetsContext morphTargetsContext;
