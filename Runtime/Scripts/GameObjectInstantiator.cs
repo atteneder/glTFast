@@ -113,7 +113,7 @@ namespace GLTFast {
         /// Transform representing the scene.
         /// Root nodes will get parented to it.
         /// </summary>
-        protected Transform sceneTransform;
+        public Transform sceneTransform { get; protected set; }
         
         /// <summary>
         /// Contains information about the latest instance of a glTF scene
@@ -219,6 +219,9 @@ namespace GLTFast {
                     }
 
                     sceneInstance.SetLegacyAnimation(animation);
+                }
+                else {
+                    sceneTransform.gameObject.AddComponent<Animator>();
                 }
             }
         }
@@ -359,6 +362,9 @@ namespace GLTFast {
 
         /// <inheritdoc />
         public virtual void AddCamera(uint nodeIndex, uint cameraIndex) {
+            if ((settings.mask & ComponentType.Camera) == 0) {
+                return;
+            }
             var camera = gltf.GetSourceCamera(cameraIndex);
             switch (camera.typeEnum) {
             case Schema.Camera.Type.Orthographic:
