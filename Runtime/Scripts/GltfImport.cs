@@ -497,25 +497,25 @@ namespace GLTFast {
         
 #region ObsoleteSyncInstantiation
 
-        /// <inheritdoc cref="InstantiateMainSceneAsync(Transform)"/>
+        /// <inheritdoc cref="InstantiateMainSceneAsync(Transform,CancellationToken)"/>
         [Obsolete("Use InstantiateMainSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
         public bool InstantiateMainScene( Transform parent ) {
             return InstantiateMainSceneAsync(parent).Result;
         }
 
-        /// <inheritdoc cref="InstantiateMainSceneAsync(IInstantiator)"/>
+        /// <inheritdoc cref="InstantiateMainSceneAsync(IInstantiator,CancellationToken)"/>
         [Obsolete("Use InstantiateMainSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
         public bool InstantiateMainScene(IInstantiator instantiator) {
             return InstantiateMainSceneAsync(instantiator).Result;
         }
 
-        /// <inheritdoc cref="InstantiateSceneAsync(Transform,int)"/>
+        /// <inheritdoc cref="InstantiateSceneAsync(Transform,int,CancellationToken)"/>
         [Obsolete("Use InstantiateSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
         public bool InstantiateScene(Transform parent, int sceneIndex = 0) {
             return InstantiateSceneAsync(parent, sceneIndex).Result;
         }
 
-        /// <inheritdoc cref="InstantiateSceneAsync(IInstantiator,int)"/>
+        /// <inheritdoc cref="InstantiateSceneAsync(IInstantiator,int,CancellationToken)"/>
         [Obsolete("Use InstantiateSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
         public bool InstantiateScene(IInstantiator instantiator, int sceneIndex = 0) {
             return InstantiateSceneAsync(instantiator, sceneIndex).Result;
