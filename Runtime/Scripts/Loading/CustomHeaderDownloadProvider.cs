@@ -13,10 +13,11 @@
 // limitations under the License.
 //
 
-using UnityEngine;
-using UnityEngine.Networking;
 using System;
 using System.Threading.Tasks;
+
+using UnityEngine;
+using UnityEngine.Networking;
 
 namespace GLTFast.Loading {
 
@@ -48,14 +49,14 @@ namespace GLTFast.Loading {
     /// </summary>
     public class CustomHeaderDownloadProvider : IDownloadProvider {
 
-        HttpHeader[] _headers;
+        HttpHeader[] m_Headers;
 
         /// <summary>
         /// Creates a new CustomHeaderDownloadProvider with a given set of HTTP request header entries
         /// </summary>
         /// <param name="headers">HTTP request header entries to send</param>
         public CustomHeaderDownloadProvider( HttpHeader[] headers ) {
-            _headers = headers;
+            m_Headers = headers;
         }
 
         /// <inheritdoc />
@@ -80,8 +81,8 @@ namespace GLTFast.Loading {
 
         void RegisterHttpHeaders(UnityWebRequest request)
         {
-            if(_headers!=null) {
-                foreach(var header in _headers)
+            if(m_Headers!=null) {
+                foreach(var header in m_Headers)
                 {
                     request.SetRequestHeader(header.key, header.value);
                 }

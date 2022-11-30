@@ -14,8 +14,8 @@
 //
 
 using System;
-using System.Collections;
 using System.Threading.Tasks;
+
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -60,8 +60,8 @@ namespace GLTFast.Loading {
     /// Default <see cref="IDownload"/> implementation that loads URIs via <see cref="UnityWebRequest"/>
     /// </summary>
     public class AwaitableDownload : IDownload {
-        const string GLB_MIME = "model/gltf-binary";
-        const string GLTF_MIME = "model/gltf+json";
+        const string k_MimeTypeGltfBinary = "model/gltf-binary";
+        const string k_MimeTypeGltf = "model/gltf+json";
 
         /// <summary>
         /// <see cref="UnityWebRequest"/> that is used for the download
@@ -113,18 +113,18 @@ namespace GLTFast.Loading {
         /// <summary>
         /// If the download failed, error description
         /// </summary>
-        public string error { get { return m_Request==null ? "Request disposed" : m_Request.error; } }
-        
+        public string error => m_Request==null ? "Request disposed" : m_Request.error;
+
         /// <summary>
         /// Downloaded data as byte array
         /// </summary>
-        public byte[] data { get { return m_Request?.downloadHandler.data; } }
-        
+        public byte[] data => m_Request?.downloadHandler.data;
+
         /// <summary>
         /// Downloaded data as string
         /// </summary>
-        public string text { get { return m_Request?.downloadHandler.text; } }
-        
+        public string text => m_Request?.downloadHandler.text;
+
         /// <summary>
         /// True if the requested download is a glTF-Binary file.
         /// False if it is a regular JSON-based glTF file.
@@ -137,9 +137,9 @@ namespace GLTFast.Loading {
                 if (success)
                 {
                     string contentType = m_Request.GetResponseHeader("Content-Type");
-                    if (contentType == GLB_MIME)
+                    if (contentType == k_MimeTypeGltfBinary)
                         return true;
-                    if (contentType == GLTF_MIME)
+                    if (contentType == k_MimeTypeGltf)
                         return false;
                 }
                 return null;
@@ -192,11 +192,7 @@ namespace GLTFast.Loading {
         }
 
         /// <inheritdoc />
-        public Texture2D texture {
-            get {
-                return (m_Request?.downloadHandler as  DownloadHandlerTexture )?.texture;
-            }
-        }
+        public Texture2D texture => (m_Request?.downloadHandler as  DownloadHandlerTexture )?.texture;
     }
 #endif
 }
