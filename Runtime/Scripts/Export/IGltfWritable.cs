@@ -50,7 +50,7 @@ namespace GLTFast.Export {
         /// <param name="uMesh">Unity mesh to be assigned and exported</param>
         /// <param name="materialIds">glTF materials IDs to be assigned
         /// (multiple in case of sub-meshes)</param>
-        void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds);
+        void AddMeshAndSkinToNode(int nodeId, Mesh uMesh, int[] materialIds);
 
         /// <summary>
         /// Assigns a camera to a previously added node

@@ -243,6 +243,8 @@ namespace GLTFast.Schema {
                 && TEXCOORD_6==b.TEXCOORD_6
                 && TEXCOORD_7==b.TEXCOORD_7
                 && COLOR_0==b.COLOR_0
+                && JOINTS_0==b.JOINTS_0
+                && WEIGHTS_0==b.WEIGHTS_0
                 ;
         }
 
@@ -259,6 +261,8 @@ namespace GLTFast.Schema {
             hash = hash * 7 + TEXCOORD_0.GetHashCode();
             hash = hash * 7 + TEXCOORD_1.GetHashCode();
             hash = hash * 7 + COLOR_0.GetHashCode();
+            hash = hash * 7 + JOINTS_0.GetHashCode();
+            hash = hash * 7 + WEIGHTS_0.GetHashCode();
             return hash;
         }
 

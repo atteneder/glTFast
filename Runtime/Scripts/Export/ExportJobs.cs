@@ -65,7 +65,8 @@ namespace GLTFast.Export {
         [BurstCompile]
         public unsafe struct ConvertPositionFloatJob : IJobParallelFor {
 
-            public uint byteStride;
+            public uint inputByteStride;
+            public uint outputByteStride;
             
             [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
@@ -76,12 +77,106 @@ namespace GLTFast.Export {
             public byte* output;
 
             public void Execute(int i) {
-                var inPtr = (float3*)(input + i * byteStride);
-                var outPtr = (float3*)(output + i * byteStride);
+                var inPtr = (float3*)(input + i * inputByteStride);
+                var outPtr = (float3*)(output + i * outputByteStride);
 
                 var tmp = *inPtr;
                 tmp.x *= -1;
                 *outPtr = tmp;
+            }
+        }
+        
+        [BurstCompile]
+        public unsafe struct ConvertSkinWeightsJob : IJobParallelFor {
+
+            public uint inputByteStride;
+            public uint outputByteStride;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+            
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i) {
+                var inPtr = (float4*)(input + i * inputByteStride);
+                var outPtr = (float4*)(output + i * outputByteStride);
+
+                *outPtr = *inPtr;
+            }
+        }
+        
+        [BurstCompile]
+        public unsafe struct ConvertMatrixJob : IJobParallelFor {
+
+            public uint byteStride;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public NativeArray<float4x4> input;
+            
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public NativeArray<float4x4> output;
+
+            public void Execute(int i) {
+                
+                var tmp = input[i];
+                tmp.c0.y *= -1;
+                tmp.c0.z *= -1;
+                
+                tmp.c1.x *= -1;
+            
+                tmp.c2.x *= -1;
+            
+                tmp.c3.x *= -1;
+
+                output[i] = tmp;
+            }
+        }
+        
+        [BurstCompile]
+        public unsafe struct ConvertSkinIndicesJob : IJobParallelFor {
+
+            struct ushort4
+            {
+                public ushort4(uint x, uint y, uint z, uint w)
+                {
+                    this.x = (ushort)x;
+                    this.y = (ushort)y;
+                    this.z = (ushort)z;
+                    this.w = (ushort)w;
+                }
+                
+                ushort x;
+                ushort y;
+                ushort z;
+                ushort w;
+            }
+            
+            public int inputByteStride;
+            public int indicesOffset;
+            public int outputByteStride;
+            
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+            
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inputIndexPtr = (uint4*)(indicesOffset + input + i * inputByteStride);
+                var outIndexPtr = (ushort4*)(indicesOffset + output + i * outputByteStride);
+
+                // Set the correct values for the indices
+                var tmpIndex = *inputIndexPtr;
+                ushort4 tmpOut = new ushort4(tmpIndex[0], tmpIndex[1], tmpIndex[2], tmpIndex[3]);
+                *outIndexPtr = tmpOut;
             }
         }
         
