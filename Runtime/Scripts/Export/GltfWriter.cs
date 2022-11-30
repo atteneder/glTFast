@@ -99,7 +99,6 @@ namespace GLTFast.Export {
         Dictionary<Transform, int> m_transformToNodeId;
         List<Mesh> m_Meshes;
         List<Skin> m_Skins;
-        List<Transform[]> m_uBones;
         Dictionary<UnityEngine.Mesh, Skin> m_SkinMap;
         List<Material> m_Materials;
         List<Texture> m_Textures;
@@ -115,6 +114,7 @@ namespace GLTFast.Export {
         List<UnityEngine.Material> m_UnityMaterials;
         List<UnityEngine.Mesh> m_UnityMeshes;
         Dictionary<int, int[]> m_NodeMaterials;
+        private Func<uint, uint[]> m_meshIdToBonesId;
 
         Stream m_BufferStream;
         string m_BufferPath;
@@ -128,10 +128,12 @@ namespace GLTFast.Export {
         /// export to preserve a stable frame rate <seealso cref="IDeferAgent"/></param>
         /// <param name="logger">Interface for logging (error) messages
         /// <seealso cref="ConsoleLogger"/></param>
+        /// <param name="meshIdToBonesId">Function used to get the bone Ids of a given mesh</param>
         public GltfWriter(
             ExportSettings exportSettings = null,
             IDeferAgent deferAgent = null,
-            ICodeLogger logger = null
+            ICodeLogger logger = null,
+            Func<uint, uint[]> meshIdToBonesId = null
             )
         {
             m_Gltf = new Root();
@@ -139,35 +141,29 @@ namespace GLTFast.Export {
             m_Logger = logger;
             m_State = State.Initialized;
             m_DeferAgent = deferAgent ?? new UninterruptedDeferAgent();
+            m_meshIdToBonesId = meshIdToBonesId;
         }
 
         /// <inheritdoc />
         public uint AddNode(
-            Transform transform,
+            float3? translation = null,
+            quaternion? rotation = null,
+            float3? scale = null,
             uint[] children = null,
             string name = null
         )
         {
             CertifyNotDisposed();
             m_State = State.ContentAdded;
-            var node = CreateNode(transform.localPosition, transform.localRotation, transform.localScale, name);
+            var node = CreateNode(translation, rotation, scale, name);
             node.children = children;
             m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
-            m_transformToNodeId = m_transformToNodeId ?? new Dictionary<Transform, uint>();
-            var nodeId = (uint) m_Nodes.Count - 1;
-            m_transformToNodeId.Add(transform, nodeId);
-            return nodeId;
+            return (uint) m_Nodes.Count - 1;
         }
 
         /// <inheritdoc />
-        public void AddMeshAndSkinToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds)
-        {
-            AddMeshAndSkinToNode(nodeId, uMesh, materialIds, null);
-        }
-
-        /// <inheritdoc />
-        public void AddMeshAndSkinToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds, Transform[] bones) {
+        public void AddMeshAndSkinToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds) {
             if ((m_Settings.componentMask & ComponentType.Mesh) == 0) return;
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
@@ -177,7 +173,7 @@ namespace GLTFast.Export {
                 m_NodeMaterials[nodeId] = materialIds;
             }
 
-            AddMeshAndSkin(uMesh, bones, out node.mesh, out node.skin);
+            AddMeshAndSkin(uMesh, out node.mesh, out node.skin);
         }
 
         /// <inheritdoc />
@@ -814,13 +810,13 @@ namespace GLTFast.Export {
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             Profiler.EndSample();
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
-                await BakeMesh(meshId, meshDataArray[meshId]);
+                await BakeMesh(meshId, meshDataArray[meshId], m_meshIdToBonesId?.Invoke((uint)meshId));
                 await m_DeferAgent.BreakPoint();
             }
             meshDataArray.Dispose();
         }
 
-        async Task BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData) {
+        async Task BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData, uint[] boneIds) {
             
             Profiler.BeginSample("BakeMesh 1");
             
@@ -931,25 +927,17 @@ namespace GLTFast.Export {
             if (uMesh.bindposes != null && uMesh.bindposes.Length > 0)
             {
                 Skin skin = m_SkinMap[uMesh];
-                Transform[] uBones = m_uBones[m_Skins.IndexOf(skin)];
             
                 var accessor = new Accessor {
                     byteOffset = 0,
                     componentType = GLTFComponentType.Float,
-                    count = uBones.Length,
+                    count = boneIds.Length,
                     typeEnum = GLTFAccessorAttributeType.MAT4
                 };
                 
                 var accessorId = AddAccessor(accessor);
                 skin.inverseBindMatrices = accessorId;
-                
-                List<uint> joints = new List<uint>();
-                for (int i = 0; i < uBones.Length; i++)
-                {
-                    joints.Add(m_transformToNodeId[uBones[i]]);
-                }
-
-                skin.joints = joints.ToArray();
+                skin.joints = boneIds;
                 
                 Profiler.BeginSample("BindPoseMatricesJobSchedule");
                 var bindPoseCount = uMesh.bindposes.Length;
@@ -1872,7 +1860,7 @@ namespace GLTFast.Export {
             return node;
         }
         
-        bool AddMeshAndSkin(UnityEngine.Mesh uMesh, Transform[] bones, out int meshId, out int skinId)
+        bool AddMeshAndSkin(UnityEngine.Mesh uMesh, out int meshId, out int skinId)
         {
             meshId = -1;
             skinId = -1;
@@ -1903,12 +1891,10 @@ namespace GLTFast.Export {
             
             m_SkinMap = m_SkinMap ?? new Dictionary<UnityEngine.Mesh, Skin>();
             m_Skins = m_Skins ?? new List<Skin>();
-            m_uBones = m_uBones ?? new List<Transform[]>();
             skinId = m_Skins.Count; 
             var newSkin = new Skin();
             m_Skins.Add(newSkin);
             m_SkinMap[uMesh] = newSkin;
-            m_uBones.Add(bones);
 
             return true;
         }

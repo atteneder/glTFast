@@ -36,7 +36,9 @@ namespace GLTFast.Export {
         /// <param name="name">Name of the node</param>
         /// <returns>glTF node index</returns>
         uint AddNode(
-            Transform transform,
+            float3? translation = null,
+            quaternion? rotation = null,
+            float3? scale = null,
             uint[] children = null,
             string name = null
         );
@@ -47,9 +49,8 @@ namespace GLTFast.Export {
         /// <param name="nodeId">Index of the node to add the mesh to</param>
         /// <param name="uMesh">Unity mesh to be assigned and exported</param>
         /// <param name="materialIds">glTF materials IDs to be assigned
-        /// <param name="bones">Unity bones for the (skinned) mesh
         /// (multiple in case of sub-meshes)</param>
-        void AddMeshAndSkinToNode(int nodeId, Mesh uMesh, int[] materialIds, Transform[] bones);
+        void AddMeshAndSkinToNode(int nodeId, Mesh uMesh, int[] materialIds);
 
         /// <summary>
         /// Assigns a camera to a previously added node

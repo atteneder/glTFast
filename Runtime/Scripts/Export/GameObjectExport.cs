@@ -32,6 +32,8 @@ namespace GLTFast.Export {
         GltfWriter m_Writer;
         IMaterialExport m_MaterialExport;
         GameObjectExportSettings m_Settings;
+        Dictionary<Transform, uint> m_transformToNodeId;
+        List<Transform[]> m_meshBones;
 
         /// <summary>
         /// Provides glTF export of GameObject based scenes and hierarchies.
@@ -51,7 +53,7 @@ namespace GLTFast.Export {
             ICodeLogger logger = null
         ) {
             m_Settings = gameObjectExportSettings ?? new GameObjectExportSettings();
-            m_Writer = new GltfWriter(exportSettings, deferAgent, logger);
+            m_Writer = new GltfWriter(exportSettings, deferAgent, logger, MeshIdToBoneIds);
             m_MaterialExport = materialExport ?? MaterialExport.GetDefaultMaterialExport();
         }
 
@@ -82,6 +84,18 @@ namespace GLTFast.Export {
             }
 
             return success;
+        }
+
+        private uint[] MeshIdToBoneIds(uint meshId)
+        {
+            Transform[] bones = m_meshBones[(int)meshId];
+            List<uint> result = new List<uint>();
+            for (int i = 0; i < bones.Length; i++)
+            {
+                result.Add(m_transformToNodeId[bones[i]]);
+            }
+
+            return result.ToArray();
         }
         
         /// <summary>
@@ -157,11 +171,17 @@ namespace GLTFast.Export {
             
             if (onIncludedLayer || children != null) {
                 nodeId = (int) m_Writer.AddNode(
-                    transform,
+                    transform.localPosition,
+                    transform.localRotation,
+                    transform.localScale,
                     children,
                     gameObject.name
                     );
                 
+                m_transformToNodeId = m_transformToNodeId ?? new Dictionary<Transform, uint>();
+
+                m_transformToNodeId.Add(transform, (uint)nodeId);
+
                 if (onIncludedLayer) {
                     AddNodeComponents(gameObject, tempMaterials, nodeId);
                 }
@@ -204,7 +224,11 @@ namespace GLTFast.Export {
             }
 
             if (mesh != null) {
-                m_Writer.AddMeshAndSkinToNode(nodeId,mesh,materialIds, bones);
+                m_Writer.AddMeshAndSkinToNode(nodeId,mesh,materialIds);
+                if(bones != null){
+                    m_meshBones = m_meshBones ?? new List<Transform[]>();
+                    m_meshBones.Add(bones);
+                }
             }
 
             if (gameObject.TryGetComponent(out Camera camera)) {
