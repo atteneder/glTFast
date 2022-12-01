@@ -55,7 +55,7 @@ namespace GLTFast.Schema {
         public int buffer;
 
         /// <summary>
-        /// The stride, in bytes, between vertex attributes or other interleavable data.
+        /// The stride, in bytes, between vertex attributes or other interleaved data.
         /// When this is zero, data is tightly packed.
         /// <minimum>0</minimum>
         /// <maximum>255</maximum>
@@ -99,7 +99,9 @@ namespace GLTFast.Schema {
 #if MESHOPT
     [System.Serializable]
     public class BufferViewExtensions {
+        // ReSharper disable InconsistentNaming
         public BufferViewMeshoptExtension EXT_meshopt_compression;
+        // ReSharper restore InconsistentNaming
     }
     
     [System.Serializable]
@@ -109,31 +111,31 @@ namespace GLTFast.Schema {
         public string mode;
         public string filter;
 
-        Mode _modeEnum = Mode.Undefined;
+        Mode m_ModeEnum = Mode.Undefined;
         public Mode modeEnum {
             get {
-                if (_modeEnum != Mode.Undefined) {
-                    return _modeEnum;
+                if (m_ModeEnum != Mode.Undefined) {
+                    return m_ModeEnum;
                 }
                 if (!string.IsNullOrEmpty (mode)) {
-                    _modeEnum = (Mode)System.Enum.Parse (typeof(Mode), mode, true);
+                    m_ModeEnum = (Mode)System.Enum.Parse (typeof(Mode), mode, true);
                     mode = null;
-                    return _modeEnum;
+                    return m_ModeEnum;
                 }
                 return Mode.Undefined;
             }
         }
         
-        Filter _filterEnum = Filter.Undefined;
+        Filter m_FilterEnum = Filter.Undefined;
         public Filter filterEnum {
             get {
-                if (_filterEnum != Filter.Undefined) {
-                    return _filterEnum;
+                if (m_FilterEnum != Filter.Undefined) {
+                    return m_FilterEnum;
                 }
                 if (!string.IsNullOrEmpty (filter)) {
-                    _filterEnum = (Filter)System.Enum.Parse (typeof(Filter), filter, true);
+                    m_FilterEnum = (Filter)System.Enum.Parse (typeof(Filter), filter, true);
                     filter = null;
-                    return _filterEnum;
+                    return m_FilterEnum;
                 }
                 return Filter.None;
             }

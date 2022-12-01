@@ -22,6 +22,7 @@ namespace GLTFast.Schema {
     public class RootExtension {
         
         /// <inheritdoc cref="LightsPunctual"/>
+        // ReSharper disable once InconsistentNaming
         public LightsPunctual KHR_lights_punctual;
         
         internal void GltfSerialize(JsonWriter writer) {

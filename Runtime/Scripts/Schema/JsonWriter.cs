@@ -24,7 +24,7 @@ namespace GLTFast.Schema {
         
         StreamWriter m_Stream;
 
-        bool separation;
+        bool m_Separation;
 
         public JsonWriter(StreamWriter stream) {
             m_Stream = stream;
@@ -33,7 +33,7 @@ namespace GLTFast.Schema {
 
         public void OpenBrackets() {
             m_Stream.Write('{');
-            separation = false;
+            m_Separation = false;
         }
         
         public void AddProperty(string name) {
@@ -41,13 +41,13 @@ namespace GLTFast.Schema {
             m_Stream.Write('"');
             m_Stream.Write(name);
             m_Stream.Write("\":");
-            separation = false;
+            m_Separation = false;
         }
 
         public void AddObject() {
             Separate();
             m_Stream.Write('{');
-            separation = false;
+            m_Separation = false;
         }
         
         public void AddArray(string name) {
@@ -55,12 +55,12 @@ namespace GLTFast.Schema {
             m_Stream.Write('"');
             m_Stream.Write(name);
             m_Stream.Write("\":[");
-            separation = false;
+            m_Separation = false;
         }
         
         public void CloseArray() {
             m_Stream.Write(']');
-            separation = true;
+            m_Separation = true;
         }
 
         public void AddArrayProperty<T>(string name, IEnumerable<T> values) {
@@ -126,15 +126,15 @@ namespace GLTFast.Schema {
         }
 
         void Separate() {
-            if (separation) {
+            if (m_Separation) {
                 m_Stream.Write(',');
             }
-            separation = true;
+            m_Separation = true;
         }
 
         public void Close() {
             m_Stream.Write('}');
-            separation = true;
+            m_Separation = true;
         }
     }
 }

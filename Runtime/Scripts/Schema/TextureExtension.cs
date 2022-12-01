@@ -22,7 +22,8 @@ namespace GLTFast.Schema {
     public class TextureExtension {
         
         /// <inheritdoc cref="Extension.TextureBasisUniversal"/>
-        public TextureBasisUniversal KHR_texture_basisu = null;
+        // ReSharper disable once InconsistentNaming
+        public TextureBasisUniversal KHR_texture_basisu;
 
         internal void GltfSerialize(JsonWriter writer) {
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
@@ -38,7 +39,7 @@ namespace GLTFast.Schema {
         
         /// <summary>
         /// Index of the image which defines a reference to the KTX v2 image
-        /// with Basis Universal supercompression.
+        /// with Basis Universal super-compression.
         /// </summary>
         public int source = -1;
     }

@@ -16,7 +16,7 @@
 #if DRACO_UNITY
 
 namespace GLTFast.FakeSchema {
-    
+    // ReSharper disable InconsistentNaming
     [System.Serializable]
     class MeshPrimitive {
         public MeshPrimitiveExtensions extensions;
@@ -26,6 +26,7 @@ namespace GLTFast.FakeSchema {
     class MeshPrimitiveExtensions {
         public string KHR_draco_mesh_compression;
     }
+    // ReSharper restore InconsistentNaming
 }
 
 #endif

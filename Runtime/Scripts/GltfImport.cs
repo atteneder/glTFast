@@ -1797,22 +1797,22 @@ namespace GLTFast {
                         var times = ((AccessorNativeData<float>) m_AccessorData[sampler.input]).data;
                         
                         switch (channel.target.pathEnum) {
-                            case AnimationChannel.Path.translation: {
+                            case AnimationChannel.Path.Translation: {
                                 var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
                                 AnimationUtils.AddTranslationCurves(m_AnimationClips[i], path, times, values, sampler.interpolationEnum);
                                 break;
                             }
-                            case AnimationChannel.Path.rotation: {
+                            case AnimationChannel.Path.Rotation: {
                                 var values= ((AccessorNativeData<Quaternion>) m_AccessorData[sampler.output]).data;
                                 AnimationUtils.AddRotationCurves(m_AnimationClips[i], path, times, values, sampler.interpolationEnum);
                                 break;
                             }
-                            case AnimationChannel.Path.scale: {
+                            case AnimationChannel.Path.Scale: {
                                 var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
                                 AnimationUtils.AddScaleCurves(m_AnimationClips[i], path, times, values, sampler.interpolationEnum);
                                 break;
                             }
-                            case AnimationChannel.Path.weights: {
+                            case AnimationChannel.Path.Weights: {
                                 var values= ((AccessorNativeData<float>) m_AccessorData[sampler.output]).data;
                                 var node = m_GltfRoot.nodes[channel.target.node];
                                 if (node.mesh < 0 || node.mesh >= m_GltfRoot.meshes.Length) {
@@ -2662,16 +2662,16 @@ namespace GLTFast {
                     foreach (var channel in animation.channels) {
                         var accessorIndex = animation.samplers[channel.sampler].output;
                         switch (channel.target.pathEnum) {
-                            case AnimationChannel.Path.translation:
+                            case AnimationChannel.Path.Translation:
                                 SetAccessorUsage(accessorIndex,AccessorUsage.Translation);
                                 break;
-                            case AnimationChannel.Path.rotation:
+                            case AnimationChannel.Path.Rotation:
                                 SetAccessorUsage(accessorIndex,AccessorUsage.Rotation);
                                 break;
-                            case AnimationChannel.Path.scale:
+                            case AnimationChannel.Path.Scale:
                                 SetAccessorUsage(accessorIndex,AccessorUsage.Scale);
                                 break;
-                            case AnimationChannel.Path.weights:
+                            case AnimationChannel.Path.Weights:
                                 SetAccessorUsage(accessorIndex,AccessorUsage.Weight);
                                 break;
                         }

@@ -57,7 +57,7 @@ namespace GLTFast {
 #endif
             
             switch (interpolationType) {
-                case InterpolationType.STEP: {
+                case InterpolationType.Step: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
@@ -68,7 +68,7 @@ namespace GLTFast {
                     }
                     break;
                 }
-                case InterpolationType.CUBICSPLINE: {
+                case InterpolationType.CubicSpline: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var inTangent = values[i*3];
@@ -175,7 +175,7 @@ namespace GLTFast {
             int morphTargetCount;
             if (morphTargetNames == null) {
                 morphTargetCount = values.Length / times.Length;
-                if (interpolationType == InterpolationType.CUBICSPLINE) {
+                if (interpolationType == InterpolationType.CubicSpline) {
                     // 3 values per key (in-tangent, out-tangent and value)
                     morphTargetCount /= 3;
                 }
@@ -211,7 +211,7 @@ namespace GLTFast {
 #endif
 
             switch (interpolationType) {
-                case InterpolationType.STEP: {
+                case InterpolationType.Step: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
@@ -221,7 +221,7 @@ namespace GLTFast {
                     }
                     break;
                 }
-                case InterpolationType.CUBICSPLINE: {
+                case InterpolationType.CubicSpline: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var inTangent = values[i*3];
@@ -299,7 +299,7 @@ namespace GLTFast {
 #endif
 
             switch (interpolationType) {
-                case InterpolationType.STEP: {
+                case InterpolationType.Step: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var valueIndex = i * valueStride + curveIndex;
@@ -308,7 +308,7 @@ namespace GLTFast {
                     }
                     break;
                 }
-                case InterpolationType.CUBICSPLINE: {
+                case InterpolationType.CubicSpline: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var valueIndex = i * valueStride + curveIndex;

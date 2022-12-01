@@ -39,7 +39,7 @@ namespace GLTFast.Schema {
 			writer.AddObject();
 			GltfSerializeRoot(writer);
 			writer.Close();
-			throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+			throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
 		}
     }
     
@@ -47,12 +47,12 @@ namespace GLTFast.Schema {
     public class AnimationChannel
     {
 	    public enum Path {
-		    unknown,
-		    invalid,
-		    translation,
-		    rotation,
-		    scale,
-		    weights
+		    Unknown,
+		    Invalid,
+		    Translation,
+		    Rotation,
+		    Scale,
+		    Weights
 	    }
         
 	    /// <summary>
@@ -67,7 +67,7 @@ namespace GLTFast.Schema {
 	    public AnimationChannelTarget target;
 	    
 	    internal void GltfSerialize(JsonWriter writer) {
-		    throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+		    throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
 	    }
     }
 
@@ -87,29 +87,29 @@ namespace GLTFast.Schema {
 
 	    public AnimationChannel.Path pathEnum {
 		    get {
-			    if ( m_Path == AnimationChannel.Path.unknown ) {
+			    if ( m_Path == AnimationChannel.Path.Unknown ) {
 				    if (!string.IsNullOrEmpty (path)) {
-					    m_Path = (AnimationChannel.Path)System.Enum.Parse (typeof(AnimationChannel.Path), path, true);
+					    m_Path = (AnimationChannel.Path)Enum.Parse (typeof(AnimationChannel.Path), path, true);
 					    path = null;
 					    return m_Path;
 				    }
-				    return AnimationChannel.Path.invalid;
+				    return AnimationChannel.Path.Invalid;
 			    }
 				return m_Path;
 		    }
 	    }
 	    
 	    internal void GltfSerialize(JsonWriter writer) {
-		    throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+		    throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
 	    }
     }
     
     public enum InterpolationType
     {
 	    Unknown,
-	    LINEAR,
-	    STEP,
-	    CUBICSPLINE
+	    Linear,
+	    Step,
+	    CubicSpline
     }
     
     [Serializable]
@@ -143,7 +143,7 @@ namespace GLTFast.Schema {
 					    return m_Interpolation;
 				    }
 
-				    m_Interpolation = InterpolationType.LINEAR;
+				    m_Interpolation = InterpolationType.Linear;
 			    }
 			    return m_Interpolation;
 		    }

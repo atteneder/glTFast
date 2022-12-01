@@ -27,7 +27,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// Rotate the UVs by this many radians counter-clockwise around the origin. This is equivalent to a similar rotation of the image clockwise.
         /// </summary>
-        public float rotation = 0;
+        public float rotation;
 
         /// <summary>
         /// The scale factor applied to the components of the UV coordinates.

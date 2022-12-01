@@ -20,7 +20,7 @@ namespace GLTFast.Schema {
     /// <summary>
     /// A texture is defined by an image and a sampler.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class Texture : NamedObject {
         
         /// <summary>
@@ -52,12 +52,8 @@ namespace GLTFast.Schema {
         /// <summary>
         /// True, if the texture is of the KTX format.
         /// </summary>
-        public bool isKtx {
-            get {
-                return extensions!=null && extensions.KHR_texture_basisu!=null;
-            }
-        }
-        
+        public bool isKtx => extensions?.KHR_texture_basisu != null;
+
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
@@ -81,7 +77,7 @@ namespace GLTFast.Schema {
         /// <returns>true if the specified object is equal to the current object; otherwise, false.</returns>
         public override bool Equals(object obj) {
             //Check for null and compare run-time types.
-            if (obj == null || ! GetType().Equals(obj.GetType())) {
+            if (obj == null || GetType() != obj.GetType()) {
                 return false;
             }
             return Equals((Texture)obj);

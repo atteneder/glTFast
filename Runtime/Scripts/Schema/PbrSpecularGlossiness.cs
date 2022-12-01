@@ -33,21 +33,18 @@ namespace GLTFast.Schema {
         /// <summary>
         /// Diffuse color in linear space.
         /// </summary>
-        public Color diffuseColor {
-            get {
-                return new Color(
-                    diffuseFactor[0],
-                    diffuseFactor[1],
-                    diffuseFactor[2],
-                    diffuseFactor[3]
-                );
-            }
-        }
+        public Color diffuseColor =>
+            new Color(
+                diffuseFactor[0],
+                diffuseFactor[1],
+                diffuseFactor[2],
+                diffuseFactor[3]
+            );
 
         /// <summary>
         /// Diffuse color texture info.
         /// </summary>
-        public TextureInfo diffuseTexture = null;
+        public TextureInfo diffuseTexture;
 
         /// <summary>
         /// Specular color red, green and blue components in linear space.
@@ -57,15 +54,12 @@ namespace GLTFast.Schema {
         /// <summary>
         /// Specular color in linear space.
         /// </summary>
-        public Color specularColor {
-            get {
-                return new Color(
-                    specularFactor[0],
-                    specularFactor[1],
-                    specularFactor[2]
-                );
-            }
-        }
+        public Color specularColor =>
+            new Color(
+                specularFactor[0],
+                specularFactor[1],
+                specularFactor[2]
+            );
 
         /// <summary>
         /// The glossiness or smoothness of the material.
@@ -75,7 +69,7 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The specular-glossiness texture.
         /// </summary>
-        public TextureInfo specularGlossinessTexture = null;
+        public TextureInfo specularGlossinessTexture;
         
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();

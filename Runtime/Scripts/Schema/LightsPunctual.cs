@@ -170,7 +170,7 @@ namespace GLTFast.Schema {
         /// Angle, in radians, from centre of spotlight where falloff begins
         /// Must be greater than or equal to 0 and less than outerConeAngle
         /// </summary>
-        public float innerConeAngle = 0;
+        public float innerConeAngle;
 
         /// <summary>
         /// Angle, in radians, from centre of spotlight where falloff ends.

@@ -45,17 +45,17 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The sheen color texture.
         /// </summary>
-        public TextureInfo sheenColorTexture = null;
+        public TextureInfo sheenColorTexture;
         
         /// <summary>
         /// The sheen roughness.
         /// </summary>
-        public float sheenRoughnessFactor = 0;
+        public float sheenRoughnessFactor;
         
         /// <summary>
         /// The sheen roughness (Alpha) texture.
         /// </summary>
-        public TextureInfo sheenRoughnessTexture = null;
+        public TextureInfo sheenRoughnessTexture;
         
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();

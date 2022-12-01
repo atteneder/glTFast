@@ -42,7 +42,7 @@ namespace GLTFast.Schema {
     /// <summary>
     /// Geometry to be rendered with the given material.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class MeshPrimitive : ICloneable {
 
         /// <summary>
@@ -86,11 +86,7 @@ namespace GLTFast.Schema {
         public MeshPrimitiveExtensions extensions;
 
 #if DRACO_UNITY
-        public bool isDracoCompressed {
-            get {
-                return extensions!=null && extensions.KHR_draco_mesh_compression != null;
-            }
-        }
+        public bool isDracoCompressed => extensions!=null && extensions.KHR_draco_mesh_compression != null;
 #endif
         
         /// <summary>
@@ -103,7 +99,7 @@ namespace GLTFast.Schema {
         public override bool Equals(object obj)
         {
             //Check for null and compare run-time types.
-            if ((obj == null) || ! this.GetType().Equals(obj.GetType())) {
+            if (obj == null || GetType() != obj.GetType()) {
                 return false;
             }
             var b = (MeshPrimitive) obj;
@@ -178,7 +174,7 @@ namespace GLTFast.Schema {
     /// Mesh vertex attribute collection. Each property value is the index of
     /// the accessor containing attribute’s data.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class Attributes {
         
         // Names are identical to glTF specified property names, that's why
@@ -226,7 +222,7 @@ namespace GLTFast.Schema {
         public override bool Equals(object obj)
         {
             //Check for null and compare run-time types.
-            if ((obj == null) || ! this.GetType().Equals(obj.GetType())) 
+            if (obj == null || GetType() != obj.GetType()) 
             {
                 return false;
             }
@@ -285,9 +281,10 @@ namespace GLTFast.Schema {
     /// <summary>
     /// Mesh primitive extensions
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class MeshPrimitiveExtensions {
 #if DRACO_UNITY
+        // ReSharper disable once InconsistentNaming
         public MeshPrimitiveDracoExtension KHR_draco_mesh_compression;
 #endif
 
@@ -302,13 +299,13 @@ namespace GLTFast.Schema {
     }
 
 #if DRACO_UNITY
-    [System.Serializable]
+    [Serializable]
     public class MeshPrimitiveDracoExtension {
         public int bufferView;
         public Attributes attributes;
 
         internal void GltfSerialize(JsonWriter writer) {
-            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
+            throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
 #endif
@@ -316,7 +313,7 @@ namespace GLTFast.Schema {
     /// <summary>
     /// Morph target (blend shape)
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class MorphTarget {
     
         // Names are identical to glTF specified property names, that's why
@@ -340,7 +337,7 @@ namespace GLTFast.Schema {
         public override bool Equals(object obj)
         {
             //Check for null and compare run-time types.
-            if ((obj == null) || ! this.GetType().Equals(obj.GetType())) {
+            if (obj == null || GetType() != obj.GetType()) {
                 return false;
             }
             var b = (MorphTarget) obj; 

@@ -23,7 +23,7 @@ namespace GLTFast.Schema {
     /// A set of parameter values that are used to define the metallic-roughness
     /// material model from Physically-Based Rendering (PBR) methodology.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class PbrMetallicRoughness {
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace GLTFast.Schema {
         /// If the fourth component (A) is present, it represents the opacity of the
         /// material. Otherwise, an opacity of 1.0 is assumed.
         /// </summary>
-        public TextureInfo baseColorTexture = null;
+        public TextureInfo baseColorTexture;
 
         /// <summary>
         /// The metalness of the material.

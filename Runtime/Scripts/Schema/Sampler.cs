@@ -21,7 +21,7 @@ namespace GLTFast.Schema
     /// <summary>
     /// Texture sampler properties for filtering and wrapping modes.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class Sampler : NamedObject
     {
 
@@ -105,13 +105,13 @@ namespace GLTFast.Schema
         /// Unity texture wrap mode (horizontal), derived from glTF's
         /// <see cref="wrapS"/> value.
         /// </summary>
-        public TextureWrapMode wrapU => ConvertWrapMode((WrapMode)wrapS);
+        public TextureWrapMode wrapU => ConvertWrapMode(wrapS);
         
         /// <summary>
         /// Unity texture wrap mode (vertical), derived from glTF's
         /// <see cref="wrapT"/> value.
         /// </summary>
-        public TextureWrapMode wrapV => ConvertWrapMode((WrapMode)wrapT);
+        public TextureWrapMode wrapV => ConvertWrapMode(wrapT);
 
         static FilterMode ConvertFilterMode(MinFilterMode minFilterToConvert, MagFilterMode magFilterToConvert)
         {

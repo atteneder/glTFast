@@ -238,8 +238,8 @@ namespace GLTFast.Schema {
             }
             if (scenes!=null) {
                 writer.AddArray("scenes");
-                foreach( var scene in scenes) {
-                    scene.GltfSerialize(writer);
+                foreach( var sceneToSerialize in scenes) {
+                    sceneToSerialize.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }

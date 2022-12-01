@@ -41,28 +41,28 @@ namespace GLTFast.Schema {
         [SerializeField]
         string type;
 
-        Type? _typeEnum;
+        Type? m_TypeEnum;
         
         /// <summary>
         /// <see cref="Type"/> typed view onto <see cref="type"/> string. 
         /// </summary>
         public Type typeEnum {
             get {
-                if (_typeEnum.HasValue) {
-                    return _typeEnum.Value;
+                if (m_TypeEnum.HasValue) {
+                    return m_TypeEnum.Value;
                 }
                 if (!string.IsNullOrEmpty (type)) {
-                    _typeEnum = (Type)System.Enum.Parse (typeof(Type), type, true);
+                    m_TypeEnum = (Type)Enum.Parse (typeof(Type), type, true);
                     type = null;
-                    return _typeEnum.Value;
+                    return m_TypeEnum.Value;
                 }
-                if (orthographic != null) _typeEnum = Type.Orthographic;
-                if (perspective != null) _typeEnum = Type.Perspective;
-                return _typeEnum.Value;
+                if (orthographic != null) m_TypeEnum = Type.Orthographic;
+                if (perspective != null) m_TypeEnum = Type.Perspective;
+                return m_TypeEnum ?? Type.Perspective;
             }
             set {
                 type = null;
-                _typeEnum = value;
+                m_TypeEnum = value;
             }
         }
         
@@ -75,7 +75,7 @@ namespace GLTFast.Schema {
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
-            writer.AddProperty("type", _typeEnum.ToString().ToLower());
+            writer.AddProperty("type", m_TypeEnum.ToString().ToLower());
             if(perspective!=null) {
                 writer.AddProperty("perspective");
                 perspective.GltfSerialize(writer);
@@ -97,29 +97,36 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The floating-point horizontal magnification of the view. Must not be zero.
         /// /// </summary>
+        // ReSharper disable once IdentifierTypo
         public float xmag;
         
         /// <summary>
         /// The floating-point vertical magnification of the view. Must not be zero.
         /// </summary>
+        // ReSharper disable once IdentifierTypo
         public float ymag;
         
         /// <summary>
-        /// The floating-point distance to the far clipping plane. zfar must be greater than znear.
-        /// /// </summary>
+        /// The floating-point distance to the far clipping plane.
+        /// <see cref="zfar"/> must be greater than <see cref="znear"/>.
+        /// </summary>
+        // ReSharper disable once IdentifierTypo
         public float zfar;
         
         /// <summary>
         /// The floating-point distance to the near clipping plane.
         /// </summary>
+        // ReSharper disable once IdentifierTypo
         public float znear;
         
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
+            // ReSharper disable StringLiteralTypo
             writer.AddProperty("xmag", xmag);
             writer.AddProperty("ymag", ymag);
             writer.AddProperty("zfar", zfar);
             writer.AddProperty("znear", znear);
+            // ReSharper restore StringLiteralTypo
             writer.Close();
         }
     }
@@ -138,16 +145,19 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The floating-point vertical field of view in radians.
         /// </summary>
+        // ReSharper disable once IdentifierTypo
         public float yfov;
         
         /// <summary>
         /// The floating-point distance to the far clipping plane.
         /// </summary>
+        // ReSharper disable once IdentifierTypo
         public float zfar = -1f;
         
         /// <summary>
         /// The floating-point distance to the near clipping plane.
         /// </summary>
+        // ReSharper disable once IdentifierTypo
         public float znear;
         
         internal void GltfSerialize(JsonWriter writer) {
@@ -155,11 +165,13 @@ namespace GLTFast.Schema {
             if (aspectRatio > 0) {
                 writer.AddProperty("aspectRatio", aspectRatio);
             }
+            // ReSharper disable StringLiteralTypo
             writer.AddProperty("yfov", yfov);
             if (zfar < float.MaxValue) {
                 writer.AddProperty("zfar", zfar);
             }
             writer.AddProperty("znear", znear);
+            // ReSharper restore StringLiteralTypo
             writer.Close();
         }
     }

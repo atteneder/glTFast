@@ -30,7 +30,7 @@ namespace GLTFast.Schema {
         /// The offset relative to the start of the bufferView in bytes. Must be aligned.
         /// <minimum>0</minimum>
         /// </summary>
-        public int byteOffset = 0;
+        public int byteOffset;
         
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();

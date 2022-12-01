@@ -105,23 +105,19 @@ namespace GLTFast.Schema {
         /// <minItems>3</minItems>
         /// <maxItems>3</maxItems>
         /// </summary>
-        [UnityEngine.SerializeField]
+        [SerializeField]
         float[] emissiveFactor = {0,0,0};
 
         /// <summary>
         /// Emissive color of the material.
         /// </summary>
         public Color emissive {
-            get {
-                return new Color(
-                    emissiveFactor[0],
-                    emissiveFactor[1],
-                    emissiveFactor[2]
+            get => new Color(
+                emissiveFactor[0],
+                emissiveFactor[1],
+                emissiveFactor[2]
                 );
-            }
-            set {
-                emissiveFactor = new[] { value.r, value.g, value.b };
-            }
+            set => emissiveFactor = new[] { value.r, value.g, value.b };
         }
 
         /// <summary>
@@ -136,26 +132,26 @@ namespace GLTFast.Schema {
         [SerializeField]
         public string alphaMode;
 
-        AlphaMode? _alphaModeEnum;
+        AlphaMode? m_AlphaModeEnum;
 
         /// <summary>
         /// <see cref="AlphaMode"/> typed view onto <see cref="alphaMode"/> string. 
         /// </summary>
         public AlphaMode alphaModeEnum {
             get {
-                if ( _alphaModeEnum.HasValue ) {
-                    return _alphaModeEnum.Value;
+                if ( m_AlphaModeEnum.HasValue ) {
+                    return m_AlphaModeEnum.Value;
                 }
                 if (!string.IsNullOrEmpty (alphaMode)) {
-                    _alphaModeEnum = (AlphaMode)System.Enum.Parse (typeof(AlphaMode), alphaMode, true);
+                    m_AlphaModeEnum = (AlphaMode)System.Enum.Parse (typeof(AlphaMode), alphaMode, true);
                     alphaMode = null;
-                    return _alphaModeEnum.Value;
+                    return m_AlphaModeEnum.Value;
                 }
 
                 return AlphaMode.OPAQUE;
             }
             set {
-                _alphaModeEnum = value;
+                m_AlphaModeEnum = value;
                 if (value != AlphaMode.OPAQUE) {
                     alphaMode = value.ToString();
                 }
@@ -175,7 +171,7 @@ namespace GLTFast.Schema {
         /// sided lighting is enabled. The back-face must have its normals reversed before the
         /// lighting equation is evaluated.
         /// </summary>
-        public bool doubleSided = false;
+        public bool doubleSided;
 
         /// <summary>
         /// True if the material requires the mesh to have normals.

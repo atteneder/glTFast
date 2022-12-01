@@ -22,6 +22,6 @@ namespace GLTFast.FakeSchema {
     /// </summary>
     [System.Serializable]
     class Material : RootChild {
-        public MaterialExtension extensions = null;
+        public MaterialExtension extensions;
     }
 }

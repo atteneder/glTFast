@@ -53,11 +53,11 @@ namespace GLTFast.Schema {
         /// </summary>
         public float[] translation;
 
-        /// <summary>
-        /// The weights of the instantiated Morph Target.
-        /// Number of elements must match number of Morph Targets of used mesh.
-        /// </summary>
-        //public double[] weights;
+        // /// <summary>
+        // /// The weights of the instantiated Morph Target.
+        // /// Number of elements must match number of Morph Targets of used mesh.
+        // /// </summary>
+        // public double[] weights;
 
         /// <summary>
         /// </summary>

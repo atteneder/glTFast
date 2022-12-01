@@ -31,6 +31,8 @@ namespace GLTFast.Schema {
         [System.Serializable]
         public class Attributes {
             
+            // ReSharper disable InconsistentNaming
+            
             /// <summary>
             /// Instance positions accessor index
             /// </summary>
@@ -45,6 +47,8 @@ namespace GLTFast.Schema {
             /// Instance scales accessor index
             /// </summary>
             public int SCALE = -1;
+            
+            // ReSharper restore InconsistentNaming
         }
 
         /// <inheritdoc cref="Attributes"/>

@@ -25,14 +25,14 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The base fraction of light that is transmitted through the surface.
         /// </summary>
-        public float transmissionFactor = 0;
+        public float transmissionFactor;
         
         /// <summary>
         /// A texture that defines the transmission fraction of the surface,
         /// stored in the R channel. This will be multiplied by
         /// transmissionFactor.
         /// </summary>
-        public TextureInfo transmissionTexture = null;
+        public TextureInfo transmissionTexture;
 
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();

@@ -21,7 +21,7 @@ namespace GLTFast.Schema {
     /// A set of primitives to be rendered. Its global transform is defined by
     /// a node that references it.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class Mesh : NamedObject, ICloneable {
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace GLTFast.Schema {
     /// <summary>
     /// Mesh specific extra data.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class MeshExtras {
         
         /// <summary>

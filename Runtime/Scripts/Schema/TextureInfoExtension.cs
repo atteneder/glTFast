@@ -22,6 +22,7 @@ namespace GLTFast.Schema {
     public class TextureInfoExtension {
         
         /// <inheritdoc cref="Extension.TextureTransform"/>
+        // ReSharper disable once InconsistentNaming
         public TextureTransform KHR_texture_transform;
 
         internal void GltfSerialize(JsonWriter writer) {
