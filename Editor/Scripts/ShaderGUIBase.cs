@@ -90,9 +90,9 @@ namespace GLTFast.Editor
                 material.SetVector(scaleTransformPropertyId,new Vector4(rotScale.c0.x,rotScale.c1.y,currentScaleTransform.z,currentScaleTransform.w));
                 material.SetVector(rotationPropertyId,new Vector4(rotScale.c1.x,rotScale.c0.y,0,0));
                 if (newUvTransform.rotation == 0) {
-                    material.DisableKeyword(KW_TEXTURE_TRANSFORM);
+                    material.DisableKeyword(textureTransformKeyword);
                 } else {
-                    material.EnableKeyword(KW_TEXTURE_TRANSFORM);
+                    material.EnableKeyword(textureTransformKeyword);
                 }
                 return newUvTransform;
             }

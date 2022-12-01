@@ -25,6 +25,6 @@ namespace GLTFast.Materials {
         /// <summary>
         /// Shader keyword for normal mapping
         /// </summary>
-        public const string kwNormalMap = "_NORMALMAP";
+        public const string normalMapKeyword = "_NORMALMAP";
     }
 }

@@ -42,23 +42,23 @@ namespace GLTFast.Editor
         {
             if (materialEditor.target is Material material)
             {
-                string current = material.GetTag(TAG_RENDER_TYPE, false);
+                string current = material.GetTag(RenderTypeTag, false);
                 BlendModeOption currentBlendMode = BlendModeOption.Opaque;
 
                 switch (current)
                 {
                     case "":
-                    case TAG_RENDER_TYPE_OPAQUE:
+                    case OpaqueRenderType:
                         currentBlendMode = BlendModeOption.Opaque;
                         break;
 
-                    case TAG_RENDER_TYPE_CUTOUT:
+                    case TransparentCutoutRenderType:
                         currentBlendMode = BlendModeOption.Cutout;
                         break;
-                    case TAG_RENDER_TYPE_FADE:
+                    case FadeRenderType:
                         currentBlendMode = BlendModeOption.Fade;
                         break;
-                    case TAG_RENDER_TYPE_TRANSPARENT:
+                    case TransparentRenderType:
                         currentBlendMode = BlendModeOption.Transparent;
                         break;
 
@@ -83,9 +83,9 @@ namespace GLTFast.Editor
                 if (uvTransform.HasValue)
                 {
                     if (uvTransform.Value.rotation != 0) {
-                        material.EnableKeyword(KW_TEXTURE_TRANSFORM);
+                        material.EnableKeyword(textureTransformKeyword);
                     } else {
-                        material.DisableKeyword(KW_TEXTURE_TRANSFORM);
+                        material.DisableKeyword(textureTransformKeyword);
                     }
                 }
                 

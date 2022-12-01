@@ -14,15 +14,17 @@
 //
 
 using System;
-using GLTFast.Materials;
+
 using Unity.Mathematics;
 using UnityEngine;
+#if USING_URP || USING_HDRP
 using UnityEngine.Rendering;
-#if USING_URP
-using UnityEngine.Rendering.Universal;
 #endif
 #if USING_HDRP
 using UnityEngine.Rendering.HighDefinition;
+#endif
+#if USING_URP
+using UnityEngine.Rendering.Universal;
 #endif
 
 namespace GLTFast.Export {
@@ -112,7 +114,7 @@ namespace GLTFast.Export {
             }
             if (
                 uMaterial.HasProperty(k_BumpMap)
-                && (uMaterial.IsKeywordEnabled( Materials.Constants.kwNormalMap)
+                && (uMaterial.IsKeywordEnabled(Materials.Constants.normalMapKeyword)
                     || uMaterial.IsKeywordEnabled(k_KeywordBumpMap))
             )
             {

@@ -18,16 +18,21 @@
 using System;
 using UnityEngine;
 using UnityEngine.Rendering;
+#if USING_HDRP_10_OR_NEWER
 using UnityEngine.Rendering.HighDefinition;
+#endif
 
 namespace GLTFast.Materials {
 
     public class HighDefinitionRPMaterialGenerator : ShaderGraphMaterialGenerator {
         
         static readonly int k_AlphaCutoffEnable = Shader.PropertyToID("_AlphaCutoffEnable");
+        static readonly int k_ZTestDepthEqualForOpaque = Shader.PropertyToID("_ZTestDepthEqualForOpaque");
+
+#if USING_HDRP_10_OR_NEWER
         static readonly int k_RenderQueueType = Shader.PropertyToID("_RenderQueueType");
         static readonly int k_SurfaceType = Shader.PropertyToID("_SurfaceType");
-        static readonly int k_ZTestDepthEqualForOpaque = Shader.PropertyToID("_ZTestDepthEqualForOpaque");
+#endif
 
         protected const string k_DistortionVectorsPass = "DistortionVectors";
 
@@ -75,7 +80,7 @@ namespace GLTFast.Materials {
             base.SetAlphaModeMask(gltfMaterial,material);
             
             material.SetFloat(k_AlphaCutoffEnable, 1);
-            material.SetOverrideTag(TAG_MOTION_VECTOR,TAG_MOTION_VECTOR_USER);
+            material.SetOverrideTag(k_MotionVectorTag,k_MotionVectorUser);
             material.SetShaderPassEnabled(k_MotionVectorsPass,false);
             
             
@@ -93,7 +98,7 @@ namespace GLTFast.Materials {
 
                 material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
 #endif
-                material.SetOverrideTag(TAG_RENDER_TYPE,TAG_RENDER_TYPE_TRANSPARENT);
+                material.SetOverrideTag(RenderTypeTag,TransparentRenderType);
                 material.SetShaderPassEnabled(k_DistortionVectorsPass,false);
                 material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
                 material.SetFloat(srcBlendPropId, (int) BlendMode.One);
@@ -107,13 +112,13 @@ namespace GLTFast.Materials {
 #if USING_HDRP_10_OR_NEWER
         protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
             
-            material.DisableKeyword(KW_ALPHATEST_ON);
+            material.DisableKeyword(alphaTestOnKeyword);
             material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
             // material.EnableKeyword(KW_DISABLE_DECALS);
             material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
             material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
             
-            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
+            material.SetOverrideTag(RenderTypeTag, TransparentRenderType);
             
             material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPrepass, false);
             material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);

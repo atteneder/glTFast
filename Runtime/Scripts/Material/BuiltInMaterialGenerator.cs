@@ -19,12 +19,12 @@
 
 #if GLTFAST_BUILTIN_RP || UNITY_EDITOR
 
-using System.Collections.Generic;
 using UnityEngine;
-using Material = UnityEngine.Material;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+
+using Material = UnityEngine.Material;
 
 namespace GLTFast.Materials {
 
@@ -59,58 +59,58 @@ namespace GLTFast.Materials {
     public class BuiltInMaterialGenerator : MaterialGenerator {
 
         // Built-in Render Pipeline
-        const string KW_ALPHABLEND_ON = "_ALPHABLEND_ON";
-        const string KW_ALPHAPREMULTIPLY_ON = "_ALPHAPREMULTIPLY_ON";
-        const string KW_EMISSION = "_EMISSION";
-        const string KW_METALLIC_ROUGNESS_MAP = "_METALLICGLOSSMAP";
-        const string KW_OCCLUSION = "_OCCLUSION";
-        const string KW_SPEC_GLOSS_MAP = "_SPECGLOSSMAP";
+        const string k_AlphaBlendOnKeyword = "_ALPHABLEND_ON";
+        const string k_AlphaPremultiplyOnKeyword = "_ALPHAPREMULTIPLY_ON";
+        const string k_EmissionKeyword = "_EMISSION";
+        const string k_MetallicRoughnessMapKeyword = "_METALLICGLOSSMAP";
+        const string k_OcclusionKeyword = "_OCCLUSION";
+        const string k_SpecGlossMapKeyword = "_SPECGLOSSMAP";
 
-        static readonly int modePropId = Shader.PropertyToID("_Mode");
+        static readonly int k_ModePropId = Shader.PropertyToID("_Mode");
 
 #if UNITY_EDITOR
-        const string SHADER_PATH_PREFIX = "Packages/com.atteneder.gltfast/Runtime/Shader/Built-In/";
-        const string SHADER_PATH_PBR_METALLIC_ROUGHNESS = "glTFPbrMetallicRoughness.shader";
-        const string SHADER_PATH_PBR_SPECULAR_GLOSSINESS = "glTFPbrSpecularGlossiness.shader";
-        const string SHADER_PATH_UNLIT = "glTFUnlit.shader";
+        const string k_ShaderPathPrefix = "Packages/com.atteneder.gltfast/Runtime/Shader/Built-In/";
+        const string k_PbrMetallicRoughnessShaderPath = "glTFPbrMetallicRoughness.shader";
+        const string k_PbrSpecularGlossinessShaderPath = "glTFPbrSpecularGlossiness.shader";
+        const string k_UnlitShaderPath = "glTFUnlit.shader";
 #else
-        const string SHADER_PBR_METALLIC_ROUGHNESS = "glTF/PbrMetallicRoughness";
-        const string SHADER_PBR_SPECULAR_GLOSSINESS = "glTF/PbrSpecularGlossiness";
-        const string SHADER_UNLIT = "glTF/Unlit";
+        const string k_PbrMetallicRoughnessShaderName = "glTF/PbrMetallicRoughness";
+        const string k_PbrSpecularGlossinessShaderName = "glTF/PbrSpecularGlossiness";
+        const string k_UnlitShaderName = "glTF/Unlit";
 #endif
 
-        Shader pbrMetallicRoughnessShader;
-        Shader pbrSpecularGlossinessShader;
-        Shader unlitShader;
+        Shader m_PbrMetallicRoughnessShader;
+        Shader m_PbrSpecularGlossinessShader;
+        Shader m_UnlitShader;
 
-        static bool defaultMaterialGenerated;
-        static Material defaultMaterial;
+        static bool s_DefaultMaterialGenerated;
+        static Material s_DefaultMaterial;
 
         /// <inheritdoc />
         protected override Material GenerateDefaultMaterial(bool pointsSupport = false) {
             if(pointsSupport) {
-                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
+                m_Logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
             }
-            if (!defaultMaterialGenerated) {
-                defaultMaterial = GetPbrMetallicRoughnessMaterial();
-                defaultMaterial.name = DEFAULT_MATERIAL_NAME;
-                defaultMaterialGenerated = true;
+            if (!s_DefaultMaterialGenerated) {
+                s_DefaultMaterial = GetPbrMetallicRoughnessMaterial();
+                s_DefaultMaterial.name = defaultMaterialName;
+                s_DefaultMaterialGenerated = true;
                 // Material works on lines as well
                 // TODO: Create dedicated point cloud material
             }
 
-            return defaultMaterial;
+            return s_DefaultMaterial;
         }
         
         /// <summary>
         /// Finds the shader required for metallic/roughness based materials.
         /// </summary>
         /// <returns>Metallic/Roughness shader</returns>
-        protected virtual Shader FinderShaderMetallicRoughness() {
+        static Shader FinderShaderMetallicRoughness() {
 #if UNITY_EDITOR
-            return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_PBR_METALLIC_ROUGHNESS}");
+            return AssetDatabase.LoadAssetAtPath<Shader>($"{k_ShaderPathPrefix}{k_PbrMetallicRoughnessShaderPath}");
 #else
-            return FindShader(SHADER_PBR_METALLIC_ROUGHNESS);
+            return FindShader(k_PbrMetallicRoughnessShaderName);
 #endif
         }
         
@@ -118,11 +118,11 @@ namespace GLTFast.Materials {
         /// Finds the shader required for specular/glossiness based materials.
         /// </summary>
         /// <returns>Specular/Glossiness shader</returns>
-        protected virtual Shader FinderShaderSpecularGlossiness() {
+        static Shader FinderShaderSpecularGlossiness() {
 #if UNITY_EDITOR
-            return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_PBR_SPECULAR_GLOSSINESS}");
+            return AssetDatabase.LoadAssetAtPath<Shader>($"{k_ShaderPathPrefix}{k_PbrSpecularGlossinessShaderPath}");
 #else
-            return FindShader(SHADER_PBR_SPECULAR_GLOSSINESS);
+            return FindShader(k_PbrSpecularGlossinessShaderName);
 #endif
         }
 
@@ -130,23 +130,23 @@ namespace GLTFast.Materials {
         /// Finds the shader required for unlit materials.
         /// </summary>
         /// <returns>Unlit shader</returns>
-        protected virtual Shader FinderShaderUnlit() {
+        static Shader FinderShaderUnlit() {
 #if UNITY_EDITOR
-            return AssetDatabase.LoadAssetAtPath<Shader>($"{SHADER_PATH_PREFIX}{SHADER_PATH_UNLIT}");
+            return AssetDatabase.LoadAssetAtPath<Shader>($"{k_ShaderPathPrefix}{k_UnlitShaderPath}");
 #else
-            return FindShader(SHADER_UNLIT);
+            return FindShader(k_UnlitShaderName);
 #endif
         }
 
         Material GetPbrMetallicRoughnessMaterial(bool doubleSided=false) {
-            if(pbrMetallicRoughnessShader==null)
+            if(m_PbrMetallicRoughnessShader==null)
             {
-                pbrMetallicRoughnessShader = FinderShaderMetallicRoughness();
+                m_PbrMetallicRoughnessShader = FinderShaderMetallicRoughness();
             }
-            if(pbrMetallicRoughnessShader==null) {
+            if(m_PbrMetallicRoughnessShader==null) {
                 return null;
             }
-            var mat = new Material(pbrMetallicRoughnessShader);
+            var mat = new Material(m_PbrMetallicRoughnessShader);
             if(doubleSided) {
                 // Turn off back-face culling
                 mat.SetFloat(cullModePropId,0);
@@ -158,13 +158,13 @@ namespace GLTFast.Materials {
         }
 
         Material GetPbrSpecularGlossinessMaterial(bool doubleSided=false) {
-            if(pbrSpecularGlossinessShader==null) {
-                pbrSpecularGlossinessShader = FinderShaderSpecularGlossiness();
+            if(m_PbrSpecularGlossinessShader==null) {
+                m_PbrSpecularGlossinessShader = FinderShaderSpecularGlossiness();
             }
-            if(pbrSpecularGlossinessShader==null) {
+            if(m_PbrSpecularGlossinessShader==null) {
                 return null;
             }
-            var mat = new Material(pbrSpecularGlossinessShader);
+            var mat = new Material(m_PbrSpecularGlossinessShader);
             if(doubleSided) {
                 // Turn off back-face culling
                 mat.SetFloat(cullModePropId,0);
@@ -176,13 +176,13 @@ namespace GLTFast.Materials {
         }
 
         Material GetUnlitMaterial(bool doubleSided=false) {
-            if(unlitShader==null) {
-                unlitShader = FinderShaderUnlit();
+            if(m_UnlitShader==null) {
+                m_UnlitShader = FinderShaderUnlit();
             }
-            if(unlitShader==null) {
+            if(m_UnlitShader==null) {
                 return null;
             }
-            var mat = new Material(unlitShader);
+            var mat = new Material(m_UnlitShader);
             if(doubleSided) {
                 // Turn off back-face culling
                 mat.SetFloat(cullModePropId,0);
@@ -215,7 +215,7 @@ namespace GLTFast.Materials {
             if(material==null) return null;
 
             if (!isUnlit && pointsSupport) {
-                logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
+                m_Logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
             }
             
             material.name = gltfMaterial.name;
@@ -258,7 +258,7 @@ namespace GLTFast.Materials {
                         specularGlossinessTextureRotationPropId,
                         specularGlossinessTextureTexCoordPropId
                         )) {
-                        material.EnableKeyword(KW_SPEC_GLOSS_MAP);
+                        material.EnableKeyword(k_SpecGlossMapKeyword);
                     }
                 }
             }
@@ -270,7 +270,7 @@ namespace GLTFast.Materials {
             {
                 baseColorLinear = gltfMaterial.pbrMetallicRoughness.baseColor;
                 material.SetFloat(metallicPropId, gltfMaterial.pbrMetallicRoughness.metallicFactor );
-                material.SetFloat(roughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
+                material.SetFloat(k_RoughnessFactorPropId, gltfMaterial.pbrMetallicRoughness.roughnessFactor );
 
                 TrySetTexture(
                     gltfMaterial.pbrMetallicRoughness.baseColorTexture,
@@ -286,12 +286,12 @@ namespace GLTFast.Materials {
                     gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture,
                     material,
                     gltf,
-                    metallicRoughnessMapPropId,
-                    metallicRoughnessMapScaleTransformPropId,
-                    metallicRoughnessMapRotationPropId,
-                    metallicRoughnessMapUVChannelPropId
+                    k_MetallicRoughnessMapPropId,
+                    k_MetallicRoughnessMapScaleTransformPropId,
+                    k_MetallicRoughnessMapRotationPropId,
+                    k_MetallicRoughnessMapUVChannelPropId
                     )) {
-                    material.EnableKeyword(KW_METALLIC_ROUGNESS_MAP);
+                    material.EnableKeyword(k_MetallicRoughnessMapKeyword);
                 }
             }
 
@@ -304,7 +304,7 @@ namespace GLTFast.Materials {
                 normalTextureRotationPropId,
                 normalTextureTexCoordPropId
             )) {
-                material.EnableKeyword(Constants.kwNormalMap);
+                material.EnableKeyword(Constants.normalMapKeyword);
                 material.SetFloat(normalTextureScalePropId,gltfMaterial.normalTexture.scale);
             }
 
@@ -317,7 +317,7 @@ namespace GLTFast.Materials {
                 occlusionTextureRotationPropId,
                 occlusionTextureTexCoordPropId
                 )) {
-                material.EnableKeyword(KW_OCCLUSION);
+                material.EnableKeyword(k_OcclusionKeyword);
                 material.SetFloat(occlusionTextureStrengthPropId,gltfMaterial.occlusionTexture.strength);
             }
 
@@ -330,7 +330,7 @@ namespace GLTFast.Materials {
                 emissiveTextureRotationPropId,
                 emissiveTextureTexCoordPropId
                 )) {
-                material.EnableKeyword(KW_EMISSION);
+                material.EnableKeyword(k_EmissionKeyword);
             }
 
             if (gltfMaterial.extensions != null) {
@@ -339,13 +339,13 @@ namespace GLTFast.Materials {
                 var transmission = gltfMaterial.extensions.KHR_materials_transmission;
                 if (transmission != null) {
 #if UNITY_EDITOR
-                    logger?.Warning(LogCode.MaterialTransmissionApprox);
+                    m_Logger?.Warning(LogCode.MaterialTransmissionApprox);
 #endif
                     // Correct transmission is not supported in Built-In renderer
                     // This is an approximation for some corner cases
                     if (transmission.transmissionFactor > 0f && transmission.transmissionTexture.index < 0) {
-                        var premul = TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
-                        shaderMode = premul ? StandardShaderMode.Transparent : StandardShaderMode.Fade;
+                        var premultiply = TransmissionWorkaroundShaderMode(transmission, ref baseColorLinear);
+                        shaderMode = premultiply ? StandardShaderMode.Transparent : StandardShaderMode.Fade;
                     }
                 }
             }
@@ -366,11 +366,11 @@ namespace GLTFast.Materials {
                     break;
             }
 
-            material.SetVector(baseColorPropId, baseColorLinear.gamma);
+            material.SetVector(k_BaseColorPropId, baseColorLinear.gamma);
             
             if(gltfMaterial.emissive != Color.black) {
                 material.SetColor(emissiveFactorPropId, gltfMaterial.emissive.gamma);
-                material.EnableKeyword(KW_EMISSION);
+                material.EnableKeyword(k_EmissionKeyword);
             }
 
             return material;
@@ -381,18 +381,18 @@ namespace GLTFast.Materials {
         /// </summary>
         /// <param name="material">Target material</param>
         /// <param name="alphaCutoff">Threshold value for alpha masking</param>
-        public static void SetAlphaModeMask(UnityEngine.Material material, float alphaCutoff)
+        public static void SetAlphaModeMask(Material material, float alphaCutoff)
         {
-            material.EnableKeyword(KW_ALPHATEST_ON);
+            material.EnableKeyword(alphaTestOnKeyword);
             material.SetInt(zWritePropId, 1);
-            material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
+            material.DisableKeyword(k_AlphaPremultiplyOnKeyword);
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.AlphaTest;  //2450
             material.SetFloat(alphaCutoffPropId, alphaCutoff);
-            material.SetFloat(modePropId, (int)StandardShaderMode.Cutout);
-            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_CUTOUT);
+            material.SetFloat(k_ModePropId, (int)StandardShaderMode.Cutout);
+            material.SetOverrideTag(RenderTypeTag, TransparentCutoutRenderType);
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);
             material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.Zero);
-            material.DisableKeyword(KW_ALPHABLEND_ON);
+            material.DisableKeyword(k_AlphaBlendOnKeyword);
         }
 
         /// <summary>
@@ -400,7 +400,7 @@ namespace GLTFast.Materials {
         /// </summary>
         /// <param name="material">Target material</param>
         /// <param name="gltfMaterial">Source material</param>
-        public static void SetAlphaModeMask(UnityEngine.Material material, Schema.Material gltfMaterial)
+        static void SetAlphaModeMask(Material material, Schema.Material gltfMaterial)
         {
             SetAlphaModeMask(material, gltfMaterial.alphaCutoff);
         }
@@ -409,15 +409,15 @@ namespace GLTFast.Materials {
         /// Configures material for alpha blending.
         /// </summary>
         /// <param name="material">Target material</param>
-        public static void SetAlphaModeBlend( UnityEngine.Material material ) {
-            material.SetFloat(modePropId, (int)StandardShaderMode.Fade);
-            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_FADE);
-            material.EnableKeyword(KW_ALPHABLEND_ON);
+        public static void SetAlphaModeBlend( Material material ) {
+            material.SetFloat(k_ModePropId, (int)StandardShaderMode.Fade);
+            material.SetOverrideTag(RenderTypeTag, FadeRenderType);
+            material.EnableKeyword(k_AlphaBlendOnKeyword);
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);//5
             material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);//10
             material.SetInt(zWritePropId, 0);
-            material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
-            material.DisableKeyword(KW_ALPHATEST_ON);
+            material.DisableKeyword(k_AlphaPremultiplyOnKeyword);
+            material.DisableKeyword(alphaTestOnKeyword);
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
         }
 
@@ -425,15 +425,15 @@ namespace GLTFast.Materials {
         /// Configures material for transparency.
         /// </summary>
         /// <param name="material">Target material</param>
-        public static void SetAlphaModeTransparent( UnityEngine.Material material ) {
-            material.SetFloat(modePropId, (int)StandardShaderMode.Fade);
-            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
-            material.EnableKeyword(KW_ALPHAPREMULTIPLY_ON);
+        public static void SetAlphaModeTransparent( Material material ) {
+            material.SetFloat(k_ModePropId, (int)StandardShaderMode.Fade);
+            material.SetOverrideTag(RenderTypeTag, TransparentRenderType);
+            material.EnableKeyword(k_AlphaPremultiplyOnKeyword);
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);//1
             material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);//10
             material.SetInt(zWritePropId, 0);
-            material.DisableKeyword(KW_ALPHABLEND_ON);
-            material.DisableKeyword(KW_ALPHATEST_ON);
+            material.DisableKeyword(k_AlphaBlendOnKeyword);
+            material.DisableKeyword(alphaTestOnKeyword);
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;  //3000
         }
 
@@ -441,15 +441,15 @@ namespace GLTFast.Materials {
         /// Configures material to be opaque.
         /// </summary>
         /// <param name="material">Target material</param>
-        public static void SetOpaqueMode(UnityEngine.Material material) {
-            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_OPAQUE);
-            material.DisableKeyword(KW_ALPHABLEND_ON);
+        public static void SetOpaqueMode(Material material) {
+            material.SetOverrideTag(RenderTypeTag, OpaqueRenderType);
+            material.DisableKeyword(k_AlphaBlendOnKeyword);
             material.renderQueue = -1;
             material.SetInt(srcBlendPropId, (int)UnityEngine.Rendering.BlendMode.One);
             material.SetInt(dstBlendPropId, (int)UnityEngine.Rendering.BlendMode.Zero);
             material.SetInt(zWritePropId, 1);
-            material.DisableKeyword(KW_ALPHATEST_ON);
-            material.DisableKeyword(KW_ALPHAPREMULTIPLY_ON);
+            material.DisableKeyword(alphaTestOnKeyword);
+            material.DisableKeyword(k_AlphaPremultiplyOnKeyword);
         }
     }
 }

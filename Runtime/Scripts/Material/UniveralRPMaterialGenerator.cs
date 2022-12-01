@@ -16,28 +16,30 @@
 #if USING_URP
 
 using System;
-using System.Collections.Generic;
+
 using GLTFast.Schema;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+
 using Material = UnityEngine.Material;
-using Texture = GLTFast.Schema.Texture;
 
 namespace GLTFast.Materials {
 
     public class UniversalRPMaterialGenerator : ShaderGraphMaterialGenerator {
 
         // Keywords
-        const string KW_TRANSMISSION = "_TRANSMISSION";
+        const string k_TransmissionKeyword = "_TRANSMISSION";
         
-        static bool supportsCameraOpaqueTexture;
-        
-        static readonly int k_AlphaClip = Shader.PropertyToID("_AlphaClip");
-        static readonly int k_Surface = Shader.PropertyToID("_Surface");
+        static bool s_SupportsCameraOpaqueTexture;
+
+#if USING_URP_12_OR_NEWER
+        static readonly int k_AlphaClipPropId = Shader.PropertyToID("_AlphaClip");
+        static readonly int k_SurfacePropId = Shader.PropertyToID("_Surface");
+#endif
 
         public UniversalRPMaterialGenerator(UniversalRenderPipelineAsset renderPipelineAsset) {
-            supportsCameraOpaqueTexture = renderPipelineAsset.supportsCameraOpaqueTexture;
+            s_SupportsCameraOpaqueTexture = renderPipelineAsset.supportsCameraOpaqueTexture;
         }
         
 #if USING_URP_12_OR_NEWER
@@ -62,11 +64,11 @@ namespace GLTFast.Materials {
 
         protected override void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
             base.SetAlphaModeMask(gltfMaterial, material);
-            material.SetFloat(k_AlphaClip, 1);
+            material.SetFloat(k_AlphaClipPropId, 1);
         }
 
         protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
-            material.SetOverrideTag(TAG_RENDER_TYPE, TAG_RENDER_TYPE_TRANSPARENT);
+            material.SetOverrideTag(TAG_RENDER_TYPE, TransparentRenderType);
             material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
             material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
             material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
@@ -79,13 +81,13 @@ namespace GLTFast.Materials {
             material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
             material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
-            material.SetFloat(k_Surface, 1);
+            material.SetFloat(k_SurfacePropId, 1);
             material.SetFloat(zWritePropId, 0);
         }
 #endif
 
         protected override ShaderMode? ApplyTransmissionShaderFeatures(Schema.Material gltfMaterial) {
-            if (!supportsCameraOpaqueTexture) {
+            if (!s_SupportsCameraOpaqueTexture) {
                 // Fall back to makeshift approximation via premultiply or blend 
                 return base.ApplyTransmissionShaderFeatures(gltfMaterial);
             }
@@ -107,19 +109,19 @@ namespace GLTFast.Materials {
             Material material,
             RenderQueue? renderQueue
         ) {
-            if (supportsCameraOpaqueTexture) {
+            if (s_SupportsCameraOpaqueTexture) {
                 if (transmission.transmissionFactor > 0f) {
-                    material.EnableKeyword(KW_TRANSMISSION);
-                    material.SetFloat(transmissionFactorPropId, transmission.transmissionFactor);
+                    material.EnableKeyword(k_TransmissionKeyword);
+                    material.SetFloat(k_TransmissionFactorPropId, transmission.transmissionFactor);
                     renderQueue = RenderQueue.Transparent;
                     if (TrySetTexture(
                         transmission.transmissionTexture,
                         material,
                         gltf,
-                        transmissionTexturePropId,
-                        transmissionTextureScaleTransformPropId, // TODO: add support in shader
-                        transmissionTextureRotationPropId, // TODO: add support in shader
-                        transmissionTextureUVChannelPropId // TODO: add support in shader
+                        k_TransmissionTexturePropId,
+                        k_TransmissionTextureScaleTransformPropId, // TODO: add support in shader
+                        k_TransmissionTextureRotationPropId, // TODO: add support in shader
+                        k_TransmissionTextureUVChannelPropId // TODO: add support in shader
                     )) { }
                 }
                 return renderQueue;

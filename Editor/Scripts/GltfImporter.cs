@@ -16,7 +16,7 @@
 #if !GLTFAST_EDITOR_IMPORT_OFF
 
 // glTFast is on the path to being official, so it should have highest priority as importer by default
-// This ifdef is included for completeness.
+// This define is included for completeness.
 // Other glTF importers should specify this via AsmDef dependency, for example
 // `com.atteneder.gltfast@3.0.0: HAVE_GLTFAST` and then checking here `#if HAVE_GLTFAST`
 #if false 
@@ -63,11 +63,14 @@ namespace GLTFast.Editor {
         [SerializeField]
         InstantiationSettings instantiationSettings;
         
+        // These are used/read in the GltfImporterEditor
+        // ReSharper disable NotAccessedField.Local
         [SerializeField]
         GltfAssetDependency[] assetDependencies;
         
         [SerializeField]
         LogItem[] reportItems;
+        // ReSharper restore NotAccessedField.Local
         
         GltfImport m_Gltf;
 
