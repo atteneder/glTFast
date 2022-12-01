@@ -1182,7 +1182,7 @@ namespace GLTFast.Export {
                         attributes.TANGENT = accessorId;
                         break;
                     case VertexAttribute.Color:
-                        accessor.componentType = GLTFComponentType.UnsignedByte;
+                        accessor.componentType = GltfComponentType.UnsignedByte;
                         accessor.normalized = true;
                         attributes.COLOR_0 = accessorId;
                         break;
@@ -1222,7 +1222,7 @@ namespace GLTFast.Export {
             }
 
             var streamCount = attrDataDict.Count;
-            var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GLTFComponentType.UnsignedShort : GLTFComponentType.UnsignedInt;
+            var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GltfComponentType.UnsignedShort : GltfComponentType.UnsignedInt;
             mesh.primitives = new MeshPrimitive[uMesh.subMeshCount];
             var indexAccessors = new Accessor[uMesh.subMeshCount];
             var indexOffset = 0;
@@ -1244,7 +1244,7 @@ namespace GLTFast.Export {
                 Accessor indexAccessor;
                 
                 indexAccessor = new Accessor {
-                    typeEnum = GLTFAccessorAttributeType.SCALAR,
+                    typeEnum = GltfAccessorAttributeType.SCALAR,
                     byteOffset = indexOffset,
                     componentType = indexComponentType,
                     count = subMesh.indexCount,

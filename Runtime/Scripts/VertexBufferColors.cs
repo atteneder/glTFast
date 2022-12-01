@@ -85,8 +85,8 @@ namespace GLTFast {
         
         unsafe JobHandle? GetColors32Job(
             void* input,
-            GLTFComponentType inputType,
-            GLTFAccessorAttributeType attributeType,
+            GltfComponentType inputType,
+            GltfAccessorAttributeType attributeType,
             int inputByteStride,
             NativeArray<float4> output
             )
@@ -94,11 +94,11 @@ namespace GLTFast {
             Profiler.BeginSample("PrepareColors32");
             JobHandle? jobHandle = null;
 
-            if (attributeType == GLTFAccessorAttributeType.VEC3)
+            if (attributeType == GltfAccessorAttributeType.VEC3)
             {
                 switch (inputType)
                 {
-                    case GLTFComponentType.UnsignedByte:
+                    case GltfComponentType.UnsignedByte:
                         {
                             var job = new Jobs.ConvertColorsRGBUInt8ToRGBAFloatJob {
                                 input = (byte*) input,
@@ -108,7 +108,7 @@ namespace GLTFast {
                             jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
                         break;
-                    case GLTFComponentType.Float:
+                    case GltfComponentType.Float:
                         {
                             var job = new Jobs.ConvertColorsRGBFloatToRGBAFloatJob {
                                 input = (byte*) input,
@@ -118,7 +118,7 @@ namespace GLTFast {
                             jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
                         break;
-                    case GLTFComponentType.UnsignedShort:
+                    case GltfComponentType.UnsignedShort:
                         {
                             var job = new Jobs.ConvertColorsRGBUInt16ToRGBAFloatJob {
                                 input = (System.UInt16*)input,
@@ -133,11 +133,11 @@ namespace GLTFast {
                         break;
                 }
             }
-            else if (attributeType == GLTFAccessorAttributeType.VEC4)
+            else if (attributeType == GltfAccessorAttributeType.VEC4)
             {
                 switch (inputType)
                 {
-                    case GLTFComponentType.UnsignedByte:
+                    case GltfComponentType.UnsignedByte:
                         {
                             var job = new Jobs.ConvertColorsRGBAUInt8ToRGBAFloatJob {
                                 input = (byte*) input,
@@ -147,7 +147,7 @@ namespace GLTFast {
                             jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
                         }
                         break;
-                    case GLTFComponentType.Float:
+                    case GltfComponentType.Float:
                         {
                             if (inputByteStride == 16 || inputByteStride <= 0)
                             {
@@ -171,7 +171,7 @@ namespace GLTFast {
                             }
                         }
                         break;
-                    case GLTFComponentType.UnsignedShort:
+                    case GltfComponentType.UnsignedShort:
                         {
                             var job = new Jobs.ConvertColorsRGBAUInt16ToRGBAFloatJob {
                                 input = (System.UInt16*) input,

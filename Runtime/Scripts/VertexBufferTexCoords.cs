@@ -105,7 +105,7 @@ namespace GLTFast {
         unsafe JobHandle? GetUvsJob(
             void* input,
             int count,
-            GLTFComponentType inputType,
+            GltfComponentType inputType,
             int inputByteStride,
             float2* output,
             int outputByteStride,
@@ -116,7 +116,7 @@ namespace GLTFast {
             JobHandle? jobHandle = null;
             
             switch( inputType ) { 
-            case GLTFComponentType.Float:
+            case GltfComponentType.Float:
                 {
                     var jobUv = new Jobs.ConvertUVsFloatToFloatInterleavedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 8,
@@ -131,7 +131,7 @@ namespace GLTFast {
 #endif
                 }
                 break;
-            case GLTFComponentType.UnsignedByte:
+            case GltfComponentType.UnsignedByte:
                 if (normalized) {
                     var jobUv = new Jobs.ConvertUVsUInt8ToFloatInterleavedNormalizedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 2,
@@ -154,7 +154,7 @@ namespace GLTFast {
 #endif
                 }
                 break;
-            case GLTFComponentType.UnsignedShort:
+            case GltfComponentType.UnsignedShort:
                 if (normalized) {
                     var jobUv = new Jobs.ConvertUVsUInt16ToFloatInterleavedNormalizedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 4,
@@ -177,7 +177,7 @@ namespace GLTFast {
 #endif
                 }
                 break;
-            case GLTFComponentType.Short:
+            case GltfComponentType.Short:
                 if (normalized) {
                     var job = new Jobs.ConvertUVsInt16ToFloatInterleavedNormalizedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
@@ -204,7 +204,7 @@ namespace GLTFast {
 #endif
                 }
                 break;
-            case GLTFComponentType.Byte:
+            case GltfComponentType.Byte:
                 var byteStride = inputByteStride>0 ? inputByteStride : 2;
                 if (normalized) {
                     var jobInt8 = new Jobs.ConvertUVsInt8ToFloatInterleavedNormalizedJob {

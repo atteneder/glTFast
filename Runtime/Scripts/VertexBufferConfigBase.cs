@@ -91,7 +91,7 @@ namespace GLTFast
         public static unsafe JobHandle? GetVector3sJob(
             void* input,
             int count,
-            GLTFComponentType inputType,
+            GltfComponentType inputType,
             int inputByteStride,
             float3* output,
             int outputByteStride,
@@ -101,7 +101,7 @@ namespace GLTFast
             JobHandle? jobHandle;
 
             Profiler.BeginSample("GetVector3sJob");
-            if(inputType == GLTFComponentType.Float) {
+            if(inputType == GltfComponentType.Float) {
                 var job = new ConvertVector3FloatToFloatInterleavedJob {
                     inputByteStride = (inputByteStride>0) ? inputByteStride : 12,
                     input = (byte*)input,
@@ -114,7 +114,7 @@ namespace GLTFast
                 jobHandle = job.Schedule(count,GltfImport.DefaultBatchCount);
 #endif
             } else
-            if(inputType == GLTFComponentType.UnsignedShort) {
+            if(inputType == GltfComponentType.UnsignedShort) {
                 if (normalized) {
                     var job = new ConvertPositionsUInt16ToFloatInterleavedNormalizedJob {
                         inputByteStride = (inputByteStride>0) ? inputByteStride : 6,
@@ -141,7 +141,7 @@ namespace GLTFast
 #endif
                 }
             } else
-            if(inputType == GLTFComponentType.Short) {
+            if(inputType == GltfComponentType.Short) {
                 if (normalized) {
                     if (ensureUnitLength) {
                         // TODO: test. did not have test files
@@ -184,7 +184,7 @@ namespace GLTFast
 #endif
                 }
             } else
-            if(inputType == GLTFComponentType.Byte) {
+            if(inputType == GltfComponentType.Byte) {
                 if (normalized) {
                     if (ensureUnitLength) {
                         var job = new ConvertNormalsInt8ToFloatInterleavedNormalizedJob {
@@ -226,7 +226,7 @@ namespace GLTFast
 #endif
                 }
             } else
-            if(inputType == GLTFComponentType.UnsignedByte) {
+            if(inputType == GltfComponentType.UnsignedByte) {
                 // TODO: test. did not have test files
                 if (normalized) {
                     var job = new ConvertPositionsUInt8ToFloatInterleavedNormalizedJob {
@@ -264,7 +264,7 @@ namespace GLTFast
         protected unsafe JobHandle? GetTangentsJob(
             void* input,
             int count,
-            GLTFComponentType inputType,
+            GltfComponentType inputType,
             int inputByteStride,
             float4* output,
             int outputByteStride,
@@ -274,7 +274,7 @@ namespace GLTFast
             Profiler.BeginSample("GetTangentsJob");
             JobHandle? jobHandle;
             switch(inputType) {
-                case GLTFComponentType.Float: {
+                case GltfComponentType.Float: {
                     var jobTangent = new ConvertTangentsFloatToFloatInterleavedJob {
                         inputByteStride = inputByteStride>0 ? inputByteStride : 16,
                         input = (byte*)input,
@@ -288,7 +288,7 @@ namespace GLTFast
 #endif
                     break;
                 }
-                case GLTFComponentType.Short: {
+                case GltfComponentType.Short: {
                     Assert.IsTrue(normalized);
                     var jobTangent = new ConvertTangentsInt16ToFloatInterleavedNormalizedJob {
                         inputByteStride = inputByteStride>0 ? inputByteStride : 8,
@@ -303,7 +303,7 @@ namespace GLTFast
 #endif
                     break;
                 }
-                case GLTFComponentType.Byte: {
+                case GltfComponentType.Byte: {
                     Assert.IsTrue(normalized);
                     var jobTangent = new ConvertTangentsInt8ToFloatInterleavedNormalizedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
@@ -332,8 +332,8 @@ namespace GLTFast
             void* indexBuffer,
             void* valueBuffer,
             int sparseCount,
-            GLTFComponentType indexType,
-            GLTFComponentType valueType,
+            GltfComponentType indexType,
+            GltfComponentType valueType,
             float3* output,
             int outputByteStride,
             ref JobHandle? dependsOn,

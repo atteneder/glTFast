@@ -2693,7 +2693,7 @@ namespace GLTFast {
                     continue;
                 }
                 switch (acc.typeEnum) {
-                    case GLTFAccessorAttributeType.SCALAR when m_AccessorUsage[i]==AccessorUsage.IndexFlipped ||
+                    case GltfAccessorAttributeType.SCALAR when m_AccessorUsage[i]==AccessorUsage.IndexFlipped ||
                         m_AccessorUsage[i]==AccessorUsage.Index:
                     {
                         var ads = new  AccessorData<int>();
@@ -2702,7 +2702,7 @@ namespace GLTFast {
                         m_AccessorData[i] = ads;
                         break;
                     }
-                    case GLTFAccessorAttributeType.MAT4 when m_AccessorUsage[i]==AccessorUsage.InverseBindMatrix: {
+                    case GltfAccessorAttributeType.MAT4 when m_AccessorUsage[i]==AccessorUsage.InverseBindMatrix: {
                         // TODO: Maybe use AccessorData, since Mesh.bindposes only accepts C# arrays.
                         var ads = new  AccessorNativeData<Matrix4x4>();
                         GetMatricesJob(gltf,i,out ads.data, out var jh);
@@ -2710,7 +2710,7 @@ namespace GLTFast {
                         m_AccessorData[i] = ads;
                         break;
                     }
-                    case GLTFAccessorAttributeType.VEC3 when (m_AccessorUsage[i]&AccessorUsage.Translation)!=0:
+                    case GltfAccessorAttributeType.VEC3 when (m_AccessorUsage[i]&AccessorUsage.Translation)!=0:
                     {
                         var ads = new AccessorNativeData<Vector3>();
                         GetVector3Job(gltf,i,out ads.data, out var jh, true);
@@ -2718,7 +2718,7 @@ namespace GLTFast {
                         m_AccessorData[i] = ads;
                         break;
                     }
-                    case GLTFAccessorAttributeType.VEC4 when (m_AccessorUsage[i]&AccessorUsage.Rotation)!=0:
+                    case GltfAccessorAttributeType.VEC4 when (m_AccessorUsage[i]&AccessorUsage.Rotation)!=0:
                     {
                         var ads = new AccessorNativeData<Quaternion>();
                         GetVector4Job(gltf,i,out ads.data, out var jh);
@@ -2726,7 +2726,7 @@ namespace GLTFast {
                         m_AccessorData[i] = ads;
                         break;
                     }
-                    case GLTFAccessorAttributeType.VEC3 when (m_AccessorUsage[i]&AccessorUsage.Scale)!=0:
+                    case GltfAccessorAttributeType.VEC3 when (m_AccessorUsage[i]&AccessorUsage.Scale)!=0:
                     {
                         var ads = new AccessorNativeData<Vector3>();
                         GetVector3Job(gltf,i,out ads.data, out var jh, false);
@@ -2735,7 +2735,7 @@ namespace GLTFast {
                         break;
                     }
 #if UNITY_ANIMATION
-                    case GLTFAccessorAttributeType.SCALAR when m_AccessorUsage[i]==AccessorUsage.AnimationTimes || m_AccessorUsage[i]==AccessorUsage.Weight:
+                    case GltfAccessorAttributeType.SCALAR when m_AccessorUsage[i]==AccessorUsage.AnimationTimes || m_AccessorUsage[i]==AccessorUsage.Weight:
                     {
                         // JobHandle? jh;
                         var ads = new  AccessorNativeData<float>();
@@ -3002,7 +3002,7 @@ namespace GLTFast {
             resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
             Profiler.EndSample();
 
-            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
+            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.SCALAR);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             if (accessor.isSparse) {
                 m_Logger.Error(LogCode.SparseAccessor,"indices");
@@ -3010,7 +3010,7 @@ namespace GLTFast {
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
-            case GLTFComponentType.UnsignedByte:
+            case GltfComponentType.UnsignedByte:
                 if(flip) {
                     var job8 = new ConvertIndicesUInt8ToInt32FlippedJob();
                     fixed( void* dst = &(indices[0]) ) {
@@ -3027,7 +3027,7 @@ namespace GLTFast {
                     jobHandle = job8.Schedule(accessor.count,DefaultBatchCount);
                 }
                 break;
-            case GLTFComponentType.UnsignedShort:
+            case GltfComponentType.UnsignedShort:
                 if(flip) {
                     var job16 = new ConvertIndicesUInt16ToInt32FlippedJob();
                     fixed( void* dst = &(indices[0]) ) {
@@ -3044,7 +3044,7 @@ namespace GLTFast {
                     jobHandle = job16.Schedule(accessor.count,DefaultBatchCount);
                 }
                 break;
-            case GLTFComponentType.UnsignedInt:
+            case GltfComponentType.UnsignedInt:
                 if(flip) {
                     var job32 = new ConvertIndicesUInt32ToInt32FlippedJob();
                     fixed( void* dst = &(indices[0]) ) {
@@ -3080,7 +3080,7 @@ namespace GLTFast {
             matrices = new NativeArray<Matrix4x4>(accessor.count,Allocator.Persistent);
             Profiler.EndSample();
             
-            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.MAT4);
+            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.MAT4);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             if (accessor.isSparse) {
                 m_Logger.Error(LogCode.SparseAccessor,"Matrix");
@@ -3088,7 +3088,7 @@ namespace GLTFast {
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
-            case GLTFComponentType.Float:
+            case GltfComponentType.Float:
                 var job32 = new ConvertMatricesJob {
                     input = (float4x4*)bufferView.GetUnsafeReadOnlyPtr(),
                     result = (float4x4*)matrices.GetUnsafePtr()
@@ -3113,14 +3113,14 @@ namespace GLTFast {
             vectors = new NativeArray<Vector3>(accessor.count,Allocator.Persistent);
             Profiler.EndSample();
             
-            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC3);
+            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.VEC3);
             if (accessor.isSparse) {
                 m_Logger.Error(LogCode.SparseAccessor,"Vector3");
             }
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
-                case GLTFComponentType.Float: {
+                case GltfComponentType.Float: {
                     if (flip) {
                         var job = new ConvertVector3FloatToFloatJob {
                             input = (float3*)bufferView.GetUnsafeReadOnlyPtr(),
@@ -3157,14 +3157,14 @@ namespace GLTFast {
             vectors = new NativeArray<Quaternion>(accessor.count,Allocator.Persistent);
             Profiler.EndSample();
             
-            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.VEC4);
+            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.VEC4);
             if (accessor.isSparse) {
                 m_Logger.Error(LogCode.SparseAccessor,"Vector4");
             }
 
             Profiler.BeginSample("CreateJob");
             switch( accessor.componentType ) {
-            case GLTFComponentType.Float: {
+            case GltfComponentType.Float: {
                 var job = new ConvertRotationsFloatToFloatJob {
                     input = (float4*)bufferView.GetUnsafeReadOnlyPtr(),
                     result = (float4*)vectors.GetUnsafePtr()
@@ -3172,7 +3172,7 @@ namespace GLTFast {
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
             }
-            case GLTFComponentType.Short: {
+            case GltfComponentType.Short: {
                 var job = new ConvertRotationsInt16ToFloatJob {
                     input = (short*)bufferView.GetUnsafeReadOnlyPtr(),
                     result = (float*)vectors.GetUnsafePtr()
@@ -3180,7 +3180,7 @@ namespace GLTFast {
                 jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                 break;
             }
-            case GLTFComponentType.Byte: {
+            case GltfComponentType.Byte: {
                 var job = new ConvertRotationsInt8ToFloatJob {
                     input = (sbyte*)bufferView.GetUnsafeReadOnlyPtr(),
                     result = (float*)vectors.GetUnsafePtr()
@@ -3205,12 +3205,12 @@ namespace GLTFast {
             var accessor = gltf.accessors[accessorIndex];
             var buffer = GetBufferView(accessor.bufferView,accessor.byteOffset);
 
-            Assert.AreEqual(accessor.typeEnum, GLTFAccessorAttributeType.SCALAR);
+            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.SCALAR);
             if (accessor.isSparse) {
                 m_Logger.Error(LogCode.SparseAccessor,"scalars");
             }
             
-            if (accessor.componentType == GLTFComponentType.Float) {
+            if (accessor.componentType == GltfComponentType.Float) {
                 Profiler.BeginSample("CopyAnimationTimes");
                 // TODO: For long animations with lots of times, threading this just like everything else maybe makes sense.
                 var bufferTimes = Reinterpret<float>(buffer, accessor.count);
@@ -3225,7 +3225,7 @@ namespace GLTFast {
                 Profiler.EndSample();
                 
                 switch( accessor.componentType ) {
-                    case GLTFComponentType.Byte: {
+                    case GltfComponentType.Byte: {
                         var job = new ConvertScalarInt8ToFloatNormalizedJob {
                             input = (sbyte*)buffer.GetUnsafeReadOnlyPtr(),
                             result = scalars.Value
@@ -3233,7 +3233,7 @@ namespace GLTFast {
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                         break;
                     }
-                    case GLTFComponentType.UnsignedByte: {
+                    case GltfComponentType.UnsignedByte: {
                         var job = new ConvertScalarUInt8ToFloatNormalizedJob {
                             input = (byte*)buffer.GetUnsafeReadOnlyPtr(),
                             result = scalars.Value
@@ -3241,7 +3241,7 @@ namespace GLTFast {
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                         break;
                     }
-                    case GLTFComponentType.Short: {
+                    case GltfComponentType.Short: {
                         var job = new ConvertScalarInt16ToFloatNormalizedJob {
                             input = (short*) ((byte*)buffer.GetUnsafeReadOnlyPtr()),
                             result = scalars.Value
@@ -3249,7 +3249,7 @@ namespace GLTFast {
                         jobHandle = job.Schedule(accessor.count,DefaultBatchCount);
                         break;
                     }
-                    case GLTFComponentType.UnsignedShort: {
+                    case GltfComponentType.UnsignedShort: {
                         var job = new ConvertScalarUInt16ToFloatNormalizedJob {
                             input = (ushort*) ((byte*)buffer.GetUnsafeReadOnlyPtr()),
                             result = scalars.Value

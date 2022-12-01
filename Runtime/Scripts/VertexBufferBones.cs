@@ -167,7 +167,7 @@ namespace GLTFast {
         protected unsafe JobHandle? GetWeightsJob(
             void* input,
             int count,
-            GLTFComponentType inputType,
+            GltfComponentType inputType,
             int inputByteStride,
             float4* output,
             int outputByteStride,
@@ -177,7 +177,7 @@ namespace GLTFast {
             Profiler.BeginSample("GetWeightsJob");
             JobHandle? jobHandle;
             switch(inputType) {
-                case GLTFComponentType.Float:
+                case GltfComponentType.Float:
                     var jobTangentI = new Jobs.ConvertBoneWeightsFloatToFloatInterleavedJob();
                     jobTangentI.inputByteStride = inputByteStride>0 ? inputByteStride : 16;
                     jobTangentI.input = (byte*)input;
@@ -189,7 +189,7 @@ namespace GLTFast {
                     jobHandle = jobTangentI.Schedule(count,GltfImport.DefaultBatchCount);
 #endif
                     break;
-                case GLTFComponentType.UnsignedShort: {
+                case GltfComponentType.UnsignedShort: {
                     var job = new Jobs.ConvertBoneWeightsUInt16ToFloatInterleavedJob {
                         inputByteStride = inputByteStride>0 ? inputByteStride : 8,
                         input = (byte*)input,
@@ -203,7 +203,7 @@ namespace GLTFast {
 #endif
                     break;
                 }
-                case GLTFComponentType.UnsignedByte: {
+                case GltfComponentType.UnsignedByte: {
                     var job = new Jobs.ConvertBoneWeightsUInt8ToFloatInterleavedJob {
                         inputByteStride = inputByteStride>0 ? inputByteStride : 4,
                         input = (byte*)input,
@@ -230,7 +230,7 @@ namespace GLTFast {
         static unsafe JobHandle? GetJointsJob(
             void* input,
             int count,
-            GLTFComponentType inputType,
+            GltfComponentType inputType,
             int inputByteStride,
             uint4* output,
             int outputByteStride,
@@ -240,7 +240,7 @@ namespace GLTFast {
             Profiler.BeginSample("GetJointsJob");
             JobHandle? jobHandle;
             switch(inputType) {
-                case GLTFComponentType.UnsignedByte:
+                case GltfComponentType.UnsignedByte:
                     var jointsUInt8Job = new Jobs.ConvertBoneJointsUInt8ToUInt32Job();
                     jointsUInt8Job.inputByteStride = inputByteStride>0 ? inputByteStride : 4;
                     jointsUInt8Job.input = (byte*)input;
@@ -248,7 +248,7 @@ namespace GLTFast {
                     jointsUInt8Job.result = output;
                     jobHandle = jointsUInt8Job.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
-                case GLTFComponentType.UnsignedShort:
+                case GltfComponentType.UnsignedShort:
                     var jointsUInt16Job = new Jobs.ConvertBoneJointsUInt16ToUInt32Job();
                     jointsUInt16Job.inputByteStride = inputByteStride>0 ? inputByteStride : 8;
                     jointsUInt16Job.input = (byte*)input;

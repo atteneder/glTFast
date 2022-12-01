@@ -226,7 +226,7 @@ namespace GLTFast.Tests
             Assert.NotNull(sparse.sparse.indices);
             Assert.AreEqual(2,sparse.sparse.indices.bufferView);
             Assert.AreEqual(0,sparse.sparse.indices.byteOffset);
-            Assert.AreEqual(GLTFComponentType.UnsignedShort,sparse.sparse.indices.componentType);
+            Assert.AreEqual(GltfComponentType.UnsignedShort,sparse.sparse.indices.componentType);
             Assert.NotNull(sparse.sparse.values);
             Assert.AreEqual(3,sparse.sparse.values.bufferView);
             Assert.AreEqual(0,sparse.sparse.values.byteOffset);

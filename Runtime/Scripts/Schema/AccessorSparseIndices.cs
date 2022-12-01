@@ -38,7 +38,7 @@ namespace GLTFast.Schema {
         /// `5123` (UNSIGNED_SHORT)
         /// `5125` (UNSIGNED_INT)
         /// </summary>
-        public GLTFComponentType componentType;
+        public GltfComponentType componentType;
 
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
