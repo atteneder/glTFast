@@ -109,8 +109,8 @@ namespace GLTFast.Editor
             float4 st = material.GetVector(scaleTransformPropertyId);
             float2 r = (Vector2)material.GetVector(rotationPropertyId);
 
-            uvTransform.scale.x = Mathematics.normalize(new float2(st.x,r.y), out var r1);
-            uvTransform.scale.y = Mathematics.normalize(new float2(st.y,r.x), out var r2);
+            uvTransform.scale.x = Mathematics.Normalize(new float2(st.x,r.y), out var r1);
+            uvTransform.scale.y = Mathematics.Normalize(new float2(st.y,r.x), out var r2);
 
             var acos = Mathf.Acos(r1.x);
             if (r2.x < 0) acos = Mathf.PI*2-acos;

@@ -22,7 +22,6 @@ using GLTFast.Logging;
 using GLTFast.Materials;
 using Unity.Burst;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -45,11 +44,11 @@ namespace GLTFast {
         public int sceneId = -1;
         
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
-        public bool streamingAsset = false;
+        public bool streamingAsset;
 
         public InstantiationSettings instantiationSettings;
         
-        Entity sceneRoot;
+        Entity m_SceneRoot;
 
         public string FullUrl => streamingAsset
             ? Path.Combine(Application.streamingAssetsPath, url)
@@ -63,7 +62,7 @@ namespace GLTFast {
         }
         
         public override async Task<bool> Load(
-            string url,
+            string gltfUrl,
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null,
@@ -71,7 +70,7 @@ namespace GLTFast {
         )
         {
             logger = logger ?? new ConsoleLogger();
-            var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator, logger);
+            var success = await base.Load(gltfUrl, downloadProvider, deferAgent, materialGenerator, logger);
             if(success) {
                 if (deferAgent != null) await deferAgent.BreakPoint();
                 // Auto-Instantiate
@@ -93,28 +92,28 @@ namespace GLTFast {
                 typeof(LocalToWorld)
                 // typeof(LinkedEntityGroup)
             );
-            sceneRoot = entityManager.CreateEntity(sceneArchetype);
+            m_SceneRoot = entityManager.CreateEntity(sceneArchetype);
 #if UNITY_EDITOR
-            entityManager.SetName(sceneRoot, string.IsNullOrEmpty(name) ? "glTF" : name);
+            entityManager.SetName(m_SceneRoot, string.IsNullOrEmpty(name) ? "glTF" : name);
 #endif
-            entityManager.SetComponentData(sceneRoot,new Translation {Value = transform.position});
-            entityManager.SetComponentData(sceneRoot,new Rotation {Value = transform.rotation});
-            entityManager.SetComponentData(sceneRoot,new Scale {Value = transform.localScale.x});
+            entityManager.SetComponentData(m_SceneRoot,new Translation {Value = transform.position});
+            entityManager.SetComponentData(m_SceneRoot,new Rotation {Value = transform.rotation});
+            entityManager.SetComponentData(m_SceneRoot,new Scale {Value = transform.localScale.x});
             // entityManager.AddBuffer<LinkedEntityGroup>(sceneRoot);
-            return new EntityInstantiator(importer, sceneRoot, logger, instantiationSettings);
+            return new EntityInstantiator(importer, m_SceneRoot, logger, instantiationSettings);
         }
         
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
-            currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
+            currentSceneId = success ? importer.defaultSceneIndex : null;
         }
         
         /// <summary>
         /// Removes previously instantiated scene(s)
         /// </summary>
         public override void ClearScenes() {
-            if (sceneRoot != Entity.Null) {
-                DestroyEntityHierarchy(sceneRoot);
-                sceneRoot = Entity.Null;
+            if (m_SceneRoot != Entity.Null) {
+                DestroyEntityHierarchy(m_SceneRoot);
+                m_SceneRoot = Entity.Null;
             }
         }
 

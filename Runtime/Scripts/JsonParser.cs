@@ -20,8 +20,8 @@ using UnityEngine.Profiling;
 namespace GLTFast {
     
     using Schema;
-    
-    class JsonParser {
+
+    static class JsonParser {
         internal static Root ParseJson(string json) {
             // JsonUtility sometimes creates non-null default instances of objects-type members
             // even though there are none in the original JSON.
@@ -30,7 +30,7 @@ namespace GLTFast {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 #endif
-            Root root = null;
+            Root root;
             
             // Step one: main JSON parsing
             Profiler.BeginSample("JSON main");

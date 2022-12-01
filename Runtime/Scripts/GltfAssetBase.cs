@@ -33,10 +33,11 @@ namespace GLTFast
         /// <summary>
         /// Instance used for loading the glTF's content
         /// </summary>
+        // ReSharper disable once MemberCanBeProtected.Global
         public GltfImport importer { get; protected set; }
         
         /// <summary>
-        /// Indicates wheter the glTF was loaded (no matter if successfully or not)
+        /// Indicates whether the glTF was loaded (no matter if successfully or not)
         /// </summary>
         /// <value>True when loading routine ended, false otherwise.</value>
         public bool isDone => importer!=null && importer.LoadingDone;
@@ -50,7 +51,7 @@ namespace GLTFast
         /// <summary>
         /// Method for manual loading with custom <see cref="IDownloadProvider"/> and <see cref="IDeferAgent"/>.
         /// </summary>
-        /// <param name="url">URL of the glTF file.</param>
+        /// <param name="gltfUrl">URL of the glTF file.</param>
         /// <param name="downloadProvider">Download Provider for custom loading (e.g. caching or HTTP authorization)</param>
         /// <param name="deferAgent">Defer Agent takes care of interrupting the
         /// loading procedure in order to keep the frame rate responsive.</param>
@@ -58,7 +59,7 @@ namespace GLTFast
         /// <param name="logger">Used for message reporting</param>
         /// <returns>Async Task that loads the glTF's contents</returns>
         public virtual async Task<bool> Load(
-            string url,
+            string gltfUrl,
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null,
@@ -66,7 +67,7 @@ namespace GLTFast
             )
         {
             importer = new GltfImport(downloadProvider,deferAgent, materialGenerator, logger);
-            return await importer.Load(url,importSettings);
+            return await importer.Load(gltfUrl,importSettings);
         }
 
         /// <summary>
@@ -74,6 +75,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
+        // ReSharper disable once MemberCanBeProtected.Global
         public async Task<bool> Instantiate(ICodeLogger logger = null) {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
@@ -120,7 +122,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="index">Index of material in glTF file.</param>
         /// <returns>glTF material if it was loaded successfully and index is correct, null otherwise.</returns>
-        public UnityEngine.Material GetMaterial( int index = 0 ) {
+        public Material GetMaterial( int index = 0 ) {
             return importer?.GetMaterial(index);
         }
 
@@ -158,12 +160,13 @@ namespace GLTFast
         /// <param name="instantiator">instantiator that was used</param>
         /// <param name="success">True if instantiation was successful, false otherwise</param>
         protected virtual void PostInstantiation(IInstantiator instantiator, bool success) {
-            currentSceneId = success ? importer.defaultSceneIndex : (int?)null;
+            currentSceneId = success ? importer.defaultSceneIndex : null;
         }
 
         /// <summary>
         /// Releases previously allocated resources.
         /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
         public void Dispose() {
             if(importer!=null) {
                 importer.Dispose();

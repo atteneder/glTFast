@@ -411,7 +411,7 @@ namespace GLTFast.Materials {
         Shader GetMetallicShader(MetallicShaderFeatures metallicShaderFeatures) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
             if (s_MetallicShader == null) {
-                s_MetallicShader = LoadShaderByName(SHADER_METALLIC);
+                s_MetallicShader = LoadShaderByName(k_MetallicShader);
             }
             return s_MetallicShader;
 #else
@@ -426,7 +426,7 @@ namespace GLTFast.Materials {
         Shader GetUnlitShader(Schema.Material gltfMaterial) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
             if (s_UnlitShader == null) {
-                s_UnlitShader = LoadShaderByName(SHADER_UNLIT);
+                s_UnlitShader = LoadShaderByName(k_UnlitShader);
             }
             return s_UnlitShader;
 #else
@@ -443,7 +443,7 @@ namespace GLTFast.Materials {
         Shader GetSpecularShader(SpecularShaderFeatures features) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
             if (s_SpecularShader == null) {
-                s_SpecularShader = LoadShaderByName(SHADER_SPECULAR);
+                s_SpecularShader = LoadShaderByName(k_SpecularShader);
             }
             return s_SpecularShader;
 #else
@@ -464,11 +464,7 @@ namespace GLTFast.Materials {
             }
             return shader;
 #else
-            var shader = FindShader($"{k_ShaderGraphsPrefix}{shaderName}");
-            if (shader == null) {
-                logger?.Error(LogCode.ShaderMissing,shaderName);
-            }
-            return shader;
+            return FindShader($"{k_ShaderGraphsPrefix}{shaderName}", m_Logger);
 #endif
         }
 
@@ -480,7 +476,7 @@ namespace GLTFast.Materials {
             material.SetFloat(alphaCutoffPropId, gltfMaterial.alphaCutoff);
 #if USING_HDRP_10_OR_NEWER || USING_URP_12_OR_NEWER
             material.EnableKeyword(alphaTestOnKeyword);
-            material.SetOverrideTag(TAG_RENDER_TYPE, TransparentCutoutRenderType);
+            material.SetOverrideTag(RenderTypeTag, TransparentCutoutRenderType);
             material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
 #endif
         }

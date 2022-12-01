@@ -18,7 +18,6 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -29,10 +28,10 @@ namespace GLTFast {
 
     abstract class VertexBufferTexCoordsBase {
         
-        protected ICodeLogger logger;
+        protected ICodeLogger m_Logger;
 
-        public VertexBufferTexCoordsBase(ICodeLogger logger) {
-            this.logger = logger;
+        protected VertexBufferTexCoordsBase(ICodeLogger logger) {
+            m_Logger = logger;
         }
         
         public int uvSetCount { get; protected set; }
@@ -43,15 +42,15 @@ namespace GLTFast {
     }
 
     class VertexBufferTexCoords<T> : VertexBufferTexCoordsBase where T : struct {
-        NativeArray<T> vData;
+        NativeArray<T> m_Data;
 
         public VertexBufferTexCoords(ICodeLogger logger) : base(logger) {}
         
         public override unsafe bool ScheduleVertexUVJobs(IGltfBuffers buffers, int[] uvAccessorIndices, int vertexCount, NativeSlice<JobHandle> handles) {
             Profiler.BeginSample("ScheduleVertexUVJobs");
             Profiler.BeginSample("AllocateNativeArray");
-            vData = new NativeArray<T>( vertexCount, VertexBufferConfigBase.defaultAllocator);
-            var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
+            m_Data = new NativeArray<T>( vertexCount, VertexBufferConfigBase.defaultAllocator);
+            var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(m_Data);
             Profiler.EndSample();
             uvSetCount = uvAccessorIndices.Length;
             int outputByteStride = uvAccessorIndices.Length * 8;
@@ -60,7 +59,7 @@ namespace GLTFast {
                 var accIndex = uvAccessorIndices[i];
                 buffers.GetAccessor(accIndex, out var uvAcc, out var data, out var byteStride);
                 if (uvAcc.isSparse) {
-                    logger.Error(LogCode.SparseAccessor,"UVs");
+                    m_Logger.Error(LogCode.SparseAccessor,"UVs");
                 }
                 var h = GetUvsJob(
                     data,
@@ -92,13 +91,13 @@ namespace GLTFast {
 
         public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags) {
             Profiler.BeginSample("ApplyUVs");
-            msh.SetVertexBufferData(vData,0,0,vData.Length,stream,flags);
+            msh.SetVertexBufferData(m_Data,0,0,m_Data.Length,stream,flags);
             Profiler.EndSample();
         }
 
         public override void Dispose() {
-            if (vData.IsCreated) {
-                vData.Dispose();
+            if (m_Data.IsCreated) {
+                m_Data.Dispose();
             }
         }
 
@@ -205,7 +204,6 @@ namespace GLTFast {
                 }
                 break;
             case GltfComponentType.Byte:
-                var byteStride = inputByteStride>0 ? inputByteStride : 2;
                 if (normalized) {
                     var jobInt8 = new Jobs.ConvertUVsInt8ToFloatInterleavedNormalizedJob {
                         inputByteStride = inputByteStride > 0 ? inputByteStride : 2,
@@ -233,7 +231,7 @@ namespace GLTFast {
                 }
                 break;
             default:
-                logger?.Error(LogCode.TypeUnsupported, "UV", inputType.ToString());
+                m_Logger?.Error(LogCode.TypeUnsupported, "UV", inputType.ToString());
                 break;
             }
             Profiler.EndSample();

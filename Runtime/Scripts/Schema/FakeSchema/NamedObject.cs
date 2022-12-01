@@ -16,7 +16,7 @@
 namespace GLTFast.FakeSchema {
 
     [System.Serializable]
-    class RootChild {
+    class NamedObject {
         public string name;        
     }
 }

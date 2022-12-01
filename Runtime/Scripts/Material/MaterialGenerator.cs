@@ -238,11 +238,12 @@ namespace GLTFast.Materials {
         /// Tries to load a shader and covers error handling.
         /// </summary>
         /// <param name="shaderName">The requested shader's name.</param>
+        /// <param name="logger">Logger used for reporting errors.</param>
         /// <returns>Requested shader or null if it couldn't be loaded.</returns>
-        protected Shader FindShader(string shaderName) {
+        protected static Shader FindShader(string shaderName, ICodeLogger logger) {
             var shader = Shader.Find(shaderName);
             if(shader==null) {
-                m_Logger?.Error(LogCode.ShaderMissing, shaderName);
+                logger?.Error(LogCode.ShaderMissing, shaderName);
             }
             return shader;
         }

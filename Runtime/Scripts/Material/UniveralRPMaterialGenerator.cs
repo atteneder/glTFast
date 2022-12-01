@@ -68,7 +68,7 @@ namespace GLTFast.Materials {
         }
 
         protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
-            material.SetOverrideTag(TAG_RENDER_TYPE, TransparentRenderType);
+            material.SetOverrideTag(RenderTypeTag, TransparentRenderType);
             material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
             material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
             material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);

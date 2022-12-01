@@ -13,12 +13,7 @@
 // limitations under the License.
 //
 
-#if DEBUG
-using System.Collections.Generic;
-#endif
-
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -53,13 +48,13 @@ namespace GLTFast
         public bool calculateNormals = false;
         public bool calculateTangents = false;
 
-        protected VertexAttributeDescriptor[] vad;
-        protected ICodeLogger logger;
+        protected VertexAttributeDescriptor[] m_Descriptors;
+        protected ICodeLogger m_Logger;
 
         public Bounds? bounds { get; protected set; }
 
-        public VertexBufferConfigBase(ICodeLogger logger) {
-            this.logger = logger;
+        protected VertexBufferConfigBase(ICodeLogger logger) {
+            m_Logger = logger;
         }
         
         public abstract JobHandle? ScheduleVertexJobs(
@@ -84,11 +79,11 @@ namespace GLTFast
         /// <param name="inputType">Input data type</param>
         /// <param name="inputByteStride">Input byte stride</param>
         /// <param name="output">Points at the destination buffer in memory</param>
-        /// <param name="outputByteStride">Ouput byte stride</param>
+        /// <param name="outputByteStride">Output byte stride</param>
         /// <param name="normalized">If true, integer values have to be normalized</param>
         /// <param name="ensureUnitLength">If true, normalized values will be scaled to have unit length again (only if <see cref="normalized"/>is true)</param>
         /// <returns></returns>
-        public static unsafe JobHandle? GetVector3sJob(
+        public static unsafe JobHandle? GetVector3Job(
             void* input,
             int count,
             GltfComponentType inputType,
@@ -100,7 +95,7 @@ namespace GLTFast
         ) {
             JobHandle? jobHandle;
 
-            Profiler.BeginSample("GetVector3sJob");
+            Profiler.BeginSample("GetVector3Job");
             if(inputType == GltfComponentType.Float) {
                 var job = new ConvertVector3FloatToFloatInterleavedJob {
                     inputByteStride = (inputByteStride>0) ? inputByteStride : 12,
@@ -319,7 +314,7 @@ namespace GLTFast
                     break;
                 }
                 default:
-                    logger?.Error(LogCode.TypeUnsupported, "Tangent", inputType.ToString());
+                    m_Logger?.Error(LogCode.TypeUnsupported, "Tangent", inputType.ToString());
                     jobHandle = null;
                     break;
             }
@@ -328,7 +323,7 @@ namespace GLTFast
             return jobHandle;
         }
 
-        public static unsafe JobHandle? GetVector3sSparseJob(
+        public static unsafe JobHandle? GetVector3SparseJob(
             void* indexBuffer,
             void* valueBuffer,
             int sparseCount,
@@ -339,9 +334,7 @@ namespace GLTFast
             ref JobHandle? dependsOn,
             bool normalized = false
         ) {
-            JobHandle? jobHandle;
-
-            Profiler.BeginSample("GetVector3sSparseJob");
+            Profiler.BeginSample("GetVector3SparseJob");
             var job = new ConvertVector3SparseJob {
                 indexBuffer = (ushort*)indexBuffer,
                 indexConverter = CachedFunction.GetIndexConverter(indexType),
@@ -352,11 +345,11 @@ namespace GLTFast
                 result = output,
             };
             
-            jobHandle = job.Schedule(
+            JobHandle? jobHandle = job.Schedule(
                 sparseCount,
                 GltfImport.DefaultBatchCount,
-                dependsOn: dependsOn.HasValue ? dependsOn.Value : default(JobHandle)
-                );
+                dependsOn: dependsOn ?? default(JobHandle)
+            );
             Profiler.EndSample();
             return jobHandle;
         }

@@ -49,15 +49,15 @@ namespace GLTFast.Materials {
 #if USING_HDRP_10_OR_NEWER
 #if !UNITY_SHADER_GRAPH_12_OR_NEWER
         protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
-            return SHADER_METALLIC;
+            return k_MetallicShader;
         }
         
         protected override string GetSpecularShaderName(SpecularShaderFeatures features) {
-            return SHADER_SPECULAR;
+            return k_SpecularShader;
         }
         
         protected override string GetUnlitShaderName(UnlitShaderFeatures features) {
-            return SHADER_UNLIT;
+            return k_UnlitShader;
         }
 #endif
 

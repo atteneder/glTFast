@@ -21,12 +21,12 @@ namespace GLTFast {
         Unknown,
         PNG,
         Jpeg,
-        KTX
+        Ktx
     }
     
     enum ChunkFormat : uint {
-        JSON = 0x4e4f534a,
-        BIN = 0x004e4942
+        Json = 0x4e4f534a,
+        Binary = 0x004e4942
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ namespace GLTFast {
         /// First four bytes of a glTF-Binary file are made up of this signature
         /// Represents glTF in ASCII
         /// </summary>
-        public const uint GLB_MAGIC = 0x46546c67; 
+        public const uint gltfBinaryMagic = 0x46546c67; 
         
         /// <summary>
         /// Figures out if a byte array contains data of a glTF-Binary
@@ -57,7 +57,7 @@ namespace GLTFast {
         /// <returns>True if the data is a glTF-Binary, false otherwise</returns>
         public static bool IsGltfBinary(byte[] data) {
             var magic = BitConverter.ToUInt32( data, 0 );
-            return magic == GLB_MAGIC;
+            return magic == gltfBinaryMagic;
         }
     }
 }

@@ -25,7 +25,7 @@ namespace GLTFast {
     /// </summary>
     public class GameObjectBoundsInstantiator : GameObjectInstantiator {
 
-        Dictionary<uint, Bounds> nodeBounds;
+        Dictionary<uint, Bounds> m_NodeBounds;
 
         /// <inheritdoc />
         public GameObjectBoundsInstantiator(
@@ -45,7 +45,7 @@ namespace GLTFast {
 				name,
 				rootNodeIndices
 				);
-            nodeBounds = new Dictionary<uint, Bounds>();
+            m_NodeBounds = new Dictionary<uint, Bounds>();
         }
 
         /// <inheritdoc />
@@ -70,14 +70,14 @@ namespace GLTFast {
                 primitiveNumeration
             );
 
-            if (nodeBounds!=null) {
-                var meshBounds = GetTransformedBounds(mesh.bounds, nodes[nodeIndex].transform.localToWorldMatrix);
-                if (nodeBounds.TryGetValue(nodeIndex,out var prevBounds)) {
+            if (m_NodeBounds!=null) {
+                var meshBounds = GetTransformedBounds(mesh.bounds, m_Nodes[nodeIndex].transform.localToWorldMatrix);
+                if (m_NodeBounds.TryGetValue(nodeIndex,out var prevBounds)) {
                     meshBounds.Encapsulate(prevBounds);
-                    nodeBounds[nodeIndex] = meshBounds;
+                    m_NodeBounds[nodeIndex] = meshBounds;
                 }
                 else {
-                    nodeBounds[nodeIndex] = meshBounds;
+                    m_NodeBounds[nodeIndex] = meshBounds;
                 }
             }
         }
@@ -88,12 +88,12 @@ namespace GLTFast {
         /// <returns>Instance's bounds, if calculation succeeded</returns>
         public Bounds? CalculateBounds() {
 
-            if (nodeBounds == null) { return null; }
+            if (m_NodeBounds == null) { return null; }
 
             var sceneBoundsSet = false;
             var sceneBounds = new Bounds();
             
-            foreach (var nodeBound in nodeBounds.Values) {
+            foreach (var nodeBound in m_NodeBounds.Values) {
                 if (sceneBoundsSet) {
                     sceneBounds.Encapsulate(nodeBound);
                 } else {

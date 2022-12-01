@@ -16,10 +16,11 @@
 using UnityEngine;
 
 namespace GLTFast {
-	struct GlbBinChunk
+	readonly struct GlbBinChunk
 	{
-		public int start;
-		public uint length;
+		public int start { get; }
+
+		public uint length { get; }
 		
 		public GlbBinChunk(int start, uint length)
 		{

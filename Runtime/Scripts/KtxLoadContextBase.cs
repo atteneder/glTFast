@@ -26,7 +26,7 @@ using UnityEngine;
 namespace GLTFast {
     abstract class KtxLoadContextBase {
         public int imageIndex;
-        protected KtxTexture ktxTexture;
+        protected KtxTexture m_KtxTexture;
         
         public abstract Task<TextureResult> LoadTexture2D(bool linear);
     }

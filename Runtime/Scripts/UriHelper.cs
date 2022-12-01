@@ -26,7 +26,8 @@ namespace GLTFast {
         public static Uri GetBaseUri( Uri uri ) {
             if(uri==null) return null;
             if (!uri.IsAbsoluteUri) {
-                return new Uri(Path.GetDirectoryName(uri.OriginalString), UriKind.Relative);
+                var uriString = Path.GetDirectoryName(uri.OriginalString) ?? "";
+                return new Uri(uriString, UriKind.Relative);
             }
             return new Uri(uri, ".");
         }
@@ -70,9 +71,9 @@ namespace GLTFast {
         /// Removes relative dot segments "." and ".." and resolves them.
         /// See https://datatracker.ietf.org/doc/html/rfc3986#section-5.2.4
         /// </summary>
-        /// <param name="uri">relative input path</param>
+        /// <param name="uri">Relative input URI</param>
         /// <param name="parentLevels">Number of levels going beyond this paths hierarchy (due to "..")</param>
-        /// <returns>Resolved/compressed nput path without dot segments</returns>
+        /// <returns>Resolved/compressed input URI without dot segments</returns>
         public static string RemoveDotSegments(string uri, out int parentLevels) {
             var segments = new List<string>();
             var start = 0;
@@ -139,7 +140,7 @@ namespace GLTFast {
         /// Detect image format from URI string
         /// </summary>
         /// <param name="uri">Input URI string</param>
-        /// <returns>ImageFormat if detected correctly, ImageFormat.Unkonwn otherwise</returns>
+        /// <returns>ImageFormat if detected correctly, <see cref="ImageFormat.Unknown"/> otherwise</returns>
         internal static ImageFormat GetImageFormatFromUri(string uri) {
             if (string.IsNullOrEmpty(uri)) return ImageFormat.Unknown;
             var queryStartIndex = uri.LastIndexOf('?');
@@ -149,7 +150,7 @@ namespace GLTFast {
             var fileExtension = uri.Substring(extStartIndex+1, queryStartIndex - extStartIndex - 1); // extract the file ending
             if (fileExtension.Equals("png", StringComparison.OrdinalIgnoreCase)) return ImageFormat.PNG;
             if (fileExtension.Equals("jpg", StringComparison.OrdinalIgnoreCase) || fileExtension.Equals("jpeg", StringComparison.OrdinalIgnoreCase)) return ImageFormat.Jpeg;
-            if (fileExtension.Equals("ktx", StringComparison.OrdinalIgnoreCase) || fileExtension.Equals("ktx2", StringComparison.OrdinalIgnoreCase)) return ImageFormat.KTX;
+            if (fileExtension.Equals("ktx", StringComparison.OrdinalIgnoreCase) || fileExtension.Equals("ktx2", StringComparison.OrdinalIgnoreCase)) return ImageFormat.Ktx;
             return ImageFormat.Unknown;
         }
         

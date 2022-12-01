@@ -18,7 +18,7 @@
 namespace GLTFast.FakeSchema {
 
     [System.Serializable]
-    class Mesh : RootChild {
+    class Mesh : NamedObject {
         public MeshPrimitive[] primitives;
     }
 }

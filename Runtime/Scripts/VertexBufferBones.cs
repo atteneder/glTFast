@@ -14,14 +14,12 @@
 //
 
 using System;
-using System.IO;
 using GLTFast.Jobs;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
@@ -33,10 +31,10 @@ namespace GLTFast {
 
     abstract class VertexBufferBonesBase {
         
-        protected ICodeLogger logger;
+        protected ICodeLogger m_Logger;
 
-        public VertexBufferBonesBase(ICodeLogger logger) {
-            this.logger = logger;
+        protected VertexBufferBonesBase(ICodeLogger logger) {
+            m_Logger = logger;
         }
 
         public abstract JobHandle? ScheduleVertexBonesJob(
@@ -50,7 +48,7 @@ namespace GLTFast {
     }
 
     class VertexBufferBones : VertexBufferBonesBase {
-        NativeArray<VBones> vData;
+        NativeArray<VBones> m_Data;
 
         public VertexBufferBones(ICodeLogger logger) : base(logger) {}
         
@@ -65,10 +63,10 @@ namespace GLTFast {
             
             buffers.GetAccessor(weightsAccessorIndex, out var weightsAcc, out var weightsData, out var weightsByteStride);
             if (weightsAcc.isSparse) {
-                logger.Error(LogCode.SparseAccessor,"bone weights");
+                m_Logger.Error(LogCode.SparseAccessor,"bone weights");
             }
-            vData = new NativeArray<VBones>(weightsAcc.count, VertexBufferConfigBase.defaultAllocator);
-            var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(vData);
+            m_Data = new NativeArray<VBones>(weightsAcc.count, VertexBufferConfigBase.defaultAllocator);
+            var vDataPtr = (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(m_Data);
             Profiler.EndSample();
 
             JobHandle weightsHandle;
@@ -81,8 +79,7 @@ namespace GLTFast {
                     weightsAcc.componentType,
                     weightsByteStride,
                     (float4*)vDataPtr,
-                    32,
-                    weightsAcc.normalized
+                    32
                 );
                 if (h.HasValue) {
                     weightsHandle = h.Value;
@@ -95,7 +92,7 @@ namespace GLTFast {
             {
                 buffers.GetAccessor(jointsAccessorIndex, out var jointsAcc, out var jointsData, out var jointsByteStride);
                 if (jointsAcc.isSparse) {
-                    logger.Error(LogCode.SparseAccessor,"bone joints");
+                    m_Logger.Error(LogCode.SparseAccessor,"bone joints");
                 }
                 var h = GetJointsJob(
                     jointsData,
@@ -104,7 +101,7 @@ namespace GLTFast {
                     jointsByteStride,
                     (uint4*)(vDataPtr+16),
                     32,
-                    logger
+                    m_Logger
                 );
                 if (h.HasValue) {
                     jointsHandle = h.Value;
@@ -127,19 +124,19 @@ namespace GLTFast {
 #else
             if(skinWeights < 4) { 
 #endif
-                var job = new SortAndRenormalizeBoneWeightsJob {
-                    bones = vData,
+                var job = new SortAndNormalizeBoneWeightsJob {
+                    bones = m_Data,
                     skinWeights = math.max(1,skinWeights)
                 };
-                jobHandle = job.Schedule(vData.Length, GltfImport.DefaultBatchCount, jobHandle); 
+                jobHandle = job.Schedule(m_Data.Length, GltfImport.DefaultBatchCount, jobHandle); 
             }
 #if GLTFAST_SAFE
             else {
                 // Re-normalizing alone is sufficient
                 var job = new RenormalizeBoneWeightsJob {
-                    bones = vData,
+                    bones = m_Data,
                 };
-                jobHandle = job.Schedule(vData.Length, GltfImport.DefaultBatchCount, jobHandle);
+                jobHandle = job.Schedule(m_Data.Length, GltfImport.DefaultBatchCount, jobHandle);
             }
 #endif
 
@@ -154,31 +151,30 @@ namespace GLTFast {
 
         public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags) {
             Profiler.BeginSample("ApplyBones");
-            msh.SetVertexBufferData(vData,0,0,vData.Length,stream,flags);
+            msh.SetVertexBufferData(m_Data,0,0,m_Data.Length,stream,flags);
             Profiler.EndSample();
         }
 
         public override void Dispose() {
-            if (vData.IsCreated) {
-                vData.Dispose();
+            if (m_Data.IsCreated) {
+                m_Data.Dispose();
             }
         }
 
-        protected unsafe JobHandle? GetWeightsJob(
+        unsafe JobHandle? GetWeightsJob(
             void* input,
             int count,
             GltfComponentType inputType,
             int inputByteStride,
             float4* output,
-            int outputByteStride,
-            bool normalized = false
+            int outputByteStride
             )
         {
             Profiler.BeginSample("GetWeightsJob");
             JobHandle? jobHandle;
             switch(inputType) {
                 case GltfComponentType.Float:
-                    var jobTangentI = new Jobs.ConvertBoneWeightsFloatToFloatInterleavedJob();
+                    var jobTangentI = new ConvertBoneWeightsFloatToFloatInterleavedJob();
                     jobTangentI.inputByteStride = inputByteStride>0 ? inputByteStride : 16;
                     jobTangentI.input = (byte*)input;
                     jobTangentI.outputByteStride = outputByteStride;
@@ -190,7 +186,7 @@ namespace GLTFast {
 #endif
                     break;
                 case GltfComponentType.UnsignedShort: {
-                    var job = new Jobs.ConvertBoneWeightsUInt16ToFloatInterleavedJob {
+                    var job = new ConvertBoneWeightsUInt16ToFloatInterleavedJob {
                         inputByteStride = inputByteStride>0 ? inputByteStride : 8,
                         input = (byte*)input,
                         outputByteStride = outputByteStride,
@@ -204,7 +200,7 @@ namespace GLTFast {
                     break;
                 }
                 case GltfComponentType.UnsignedByte: {
-                    var job = new Jobs.ConvertBoneWeightsUInt8ToFloatInterleavedJob {
+                    var job = new ConvertBoneWeightsUInt8ToFloatInterleavedJob {
                         inputByteStride = inputByteStride>0 ? inputByteStride : 4,
                         input = (byte*)input,
                         outputByteStride = outputByteStride,
@@ -218,7 +214,7 @@ namespace GLTFast {
                     break;
                 }
                 default:
-                    logger?.Error(LogCode.TypeUnsupported,"Weights",inputType.ToString());
+                    m_Logger?.Error(LogCode.TypeUnsupported,"Weights",inputType.ToString());
                     jobHandle = null;
                     break;
             }
@@ -241,7 +237,7 @@ namespace GLTFast {
             JobHandle? jobHandle;
             switch(inputType) {
                 case GltfComponentType.UnsignedByte:
-                    var jointsUInt8Job = new Jobs.ConvertBoneJointsUInt8ToUInt32Job();
+                    var jointsUInt8Job = new ConvertBoneJointsUInt8ToUInt32Job();
                     jointsUInt8Job.inputByteStride = inputByteStride>0 ? inputByteStride : 4;
                     jointsUInt8Job.input = (byte*)input;
                     jointsUInt8Job.outputByteStride = outputByteStride;
@@ -249,7 +245,7 @@ namespace GLTFast {
                     jobHandle = jointsUInt8Job.Schedule(count,GltfImport.DefaultBatchCount);
                     break;
                 case GltfComponentType.UnsignedShort:
-                    var jointsUInt16Job = new Jobs.ConvertBoneJointsUInt16ToUInt32Job();
+                    var jointsUInt16Job = new ConvertBoneJointsUInt16ToUInt32Job();
                     jointsUInt16Job.inputByteStride = inputByteStride>0 ? inputByteStride : 8;
                     jointsUInt16Job.input = (byte*)input;
                     jointsUInt16Job.outputByteStride = outputByteStride;

@@ -57,7 +57,7 @@ namespace GLTFast
         /// If true, url is treated as relative StreamingAssets path
         /// </summary>
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
-        public bool streamingAsset = false;
+        public bool streamingAsset;
 
         /// <inheritdoc cref="InstantiationSettings"/>
         public InstantiationSettings instantiationSettings;
@@ -87,7 +87,7 @@ namespace GLTFast
 
         /// <inheritdoc />
         public override async Task<bool> Load(
-            string url,
+            string gltfUrl,
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null,
@@ -95,14 +95,14 @@ namespace GLTFast
             )
         {
             logger = logger ?? new ConsoleLogger();
-            var success = await base.Load(url, downloadProvider, deferAgent, materialGenerator, logger);
+            var success = await base.Load(gltfUrl, downloadProvider, deferAgent, materialGenerator, logger);
             if(success) {
                 if (deferAgent != null) await deferAgent.BreakPoint();
                 // Auto-Instantiate
                 if (sceneId>=0) {
-                    await InstantiateScene(sceneId,logger);
+                    success = await InstantiateScene(sceneId,logger);
                 } else {
-                    await Instantiate(logger);
+                    success = await Instantiate(logger);
                 }
             }
             return success;
@@ -115,12 +115,14 @@ namespace GLTFast
         
         /// <inheritdoc />
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
-            sceneInstance = (instantiator as GameObjectInstantiator).sceneInstance;
+            sceneInstance = (instantiator as GameObjectInstantiator)?.sceneInstance;
 #if UNITY_ANIMATION
-            if (playAutomatically) {
-                var legacyAnimation = sceneInstance?.legacyAnimation;
-                if (legacyAnimation != null) {
-                    sceneInstance.legacyAnimation.Play();
+            if (sceneInstance != null) {
+                if (playAutomatically) {
+                    var legacyAnimation = sceneInstance.legacyAnimation;
+                    if (legacyAnimation != null) {
+                        sceneInstance.legacyAnimation.Play();
+                    }
                 }
             }
 #endif

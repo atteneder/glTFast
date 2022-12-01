@@ -31,8 +31,8 @@ namespace GLTFast {
         [Tooltip("Per-frame time budget as fraction of the targeted frame time. Keep it well below 0.5, so there's enough time for other game logic and rendering. A value of 1.0 can lead to dropping a full frame. Even higher values can stall for multiple frames.")]
         float frameBudget = .5f;
         
-        float lastTime;
-        float timeBudget = .5f/30;
+        float m_LastTime;
+        float m_TimeBudget = .5f/30;
 
         /// <summary>
         /// Defers work to the next frame if a fix time budget is
@@ -47,7 +47,7 @@ namespace GLTFast {
         void UpdateTimeBudget() {
             float targetFrameRate = Application.targetFrameRate;
             if(targetFrameRate<0) targetFrameRate = 30;
-            timeBudget = frameBudget/targetFrameRate;
+            m_TimeBudget = frameBudget/targetFrameRate;
             ResetLastTime();
         }
 
@@ -61,7 +61,7 @@ namespace GLTFast {
 
         void ResetLastTime()
         {
-            lastTime = Time.realtimeSinceStartup;
+            m_LastTime = Time.realtimeSinceStartup;
         }
 
         /// <inheritdoc />
@@ -75,7 +75,7 @@ namespace GLTFast {
         }
         
         bool FitsInCurrentFrame(float duration) {
-            return duration <= timeBudget - (Time.realtimeSinceStartup - lastTime);
+            return duration <= m_TimeBudget - (Time.realtimeSinceStartup - m_LastTime);
         }
 
         /// <inheritdoc />

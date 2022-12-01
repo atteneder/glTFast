@@ -14,7 +14,9 @@
 //
 
 using UnityEngine;
+#if USING_URP || USING_HDRP
 using UnityEngine.Rendering;
+#endif
 #if USING_URP
 using UnityEngine.Rendering.Universal;
 #endif

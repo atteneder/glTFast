@@ -106,11 +106,11 @@ namespace GLTFast.Materials {
         /// Finds the shader required for metallic/roughness based materials.
         /// </summary>
         /// <returns>Metallic/Roughness shader</returns>
-        static Shader FinderShaderMetallicRoughness() {
+        Shader FinderShaderMetallicRoughness() {
 #if UNITY_EDITOR
             return AssetDatabase.LoadAssetAtPath<Shader>($"{k_ShaderPathPrefix}{k_PbrMetallicRoughnessShaderPath}");
 #else
-            return FindShader(k_PbrMetallicRoughnessShaderName);
+            return FindShader(k_PbrMetallicRoughnessShaderName, m_Logger);
 #endif
         }
         
@@ -118,11 +118,11 @@ namespace GLTFast.Materials {
         /// Finds the shader required for specular/glossiness based materials.
         /// </summary>
         /// <returns>Specular/Glossiness shader</returns>
-        static Shader FinderShaderSpecularGlossiness() {
+        Shader FinderShaderSpecularGlossiness() {
 #if UNITY_EDITOR
             return AssetDatabase.LoadAssetAtPath<Shader>($"{k_ShaderPathPrefix}{k_PbrSpecularGlossinessShaderPath}");
 #else
-            return FindShader(k_PbrSpecularGlossinessShaderName);
+            return FindShader(k_PbrSpecularGlossinessShaderName, m_Logger);
 #endif
         }
 
@@ -130,11 +130,11 @@ namespace GLTFast.Materials {
         /// Finds the shader required for unlit materials.
         /// </summary>
         /// <returns>Unlit shader</returns>
-        static Shader FinderShaderUnlit() {
+        Shader FinderShaderUnlit() {
 #if UNITY_EDITOR
             return AssetDatabase.LoadAssetAtPath<Shader>($"{k_ShaderPathPrefix}{k_UnlitShaderPath}");
 #else
-            return FindShader(k_UnlitShaderName);
+            return FindShader(k_UnlitShaderName, m_Logger);
 #endif
         }
 

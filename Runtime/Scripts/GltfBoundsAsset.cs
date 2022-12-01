@@ -40,12 +40,13 @@ namespace GLTFast
         /// Bounding box of the instantiated glTF scene
         /// </summary>
         [NonSerialized]
+        // ReSharper disable once MemberCanBePrivate.Global
         public Bounds bounds;
 
         
         /// <inheritdoc />
         public override async Task<bool> Load(
-            string url,
+            string gltfUrl,
             IDownloadProvider downloadProvider=null,
             IDeferAgent deferAgent=null,
             IMaterialGenerator materialGenerator=null,
@@ -53,22 +54,22 @@ namespace GLTFast
             )
         {
             importer = new GltfImport(downloadProvider,deferAgent, materialGenerator);
-            var success = await importer.Load(url);
+            var success = await importer.Load(gltfUrl);
             if(success) {
-                var insta = (GameObjectBoundsInstantiator) GetDefaultInstantiator(logger);
+                var instantiator = (GameObjectBoundsInstantiator) GetDefaultInstantiator(logger);
                 // Auto-Instantiate
                 if (sceneId>=0) {
-                    success = await importer.InstantiateSceneAsync(insta, sceneId);
+                    success = await importer.InstantiateSceneAsync(instantiator, sceneId);
                     currentSceneId = success ? sceneId : (int?)null;
                 } else {
-                    success = await importer.InstantiateMainSceneAsync(insta);
+                    success = await importer.InstantiateMainSceneAsync(instantiator);
                     currentSceneId = importer.defaultSceneIndex;
                 }
 
-                sceneInstance = insta.sceneInstance;
+                sceneInstance = instantiator.sceneInstance;
 
                 if(success) {
-                    SetBounds(insta);
+                    SetBounds(instantiator);
                 }
             }
             return success;
@@ -91,8 +92,8 @@ namespace GLTFast
             return new GameObjectBoundsInstantiator(importer, transform, logger);
         }
         
-        void SetBounds(GameObjectBoundsInstantiator insta) {
-            var sceneBounds = insta.sceneInstance!=null ? insta.CalculateBounds() : null;
+        void SetBounds(GameObjectBoundsInstantiator instantiator) {
+            var sceneBounds = instantiator.sceneInstance!=null ? instantiator.CalculateBounds() : null;
             if (sceneBounds.HasValue) {
                 bounds = sceneBounds.Value;
                 if (createBoxCollider) {

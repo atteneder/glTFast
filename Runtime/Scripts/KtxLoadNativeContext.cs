@@ -25,22 +25,22 @@ using Unity.Collections;
 
 namespace GLTFast {
     class KtxLoadNativeContext : KtxLoadContextBase {
-        NativeSlice<byte> slice;
+        NativeSlice<byte> m_Slice;
 
         public KtxLoadNativeContext(int index,NativeSlice<byte> slice) {
             imageIndex = index;
-            this.slice = slice;
-            ktxTexture = new KtxTexture();
+            m_Slice = slice;
+            m_KtxTexture = new KtxTexture();
         }
 
         public override async Task<TextureResult> LoadTexture2D(bool linear) {
-            var errorCode = ktxTexture.Open(slice);
+            var errorCode = m_KtxTexture.Open(m_Slice);
             if (errorCode != ErrorCode.Success) {
                 return new TextureResult(errorCode);
             }
 
-            var result = await ktxTexture.LoadTexture2D(linear);
-            ktxTexture.Dispose();
+            var result = await m_KtxTexture.LoadTexture2D(linear);
+            m_KtxTexture.Dispose();
             return result;
         }
     }

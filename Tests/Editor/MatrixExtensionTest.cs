@@ -14,6 +14,7 @@
 //
 
 using GLTFast.Materials;
+using GLTFast.Vertex;
 using NUnit.Framework;
 using UnityEngine;
 using Unity.Mathematics;
@@ -89,5 +90,83 @@ namespace GLTFast.Tests
             Assert.That((Quaternion) new quaternion(r3), Is.EqualTo(new Quaternion(0.65328151f, -0.270598054f, 0.270598054f, 0.65328151f)).Using(comparer4));
             Assert.That((Vector3)s3, Is.EqualTo(new Vector3(-.99999994f, -.99999994f, -1)).Using(comparer3));
         }
+
+        // [Test]
+        // public void VertexStructTest() {
+        //     var v = new VPosNormTan {
+        //         position = new float3(1, 2, 3),
+        //         normal = new float3(1, 0, 0),
+        //         tangent = new float4(0, 1, 0,1),
+        //     };
+        //
+        //     var vPosNor = new VPosNorm {
+        //         position = new float3(1, 2, 3),
+        //         normal = new float3(1, 0, 0),
+        //     };
+        //     
+        //     var vPos = new VPos {
+        //         position = new float3(1, 2, 3)
+        //     };
+        //
+        //     var uv1 = new VTexCoord1 {
+        //         uv0 = new float2(1, 2),
+        //     };
+        //     
+        //     var uv2 = new VTexCoord2 {
+        //         uv0 = new float2(1, 2),
+        //         uv1 = new float2(1, 2),
+        //     };
+        //
+        //     var uv3 = new VTexCoord3 {
+        //         uv0 = new float2(1, 2),
+        //         uv1 = new float2(1, 2),
+        //         uv2 = new float2(1, 2),
+        //     };
+        //
+        //     var uv4 = new VTexCoord4 {
+        //         uv0 = new float2(1, 2),
+        //         uv1 = new float2(1, 2),
+        //         uv2 = new float2(1, 2),
+        //         uv3 = new float2(1, 2),
+        //     };
+        //     
+        //     var uv5 = new VTexCoord5 {
+        //         uv0 = new float2(1, 2),
+        //         uv1 = new float2(1, 2),
+        //         uv2 = new float2(1, 2),
+        //         uv3 = new float2(1, 2),
+        //         uv4 = new float2(1, 2),
+        //     };
+        //     
+        //     var uv6 = new VTexCoord6 {
+        //         uv0 = new float2(1, 2),
+        //         uv1 = new float2(1, 2),
+        //         uv2 = new float2(1, 2),
+        //         uv3 = new float2(1, 2),
+        //         uv4 = new float2(1, 2),
+        //         uv5 = new float2(1, 2),
+        //     };
+        //     
+        //     var uv7 = new VTexCoord7 {
+        //         uv0 = new float2(1, 2),
+        //         uv1 = new float2(1, 2),
+        //         uv2 = new float2(1, 2),
+        //         uv3 = new float2(1, 2),
+        //         uv4 = new float2(1, 2),
+        //         uv5 = new float2(1, 2),
+        //         uv6 = new float2(1, 2),
+        //     };
+        //     
+        //     var uv8 = new VTexCoord8 {
+        //         uv0 = new float2(1, 2),
+        //         uv1 = new float2(1, 2),
+        //         uv2 = new float2(1, 2),
+        //         uv3 = new float2(1, 2),
+        //         uv4 = new float2(1, 2),
+        //         uv5 = new float2(1, 2),
+        //         uv6 = new float2(1, 2),
+        //         uv7 = new float2(1, 2),
+        //     };
+        // }
     }
 }

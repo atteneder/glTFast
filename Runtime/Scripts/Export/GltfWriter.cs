@@ -543,7 +543,7 @@ namespace GLTFast.Export {
             const uint headerSize = 12; // 4 bytes magic + 4 bytes version + 4 bytes length (uint each)
             const uint chunkOverhead = 8; // 4 bytes chunk length + 4 bytes chunk type (uint each)
             if (isBinary) {
-                outStream.Write(BitConverter.GetBytes(GltfGlobals.GLB_MAGIC));
+                outStream.Write(BitConverter.GetBytes(GltfGlobals.gltfBinaryMagic));
                 outStream.Write(BitConverter.GetBytes((uint)2));
 
                 MemoryStream jsonStream = null;
@@ -583,7 +583,7 @@ namespace GLTFast.Export {
                 outStream.Write(BitConverter.GetBytes(totalLength));
                 
                 outStream.Write(BitConverter.GetBytes((uint)(jsonLength+jsonPad)));
-                outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.JSON));
+                outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.Json));
 
                 if (outStream.CanSeek) {
                     outStream.Seek(0, SeekOrigin.End);
@@ -599,7 +599,7 @@ namespace GLTFast.Export {
 
                 if (hasBufferContent) {
                     outStream.Write(BitConverter.GetBytes((uint)(m_BufferStream.Length+binPad)));
-                    outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.BIN));
+                    outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.Binary));
                     var ms = (MemoryStream)m_BufferStream;
                     ms.WriteTo(outStream);
                     await ms.FlushAsync();
@@ -914,7 +914,7 @@ namespace GLTFast.Export {
                 streamCount = stream + 1;
             }
             
-            var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GLTFComponentType.UnsignedShort : GLTFComponentType.UnsignedInt;
+            var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GltfComponentType.UnsignedShort : GltfComponentType.UnsignedInt;
             mesh.primitives = new MeshPrimitive[meshData.subMeshCount];
             var indexAccessors = new Accessor[meshData.subMeshCount];
             var indexOffset = 0;
@@ -935,7 +935,7 @@ namespace GLTFast.Export {
                 Accessor indexAccessor;
                 
                 indexAccessor = new Accessor {
-                    typeEnum = GLTFAccessorAttributeType.SCALAR,
+                    typeEnum = GltfAccessorAttributeType.SCALAR,
                     byteOffset = indexOffset,
                     componentType = indexComponentType,
                     count = subMesh.indexCount,

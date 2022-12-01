@@ -21,7 +21,7 @@ namespace GLTFast.FakeSchema {
     /// The material appearance of a primitive.
     /// </summary>
     [System.Serializable]
-    class Material : RootChild {
+    class Material : NamedObject {
         public MaterialExtension extensions;
     }
 }

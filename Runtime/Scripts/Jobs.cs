@@ -38,24 +38,24 @@ namespace GLTFast.Jobs {
         public delegate void GetFloat3Delegate(float3* destination, void* src);
         
         // Cached function pointers
-        static FunctionPointer<GetIndexDelegate> GetIndexValueInt8Method;
-        static FunctionPointer<GetIndexDelegate> GetIndexValueUInt8Method;
-        static FunctionPointer<GetIndexDelegate> GetIndexValueInt16Method;
-        static FunctionPointer<GetIndexDelegate> GetIndexValueUInt16Method;
-        static FunctionPointer<GetIndexDelegate> GetIndexValueUInt32Method;
+        static FunctionPointer<GetIndexDelegate> s_GetIndexValueInt8Method;
+        static FunctionPointer<GetIndexDelegate> s_GetIndexValueUInt8Method;
+        static FunctionPointer<GetIndexDelegate> s_GetIndexValueInt16Method;
+        static FunctionPointer<GetIndexDelegate> s_GetIndexValueUInt16Method;
+        static FunctionPointer<GetIndexDelegate> s_GetIndexValueUInt32Method;
         
         
-        static FunctionPointer<GetFloat3Delegate> GetFloat3FloatMethod;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3Int8Method;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt8Method;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3Int16Method;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt16Method;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt32Method;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3Int8NormalizedMethod;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt8NormalizedMethod;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3Int16NormalizedMethod;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt16NormalizedMethod;
-        static FunctionPointer<GetFloat3Delegate> GetFloat3UInt32NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3FloatMethod;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3Int8Method;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3UInt8Method;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3Int16Method;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3UInt16Method;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3UInt32Method;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3Int8NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3UInt8NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3Int16NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3UInt16NormalizedMethod;
+        static FunctionPointer<GetFloat3Delegate> s_GetFloat3UInt32NormalizedMethod;
         
         /// <summary>
         /// Returns Burst compatible function that retrieves an index value
@@ -66,30 +66,30 @@ namespace GLTFast.Jobs {
         public static FunctionPointer<GetIndexDelegate> GetIndexConverter(GltfComponentType format) {
             switch (format) {
                 case GltfComponentType.UnsignedByte:
-                    if (!GetIndexValueUInt8Method.IsCreated) {
-                        GetIndexValueUInt8Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt8);
+                    if (!s_GetIndexValueUInt8Method.IsCreated) {
+                        s_GetIndexValueUInt8Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt8);
                     }
-                    return GetIndexValueUInt8Method;
+                    return s_GetIndexValueUInt8Method;
                 case GltfComponentType.Byte:
-                    if (!GetIndexValueInt8Method.IsCreated) {
-                        GetIndexValueInt8Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueInt8);
+                    if (!s_GetIndexValueInt8Method.IsCreated) {
+                        s_GetIndexValueInt8Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueInt8);
                     }
-                    return GetIndexValueInt8Method;
+                    return s_GetIndexValueInt8Method;
                 case GltfComponentType.UnsignedShort:
-                    if (!GetIndexValueUInt16Method.IsCreated) {
-                        GetIndexValueUInt16Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt16);
+                    if (!s_GetIndexValueUInt16Method.IsCreated) {
+                        s_GetIndexValueUInt16Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt16);
                     }
-                    return GetIndexValueUInt16Method;
+                    return s_GetIndexValueUInt16Method;
                 case GltfComponentType.Short:
-                    if (!GetIndexValueInt16Method.IsCreated) {
-                        GetIndexValueInt16Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueInt16);
+                    if (!s_GetIndexValueInt16Method.IsCreated) {
+                        s_GetIndexValueInt16Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueInt16);
                     }
-                    return GetIndexValueInt16Method;
+                    return s_GetIndexValueInt16Method;
                 case GltfComponentType.UnsignedInt:
-                    if (!GetIndexValueUInt32Method.IsCreated) {
-                        GetIndexValueUInt32Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt32);
+                    if (!s_GetIndexValueUInt32Method.IsCreated) {
+                        s_GetIndexValueUInt32Method = BurstCompiler.CompileFunctionPointer<GetIndexDelegate>(GetIndexValueUInt32);
                     }
-                    return GetIndexValueUInt32Method;
+                    return s_GetIndexValueUInt32Method;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
@@ -107,63 +107,63 @@ namespace GLTFast.Jobs {
                         // Fall back to non-normalized below
                         break;
                     case GltfComponentType.Byte:
-                        if (!GetFloat3Int8NormalizedMethod.IsCreated) {
-                            GetFloat3Int8NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int8Normalized);
+                        if (!s_GetFloat3Int8NormalizedMethod.IsCreated) {
+                            s_GetFloat3Int8NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int8Normalized);
                         }
-                        return GetFloat3Int8NormalizedMethod;
+                        return s_GetFloat3Int8NormalizedMethod;
                     case GltfComponentType.UnsignedByte:
-                        if (!GetFloat3UInt8NormalizedMethod.IsCreated) {
-                            GetFloat3UInt8NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt8Normalized);
+                        if (!s_GetFloat3UInt8NormalizedMethod.IsCreated) {
+                            s_GetFloat3UInt8NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt8Normalized);
                         }
-                        return GetFloat3UInt8NormalizedMethod;
+                        return s_GetFloat3UInt8NormalizedMethod;
                     case GltfComponentType.Short:
-                        if (!GetFloat3Int16NormalizedMethod.IsCreated) {
-                            GetFloat3Int16NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int16Normalized);
+                        if (!s_GetFloat3Int16NormalizedMethod.IsCreated) {
+                            s_GetFloat3Int16NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int16Normalized);
                         }
-                        return GetFloat3Int16NormalizedMethod;
+                        return s_GetFloat3Int16NormalizedMethod;
                     case GltfComponentType.UnsignedShort:
-                        if (!GetFloat3UInt16NormalizedMethod.IsCreated) {
-                            GetFloat3UInt16NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt16Normalized);
+                        if (!s_GetFloat3UInt16NormalizedMethod.IsCreated) {
+                            s_GetFloat3UInt16NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt16Normalized);
                         }
-                        return GetFloat3UInt16NormalizedMethod;
+                        return s_GetFloat3UInt16NormalizedMethod;
                     case GltfComponentType.UnsignedInt:
-                        if (!GetFloat3UInt32NormalizedMethod.IsCreated) {
-                            GetFloat3UInt32NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt32Normalized);
+                        if (!s_GetFloat3UInt32NormalizedMethod.IsCreated) {
+                            s_GetFloat3UInt32NormalizedMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt32Normalized);
                         }
-                        return GetFloat3UInt32NormalizedMethod;
+                        return s_GetFloat3UInt32NormalizedMethod;
                 }
             }
             switch (format) {
                 case GltfComponentType.Float:
-                    if (!GetFloat3FloatMethod.IsCreated) {
-                        GetFloat3FloatMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Float);
+                    if (!s_GetFloat3FloatMethod.IsCreated) {
+                        s_GetFloat3FloatMethod = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Float);
                     }
-                    return GetFloat3FloatMethod;
+                    return s_GetFloat3FloatMethod;
                 case GltfComponentType.Byte:
-                    if (!GetFloat3Int8Method.IsCreated) {
-                        GetFloat3Int8Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int8);
+                    if (!s_GetFloat3Int8Method.IsCreated) {
+                        s_GetFloat3Int8Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int8);
                     }
-                    return GetFloat3Int8Method;
+                    return s_GetFloat3Int8Method;
                 case GltfComponentType.UnsignedByte:
-                    if (!GetFloat3UInt8Method.IsCreated) {
-                        GetFloat3UInt8Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt8);
+                    if (!s_GetFloat3UInt8Method.IsCreated) {
+                        s_GetFloat3UInt8Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt8);
                     }
-                    return GetFloat3UInt8Method;
+                    return s_GetFloat3UInt8Method;
                 case GltfComponentType.Short:
-                    if (!GetFloat3Int16Method.IsCreated) {
-                        GetFloat3Int16Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int16);
+                    if (!s_GetFloat3Int16Method.IsCreated) {
+                        s_GetFloat3Int16Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3Int16);
                     }
-                    return GetFloat3Int16Method;
+                    return s_GetFloat3Int16Method;
                 case GltfComponentType.UnsignedShort:
-                    if (!GetFloat3UInt16Method.IsCreated) {
-                        GetFloat3UInt16Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt16);
+                    if (!s_GetFloat3UInt16Method.IsCreated) {
+                        s_GetFloat3UInt16Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt16);
                     }
-                    return GetFloat3UInt16Method;
+                    return s_GetFloat3UInt16Method;
                 case GltfComponentType.UnsignedInt:
-                    if (!GetFloat3UInt32Method.IsCreated) {
-                        GetFloat3UInt32Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt32);
+                    if (!s_GetFloat3UInt32Method.IsCreated) {
+                        s_GetFloat3UInt32Method = BurstCompiler.CompileFunctionPointer<GetFloat3Delegate>(GetFloat3UInt32);
                     }
-                    return GetFloat3UInt32Method;
+                    return s_GetFloat3UInt32Method;
             }
             throw new ArgumentOutOfRangeException(nameof(format), format, null);
         }
@@ -877,7 +877,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    unsafe struct ConvertColorsRGBUInt8ToRGBAFloatJob : IJobParallelFor {
+    unsafe struct ConvertColorsRgbUInt8ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -899,7 +899,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    unsafe struct ConvertColorsRGBUInt16ToRGBAFloatJob : IJobParallelFor {
+    unsafe struct ConvertColorsRgbUInt16ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -922,7 +922,7 @@ namespace GLTFast.Jobs {
     }
 
     [BurstCompile]
-    unsafe struct ConvertColorsRGBAUInt16ToRGBAFloatJob : 
+    unsafe struct ConvertColorsRgbaUInt16ToRGBAFloatJob : 
 #if UNITY_JOBS
         IJobParallelForBatch
 #else
@@ -1007,7 +1007,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    unsafe struct ConvertColorsRGBAUInt8ToRGBAFloatJob : IJobParallelFor {
+    unsafe struct ConvertColorsRgbaUInt8ToRGBAFloatJob : IJobParallelFor {
 
         [ReadOnly]
         public int inputByteStride;
@@ -2107,7 +2107,7 @@ namespace GLTFast.Jobs {
     }
     
     [BurstCompile]
-    struct SortAndRenormalizeBoneWeightsJob : IJobParallelFor {
+    struct SortAndNormalizeBoneWeightsJob : IJobParallelFor {
 
         public NativeArray<VBones> bones;
         

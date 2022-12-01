@@ -697,9 +697,9 @@ namespace GLTFast {
             }
             return defaultMaterial;
 #else
-            materialGenerator.SetLogger(logger);
-            return materialGenerator.GetDefaultMaterial(defaultMaterialPointsSupport);
-            materialGenerator.SetLogger(null);
+            m_MaterialGenerator.SetLogger(m_Logger);
+            return m_MaterialGenerator.GetDefaultMaterial(m_DefaultMaterialPointsSupport);
+            m_MaterialGenerator.SetLogger(null);
 #endif
         }
         
@@ -967,12 +967,12 @@ namespace GLTFast {
                     if(!supported) {
 #if !DRACO_UNITY
                         if(ext==ExtensionName.DracoMeshCompression) {
-                            logger?.Error(LogCode.PackageMissing,"DracoUnity",ext);
+                            m_Logger?.Error(LogCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
                         if(ext==ExtensionName.TextureBasisUniversal) {
-                            logger?.Error(LogCode.PackageMissing,"KtxUnity",ext);
+                            m_Logger?.Error(LogCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
                         {
@@ -988,12 +988,12 @@ namespace GLTFast {
                     if(!supported) {
 #if !DRACO_UNITY
                         if(ext==ExtensionName.DracoMeshCompression) {
-                            logger?.Warning(LogCode.PackageMissing,"DracoUnity",ext);
+                            m_Logger?.Warning(LogCode.PackageMissing,"DracoUnity",ext);
                         } else
 #endif
 #if !KTX_UNITY
                         if(ext==ExtensionName.TextureBasisUniversal) {
-                            logger?.Warning(LogCode.PackageMissing,"KtxUnity",ext);
+                            m_Logger?.Warning(LogCode.PackageMissing,"KtxUnity",ext);
                         } else
 #endif
                         {
@@ -1058,7 +1058,7 @@ namespace GLTFast {
                     var texture = m_GltfRoot.textures[i];
                     if(texture.isKtx) {
                         var imgIndex = texture.GetImageIndex();
-                        m_ImageFormats[imgIndex] = ImageFormat.KTX;
+                        m_ImageFormats[imgIndex] = ImageFormat.Ktx;
                     }
                 }
 #endif // KTX_UNITY
@@ -1094,7 +1094,7 @@ namespace GLTFast {
                         var imageTask = LoadImageFromBuffer(decodedBufferTask, imageIndex, img);
                         imageTasks.Add(imageTask);
 #else
-                        logger?.Warning(LogCode.ImageConversionNotEnabled);
+                        m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
 #endif
                     } else {
                         ImageFormat imgFormat;
@@ -1111,7 +1111,7 @@ namespace GLTFast {
                             if (img.bufferView < 0) {
                                 // Not Inside buffer
                                 if(!string.IsNullOrEmpty(img.uri)) {
-                                    LoadImage(imageIndex,UriHelper.GetUriString(img.uri,baseUri), !m_ImageReadable[imageIndex], imgFormat==ImageFormat.KTX);
+                                    LoadImage(imageIndex,UriHelper.GetUriString(img.uri,baseUri), !m_ImageReadable[imageIndex], imgFormat==ImageFormat.Ktx);
                                 } else {
                                     m_Logger?.Error(LogCode.MissingImageURL);
                                 }
@@ -1210,7 +1210,7 @@ namespace GLTFast {
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
                         txt.LoadImage(www.data,!m_ImageReadable[imageIndex]);
 #else
-                        logger?.Warning(LogCode.ImageConversionNotEnabled);
+                        m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
                         txt = null;
 #endif
                     } else {
@@ -1331,7 +1331,7 @@ namespace GLTFast {
                 }
                 m_KtxDownloadTasks.Add(imageIndex, downloadTask);
 #else
-                logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtensionName.TextureBasisUniversal);
+                m_Logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtensionName.TextureBasisUniversal);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
@@ -1345,7 +1345,7 @@ namespace GLTFast {
                 }
                 m_TextureDownloadTasks.Add(imageIndex, downloadTask);
 #else
-                logger?.Warning(LogCode.ImageConversionNotEnabled);
+                m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
 #endif
             }
             Profiler.EndSample();
@@ -1411,11 +1411,11 @@ namespace GLTFast {
                     return false;
                 }
 
-                if (chType == (uint)ChunkFormat.BIN) {
+                if (chType == (uint)ChunkFormat.Binary) {
                     Assert.IsFalse(m_GlbBinChunk.HasValue); // There can only be one binary chunk
                     m_GlbBinChunk = new GlbBinChunk( index, chLength);
                 }
-                else if (chType == (uint)ChunkFormat.JSON) {
+                else if (chType == (uint)ChunkFormat.Json) {
                     Assert.IsNull(m_GltfRoot);
 
                     Profiler.BeginSample("GetJSON");
@@ -1499,9 +1499,13 @@ namespace GLTFast {
                 Profiler.EndSample();
             }
             var chunk = m_BinChunks[bufferIndex];
+            var nativeBuffer = m_NativeBuffers[bufferIndex];
+            var totalOffset = chunk.start + bufferView.byteOffset + offset;
+            Assert.IsTrue( bufferView.byteOffset + offset <= chunk.length);
+            Assert.IsTrue( totalOffset + length <= nativeBuffer.Length);
             return new NativeSlice<byte>(
                 m_NativeBuffers[bufferIndex],
-                chunk.start + bufferView.byteOffset + offset,
+                totalOffset,
                 length
                 );
         }
@@ -2315,7 +2319,7 @@ namespace GLTFast {
                 if (imgFormat!=ImageFormat.Unknown) {
                     if (img.bufferView >= 0) {
                         
-                        if(imgFormat == ImageFormat.KTX) {
+                        if(imgFormat == ImageFormat.Ktx) {
 #if KTX
                             Profiler.BeginSample("CreateTexturesFromBuffers.KtxLoadNativeContext");
                             if(m_KtxLoadContextsBuffer==null) {
@@ -2326,7 +2330,7 @@ namespace GLTFast {
                             Profiler.EndSample();
                             await m_DeferAgent.BreakPoint();
 #else
-                            logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtensionName.TextureBasisUniversal);
+                            m_Logger?.Error(LogCode.PackageMissing,"KtxUnity",ExtensionName.TextureBasisUniversal);
 #endif // KTX_UNITY
                         } else {
                             Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBuffer");
@@ -3364,7 +3368,7 @@ namespace GLTFast {
                     return ImageFormat.PNG;
                 case "ktx":
                 case "ktx2":
-                    return ImageFormat.KTX;
+                    return ImageFormat.Ktx;
                 default:
                     return ImageFormat.Unknown;
             }

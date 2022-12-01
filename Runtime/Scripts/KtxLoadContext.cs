@@ -21,29 +21,28 @@
 
 using System.Threading.Tasks;
 using KtxUnity;
-using Unity.Collections;
 
 namespace GLTFast {
     class KtxLoadContext : KtxLoadContextBase {
-        byte[] data;
+        byte[] m_Data;
 
         public KtxLoadContext(int index,byte[] data) {
             imageIndex = index;
-            this.data = data;
-            ktxTexture = new KtxTexture();
+            this.m_Data = data;
+            m_KtxTexture = new KtxTexture();
         }
 
         public override async Task<TextureResult> LoadTexture2D(bool linear) {
-            using (var array = new ManagedNativeArray(data)) {
+            using (var array = new ManagedNativeArray(m_Data)) {
                 
-                var errorCode = ktxTexture.Open(array.nativeArray);
+                var errorCode = m_KtxTexture.Open(array.nativeArray);
                 if (errorCode != ErrorCode.Success) {
                     return new TextureResult(errorCode);
                 }
 
-                var result = await ktxTexture.LoadTexture2D(linear);
+                var result = await m_KtxTexture.LoadTexture2D(linear);
                 
-                ktxTexture.Dispose();
+                m_KtxTexture.Dispose();
                 return result;
             }
         }

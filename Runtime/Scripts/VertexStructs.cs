@@ -19,22 +19,25 @@ using Unity.Mathematics;
 namespace GLTFast.Vertex
 {
 
+    // Most struct members are never accessed, but keeping them public makes still sense for future use.
+    // ReSharper disable MemberCanBePrivate.Global
+    
     [StructLayout(LayoutKind.Sequential)]
     struct VPosNormTan {
-        public float3 pos;
-        public float3 nrm;
-        public float4 tan;
+        public float3 position;
+        public float3 normal;
+        public float4 tangent;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     struct VPosNorm {
-        public float3 pos;
-        public float3 nrm;
+        public float3 position;
+        public float3 normal;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     struct VPos {
-        public float3 pos;
+        public float3 position;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -116,4 +119,6 @@ namespace GLTFast.Vertex
         }
 #endif
     }
+    
+    // ReSharper restore MemberCanBePrivate.Global
 }

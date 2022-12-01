@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 namespace GLTFast {
 
     /// <summary>
-    /// An IDeferAgent decides whether to interrupt a preemptable procedure
+    /// An IDeferAgent decides whether to interrupt a preempt-able procedure
     /// running on the main thread at the current point in time.
     /// This decision manages the trade-off between minimum procedure duration
     /// and a responsive frame rate.
@@ -44,14 +44,14 @@ namespace GLTFast {
         /// <summary>
         /// Conditional yield. May continue right away or yield once, based on time.
         /// </summary>
-        /// <returns>If <see cref="ShouldDefer"/> returns true, returns Task.Yield(). Otherwise returns sync</returns>
+        /// <returns>If <see cref="ShouldDefer()"/> returns true, returns Task.Yield(). Otherwise returns sync</returns>
         Task BreakPoint();
         
         /// <summary>
         /// Conditional yield. May continue right away or yield once, based on time and duration.
         /// </summary>
         /// <param name="duration">Predicted duration of upcoming processing in seconds</param>
-        /// <returns>If <see cref="ShouldDefer"/> returns true, returns Task.Yield(). Otherwise returns sync</returns>
+        /// <returns>If <see cref="ShouldDefer(float)"/> returns true, returns Task.Yield(). Otherwise returns sync</returns>
         Task BreakPoint( float duration );
     }
 }
