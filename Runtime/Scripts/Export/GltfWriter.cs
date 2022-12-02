@@ -24,15 +24,22 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+
 using GLTFast.Schema;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#if GLTFAST_MESH_DATA
 using Unity.Jobs;
+#endif
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
+#if USING_HDRP
+using UnityEngine.Rendering.HighDefinition;
+#endif
+
 using Buffer = GLTFast.Schema.Buffer;
 using Camera = GLTFast.Schema.Camera;
 using Debug = UnityEngine.Debug;
@@ -40,10 +47,6 @@ using Material = GLTFast.Schema.Material;
 using Mesh = GLTFast.Schema.Mesh;
 using Sampler = GLTFast.Schema.Sampler;
 using Texture = GLTFast.Schema.Texture;
-
-#if USING_HDRP
-using UnityEngine.Rendering.HighDefinition;
-#endif
 
 #if DEBUG
 using System.Text;
@@ -71,15 +74,17 @@ namespace GLTFast.Export {
         }
         
         struct AttributeData {
+#if GLTFAST_MESH_DATA
             public int stream;
+#endif
             public int offset;
             public int accessorId;
         }
         
-#region Constants
+#if GLTFAST_MESH_DATA
         const int k_MAXStreamCount = 4;
         const int k_DefaultInnerLoopBatchCount = 512;
-#endregion Constants
+#endif
 
 #region Private
         State m_State;
@@ -99,7 +104,7 @@ namespace GLTFast.Export {
         List<Material> m_Materials;
         List<Texture> m_Textures;
         List<Image> m_Images;
-        List<Schema.Camera> m_Cameras;
+        List<Camera> m_Cameras;
         List<LightPunctual> m_Lights;
         List<Sampler> m_Samplers;
         List<Accessor> m_Accessors;
@@ -181,7 +186,7 @@ namespace GLTFast.Export {
             if (uCamera.orthographic) {
                 camera.typeEnum = Camera.Type.Orthographic;
                 var oSize = uCamera.orthographicSize;
-                var aspectRatio = 1f;
+                float aspectRatio;
                 var targetTexture = uCamera.targetTexture;
                 if (targetTexture == null) {
                     aspectRatio = Screen.width / (float) Screen.height; 
@@ -548,8 +553,8 @@ namespace GLTFast.Export {
 
                 MemoryStream jsonStream = null;
                 uint jsonLength;
-                
-                if(outStream.CanSeek) {
+                var outStreamCanSeek = outStream.CanSeek; 
+                if(outStreamCanSeek) {
                     // Write empty 3 place-holder uints for:
                     // - total length
                     // - JSON chunk length
@@ -576,7 +581,7 @@ namespace GLTFast.Export {
                     totalLength += (uint) (chunkOverhead + m_BufferStream.Length + binPad);
                 }
 
-                if (outStream.CanSeek) {
+                if (outStreamCanSeek) {
                     outStream.Seek(8, SeekOrigin.Begin);
                 }
                 
@@ -585,7 +590,7 @@ namespace GLTFast.Export {
                 outStream.Write(BitConverter.GetBytes((uint)(jsonLength+jsonPad)));
                 outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.Json));
 
-                if (outStream.CanSeek) {
+                if (outStreamCanSeek) {
                     outStream.Seek(0, SeekOrigin.End);
                 }
                 else {
@@ -644,7 +649,7 @@ namespace GLTFast.Export {
             return imageDest;
         }
 
-        int GetPadByteCount(uint length) {
+        static int GetPadByteCount(uint length) {
             return (4 - (int)(length & 3) ) & 3;
         }
 
@@ -716,7 +721,7 @@ namespace GLTFast.Export {
 
         void BakeExtensions() {
             if (m_ExtensionsRequired != null) {
-                var usedOnlyCount = m_ExtensionsUsedOnly == null ? 0 : m_ExtensionsUsedOnly.Count;
+                var usedOnlyCount = m_ExtensionsUsedOnly?.Count ?? 0;
                 m_Gltf.extensionsRequired = new string[m_ExtensionsRequired.Count];
                 m_Gltf.extensionsUsed = new string[m_ExtensionsRequired.Count + usedOnlyCount];
                 var i = 0;
@@ -1145,7 +1150,9 @@ namespace GLTFast.Export {
                 
                 var attrData = new AttributeData {
                     offset = 0,
+#if GLTFAST_MESH_DATA
                     stream = streamId
+#endif
                 };
 
                 var accessor = new Accessor {
@@ -1221,7 +1228,6 @@ namespace GLTFast.Export {
                 }
             }
 
-            var streamCount = attrDataDict.Count;
             var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GltfComponentType.UnsignedShort : GltfComponentType.UnsignedInt;
             mesh.primitives = new MeshPrimitive[uMesh.subMeshCount];
             var indexAccessors = new Accessor[uMesh.subMeshCount];
@@ -1241,9 +1247,7 @@ namespace GLTFast.Export {
                     mode = DrawMode.Points;
                 }
 
-                Accessor indexAccessor;
-                
-                indexAccessor = new Accessor {
+                var indexAccessor = new Accessor {
                     typeEnum = GltfAccessorAttributeType.SCALAR,
                     byteOffset = indexOffset,
                     componentType = indexComponentType,
@@ -1541,8 +1545,7 @@ namespace GLTFast.Export {
                         }
                     }
                     else if (imageDest == ImageDestination.SeparateFile) {
-                        string fileName = null;
-                        if (!(fileNameOverrides != null && fileNameOverrides.TryGetValue(imageId, out fileName))) {
+                        if (!(fileNameOverrides != null && fileNameOverrides.TryGetValue(imageId, out var fileName))) {
                             fileName = imageExport.fileName;
                         }
                         if(imageExport.Write( Path.Combine(directory, fileName), overwrite)) {
@@ -1559,6 +1562,8 @@ namespace GLTFast.Export {
             return true;
         }
         
+#if GLTFAST_MESH_DATA
+
         static async Task ConvertPositionAttribute(
             AttributeData attrData,
             uint byteStride,
@@ -1620,6 +1625,8 @@ namespace GLTFast.Export {
             return job;
         }
 
+#endif // GLTFAST_MESH_DATA
+
         static DrawMode? GetDrawMode(MeshTopology topology) {
             switch (topology) {
                 case MeshTopology.Quads:
@@ -1659,13 +1666,13 @@ namespace GLTFast.Export {
             }
             return node;
         }
-        
-        Node CreateNode(
+
+        static Node CreateNode(
             float3? translation = null,
             quaternion? rotation = null,
             float3? scale = null,
             string name = null
-        )
+            )
         {
             var node = new Node {
                 name = name,
@@ -1815,6 +1822,7 @@ namespace GLTFast.Export {
             m_State = State.Disposed;
         }
         
+#if GLTFAST_MESH_DATA
         static unsafe int GetAttributeSize(VertexAttributeFormat format) {
             switch (format) {
                 case VertexAttributeFormat.Float32:
@@ -1845,5 +1853,6 @@ namespace GLTFast.Export {
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
         }
+#endif
     }
 }

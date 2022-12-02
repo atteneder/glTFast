@@ -28,7 +28,7 @@ namespace GLTFast.Export {
             
         public override bool Equals(object obj) {
             //Check for null and compare run-time types.
-            if (obj == null || ! GetType().Equals(obj.GetType())) {
+            if (obj == null || GetType() != obj.GetType()) {
                 return false;
             }
             return Equals((MeshMaterialCombination)obj);

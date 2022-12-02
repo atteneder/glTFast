@@ -159,7 +159,7 @@ namespace GLTFast.Logging {
         /// Chance of incorrect materials! glTF transmission is approximated.
         /// Enable Opaque Texture access in Universal Render Pipeline!
         /// </summary>
-        MaterialTransmissionApproxURP,
+        MaterialTransmissionApproxUrp,
         /// <summary>
         /// No bounds for mesh {0} => calculating them. 
         /// </summary>
@@ -280,7 +280,7 @@ See details in corresponding issue at https://github.com/atteneder/glTFast/issue
             { LogCode.IndexFormatInvalid, "Invalid index format {0}" },
             { LogCode.JsonParsingFailed, "Parsing JSON failed" },
             { LogCode.MaterialTransmissionApprox, "Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!" },
-            { LogCode.MaterialTransmissionApproxURP, @"Chance of incorrect materials! glTF transmission
+            { LogCode.MaterialTransmissionApproxUrp, @"Chance of incorrect materials! glTF transmission
 is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             { LogCode.MeshBoundsMissing, "No bounds for mesh {0} => calculating them." },
             { LogCode.MeshNotReadable, "Skipping non-readable mesh {0}" },
@@ -324,6 +324,7 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             }
 #if GLTFAST_REPORT
             return messages != null
+                // ReSharper disable once CoVariantArrayConversion
                 ? string.Format(k_FullMessages[code], messages)
                 : k_FullMessages[code];
 #else

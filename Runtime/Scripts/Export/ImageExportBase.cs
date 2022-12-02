@@ -15,7 +15,9 @@
 
 using System;
 using UnityEngine;
+#if UNITY_2022_1_OR_NEWER
 using UnityEngine.Experimental.Rendering;
+#endif
 using Object = UnityEngine.Object;
 
 namespace GLTFast.Export {

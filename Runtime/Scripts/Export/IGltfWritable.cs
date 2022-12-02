@@ -73,7 +73,7 @@ namespace GLTFast.Export {
         /// <param name="materialId">glTF material index</param>
         /// <param name="materialExport">Material converter</param>
         /// <returns>True if converting and adding material was successful, false otherwise</returns>
-        bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport);
+        bool AddMaterial(Material uMaterial, out int materialId, IMaterialExport materialExport);
         
         /// <summary>
         /// Adds an ImageExport to the glTF and returns the resulting image index

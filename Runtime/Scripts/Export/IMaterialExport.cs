@@ -33,7 +33,7 @@ namespace GLTFast.Export {
         /// <param name="logger">Logger used for reporting</param>
         /// <returns>True if no errors occured, false otherwise</returns>
         bool ConvertMaterial(
-            UnityEngine.Material uMaterial,
+            Material uMaterial,
             out Schema.Material material,
             IGltfWritable gltf,
             ICodeLogger logger

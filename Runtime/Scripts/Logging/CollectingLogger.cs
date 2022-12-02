@@ -26,62 +26,62 @@ namespace GLTFast.Logging {
     [Serializable]
     public class CollectingLogger : ICodeLogger {
 
-        List<LogItem> items;
+        List<LogItem> m_Items;
 
         /// <inheritdoc />
         public void Error(LogCode code, params string[] messages) {
-            if (items == null) {
-                items = new List<LogItem>();
+            if (m_Items == null) {
+                m_Items = new List<LogItem>();
             }
-            items.Add(new LogItem(LogType.Error, code, messages));
+            m_Items.Add(new LogItem(LogType.Error, code, messages));
         }
         
         /// <inheritdoc />
         public void Warning(LogCode code, params string[] messages) {
-            if (items == null) {
-                items = new List<LogItem>();
+            if (m_Items == null) {
+                m_Items = new List<LogItem>();
             }
-            items.Add(new LogItem(LogType.Warning, code, messages));
+            m_Items.Add(new LogItem(LogType.Warning, code, messages));
         }
         
         /// <inheritdoc />
         public void Info(LogCode code, params string[] messages) {
-            if (items == null) {
-                items = new List<LogItem>();
+            if (m_Items == null) {
+                m_Items = new List<LogItem>();
             }
-            items.Add(new LogItem(LogType.Log, code, messages));
+            m_Items.Add(new LogItem(LogType.Log, code, messages));
         }
         
         /// <inheritdoc />
         public void Error(string message) {
-            if (items == null) {
-                items = new List<LogItem>();
+            if (m_Items == null) {
+                m_Items = new List<LogItem>();
             }
-            items.Add(new LogItem(LogType.Error, LogCode.None, message ));
+            m_Items.Add(new LogItem(LogType.Error, LogCode.None, message ));
         }
         
         /// <inheritdoc />
         public void Warning(string message) {
-            if (items == null) {
-                items = new List<LogItem>();
+            if (m_Items == null) {
+                m_Items = new List<LogItem>();
             }
-            items.Add(new LogItem(LogType.Warning, LogCode.None, message ));
+            m_Items.Add(new LogItem(LogType.Warning, LogCode.None, message ));
         }
         
         /// <inheritdoc />
         public void Info(string message) {
-            if (items == null) {
-                items = new List<LogItem>();
+            if (m_Items == null) {
+                m_Items = new List<LogItem>();
             }
-            items.Add(new LogItem(LogType.Log, LogCode.None, message ));
+            m_Items.Add(new LogItem(LogType.Log, LogCode.None, message ));
         }
         
         /// <summary>
         /// Logs all collected messages to the console.
         /// </summary>
         public void LogAll() {
-            if (items != null) {
-                foreach (var item in items) {
+            if (m_Items != null) {
+                foreach (var item in m_Items) {
                     item.Log();
                 }
             }
@@ -90,14 +90,12 @@ namespace GLTFast.Logging {
         /// <summary>
         /// Number of log items in <see cref="Items"/>
         /// </summary>
-        public int Count {
-            get { return items?.Count ?? 0; }
-        }
+        public int Count => m_Items?.Count ?? 0;
 
         /// <summary>
         /// Items that were logged
         /// </summary>
-        public IEnumerable<LogItem> Items { get { return items?.AsReadOnly(); } }
+        public IEnumerable<LogItem> Items => m_Items?.AsReadOnly();
     }
     
     /// <summary>

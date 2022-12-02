@@ -19,7 +19,9 @@ using System.IO;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+#if UNITY_2022_1_OR_NEWER
 using UnityEngine.Experimental.Rendering;
+#endif
 using Object = UnityEngine.Object;
 
 namespace GLTFast.Export {
@@ -197,7 +199,7 @@ namespace GLTFast.Export {
         /// <param name="smoothnessTexture">Smoothness texture</param>
         /// <param name="format">Export image format</param>
         /// <returns></returns>
-        protected static byte[] EncodeOrmTexture(
+        static byte[] EncodeOrmTexture(
             Texture2D metalGlossTexture,
             Texture2D occlusionTexture,
             Texture2D smoothnessTexture,

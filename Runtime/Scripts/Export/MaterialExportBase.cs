@@ -14,8 +14,6 @@
 //
 
 using System;
-using GLTFast.Materials;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -176,7 +174,7 @@ namespace GLTFast.Export {
         /// Export a Unity texture to a glTF.
         /// </summary>
         /// <param name="texture">Texture to export.</param>
-        /// <param name="gltf">Context glTF to expor to</param>
+        /// <param name="gltf">Context glTF to export to</param>
         /// <param name="format">Desired image format</param>
         /// <returns>glTF texture info</returns>
         protected static TextureInfo ExportTextureInfo(

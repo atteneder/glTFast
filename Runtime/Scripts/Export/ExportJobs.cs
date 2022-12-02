@@ -13,6 +13,11 @@
 // limitations under the License.
 //
 
+#if UNITY_2020_2_OR_NEWER
+#define GLTFAST_MESH_DATA
+#endif
+
+
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -24,6 +29,8 @@ namespace GLTFast.Export {
     
     [BurstCompile]
     static class ExportJobs {
+
+#if GLTFAST_MESH_DATA
 
         [BurstCompile]
         public struct ConvertIndicesFlippedJob<T> : IJobParallelFor where T : struct {
@@ -61,6 +68,8 @@ namespace GLTFast.Export {
                 result[i*6+5] = input[i*4+3];
             }
         }
+
+#endif // GLTFAST_MESH_DATA
 
         [BurstCompile]
         public unsafe struct ConvertPositionFloatJob : IJobParallelFor {

@@ -25,17 +25,17 @@ namespace GLTFast.Logging {
 
         /// <inheritdoc />
         public void Error(LogCode code, params string[] messages) {
-            Debug.LogError(LogMessages.GetFullMessage(code,messages));
+            Debug.LogError(LogMessages.GetFullMessage(code, messages));
         }
         
         /// <inheritdoc />
         public void Warning(LogCode code, params string[] messages) {
-            Debug.LogWarning(LogMessages.GetFullMessage(code,messages));
+            Debug.LogWarning(LogMessages.GetFullMessage(code, messages));
         }
         
         /// <inheritdoc />
         public void Info(LogCode code, params string[] messages) {
-            Debug.Log(LogMessages.GetFullMessage(code,messages));
+            Debug.Log(LogMessages.GetFullMessage(code, messages));
         }
         
         /// <inheritdoc />

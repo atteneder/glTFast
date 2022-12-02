@@ -71,7 +71,7 @@ namespace GLTFast {
         static RenderPipeline DetectRenderPipeline() {
 #if USING_URP || USING_HDRP
 	        // ReSharper disable once Unity.PerformanceCriticalCodeNullComparison
-	        var rpAsset = QualitySettings.renderPipeline ?? GraphicsSettings.defaultRenderPipeline;
+	        var rpAsset = QualitySettings.renderPipeline ? QualitySettings.renderPipeline : GraphicsSettings.defaultRenderPipeline;
 	        if (rpAsset != null) {
 #if USING_URP
 		        if (rpAsset is UniversalRenderPipelineAsset) {
