@@ -22,8 +22,8 @@ using UnityEngine.TestTools;
 namespace GLTFast.Tests
 {
     using Logging;
-    
-    class LoggerTest
+
+    static class LoggerTest
     {
         [Test]
         public static void CollectingLoggerTest() {

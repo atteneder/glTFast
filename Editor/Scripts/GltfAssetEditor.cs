@@ -24,8 +24,6 @@ namespace GLTFast.Editor {
     {
         VisualElement m_Container;
 
-        UnityEditor.Editor m_InstantiationEditor; 
-
         public override VisualElement CreateInspectorGUI()
         {
             m_Container = new VisualElement();

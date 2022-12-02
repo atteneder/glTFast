@@ -28,7 +28,7 @@ namespace GLTFast.Editor
         /// <summary>
         /// Subset of <see cref="StandardShaderMode"/> as not all configurations are supported
         /// </summary>
-        public enum BlendModeOption
+        enum BlendModeOption
         {
             Opaque = StandardShaderMode.Opaque,
             Cutout = StandardShaderMode.Cutout,
@@ -36,7 +36,7 @@ namespace GLTFast.Editor
             Transparent = StandardShaderMode.Transparent,
         }
 
-        private UvTransform? uvTransform;
+        UvTransform? m_UVTransform;
         
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
@@ -73,16 +73,16 @@ namespace GLTFast.Editor
                     ConfigureBlendMode(material, blend);
                 }
 
-                uvTransform = TextureRotationSlider(
+                m_UVTransform = TextureRotationSlider(
                     material,
-                    uvTransform,
+                    m_UVTransform,
                     baseColorTextureScaleTransformPropId,
                     baseColorTextureRotationPropId,
                     true,
                     "Base Color Tex Rotation");
-                if (uvTransform.HasValue)
+                if (m_UVTransform.HasValue)
                 {
-                    if (uvTransform.Value.rotation != 0) {
+                    if (m_UVTransform.Value.rotation != 0) {
                         material.EnableKeyword(textureTransformKeyword);
                     } else {
                         material.DisableKeyword(textureTransformKeyword);
@@ -112,7 +112,7 @@ namespace GLTFast.Editor
             base.OnGUI(materialEditor, properties);
         }
 
-        public static void ConfigureBlendMode(Material material, BlendModeOption mode)
+        static void ConfigureBlendMode(Material material, BlendModeOption mode)
         {
             switch (mode)
             {

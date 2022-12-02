@@ -17,15 +17,6 @@ using System;
 
 using Unity.Mathematics;
 using UnityEngine;
-#if USING_URP || USING_HDRP
-using UnityEngine.Rendering;
-#endif
-#if USING_HDRP
-using UnityEngine.Rendering.HighDefinition;
-#endif
-#if USING_URP
-using UnityEngine.Rendering.Universal;
-#endif
 
 namespace GLTFast.Export {
 	
@@ -195,7 +186,7 @@ namespace GLTFast.Export {
                 if (occTex != null) {
                     if(occTex is Texture2D occTex2d) {
                         if (ormImageExport == null) {
-                            material.occlusionTexture = ExportOcclusionTextureInfo(occTex2d, uMaterial, gltf);
+                            material.occlusionTexture = ExportOcclusionTextureInfo(occTex2d, gltf);
                         }
                         else {
                             material.occlusionTexture = new OcclusionTextureInfo();
@@ -363,7 +354,6 @@ namespace GLTFast.Export {
         
         static OcclusionTextureInfo ExportOcclusionTextureInfo(
             UnityEngine.Texture texture,
-            UnityEngine.Material material,
             IGltfWritable gltf
         )
         {

@@ -15,8 +15,6 @@ namespace GLTFast {
         public string originalUri;
         public string assetPath;
 
-        bool availableLocally => assetPath == null;
-
         public GltfAssetDependency(string originalUri, Type type = Type.Unknown) {
             this.originalUri = originalUri;
             this.type = type;

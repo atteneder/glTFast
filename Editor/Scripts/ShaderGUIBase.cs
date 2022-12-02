@@ -23,9 +23,9 @@ namespace GLTFast.Editor
 {
     class ShaderGUIBase : ShaderGUI
     {
-        protected const float TOLERANCE = 0.001f;
+        const float k_Tolerance = 0.001f;
 
-        public struct UvTransform
+        protected struct UvTransform
         {
             public float rotation;
             public float2 scale;
@@ -71,7 +71,7 @@ namespace GLTFast.Editor
 
             bool update = false;
 
-            if (Math.Abs(newUvRotation - oldUvTransform.rotation) > TOLERANCE) {
+            if (Math.Abs(newUvRotation - oldUvTransform.rotation) > k_Tolerance) {
                 newUvTransform.rotation = newUvRotation;
                 update = true;
             }
@@ -104,7 +104,9 @@ namespace GLTFast.Editor
         /// Extracts a material's texture rotation (degrees) from the 2 by 2 matrix
         /// </summary>
         /// <param name="material"></param>
-        /// <returns>texture rotation in degrees</returns>
+        /// <param name="scaleTransformPropertyId">ID of the scale-transform (_ST) property</param>
+        /// <param name="rotationPropertyId">ID of the rotation property</param>
+        /// <param name="uvTransform">Resulting UV transform</param>
         static void GetUvTransform(Material material, int scaleTransformPropertyId, int rotationPropertyId, out UvTransform uvTransform) {
             float4 st = material.GetVector(scaleTransformPropertyId);
             float2 r = (Vector2)material.GetVector(rotationPropertyId);

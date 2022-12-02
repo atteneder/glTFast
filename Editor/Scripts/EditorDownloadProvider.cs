@@ -38,21 +38,16 @@ namespace GLTFast.Editor {
             return req;
         }
 
-        public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+        public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable) {
             var dependency = new GltfAssetDependency {
                 originalUri = url.OriginalString,
                 type = GltfAssetDependency.Type.Texture
             };
             assetDependencies.Add(dependency);
-            var req = new SyncTextureLoader(url,nonReadable);
+            var req = new SyncTextureLoader(url);
             return req;
         }
 #pragma warning restore 1998
-
-        Uri MakePathProjectRelative(Uri uri) {
-            var projectPath = new Uri(Path.GetDirectoryName(Application.dataPath));
-            return uri.MakeRelativeUri(projectPath);
-        }
     }
 
     class SyncFileLoader : IDownload {
@@ -97,7 +92,7 @@ namespace GLTFast.Editor {
 
         public override bool success => texture!=null;
         
-        public SyncTextureLoader(Uri url, bool nonReadable)
+        public SyncTextureLoader(Uri url)
             : base(url) {
             texture = AssetDatabase.LoadAssetAtPath<Texture2D>(url.OriginalString);
             if (texture == null) {

@@ -180,19 +180,6 @@ namespace GLTFast {
             return root;
         }
 
-        static void DrawImportSettings(SerializedObject obj, params SerializedProperty[] properties)
-        {
-            EditorGUI.BeginChangeCheck();
-            obj.Update();
-
-            foreach (var property in properties) {
-                EditorGUILayout.PropertyField(property);
-            }
-
-            obj.ApplyModifiedProperties();
-            EditorGUI.EndChangeCheck();
-        }
-
         static void FixTextureImportSettings(TextureImporter maliciousTextureImporter) {
             maliciousTextureImporter.textureShape = TextureImporterShape.Texture2D;
             maliciousTextureImporter.SaveAndReimport();

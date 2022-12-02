@@ -13,8 +13,6 @@
 // limitations under the License.
 //
 
-using GLTFast.Materials;
-using GLTFast.Vertex;
 using NUnit.Framework;
 using UnityEngine;
 using Unity.Mathematics;
@@ -64,9 +62,11 @@ namespace GLTFast.Tests
 
             Profiler.BeginSample("Matrix4x4.DecomposeUnity");
             if (m.ValidTRS()) {
-                Vector3 t1 = new Vector3(m.m03, m.m13, m.m23);
-                Quaternion r1 = m.rotation;
-                Vector3 s1 = m.lossyScale;
+                // ReSharper disable UnusedVariable
+                var t1 = new Vector3(m.m03, m.m13, m.m23);
+                var r1 = m.rotation;
+                var s1 = m.lossyScale;
+                // ReSharper restore UnusedVariable
             }
 
             Profiler.EndSample();

@@ -22,21 +22,21 @@ namespace GLTFast.Tests
 {
     class UriHelperTest
     {
-        static Uri[] glb = new []{
+        static Uri[] s_Glb = {
             new Uri("file.glb",UriKind.RelativeOrAbsolute),
             new Uri("file:///dir/sub/file.glb",UriKind.RelativeOrAbsolute),
             new Uri("http://www.server.com/dir/sub/file.glb",UriKind.RelativeOrAbsolute),
             new Uri("http://www.server.com/dir/sub/file.glb",UriKind.RelativeOrAbsolute),
             new Uri("http://www.server.com/dir/sub/file.glb?a=123&b=234",UriKind.RelativeOrAbsolute),
         };
-        static Uri[] gltf = new []{
+        static Uri[] s_Gltf = {
             new Uri("file.gltf",UriKind.RelativeOrAbsolute),
             new Uri("file:///dir/sub/file.gltf",UriKind.RelativeOrAbsolute),
             new Uri("http://www.server.com/dir/sub/file.gltf",UriKind.RelativeOrAbsolute),
             new Uri("http://www.server.com/dir/sub/file.gltf",UriKind.RelativeOrAbsolute),
             new Uri("http://www.server.com/dir/sub/file.gltf?a=123&b=234",UriKind.RelativeOrAbsolute),
         };
-        static Uri[] unknown = new []{
+        static Uri[] s_Unknown = {
             new Uri("f",UriKind.RelativeOrAbsolute),
             new Uri("file:///dir/sub/f",UriKind.RelativeOrAbsolute),
             new Uri("http://www.server.com/dir/sub/f",UriKind.RelativeOrAbsolute),
@@ -185,19 +185,19 @@ namespace GLTFast.Tests
             Profiler.BeginSample("IsGltfBinaryProfile");
             for (int i = 0; i < 1000; i++)
             {
-                for (int j = 0; j < glb.Length; j++) {
+                for (int j = 0; j < s_Glb.Length; j++) {
                     Profiler.BeginSample("IsGltfBinaryUriTrue");
-                    Assert.IsTrue(UriHelper.IsGltfBinary(glb[j]));
+                    Assert.IsTrue(UriHelper.IsGltfBinary(s_Glb[j]));
                     Profiler.EndSample();
                 }
-                for (int j = 0; j < gltf.Length; j++) {
+                for (int j = 0; j < s_Gltf.Length; j++) {
                     Profiler.BeginSample("IsGltfBinaryUriFalse");
-                    Assert.IsFalse(UriHelper.IsGltfBinary(gltf[j]));
+                    Assert.IsFalse(UriHelper.IsGltfBinary(s_Gltf[j]));
                     Profiler.EndSample();
                 }
-                for (int j = 0; j < unknown.Length; j++) {
+                for (int j = 0; j < s_Unknown.Length; j++) {
                     Profiler.BeginSample("IsGltfBinaryUriUnknown");
-                    Assert.IsNull(UriHelper.IsGltfBinary(unknown[j]));
+                    Assert.IsNull(UriHelper.IsGltfBinary(s_Unknown[j]));
                     Profiler.EndSample();
                 }
             }

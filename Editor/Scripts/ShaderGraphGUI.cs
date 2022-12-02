@@ -27,14 +27,14 @@ namespace GLTFast.Editor
     class ShaderGraphGUI : ShaderGUIBase
     {
 
-        private UvTransform? uvTransform;
+        UvTransform? m_UVTransform;
         
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
             if (materialEditor.target is Material material) {
-                uvTransform = TextureRotationSlider(
+                m_UVTransform = TextureRotationSlider(
                     material,
-                    uvTransform,
+                    m_UVTransform,
                     baseColorTextureScaleTransformPropId,
                     baseColorTextureRotationPropId,
                     label:"Base Color Tex Rotation"
