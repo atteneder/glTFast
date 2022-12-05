@@ -29,10 +29,20 @@ namespace GLTFast.Editor
     {
 
         public List<GltfAssetDependency> assetDependencies = new List<GltfAssetDependency>();
+        private Func<Uri, Uri> urlConversion;
+
+        public EditorDownloadProvider(Func<Uri, Uri> urlConversion)
+        {
+            this.urlConversion = urlConversion;
+        }
 
 #pragma warning disable 1998
         public async Task<IDownload> Request(Uri url)
         {
+            if (urlConversion != null)
+            {
+                url = urlConversion(url);
+            }
             var dependency = new GltfAssetDependency
             {
                 originalUri = url.OriginalString
@@ -44,6 +54,10 @@ namespace GLTFast.Editor
 
         public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable)
         {
+            if (urlConversion != null)
+            {
+                url = urlConversion(url);
+            }
             var dependency = new GltfAssetDependency
             {
                 originalUri = url.OriginalString,
