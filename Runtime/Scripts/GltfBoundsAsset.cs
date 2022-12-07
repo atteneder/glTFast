@@ -54,7 +54,7 @@ namespace GLTFast
             ICodeLogger logger = null
             )
         {
-            importer = new GltfImport(downloadProvider, deferAgent, materialGenerator);
+            importer = new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
             var success = await importer.Load(gltfUrl);
             if (success)
             {
