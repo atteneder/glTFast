@@ -84,6 +84,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - No more redundant default (fallback) materials are being generated
 - (JSON parsing) Potential NPDR when just one of many node extensions is present (#464)
 - (Import) Draco meshes are correctly named (#527)
+- (Import) Gracefully fallback to loading textures from byte arrays if UnityWebRequestTexture module is not enabled and trigger a warning.
 
 ## [4.9.1] - 2022-11-28
 ### Changed
