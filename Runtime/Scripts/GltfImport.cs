@@ -1324,6 +1324,12 @@ namespace GLTFast
                 await dl.Value.Load();
                 var www = dl.Value.download;
 
+                if (www == null)
+                {
+                    m_Logger?.Error(LogCode.TextureDownloadFailed, "?", dl.Key.ToString());
+                    return false;
+                }
+
                 if (www.success)
                 {
                     var imageIndex = dl.Key;
@@ -1510,8 +1516,13 @@ namespace GLTFast
                 return false;
             }
 #endif
+#if UNITY_WEBREQUEST_TEXTURE
             var forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[imageIndex];
             return forceSampleLinear || m_Settings.generateMipMaps;
+#else
+            m_Logger?.Warning(LogCode.UnityWebRequestTextureNotEnabled);
+            return true;
+#endif
         }
 
         async Task<bool> LoadGltfBinaryBuffer(byte[] bytes, Uri uri = null)

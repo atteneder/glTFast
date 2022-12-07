@@ -235,6 +235,10 @@ namespace GLTFast.Logging
         /// </summary>
         TypeUnsupported,
         /// <summary>
+        /// Support for direct Jpeg/PNG texture download is not enabled
+        /// </summary>
+        UnityWebRequestTextureNotEnabled,
+        /// <summary>
         /// Only eight UV sets will get imported
         /// </summary>
         UVLimit,
@@ -250,6 +254,8 @@ namespace GLTFast.Logging
     public static class LogMessages
     {
 #if GLTFAST_REPORT
+        const string k_LinkProjectSetupTextureSupport = "See https://github.com/atteneder/glTFast/blob/main/Documentation~/ProjectSetup.md#texture-support for details.";
+
         static readonly Dictionary<LogCode, string> k_FullMessages = new Dictionary<LogCode, string>() {
             { LogCode.AccessorAttributeTypeUnknown, "Unknown GLTFAccessorAttributeType" },
             { LogCode.AccessorInconsistentUsage, "Inconsistent accessor usage {0} != {1}" },
@@ -277,7 +283,7 @@ See details in corresponding issue at https://github.com/atteneder/glTFast/issue
             { LogCode.GltfNotBinary, "Not a glTF-binary file" },
             { LogCode.GltfUnsupportedVersion, "Unsupported glTF version {0}" },
             { LogCode.HierarchyInvalid, "Invalid hierarchy" },
-            { LogCode.ImageConversionNotEnabled, "Jpeg/PNG textures failed because required built-in packages \"Image Conversion\"/\"Unity Web Request Texture\" are not enabled. See https://github.com/atteneder/glTFast/blob/main/Documentation~/ProjectSetup.md#texture-support for details." },
+            { LogCode.ImageConversionNotEnabled, $"Jpeg/PNG textures failed because required built-in packages \"Image Conversion\"/\"Unity Web Request Texture\" are not enabled. {k_LinkProjectSetupTextureSupport}" },
             { LogCode.ImageFormatUnknown, "Unknown image format (image {0};uri:{1})" },
             { LogCode.ImageMultipleSamplers, "Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory." },
             { LogCode.IndexFormatInvalid, "Invalid index format {0}" },
@@ -303,6 +309,7 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             { LogCode.TopologyPointsMaterialUnsupported, "Could not find material that supports points topology" },
             { LogCode.TopologyUnsupported, "Unsupported topology {0}" },
             { LogCode.TypeUnsupported, "Unsupported {0} type {1}" },
+            { LogCode.UnityWebRequestTextureNotEnabled, $"PNG/Jpeg textures load slower because built-in package \"Unity Web Request Texture\" is not enabled. {k_LinkProjectSetupTextureSupport}" },
             { LogCode.UVLimit, "Only eight UV sets will get imported" },
             { LogCode.UVMulti, "UV set index {0} is not supported in current render pipeline" },
         };
