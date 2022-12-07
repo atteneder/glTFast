@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ using Unity.Collections;
 namespace GLTFast
 {
     [Flags]
-    enum AccessorUsage {
+    enum AccessorUsage
+    {
         Unknown = 0,
         Ignore = 0x1,
         Index = 0x2,
@@ -40,26 +41,30 @@ namespace GLTFast
         RequiredForInstantiation = 0x4000
     }
 
-    abstract class AccessorDataBase {
+    abstract class AccessorDataBase
+    {
         public abstract void Unpin();
         public abstract void Dispose();
     }
 
-    class AccessorData<T> : AccessorDataBase {
+    class AccessorData<T> : AccessorDataBase
+    {
         public T[] data;
         public GCHandle gcHandle;
 
-        public override void Unpin() {
+        public override void Unpin()
+        {
             gcHandle.Free();
         }
-        public override void Dispose() {}
+        public override void Dispose() { }
     }
 
-    class AccessorNativeData<T> : AccessorDataBase where T: struct
+    class AccessorNativeData<T> : AccessorDataBase where T : struct
     {
         public NativeArray<T> data;
-        public override void Unpin() {}
-        public override void Dispose() {
+        public override void Unpin() { }
+        public override void Dispose()
+        {
             data.Dispose();
         }
     }

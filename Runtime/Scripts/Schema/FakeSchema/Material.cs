@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
 
 using UnityEngine;
 
-namespace GLTFast.FakeSchema {
+namespace GLTFast.FakeSchema
+{
 
     /// <summary>
     /// The material appearance of a primitive.
     /// </summary>
     [System.Serializable]
-    class Material : RootChild {
-        public MaterialExtension extensions = null;
+    class Material : NamedObject
+    {
+        public MaterialExtension extensions;
     }
 }

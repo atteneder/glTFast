@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,8 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// This extension defines a clear coating that can be layered on top of an
@@ -21,34 +22,36 @@ namespace GLTFast.Schema {
     /// <seealso href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_clearcoat/README.md"/>
     /// </summary>
     [System.Serializable]
-    public class ClearCoat {
+    public class ClearCoat
+    {
 
         /// <summary>
         /// The clearcoat layer intensity.
         /// </summary>
-        public float clearcoatFactor = 0;
-        
+        public float clearcoatFactor;
+
         /// <summary>
         /// The clearcoat layer intensity texture.
         /// </summary>
-        public TextureInfo clearcoatTexture = null;
-        
+        public TextureInfo clearcoatTexture;
+
         /// <summary>
         /// The clearcoat layer roughness.
         /// </summary>
-        public float clearcoatRoughnessFactor = 0;
-        
+        public float clearcoatRoughnessFactor;
+
         /// <summary>
         /// The clearcoat layer roughness texture.
         /// </summary>
-        public TextureInfo clearcoatRoughnessTexture = null;
+        public TextureInfo clearcoatRoughnessTexture;
 
         /// <summary>
         /// The clearcoat normal map texture.
         /// </summary>
-        public TextureInfo clearcoatNormalTexture = null;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+        public TextureInfo clearcoatNormalTexture;
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             writer.Close();
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");

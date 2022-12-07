@@ -15,7 +15,8 @@
 
 using UnityEngine;
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// This extension defines the specular-glossiness material model from
@@ -23,8 +24,9 @@ namespace GLTFast.Schema {
     /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness"/>
     /// </summary>
     [System.Serializable]
-    public class PbrSpecularGlossiness {
-        
+    public class PbrSpecularGlossiness
+    {
+
         /// <summary>
         /// Diffuse color red, green, blue and alpha components in linear space.
         /// </summary>
@@ -33,21 +35,18 @@ namespace GLTFast.Schema {
         /// <summary>
         /// Diffuse color in linear space.
         /// </summary>
-        public Color diffuseColor {
-            get {
-                return new Color(
-                    diffuseFactor[0],
-                    diffuseFactor[1],
-                    diffuseFactor[2],
-                    diffuseFactor[3]
-                );
-            }
-        }
+        public Color diffuseColor =>
+            new Color(
+                diffuseFactor[0],
+                diffuseFactor[1],
+                diffuseFactor[2],
+                diffuseFactor[3]
+            );
 
         /// <summary>
         /// Diffuse color texture info.
         /// </summary>
-        public TextureInfo diffuseTexture = null;
+        public TextureInfo diffuseTexture;
 
         /// <summary>
         /// Specular color red, green and blue components in linear space.
@@ -57,15 +56,12 @@ namespace GLTFast.Schema {
         /// <summary>
         /// Specular color in linear space.
         /// </summary>
-        public Color specularColor {
-            get {
-                return new Color(
-                    specularFactor[0],
-                    specularFactor[1],
-                    specularFactor[2]
-                );
-            }
-        }
+        public Color specularColor =>
+            new Color(
+                specularFactor[0],
+                specularFactor[1],
+                specularFactor[2]
+            );
 
         /// <summary>
         /// The glossiness or smoothness of the material.
@@ -75,14 +71,13 @@ namespace GLTFast.Schema {
         /// <summary>
         /// The specular-glossiness texture.
         /// </summary>
-        public TextureInfo specularGlossinessTexture = null;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+        public TextureInfo specularGlossinessTexture;
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             writer.Close();
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
 }
-
-

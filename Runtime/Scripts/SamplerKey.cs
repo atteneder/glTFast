@@ -17,30 +17,36 @@ using System;
 using GLTFast.Schema;
 using UnityEngine;
 
-namespace GLTFast {
-    struct SamplerKey : IEquatable<SamplerKey> {
-        
+namespace GLTFast
+{
+    struct SamplerKey : IEquatable<SamplerKey>
+    {
+
         FilterMode m_FilterMode;
         TextureWrapMode m_WrapModeU;
         TextureWrapMode m_WrapModeV;
 
-        public SamplerKey(Sampler sampler) {
+        public SamplerKey(Sampler sampler)
+        {
             m_FilterMode = sampler.filterMode;
             m_WrapModeU = sampler.wrapU;
             m_WrapModeV = sampler.wrapV;
         }
 
-        public SamplerKey(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV) {
+        public SamplerKey(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV)
+        {
             m_FilterMode = filterMode;
             m_WrapModeU = wrapModeU;
             m_WrapModeV = wrapModeV;
         }
-        
-        public override int GetHashCode() {
-            return (m_FilterMode,m_WrapModeU,m_WrapModeV).GetHashCode();
+
+        public override int GetHashCode()
+        {
+            return (m_FilterMode, m_WrapModeU, m_WrapModeV).GetHashCode();
         }
 
-        public bool Equals(SamplerKey other) {
+        public bool Equals(SamplerKey other)
+        {
             return m_FilterMode == other.m_FilterMode &&
                 m_WrapModeU == other.m_WrapModeU &&
                 m_WrapModeV == other.m_WrapModeV;

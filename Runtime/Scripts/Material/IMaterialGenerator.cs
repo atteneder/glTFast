@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
 
 using UnityEngine;
 
-namespace GLTFast.Materials {
+namespace GLTFast.Materials
+{
     using Logging;
     using Schema;
-    
+
     /// <summary>
     /// Provides a mechanism to convert glTF materials into Unity Materials
     /// </summary>
-    public interface IMaterialGenerator {
+    public interface IMaterialGenerator
+    {
 
         /// <summary>
         /// Get fallback material that is assigned to nodes without a material.

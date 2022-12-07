@@ -13,18 +13,22 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// Texture extensions
     /// </summary>
     [System.Serializable]
-    public class TextureExtension {
-        
-        /// <inheritdoc cref="Extension.TextureBasisUniversal"/>
-        public TextureBasisUniversal KHR_texture_basisu = null;
+    public class TextureExtension
+    {
 
-        internal void GltfSerialize(JsonWriter writer) {
+        /// <inheritdoc cref="Extension.TextureBasisUniversal"/>
+        // ReSharper disable once InconsistentNaming
+        public TextureBasisUniversal KHR_texture_basisu;
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
@@ -34,11 +38,12 @@ namespace GLTFast.Schema {
     /// <seealso cref="Extension.TextureBasisUniversal"/>
     /// </summary>
     [System.Serializable]
-    public class TextureBasisUniversal {
-        
+    public class TextureBasisUniversal
+    {
+
         /// <summary>
         /// Index of the image which defines a reference to the KTX v2 image
-        /// with Basis Universal supercompression.
+        /// with Basis Universal super-compression.
         /// </summary>
         public int source = -1;
     }

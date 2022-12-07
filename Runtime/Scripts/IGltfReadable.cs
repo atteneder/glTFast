@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,49 +15,51 @@
 
 using UnityEngine;
 
-namespace GLTFast {
-    
+namespace GLTFast
+{
+
     /// <summary>
     /// Provides read-only access to a glTF (schema and imported Unity resources)
     /// </summary>
-    public interface IGltfReadable {
-        
+    public interface IGltfReadable
+    {
+
         /// <summary>
         /// Number of materials
         /// </summary>
         int materialCount { get; }
-        
+
         /// <summary>
         /// Number of images
         /// </summary>
         int imageCount { get; }
-        
+
         /// <summary>
         /// Number of textures
         /// </summary>
         int textureCount { get; }
 
         /// <summary>
-        /// Get a Unity Material by its glTF material index 
+        /// Get a Unity Material by its glTF material index
         /// </summary>
         /// <param name="index">glTF material index</param>
         /// <returns>Corresponding Unity Material</returns>
         Material GetMaterial(int index = 0);
-        
+
         /// <summary>
         /// Returns a fallback material to be used when no material was
         /// assigned (provided by the <see cref="Materials.IMaterialGenerator"/>)
         /// </summary>
         /// <returns>Default material</returns>
         Material GetDefaultMaterial();
-        
+
         /// <summary>
         /// Get texture by glTF image index
         /// </summary>
         /// <param name="index">glTF image index</param>
         /// <returns>Loaded Unity texture</returns>
         Texture2D GetImage(int index = 0);
-        
+
         /// <summary>
         /// Get texture by glTF texture index
         /// </summary>
@@ -72,14 +74,14 @@ namespace GLTFast {
         /// </summary>
         /// <returns>De-serialized glTF root object</returns>
         Schema.Root GetSourceRoot();
-        
+
         /// <summary>
         /// Get source (de-serialized glTF) camera
         /// </summary>
         /// <param name="index">glTF camera index</param>
         /// <returns>De-serialized glTF camera</returns>
         Schema.Camera GetSourceCamera(uint index);
-        
+
         /// <summary>
         /// Get source (de-serialized glTF) material
         /// </summary>
@@ -93,28 +95,28 @@ namespace GLTFast {
         /// <param name="index">glTF node index</param>
         /// <returns>De-serialized glTF node</returns>
         Schema.Node GetSourceNode(int index = 0);
-        
+
         /// <summary>
         /// Get source (de-serialized glTF) scene
         /// </summary>
         /// <param name="index">glTF scene index</param>
         /// <returns>De-serialized glTF scene</returns>
         Schema.Scene GetSourceScene(int index = 0);
-        
+
         /// <summary>
         /// Get source (de-serialized glTF) texture
         /// </summary>
         /// <param name="index">glTF texture index</param>
         /// <returns>De-serialized glTF texture</returns>
         Schema.Texture GetSourceTexture(int index = 0);
-        
+
         /// <summary>
         /// Get source (de-serialized glTF) image
         /// </summary>
         /// <param name="index">glTF image index</param>
         /// <returns>De-serialized glTF image</returns>
         Schema.Image GetSourceImage(int index = 0);
-        
+
         /// <summary>
         /// Get source (de-serialized glTF) light
         /// </summary>

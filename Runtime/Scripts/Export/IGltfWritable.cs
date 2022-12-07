@@ -18,12 +18,14 @@ using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace GLTFast.Export {
-    
+namespace GLTFast.Export
+{
+
     /// <summary>
     /// Is able to receive asset resources and export them to glTF
     /// </summary>
-    public interface IGltfWritable {
+    public interface IGltfWritable
+    {
 
         /// <summary>
         /// Adds a node to the glTF
@@ -58,23 +60,23 @@ namespace GLTFast.Export {
         /// <param name="nodeId">Index of the node to add the mesh to</param>
         /// <param name="cameraId">glTF camera ID to be assigned</param>
         void AddCameraToNode(int nodeId, int cameraId);
-        
+
         /// <summary>
         /// Assigns a light to a previously added node
         /// </summary>
         /// <param name="nodeId">Index of the node to add the mesh to</param>
         /// <param name="lightId">glTF light ID to be assigned</param>
         void AddLightToNode(int nodeId, int lightId);
-        
+
         /// <summary>
-        /// Adds a Unity material 
+        /// Adds a Unity material
         /// </summary>
         /// <param name="uMaterial">Unity material</param>
         /// <param name="materialId">glTF material index</param>
         /// <param name="materialExport">Material converter</param>
         /// <returns>True if converting and adding material was successful, false otherwise</returns>
-        bool AddMaterial(UnityEngine.Material uMaterial, out int materialId, IMaterialExport materialExport);
-        
+        bool AddMaterial(Material uMaterial, out int materialId, IMaterialExport materialExport);
+
         /// <summary>
         /// Adds an ImageExport to the glTF and returns the resulting image index
         /// </summary>
@@ -106,7 +108,7 @@ namespace GLTFast.Export {
         /// <param name="cameraId">glTF camera index</param>
         /// <returns>True if camera was successfully created, false otherwise</returns>
         bool AddCamera(Camera uCamera, out int cameraId);
-        
+
         /// <summary>
         /// Creates a glTF light based on a Unity light
         /// Uses the KHR_lights_punctual extension.
@@ -123,14 +125,14 @@ namespace GLTFast.Export {
         /// <param name="name">Name of the scene</param>
         /// <returns>glTF scene index</returns>
         uint AddScene(uint[] nodes, string name = null);
-        
+
         /// <summary>
         /// Registers the use of a glTF extension
         /// </summary>
         /// <param name="extension">Extension's name</param>
         /// <param name="required">True if extension is required and used. False if it's used only</param>
         void RegisterExtensionUsage(Extension extension, bool required = true);
-        
+
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a file
         /// and disposes this object.

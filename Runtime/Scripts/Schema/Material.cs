@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// The material appearance of a primitive.
     /// </summary>
     [System.Serializable]
-    public class Material : NamedObject {
+    public class Material : NamedObject
+    {
 
         /// <summary>
         /// The material’s alpha rendering mode enumeration specifying the
@@ -33,27 +35,27 @@ namespace GLTFast.Schema {
             // Names are identical to glTF specified strings, that's why
             // inconsistent names are ignored.
             // ReSharper disable InconsistentNaming
-            
+
             /// <summary>
             /// The alpha value is ignored, and the rendered output is fully
             /// opaque.
             /// </summary>
             OPAQUE,
-            
+
             /// <summary>
             /// The rendered output is either fully opaque or fully transparent
             /// depending on the alpha value and the specified alphaCutoff
             /// value
             /// </summary>
             MASK,
-            
+
             /// <summary>
             /// The alpha value is used to composite the source and destination
             /// areas. The rendered output is combined with the background
             /// using the normal painting operation.
             /// </summary>
             BLEND
-            
+
             // ReSharper restore InconsistentNaming
         }
 
@@ -105,23 +107,20 @@ namespace GLTFast.Schema {
         /// <minItems>3</minItems>
         /// <maxItems>3</maxItems>
         /// </summary>
-        [UnityEngine.SerializeField]
-        float[] emissiveFactor = {0,0,0};
+        [SerializeField]
+        float[] emissiveFactor = { 0, 0, 0 };
 
         /// <summary>
         /// Emissive color of the material.
         /// </summary>
-        public Color emissive {
-            get {
-                return new Color(
-                    emissiveFactor[0],
-                    emissiveFactor[1],
-                    emissiveFactor[2]
+        public Color emissive
+        {
+            get => new Color(
+                emissiveFactor[0],
+                emissiveFactor[1],
+                emissiveFactor[2]
                 );
-            }
-            set {
-                emissiveFactor = new[] { value.r, value.g, value.b };
-            }
+            set => emissiveFactor = new[] { value.r, value.g, value.b };
         }
 
         /// <summary>
@@ -136,27 +135,33 @@ namespace GLTFast.Schema {
         [SerializeField]
         public string alphaMode;
 
-        AlphaMode? _alphaModeEnum;
+        AlphaMode? m_AlphaModeEnum;
 
         /// <summary>
-        /// <see cref="AlphaMode"/> typed view onto <see cref="alphaMode"/> string. 
+        /// <see cref="AlphaMode"/> typed view onto <see cref="alphaMode"/> string.
         /// </summary>
-        public AlphaMode alphaModeEnum {
-            get {
-                if ( _alphaModeEnum.HasValue ) {
-                    return _alphaModeEnum.Value;
+        public AlphaMode alphaModeEnum
+        {
+            get
+            {
+                if (m_AlphaModeEnum.HasValue)
+                {
+                    return m_AlphaModeEnum.Value;
                 }
-                if (!string.IsNullOrEmpty (alphaMode)) {
-                    _alphaModeEnum = (AlphaMode)System.Enum.Parse (typeof(AlphaMode), alphaMode, true);
+                if (!string.IsNullOrEmpty(alphaMode))
+                {
+                    m_AlphaModeEnum = (AlphaMode)System.Enum.Parse(typeof(AlphaMode), alphaMode, true);
                     alphaMode = null;
-                    return _alphaModeEnum.Value;
+                    return m_AlphaModeEnum.Value;
                 }
 
                 return AlphaMode.OPAQUE;
             }
-            set {
-                _alphaModeEnum = value;
-                if (value != AlphaMode.OPAQUE) {
+            set
+            {
+                m_AlphaModeEnum = value;
+                if (value != AlphaMode.OPAQUE)
+                {
                     alphaMode = value.ToString();
                 }
             }
@@ -175,7 +180,7 @@ namespace GLTFast.Schema {
         /// sided lighting is enabled. The back-face must have its normals reversed before the
         /// lighting equation is evaluated.
         /// </summary>
-        public bool doubleSided = false;
+        public bool doubleSided;
 
         /// <summary>
         /// True if the material requires the mesh to have normals.
@@ -185,24 +190,29 @@ namespace GLTFast.Schema {
         /// <summary>
         /// True if the material requires the mesh to have tangents.
         /// </summary>
-        public bool requiresTangents => normalTexture!=null && normalTexture.index>=0;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+        public bool requiresTangents => normalTexture != null && normalTexture.index >= 0;
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             GltfSerializeRoot(writer);
-            if(pbrMetallicRoughness!=null) {
+            if (pbrMetallicRoughness != null)
+            {
                 writer.AddProperty("pbrMetallicRoughness");
                 pbrMetallicRoughness.GltfSerialize(writer);
             }
-            if(normalTexture!=null) {
+            if (normalTexture != null)
+            {
                 writer.AddProperty("normalTexture");
                 normalTexture.GltfSerialize(writer);
             }
-            if(occlusionTexture!=null) {
+            if (occlusionTexture != null)
+            {
                 writer.AddProperty("occlusionTexture");
                 occlusionTexture.GltfSerialize(writer);
             }
-            if(emissiveTexture!=null) {
+            if (emissiveTexture != null)
+            {
                 writer.AddProperty("emissiveTexture");
                 emissiveTexture.GltfSerialize(writer);
             }
@@ -215,16 +225,20 @@ namespace GLTFast.Schema {
             {
                 writer.AddArrayProperty("emissiveFactor", emissiveFactor);
             }
-            if (!string.IsNullOrEmpty(alphaMode)) {
+            if (!string.IsNullOrEmpty(alphaMode))
+            {
                 writer.AddProperty("alphaMode", alphaMode);
             }
-            if (math.abs(alphaCutoff - .5f) > Constants.epsilon) {
+            if (math.abs(alphaCutoff - .5f) > Constants.epsilon)
+            {
                 writer.AddProperty("alphaCutoff", alphaCutoff);
             }
-            if (doubleSided) {
+            if (doubleSided)
+            {
                 writer.AddProperty("doubleSided", doubleSided);
             }
-            if (extensions != null) {
+            if (extensions != null)
+            {
                 writer.AddProperty("extensions");
                 extensions.GltfSerialize(writer);
             }

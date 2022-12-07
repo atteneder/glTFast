@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ namespace GLTFast {
 
         bool m_NeedsNormals;
         bool m_NeedsTangents;
-        
+
         public override bool IsCompleted => m_DracoTask!=null && m_DracoTask.IsCompleted;
 
         public PrimitiveDracoCreateContext(
@@ -42,8 +42,8 @@ namespace GLTFast {
             bool needsTangents,
             string meshName,
             Bounds? bounds
-            ) 
-            : base(primitiveIndex, materialCount, meshName) 
+            )
+            : base(primitiveIndex, materialCount, meshName)
         {
             m_NeedsNormals = needsNormals;
             m_NeedsTangents = needsTangents;
@@ -61,7 +61,7 @@ namespace GLTFast {
                 morphTargetsContext!=null
                 );
         }
-        
+
         public override async Task<Primitive?> CreatePrimitive() {
 
             var mesh = m_DracoTask.Result;
@@ -72,10 +72,10 @@ namespace GLTFast {
             }
 
             mesh.name = m_MeshName;
-            
+
             if (m_Bounds.HasValue) {
                 mesh.bounds = m_Bounds.Value;
-                
+
                 // Setting the sub-meshes' bounds to the overall bounds
                 // Calculating the actual sub-mesh bounds (by iterating the verts referenced
                 // by the sub-mesh indices) would be slow. Also, hardly any glTFs re-use
@@ -89,7 +89,7 @@ namespace GLTFast {
             } else {
                 mesh.RecalculateBounds();
             }
-            
+
             if (morphTargetsContext != null) {
                 await morphTargetsContext.ApplyOnMeshAndDispose(mesh);
             }

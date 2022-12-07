@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,61 +19,73 @@ using Unity.Mathematics;
 namespace GLTFast.Vertex
 {
 
+    // Most struct members are never accessed, but keeping them public makes still sense for future use.
+    // ReSharper disable MemberCanBePrivate.Global
+
     [StructLayout(LayoutKind.Sequential)]
-    struct VPosNormTan {
-        public float3 pos;
-        public float3 nrm;
-        public float4 tan;
+    struct VPosNormTan
+    {
+        public float3 position;
+        public float3 normal;
+        public float4 tangent;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct VPosNorm {
-        public float3 pos;
-        public float3 nrm;
+    struct VPosNorm
+    {
+        public float3 position;
+        public float3 normal;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct VPos {
-        public float3 pos;
+    struct VPos
+    {
+        public float3 position;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct VTexCoord1 {
+    struct VTexCoord1
+    {
         public float2 uv0;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct VTexCoord2 {
+    struct VTexCoord2
+    {
         public float2 uv0;
         public float2 uv1;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
-    struct VTexCoord3 {
+    struct VTexCoord3
+    {
         public float2 uv0;
         public float2 uv1;
         public float2 uv2;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
-    struct VTexCoord4 {
+    struct VTexCoord4
+    {
         public float2 uv0;
         public float2 uv1;
         public float2 uv2;
         public float2 uv3;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
-    struct VTexCoord5 {
+    struct VTexCoord5
+    {
         public float2 uv0;
         public float2 uv1;
         public float2 uv2;
         public float2 uv3;
         public float2 uv4;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
-    struct VTexCoord6 {
+    struct VTexCoord6
+    {
         public float2 uv0;
         public float2 uv1;
         public float2 uv2;
@@ -81,9 +93,10 @@ namespace GLTFast.Vertex
         public float2 uv4;
         public float2 uv5;
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
-    struct VTexCoord7 {
+    struct VTexCoord7
+    {
         public float2 uv0;
         public float2 uv1;
         public float2 uv2;
@@ -94,7 +107,8 @@ namespace GLTFast.Vertex
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    struct VTexCoord8 {
+    struct VTexCoord8
+    {
         public float2 uv0;
         public float2 uv1;
         public float2 uv2;
@@ -106,7 +120,8 @@ namespace GLTFast.Vertex
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    unsafe struct VBones {
+    unsafe struct VBones
+    {
         public fixed float weights[4];
         public fixed uint joints[4];
 
@@ -116,4 +131,6 @@ namespace GLTFast.Vertex
         }
 #endif
     }
+
+    // ReSharper restore MemberCanBePrivate.Global
 }

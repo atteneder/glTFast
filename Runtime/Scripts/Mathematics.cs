@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 using UnityEngine;
 using static Unity.Mathematics.math;
 
-namespace GLTFast {
+namespace GLTFast
+{
 
     using Unity.Mathematics;
 
@@ -40,15 +41,15 @@ namespace GLTFast {
             out Vector3 scale
             )
         {
-            translation = new Vector3( m.m03, m.m13, m.m23 );
+            translation = new Vector3(m.m03, m.m13, m.m23);
             var mRotScale = new float3x3(
-                m.m00,m.m01,m.m02,
-                m.m10,m.m11,m.m12,
-                m.m20,m.m21,m.m22
+                m.m00, m.m01, m.m02,
+                m.m10, m.m11, m.m12,
+                m.m20, m.m21, m.m22
                 );
             mRotScale.Decompose(out float4 mRotation, out float3 mScale);
-            rotation = new Quaternion(mRotation.x,mRotation.y,mRotation.z,mRotation.w);
-            scale = new Vector3(mScale.x,mScale.y,mScale.z);
+            rotation = new Quaternion(mRotation.x, mRotation.y, mRotation.z, mRotation.w);
+            scale = new Vector3(mScale.x, mScale.y, mScale.z);
         }
 
         /// <summary>
@@ -81,21 +82,23 @@ namespace GLTFast {
         /// <param name="m">Input matrix</param>
         /// <param name="rotation">Rotation quaternion values</param>
         /// <param name="scale">Scale</param>
-        public static void Decompose( this float3x3 m, out float4 rotation, out float3 scale ) {
+        static void Decompose(this float3x3 m, out float4 rotation, out float3 scale)
+        {
             var lenC0 = length(m.c0);
             var lenC1 = length(m.c1);
             var lenC2 = length(m.c2);
-    
+
             float3x3 rotationMatrix;
             rotationMatrix.c0 = m.c0 / lenC0;
             rotationMatrix.c1 = m.c1 / lenC1;
             rotationMatrix.c2 = m.c2 / lenC2;
-    
+
             scale.x = lenC0;
             scale.y = lenC1;
             scale.z = lenC2;
 
-            if (rotationMatrix.IsNegative()) {
+            if (rotationMatrix.IsNegative())
+            {
                 rotationMatrix *= -1f;
                 scale *= -1f;
             }
@@ -104,46 +107,26 @@ namespace GLTFast {
             rotationMatrix.c0 = math.normalize(rotationMatrix.c0);
             rotationMatrix.c1 = math.normalize(rotationMatrix.c1);
             rotationMatrix.c2 = math.normalize(rotationMatrix.c2);
-    
+
             rotation = new quaternion(rotationMatrix).value;
         }
 
+        static bool IsNegative(this float3x3 m)
+        {
+            var cross = math.cross(m.c0, m.c1);
+            return math.dot(cross, m.c2) < 0f;
+        }
+
         /// <summary>
         /// Normalizes a vector
         /// </summary>
         /// <param name="input">Input vector</param>
         /// <param name="output">Normalized output vector</param>
         /// <returns>Length/magnitude of input vector</returns>
-        static float normalize(float3 input,out float3 output) {
-            var len = length(input);
-            output = input/len;
-            return len;
-        }
-
-        /// <summary>
-        /// Normalizes columns of a 3 by 3 matrix
-        /// </summary>
-        /// <param name="m">Matrix to be normalized</param>
-        static void normalize(ref float3x3 m) {
-            m.c0 = math.normalize(m.c0);
-            m.c1 = math.normalize(m.c1);
-            m.c2 = math.normalize(m.c2);
-        }
-
-        static bool IsNegative(this float3x3 m) {
-            var cross = math.cross(m.c0,m.c1);
-            return math.dot(cross,m.c2)<0f;
-        }
-        
-        /// <summary>
-        /// Normalizes a vector
-        /// </summary>
-        /// <param name="input">Input vector</param>
-        /// <param name="output">Normalized output vector</param>
-        /// <returns>Length/magnitude of input vector</returns>
-        public static float normalize(float2 input,out float2 output) {
+        public static float Normalize(float2 input, out float2 output)
+        {
             float len = math.length(input);
-            output = input/len;
+            output = input / len;
             return len;
         }
     }

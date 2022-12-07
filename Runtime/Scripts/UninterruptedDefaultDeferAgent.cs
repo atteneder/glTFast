@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,22 +16,26 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast {
-    
+namespace GLTFast
+{
+
     /// <summary>
     /// Will (un)register an UninterruptedDeferAgent as GltfImport's default when it's enabled or disabled.
     /// </summary>
     [DefaultExecutionOrder(-1)]
-    class UninterruptedDefaultDeferAgent : MonoBehaviour {
+    class UninterruptedDefaultDeferAgent : MonoBehaviour
+    {
 
         UninterruptedDeferAgent m_DeferAgent;
-        
-        void OnEnable() {
+
+        void OnEnable()
+        {
             m_DeferAgent = new UninterruptedDeferAgent();
             GltfImport.SetDefaultDeferAgent(m_DeferAgent);
         }
 
-        void OnDisable() {
+        void OnDisable()
+        {
             GltfImport.UnsetDefaultDeferAgent(m_DeferAgent);
             m_DeferAgent = null;
         }

@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,18 +16,23 @@
 using GLTFast.Schema;
 using UnityEngine;
 
-namespace GLTFast {
-    
-    static class RootExtension {
+namespace GLTFast
+{
+
+    static class RootExtension
+    {
 
         /// <summary>
-        /// Figures if any skins' skeleton property is not set. 
+        /// Figures if any skins' skeleton property is not set.
         /// </summary>
         /// <param name="root">glTF Root object</param>
         /// <returns>True if the skeleton property on any skin is not set, false otherwise.</returns>
-        internal static bool IsASkeletonMissing(this Root root) {
-            if (root.skins != null) {
-                foreach (var skin in root.skins) {
+        internal static bool IsASkeletonMissing(this Root root)
+        {
+            if (root.skins != null)
+            {
+                foreach (var skin in root.skins)
+                {
                     if (skin.skeleton < 0) return true;
                 }
             }

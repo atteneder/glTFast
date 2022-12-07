@@ -18,72 +18,86 @@ using System.Globalization;
 using System.IO;
 using UnityEngine;
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
-    class JsonWriter {
-        
+    class JsonWriter
+    {
+
         StreamWriter m_Stream;
 
-        bool separation;
+        bool m_Separation;
 
-        public JsonWriter(StreamWriter stream) {
+        public JsonWriter(StreamWriter stream)
+        {
             m_Stream = stream;
             OpenBrackets();
         }
 
-        public void OpenBrackets() {
+        public void OpenBrackets()
+        {
             m_Stream.Write('{');
-            separation = false;
+            m_Separation = false;
         }
-        
-        public void AddProperty(string name) {
+
+        public void AddProperty(string name)
+        {
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
             m_Stream.Write("\":");
-            separation = false;
+            m_Separation = false;
         }
 
-        public void AddObject() {
+        public void AddObject()
+        {
             Separate();
             m_Stream.Write('{');
-            separation = false;
+            m_Separation = false;
         }
-        
-        public void AddArray(string name) {
+
+        public void AddArray(string name)
+        {
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
             m_Stream.Write("\":[");
-            separation = false;
-        }
-        
-        public void CloseArray() {
-            m_Stream.Write(']');
-            separation = true;
+            m_Separation = false;
         }
 
-        public void AddArrayProperty<T>(string name, IEnumerable<T> values) {
+        public void CloseArray()
+        {
+            m_Stream.Write(']');
+            m_Separation = true;
+        }
+
+        public void AddArrayProperty<T>(string name, IEnumerable<T> values)
+        {
             AddArray(name);
-            foreach (var value in values) {
+            foreach (var value in values)
+            {
                 Separate();
                 m_Stream.Write(value.ToString());
             }
             CloseArray();
         }
-        
-        public void AddArrayProperty(string name, IEnumerable<float> values) {
+
+        public void AddArrayProperty(string name, IEnumerable<float> values)
+        {
             AddArray(name);
-            foreach (var value in values) {
+            foreach (var value in values)
+            {
                 Separate();
                 m_Stream.Write(value.ToString("R", CultureInfo.InvariantCulture));
             }
             CloseArray();
         }
-        
-        public void AddArrayProperty(string name, IEnumerable<string> values) {
+
+        public void AddArrayProperty(string name, IEnumerable<string> values)
+        {
             AddArray(name);
-            foreach (var value in values) {
+            foreach (var value in values)
+            {
                 Separate();
                 m_Stream.Write('"');
                 m_Stream.Write(value);
@@ -92,7 +106,8 @@ namespace GLTFast.Schema {
             CloseArray();
         }
 
-        public void AddProperty<T>(string name, T value) {
+        public void AddProperty<T>(string name, T value)
+        {
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
@@ -100,15 +115,17 @@ namespace GLTFast.Schema {
             m_Stream.Write(value.ToString());
         }
 
-        public void AddProperty(string name, float value) {
+        public void AddProperty(string name, float value)
+        {
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
             m_Stream.Write("\":");
             m_Stream.Write(value.ToString("R", CultureInfo.InvariantCulture));
         }
-        
-        public void AddProperty(string name, string value) {
+
+        public void AddProperty(string name, string value)
+        {
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
@@ -116,25 +133,29 @@ namespace GLTFast.Schema {
             m_Stream.Write(value);
             m_Stream.Write('"');
         }
-        
-        public void AddProperty(string name, bool value) {
+
+        public void AddProperty(string name, bool value)
+        {
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
             m_Stream.Write("\":");
-            m_Stream.Write(value?"true":"false");
+            m_Stream.Write(value ? "true" : "false");
         }
 
-        void Separate() {
-            if (separation) {
+        void Separate()
+        {
+            if (m_Separation)
+            {
                 m_Stream.Write(',');
             }
-            separation = true;
+            m_Separation = true;
         }
 
-        public void Close() {
+        public void Close()
+        {
             m_Stream.Write('}');
-            separation = true;
+            m_Separation = true;
         }
     }
 }

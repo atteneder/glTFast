@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,30 +13,34 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// A buffer points to binary geometry, animation, or skins.
     /// </summary>
     [System.Serializable]
-    public class Buffer {
-        
+    public class Buffer
+    {
+
         /// <summary>
         /// The length of the buffer in bytes.
         /// </summary>
         public uint byteLength;
-        
+
         /// <summary>
         /// The URI (or IRI) of the buffer.
         /// </summary>
         public string uri;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
-            if (!string.IsNullOrEmpty(uri)) {
+            if (!string.IsNullOrEmpty(uri))
+            {
                 writer.AddProperty("uri", uri);
             }
-            writer.AddProperty("byteLength",byteLength);
+            writer.AddProperty("byteLength", byteLength);
             writer.Close();
         }
     }

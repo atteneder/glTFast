@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,13 +21,14 @@ using UnityEngine.Assertions;
 // GLTF_EXPORT
 using UnityEngine.Rendering;
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// The datatype of an accessor's components
     /// <seealso href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#accessor-data-types"/>
     /// </summary>
-    public enum GLTFComponentType
+    public enum GltfComponentType
     {
         /// <summary>
         /// Signed byte (8-bit integer)
@@ -59,17 +60,17 @@ namespace GLTFast.Schema {
     /// Specifier for an accessor’s type
     /// <seealso href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#accessor-data-types"/>
     /// </summary>
-    public enum GLTFAccessorAttributeType : byte
+    public enum GltfAccessorAttributeType : byte
     {
         // Names are identical to glTF specified strings, that's why
         // inconsistent names are ignored.
         // ReSharper disable InconsistentNaming
-        
+
         /// <summary>
         /// Unknown/undefined type
         /// </summary>
         Undefined,
-        
+
         /// <summary>
         /// Scalar. single value.
         /// </summary>
@@ -107,8 +108,9 @@ namespace GLTFast.Schema {
     /// See <see href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#accessors">
     /// accessor in the glTF 2.0 specification</see>
     /// </summary>
-    [System.Serializable]
-    public class Accessor {
+    [Serializable]
+    public class Accessor
+    {
         /// <summary>
         /// The index of the bufferView.
         /// If this is undefined, look in the sparse object for the index and value buffer views.
@@ -130,7 +132,7 @@ namespace GLTFast.Schema {
         /// 5125 (UNSIGNED_INT) is only allowed when the accessor contains indices
         /// i.e., the accessor is only referenced by `primitive.indices`.
         /// </summary>
-        public GLTFComponentType componentType;
+        public GltfComponentType componentType;
 
         /// <summary>
         /// Specifies whether integer data values should be normalized
@@ -151,33 +153,41 @@ namespace GLTFast.Schema {
         /// Specifies if the attribute is a scalar, vector, or matrix,
         /// and the number of elements in the vector or matrix.
         /// </summary>
-        [UnityEngine.SerializeField]
+        [SerializeField]
         string type;
 
         [NonSerialized]
-        GLTFAccessorAttributeType _typeEnum = GLTFAccessorAttributeType.Undefined;
-        
+        GltfAccessorAttributeType m_TypeEnum = GltfAccessorAttributeType.Undefined;
+
         /// <summary>
-        /// <see cref="GLTFAccessorAttributeType"/> typed view onto <see cref="type"/> string. 
+        /// <see cref="GltfAccessorAttributeType"/> typed view onto <see cref="type"/> string.
         /// </summary>
-        public GLTFAccessorAttributeType typeEnum {
-            get {
-                if (_typeEnum != GLTFAccessorAttributeType.Undefined) {
-                    return _typeEnum;
-                } else if (!string.IsNullOrEmpty (type)) {
-                    _typeEnum = (GLTFAccessorAttributeType)System.Enum.Parse (typeof(GLTFAccessorAttributeType), type, true);
+        public GltfAccessorAttributeType typeEnum
+        {
+            get
+            {
+                if (m_TypeEnum != GltfAccessorAttributeType.Undefined)
+                {
+                    return m_TypeEnum;
+                }
+                else if (!string.IsNullOrEmpty(type))
+                {
+                    m_TypeEnum = (GltfAccessorAttributeType)Enum.Parse(typeof(GltfAccessorAttributeType), type, true);
                     type = null;
-                    return _typeEnum;
-                } else {
-                    return GLTFAccessorAttributeType.Undefined;
+                    return m_TypeEnum;
+                }
+                else
+                {
+                    return GltfAccessorAttributeType.Undefined;
                 }
             }
-            set {
-                _typeEnum = value;
+            set
+            {
+                m_TypeEnum = value;
                 type = value.ToString();
             }
         }
-    
+
         /// <summary>
         /// Maximum value of each component in this attribute.
         /// Both min and max arrays have the same length.
@@ -226,48 +236,52 @@ namespace GLTFast.Schema {
         /// <param name="componentType">glTF component type</param>
         /// <returns>Component size in bytes</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static int GetComponentTypeSize( GLTFComponentType componentType ) {
-            switch (componentType) {
-                case GLTFComponentType.Byte:
-                case GLTFComponentType.UnsignedByte:
+        public static int GetComponentTypeSize(GltfComponentType componentType)
+        {
+            switch (componentType)
+            {
+                case GltfComponentType.Byte:
+                case GltfComponentType.UnsignedByte:
                     return 1;
-                case GLTFComponentType.Short:
-                case GLTFComponentType.UnsignedShort:
+                case GltfComponentType.Short:
+                case GltfComponentType.UnsignedShort:
                     return 2;
-                case GLTFComponentType.Float:
-                case GLTFComponentType.UnsignedInt:
+                case GltfComponentType.Float:
+                case GltfComponentType.UnsignedInt:
                     return 4;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(componentType), componentType, null);
             }
         }
-        
+
         /// <summary>
-        /// Converts Unity vertex attribute format to glTF component type.  
+        /// Converts Unity vertex attribute format to glTF component type.
         /// </summary>
         /// <param name="format">vertex attribute format</param>
         /// <returns>glTF component type</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static GLTFComponentType GetComponentType(VertexAttributeFormat format) {
-            switch (format) {
+        public static GltfComponentType GetComponentType(VertexAttributeFormat format)
+        {
+            switch (format)
+            {
                 case VertexAttributeFormat.Float32:
                 case VertexAttributeFormat.Float16:
-                    return GLTFComponentType.Float;
+                    return GltfComponentType.Float;
                 case VertexAttributeFormat.UNorm8:
                 case VertexAttributeFormat.UInt8:
-                    return GLTFComponentType.UnsignedByte;
+                    return GltfComponentType.UnsignedByte;
                 case VertexAttributeFormat.SNorm8:
                 case VertexAttributeFormat.SInt8:
-                    return GLTFComponentType.Byte;
+                    return GltfComponentType.Byte;
                 case VertexAttributeFormat.UNorm16:
                 case VertexAttributeFormat.UInt16:
-                    return GLTFComponentType.UnsignedShort;
+                    return GltfComponentType.UnsignedShort;
                 case VertexAttributeFormat.SNorm16:
                 case VertexAttributeFormat.SInt16:
-                    return GLTFComponentType.Short;
+                    return GltfComponentType.Short;
                 case VertexAttributeFormat.UInt32:
                 case VertexAttributeFormat.SInt32:
-                    return GLTFComponentType.UnsignedInt;
+                    return GltfComponentType.UnsignedInt;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
@@ -280,42 +294,45 @@ namespace GLTFast.Schema {
         /// <param name="dimension">Number of components per element</param>
         /// <returns>Corresponding one-dimensional glTF attribute type</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static GLTFAccessorAttributeType GetAccessorAttributeType(int dimension) {
-            switch (dimension) {
+        public static GltfAccessorAttributeType GetAccessorAttributeType(int dimension)
+        {
+            switch (dimension)
+            {
                 case 1:
-                    return GLTFAccessorAttributeType.SCALAR;
+                    return GltfAccessorAttributeType.SCALAR;
                 case 2:
-                    return GLTFAccessorAttributeType.VEC2;
+                    return GltfAccessorAttributeType.VEC2;
                 case 3:
-                    return GLTFAccessorAttributeType.VEC3;
+                    return GltfAccessorAttributeType.VEC3;
                 case 4:
-                    return GLTFAccessorAttributeType.VEC4;
+                    return GltfAccessorAttributeType.VEC4;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(dimension), dimension, null);
             }
         }
-        
+
         /// <summary>
         /// Get number of components of glTF attribute type.
         /// </summary>
         /// <param name="type">glTF attribute type</param>
         /// <returns>Number of components</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static int GetAccessorAttributeTypeLength( GLTFAccessorAttributeType type ) {
+        public static int GetAccessorAttributeTypeLength(GltfAccessorAttributeType type)
+        {
             switch (type)
             {
-                case GLTFAccessorAttributeType.SCALAR:
+                case GltfAccessorAttributeType.SCALAR:
                     return 1;
-                case GLTFAccessorAttributeType.VEC2:
+                case GltfAccessorAttributeType.VEC2:
                     return 2;
-                case GLTFAccessorAttributeType.VEC3:
+                case GltfAccessorAttributeType.VEC3:
                     return 3;
-                case GLTFAccessorAttributeType.VEC4:
-                case GLTFAccessorAttributeType.MAT2:
+                case GltfAccessorAttributeType.VEC4:
+                case GltfAccessorAttributeType.MAT2:
                     return 4;
-                case GLTFAccessorAttributeType.MAT3:
+                case GltfAccessorAttributeType.MAT3:
                     return 9;
-                case GLTFAccessorAttributeType.MAT4:
+                case GltfAccessorAttributeType.MAT4:
                     return 16;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -326,36 +343,41 @@ namespace GLTFast.Schema {
         /// For 3D positional data, returns accessor's bounding box. Applies coordinate system transform (glTF to Unity)
         /// </summary>
         /// <returns>Bounding box enclosing the minimum and maximum values</returns>
-        public Bounds? TryGetBounds() {
-            Assert.AreEqual(GLTFAccessorAttributeType.VEC3 ,typeEnum);
-            if (min != null && min.Length > 2 && max != null && max.Length > 2) {
+        public Bounds? TryGetBounds()
+        {
+            Assert.AreEqual(GltfAccessorAttributeType.VEC3, typeEnum);
+            if (min != null && min.Length > 2 && max != null && max.Length > 2)
+            {
                 var maxBounds = new float3(-min[0], max[1], max[2]);
                 var minBounds = new float3(-max[0], min[1], min[2]);
-                if(normalized) {
-                    switch (componentType) {
-                        case GLTFComponentType.Byte:
-                            maxBounds = math.max(maxBounds/sbyte.MaxValue,-1);
-                            minBounds = math.max(minBounds/sbyte.MaxValue,-1);
+                if (normalized)
+                {
+                    switch (componentType)
+                    {
+                        case GltfComponentType.Byte:
+                            maxBounds = math.max(maxBounds / sbyte.MaxValue, -1);
+                            minBounds = math.max(minBounds / sbyte.MaxValue, -1);
                             break;
-                        case GLTFComponentType.UnsignedByte:
+                        case GltfComponentType.UnsignedByte:
                             maxBounds /= byte.MaxValue;
                             minBounds /= byte.MaxValue;
                             break;
-                        case GLTFComponentType.Short:
-                            maxBounds = math.max(maxBounds/short.MaxValue,-1);
-                            minBounds = math.max(minBounds/short.MaxValue,-1);
+                        case GltfComponentType.Short:
+                            maxBounds = math.max(maxBounds / short.MaxValue, -1);
+                            minBounds = math.max(minBounds / short.MaxValue, -1);
                             break;
-                        case GLTFComponentType.UnsignedShort:
+                        case GltfComponentType.UnsignedShort:
                             maxBounds /= ushort.MaxValue;
                             minBounds /= ushort.MaxValue;
                             break;
-                        case GLTFComponentType.UnsignedInt:
+                        case GltfComponentType.UnsignedInt:
                             maxBounds /= uint.MaxValue;
                             minBounds /= uint.MaxValue;
                             break;
                     }
                 }
-                return new Bounds {
+                return new Bounds
+                {
                     max = maxBounds,
                     min = minBounds
                 };
@@ -368,28 +390,35 @@ namespace GLTFast.Schema {
         /// </summary>
         public bool isSparse => sparse != null;
 
-        internal void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
-            if (bufferView >= 0) {
+            if (bufferView >= 0)
+            {
                 writer.AddProperty("bufferView", bufferView);
             }
             writer.AddProperty("componentType", (int)componentType);
             writer.AddProperty("count", count);
             writer.AddProperty("type", type);
-            if (byteOffset > 0) {
+            if (byteOffset > 0)
+            {
                 writer.AddProperty("byteOffset", byteOffset);
             }
-            if (normalized) {
+            if (normalized)
+            {
                 writer.AddProperty("normalized", normalized);
             }
-            if (max!=null) {
+            if (max != null)
+            {
                 writer.AddArrayProperty("max", max);
             }
-            if (min!=null) {
+            if (min != null)
+            {
                 writer.AddArrayProperty("min", min);
             }
 
-            if (sparse != null) {
+            if (sparse != null)
+            {
                 writer.AddProperty("sparse");
                 sparse.GltfSerialize(writer);
                 writer.Close();

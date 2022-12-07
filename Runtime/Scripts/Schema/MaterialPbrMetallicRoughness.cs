@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,26 +17,29 @@ using System;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// A set of parameter values that are used to define the metallic-roughness
     /// material model from Physically-Based Rendering (PBR) methodology.
     /// </summary>
-    [System.Serializable]
-    public class PbrMetallicRoughness {
+    [Serializable]
+    public class PbrMetallicRoughness
+    {
 
         /// <summary>
         /// The RGBA components of the base color of the material.
         /// The fourth component (A) is the opacity of the material.
         /// These values are linear.
         /// </summary>
-        public float[] baseColorFactor = {1,1,1,1};
+        public float[] baseColorFactor = { 1, 1, 1, 1 };
 
         /// <summary>
         /// Base color of the material in linear color space.
         /// </summary>
-        public Color baseColor {
+        public Color baseColor
+        {
             get =>
                 new Color(
                     baseColorFactor[0],
@@ -44,7 +47,8 @@ namespace GLTFast.Schema {
                     baseColorFactor[2],
                     baseColorFactor[3]
                 );
-            set {
+            set
+            {
                 baseColorFactor = new[] { value.r, value.g, value.b, value.a };
             }
         }
@@ -56,7 +60,7 @@ namespace GLTFast.Schema {
         /// If the fourth component (A) is present, it represents the opacity of the
         /// material. Otherwise, an opacity of 1.0 is assumed.
         /// </summary>
-        public TextureInfo baseColorTexture = null;
+        public TextureInfo baseColorTexture;
 
         /// <summary>
         /// The metalness of the material.
@@ -86,7 +90,8 @@ namespace GLTFast.Schema {
         /// </summary>
         public TextureInfo metallicRoughnessTexture;
 
-        internal void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             if (baseColorFactor != null && (
                 math.abs(baseColorFactor[0] - 1f) > Constants.epsilon ||
@@ -98,21 +103,25 @@ namespace GLTFast.Schema {
                 writer.AddArrayProperty("baseColorFactor", baseColorFactor);
             }
 
-            if(metallicFactor < 1f) {
+            if (metallicFactor < 1f)
+            {
                 writer.AddProperty("metallicFactor", metallicFactor);
             }
-            if(roughnessFactor < 1f) {
+            if (roughnessFactor < 1f)
+            {
                 writer.AddProperty("roughnessFactor", roughnessFactor);
             }
-            if(baseColorTexture!=null) {
+            if (baseColorTexture != null)
+            {
                 writer.AddProperty("baseColorTexture");
                 baseColorTexture.GltfSerialize(writer);
             }
-            if(metallicRoughnessTexture!=null) {
+            if (metallicRoughnessTexture != null)
+            {
                 writer.AddProperty("metallicRoughnessTexture");
                 metallicRoughnessTexture.GltfSerialize(writer);
             }
-                
+
             writer.Close();
         }
     }

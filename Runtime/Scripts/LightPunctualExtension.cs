@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,14 +20,16 @@ using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 #endif
 
-namespace GLTFast {
-    
+namespace GLTFast
+{
+
     using Schema;
 
     /// <summary>
     /// Extension methods for <seealso cref="LightPunctual"/>
     /// </summary>
-    public static class LightPunctualExtension {
+    public static class LightPunctualExtension
+    {
 
         /// <summary>
         /// Initialize a UnityEngine.Light from a LightsPunctual
@@ -35,8 +37,10 @@ namespace GLTFast {
         /// <param name="lightSource">light to get data from</param>
         /// <param name="lightDestination">light to initialize</param>
         /// <param name="lightIntensityFactor">light intensity conversion factor</param>
-        public static void ToUnityLight(this LightPunctual lightSource, Light lightDestination, float lightIntensityFactor) {
-            switch (lightSource.typeEnum) {
+        public static void ToUnityLight(this LightPunctual lightSource, Light lightDestination, float lightIntensityFactor)
+        {
+            switch (lightSource.typeEnum)
+            {
                 case LightPunctual.Type.Unknown:
                     break;
                 case LightPunctual.Type.Spot:
@@ -51,9 +55,9 @@ namespace GLTFast {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
             lightDestination.color = lightSource.lightColor.gamma;
-            
+
             LightAssignIntensity(lightDestination, lightSource, lightIntensityFactor);
 
             lightDestination.range = lightSource.range > 0
@@ -61,20 +65,23 @@ namespace GLTFast {
                 : 100_000; // glTF 2.0 spec says infinite, but float.MaxValue
                            // breaks spot lights in URP.
 
-            if (lightSource.typeEnum == LightPunctual.Type.Spot) {
+            if (lightSource.typeEnum == LightPunctual.Type.Spot)
+            {
                 lightDestination.spotAngle = lightSource.spot.outerConeAngle * Mathf.Rad2Deg * 2f;
                 lightDestination.innerSpotAngle = lightSource.spot.innerConeAngle * Mathf.Rad2Deg * 2f;
             }
         }
-        
+
         /// <summary>
         /// Initialize a LightPunctual from a UnityEngine.Light
         /// </summary>
         /// <param name="lightDestination">light to initialize</param>
         /// <param name="lightSource">light to get data from</param>
         /// <param name="lightIntensityFactor">light intensity conversion factor</param>
-        public static void ToLightPunctual(this Light lightSource, LightPunctual lightDestination, float lightIntensityFactor) {
-            switch (lightSource.type) {
+        public static void ToLightPunctual(this Light lightSource, LightPunctual lightDestination, float lightIntensityFactor)
+        {
+            switch (lightSource.type)
+            {
                 case LightType.Spot:
                     lightDestination.typeEnum = LightPunctual.Type.Spot;
                     break;
@@ -87,9 +94,9 @@ namespace GLTFast {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
             lightDestination.lightColor = lightSource.color;
-            
+
             LightAssignIntensity(lightDestination, lightSource, lightIntensityFactor);
 
             lightDestination.range = lightSource.range > 0
@@ -104,11 +111,13 @@ namespace GLTFast {
                 lightDestination.spot.innerConeAngle = lightSource.innerSpotAngle / Mathf.Rad2Deg * 0.5f;
             }
         }
-        
-        static void LightAssignIntensity(Light lightDestination, LightPunctual lightSource, float lightIntensityFactor) {
+
+        static void LightAssignIntensity(Light lightDestination, LightPunctual lightSource, float lightIntensityFactor)
+        {
             var intensity = lightSource.intensity * lightIntensityFactor;
             var renderPipeline = RenderPipelineUtils.renderPipeline;
-            switch (renderPipeline) {
+            switch (renderPipeline)
+            {
                 case RenderPipeline.BuiltIn:
                     lightDestination.intensity = intensity / Mathf.PI;
                     break;
@@ -132,11 +141,13 @@ namespace GLTFast {
                     break;
             }
         }
-        
-        static void LightAssignIntensity(LightPunctual lightDestination, Light lightSource, float lightIntensityFactor) {
+
+        static void LightAssignIntensity(LightPunctual lightDestination, Light lightSource, float lightIntensityFactor)
+        {
             var intensity = lightSource.intensity / lightIntensityFactor;
             var renderPipeline = RenderPipelineUtils.renderPipeline;
-            switch (renderPipeline) {
+            switch (renderPipeline)
+            {
                 case RenderPipeline.BuiltIn:
                     lightDestination.intensity = intensity * Mathf.PI;
                     break;

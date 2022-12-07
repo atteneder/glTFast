@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@
 // limitations under the License.
 //
 
-namespace GLTFast.FakeSchema {
+namespace GLTFast.FakeSchema
+{
 
     [System.Serializable]
-    class MaterialExtension {
+    class MaterialExtension
+    {
+        // ReSharper disable InconsistentNaming
         public string KHR_materials_pbrSpecularGlossiness;
         public string KHR_materials_unlit;
         public string KHR_materials_transmission;
         public string KHR_materials_clearcoat;
         public string KHR_materials_sheen;
+        // ReSharper restore InconsistentNaming
     }
 }

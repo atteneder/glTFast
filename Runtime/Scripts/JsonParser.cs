@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 
-namespace GLTFast {
-    
+namespace GLTFast
+{
+
     using Schema;
-    
-    class JsonParser {
-        internal static Root ParseJson(string json) {
+
+    static class JsonParser
+    {
+        internal static Root ParseJson(string json)
+        {
             // JsonUtility sometimes creates non-null default instances of objects-type members
             // even though there are none in the original JSON.
             // This work-around makes sure not existent JSON nodes will be null in the result.
@@ -30,44 +33,55 @@ namespace GLTFast {
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 #endif
-            Root root = null;
-            
+            Root root;
+
             // Step one: main JSON parsing
             Profiler.BeginSample("JSON main");
-            try {
+            try
+            {
                 root = JsonUtility.FromJson<Root>(json);
             }
-            catch (System.ArgumentException) {
+            catch (System.ArgumentException)
+            {
                 return null;
             }
 
-            if (root == null) {
+            if (root == null)
+            {
                 return null;
             }
             Profiler.EndSample();
-            
+
             // Step two:
             // detect, if a secondary null-check is necessary.
             Profiler.BeginSample("JSON extension check");
             bool check = false;
-            if(root.materials!=null) {
-                for (int i = 0; i < root.materials.Length; i++) {
+            if (root.materials != null)
+            {
+                for (int i = 0; i < root.materials.Length; i++)
+                {
                     var mat = root.materials[i];
                     // mat.extension is always set (not null), because JsonUtility constructs a default
                     // if any of mat.extension's members is not null, it is because there was
                     // a legit extensions node in JSON => we have to check which ones
-                    if (mat.extensions.KHR_materials_unlit != null) {
+                    if (mat.extensions.KHR_materials_unlit != null)
+                    {
                         check = true;
-                    } else {
+                    }
+                    else
+                    {
                         // otherwise dump the wrongfully constructed MaterialExtension
                         mat.extensions = null;
                     }
                 }
             }
-            if(root.accessors != null) {
-                for (int i = 0; i < root.accessors.Length; i++) {
+            if (root.accessors != null)
+            {
+                for (int i = 0; i < root.accessors.Length; i++)
+                {
                     var accessor = root.accessors[i];
-                    if (accessor.sparse.indices == null || accessor.sparse.values == null) {
+                    if (accessor.sparse.indices == null || accessor.sparse.values == null)
+                    {
                         // If indices and values members are null, `sparse` is likely
                         // an auto-instance by the JsonUtility and not present in JSON.
                         // Therefore we remove it:
@@ -104,33 +118,41 @@ namespace GLTFast {
             // different, minimal Root class, where class members are serialized to
             // the type string. In case the string is null, there's no JSON node.
             // Otherwise the string would be empty ("").
-            if(check) {
+            if (check)
+            {
                 Profiler.BeginSample("JSON secondary");
                 var fakeRoot = JsonUtility.FromJson<FakeSchema.Root>(json);
 
-                if (root.materials != null) {
-                    for (var i = 0; i < root.materials.Length; i++) {
+                if (root.materials != null)
+                {
+                    for (var i = 0; i < root.materials.Length; i++)
+                    {
                         var mat = root.materials[i];
                         if (mat.extensions == null) continue;
                         Assert.AreEqual(mat.name, fakeRoot.materials[i].name);
                         var fake = fakeRoot.materials[i].extensions;
-                        if (fake.KHR_materials_unlit == null) {
+                        if (fake.KHR_materials_unlit == null)
+                        {
                             mat.extensions.KHR_materials_unlit = null;
                         }
 
-                        if (fake.KHR_materials_pbrSpecularGlossiness == null) {
+                        if (fake.KHR_materials_pbrSpecularGlossiness == null)
+                        {
                             mat.extensions.KHR_materials_pbrSpecularGlossiness = null;
                         }
 
-                        if (fake.KHR_materials_transmission == null) {
+                        if (fake.KHR_materials_transmission == null)
+                        {
                             mat.extensions.KHR_materials_transmission = null;
                         }
 
-                        if (fake.KHR_materials_clearcoat == null) {
+                        if (fake.KHR_materials_clearcoat == null)
+                        {
                             mat.extensions.KHR_materials_clearcoat = null;
                         }
 
-                        if (fake.KHR_materials_sheen == null) {
+                        if (fake.KHR_materials_sheen == null)
+                        {
                             mat.extensions.KHR_materials_sheen = null;
                         }
                     }
@@ -169,24 +191,30 @@ namespace GLTFast {
 #endif
                 Profiler.EndSample();
             }
-            
+
             // Step four:
             // Further null checks on nodes' extensions
-            if (root.nodes != null) {
-                for (int i = 0; i < root.nodes.Length; i++) {
+            if (root.nodes != null)
+            {
+                for (int i = 0; i < root.nodes.Length; i++)
+                {
                     var e = root.nodes[i].extensions;
-                    if (e != null) {
+                    if (e != null)
+                    {
                         // Check if GPU instancing extension is valid
-                        if (e.EXT_mesh_gpu_instancing?.attributes == null) {
+                        if (e.EXT_mesh_gpu_instancing?.attributes == null)
+                        {
                             e.EXT_mesh_gpu_instancing = null;
                         }
                         // Check if Lights extension is valid
-                        if ((e.KHR_lights_punctual?.light ?? -1) < 0) {
+                        if ((e.KHR_lights_punctual?.light ?? -1) < 0)
+                        {
                             e.KHR_lights_punctual = null;
                         }
                         // Unset `extension` if none of them was valid
-                        if (e.EXT_mesh_gpu_instancing == null && 
-                            e.KHR_lights_punctual == null ) {
+                        if (e.EXT_mesh_gpu_instancing == null &&
+                            e.KHR_lights_punctual == null)
+                        {
                             root.nodes[i].extensions = null;
                         }
                     }

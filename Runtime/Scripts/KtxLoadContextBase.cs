@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ using UnityEngine;
 namespace GLTFast {
     abstract class KtxLoadContextBase {
         public int imageIndex;
-        protected KtxTexture ktxTexture;
-        
+        protected KtxTexture m_KtxTexture;
+
         public abstract Task<TextureResult> LoadTexture2D(bool linear);
     }
 }

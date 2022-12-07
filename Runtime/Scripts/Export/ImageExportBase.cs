@@ -15,20 +15,25 @@
 
 using System;
 using UnityEngine;
+#if UNITY_2022_1_OR_NEWER
 using UnityEngine.Experimental.Rendering;
+#endif
 using Object = UnityEngine.Object;
 
-namespace GLTFast.Export {
-    
+namespace GLTFast.Export
+{
+
     /// <summary>
     /// Wrapper to export a glTF image from one or more Unity textures
     /// </summary>
-    public abstract class ImageExportBase {
+    public abstract class ImageExportBase
+    {
 
         /// <summary>
         /// Exported image file format
         /// </summary>
-        public enum Format {
+        public enum Format
+        {
             /// <summary>
             /// Unknown, no preferred file format
             /// </summary>
@@ -47,27 +52,27 @@ namespace GLTFast.Export {
         /// Exported texture's file name
         /// </summary>
         public abstract string fileName { get; }
-        
+
         /// <summary>
         /// Exported texture's mime type
         /// </summary>
         public abstract string mimeType { get; }
-        
+
         /// <summary>
         /// Source texture's filter mode
         /// </summary>
         public abstract FilterMode filterMode { get; }
-        
+
         /// <summary>
         /// Source texture's wrap mode (U direction)
         /// </summary>
         public abstract TextureWrapMode wrapModeU { get; }
-        
+
         /// <summary>
         /// Source texture's wrap mode (V direction)
         /// </summary>
         public abstract TextureWrapMode wrapModeV { get; }
-        
+
         /// <summary>
         /// Writes image file
         /// </summary>
@@ -75,7 +80,7 @@ namespace GLTFast.Export {
         /// <param name="overwrite">If true, existing files will be overwritten</param>
         /// <returns>True if writing succeeded, false otherwise</returns>
         public abstract bool Write(string filePath, bool overwrite);
-        
+
         /// <summary>
         /// Returns the exported and encoded texture data
         /// </summary>
@@ -90,12 +95,13 @@ namespace GLTFast.Export {
         /// <param name="hasAlpha">True if the texture has an alpha channel</param>
         /// <param name="blitMaterial">Custom blit material</param>
         /// <returns>Encoded texture data</returns>
-        protected static byte[] EncodeTexture(Texture2D texture, Format format, bool hasAlpha = true, Material blitMaterial = null) {
+        protected static byte[] EncodeTexture(Texture2D texture, Format format, bool hasAlpha = true, Material blitMaterial = null)
+        {
 
 #if UNITY_IMAGECONVERSION
             Texture2D exportTexture;
             var tmpTexture = false;
-            
+
             if (texture.isReadable && blitMaterial==null) {
                 exportTexture = texture;
                 if (exportTexture == null) {
@@ -135,8 +141,8 @@ namespace GLTFast.Export {
                 exportTexture.Apply();
                 tmpTexture = true;
             }
-            
-            var imageData = format == Format.Png 
+
+            var imageData = format == Format.Png
                 ? exportTexture.EncodeToPNG()
                 : exportTexture.EncodeToJPG(60);
 

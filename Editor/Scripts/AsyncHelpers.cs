@@ -1,11 +1,12 @@
-﻿// Source: https://social.msdn.microsoft.com/Forums/en-US/163ef755-ff7b-4ea5-b226-bbe8ef5f4796/is-there-a-pattern-for-calling-an-async-method-synchronously?forum=async
+// Source: https://social.msdn.microsoft.com/Forums/en-US/163ef755-ff7b-4ea5-b226-bbe8ef5f4796/is-there-a-pattern-for-calling-an-async-method-synchronously?forum=async
 
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace GLTFast.Utils {
+namespace GLTFast.Utils
+{
 
     static class AsyncHelpers
     {
@@ -18,6 +19,7 @@ namespace GLTFast.Utils {
             var oldContext = SynchronizationContext.Current;
             var sync = new ExclusiveSynchronizationContext();
             SynchronizationContext.SetSynchronizationContext(sync);
+            // ReSharper disable once AsyncVoidLambda
             sync.Post(async _ =>
             {
                 try
@@ -51,6 +53,7 @@ namespace GLTFast.Utils {
             var sync = new ExclusiveSynchronizationContext();
             SynchronizationContext.SetSynchronizationContext(sync);
             T ret = default(T);
+            // ReSharper disable once AsyncVoidLambda
             sync.Post(async _ =>
             {
                 try
@@ -74,10 +77,10 @@ namespace GLTFast.Utils {
 
         class ExclusiveSynchronizationContext : SynchronizationContext
         {
-            bool done;
+            bool m_Done;
             public Exception InnerException { get; set; }
-            readonly AutoResetEvent workItemsWaiting = new AutoResetEvent(false);
-            readonly Queue<Tuple<SendOrPostCallback, object>> items =
+            readonly AutoResetEvent m_WorkItemsWaiting = new AutoResetEvent(false);
+            readonly Queue<Tuple<SendOrPostCallback, object>> m_Items =
                 new Queue<Tuple<SendOrPostCallback, object>>();
 
             public override void Send(SendOrPostCallback d, object state)
@@ -87,28 +90,28 @@ namespace GLTFast.Utils {
 
             public override void Post(SendOrPostCallback d, object state)
             {
-                lock (items)
+                lock (m_Items)
                 {
-                    items.Enqueue(Tuple.Create(d, state));
+                    m_Items.Enqueue(Tuple.Create(d, state));
                 }
-                workItemsWaiting.Set();
+                m_WorkItemsWaiting.Set();
             }
 
             public void EndMessageLoop()
             {
-                Post(_ => done = true, null);
+                Post(_ => m_Done = true, null);
             }
 
             public void BeginMessageLoop()
             {
-                while (!done)
+                while (!m_Done)
                 {
                     Tuple<SendOrPostCallback, object> task = null;
-                    lock (items)
+                    lock (m_Items)
                     {
-                        if (items.Count > 0)
+                        if (m_Items.Count > 0)
                         {
-                            task = items.Dequeue();
+                            task = m_Items.Dequeue();
                         }
                     }
                     if (task != null)
@@ -121,7 +124,7 @@ namespace GLTFast.Utils {
                     }
                     else
                     {
-                        workItemsWaiting.WaitOne();
+                        m_WorkItemsWaiting.WaitOne();
                     }
                 }
             }

@@ -17,24 +17,28 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace GLTFast.Editor {
-    
+namespace GLTFast.Editor
+{
+
     [CustomEditor(typeof(ImportSettings))]
     class ImportSettingsEditor : UnityEditor.Editor
     {
-        
+
         VisualElement m_Container;
 
-        public override VisualElement CreateInspectorGUI() {
+        public override VisualElement CreateInspectorGUI()
+        {
             m_Container = new VisualElement();
-            CreateUI(serializedObject,m_Container);
+            CreateUI(serializedObject, m_Container);
             return m_Container;
         }
 
-        internal static void CreateUI(SerializedObject serializedObject, VisualElement container, string pathPrefix = "", bool importerContext = false) {
-            
+        internal static void CreateUI(SerializedObject serializedObject, VisualElement container, string pathPrefix = "", bool importerContext = false)
+        {
+
             Utils.CreateProperty(container, serializedObject.FindProperty($"{pathPrefix}nodeNameMethod"));
-            if (!importerContext) {
+            if (!importerContext)
+            {
                 Utils.CreateProperty(container, serializedObject.FindProperty($"{pathPrefix}animationMethod"));
             }
 
@@ -45,7 +49,7 @@ namespace GLTFast.Editor {
                 serializedObject.FindProperty($"{pathPrefix}defaultMagFilterMode"),
                 serializedObject.FindProperty($"{pathPrefix}anisotropicFilterLevel"),
             };
-            var foldout = new Foldout {text = "Textures", value = true};
+            var foldout = new Foldout { text = "Textures", value = true };
             Utils.CreateProperties(foldout, properties);
             container.Add(foldout);
         }

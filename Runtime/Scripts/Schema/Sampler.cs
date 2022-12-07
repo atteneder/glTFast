@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ namespace GLTFast.Schema
     /// <summary>
     /// Texture sampler properties for filtering and wrapping modes.
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class Sampler : NamedObject
     {
 
@@ -37,7 +37,7 @@ namespace GLTFast.Schema
             /// <summary>Linear pixel interpolation sampling</summary>
             Linear = 9729,
         }
-    
+
         /// <summary>
         /// Minification filter mode.
         /// </summary>
@@ -58,7 +58,7 @@ namespace GLTFast.Schema
             /// <summary>Linear pixel interpolation and linear mipmap interpolation sampling</summary>
             LinearMipmapLinear = 9987
         }
-    
+
         /// <summary>
         /// Texture wrap mode.
         /// </summary>
@@ -105,13 +105,13 @@ namespace GLTFast.Schema
         /// Unity texture wrap mode (horizontal), derived from glTF's
         /// <see cref="wrapS"/> value.
         /// </summary>
-        public TextureWrapMode wrapU => ConvertWrapMode((WrapMode)wrapS);
-        
+        public TextureWrapMode wrapU => ConvertWrapMode(wrapS);
+
         /// <summary>
         /// Unity texture wrap mode (vertical), derived from glTF's
         /// <see cref="wrapT"/> value.
         /// </summary>
-        public TextureWrapMode wrapV => ConvertWrapMode((WrapMode)wrapT);
+        public TextureWrapMode wrapV => ConvertWrapMode(wrapT);
 
         static FilterMode ConvertFilterMode(MinFilterMode minFilterToConvert, MagFilterMode magFilterToConvert)
         {
@@ -133,21 +133,25 @@ namespace GLTFast.Schema
             }
         }
 
-        static TextureWrapMode ConvertWrapMode(WrapMode wrapMode) {
-            switch(wrapMode) {
-            case WrapMode.None:
-            case WrapMode.Repeat:
-            default:
-                return TextureWrapMode.Repeat;
-            case WrapMode.ClampToEdge:
-                return TextureWrapMode.Clamp;
-            case WrapMode.MirroredRepeat:
-                return TextureWrapMode.Mirror;
+        static TextureWrapMode ConvertWrapMode(WrapMode wrapMode)
+        {
+            switch (wrapMode)
+            {
+                case WrapMode.None:
+                case WrapMode.Repeat:
+                default:
+                    return TextureWrapMode.Repeat;
+                case WrapMode.ClampToEdge:
+                    return TextureWrapMode.Clamp;
+                case WrapMode.MirroredRepeat:
+                    return TextureWrapMode.Mirror;
             }
         }
 
-        static WrapMode ConvertWrapMode(TextureWrapMode wrapMode) {
-            switch (wrapMode) {
+        static WrapMode ConvertWrapMode(TextureWrapMode wrapMode)
+        {
+            switch (wrapMode)
+            {
                 case TextureWrapMode.Clamp:
                     return WrapMode.ClampToEdge;
                 case TextureWrapMode.Mirror:
@@ -159,7 +163,7 @@ namespace GLTFast.Schema
             }
         }
 
-        
+
         /// <summary>
         /// Parameter-less constructor
         /// </summary>
@@ -171,8 +175,10 @@ namespace GLTFast.Schema
         /// <param name="filterMode">Unity texture filter mode</param>
         /// <param name="wrapModeU">Unity texture wrap mode (horizontal)</param>
         /// <param name="wrapModeV">Unity texture wrap mode (vertical)</param>
-        public Sampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV) {
-            switch (filterMode) {
+        public Sampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV)
+        {
+            switch (filterMode)
+            {
                 case FilterMode.Point:
                     magFilter = MagFilterMode.Nearest;
                     minFilter = MinFilterMode.Nearest;
@@ -199,7 +205,8 @@ namespace GLTFast.Schema
         /// <param name="defaultMagFilter">Fallback magnification filter</param>
         public void Apply(Texture2D image,
                           MinFilterMode defaultMinFilter = MinFilterMode.Linear,
-                          MagFilterMode defaultMagFilter = MagFilterMode.Linear) {
+                          MagFilterMode defaultMagFilter = MagFilterMode.Linear)
+        {
             if (image == null) return;
             image.wrapModeU = wrapU;
             image.wrapModeV = wrapV;
@@ -210,24 +217,29 @@ namespace GLTFast.Schema
                 magFilter == MagFilterMode.None ? defaultMagFilter : magFilter
             );
         }
-        
-        internal void GltfSerialize(JsonWriter writer) {
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             GltfSerializeRoot(writer);
             // Assuming MagFilterMode.Linear is the project's default, only
             // serialize valid, non-default values
-            if (magFilter == MagFilterMode.Nearest) {
+            if (magFilter == MagFilterMode.Nearest)
+            {
                 writer.AddProperty("magFilter", (int)magFilter);
             }
             // Assuming MinFilterMode.Linear is the project's default, only
             // serialize valid, non-default values
-            if (minFilter != MinFilterMode.None && minFilter != MinFilterMode.Linear) {
+            if (minFilter != MinFilterMode.None && minFilter != MinFilterMode.Linear)
+            {
                 writer.AddProperty("minFilter", (int)minFilter);
             }
-            if (wrapS != WrapMode.None && wrapS != WrapMode.Repeat) {
+            if (wrapS != WrapMode.None && wrapS != WrapMode.Repeat)
+            {
                 writer.AddProperty("wrapS", (int)wrapS);
             }
-            if (wrapT != WrapMode.None && wrapT != WrapMode.Repeat) {
+            if (wrapT != WrapMode.None && wrapT != WrapMode.Repeat)
+            {
                 writer.AddProperty("wrapT", (int)wrapT);
             }
             writer.Close();

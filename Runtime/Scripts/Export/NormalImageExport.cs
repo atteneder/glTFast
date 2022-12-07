@@ -16,15 +16,17 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast.Export {
-    
+namespace GLTFast.Export
+{
+
     /// <summary>
     /// Wrapper to export a glTF image normal map
     /// </summary>
-    public class NormalImageExport : ImageExport {
-        
+    public class NormalImageExport : ImageExport
+    {
+
         static Material s_NormalBlitMaterial;
-        
+
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -32,17 +34,21 @@ namespace GLTFast.Export {
         public NormalImageExport(Texture2D texture)
             : base(texture) { }
 
-        static Material GetNormalBlitMaterial() {
-            if (s_NormalBlitMaterial == null) {
+        static Material GetNormalBlitMaterial()
+        {
+            if (s_NormalBlitMaterial == null)
+            {
                 s_NormalBlitMaterial = LoadBlitMaterial("glTFExportNormal");
             }
             return s_NormalBlitMaterial;
         }
 
         /// <inheritdoc />
-        protected override bool GenerateTexture(out byte[] imageData) {
-            if (m_Texture != null) {
-                imageData = EncodeTexture(m_Texture, format, hasAlpha:false, blitMaterial:GetNormalBlitMaterial());
+        protected override bool GenerateTexture(out byte[] imageData)
+        {
+            if (m_Texture != null)
+            {
+                imageData = EncodeTexture(m_Texture, format, hasAlpha: false, blitMaterial: GetNormalBlitMaterial());
                 return true;
             }
             imageData = null;

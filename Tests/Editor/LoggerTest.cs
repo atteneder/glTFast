@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,23 +22,25 @@ using UnityEngine.TestTools;
 namespace GLTFast.Tests
 {
     using Logging;
-    
-    class LoggerTest
+
+    static class LoggerTest
     {
         [Test]
-        public static void CollectingLoggerTest() {
+        public static void CollectingLoggerTest()
+        {
             var r = new CollectingLogger();
-            r.Error(LogCode.Download,"404", "https://something.com/nowherfound.glb");
-            
-            Assert.AreEqual(1,r.Count);
+            r.Error(LogCode.Download, "404", "https://something.com/nowherfound.glb");
+
+            Assert.AreEqual(1, r.Count);
             var items = r.Items.ToArray();
             Assert.AreEqual("Download URL https://something.com/nowherfound.glb failed: 404", items[0].ToString());
         }
-        
+
         [Test]
-        public static void ConsoleLoggerTest() {
+        public static void ConsoleLoggerTest()
+        {
             var r = new ConsoleLogger();
-            r.Error(LogCode.Download,"404", "https://something.com/nowherfound.glb");
+            r.Error(LogCode.Download, "404", "https://something.com/nowherfound.glb");
             LogAssert.Expect(LogType.Error, "Download URL https://something.com/nowherfound.glb failed: 404");
         }
     }

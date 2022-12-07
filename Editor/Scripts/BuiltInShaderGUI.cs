@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ namespace GLTFast.Editor
         /// <summary>
         /// Subset of <see cref="StandardShaderMode"/> as not all configurations are supported
         /// </summary>
-        public enum BlendModeOption
+        enum BlendModeOption
         {
             Opaque = StandardShaderMode.Opaque,
             Cutout = StandardShaderMode.Cutout,
@@ -36,29 +36,29 @@ namespace GLTFast.Editor
             Transparent = StandardShaderMode.Transparent,
         }
 
-        private UvTransform? uvTransform;
-        
+        UvTransform? m_UVTransform;
+
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
             if (materialEditor.target is Material material)
             {
-                string current = material.GetTag(TAG_RENDER_TYPE, false);
+                string current = material.GetTag(RenderTypeTag, false);
                 BlendModeOption currentBlendMode = BlendModeOption.Opaque;
 
                 switch (current)
                 {
                     case "":
-                    case TAG_RENDER_TYPE_OPAQUE:
+                    case OpaqueRenderType:
                         currentBlendMode = BlendModeOption.Opaque;
                         break;
 
-                    case TAG_RENDER_TYPE_CUTOUT:
+                    case TransparentCutoutRenderType:
                         currentBlendMode = BlendModeOption.Cutout;
                         break;
-                    case TAG_RENDER_TYPE_FADE:
+                    case FadeRenderType:
                         currentBlendMode = BlendModeOption.Fade;
                         break;
-                    case TAG_RENDER_TYPE_TRANSPARENT:
+                    case TransparentRenderType:
                         currentBlendMode = BlendModeOption.Transparent;
                         break;
 
@@ -73,23 +73,27 @@ namespace GLTFast.Editor
                     ConfigureBlendMode(material, blend);
                 }
 
-                uvTransform = TextureRotationSlider(
+                m_UVTransform = TextureRotationSlider(
                     material,
-                    uvTransform,
+                    m_UVTransform,
                     baseColorTextureScaleTransformPropId,
                     baseColorTextureRotationPropId,
                     true,
                     "Base Color Tex Rotation");
-                if (uvTransform.HasValue)
+                if (m_UVTransform.HasValue)
                 {
-                    if (uvTransform.Value.rotation != 0) {
-                        material.EnableKeyword(KW_TEXTURE_TRANSFORM);
-                    } else {
-                        material.DisableKeyword(KW_TEXTURE_TRANSFORM);
+                    if (m_UVTransform.Value.rotation != 0)
+                    {
+                        material.EnableKeyword(textureTransformKeyword);
+                    }
+                    else
+                    {
+                        material.DisableKeyword(textureTransformKeyword);
                     }
                 }
-                
-                if (GUI.changed) {
+
+                if (GUI.changed)
+                {
                     EditorUtility.SetDirty(material);
                 }
 
@@ -97,10 +101,10 @@ namespace GLTFast.Editor
                 {
                     if (material.HasProperty(textureProperty))
                     {
-                        if(material.GetTexture(textureProperty) && !material.IsKeywordEnabled(keyword))
+                        if (material.GetTexture(textureProperty) && !material.IsKeywordEnabled(keyword))
                             material.EnableKeyword(keyword);
-                        
-                        if(!material.GetTexture(textureProperty) && material.IsKeywordEnabled(keyword))
+
+                        if (!material.GetTexture(textureProperty) && material.IsKeywordEnabled(keyword))
                             material.DisableKeyword(keyword);
                     }
                 }
@@ -112,7 +116,7 @@ namespace GLTFast.Editor
             base.OnGUI(materialEditor, properties);
         }
 
-        public static void ConfigureBlendMode(Material material, BlendModeOption mode)
+        static void ConfigureBlendMode(Material material, BlendModeOption mode)
         {
             switch (mode)
             {

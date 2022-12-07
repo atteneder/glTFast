@@ -16,47 +16,60 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast.Export {
-    readonly struct MeshMaterialCombination {
+namespace GLTFast.Export
+{
+    readonly struct MeshMaterialCombination
+    {
         readonly int m_MeshId;
         readonly int[] m_MaterialIds;
-            
-        public MeshMaterialCombination(int meshId, int[] materialIds) {
+
+        public MeshMaterialCombination(int meshId, int[] materialIds)
+        {
             m_MeshId = meshId;
             m_MaterialIds = materialIds;
         }
-            
-        public override bool Equals(object obj) {
+
+        public override bool Equals(object obj)
+        {
             //Check for null and compare run-time types.
-            if (obj == null || ! GetType().Equals(obj.GetType())) {
+            if (obj == null || GetType() != obj.GetType())
+            {
                 return false;
             }
             return Equals((MeshMaterialCombination)obj);
         }
 
-        bool Equals(MeshMaterialCombination other) {
+        bool Equals(MeshMaterialCombination other)
+        {
             return m_MeshId == other.m_MeshId && Equals(m_MaterialIds, other.m_MaterialIds);
         }
 
-        static bool Equals(int[] a, int[] b) {
-            if (a == null && b == null) {
+        static bool Equals(int[] a, int[] b)
+        {
+            if (a == null && b == null)
+            {
                 return true;
             }
-            if (a == null ^ b == null) {
+            if (a == null ^ b == null)
+            {
                 return false;
             }
-            if (a.Length != b.Length) {
+            if (a.Length != b.Length)
+            {
                 return false;
             }
-            for (var i = 0; i < a.Length; i++) {
-                if (a[i] != b[i]) {
+            for (var i = 0; i < a.Length; i++)
+            {
+                if (a[i] != b[i])
+                {
                     return false;
                 }
             }
             return true;
         }
 
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
 #if NET_STANDARD
             var hash = new HashCode();
             hash.Add(m_MeshId);
@@ -69,9 +82,11 @@ namespace GLTFast.Export {
 #else
             var hash = 17;
             hash = hash * 31 + m_MeshId.GetHashCode();
-            if (m_MaterialIds != null) {
+            if (m_MaterialIds != null)
+            {
                 hash = hash * 31 + m_MaterialIds.Length;
-                foreach (var id in m_MaterialIds) {
+                foreach (var id in m_MaterialIds)
+                {
                     hash = hash * 31 + id;
                 }
             }

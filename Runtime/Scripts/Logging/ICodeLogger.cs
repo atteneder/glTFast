@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,46 +16,48 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast.Logging {
-    
+namespace GLTFast.Logging
+{
+
     /// <summary>
     /// A logger that can receive log messages of severeness levels
     /// </summary>
-    public interface ICodeLogger {
-        
+    public interface ICodeLogger
+    {
+
         /// <summary>
         /// Dispatches a critical error message.
         /// </summary>
         /// <param name="code">Message's log code</param>
         /// <param name="messages">Additional, optional message parts</param>
         void Error(LogCode code, params string[] messages);
-        
+
         /// <summary>
         /// Dispatches a warning message.
         /// </summary>
         /// <param name="code">Message's log code</param>
         /// <param name="messages">Additional, optional message parts</param>
         void Warning(LogCode code, params string[] messages);
-        
+
         /// <summary>
         /// Dispatches an informational message.
         /// </summary>
         /// <param name="code">Message's log code</param>
         /// <param name="messages">Additional, optional message parts</param>
         void Info(LogCode code, params string[] messages);
-        
+
         /// <summary>
         /// Dispatches a critical error message.
         /// </summary>
         /// <param name="message">Message to send</param>
         void Error(string message);
-        
+
         /// <summary>
         /// Dispatches a warning message.
         /// </summary>
         /// <param name="message">Message to send</param>
         void Warning(string message);
-        
+
         /// <summary>
         /// Dispatches an informational message.
         /// </summary>

@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,19 +15,20 @@
 
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-namespace GLTFast.Editor {
+namespace GLTFast.Editor
+{
 
     /// <summary>
     /// Editor Import specific settings (not relevant at runtime)
     /// </summary>
     [Serializable]
-    class EditorImportSettings {
-        
+    class EditorImportSettings
+    {
+
         /// <summary>
         /// Creates a secondary UV set on all meshes, if there is none present already.
-        /// Often used for lightmaps. 
+        /// Often used for lightmaps.
         /// </summary>
         [Tooltip("Generate Lightmap UVs")]
         public bool generateSecondaryUVSet;

@@ -15,17 +15,19 @@
 
 using UnityEngine;
 
-namespace GLTFast.Export {
-    
+namespace GLTFast.Export
+{
+
     using Logging;
 
     /// <summary>
-    /// Converts a Unity Material into a glTF material 
+    /// Converts a Unity Material into a glTF material
     /// </summary>
-    public interface IMaterialExport {
+    public interface IMaterialExport
+    {
 
         /// <summary>
-        /// Converts a Unity material to a glTF material. 
+        /// Converts a Unity material to a glTF material.
         /// </summary>
         /// <param name="uMaterial">Source material</param>
         /// <param name="material">Resulting material</param>
@@ -33,7 +35,7 @@ namespace GLTFast.Export {
         /// <param name="logger">Logger used for reporting</param>
         /// <returns>True if no errors occured, false otherwise</returns>
         bool ConvertMaterial(
-            UnityEngine.Material uMaterial,
+            Material uMaterial,
             out Schema.Material material,
             IGltfWritable gltf,
             ICodeLogger logger

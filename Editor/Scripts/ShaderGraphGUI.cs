@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ namespace GLTFast.Editor
     class ShaderGraphGUI : ShaderGUIBase
     {
 
-        private UvTransform? uvTransform;
-        
+        UvTransform? m_UVTransform;
+
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
             if (materialEditor.target is Material material) {
-                uvTransform = TextureRotationSlider(
+                m_UVTransform = TextureRotationSlider(
                     material,
-                    uvTransform,
+                    m_UVTransform,
                     baseColorTextureScaleTransformPropId,
                     baseColorTextureRotationPropId,
                     label:"Base Color Tex Rotation"
@@ -53,7 +53,7 @@ namespace GLTFast.Editor
             //     }
             // }
             // base.OnGUI(materialEditor, filteredProperties.ToArray());
-            
+
             base.OnGUI(materialEditor, properties);
         }
     }

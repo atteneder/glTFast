@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
 
 using Unity.Mathematics;
 
-namespace GLTFast.Schema{
-    
+namespace GLTFast.Schema
+{
+
     /// <summary>
     /// Occlusion map specific texture info
     /// </summary>
     [System.Serializable]
-    public class OcclusionTextureInfo : TextureInfo {
+    public class OcclusionTextureInfo : TextureInfo
+    {
 
         /// <summary>
         /// A scalar multiplier controlling the amount of occlusion applied.
@@ -33,11 +35,13 @@ namespace GLTFast.Schema{
         /// <maximum>1.0</maximum>
         /// </summary>
         public float strength = 1.0f;
-        
-        internal override void GltfSerialize(JsonWriter writer) {
+
+        internal override void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             GltfSerializeTextureInfo(writer);
-            if (math.abs(strength - 1f) > Constants.epsilon) {
+            if (math.abs(strength - 1f) > Constants.epsilon)
+            {
                 writer.AddProperty("strength", strength);
             }
             writer.Close();

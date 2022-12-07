@@ -22,14 +22,14 @@ using Unity.Mathematics;
 using UnityEngine;
 
 namespace GLTFast.Export {
-	
+
     using Schema;
 
     public class HighDefinitionMaterialExport : MaterialExportBase {
 
         const string k_KeywordNormalMapTangentSpace = "_NORMALMAP_TANGENT_SPACE";
         const string k_KeywordMaskMap = "_MASKMAP"; // HDRP Lit
-		    
+
         static readonly int k_AORemapMax = Shader.PropertyToID("_AORemapMax");
         static readonly int k_AORemapMin = Shader.PropertyToID("_AORemapMin");
         static readonly int k_EmissiveColor = Shader.PropertyToID("_EmissiveColor");
@@ -43,7 +43,7 @@ namespace GLTFast.Export {
         static readonly int k_UnlitColor = Shader.PropertyToID("_UnlitColor");
 
         /// <summary>
-        /// Converts a Unity material to a glTF material. 
+        /// Converts a Unity material to a glTF material.
         /// </summary>
         /// <param name="uMaterial">Source material</param>
         /// <param name="material">Resulting material</param>
@@ -83,7 +83,7 @@ namespace GLTFast.Export {
 
             if (uMaterial.HasProperty(k_EmissionColorMap)) {
                 var emissionTex = uMaterial.GetTexture(k_EmissionColorMap);
- 
+
                 if (emissionTex != null) {
                     if(emissionTex is Texture2D) {
                         material.emissiveTexture = ExportTextureInfo(emissionTex, gltf);
@@ -116,9 +116,9 @@ namespace GLTFast.Export {
                 }
             }
 
-            
+
             var mainTexProperty = uMaterial.HasProperty(k_BaseColorMap) ? k_BaseColorMap : k_MainTex;
-			
+
             if(IsUnlit(uMaterial)) {
                 ExportUnlit(material, uMaterial, mainTexProperty, gltf, logger);
             } else {
@@ -129,12 +129,12 @@ namespace GLTFast.Export {
                     logger
                 );
             }
-			
-            
+
+
 
             return success;
         }
-        
+
         static bool ExportPbrMetallicRoughness(
             UnityEngine.Material uMaterial,
             Material material,
@@ -149,7 +149,7 @@ namespace GLTFast.Export {
                 pbr.metallicFactor = uMaterial.GetFloat(k_Metallic);
                 metallicUsed = pbr.metallicFactor > 0;
             }
-            
+
             if (uMaterial.HasProperty(k_BaseColorMap)) {
                 // TODO if additive particle, render black into alpha
                 // TODO use private Material.GetFirstPropertyNameIdByAttribute here, supported from 2020.1+
@@ -187,7 +187,7 @@ namespace GLTFast.Export {
                             }
                         }
                     }
-                    
+
                     var occStrength = 1f;
                     if (uMaterial.HasProperty(k_AORemapMin)) {
                         var occMin = uMaterial.GetFloat(k_AORemapMin);
@@ -201,7 +201,7 @@ namespace GLTFast.Export {
                     }
 
                     var occUsed = occStrength > 0;
-                    
+
                     // TODO: Detect if metallic/smoothness/occlusion channels
                     // are used based on pixel values (i.e. have non-white
                     // pixels) on top of parameter evaluation
@@ -237,7 +237,7 @@ namespace GLTFast.Export {
                     }
                 }
             }
-            
+
             if (uMaterial.HasProperty(k_BaseColor))
             {
                 pbr.baseColor = uMaterial.GetColor(k_BaseColor);
@@ -253,7 +253,7 @@ namespace GLTFast.Export {
             material.pbrMetallicRoughness = pbr;
             return success;
         }
-        
+
         protected override bool GetUnlitColor(UnityEngine.Material uMaterial, out Color baseColor) {
             if (uMaterial.HasProperty(k_UnlitColor)) {
                 baseColor = uMaterial.GetColor(k_UnlitColor);

@@ -17,14 +17,13 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace GLTFast.Editor {
-    
+namespace GLTFast.Editor
+{
+
     [CustomEditor(typeof(GltfAsset)), CanEditMultipleObjects]
     class GltfAssetInspector : UnityEditor.Editor
     {
         VisualElement m_Container;
-
-        UnityEditor.Editor m_InstantiationEditor; 
 
         public override VisualElement CreateInspectorGUI()
         {
@@ -39,17 +38,17 @@ namespace GLTFast.Editor {
             };
 
             Utils.CreateProperties(m_Container, properties);
-            
+
             // Import Settings Foldout
-            var importSettingsFoldout = new Foldout {text = "Import Settings", value = true};
-            ImportSettingsEditor.CreateUI(serializedObject,importSettingsFoldout,"importSettings.");
+            var importSettingsFoldout = new Foldout { text = "Import Settings", value = true };
+            ImportSettingsEditor.CreateUI(serializedObject, importSettingsFoldout, "importSettings.");
             m_Container.Add(importSettingsFoldout);
-            
+
             // Instantiation Settings Foldout
-            var instantiationSettingsFoldout = new Foldout {text = "Instantiation Settings", value = true};
-            InstantiationSettingsEditor.CreateUI(serializedObject,instantiationSettingsFoldout,"instantiationSettings.");
+            var instantiationSettingsFoldout = new Foldout { text = "Instantiation Settings", value = true };
+            InstantiationSettingsEditor.CreateUI(serializedObject, instantiationSettingsFoldout, "instantiationSettings.");
             m_Container.Add(instantiationSettingsFoldout);
-            
+
             return m_Container;
         }
     }

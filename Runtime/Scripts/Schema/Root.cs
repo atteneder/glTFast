@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,8 +18,9 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
 
-namespace GLTFast.Schema {
-    
+namespace GLTFast.Schema
+{
+
     /// <summary>
     /// The root object for a glTF asset.
     /// <seealso href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#reference-gltf"/>
@@ -117,49 +118,56 @@ namespace GLTFast.Schema {
 
         /// <inheritdoc cref="RootExtension"/>
         public RootExtension extensions;
-        
+
 #if UNITY_ANIMATION
         public bool hasAnimation => animations != null && animations.Length > 0;
 #endif // UNITY_ANIMATION
-        
+
         /// <summary>
         /// Looks up if a certain accessor points to interleaved data.
         /// </summary>
         /// <param name="accessorIndex">Accessor index</param>
         /// <returns>True if accessor is interleaved, false if its data is
         /// continuous.</returns>
-        public bool IsAccessorInterleaved( int accessorIndex ) {
-			var accessor = accessors[accessorIndex];
-			var bufferView = bufferViews[accessor.bufferView];
-			if (bufferView.byteStride < 0) return false;
-			var elementSize = Accessor.GetAccessorAttributeTypeLength(accessor.typeEnum) * Accessor.GetComponentTypeSize(accessor.componentType);
-			return bufferView.byteStride > elementSize;
-		}
+        public bool IsAccessorInterleaved(int accessorIndex)
+        {
+            var accessor = accessors[accessorIndex];
+            var bufferView = bufferViews[accessor.bufferView];
+            if (bufferView.byteStride < 0) return false;
+            var elementSize = Accessor.GetAccessorAttributeTypeLength(accessor.typeEnum) * Accessor.GetComponentTypeSize(accessor.componentType);
+            return bufferView.byteStride > elementSize;
+        }
 
         /// <summary>
         /// Serialization to JSON
         /// </summary>
         /// <param name="stream">Stream the JSON string is being written to.</param>
-        public void GltfSerialize(StreamWriter stream) {
+        public void GltfSerialize(StreamWriter stream)
+        {
             var writer = new JsonWriter(stream);
 
-            if (asset != null) {
+            if (asset != null)
+            {
                 writer.AddProperty("asset");
                 asset.GltfSerialize(writer);
             }
-            if (nodes != null) {
+            if (nodes != null)
+            {
                 writer.AddArray("nodes");
-                foreach (var node in nodes) {
+                foreach (var node in nodes)
+                {
                     node.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
 
-            if (extensionsRequired != null) {
+            if (extensionsRequired != null)
+            {
                 writer.AddArrayProperty("extensionsRequired", extensionsRequired);
             }
-            
-            if (extensionsUsed != null) {
+
+            if (extensionsUsed != null)
+            {
                 writer.AddArrayProperty("extensionsUsed", extensionsUsed);
             }
 
@@ -173,96 +181,120 @@ namespace GLTFast.Schema {
             }
 #endif
 
-            if (buffers!=null) {
+            if (buffers != null)
+            {
                 writer.AddArray("buffers");
-                foreach( var buffer in buffers) {
+                foreach (var buffer in buffers)
+                {
                     buffer.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            
-            if (bufferViews!=null) {
+
+            if (bufferViews != null)
+            {
                 writer.AddArray("bufferViews");
-                foreach( var bufferView in bufferViews) {
+                foreach (var bufferView in bufferViews)
+                {
                     bufferView.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            
-            if (accessors!=null) {
+
+            if (accessors != null)
+            {
                 writer.AddArray("accessors");
-                foreach( var accessor in accessors) {
+                foreach (var accessor in accessors)
+                {
                     accessor.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
 
-            if (cameras!=null) {
+            if (cameras != null)
+            {
                 writer.AddArray("cameras");
-                foreach( var camera in cameras) {
+                foreach (var camera in cameras)
+                {
                     camera.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            
-            if (images!=null) {
+
+            if (images != null)
+            {
                 writer.AddArray("images");
-                foreach( var image in images) {
+                foreach (var image in images)
+                {
                     image?.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            if (materials!=null) {
+            if (materials != null)
+            {
                 writer.AddArray("materials");
-                foreach( var material in materials) {
+                foreach (var material in materials)
+                {
                     material.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            if (meshes!=null) {
+            if (meshes != null)
+            {
                 writer.AddArray("meshes");
-                foreach( var mesh in meshes) {
+                foreach (var mesh in meshes)
+                {
                     mesh.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            if (samplers!=null) {
+            if (samplers != null)
+            {
                 writer.AddArray("samplers");
-                foreach( var sampler in samplers) {
+                foreach (var sampler in samplers)
+                {
                     sampler.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            if (scene>=0) {
-                writer.AddProperty("scene",scene);
+            if (scene >= 0)
+            {
+                writer.AddProperty("scene", scene);
             }
-            if (scenes!=null) {
+            if (scenes != null)
+            {
                 writer.AddArray("scenes");
-                foreach( var scene in scenes) {
-                    scene.GltfSerialize(writer);
+                foreach (var sceneToSerialize in scenes)
+                {
+                    sceneToSerialize.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            if (skins!=null) {
+            if (skins != null)
+            {
                 writer.AddArray("skins");
-                foreach( var skin in skins) {
+                foreach (var skin in skins)
+                {
                     skin.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
-            if (textures!=null) {
+            if (textures != null)
+            {
                 writer.AddArray("textures");
-                foreach( var texture in textures) {
+                foreach (var texture in textures)
+                {
                     texture.GltfSerialize(writer);
                 }
                 writer.CloseArray();
             }
 
-            if (extensions != null) {
+            if (extensions != null)
+            {
                 writer.AddProperty("extensions");
                 extensions.GltfSerialize(writer);
             }
-            
+
             writer.Close();
         }
     }

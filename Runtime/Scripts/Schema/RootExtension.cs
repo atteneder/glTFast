@@ -13,20 +13,25 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
-    /// glTF root extensions 
+    /// glTF root extensions
     /// </summary>
     [System.Serializable]
-    public class RootExtension {
-        
+    public class RootExtension
+    {
+
         /// <inheritdoc cref="LightsPunctual"/>
+        // ReSharper disable once InconsistentNaming
         public LightsPunctual KHR_lights_punctual;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
-            if(KHR_lights_punctual!=null) {
+            if (KHR_lights_punctual != null)
+            {
                 writer.AddProperty("KHR_lights_punctual");
                 KHR_lights_punctual.GltfSerialize(writer);
             }

@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,22 +15,26 @@
 
 using UnityEngine;
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// Assigns a light to a node
     /// </summary>
     [System.Serializable]
-    public class NodeLightsPunctual {
+    public class NodeLightsPunctual
+    {
 
         /// <summary>
         /// Light index
         /// </summary>
         public int light = -1;
 
-        internal void GltfSerialize(JsonWriter writer) {
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
-            if (light >= 0) {
+            if (light >= 0)
+            {
                 writer.AddProperty("light", light);
             }
             writer.Close();

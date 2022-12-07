@@ -55,9 +55,9 @@ namespace GLTFast {
 #if DEBUG
             uint duplicates = 0;
 #endif
-            
+
             switch (interpolationType) {
-                case InterpolationType.STEP: {
+                case InterpolationType.Step: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
@@ -68,7 +68,7 @@ namespace GLTFast {
                     }
                     break;
                 }
-                case InterpolationType.CUBICSPLINE: {
+                case InterpolationType.CubicSpline: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var inTangent = values[i*3];
@@ -85,11 +85,11 @@ namespace GLTFast {
                     var prevTime = times[0];
                     var prevValue = values[0];
                     var inTangent = new quaternion(new float4(0f));
-                    
+
                     for (var i = 1; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
-                        
+
                         if (prevTime >= time) {
                             // Time value is not increasing, so we ignore this keyframe
                             // This happened on some Sketchfab files (see #298)
@@ -98,12 +98,12 @@ namespace GLTFast {
 #endif
                             continue;
                         }
-                        
+
                         // Ensure shortest path rotation ( see https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#interpolation-slerp )
                         if (math.dot(prevValue, value) < 0) {
                             value.value = -value.value;
                         }
-                        
+
                         var dT = time - prevTime;
                         var dV = value.value - prevValue.value;
                         quaternion outTangent;
@@ -115,7 +115,7 @@ namespace GLTFast {
                         } else {
                             outTangent = dV / dT;
                         }
-                        
+
                         rotX.AddKey( new Keyframe(prevTime, prevValue.value.x, inTangent.value.x, outTangent.value.x ) );
                         rotY.AddKey( new Keyframe(prevTime, prevValue.value.y, inTangent.value.y, outTangent.value.y ) );
                         rotZ.AddKey( new Keyframe(prevTime, prevValue.value.z, inTangent.value.z, outTangent.value.z ) );
@@ -125,16 +125,16 @@ namespace GLTFast {
                         prevTime = time;
                         prevValue = value;
                     }
-                    
+
                     rotX.AddKey( new Keyframe(prevTime, prevValue.value.x, inTangent.value.x, 0 ) );
                     rotY.AddKey( new Keyframe(prevTime, prevValue.value.y, inTangent.value.y, 0 ) );
                     rotZ.AddKey( new Keyframe(prevTime, prevValue.value.z, inTangent.value.z, 0 ) );
                     rotW.AddKey( new Keyframe(prevTime, prevValue.value.w, inTangent.value.w, 0 ) );
-                    
+
                     break;
                 }
             }
-            
+
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.x", rotX);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.y", rotY);
             clip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
@@ -161,7 +161,7 @@ namespace GLTFast {
             Profiler.EndSample();
             return sb.ToString();
         }
-        
+
         public static void AddMorphTargetWeightCurves(
             AnimationClip clip,
             string animationPath,
@@ -175,7 +175,7 @@ namespace GLTFast {
             int morphTargetCount;
             if (morphTargetNames == null) {
                 morphTargetCount = values.Length / times.Length;
-                if (interpolationType == InterpolationType.CUBICSPLINE) {
+                if (interpolationType == InterpolationType.CubicSpline) {
                     // 3 values per key (in-tangent, out-tangent and value)
                     morphTargetCount /= 3;
                 }
@@ -183,7 +183,7 @@ namespace GLTFast {
             else {
                 morphTargetCount = morphTargetNames.Length;
             }
-            
+
             for (var i = 0; i < morphTargetCount; i++) {
                 var morphTargetName = morphTargetNames==null ? i.ToString() : morphTargetNames[i];
                 AddScalarCurve(
@@ -211,7 +211,7 @@ namespace GLTFast {
 #endif
 
             switch (interpolationType) {
-                case InterpolationType.STEP: {
+                case InterpolationType.Step: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
@@ -221,7 +221,7 @@ namespace GLTFast {
                     }
                     break;
                 }
-                case InterpolationType.CUBICSPLINE: {
+                case InterpolationType.CubicSpline: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var inTangent = values[i*3];
@@ -237,11 +237,11 @@ namespace GLTFast {
                     var prevTime = times[0];
                     var prevValue = values[0];
                     var inTangent = new float3(0f);
-                    
+
                     for (var i = 1; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
-                        
+
                         if (prevTime >= time) {
                             // Time value is not increasing, so we ignore this keyframe
                             // This happened on some Sketchfab files (see #298)
@@ -250,7 +250,7 @@ namespace GLTFast {
 #endif
                             continue;
                         }
-                        
+
                         var dT = time - prevTime;
                         var dV = value - prevValue;
                         float3 outTangent;
@@ -261,7 +261,7 @@ namespace GLTFast {
                         } else {
                             outTangent = dV / dT;
                         }
-                        
+
                         curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, outTangent.x ) );
                         curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, outTangent.y ) );
                         curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, outTangent.z ) );
@@ -270,11 +270,11 @@ namespace GLTFast {
                         prevTime = time;
                         prevValue = value;
                     }
-                    
+
                     curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, 0 ) );
                     curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, 0 ) );
                     curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, 0 ) );
-                    
+
                     break;
                 }
             }
@@ -289,17 +289,17 @@ namespace GLTFast {
             }
 #endif
         }
-        
+
         static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyPrefix, int curveIndex, int valueStride, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
             Profiler.BeginSample("AnimationUtils.AddScalarCurve");
             var curve = new AnimationCurve();
-            
+
 #if DEBUG
             uint duplicates = 0;
 #endif
 
             switch (interpolationType) {
-                case InterpolationType.STEP: {
+                case InterpolationType.Step: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var valueIndex = i * valueStride + curveIndex;
@@ -308,7 +308,7 @@ namespace GLTFast {
                     }
                     break;
                 }
-                case InterpolationType.CUBICSPLINE: {
+                case InterpolationType.CubicSpline: {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var valueIndex = i * valueStride + curveIndex;
@@ -323,12 +323,12 @@ namespace GLTFast {
                     var prevTime = times[0];
                     var prevValue = values[curveIndex];
                     var inTangent = 0f;
-                    
+
                     for (var i = 1; i < times.Length; i++) {
                         var time = times[i];
                         var valueIndex = i * valueStride + curveIndex;
                         var value = values[valueIndex];
-                        
+
                         if (prevTime >= time) {
                             // Time value is not increasing, so we ignore this keyframe
                             // This happened on some Sketchfab files (see #298)
@@ -337,7 +337,7 @@ namespace GLTFast {
 #endif
                             continue;
                         }
-                        
+
                         var dT = time - prevTime;
                         var dV = value - prevValue;
                         float outTangent;
@@ -346,20 +346,20 @@ namespace GLTFast {
                         } else {
                             outTangent = dV / dT;
                         }
-                        
+
                         curve.AddKey( new Keyframe(prevTime, prevValue, inTangent, outTangent ) );
 
                         inTangent = outTangent;
                         prevTime = time;
                         prevValue = value;
                     }
-                    
+
                     curve.AddKey( new Keyframe(prevTime, prevValue, inTangent, 0 ) );
-                    
+
                     break;
                 }
             }
-            
+
             clip.SetCurve(animationPath, typeof(SkinnedMeshRenderer), $"blendShape.{propertyPrefix}", curve);
             Profiler.EndSample();
 #if DEBUG
@@ -368,7 +368,7 @@ namespace GLTFast {
             }
 #endif
         }
-        
+
 #if DEBUG
         static void ReportDuplicateKeyframes() {
             Debug.LogError("Time of subsequent animation keyframes is not increasing (glTF-Validator error ACCESSOR_ANIMATION_INPUT_NON_INCREASING)");

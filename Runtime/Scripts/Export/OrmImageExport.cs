@@ -19,16 +19,20 @@ using System.IO;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+#if UNITY_2022_1_OR_NEWER
 using UnityEngine.Experimental.Rendering;
+#endif
 using Object = UnityEngine.Object;
 
-namespace GLTFast.Export {
-    
+namespace GLTFast.Export
+{
+
     /// <summary>
     /// Exports a glTF ORM (occlusion/roughness/metallic) image map
     /// </summary>
-    public class OrmImageExport : ImageExport {
-        
+    public class OrmImageExport : ImageExport
+    {
+
         static Material s_MetalGlossBlitMaterial;
         static Material s_OcclusionBlitMaterial;
         static Material s_GlossBlitMaterial;
@@ -48,39 +52,48 @@ namespace GLTFast.Export {
             Texture2D occlusionTexture = null,
             Texture2D smoothnessTexture = null,
             Format format = Format.Unknown)
-            : base(metalGlossTexture,format) 
+            : base(metalGlossTexture, format)
         {
             m_OccTexture = occlusionTexture;
             m_SmoothnessTexture = smoothnessTexture;
         }
-        
+
         /// <inheritdoc />
-        public override string fileName {
-            get {
+        public override string fileName
+        {
+            get
+            {
                 if (m_Texture != null) return base.fileName;
-                if (m_OccTexture != null && !string.IsNullOrEmpty(m_OccTexture.name)) {
+                if (m_OccTexture != null && !string.IsNullOrEmpty(m_OccTexture.name))
+                {
                     return $"{m_OccTexture.name}.{fileExtension}";
                 }
-                if (m_SmoothnessTexture != null && !string.IsNullOrEmpty(m_SmoothnessTexture.name)) {
+                if (m_SmoothnessTexture != null && !string.IsNullOrEmpty(m_SmoothnessTexture.name))
+                {
                     return $"{m_SmoothnessTexture.name}ORM.{fileExtension}";
                 }
                 return $"ORM.{fileExtension}";
             }
         }
-        
+
         /// <inheritdoc />
         protected override Format format => m_Format != Format.Unknown ? m_Format : Format.Jpg;
 
         /// <inheritdoc />
-        public override FilterMode filterMode {
-            get {
-                if (m_Texture != null) {
+        public override FilterMode filterMode
+        {
+            get
+            {
+                if (m_Texture != null)
+                {
                     return m_Texture.filterMode;
                 }
-                if (m_OccTexture != null) {
+                if (m_OccTexture != null)
+                {
                     return m_OccTexture.filterMode;
                 }
-                if (m_SmoothnessTexture != null) {
+                if (m_SmoothnessTexture != null)
+                {
                     return m_SmoothnessTexture.filterMode;
                 }
                 return FilterMode.Bilinear;
@@ -88,15 +101,20 @@ namespace GLTFast.Export {
         }
 
         /// <inheritdoc />
-        public override TextureWrapMode wrapModeU {
-            get {
-                if (m_Texture != null) {
+        public override TextureWrapMode wrapModeU
+        {
+            get
+            {
+                if (m_Texture != null)
+                {
                     return m_Texture.wrapModeU;
                 }
-                if (m_OccTexture != null) {
+                if (m_OccTexture != null)
+                {
                     return m_OccTexture.wrapModeU;
                 }
-                if (m_SmoothnessTexture != null) {
+                if (m_SmoothnessTexture != null)
+                {
                     return m_SmoothnessTexture.wrapModeU;
                 }
                 return TextureWrapMode.Repeat;
@@ -104,15 +122,20 @@ namespace GLTFast.Export {
         }
 
         /// <inheritdoc />
-        public override TextureWrapMode wrapModeV {
-            get {
-                if (m_Texture != null) {
+        public override TextureWrapMode wrapModeV
+        {
+            get
+            {
+                if (m_Texture != null)
+                {
                     return m_Texture.wrapModeV;
                 }
-                if (m_OccTexture != null) {
+                if (m_OccTexture != null)
+                {
                     return m_OccTexture.wrapModeV;
                 }
-                if (m_SmoothnessTexture != null) {
+                if (m_SmoothnessTexture != null)
+                {
                     return m_SmoothnessTexture.wrapModeV;
                 }
                 return TextureWrapMode.Repeat;
@@ -128,67 +151,80 @@ namespace GLTFast.Export {
         /// Assigns a Metal/Gloss source texture
         /// </summary>
         /// <param name="texture">Metal/Gloss texture</param>
-        public void SetMetalGlossTexture(Texture2D texture) {
+        public void SetMetalGlossTexture(Texture2D texture)
+        {
             m_Texture = texture;
         }
-        
+
         /// <summary>
         /// Assigns an occlusion source texture
         /// </summary>
         /// <param name="texture">Occlusion texture</param>
-        public void SetOcclusionTexture(Texture2D texture) {
+        public void SetOcclusionTexture(Texture2D texture)
+        {
             m_OccTexture = texture;
         }
-        
+
         /// <summary>
         /// Assigns a smoothness source texture
         /// </summary>
         /// <param name="texture">Smoothness texture</param>
-        public void SetSmoothnessTexture(Texture2D texture) {
+        public void SetSmoothnessTexture(Texture2D texture)
+        {
             m_SmoothnessTexture = texture;
         }
-        
-        static Material GetMetalGlossBlitMaterial() {
-            if (s_MetalGlossBlitMaterial == null) {
+
+        static Material GetMetalGlossBlitMaterial()
+        {
+            if (s_MetalGlossBlitMaterial == null)
+            {
                 s_MetalGlossBlitMaterial = LoadBlitMaterial("glTFExportMetalGloss");
             }
             return s_MetalGlossBlitMaterial;
         }
-        
-        static Material GetOcclusionBlitMaterial() {
-            if (s_OcclusionBlitMaterial == null) {
+
+        static Material GetOcclusionBlitMaterial()
+        {
+            if (s_OcclusionBlitMaterial == null)
+            {
                 s_OcclusionBlitMaterial = LoadBlitMaterial("glTFExportOcclusion");
             }
             return s_OcclusionBlitMaterial;
         }
 
-        
-        static Material GetGlossBlitMaterial() {
-            if (s_GlossBlitMaterial == null) {
+
+        static Material GetGlossBlitMaterial()
+        {
+            if (s_GlossBlitMaterial == null)
+            {
                 s_GlossBlitMaterial = LoadBlitMaterial("glTFExportSmoothness");
             }
             return s_GlossBlitMaterial;
         }
 
         /// <inheritdoc />
-        public override bool Write(string filePath, bool overwrite) {
-            if (GenerateTexture(out var imageData)) {
-                File.WriteAllBytes(filePath,imageData);
+        public override bool Write(string filePath, bool overwrite)
+        {
+            if (GenerateTexture(out var imageData))
+            {
+                File.WriteAllBytes(filePath, imageData);
                 return true;
             }
             return false;
         }
-        
+
         /// <inheritdoc />
-        protected override bool GenerateTexture(out byte[] imageData) {
-            if (m_Texture != null || m_OccTexture!=null || m_SmoothnessTexture!=null) {
+        protected override bool GenerateTexture(out byte[] imageData)
+        {
+            if (m_Texture != null || m_OccTexture != null || m_SmoothnessTexture != null)
+            {
                 imageData = EncodeOrmTexture(m_Texture, m_OccTexture, m_SmoothnessTexture, format);
                 return true;
             }
             imageData = null;
             return false;
         }
-        
+
         /// <summary>
         /// Encodes ORM texture
         /// </summary>
@@ -197,7 +233,7 @@ namespace GLTFast.Export {
         /// <param name="smoothnessTexture">Smoothness texture</param>
         /// <param name="format">Export image format</param>
         /// <returns></returns>
-        protected static byte[] EncodeOrmTexture(
+        static byte[] EncodeOrmTexture(
             Texture2D metalGlossTexture,
             Texture2D occlusionTexture,
             Texture2D smoothnessTexture,
@@ -215,17 +251,17 @@ namespace GLTFast.Export {
                 width = math.max( width, metalGlossTexture.width);
                 height = math.max(height, metalGlossTexture.height);
             }
-            
+
             if (occlusionTexture != null) {
                 width = math.max( width, occlusionTexture.width);
                 height = math.max(height, occlusionTexture.height);
             }
-            
+
             if (smoothnessTexture != null) {
                 width = math.max( width, smoothnessTexture.width);
                 height = math.max(height, smoothnessTexture.height);
             }
-            
+
             var destRenderTexture = RenderTexture.GetTemporary(
                 width,
                 height,
@@ -253,7 +289,7 @@ namespace GLTFast.Export {
                 blitMaterial = GetGlossBlitMaterial();
                 Graphics.Blit(smoothnessTexture, destRenderTexture, blitMaterial);
             }
-            
+
             var exportTexture = new Texture2D(
                 width,
                 height,
@@ -272,8 +308,8 @@ namespace GLTFast.Export {
             exportTexture.ReadPixels(new Rect(0, 0, destRenderTexture.width, destRenderTexture.height), 0, 0);
             RenderTexture.ReleaseTemporary(destRenderTexture);
             exportTexture.Apply();
-            
-            var imageData = format == Format.Png 
+
+            var imageData = format == Format.Png
                 ? exportTexture.EncodeToPNG()
                 : exportTexture.EncodeToJPG(60);
 
@@ -289,35 +325,42 @@ namespace GLTFast.Export {
             return null;
 #endif
         }
-        
+
         /// <inheritdoc />
         [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode")]
-        public override int GetHashCode() {
+        public override int GetHashCode()
+        {
             var hash = 14;
-            if (m_Texture != null) {
+            if (m_Texture != null)
+            {
                 hash = hash * 7 + m_Texture.GetHashCode();
             }
-            if (m_OccTexture != null) {
+            if (m_OccTexture != null)
+            {
                 hash = hash * 7 + m_OccTexture.GetHashCode();
             }
-            if (m_SmoothnessTexture != null) {
+            if (m_SmoothnessTexture != null)
+            {
                 hash = hash * 7 + m_SmoothnessTexture.GetHashCode();
             }
             return hash;
         }
 
         /// <inheritdoc />
-        public override bool Equals(object obj) {
+        public override bool Equals(object obj)
+        {
             //Check for null and compare run-time types.
-            if (obj == null || GetType() != obj.GetType()) {
+            if (obj == null || GetType() != obj.GetType())
+            {
                 return false;
             }
             return Equals((OrmImageExport)obj);
         }
-        
-        bool Equals(OrmImageExport other) {
-            return m_Texture == other.m_Texture 
-                && m_OccTexture == other.m_OccTexture 
+
+        bool Equals(OrmImageExport other)
+        {
+            return m_Texture == other.m_Texture
+                && m_OccTexture == other.m_OccTexture
                 && m_SmoothnessTexture == other.m_SmoothnessTexture;
         }
     }

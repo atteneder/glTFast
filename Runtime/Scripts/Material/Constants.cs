@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +13,20 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Materials {
-    
+namespace GLTFast.Materials
+{
+
     /// <summary>
     /// Contains material related constant variables that are required for both
     /// import (glTF to Unity) and export (Unity to glTF) material conversions.
     /// TODO: Make const var location consistent
     /// </summary>
-    public static class Constants {
-        
+    public static class Constants
+    {
+
         /// <summary>
         /// Shader keyword for normal mapping
         /// </summary>
-        public const string kwNormalMap = "_NORMALMAP";
+        public const string normalMapKeyword = "_NORMALMAP";
     }
 }
