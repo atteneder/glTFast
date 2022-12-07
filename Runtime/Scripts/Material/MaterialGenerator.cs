@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,19 +29,22 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 #endif
 
-namespace GLTFast.Materials {
-    
+namespace GLTFast.Materials
+{
+
     using Logging;
 
     /// <summary>
     /// Common base class for implementations of IMaterialGenerator
     /// </summary>
-    public abstract class MaterialGenerator : IMaterialGenerator {
-        
+    public abstract class MaterialGenerator : IMaterialGenerator
+    {
+
         /// <summary>
         /// Type of material
         /// </summary>
-        protected enum MaterialType {
+        protected enum MaterialType
+        {
             // Unknown
             /// <summary>
             /// Metallic-Roughness material
@@ -59,7 +62,7 @@ namespace GLTFast.Materials {
 
         /// <summary>glTF default material name</summary>
         public const string defaultMaterialName = "glTF-Default-Material";
-        
+
         /// <summary>Render type key</summary>
         public const string RenderTypeTag = "RenderType";
         /// <summary>Render type TransparentCutout value</summary>
@@ -70,14 +73,14 @@ namespace GLTFast.Materials {
         public const string FadeRenderType = "Fade";
         /// <summary>Render type Transparent value</summary>
         public const string TransparentRenderType = "Transparent";
-        
+
         /// <summary>Shader keyword _ALPHATEST_ON</summary>
         public const string alphaTestOnKeyword = "_ALPHATEST_ON";
         /// <summary>Shader keyword _TEXTURE_TRANSFORM</summary>
         public const string textureTransformKeyword = "_TEXTURE_TRANSFORM";
         /// <summary>Shader keyword _UV_CHANNEL_SELECT</summary>
         public const string uvChannelSelectKeyword = "_UV_CHANNEL_SELECT";
-        
+
         /// <summary>Shader property ID for property normalTexture</summary>
         public static readonly int normalTexturePropId = Shader.PropertyToID("normalTexture");
         /// <summary>Shader property ID for property normalTexture_Rotation</summary>
@@ -165,12 +168,12 @@ namespace GLTFast.Materials {
         protected static readonly int k_MetallicRoughnessMapUVChannelPropId = Shader.PropertyToID("metallicRoughnessTexture_texCoord");
         /// <summary>Shader property ID for property roughnessFactor</summary>
         protected static readonly int k_RoughnessFactorPropId = Shader.PropertyToID("roughnessFactor");
-        
+
         static IMaterialGenerator s_DefaultMaterialGenerator;
-        
+
         static bool s_DefaultMaterialGenerated;
         static UnityEngine.Material s_DefaultMaterial;
-        
+
         /// <summary>
         /// Provides the default material generator that's being used if no
         /// custom material generator was provided. The result depends on
@@ -178,13 +181,15 @@ namespace GLTFast.Materials {
         /// </summary>
         /// <returns>The default material generator</returns>
         /// <exception cref="Exception"></exception>
-        public static IMaterialGenerator GetDefaultMaterialGenerator() {
+        public static IMaterialGenerator GetDefaultMaterialGenerator()
+        {
 
             if (s_DefaultMaterialGenerator != null) return s_DefaultMaterialGenerator;
 
             var renderPipeline = RenderPipelineUtils.renderPipeline;
 
-            switch (renderPipeline) {
+            switch (renderPipeline)
+            {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER && GLTFAST_BUILTIN_SHADER_GRAPH
                 case RenderPipeline.BuiltIn:
                     s_DefaultMaterialGenerator = new BuiltInShaderGraphMaterialGenerator();
@@ -216,11 +221,14 @@ namespace GLTFast.Materials {
         protected ICodeLogger m_Logger;
 
         /// <inheritdoc />
-        public UnityEngine.Material GetDefaultMaterial(bool pointsSupport = false) {
-            if(pointsSupport) {
+        public UnityEngine.Material GetDefaultMaterial(bool pointsSupport = false)
+        {
+            if (pointsSupport)
+            {
                 m_Logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
             }
-            if (!s_DefaultMaterialGenerated) {
+            if (!s_DefaultMaterialGenerated)
+            {
                 s_DefaultMaterial = GenerateDefaultMaterial(pointsSupport);
                 s_DefaultMaterialGenerated = true;
             }
@@ -240,14 +248,16 @@ namespace GLTFast.Materials {
         /// <param name="shaderName">The requested shader's name.</param>
         /// <param name="logger">Logger used for reporting errors.</param>
         /// <returns>Requested shader or null if it couldn't be loaded.</returns>
-        protected static Shader FindShader(string shaderName, ICodeLogger logger) {
+        protected static Shader FindShader(string shaderName, ICodeLogger logger)
+        {
             var shader = Shader.Find(shaderName);
-            if(shader==null) {
+            if (shader == null)
+            {
                 logger?.Error(LogCode.ShaderMissing, shaderName);
             }
             return shader;
         }
-        
+
         /// <inheritdoc />
         public abstract UnityEngine.Material GenerateMaterial(
             Schema.Material gltfMaterial,
@@ -256,7 +266,8 @@ namespace GLTFast.Materials {
             );
 
         /// <inheritdoc />
-        public void SetLogger(ICodeLogger logger) {
+        public void SetLogger(ICodeLogger logger)
+        {
             this.m_Logger = logger;
         }
 
@@ -288,8 +299,9 @@ namespace GLTFast.Materials {
                 if (srcTexture != null)
                 {
                     var texture = gltf.GetTexture(textureIndex);
-                    if(texture != null) {
-                        material.SetTexture(texturePropertyId,texture);
+                    if (texture != null)
+                    {
+                        material.SetTexture(texturePropertyId, texture);
                         var isKtx = srcTexture.isKtx;
                         TrySetTextureTransform(
                             textureInfo,
@@ -305,13 +317,15 @@ namespace GLTFast.Materials {
 #if UNITY_IMAGECONVERSION
                     m_Logger?.Error(LogCode.TextureLoadFailed,textureIndex.ToString());
 #endif
-                } else {
-                    m_Logger?.Error(LogCode.TextureNotFound,textureIndex.ToString());
+                }
+                else
+                {
+                    m_Logger?.Error(LogCode.TextureNotFound, textureIndex.ToString());
                 }
             }
             return false;
         }
-        
+
         // protected static bool DifferentIndex(TextureInfo a, TextureInfo b) {
         //     return a != null && b != null && a.index>=0 && b.index>=0 && a.index != b.index;
         // }
@@ -329,41 +343,48 @@ namespace GLTFast.Materials {
             var hasTransform = false;
             // Scale (x,y) and Transform (z,w)
             var textureScaleTranslation = new float4(
-                1,1,// scale
-                0,0 // translation
+                1, 1,// scale
+                0, 0 // translation
                 );
 
             var texCoord = textureInfo.texCoord;
 
-            if(textureInfo.extensions?.KHR_texture_transform != null) {
+            if (textureInfo.extensions?.KHR_texture_transform != null)
+            {
                 hasTransform = true;
                 var tt = textureInfo.extensions.KHR_texture_transform;
-                if (tt.texCoord >= 0) {
+                if (tt.texCoord >= 0)
+                {
                     texCoord = tt.texCoord;
                 }
 
-                if(tt.offset!=null) {
+                if (tt.offset != null)
+                {
                     textureScaleTranslation.z = tt.offset[0];
-                    textureScaleTranslation.w = 1-tt.offset[1];
+                    textureScaleTranslation.w = 1 - tt.offset[1];
                 }
-                if(tt.scale!=null) {
+                if (tt.scale != null)
+                {
                     textureScaleTranslation.x = tt.scale[0];
                     textureScaleTranslation.y = tt.scale[1];
                 }
-                if(tt.rotation!=0) {
+                if (tt.rotation != 0)
+                {
                     var cos = math.cos(tt.rotation);
                     var sin = math.sin(tt.rotation);
 
-                    var newRot = new Vector2(textureScaleTranslation.x * sin, textureScaleTranslation.y * -sin );
-                    
-                    Assert.IsTrue(rotationPropertyId >= 0,"Texture rotation property invalid!");
+                    var newRot = new Vector2(textureScaleTranslation.x * sin, textureScaleTranslation.y * -sin);
+
+                    Assert.IsTrue(rotationPropertyId >= 0, "Texture rotation property invalid!");
                     material.SetVector(rotationPropertyId, newRot);
-                    
+
                     textureScaleTranslation.x *= cos;
                     textureScaleTranslation.y *= cos;
 
-                    textureScaleTranslation.z -= newRot.y; // move offset to move rotation point (horizontally) 
-                } else {
+                    textureScaleTranslation.z -= newRot.y; // move offset to move rotation point (horizontally)
+                }
+                else
+                {
                     // Make sure the rotation is properly zeroed
                     material.SetVector(rotationPropertyId, Vector4.zero);
                 }
@@ -371,31 +392,37 @@ namespace GLTFast.Materials {
                 textureScaleTranslation.w -= textureScaleTranslation.y; // move offset to move flip axis point (vertically)
             }
 
-            if(texCoord!=0) {
-                if (uvChannelPropertyId >= 0 && texCoord < 2f) {
+            if (texCoord != 0)
+            {
+                if (uvChannelPropertyId >= 0 && texCoord < 2f)
+                {
                     material.EnableKeyword(uvChannelSelectKeyword);
-                    material.SetFloat(uvChannelPropertyId,texCoord);
-                } else {
-                    m_Logger?.Error(LogCode.UVMulti,texCoord.ToString());
+                    material.SetFloat(uvChannelPropertyId, texCoord);
+                }
+                else
+                {
+                    m_Logger?.Error(LogCode.UVMulti, texCoord.ToString());
                 }
             }
-            
-            if(flipY) {
+
+            if (flipY)
+            {
                 hasTransform = true;
-                textureScaleTranslation.w = 1-textureScaleTranslation.w; // flip offset in Y
+                textureScaleTranslation.w = 1 - textureScaleTranslation.w; // flip offset in Y
                 textureScaleTranslation.y = -textureScaleTranslation.y; // flip scale in Y
             }
 
-            if (hasTransform) {
+            if (hasTransform)
+            {
                 material.EnableKeyword(textureTransformKeyword);
             }
-            
+
             material.SetTextureOffset(texturePropertyId, textureScaleTranslation.zw);
             material.SetTextureScale(texturePropertyId, textureScaleTranslation.xy);
-            Assert.IsTrue(scaleTransformPropertyId >= 0,"Texture scale/transform property invalid!");
-            material.SetVector(scaleTransformPropertyId,textureScaleTranslation);
+            Assert.IsTrue(scaleTransformPropertyId >= 0, "Texture scale/transform property invalid!");
+            material.SetVector(scaleTransformPropertyId, textureScaleTranslation);
         }
-        
+
         /// <summary>
         /// Approximates Transmission material effect for Render Pipelines / Shaders where filtering the
         /// backbuffer is not possible.
@@ -403,24 +430,27 @@ namespace GLTFast.Materials {
         /// <param name="transmission">glTF transmission extension data</param>
         /// <param name="baseColorLinear">BaseColor reference. Alpha will be altered according to transmission</param>
         /// <returns>True when the transmission can be approximated with Premultiply mode. False if blending is better</returns>
-        protected static bool TransmissionWorkaroundShaderMode(Transmission transmission, ref Color baseColorLinear) {
+        protected static bool TransmissionWorkaroundShaderMode(Transmission transmission, ref Color baseColorLinear)
+        {
             var min = Mathf.Min(Mathf.Min(baseColorLinear.r, baseColorLinear.g), baseColorLinear.b);
             var max = baseColorLinear.maxColorComponent;
-            if (max - min < .1f) {
+            if (max - min < .1f)
+            {
                 // R/G/B components don't diverge too much
                 // -> white/grey/black-ish color
                 // -> Approximation via Transparent mode should be close to real transmission
                 baseColorLinear.a *= 1 - transmission.transmissionFactor;
                 return true;
             }
-            else {
+            else
+            {
                 // Color is somewhat saturated
                 // -> Fallback to Blend mode
                 // -> Dial down transmissionFactor by 50% to avoid material completely disappearing
                 // Shows at least some color tinting
                 baseColorLinear.a *= 1 - transmission.transmissionFactor * 0.5f;
 
-                // Premultiply color? Decided not to. I preferred vivid (but too bright) colors over desaturation effect. 
+                // Premultiply color? Decided not to. I preferred vivid (but too bright) colors over desaturation effect.
                 // baseColorLinear.r *= baseColorLinear.a;
                 // baseColorLinear.g *= baseColorLinear.a;
                 // baseColorLinear.b *= baseColorLinear.a;

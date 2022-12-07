@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace GLTFast.Loading {
+namespace GLTFast.Loading
+{
 
     /// <summary>
     /// Represents an HTTP request header key-value pair
@@ -31,7 +32,7 @@ namespace GLTFast.Loading {
         /// HTTP header key/name
         /// </summary>
         public string key;
-        
+
         /// <summary>
         /// HTTP header value
         /// </summary>
@@ -42,12 +43,13 @@ namespace GLTFast.Loading {
     /// Delegate that allows to edit a <seealso cref="UnityWebRequest"/> before
     /// its request is sent.
     /// </summary>
-    public delegate void EditUnityWebRequest( UnityWebRequest request );
+    public delegate void EditUnityWebRequest(UnityWebRequest request);
 
     /// <summary>
     /// DownloadProvider that sends HTTP request with custom header entries
     /// </summary>
-    public class CustomHeaderDownloadProvider : IDownloadProvider {
+    public class CustomHeaderDownloadProvider : IDownloadProvider
+    {
 
         HttpHeader[] m_Headers;
 
@@ -55,20 +57,23 @@ namespace GLTFast.Loading {
         /// Creates a new CustomHeaderDownloadProvider with a given set of HTTP request header entries
         /// </summary>
         /// <param name="headers">HTTP request header entries to send</param>
-        public CustomHeaderDownloadProvider( HttpHeader[] headers ) {
+        public CustomHeaderDownloadProvider(HttpHeader[] headers)
+        {
             m_Headers = headers;
         }
 
         /// <inheritdoc />
-        public async Task<IDownload> Request(Uri url) {
-            var req = new CustomHeaderDownload(url,RegisterHttpHeaders);
+        public async Task<IDownload> Request(Uri url)
+        {
+            var req = new CustomHeaderDownload(url, RegisterHttpHeaders);
             await req.WaitAsync();
             return req;
         }
 
         /// <inheritdoc />
 #pragma warning disable CS1998
-        public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+        public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable)
+        {
 #pragma warning restore CS1998
 #if UNITY_WEBREQUEST_TEXTURE
             var req = new CustomHeaderTextureDownload(url,nonReadable,RegisterHttpHeaders);
@@ -81,8 +86,9 @@ namespace GLTFast.Loading {
 
         void RegisterHttpHeaders(UnityWebRequest request)
         {
-            if(m_Headers!=null) {
-                foreach(var header in m_Headers)
+            if (m_Headers != null)
+            {
+                foreach (var header in m_Headers)
                 {
                     request.SetRequestHeader(header.key, header.value);
                 }
@@ -93,14 +99,16 @@ namespace GLTFast.Loading {
     /// <summary>
     /// Download that allows modifying the HTTP request before it's sent
     /// </summary>
-    public class CustomHeaderDownload : AwaitableDownload {
-        
+    public class CustomHeaderDownload : AwaitableDownload
+    {
+
         /// <summary>
         /// Constructs an <see cref="IDownload"/> with a modifier
         /// </summary>
         /// <param name="url">URI to request</param>
         /// <param name="editor">Callback that modifies the UnityWebRequest before it's sent</param>
-        public CustomHeaderDownload(Uri url, EditUnityWebRequest editor) {
+        public CustomHeaderDownload(Uri url, EditUnityWebRequest editor)
+        {
             m_Request = UnityWebRequest.Get(url);
             editor(m_Request);
             m_AsyncOperation = m_Request.SendWebRequest();

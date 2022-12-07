@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,13 +13,15 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// Metadata about the glTF asset.
     /// </summary>
     [System.Serializable]
-    public class Asset {
+    public class Asset
+    {
         /// <summary>
         /// A copyright message suitable for display to credit the content creator.
         /// </summary>
@@ -39,19 +41,24 @@ namespace GLTFast.Schema {
         /// The minimum glTF version that this asset targets.
         /// </summary>
         public string minVersion;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.OpenBrackets();
-            if (!string.IsNullOrEmpty(version)) {
+            if (!string.IsNullOrEmpty(version))
+            {
                 writer.AddProperty("version", version);
             }
-            if (!string.IsNullOrEmpty(generator)) {
+            if (!string.IsNullOrEmpty(generator))
+            {
                 writer.AddProperty("generator", generator);
             }
-            if (!string.IsNullOrEmpty(copyright)) {
+            if (!string.IsNullOrEmpty(copyright))
+            {
                 writer.AddProperty("copyright", copyright);
             }
-            if (!string.IsNullOrEmpty(minVersion)) {
+            if (!string.IsNullOrEmpty(minVersion))
+            {
                 writer.AddProperty("minVersion", minVersion);
             }
             writer.Close();

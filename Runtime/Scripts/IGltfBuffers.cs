@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
 
 using UnityEngine;
 
-namespace GLTFast {
-    
+namespace GLTFast
+{
+
     using Schema;
-    
-    interface IGltfBuffers {
+
+    interface IGltfBuffers
+    {
         unsafe void GetAccessor(int index, out Accessor accessor, out void* data, out int byteStride);
         unsafe void GetAccessorSparseIndices(AccessorSparseIndices sparseIndices, out void* data);
         unsafe void GetAccessorSparseValues(AccessorSparseValues sparseValues, out void* data);

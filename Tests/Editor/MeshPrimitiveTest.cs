@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,42 +19,44 @@ using UnityEngine;
 
 namespace GLTFast.Tests
 {
-    class MeshPrimitiveTest {
+    class MeshPrimitiveTest
+    {
 
         [Test]
-        public void MeshPrimitiveEqualTest() {
-            
-            var a = new MeshPrimitive {attributes = new Attributes { POSITION = 42 } };
-            var b = new MeshPrimitive {attributes = new Attributes { POSITION = 42 } };
+        public void MeshPrimitiveEqualTest()
+        {
+
+            var a = new MeshPrimitive { attributes = new Attributes { POSITION = 42 } };
+            var b = new MeshPrimitive { attributes = new Attributes { POSITION = 42 } };
 
             Assert.IsTrue(a.Equals(b));
 
-            a.targets = new[] { new MorphTarget{ POSITION = 0 } };
+            a.targets = new[] { new MorphTarget { POSITION = 0 } };
             b.targets = null;
             Assert.IsFalse(a.Equals(b));
-            
-            a.targets = new[] { new MorphTarget{ POSITION = 0 } };
-            b.targets = new[] { new MorphTarget{ POSITION = 0 } };
+
+            a.targets = new[] { new MorphTarget { POSITION = 0 } };
+            b.targets = new[] { new MorphTarget { POSITION = 0 } };
             Assert.IsTrue(a.Equals(b));
-            
-            a.targets = new[] { new MorphTarget{ POSITION = 0 } };
-            b.targets = new[] { new MorphTarget{ POSITION = 0, NORMAL = 1} };
+
+            a.targets = new[] { new MorphTarget { POSITION = 0 } };
+            b.targets = new[] { new MorphTarget { POSITION = 0, NORMAL = 1 } };
             Assert.IsFalse(a.Equals(b));
 
             a.targets = null;
-            b.targets = new[] { new MorphTarget{ POSITION = 0 } };
+            b.targets = new[] { new MorphTarget { POSITION = 0 } };
             Assert.IsFalse(a.Equals(b));
-            
-            a.targets = new[] { new MorphTarget{ POSITION = 0 } };
-            b.targets = new[] { new MorphTarget{ POSITION = 0 }, new MorphTarget{ POSITION = 0 } };
+
+            a.targets = new[] { new MorphTarget { POSITION = 0 } };
+            b.targets = new[] { new MorphTarget { POSITION = 0 }, new MorphTarget { POSITION = 0 } };
             Assert.IsFalse(a.Equals(b));
-            
-            a = new MeshPrimitive {attributes = new Attributes { POSITION = 41 } };
-            b = new MeshPrimitive {attributes = new Attributes { POSITION = 42 } };
+
+            a = new MeshPrimitive { attributes = new Attributes { POSITION = 41 } };
+            b = new MeshPrimitive { attributes = new Attributes { POSITION = 42 } };
             Assert.IsFalse(a.Equals(b));
-            
-            a.targets = new[] { new MorphTarget{ POSITION = 0 } };
-            b.targets = new[] { new MorphTarget{ POSITION = 0 } };
+
+            a.targets = new[] { new MorphTarget { POSITION = 0 } };
+            b.targets = new[] { new MorphTarget { POSITION = 0 } };
             Assert.IsFalse(a.Equals(b));
         }
     }

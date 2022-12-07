@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ namespace GLTFast.Materials {
 
         // Keywords
         const string k_TransmissionKeyword = "_TRANSMISSION";
-        
+
         static bool s_SupportsCameraOpaqueTexture;
 
 #if USING_URP_12_OR_NEWER
@@ -41,7 +41,7 @@ namespace GLTFast.Materials {
         public UniversalRPMaterialGenerator(UniversalRenderPipelineAsset renderPipelineAsset) {
             s_SupportsCameraOpaqueTexture = renderPipelineAsset.supportsCameraOpaqueTexture;
         }
-        
+
 #if USING_URP_12_OR_NEWER
 #if !UNITY_SHADER_GRAPH_12_OR_NEWER
         protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
@@ -51,7 +51,7 @@ namespace GLTFast.Materials {
         protected override string GetSpecularShaderName(SpecularShaderFeatures features) {
             return SHADER_SPECULAR;
         }
-        
+
         protected override string GetUnlitShaderName(UnlitShaderFeatures features) {
             return SHADER_UNLIT;
         }
@@ -88,12 +88,12 @@ namespace GLTFast.Materials {
 
         protected override ShaderMode? ApplyTransmissionShaderFeatures(Schema.Material gltfMaterial) {
             if (!s_SupportsCameraOpaqueTexture) {
-                // Fall back to makeshift approximation via premultiply or blend 
+                // Fall back to makeshift approximation via premultiply or blend
                 return base.ApplyTransmissionShaderFeatures(gltfMaterial);
             }
 
-            if (gltfMaterial?.extensions?.KHR_materials_transmission != null 
-                && gltfMaterial.extensions.KHR_materials_transmission.transmissionFactor > 0f) 
+            if (gltfMaterial?.extensions?.KHR_materials_transmission != null
+                && gltfMaterial.extensions.KHR_materials_transmission.transmissionFactor > 0f)
             {
                 return ShaderMode.Blend;
             }
@@ -101,7 +101,7 @@ namespace GLTFast.Materials {
             // No explicitly change in shader features
             return null;
         }
-        
+
         protected override RenderQueue? ApplyTransmission(
             ref Color baseColorLinear,
             IGltfReadable gltf,

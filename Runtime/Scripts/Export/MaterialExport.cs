@@ -16,26 +16,31 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast.Export {
+namespace GLTFast.Export
+{
 
     /// <summary>
     /// Provides the default material export
     /// </summary>
-    public static class MaterialExport {
+    public static class MaterialExport
+    {
 
         static IMaterialExport s_MaterialExport;
-        
+
         /// <summary>
         /// Provides the default material exporter
         /// </summary>
         /// <returns>Default material export</returns>
         /// <exception cref="Exception"></exception>
-        public static IMaterialExport GetDefaultMaterialExport() {
-            if (s_MaterialExport == null) {
+        public static IMaterialExport GetDefaultMaterialExport()
+        {
+            if (s_MaterialExport == null)
+            {
 
                 var renderPipeline = RenderPipelineUtils.renderPipeline;
 
-                switch (renderPipeline) {
+                switch (renderPipeline)
+                {
                     case RenderPipeline.BuiltIn:
                     case RenderPipeline.Universal:
                         s_MaterialExport = new StandardMaterialExport();

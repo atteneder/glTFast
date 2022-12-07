@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,22 +15,24 @@
 
 using UnityEngine;
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// This extension defines a sheen that can be layered on top of an
     /// existing glTF material definition. A sheen layer is a common technique
     /// used in Physically-Based Rendering to represent cloth and fabric
-    /// materials, for example. 
+    /// materials, for example.
     /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_sheen"/>
     /// </summary>
     [System.Serializable]
-    public class Sheen {
+    public class Sheen
+    {
 
         /// <summary>
         /// The sheen color red, green and blue components in linear space.
         /// </summary>
-        public float[] sheenColorFactor = {1,1,1};
+        public float[] sheenColorFactor = { 1, 1, 1 };
 
         /// <summary>
         /// The sheen color in linear space.
@@ -46,18 +48,19 @@ namespace GLTFast.Schema {
         /// The sheen color texture.
         /// </summary>
         public TextureInfo sheenColorTexture;
-        
+
         /// <summary>
         /// The sheen roughness.
         /// </summary>
         public float sheenRoughnessFactor;
-        
+
         /// <summary>
         /// The sheen roughness (Alpha) texture.
         /// </summary>
         public TextureInfo sheenRoughnessTexture;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             writer.Close();
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");

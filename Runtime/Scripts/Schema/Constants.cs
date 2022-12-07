@@ -13,8 +13,10 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
-    static class Constants {
+namespace GLTFast.Schema
+{
+    static class Constants
+    {
         public const float epsilon = .001f;
     }
 }

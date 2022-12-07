@@ -25,10 +25,12 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace GLTFast.Export {
-    
+namespace GLTFast.Export
+{
+
     [BurstCompile]
-    static class ExportJobs {
+    static class ExportJobs
+    {
 
 #if GLTFAST_MESH_DATA
 
@@ -48,7 +50,7 @@ namespace GLTFast.Export {
                 result[i*3+2] = input[i*3+1];
             }
         }
-        
+
         [BurstCompile]
         public struct ConvertIndicesQuadFlippedJob<T> : IJobParallelFor where T : struct {
 
@@ -72,19 +74,21 @@ namespace GLTFast.Export {
 #endif // GLTFAST_MESH_DATA
 
         [BurstCompile]
-        public unsafe struct ConvertPositionFloatJob : IJobParallelFor {
+        public unsafe struct ConvertPositionFloatJob : IJobParallelFor
+        {
 
             public uint byteStride;
-            
+
             [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
             public byte* input;
-            
+
             [WriteOnly]
             [NativeDisableUnsafePtrRestriction]
             public byte* output;
 
-            public void Execute(int i) {
+            public void Execute(int i)
+            {
                 var inPtr = (float3*)(input + i * byteStride);
                 var outPtr = (float3*)(output + i * byteStride);
 
@@ -93,21 +97,23 @@ namespace GLTFast.Export {
                 *outPtr = tmp;
             }
         }
-        
+
         [BurstCompile]
-        public unsafe struct ConvertTangentFloatJob : IJobParallelFor {
+        public unsafe struct ConvertTangentFloatJob : IJobParallelFor
+        {
 
             public uint byteStride;
-            
+
             [ReadOnly]
             [NativeDisableUnsafePtrRestriction]
             public byte* input;
-            
+
             [WriteOnly]
             [NativeDisableUnsafePtrRestriction]
             public byte* output;
 
-            public void Execute(int i) {
+            public void Execute(int i)
+            {
                 var inPtr = (float4*)(input + i * byteStride);
                 var outPtr = (float4*)(output + i * byteStride);
 

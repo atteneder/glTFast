@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,12 +22,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text;
 
-namespace GLTFast.Logging {
+namespace GLTFast.Logging
+{
 
     /// <summary>
     /// Predefined message code
     /// </summary>
-    public enum LogCode : uint {
+    public enum LogCode : uint
+    {
         /// <summary>
         /// No or unknown log code.
         /// </summary>
@@ -47,7 +49,7 @@ namespace GLTFast.Logging {
         /// </summary>
         AccessorsShared,
         /// <summary>
-        /// Animation channel has invalid node id 
+        /// Animation channel has invalid node id
         /// </summary>
         AnimationChannelNodeInvalid,
         /// <summary>
@@ -91,7 +93,7 @@ namespace GLTFast.Logging {
         /// </summary>
         Download,
         /// <summary>
-        /// Loading embed buffer failed 
+        /// Loading embed buffer failed
         /// </summary>
         EmbedBufferLoadFailed,
         /// <summary>
@@ -99,35 +101,35 @@ namespace GLTFast.Logging {
         /// </summary>
         EmbedImageInconsistentType,
         /// <summary>
-        /// Loading embedded image failed 
+        /// Loading embedded image failed
         /// </summary>
         EmbedImageLoadFailed,
         /// <summary>
-        /// Unsupported embed image format 
+        /// Unsupported embed image format
         /// </summary>
         EmbedImageUnsupportedType,
         /// <summary>
-        /// JSON embed buffers are slow! consider using glTF binary 
+        /// JSON embed buffers are slow! consider using glTF binary
         /// </summary>
         EmbedSlow,
         /// <summary>
-        /// glTF extension is not supported 
+        /// glTF extension is not supported
         /// </summary>
         ExtensionUnsupported,
         /// <summary>
-        /// Image could not get exported 
+        /// Image could not get exported
         /// </summary>
         ExportImageFailed,
         /// <summary>
-        /// Not a glTF-binary file 
+        /// Not a glTF-binary file
         /// </summary>
         GltfNotBinary,
         /// <summary>
-        /// Unsupported glTF version 
+        /// Unsupported glTF version
         /// </summary>
         GltfUnsupportedVersion,
         /// <summary>
-        /// Invalid hierarchy 
+        /// Invalid hierarchy
         /// </summary>
         HierarchyInvalid,
         /// <summary>
@@ -135,24 +137,24 @@ namespace GLTFast.Logging {
         /// </summary>
         ImageConversionNotEnabled,
         /// <summary>
-        /// Unknown image format 
+        /// Unknown image format
         /// </summary>
         ImageFormatUnknown,
         /// <summary>
-        /// Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory. 
+        /// Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory.
         /// </summary>
         ImageMultipleSamplers,
         /// <summary>
-        /// Invalid index format 
+        /// Invalid index format
         /// </summary>
         IndexFormatInvalid,
         /// <summary>
-        /// Parsing JSON failed 
+        /// Parsing JSON failed
         /// </summary>
         JsonParsingFailed,
         /// <summary>
         /// Chance of incorrect materials! glTF transmission is approximated
-        /// when using built-in render pipeline! 
+        /// when using built-in render pipeline!
         /// </summary>
         MaterialTransmissionApprox,
         /// <summary>
@@ -161,11 +163,11 @@ namespace GLTFast.Logging {
         /// </summary>
         MaterialTransmissionApproxUrp,
         /// <summary>
-        /// No bounds for mesh {0} => calculating them. 
+        /// No bounds for mesh {0} => calculating them.
         /// </summary>
         MeshBoundsMissing,
         /// <summary>
-        /// Skipping non-readable mesh 
+        /// Skipping non-readable mesh
         /// </summary>
         MeshNotReadable,
         /// <summary>
@@ -241,11 +243,12 @@ namespace GLTFast.Logging {
         /// </summary>
         UVMulti,
     }
-    
+
     /// <summary>
     /// Converts <seealso cref="LogCode"/> to human readable and understandable message string.
     /// </summary>
-    public static class LogMessages {
+    public static class LogMessages
+    {
 #if GLTFAST_REPORT
         static readonly Dictionary<LogCode, string> k_FullMessages = new Dictionary<LogCode, string>() {
             { LogCode.AccessorAttributeTypeUnknown, "Unknown GLTFAccessorAttributeType" },
@@ -311,11 +314,15 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
         /// <param name="code">Input LogCode</param>
         /// <param name="messages">Additional message parts (te be filled into final message)</param>
         /// <returns>Human readable and understandable message string</returns>
-        public static string GetFullMessage(LogCode code, params string[] messages) {
-            if (code == LogCode.None) {
+        public static string GetFullMessage(LogCode code, params string[] messages)
+        {
+            if (code == LogCode.None)
+            {
                 var sb = new StringBuilder();
-                foreach (var message in messages) {
-                    if (sb.Length > 0) {
+                foreach (var message in messages)
+                {
+                    if (sb.Length > 0)
+                    {
                         sb.Append(";");
                     }
                     sb.Append(message);
@@ -328,11 +335,15 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
                 ? string.Format(k_FullMessages[code], messages)
                 : k_FullMessages[code];
 #else
-            if (messages == null) {
+            if (messages == null)
+            {
                 return code.ToString();
-            } else {
+            }
+            else
+            {
                 var sb = new StringBuilder(code.ToString());
-                foreach (var message in messages) {
+                foreach (var message in messages)
+                {
                     sb.Append(";");
                     sb.Append(message);
                 }
@@ -342,4 +353,3 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
         }
     }
 }
-

@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ namespace GLTFast {
 
         public override async Task<TextureResult> LoadTexture2D(bool linear) {
             using (var array = new ManagedNativeArray(m_Data)) {
-                
+
                 var errorCode = m_KtxTexture.Open(array.nativeArray);
                 if (errorCode != ErrorCode.Success) {
                     return new TextureResult(errorCode);
                 }
 
                 var result = await m_KtxTexture.LoadTexture2D(linear);
-                
+
                 m_KtxTexture.Dispose();
                 return result;
             }

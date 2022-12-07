@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,26 +16,32 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast {
-    
+namespace GLTFast
+{
+
     /// <summary>
     /// To be added to a GameObject along a default <see cref="IDeferAgent"/>.
     /// Will (un)register it as GltfImport's default when it's enabled or disabled.
     /// </summary>
     [RequireComponent(typeof(IDeferAgent))]
     [DefaultExecutionOrder(-1)]
-    class DefaultDeferAgent : MonoBehaviour {
+    class DefaultDeferAgent : MonoBehaviour
+    {
 
-        void OnEnable() {
+        void OnEnable()
+        {
             var deferAgent = GetComponent<IDeferAgent>();
-            if (deferAgent != null) {
+            if (deferAgent != null)
+            {
                 GltfImport.SetDefaultDeferAgent(deferAgent);
             }
         }
 
-        void OnDisable() {
+        void OnDisable()
+        {
             var deferAgent = GetComponent<IDeferAgent>();
-            if (deferAgent != null) {
+            if (deferAgent != null)
+            {
                 GltfImport.UnsetDefaultDeferAgent(deferAgent);
             }
         }

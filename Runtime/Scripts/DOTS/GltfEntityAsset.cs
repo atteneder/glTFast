@@ -26,7 +26,7 @@ using Unity.Transforms;
 using UnityEngine;
 
 namespace GLTFast {
-    
+
     /// <summary>
     /// Loads a glTF from a MonoBehaviour but instantiates Entities.
     /// Intermediate solution and drop-in replacement for GltfAsset
@@ -36,18 +36,18 @@ namespace GLTFast {
 
         [Tooltip("URL to load the glTF from.")]
         public string url;
-        
+
         [Tooltip("Automatically load at start.")]
         public bool loadOnStartup = true;
-        
+
         [Tooltip("Override scene to load (-1 loads glTFs default scene)")]
         public int sceneId = -1;
-        
+
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
         public bool streamingAsset;
 
         public InstantiationSettings instantiationSettings;
-        
+
         Entity m_SceneRoot;
 
         public string FullUrl => streamingAsset
@@ -60,7 +60,7 @@ namespace GLTFast {
                 await Load(FullUrl);
             }
         }
-        
+
         public override async Task<bool> Load(
             string gltfUrl,
             IDownloadProvider downloadProvider=null,
@@ -82,7 +82,7 @@ namespace GLTFast {
             }
             return success;
         }
-        
+
         protected override IInstantiator GetDefaultInstantiator(ICodeLogger logger) {
             var entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             var sceneArchetype = entityManager.CreateArchetype(
@@ -102,11 +102,11 @@ namespace GLTFast {
             // entityManager.AddBuffer<LinkedEntityGroup>(sceneRoot);
             return new EntityInstantiator(importer, m_SceneRoot, logger, instantiationSettings);
         }
-        
+
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
             currentSceneId = success ? importer.defaultSceneIndex : null;
         }
-        
+
         /// <summary>
         /// Removes previously instantiated scene(s)
         /// </summary>
@@ -139,4 +139,4 @@ namespace GLTFast {
         }
     }
 }
-#endif // UNITY_DOTS_HYBRID 
+#endif // UNITY_DOTS_HYBRID

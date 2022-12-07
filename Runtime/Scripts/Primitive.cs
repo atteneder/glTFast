@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,15 +13,18 @@
 // limitations under the License.
 //
 
-namespace GLTFast {
-    
-    struct Primitive {
+namespace GLTFast
+{
+
+    struct Primitive
+    {
         public UnityEngine.Mesh mesh;
         public int[] materialIndices;
 
-        public Primitive( UnityEngine.Mesh mesh, int[] materialIndex ) {
+        public Primitive(UnityEngine.Mesh mesh, int[] materialIndex)
+        {
             this.mesh = mesh;
             this.materialIndices = materialIndex;
         }
     }
-} 
+}

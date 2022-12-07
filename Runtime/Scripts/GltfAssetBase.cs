@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,25 +29,25 @@ namespace GLTFast
     {
         /// <inheritdoc cref="ImportSettings"/>
         public ImportSettings importSettings;
-        
+
         /// <summary>
         /// Instance used for loading the glTF's content
         /// </summary>
         // ReSharper disable once MemberCanBeProtected.Global
         public GltfImport importer { get; protected set; }
-        
+
         /// <summary>
         /// Indicates whether the glTF was loaded (no matter if successfully or not)
         /// </summary>
         /// <value>True when loading routine ended, false otherwise.</value>
-        public bool isDone => importer!=null && importer.LoadingDone;
-        
+        public bool isDone => importer != null && importer.LoadingDone;
+
         /// <summary>
         /// Scene ID of the recently instantiated scene. Null if there was no
         /// scene instantiated (successfully).
         /// </summary>
         public int? currentSceneId { get; protected set; }
-        
+
         /// <summary>
         /// Method for manual loading with custom <see cref="IDownloadProvider"/> and <see cref="IDeferAgent"/>.
         /// </summary>
@@ -60,14 +60,14 @@ namespace GLTFast
         /// <returns>Async Task that loads the glTF's contents</returns>
         public virtual async Task<bool> Load(
             string gltfUrl,
-            IDownloadProvider downloadProvider=null,
-            IDeferAgent deferAgent=null,
-            IMaterialGenerator materialGenerator=null,
+            IDownloadProvider downloadProvider = null,
+            IDeferAgent deferAgent = null,
+            IMaterialGenerator materialGenerator = null,
             ICodeLogger logger = null
             )
         {
-            importer = new GltfImport(downloadProvider,deferAgent, materialGenerator, logger);
-            return await importer.Load(gltfUrl,importSettings);
+            importer = new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
+            return await importer.Load(gltfUrl, importSettings);
         }
 
         /// <summary>
@@ -76,7 +76,8 @@ namespace GLTFast
         /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
         // ReSharper disable once MemberCanBeProtected.Global
-        public async Task<bool> Instantiate(ICodeLogger logger = null) {
+        public async Task<bool> Instantiate(ICodeLogger logger = null)
+        {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
             var success = await importer.InstantiateMainSceneAsync(instantiator);
@@ -90,10 +91,11 @@ namespace GLTFast
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <param name="logger">Used for message reporting</param>
         /// <returns>True if instantiation was successful.</returns>
-        public virtual async Task<bool> InstantiateScene(int sceneIndex, ICodeLogger logger = null) {
+        public virtual async Task<bool> InstantiateScene(int sceneIndex, ICodeLogger logger = null)
+        {
             if (importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
-            var success = await importer.InstantiateSceneAsync(instantiator,sceneIndex);
+            var success = await importer.InstantiateSceneAsync(instantiator, sceneIndex);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -104,9 +106,10 @@ namespace GLTFast
         /// <param name="sceneIndex">Index of the scene to be instantiated</param>
         /// <param name="instantiator">Receives scene construction calls</param>
         /// <returns>True if instantiation was successful.</returns>
-        protected async Task<bool> InstantiateScene(int sceneIndex, GameObjectInstantiator instantiator) {
+        protected async Task<bool> InstantiateScene(int sceneIndex, GameObjectInstantiator instantiator)
+        {
             if (importer == null) return false;
-            var success = await importer.InstantiateSceneAsync(instantiator,sceneIndex);
+            var success = await importer.InstantiateSceneAsync(instantiator, sceneIndex);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -122,7 +125,8 @@ namespace GLTFast
         /// </summary>
         /// <param name="index">Index of material in glTF file.</param>
         /// <returns>glTF material if it was loaded successfully and index is correct, null otherwise.</returns>
-        public Material GetMaterial( int index = 0 ) {
+        public Material GetMaterial(int index = 0)
+        {
             return importer?.GetMaterial(index);
         }
 
@@ -134,11 +138,15 @@ namespace GLTFast
         /// <summary>
         /// Array of scenes' names (entries can be null, if not specified)
         /// </summary>
-        public string[] sceneNames {
-            get {
-                if (importer != null && importer.sceneCount > 0) {
+        public string[] sceneNames
+        {
+            get
+            {
+                if (importer != null && importer.sceneCount > 0)
+                {
                     var names = new string[importer.sceneCount];
-                    for (int i = 0; i < names.Length; i++) {
+                    for (int i = 0; i < names.Length; i++)
+                    {
                         names[i] = importer.GetSceneName(i);
                     }
                     return names;
@@ -153,13 +161,14 @@ namespace GLTFast
         /// <param name="logger">Custom logger to use with the instantiator</param>
         /// <returns>Default instantiator instance</returns>
         protected abstract IInstantiator GetDefaultInstantiator(ICodeLogger logger);
-        
+
         /// <summary>
         /// Callback that is called after instantiation
         /// </summary>
         /// <param name="instantiator">instantiator that was used</param>
         /// <param name="success">True if instantiation was successful, false otherwise</param>
-        protected virtual void PostInstantiation(IInstantiator instantiator, bool success) {
+        protected virtual void PostInstantiation(IInstantiator instantiator, bool success)
+        {
             currentSceneId = success ? importer.defaultSceneIndex : null;
         }
 
@@ -167,10 +176,12 @@ namespace GLTFast
         /// Releases previously allocated resources.
         /// </summary>
         // ReSharper disable once MemberCanBePrivate.Global
-        public void Dispose() {
-            if(importer!=null) {
+        public void Dispose()
+        {
+            if (importer != null)
+            {
                 importer.Dispose();
-                importer=null;
+                importer = null;
             }
         }
 

@@ -31,21 +31,21 @@ namespace GLTFast {
         const float k_Epsilon = .00001f;
 
         protected ICodeLogger m_Logger;
-        
+
         protected IGltfReadable m_Gltf;
-        
+
         protected Entity m_Parent;
 
         protected Dictionary<uint,Entity> m_Nodes;
 
         protected InstantiationSettings m_Settings;
-        
+
         EntityManager m_EntityManager;
         EntityArchetype m_NodeArchetype;
         EntityArchetype m_SceneArchetype;
 
         Parent m_SceneParent;
-        
+
         public EntityInstantiator(
             IGltfReadable gltf,
             Entity parent,
@@ -58,7 +58,7 @@ namespace GLTFast {
             this.m_Logger = logger;
             this.m_Settings = settings ?? new InstantiationSettings();
         }
-        
+
         /// <inheritdoc />
         public void BeginScene(
             string name,
@@ -81,7 +81,7 @@ namespace GLTFast {
                 typeof(Rotation),
                 typeof(LocalToWorld)
             );
-            
+
             if (m_Settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
                 || m_Settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
                 m_SceneParent = new Parent { Value = m_Parent };
@@ -100,7 +100,7 @@ namespace GLTFast {
             }
             Profiler.EndSample();
         }
-        
+
 #if UNITY_ANIMATION
         /// <inheritdoc />
         public void AddAnimation(AnimationClip[] animationClips) {
@@ -125,7 +125,7 @@ namespace GLTFast {
             SetEntityScale(node, scale);
             m_Nodes[nodeIndex] = node;
             m_EntityManager.SetComponentData(
-                node, 
+                node,
                 parentIndex.HasValue
                     ? new Parent { Value = m_Nodes[parentIndex.Value] }
                     : m_SceneParent
@@ -174,12 +174,12 @@ namespace GLTFast {
                 m_EntityManager.SetComponentData(node,new Rotation {Value = quaternion.identity});
                 m_EntityManager.SetComponentData(node, new Parent { Value = m_Nodes[nodeIndex] });
             }
-            
+
             var hasMorphTargets = mesh.blendShapeCount > 0;
 
             for (var index = 0; index < materialIndices.Length; index++) {
                 var material = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
-                 
+
                 RenderMeshUtility.AddComponents(node,m_EntityManager,new RenderMeshDescription(mesh,material,layer:m_Settings.layer,subMeshIndex:index));
                  if(joints!=null || hasMorphTargets) {
                      if (joints != null) {
@@ -259,7 +259,7 @@ namespace GLTFast {
             // }
             // TODO: Add lights support
         }
-        
+
         /// <inheritdoc />
         public virtual void EndScene(uint[] rootNodeIndices) {
             Profiler.BeginSample("EndScene");

@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,43 +21,49 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
-namespace GLTFast {
+namespace GLTFast
+{
 
     using Logging;
     using Schema;
 
-    abstract class VertexBufferColorsBase {
+    abstract class VertexBufferColorsBase
+    {
         public abstract bool ScheduleVertexColorJob(IGltfBuffers buffers, int colorAccessorIndex, NativeSlice<JobHandle> handles);
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream);
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
         public abstract void Dispose();
 
         protected ICodeLogger m_Logger;
-        
-        protected VertexBufferColorsBase(ICodeLogger logger) {
+
+        protected VertexBufferColorsBase(ICodeLogger logger)
+        {
             m_Logger = logger;
         }
     }
 
-    class VertexBufferColors : VertexBufferColorsBase {
-        
+    class VertexBufferColors : VertexBufferColorsBase
+    {
+
         NativeArray<float4> m_Data;
-        
+
         public VertexBufferColors(ICodeLogger logger = null)
-            : base(logger) 
+            : base(logger)
         {
         }
-        
-        public override unsafe bool ScheduleVertexColorJob(IGltfBuffers buffers, int colorAccessorIndex, NativeSlice<JobHandle> handles) {
+
+        public override unsafe bool ScheduleVertexColorJob(IGltfBuffers buffers, int colorAccessorIndex, NativeSlice<JobHandle> handles)
+        {
             Profiler.BeginSample("ScheduleVertexColorJob");
             Profiler.BeginSample("AllocateNativeArray");
             buffers.GetAccessor(colorAccessorIndex, out var colorAcc, out var data, out var byteStride);
-            if (colorAcc.isSparse) {
-                m_Logger.Error(LogCode.SparseAccessor,"color");
+            if (colorAcc.isSparse)
+            {
+                m_Logger.Error(LogCode.SparseAccessor, "color");
             }
             m_Data = new NativeArray<float4>(colorAcc.count, VertexBufferConfigBase.defaultAllocator);
             Profiler.EndSample();
-            
+
             var h = GetColors32Job(
                 data,
                 colorAcc.componentType,
@@ -65,9 +71,12 @@ namespace GLTFast {
                 byteStride,
                 m_Data
             );
-            if (h.HasValue) {
+            if (h.HasValue)
+            {
                 handles[0] = h.Value;
-            } else {
+            }
+            else
+            {
                 Profiler.EndSample();
                 return false;
             }
@@ -75,22 +84,26 @@ namespace GLTFast {
             return true;
         }
 
-        public override void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream) {
+        public override void AddDescriptors(VertexAttributeDescriptor[] dst, int offset, int stream)
+        {
             dst[offset] = new VertexAttributeDescriptor(VertexAttribute.Color, VertexAttributeFormat.Float32, 4, stream);
         }
 
-        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags) {
+        public override void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags)
+        {
             Profiler.BeginSample("ApplyUVs");
-            msh.SetVertexBufferData(m_Data,0,0,m_Data.Length,stream,flags);
+            msh.SetVertexBufferData(m_Data, 0, 0, m_Data.Length, stream, flags);
             Profiler.EndSample();
         }
 
-        public override void Dispose() {
-            if (m_Data.IsCreated) {
+        public override void Dispose()
+        {
+            if (m_Data.IsCreated)
+            {
                 m_Data.Dispose();
             }
         }
-        
+
         unsafe JobHandle? GetColors32Job(
             void* input,
             GltfComponentType inputType,
@@ -108,36 +121,39 @@ namespace GLTFast {
                 {
                     case GltfComponentType.UnsignedByte:
                         {
-                            var job = new Jobs.ConvertColorsRgbUInt8ToRGBAFloatJob {
-                                input = (byte*) input,
-                                inputByteStride = inputByteStride>0 ? inputByteStride : 3,
+                            var job = new Jobs.ConvertColorsRgbUInt8ToRGBAFloatJob
+                            {
+                                input = (byte*)input,
+                                inputByteStride = inputByteStride > 0 ? inputByteStride : 3,
                                 result = output
                             };
-                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length, GltfImport.DefaultBatchCount);
                         }
                         break;
                     case GltfComponentType.Float:
                         {
-                            var job = new Jobs.ConvertColorsRGBFloatToRGBAFloatJob {
-                                input = (byte*) input,
-                                inputByteStride = inputByteStride>0 ? inputByteStride : 12,
+                            var job = new Jobs.ConvertColorsRGBFloatToRGBAFloatJob
+                            {
+                                input = (byte*)input,
+                                inputByteStride = inputByteStride > 0 ? inputByteStride : 12,
                                 result = (float4*)output.GetUnsafePtr()
                             };
-                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length, GltfImport.DefaultBatchCount);
                         }
                         break;
                     case GltfComponentType.UnsignedShort:
                         {
-                            var job = new Jobs.ConvertColorsRgbUInt16ToRGBAFloatJob {
+                            var job = new Jobs.ConvertColorsRgbUInt16ToRGBAFloatJob
+                            {
                                 input = (System.UInt16*)input,
-                                inputByteStride = inputByteStride>0 ? inputByteStride : 6,
+                                inputByteStride = inputByteStride > 0 ? inputByteStride : 6,
                                 result = output
                             };
-                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length, GltfImport.DefaultBatchCount);
                         }
                         break;
                     default:
-                        m_Logger?.Error(LogCode.ColorFormatUnsupported,attributeType.ToString());
+                        m_Logger?.Error(LogCode.ColorFormatUnsupported, attributeType.ToString());
                         break;
                 }
             }
@@ -147,49 +163,55 @@ namespace GLTFast {
                 {
                     case GltfComponentType.UnsignedByte:
                         {
-                            var job = new Jobs.ConvertColorsRgbaUInt8ToRGBAFloatJob {
-                                input = (byte*) input,
+                            var job = new Jobs.ConvertColorsRgbaUInt8ToRGBAFloatJob
+                            {
+                                input = (byte*)input,
                                 inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
                                 result = output
                             };
-                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length, GltfImport.DefaultBatchCount);
                         }
                         break;
                     case GltfComponentType.Float:
                         {
                             if (inputByteStride == 16 || inputByteStride <= 0)
                             {
-                                var job = new Jobs.MemCopyJob {
-                                    bufferSize = output.Length*16,
+                                var job = new Jobs.MemCopyJob
+                                {
+                                    bufferSize = output.Length * 16,
                                     input = input,
                                     result = output.GetUnsafeReadOnlyPtr()
                                 };
                                 jobHandle = job.Schedule();
-                            } else {
-                                var job = new Jobs.ConvertColorsRGBAFloatToRGBAFloatJob {
-                                    input = (byte*) input,
+                            }
+                            else
+                            {
+                                var job = new Jobs.ConvertColorsRGBAFloatToRGBAFloatJob
+                                {
+                                    input = (byte*)input,
                                     inputByteStride = inputByteStride,
                                     result = (float4*)output.GetUnsafePtr()
                                 };
 #if UNITY_JOBS
                                 jobHandle = job.ScheduleBatch(output.Length,GltfImport.DefaultBatchCount);
 #else
-                                jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+                                jobHandle = job.Schedule(output.Length, GltfImport.DefaultBatchCount);
 #endif
                             }
                         }
                         break;
                     case GltfComponentType.UnsignedShort:
                         {
-                            var job = new Jobs.ConvertColorsRgbaUInt16ToRGBAFloatJob {
-                                input = (System.UInt16*) input,
-                                inputByteStride = inputByteStride>0 ? inputByteStride : 8,
+                            var job = new Jobs.ConvertColorsRgbaUInt16ToRGBAFloatJob
+                            {
+                                input = (System.UInt16*)input,
+                                inputByteStride = inputByteStride > 0 ? inputByteStride : 8,
                                 result = (float4*)output.GetUnsafePtr()
                             };
 #if UNITY_JOBS
                             jobHandle = job.ScheduleBatch(output.Length,GltfImport.DefaultBatchCount);
 #else
-                            jobHandle = job.Schedule(output.Length,GltfImport.DefaultBatchCount);
+                            jobHandle = job.Schedule(output.Length, GltfImport.DefaultBatchCount);
 #endif
                         }
                         break;
@@ -197,7 +219,9 @@ namespace GLTFast {
                         m_Logger?.Error(LogCode.ColorFormatUnsupported, attributeType.ToString());
                         break;
                 }
-            } else {
+            }
+            else
+            {
                 m_Logger?.Error(LogCode.TypeUnsupported, "color accessor", inputType.ToString());
             }
             Profiler.EndSample();

@@ -13,18 +13,20 @@
 // limitations under the License.
 //
 
-namespace GLTFast {
+namespace GLTFast
+{
 
     /// <summary>
     /// <see href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#specifying-extensions">glTF Extensions</see>
     /// </summary>
-    public enum Extension {
+    public enum Extension
+    {
         /// <summary>
-        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md">KHR_draco_mesh_compression</see> glTF extension 
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md">KHR_draco_mesh_compression</see> glTF extension
         /// </summary>
         DracoMeshCompression,
         /// <summary>
-        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_lights_punctual/README.md">KHR_lights_punctual</see> glTF extension 
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_lights_punctual/README.md">KHR_lights_punctual</see> glTF extension
         /// </summary>
         LightsPunctual,
         /// <summary>
@@ -56,13 +58,14 @@ namespace GLTFast {
         /// </summary>
         TextureTransform,
     }
-    
+
     /// <summary>
     /// Collection of glTF extension names
     /// </summary>
-    public static class ExtensionName {
+    public static class ExtensionName
+    {
         /// <summary>
-        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md">KHR_draco_mesh_compression</see> glTF extension 
+        /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md">KHR_draco_mesh_compression</see> glTF extension
         /// </summary>
         public const string DracoMeshCompression = "KHR_draco_mesh_compression";
         /// <summary>
@@ -101,14 +104,16 @@ namespace GLTFast {
         /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> glTF extension
         /// </summary>
         public const string LightsPunctual = "KHR_lights_punctual";
-        
+
         /// <summary>
         /// Returns the official name of the glTF extension
         /// </summary>
         /// <param name="extension">Extension enum value</param>
         /// <returns>Name of the glTF extension</returns>
-        public static string GetName(this Extension extension) {
-            switch (extension) {
+        public static string GetName(this Extension extension)
+        {
+            switch (extension)
+            {
                 case Extension.DracoMeshCompression:
                     return DracoMeshCompression;
                 case Extension.LightsPunctual:

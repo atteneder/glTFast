@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,13 +13,15 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// Reference to a texture.
     /// </summary>
     [System.Serializable]
-    public class TextureInfo {
+    public class TextureInfo
+    {
 
         /// <summary>
         /// The index of the texture.
@@ -35,22 +37,27 @@ namespace GLTFast.Schema {
 
         /// <inheritdoc cref="TextureInfoExtension"/>
         public TextureInfoExtension extensions;
-        
-        internal void GltfSerializeTextureInfo(JsonWriter writer) {
-            if (index >= 0) {
+
+        internal void GltfSerializeTextureInfo(JsonWriter writer)
+        {
+            if (index >= 0)
+            {
                 writer.AddProperty("index", index);
             }
-            if (texCoord > 0) {
+            if (texCoord > 0)
+            {
                 writer.AddProperty("texCoord", texCoord);
             }
 
-            if (extensions != null) {
+            if (extensions != null)
+            {
                 writer.AddProperty("extensions");
                 extensions.GltfSerialize(writer);
             }
         }
-        
-        internal virtual void GltfSerialize(JsonWriter writer) {
+
+        internal virtual void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             GltfSerializeTextureInfo(writer);
             writer.Close();

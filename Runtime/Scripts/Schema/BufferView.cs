@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 using Meshoptimizer;
 #endif
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     // public enum BufferViewTarget
     // {
@@ -30,7 +31,8 @@ namespace GLTFast.Schema {
     /// Base class; Consists of a byte size and offset
     /// </summary>
     [System.Serializable]
-    public abstract class BufferSlice {
+    public abstract class BufferSlice
+    {
         /// <summary>
         /// The offset into the buffer in bytes.
         /// <minimum>0</minimum>
@@ -48,7 +50,8 @@ namespace GLTFast.Schema {
     /// Adds buffer index and byte stride to <seealso cref="BufferSlice"/>
     /// </summary>
     [System.Serializable]
-    public class BufferViewBase : BufferSlice {
+    public class BufferViewBase : BufferSlice
+    {
         /// <summary>
         /// The index of the buffer.
         /// </summary>
@@ -62,30 +65,35 @@ namespace GLTFast.Schema {
         /// </summary>
         public int byteStride = -1;
     }
-    
+
     /// <summary>
     /// A view into a buffer generally representing a subset of the buffer.
     /// </summary>
     [System.Serializable]
-    public class BufferView : BufferViewBase {
+    public class BufferView : BufferViewBase
+    {
         /// <summary>
         /// The target that the WebGL buffer should be bound to.
         /// All valid values correspond to WebGL enums.
         /// When this is not provided, the bufferView contains animation or skin data.
         /// </summary>
         public int target;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             writer.AddProperty("buffer", buffer);
             writer.AddProperty("byteLength", byteLength);
-            if (byteOffset > 0) {
+            if (byteOffset > 0)
+            {
                 writer.AddProperty("byteOffset", byteOffset);
             }
-            if (byteStride > 0) {
+            if (byteStride > 0)
+            {
                 writer.AddProperty("byteStride", byteStride);
             }
-            if (target > 0) {
+            if (target > 0)
+            {
                 writer.AddProperty("target", target);
             }
             writer.Close();
@@ -103,7 +111,7 @@ namespace GLTFast.Schema {
         public BufferViewMeshoptExtension EXT_meshopt_compression;
         // ReSharper restore InconsistentNaming
     }
-    
+
     [System.Serializable]
     public class BufferViewMeshoptExtension : BufferViewBase {
 
@@ -125,7 +133,7 @@ namespace GLTFast.Schema {
                 return Mode.Undefined;
             }
         }
-        
+
         Filter m_FilterEnum = Filter.Undefined;
         public Filter filterEnum {
             get {

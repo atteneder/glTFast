@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 using UnityEngine.Rendering;
 using System.Threading.Tasks;
 
-namespace GLTFast {
-    
-    abstract class PrimitiveCreateContextBase {
-        
+namespace GLTFast
+{
+
+    abstract class PrimitiveCreateContextBase
+    {
+
         public const MeshUpdateFlags defaultMeshUpdateFlags =
             MeshUpdateFlags.DontNotifyMeshUsers
             | MeshUpdateFlags.DontRecalculateBounds
@@ -31,20 +33,22 @@ namespace GLTFast {
 
         public int primitiveIndex { get; }
 
-        public abstract bool IsCompleted {get;}
+        public abstract bool IsCompleted { get; }
 
-        protected PrimitiveCreateContextBase(int primitiveIndex, int materialCount, string meshName) {
+        protected PrimitiveCreateContextBase(int primitiveIndex, int materialCount, string meshName)
+        {
             this.primitiveIndex = primitiveIndex;
             m_Materials = new int[materialCount];
             m_MeshName = meshName;
         }
 
-        public void SetMaterial(int subMesh, int materialIndex) {
+        public void SetMaterial(int subMesh, int materialIndex)
+        {
             m_Materials[subMesh] = materialIndex;
         }
-        
+
         public MorphTargetsContext morphTargetsContext;
-        
+
         public abstract Task<Primitive?> CreatePrimitive();
     }
-} 
+}

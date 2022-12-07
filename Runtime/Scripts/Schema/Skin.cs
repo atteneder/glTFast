@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,31 +13,34 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// Joints and matrices defining a skinned mesh.
     /// </summary>
     [System.Serializable]
-    public class Skin : NamedObject {
-        
+    public class Skin : NamedObject
+    {
+
         /// <summary>
         /// The index of the accessor containing the
         /// floating-point 4x4 inverse-bind matrices.
         /// </summary>
         public int inverseBindMatrices = -1;
-        
+
         /// <summary>
         /// The index of the node used as a skeleton root.
         /// </summary>
         public int skeleton = -1;
-        
+
         /// <summary>
         /// Indices of skeleton nodes, used as joints in this skin.
         /// </summary>
         public uint[] joints;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             GltfSerializeRoot(writer);
             writer.Close();

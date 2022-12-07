@@ -16,14 +16,16 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace GLTFast.Loading {
-    
+namespace GLTFast.Loading
+{
+
     /// <summary>
     /// Used for wrapping <see cref="Task{IDownload}"/>
     /// </summary>
-    abstract class TextureDownloadBase {
+    abstract class TextureDownloadBase
+    {
         public IDownload download { get; protected set; }
-        
+
         /// <summary>
         /// Executes the texture loading process and assigns the result to
         /// <see cref="download"/>.
@@ -31,18 +33,21 @@ namespace GLTFast.Loading {
         /// <returns></returns>
         public abstract Task Load();
     }
-    
+
     /// <summary>
     /// Used for wrapping <see cref="Task{IDownload}"/>
     /// </summary>
-    class TextureDownload<T> : TextureDownloadBase where T : IDownload {
+    class TextureDownload<T> : TextureDownloadBase where T : IDownload
+    {
         Task<T> m_Task;
 
-        public TextureDownload(Task<T> task) {
+        public TextureDownload(Task<T> task)
+        {
             m_Task = task;
         }
-            
-        public override async Task Load() {
+
+        public override async Task Load()
+        {
             download = await m_Task;
         }
     }

@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,19 +19,22 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace GLTFast.Loading {
-    
+namespace GLTFast.Loading
+{
+
     /// <summary>
     /// Default <see cref="IDownloadProvider"/> implementation
     /// </summary>
-    public class DefaultDownloadProvider : IDownloadProvider {
-        
+    public class DefaultDownloadProvider : IDownloadProvider
+    {
+
         /// <summary>
         /// Sends a URI request and waits for its completion.
         /// </summary>
         /// <param name="url">URI to request</param>
         /// <returns>Object representing the request</returns>
-        public async Task<IDownload> Request(Uri url) {
+        public async Task<IDownload> Request(Uri url)
+        {
             var req = new AwaitableDownload(url);
             await req.WaitAsync();
             return req;
@@ -44,7 +47,8 @@ namespace GLTFast.Loading {
         /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
         /// <returns>Object representing the request</returns>
 #pragma warning disable CS1998
-        public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+        public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable)
+        {
 #pragma warning restore CS1998
 #if UNITY_WEBREQUEST_TEXTURE
             var req = new AwaitableTextureDownload(url,nonReadable);
@@ -59,7 +63,8 @@ namespace GLTFast.Loading {
     /// <summary>
     /// Default <see cref="IDownload"/> implementation that loads URIs via <see cref="UnityWebRequest"/>
     /// </summary>
-    public class AwaitableDownload : IDownload {
+    public class AwaitableDownload : IDownload
+    {
         const string k_MimeTypeGltfBinary = "model/gltf-binary";
         const string k_MimeTypeGltf = "model/gltf+json";
 
@@ -67,7 +72,7 @@ namespace GLTFast.Loading {
         /// <see cref="UnityWebRequest"/> that is used for the download
         /// </summary>
         protected UnityWebRequest m_Request;
-        
+
         /// <summary>
         /// The download's <see cref="UnityWebRequestAsyncOperation"/>
         /// </summary>
@@ -76,17 +81,19 @@ namespace GLTFast.Loading {
         /// <summary>
         /// Empty constructor
         /// </summary>
-        protected AwaitableDownload() {}
+        protected AwaitableDownload() { }
 
         /// <summary>
         /// Creates a download of a URI
         /// </summary>
         /// <param name="url">URI to request</param>
-        public AwaitableDownload(Uri url) {
+        public AwaitableDownload(Uri url)
+        {
             Init(url);
         }
 
-        void Init(Uri url) {
+        void Init(Uri url)
+        {
             m_Request = UnityWebRequest.Get(url);
             m_AsyncOperation = m_Request.SendWebRequest();
         }
@@ -95,8 +102,10 @@ namespace GLTFast.Loading {
         /// Waits until the URI request is completed.
         /// </summary>
         /// <returns>A task that represents the completion of the download</returns>
-        public async Task WaitAsync() {
-            while (!m_AsyncOperation.isDone) {
+        public async Task WaitAsync()
+        {
+            while (!m_AsyncOperation.isDone)
+            {
                 await Task.Yield();
             }
         }
@@ -107,13 +116,13 @@ namespace GLTFast.Loading {
 #if UNITY_2020_1_OR_NEWER
         public bool success => m_Request!=null && m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
 #else
-        public bool success => m_Request!=null && m_Request.isDone && !m_Request.isNetworkError && !m_Request.isHttpError;
+        public bool success => m_Request != null && m_Request.isDone && !m_Request.isNetworkError && !m_Request.isHttpError;
 #endif
 
         /// <summary>
         /// If the download failed, error description
         /// </summary>
-        public string error => m_Request==null ? "Request disposed" : m_Request.error;
+        public string error => m_Request == null ? "Request disposed" : m_Request.error;
 
         /// <summary>
         /// Downloaded data as byte array
@@ -149,7 +158,8 @@ namespace GLTFast.Loading {
         /// <summary>
         /// Releases previously allocated resources.
         /// </summary>
-        public void Dispose() {
+        public void Dispose()
+        {
             m_Request.Dispose();
             m_Request = null;
         }
@@ -161,7 +171,7 @@ namespace GLTFast.Loading {
     /// texture URIs via <seealso cref="UnityWebRequest"/>.
     /// </summary>
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload {
-        
+
         /// <summary>
         /// Parameter-less constructor, required for inheritance.
         /// </summary>

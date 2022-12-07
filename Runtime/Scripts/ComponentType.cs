@@ -16,14 +16,16 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast {
+namespace GLTFast
+{
 
     /// <summary>
     /// Abstract glTF component type used for including/excluding specific
     /// features from import/export.
     /// </summary>
     [Flags]
-    public enum ComponentType {
+    public enum ComponentType
+    {
         /// <summary>
         /// No components
         /// </summary>
@@ -31,19 +33,19 @@ namespace GLTFast {
         /// <summary>
         /// Meshes (Primitives)
         /// </summary>
-        Mesh = 1<<1,
+        Mesh = 1 << 1,
         /// <summary>
         /// Animation
         /// </summary>
-        Animation = 1<<2,
+        Animation = 1 << 2,
         /// <summary>
         /// Cameras
         /// </summary>
-        Camera = 1<<3,
+        Camera = 1 << 3,
         /// <summary>
         /// Lights
         /// </summary>
-        Light = 1<<4,
+        Light = 1 << 4,
         /// <summary>
         /// All component types
         /// </summary>

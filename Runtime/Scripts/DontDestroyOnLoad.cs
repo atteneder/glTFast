@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,13 +16,16 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast {
-    
+namespace GLTFast
+{
+
     /// <summary>
     /// Makes GameObject survive scene changes (<seealso cref="DontDestroyOnLoad"/>)
     /// </summary>
-    public class DontDestroyOnLoad : MonoBehaviour {
-        void Awake() {
+    public class DontDestroyOnLoad : MonoBehaviour
+    {
+        void Awake()
+        {
             DontDestroyOnLoad(gameObject);
         }
     }

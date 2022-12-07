@@ -15,7 +15,8 @@
 
 using UnityEngine;
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// This extension defines the specular-glossiness material model from
@@ -23,8 +24,9 @@ namespace GLTFast.Schema {
     /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness"/>
     /// </summary>
     [System.Serializable]
-    public class PbrSpecularGlossiness {
-        
+    public class PbrSpecularGlossiness
+    {
+
         /// <summary>
         /// Diffuse color red, green, blue and alpha components in linear space.
         /// </summary>
@@ -70,13 +72,12 @@ namespace GLTFast.Schema {
         /// The specular-glossiness texture.
         /// </summary>
         public TextureInfo specularGlossinessTexture;
-        
-        internal void GltfSerialize(JsonWriter writer) {
+
+        internal void GltfSerialize(JsonWriter writer)
+        {
             writer.AddObject();
             writer.Close();
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
 }
-
-

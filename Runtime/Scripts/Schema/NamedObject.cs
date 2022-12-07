@@ -1,4 +1,4 @@
-﻿// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2022 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,21 +13,25 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Schema {
+namespace GLTFast.Schema
+{
 
     /// <summary>
     /// Base class for anything with a name property
     /// </summary>
     [System.Serializable]
-    public abstract class NamedObject {
-        
+    public abstract class NamedObject
+    {
+
         /// <summary>
         /// Object's name
         /// </summary>
         public string name;
-        
-        internal void GltfSerializeRoot(JsonWriter writer) {
-            if (!string.IsNullOrEmpty(name)) {
+
+        internal void GltfSerializeRoot(JsonWriter writer)
+        {
+            if (!string.IsNullOrEmpty(name))
+            {
                 writer.AddProperty("name", name);
             }
         }

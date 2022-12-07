@@ -18,21 +18,23 @@ using UnityEngine;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 
-namespace GLTFast {
-    static class OnScriptsReloadHandler {
-        
-// Only run this check if glTFast is in Packages/manifest.json testables
-// (which indicates you're developing it)
+namespace GLTFast
+{
+    static class OnScriptsReloadHandler
+    {
+
+        // Only run this check if glTFast is in Packages/manifest.json testables
+        // (which indicates you're developing it)
 #if UNITY_INCLUDE_TESTS
-        
+
         static ListRequest s_Request;
-        
+
         [UnityEditor.Callbacks.DidReloadScripts]
         static void OnScriptsReloaded() {
             s_Request = Client.List();
             EditorApplication.update += Progress;
         }
-        
+
         static void Progress()
         {
             if (s_Request.IsCompleted)
