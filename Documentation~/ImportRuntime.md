@@ -223,7 +223,7 @@ You can customize logging by providing an implementation of [`ICodeLogger`][ICod
 
 There are two common implementations bundled. The `ConsoleLogger`, which logs straight to console (the default) and `CollectingLogger`, which stores messages in a list for users to process.
 
-Look into [`ICodeLogger`][ICodeLogger] and [`LogMessages`][[LogMessages]] for details.
+Look into [`ICodeLogger`][ICodeLogger] and [`LogMessages`][LogMessages] for details.
 
 ### Tune loading performance
 

@@ -54,7 +54,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Import) Deprecated existing, sync instantiation methods in favor of new async ones
 - KTX textures load much smoother thanks to bumping KtxUnity to 1.3.0 or 2.2.1
 - Sped up loading of external KTX textures by avoid making a redundant memory copy.
-- `IDownload` does not derive from `IEnumartor` anymore
+- `IDownload` does not derive from `IEnumertor` anymore
 - (Import) Successfully tested mesh primitive draw mode `lines` and removed error message about it being untested
 - (Export) Disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`) are not exported by default (see also: new `GameObjectExportSettings.disabledComponents` setting to get old behavior)
 - (Export) GameObjects with tag `EditorOnly` (including children) don't get exported (similar to building a scene)
@@ -72,14 +72,13 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
   - `GLTFast.GltFast` (was renamed to `GltfImport`)
   - `GltfImport.InstantiateGltf` (was replaced by `InstantiateMainScene` and `InstantiateScene`)
-  - `GltfImport.Destroy` (was renamed to `Dispose`)
   - Remains of Basis Universal extension draft state
     - `Schema.Image.extensions`
     - `Schema.Image.ImageExtension`
     - `Schema.Image.ImageKtx2`
 ### Fixed
 - Shader graphs' BaseColor, BaseColorTexture and vertex color calculations are now in correct color space
-- Export MeshRenderer wherre number of materials does not match number of submeshes (thanks [Dan Dando ][DanDovi] for #428)
+- Export MeshRenderer where number of materials does not match number of submeshes (thanks [Dan Dando ][DanDovi] for #428)
 - Shaders and shader graphs now have a proper main color and main texture assigned (except legacy shader graphs where this is not supported)
 - No more redundant default (fallback) materials are being generated
 - (JSON parsing) Potential NPDR when just one of many node extensions is present (#464)
