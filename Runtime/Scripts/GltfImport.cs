@@ -2070,6 +2070,9 @@ namespace GLTFast
                                 // HACK END
                                 break;
                             }
+                            case AnimationChannel.Path.Pointer:
+                                m_Logger?.Warning(LogCode.AnimationTargetPathUnsupported,channel.target.pathEnum.ToString());
+                                break;
                             default:
                                 m_Logger?.Error(LogCode.AnimationTargetPathUnsupported,channel.target.pathEnum.ToString());
                                 break;

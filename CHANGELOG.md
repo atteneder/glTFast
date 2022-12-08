@@ -86,6 +86,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - (Import) Draco meshes are correctly named (#527)
 - (Import) Gracefully fallback to loading textures from byte arrays if UnityWebRequestTexture module is not enabled and trigger a warning.
 - (Import) `GltfBoundsAsset.Load` properly passes on the logger now.
+- (Import) Exception upon loading a file that uses the `KHR_animation_pointer` extension.
 
 ## [4.9.1] - 2022-11-28
 ### Changed

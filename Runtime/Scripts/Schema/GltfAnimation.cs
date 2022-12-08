@@ -52,7 +52,8 @@ namespace GLTFast.Schema {
             Translation,
             Rotation,
             Scale,
-            Weights
+            Weights,
+            Pointer
         }
 
         /// <summary>
@@ -89,7 +90,12 @@ namespace GLTFast.Schema {
             get {
                 if ( m_Path == AnimationChannel.Path.Unknown ) {
                     if (!string.IsNullOrEmpty (path)) {
-                        m_Path = (AnimationChannel.Path)Enum.Parse (typeof(AnimationChannel.Path), path, true);
+                        try {
+                            m_Path = (AnimationChannel.Path)Enum.Parse(typeof(AnimationChannel.Path), path, true);
+                        }
+                        catch (ArgumentException) {
+                            m_Path = AnimationChannel.Path.Invalid;
+                        }
                         path = null;
                         return m_Path;
                     }
