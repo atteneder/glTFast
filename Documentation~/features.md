@@ -78,7 +78,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Normals | ✅ | ✅
 | Tangents | ✅ | ✅
 | Texture coordinates / UV sets | ✅ | `?`
-| Three or more texture coordinates / UV sets | [issue][UVsets] | `?`
+| Three or more texture coordinates / UV sets | <sup>2</sup>☑️ | `?`
 | Vertex colors | ✅ | `?`
 | Draco mesh compression (via [DracoUnity](https://github.com/atteneder/DracoUnity)) | ✅ | 
 | Implicit (no) indices | ✅ | 
@@ -87,7 +87,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Weights (up to 4 per vertex) | ✅ | 
 | | |
 | **Morph Targets / Blend Shapes**
-| Sparse accessors | <sup>2</sup> ✅ | 
+| Sparse accessors | <sup>3</sup> ✅ | 
 | [Skins][Skins] (sponsored by [Embibe](https://www.embibe.com)) | ✅ | 
 | | |
 | **Animation** 
@@ -97,7 +97,9 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 
 <sup>1</sup>: Untested due to lack of demo files.
 
-<sup>2</sup>: Not on all accessor types; morph targets and vertex positions only
+<sup>2</sup>: Up to eight UV sets can imported, but the glTFast shaders only support two (see [issue][UVsets]).
+
+<sup>3</sup>: Not on all accessor types; morph targets and vertex positions only
 
 ## Extensions
 
