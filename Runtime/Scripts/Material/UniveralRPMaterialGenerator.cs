@@ -118,10 +118,10 @@ namespace GLTFast.Materials {
                         transmission.transmissionTexture,
                         material,
                         gltf,
-                        k_TransmissionTexturePropId,
-                        k_TransmissionTextureScaleTransformPropId, // TODO: add support in shader
-                        k_TransmissionTextureRotationPropId, // TODO: add support in shader
-                        k_TransmissionTextureUVChannelPropId // TODO: add support in shader
+                        k_TransmissionTexturePropId
+                        // k_TransmissionTextureScaleTransformPropId, // TODO: add support in shader
+                        // k_TransmissionTextureRotationPropId, // TODO: add support in shader
+                        // k_TransmissionTextureUVChannelPropId // TODO: add support in shader
                     )) { }
                 }
                 return renderQueue;

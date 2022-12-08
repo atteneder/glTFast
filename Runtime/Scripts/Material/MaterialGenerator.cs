@@ -302,16 +302,21 @@ namespace GLTFast.Materials
                     if (texture != null)
                     {
                         material.SetTexture(texturePropertyId, texture);
-                        var isKtx = srcTexture.isKtx;
-                        TrySetTextureTransform(
-                            textureInfo,
-                            material,
-                            texturePropertyId,
-                            scaleTransformPropertyId,
-                            rotationPropertyId,
-                            uvChannelPropertyId,
-                            isKtx
-                            );
+                        // TODO: Implement texture transform and UV channel selection for all texture types and remove
+                        // this condition
+                        if (scaleTransformPropertyId >= 0 && rotationPropertyId >= 0 && uvChannelPropertyId >= 0)
+                        {
+                            var isKtx = srcTexture.isKtx;
+                            TrySetTextureTransform(
+                                textureInfo,
+                                material,
+                                texturePropertyId,
+                                scaleTransformPropertyId,
+                                rotationPropertyId,
+                                uvChannelPropertyId,
+                                isKtx
+                                );
+                        }
                         return true;
                     }
 #if UNITY_IMAGECONVERSION
