@@ -6,7 +6,7 @@ You can load a glTF asset from an URL or a file path.
 
 ## Runtime Loading via Component
 
-Add a `GltfAsset` component to a GameObject.
+Add a `GltfAsset` component to a GameObject. It offers a lot of settings for import and instantiation.
 
 ![GltfAsset component][gltfasset_component]
 
