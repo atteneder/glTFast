@@ -623,7 +623,7 @@ namespace GLTFast.Materials {
             var feature = UnlitShaderFeatures.Default;
             if (gltfMaterial.doubleSided) feature |= UnlitShaderFeatures.DoubleSided;
 
-            if (gltfMaterial.GetAlphaMode() != AlphaMode.OPAQUE) {
+            if (gltfMaterial.GetAlphaMode() != AlphaMode.Opaque) {
                 feature |= UnlitShaderFeatures.AlphaBlend;
             }
             return feature;
