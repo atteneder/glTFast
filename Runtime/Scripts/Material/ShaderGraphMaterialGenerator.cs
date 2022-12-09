@@ -41,8 +41,8 @@ namespace GLTFast.Materials {
         [Flags]
         protected enum ShaderMode {
             Opaque = 0,
-            Blend = 1,
-            Premultiply = 1<<1,
+            Blend = 1 << 0,
+            Premultiply = 1 << 1,
         }
 
         [Flags]
