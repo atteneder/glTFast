@@ -32,31 +32,25 @@ namespace GLTFast.Schema
         /// </summary>
         public enum AlphaMode
         {
-            // Names are identical to glTF specified strings, that's why
-            // inconsistent names are ignored.
-            // ReSharper disable InconsistentNaming
-
             /// <summary>
             /// The alpha value is ignored, and the rendered output is fully
             /// opaque.
             /// </summary>
-            OPAQUE,
+            Opaque,
 
             /// <summary>
             /// The rendered output is either fully opaque or fully transparent
             /// depending on the alpha value and the specified alphaCutoff
             /// value
             /// </summary>
-            MASK,
+            Mask,
 
             /// <summary>
             /// The alpha value is used to composite the source and destination
             /// areas. The rendered output is combined with the background
             /// using the normal painting operation.
             /// </summary>
-            BLEND
-
-            // ReSharper restore InconsistentNaming
+            Blend
         }
 
         /// <summary>
@@ -113,7 +107,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// Emissive color of the material.
         /// </summary>
-        public Color emissive
+        public Color Emissive
         {
             get => new Color(
                 emissiveFactor[0],
@@ -138,32 +132,36 @@ namespace GLTFast.Schema
         AlphaMode? m_AlphaModeEnum;
 
         /// <summary>
-        /// <see cref="AlphaMode"/> typed view onto <see cref="alphaMode"/> string.
+        /// <see cref="AlphaMode"/> typed and cached getter for <see cref="alphaMode"/> string.
         /// </summary>
-        public AlphaMode alphaModeEnum
+        /// <returns>Alpha mode if it was retrieved correctly. <see cref="AlphaMode.Opaque"/> otherwise</returns>
+        public AlphaMode GetAlphaMode()
         {
-            get
+            if (m_AlphaModeEnum.HasValue)
             {
-                if (m_AlphaModeEnum.HasValue)
-                {
-                    return m_AlphaModeEnum.Value;
-                }
-                if (!string.IsNullOrEmpty(alphaMode))
-                {
-                    m_AlphaModeEnum = (AlphaMode)System.Enum.Parse(typeof(AlphaMode), alphaMode, true);
-                    alphaMode = null;
-                    return m_AlphaModeEnum.Value;
-                }
-
-                return AlphaMode.OPAQUE;
+                return m_AlphaModeEnum.Value;
             }
-            set
+
+            if (!string.IsNullOrEmpty(alphaMode))
             {
-                m_AlphaModeEnum = value;
-                if (value != AlphaMode.OPAQUE)
-                {
-                    alphaMode = value.ToString();
-                }
+                m_AlphaModeEnum = (AlphaMode)System.Enum.Parse(typeof(AlphaMode), alphaMode, true);
+                alphaMode = null;
+                return m_AlphaModeEnum.Value;
+            }
+
+            return AlphaMode.Opaque;
+        }
+
+        /// <summary>
+        /// <see cref="AlphaMode"/> typed setter for <see cref="alphaMode"/> string.
+        /// </summary>
+        /// <param name="mode">Alpha mode</param>
+        public void SetAlphaMode(AlphaMode mode)
+        {
+            m_AlphaModeEnum = mode;
+            if (mode != AlphaMode.Opaque)
+            {
+                alphaMode = mode.ToString().ToUpper();
             }
         }
 
@@ -185,12 +183,12 @@ namespace GLTFast.Schema
         /// <summary>
         /// True if the material requires the mesh to have normals.
         /// </summary>
-        public bool requiresNormals => extensions?.KHR_materials_unlit == null;
+        public bool RequiresNormals => extensions?.KHR_materials_unlit == null;
 
         /// <summary>
         /// True if the material requires the mesh to have tangents.
         /// </summary>
-        public bool requiresTangents => normalTexture != null && normalTexture.index >= 0;
+        public bool RequiresTangents => normalTexture != null && normalTexture.index >= 0;
 
         internal void GltfSerialize(JsonWriter writer)
         {

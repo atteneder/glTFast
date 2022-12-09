@@ -59,7 +59,7 @@ namespace GLTFast.Materials {
 
         protected override void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
-            material.SetFloat(cullPropId, (int)CullMode.Off);
+            material.SetFloat(CullProperty, (int)CullMode.Off);
         }
 
         protected override void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
@@ -69,20 +69,20 @@ namespace GLTFast.Materials {
 
         protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
             material.SetOverrideTag(RenderTypeTag, TransparentRenderType);
-            material.EnableKeyword(KW_SURFACE_TYPE_TRANSPARENT);
-            material.EnableKeyword(KW_DISABLE_SSR_TRANSPARENT);
-            material.EnableKeyword(KW_ENABLE_FOG_ON_TRANSPARENT);
-            material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPrepass, false);
-            material.SetShaderPassEnabled(k_ShaderPassTransparentDepthPostpass, false);
-            material.SetShaderPassEnabled(k_ShaderPassTransparentBackface, false);
-            material.SetShaderPassEnabled(k_ShaderPassRayTracingPrepass, false);
-            material.SetShaderPassEnabled(k_ShaderPassDepthOnlyPass, false);
-            material.SetFloat(srcBlendPropId, (int) BlendMode.SrcAlpha);//5
-            material.SetFloat(dstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
-            material.SetFloat(k_ZTestGBufferPropId, (int)CompareFunction.Equal); //3
-            material.SetFloat(k_AlphaDstBlendPropId, (int)BlendMode.OneMinusSrcAlpha);//10
+            material.EnableKeyword(SurfaceTypeTransparentKeyword);
+            material.EnableKeyword(DisableSsrTransparentKeyword);
+            material.EnableKeyword(EnableFogOnTransparentKeyword);
+            material.SetShaderPassEnabled(ShaderPassTransparentDepthPrepass, false);
+            material.SetShaderPassEnabled(ShaderPassTransparentDepthPostpass, false);
+            material.SetShaderPassEnabled(ShaderPassTransparentBackface, false);
+            material.SetShaderPassEnabled(ShaderPassRayTracingPrepass, false);
+            material.SetShaderPassEnabled(ShaderPassDepthOnlyPass, false);
+            material.SetFloat(SrcBlendProperty, (int) BlendMode.SrcAlpha);//5
+            material.SetFloat(DstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
+            material.SetFloat(ZTestGBufferProperty, (int)CompareFunction.Equal); //3
+            material.SetFloat(AlphaDstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(k_SurfacePropId, 1);
-            material.SetFloat(zWritePropId, 0);
+            material.SetFloat(ZWriteProperty, 0);
         }
 #endif
 
@@ -112,16 +112,16 @@ namespace GLTFast.Materials {
             if (s_SupportsCameraOpaqueTexture) {
                 if (transmission.transmissionFactor > 0f) {
                     material.EnableKeyword(k_TransmissionKeyword);
-                    material.SetFloat(k_TransmissionFactorPropId, transmission.transmissionFactor);
+                    material.SetFloat(TransmissionFactorProperty, transmission.transmissionFactor);
                     renderQueue = RenderQueue.Transparent;
                     if (TrySetTexture(
                         transmission.transmissionTexture,
                         material,
                         gltf,
-                        k_TransmissionTexturePropId
-                        // k_TransmissionTextureScaleTransformPropId, // TODO: add support in shader
-                        // k_TransmissionTextureRotationPropId, // TODO: add support in shader
-                        // k_TransmissionTextureUVChannelPropId // TODO: add support in shader
+                        TransmissionTextureProperty
+                        // TransmissionTextureScaleTransformProperty, // TODO: add support in shader
+                        // TransmissionTextureRotationProperty, // TODO: add support in shader
+                        // TransmissionTextureUVChannelProperty // TODO: add support in shader
                     )) { }
                 }
                 return renderQueue;

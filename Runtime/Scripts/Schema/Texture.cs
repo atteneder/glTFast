@@ -57,7 +57,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// True, if the texture is of the KTX format.
         /// </summary>
-        public bool isKtx => extensions?.KHR_texture_basisu != null;
+        public bool IsKtx => extensions?.KHR_texture_basisu != null;
 
         internal void GltfSerialize(JsonWriter writer)
         {

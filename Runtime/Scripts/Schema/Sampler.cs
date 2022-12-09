@@ -99,19 +99,19 @@ namespace GLTFast.Schema
         /// Unity filter mode, derived from glTF's
         /// <see cref="minFilter"/> and <see cref="magFilter"/>.
         /// </summary>
-        public FilterMode filterMode => ConvertFilterMode(minFilter, magFilter);
+        public FilterMode FilterMode => ConvertFilterMode(minFilter, magFilter);
 
         /// <summary>
         /// Unity texture wrap mode (horizontal), derived from glTF's
         /// <see cref="wrapS"/> value.
         /// </summary>
-        public TextureWrapMode wrapU => ConvertWrapMode(wrapS);
+        public TextureWrapMode WrapU => ConvertWrapMode(wrapS);
 
         /// <summary>
         /// Unity texture wrap mode (vertical), derived from glTF's
         /// <see cref="wrapT"/> value.
         /// </summary>
-        public TextureWrapMode wrapV => ConvertWrapMode(wrapT);
+        public TextureWrapMode WrapV => ConvertWrapMode(wrapT);
 
         static FilterMode ConvertFilterMode(MinFilterMode minFilterToConvert, MagFilterMode magFilterToConvert)
         {
@@ -208,8 +208,8 @@ namespace GLTFast.Schema
                           MagFilterMode defaultMagFilter = MagFilterMode.Linear)
         {
             if (image == null) return;
-            image.wrapModeU = wrapU;
-            image.wrapModeV = wrapV;
+            image.wrapModeU = WrapU;
+            image.wrapModeV = WrapV;
 
             // Use the default filtering mode for textures that have no such specification in data
             image.filterMode = ConvertFilterMode(

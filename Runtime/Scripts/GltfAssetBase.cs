@@ -27,26 +27,33 @@ namespace GLTFast
     /// </summary>
     public abstract class GltfAssetBase : MonoBehaviour
     {
-        /// <inheritdoc cref="ImportSettings"/>
-        public ImportSettings importSettings;
+        [SerializeField]
+        ImportSettings importSettings;
+
+        /// <inheritdoc cref="GLTFast.ImportSettings"/>
+        public ImportSettings ImportSettings
+        {
+            get => importSettings;
+            set => importSettings = value;
+        }
 
         /// <summary>
         /// Instance used for loading the glTF's content
         /// </summary>
         // ReSharper disable once MemberCanBeProtected.Global
-        public GltfImport importer { get; protected set; }
+        public GltfImport Importer { get; protected set; }
 
         /// <summary>
         /// Indicates whether the glTF was loaded (no matter if successfully or not)
         /// </summary>
         /// <value>True when loading routine ended, false otherwise.</value>
-        public bool isDone => importer != null && importer.LoadingDone;
+        public bool IsDone => Importer != null && Importer.LoadingDone;
 
         /// <summary>
         /// Scene ID of the recently instantiated scene. Null if there was no
         /// scene instantiated (successfully).
         /// </summary>
-        public int? currentSceneId { get; protected set; }
+        public int? CurrentSceneId { get; protected set; }
 
         /// <summary>
         /// Method for manual loading with custom <see cref="IDownloadProvider"/> and <see cref="IDeferAgent"/>.
@@ -66,8 +73,8 @@ namespace GLTFast
             ICodeLogger logger = null
             )
         {
-            importer = new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
-            return await importer.Load(gltfUrl, importSettings);
+            Importer = new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
+            return await Importer.Load(gltfUrl, importSettings);
         }
 
         /// <summary>
@@ -78,9 +85,9 @@ namespace GLTFast
         // ReSharper disable once MemberCanBeProtected.Global
         public async Task<bool> Instantiate(ICodeLogger logger = null)
         {
-            if (importer == null) return false;
+            if (Importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
-            var success = await importer.InstantiateMainSceneAsync(instantiator);
+            var success = await Importer.InstantiateMainSceneAsync(instantiator);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -93,9 +100,9 @@ namespace GLTFast
         /// <returns>True if instantiation was successful.</returns>
         public virtual async Task<bool> InstantiateScene(int sceneIndex, ICodeLogger logger = null)
         {
-            if (importer == null) return false;
+            if (Importer == null) return false;
             var instantiator = GetDefaultInstantiator(logger);
-            var success = await importer.InstantiateSceneAsync(instantiator, sceneIndex);
+            var success = await Importer.InstantiateSceneAsync(instantiator, sceneIndex);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -108,8 +115,8 @@ namespace GLTFast
         /// <returns>True if instantiation was successful.</returns>
         protected async Task<bool> InstantiateScene(int sceneIndex, GameObjectInstantiator instantiator)
         {
-            if (importer == null) return false;
-            var success = await importer.InstantiateSceneAsync(instantiator, sceneIndex);
+            if (Importer == null) return false;
+            var success = await Importer.InstantiateSceneAsync(instantiator, sceneIndex);
             PostInstantiation(instantiator, success);
             return success;
         }
@@ -127,27 +134,27 @@ namespace GLTFast
         /// <returns>glTF material if it was loaded successfully and index is correct, null otherwise.</returns>
         public Material GetMaterial(int index = 0)
         {
-            return importer?.GetMaterial(index);
+            return Importer?.GetMaterial(index);
         }
 
         /// <summary>
         /// Number of scenes loaded
         /// </summary>
-        public int sceneCount => importer?.sceneCount ?? 0;
+        public int SceneCount => Importer?.SceneCount ?? 0;
 
         /// <summary>
         /// Array of scenes' names (entries can be null, if not specified)
         /// </summary>
-        public string[] sceneNames
+        public string[] SceneNames
         {
             get
             {
-                if (importer != null && importer.sceneCount > 0)
+                if (Importer != null && Importer.SceneCount > 0)
                 {
-                    var names = new string[importer.sceneCount];
+                    var names = new string[Importer.SceneCount];
                     for (int i = 0; i < names.Length; i++)
                     {
-                        names[i] = importer.GetSceneName(i);
+                        names[i] = Importer.GetSceneName(i);
                     }
                     return names;
                 }
@@ -169,7 +176,7 @@ namespace GLTFast
         /// <param name="success">True if instantiation was successful, false otherwise</param>
         protected virtual void PostInstantiation(IInstantiator instantiator, bool success)
         {
-            currentSceneId = success ? importer.defaultSceneIndex : null;
+            CurrentSceneId = success ? Importer.DefaultSceneIndex : null;
         }
 
         /// <summary>
@@ -178,10 +185,10 @@ namespace GLTFast
         // ReSharper disable once MemberCanBePrivate.Global
         public void Dispose()
         {
-            if (importer != null)
+            if (Importer != null)
             {
-                importer.Dispose();
-                importer = null;
+                Importer.Dispose();
+                Importer = null;
             }
         }
 

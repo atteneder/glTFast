@@ -63,11 +63,11 @@ namespace GLTFast.Editor
             var path = url.OriginalString;
             if (File.Exists(path))
             {
-                data = File.ReadAllBytes(path);
+                Data = File.ReadAllBytes(path);
             }
             else
             {
-                error = $"Cannot find resource at path {path}";
+                Error = $"Cannot find resource at path {path}";
             }
         }
 
@@ -75,20 +75,20 @@ namespace GLTFast.Editor
         public bool MoveNext() { return false; }
         public void Reset() { }
 
-        public virtual bool success => data != null;
+        public virtual bool Success => Data != null;
 
-        public string error { get; protected set; }
-        public byte[] data { get; private set; }
+        public string Error { get; protected set; }
+        public byte[] Data { get; private set; }
 
-        public string text => System.Text.Encoding.UTF8.GetString(data);
+        public string Text => System.Text.Encoding.UTF8.GetString(Data);
 
-        public bool? isBinary
+        public bool? IsBinary
         {
             get
             {
-                if (success)
+                if (Success)
                 {
-                    return GltfGlobals.IsGltfBinary(data);
+                    return GltfGlobals.IsGltfBinary(Data);
                 }
                 return null;
             }
@@ -96,31 +96,31 @@ namespace GLTFast.Editor
 
         public virtual void Dispose()
         {
-            data = null;
+            Data = null;
         }
     }
 
     class SyncTextureLoader : SyncFileLoader, ITextureDownload
     {
 
-        public Texture2D texture { get; private set; }
+        public Texture2D Texture { get; private set; }
 
-        public override bool success => texture != null;
+        public override bool Success => Texture != null;
 
         public SyncTextureLoader(Uri url)
             : base(url)
         {
-            texture = AssetDatabase.LoadAssetAtPath<Texture2D>(url.OriginalString);
-            if (texture == null)
+            Texture = AssetDatabase.LoadAssetAtPath<Texture2D>(url.OriginalString);
+            if (Texture == null)
             {
-                error = $"Couldn't load texture at {url.OriginalString}";
+                Error = $"Couldn't load texture at {url.OriginalString}";
             }
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            texture = null;
+            Texture = null;
         }
     }
 }

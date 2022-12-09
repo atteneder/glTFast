@@ -42,11 +42,11 @@ namespace GLTFast
         bool m_HasColors;
         bool m_HasBones;
 
-        VertexBufferTexCoordsBase m_TEXCoords;
+        VertexBufferTexCoordsBase m_TexCoords;
         VertexBufferColors m_Colors;
         VertexBufferBones m_Bones;
 
-        public override int vertexCount
+        public override int VertexCount
         {
             get
             {
@@ -79,11 +79,11 @@ namespace GLTFast
             var vDataPtr = (byte*)m_Data.GetUnsafeReadOnlyPtr();
             Profiler.EndSample();
 
-            bounds = posAcc.TryGetBounds();
+            Bounds = posAcc.TryGetBounds();
 
             int jobCount = 1;
             int outputByteStride = 12; // sizeof Vector3
-            if (posAcc.isSparse && posAcc.bufferView >= 0)
+            if (posAcc.IsSparse && posAcc.bufferView >= 0)
             {
                 jobCount++;
             }
@@ -119,28 +119,28 @@ namespace GLTFast
                 switch (uvAccessorIndices.Length)
                 {
                     case 1:
-                        m_TEXCoords = new VertexBufferTexCoords<VTexCoord1>(m_Logger);
+                        m_TexCoords = new VertexBufferTexCoords<VTexCoord1>(m_Logger);
                         break;
                     case 2:
-                        m_TEXCoords = new VertexBufferTexCoords<VTexCoord2>(m_Logger);
+                        m_TexCoords = new VertexBufferTexCoords<VTexCoord2>(m_Logger);
                         break;
                     case 3:
-                        m_TEXCoords = new VertexBufferTexCoords<VTexCoord3>(m_Logger);
+                        m_TexCoords = new VertexBufferTexCoords<VTexCoord3>(m_Logger);
                         break;
                     case 4:
-                        m_TEXCoords = new VertexBufferTexCoords<VTexCoord4>(m_Logger);
+                        m_TexCoords = new VertexBufferTexCoords<VTexCoord4>(m_Logger);
                         break;
                     case 5:
-                        m_TEXCoords = new VertexBufferTexCoords<VTexCoord5>(m_Logger);
+                        m_TexCoords = new VertexBufferTexCoords<VTexCoord5>(m_Logger);
                         break;
                     case 6:
-                        m_TEXCoords = new VertexBufferTexCoords<VTexCoord6>(m_Logger);
+                        m_TexCoords = new VertexBufferTexCoords<VTexCoord6>(m_Logger);
                         break;
                     case 7:
-                        m_TEXCoords = new VertexBufferTexCoords<VTexCoord7>(m_Logger);
+                        m_TexCoords = new VertexBufferTexCoords<VTexCoord7>(m_Logger);
                         break;
                     default:
-                        m_TEXCoords = new VertexBufferTexCoords<VTexCoord8>(m_Logger);
+                        m_TexCoords = new VertexBufferTexCoords<VTexCoord8>(m_Logger);
                         break;
                 }
             }
@@ -177,7 +177,7 @@ namespace GLTFast
                         false // positional data never needs to be normalized
                     );
                 }
-                if (posAcc.isSparse)
+                if (posAcc.IsSparse)
                 {
                     buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
                     buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
@@ -218,7 +218,7 @@ namespace GLTFast
             if (normalAccessorIndex >= 0)
             {
                 buffers.GetAccessor(normalAccessorIndex, out var nrmAcc, out var input, out var inputByteStride);
-                if (nrmAcc.isSparse)
+                if (nrmAcc.IsSparse)
                 {
                     m_Logger.Error(LogCode.SparseAccessor, "normals");
                 }
@@ -247,7 +247,7 @@ namespace GLTFast
             if (tangentAccessorIndex >= 0)
             {
                 buffers.GetAccessor(tangentAccessorIndex, out var tanAcc, out var input, out var inputByteStride);
-                if (tanAcc.isSparse)
+                if (tanAcc.IsSparse)
                 {
                     m_Logger.Error(LogCode.SparseAccessor, "tangents");
                 }
@@ -272,9 +272,9 @@ namespace GLTFast
                 }
             }
 
-            if (m_TEXCoords != null)
+            if (m_TexCoords != null)
             {
-                m_TEXCoords.ScheduleVertexUVJobs(
+                m_TexCoords.ScheduleVertexUVJobs(
                     buffers,
                     uvAccessorIndices,
                     posAcc.count,
@@ -330,7 +330,7 @@ namespace GLTFast
             int vadLen = 1;
             if (m_HasNormals) vadLen++;
             if (m_HasTangents) vadLen++;
-            if (m_TEXCoords != null) vadLen += m_TEXCoords.uvSetCount;
+            if (m_TexCoords != null) vadLen += m_TexCoords.UVSetCount;
             if (m_Colors != null) vadLen++;
             if (m_Bones != null) vadLen += 2;
             m_Descriptors = new VertexAttributeDescriptor[vadLen];
@@ -357,9 +357,9 @@ namespace GLTFast
                 stream++;
             }
 
-            if (m_TEXCoords != null)
+            if (m_TexCoords != null)
             {
-                m_TEXCoords.AddDescriptors(m_Descriptors, ref vadCount, stream);
+                m_TexCoords.AddDescriptors(m_Descriptors, ref vadCount, stream);
                 stream++;
             }
 
@@ -396,9 +396,9 @@ namespace GLTFast
                 stream++;
             }
 
-            if (m_TEXCoords != null)
+            if (m_TexCoords != null)
             {
-                m_TEXCoords.ApplyOnMesh(msh, stream, flags);
+                m_TexCoords.ApplyOnMesh(msh, stream, flags);
                 stream++;
             }
 
@@ -423,9 +423,9 @@ namespace GLTFast
                 m_Colors.Dispose();
             }
 
-            if (m_TEXCoords != null)
+            if (m_TexCoords != null)
             {
-                m_TEXCoords.Dispose();
+                m_TexCoords.Dispose();
             }
 
             if (m_Bones != null)

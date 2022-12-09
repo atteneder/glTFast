@@ -37,7 +37,7 @@ namespace GLTFast
             m_Logger = logger;
         }
 
-        public int uvSetCount { get; protected set; }
+        public int UVSetCount { get; protected set; }
         public abstract bool ScheduleVertexUVJobs(IGltfBuffers buffers, int[] uvAccessorIndices, int vertexCount, NativeSlice<JobHandle> handles);
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, ref int offset, int stream);
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, int stream, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
@@ -57,14 +57,14 @@ namespace GLTFast
             m_Data = new NativeArray<T>(vertexCount, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(m_Data);
             Profiler.EndSample();
-            uvSetCount = uvAccessorIndices.Length;
+            UVSetCount = uvAccessorIndices.Length;
             int outputByteStride = uvAccessorIndices.Length * 8;
 
             for (int i = 0; i < uvAccessorIndices.Length; i++)
             {
                 var accIndex = uvAccessorIndices[i];
                 buffers.GetAccessor(accIndex, out var uvAcc, out var data, out var byteStride);
-                if (uvAcc.isSparse)
+                if (uvAcc.IsSparse)
                 {
                     m_Logger.Error(LogCode.SparseAccessor, "UVs");
                 }
@@ -93,7 +93,7 @@ namespace GLTFast
 
         public override void AddDescriptors(VertexAttributeDescriptor[] dst, ref int offset, int stream)
         {
-            for (int i = 0; i < uvSetCount; i++)
+            for (int i = 0; i < UVSetCount; i++)
             {
                 var vertexAttribute = (VertexAttribute)((int)VertexAttribute.TexCoord0 + i);
                 dst[offset] = new VertexAttributeDescriptor(vertexAttribute, VertexAttributeFormat.Float32, 2, stream);

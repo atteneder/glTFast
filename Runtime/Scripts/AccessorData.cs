@@ -24,21 +24,21 @@ namespace GLTFast
     enum AccessorUsage
     {
         Unknown = 0,
-        Ignore = 0x1,
-        Index = 0x2,
-        IndexFlipped = 0x4,
-        Position = 0x8,
-        Normal = 0x10,
-        Tangent = 0x20,
-        UV = 0x40,
-        Color = 0x80,
-        InverseBindMatrix = 0x100,
-        AnimationTimes = 0x200,
-        Translation = 0x400,
-        Rotation = 0x800,
-        Scale = 0x1000,
-        Weight = 0x2000,
-        RequiredForInstantiation = 0x4000
+        Ignore = 1 << 0,
+        Index = 1 << 1,
+        IndexFlipped = 1 << 2,
+        Position = 1 << 3,
+        Normal = 1 << 4,
+        Tangent = 1 << 5,
+        UV = 1 << 6,
+        Color = 1 << 7,
+        InverseBindMatrix = 1 << 8,
+        AnimationTimes = 1 << 9,
+        Translation = 1 << 10,
+        Rotation = 1 << 11,
+        Scale = 1 << 12,
+        Weight = 1 << 13,
+        RequiredForInstantiation = 1 << 14
     }
 
     abstract class AccessorDataBase

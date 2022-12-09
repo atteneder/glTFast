@@ -90,7 +90,6 @@ namespace GLTFast.Export
         const int k_DefaultInnerLoopBatchCount = 512;
 #endif
 
-        #region Private
         State m_State;
 
         ExportSettings m_Settings;
@@ -122,7 +121,6 @@ namespace GLTFast.Export
 
         Stream m_BufferStream;
         string m_BufferPath;
-        #endregion Private
 
         /// <summary>
         /// Provides glTF export independent of workflow (GameObjects/Entities)
@@ -166,7 +164,7 @@ namespace GLTFast.Export
         /// <inheritdoc />
         public void AddMeshToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds)
         {
-            if ((m_Settings.componentMask & ComponentType.Mesh) == 0) return;
+            if ((m_Settings.ComponentMask & ComponentType.Mesh) == 0) return;
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
@@ -182,7 +180,7 @@ namespace GLTFast.Export
         /// <inheritdoc />
         public bool AddCamera(UnityEngine.Camera uCamera, out int cameraId)
         {
-            if ((m_Settings.componentMask & ComponentType.Camera) == 0)
+            if ((m_Settings.ComponentMask & ComponentType.Camera) == 0)
             {
                 cameraId = -1;
                 return false;
@@ -193,7 +191,7 @@ namespace GLTFast.Export
 
             if (uCamera.orthographic)
             {
-                camera.typeEnum = Camera.Type.Orthographic;
+                camera.SetCameraType(Camera.Type.Orthographic);
                 var oSize = uCamera.orthographicSize;
                 float aspectRatio;
                 var targetTexture = uCamera.targetTexture;
@@ -216,7 +214,7 @@ namespace GLTFast.Export
             }
             else
             {
-                camera.typeEnum = Camera.Type.Perspective;
+                camera.SetCameraType(Camera.Type.Perspective);
                 camera.perspective = new CameraPerspective
                 {
                     yfov = uCamera.fieldOfView * Mathf.Deg2Rad,
@@ -238,7 +236,7 @@ namespace GLTFast.Export
         /// <inheritdoc />
         public bool AddLight(Light uLight, out int lightId)
         {
-            if ((m_Settings.componentMask & ComponentType.Light) == 0)
+            if ((m_Settings.ComponentMask & ComponentType.Light) == 0)
             {
                 lightId = -1;
                 return false;
@@ -251,7 +249,7 @@ namespace GLTFast.Export
 
             var lightType = uLight.type;
 
-            var renderPipeline = RenderPipelineUtils.renderPipeline;
+            var renderPipeline = RenderPipelineUtils.RenderPipeline;
 #if USING_HDRP
             HDAdditionalLightData lightHd = null;
             if (renderPipeline == RenderPipeline.HighDefinition) {
@@ -265,7 +263,7 @@ namespace GLTFast.Export
             switch (lightType)
             {
                 case LightType.Spot:
-                    light.typeEnum = LightPunctual.Type.Spot;
+                    light.SetLightType(LightPunctual.Type.Spot);
                     light.spot = new SpotLight
                     {
                         outerConeAngle = uLight.spotAngle * Mathf.Deg2Rad * .5f,
@@ -273,15 +271,15 @@ namespace GLTFast.Export
                     };
                     break;
                 case LightType.Directional:
-                    light.typeEnum = LightPunctual.Type.Directional;
+                    light.SetLightType(LightPunctual.Type.Directional);
                     break;
                 case LightType.Point:
-                    light.typeEnum = LightPunctual.Type.Point;
+                    light.SetLightType(LightPunctual.Type.Point);
                     break;
                 case LightType.Area:
                 case LightType.Disc:
                 default:
-                    light.typeEnum = LightPunctual.Type.Spot;
+                    light.SetLightType(LightPunctual.Type.Spot);
                     light.spot = new SpotLight
                     {
                         outerConeAngle = 45 * Mathf.Deg2Rad * .5f,
@@ -290,7 +288,7 @@ namespace GLTFast.Export
                     break;
             }
 
-            light.lightColor = uLight.color.linear;
+            light.LightColor = uLight.color.linear;
             light.range = uLight.range;
 
             switch (renderPipeline)
@@ -341,7 +339,7 @@ namespace GLTFast.Export
                     break;
             }
 
-            light.intensity *= m_Settings.lightIntensityFactor;
+            light.intensity *= m_Settings.LightIntensityFactor;
 
             if (m_Lights == null)
             {
@@ -372,7 +370,7 @@ namespace GLTFast.Export
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
             var light = m_Lights[lightId];
-            if (light.typeEnum != LightPunctual.Type.Point)
+            if (light.GetLightType() != LightPunctual.Type.Point)
             {
                 // glTF lights face in the opposite direction, so we create a
                 // helper node that applies the correct rotation.
@@ -454,8 +452,8 @@ namespace GLTFast.Export
             // TODO: KTX encoding
 
             var image = new Image {
-                name = imageExport.fileName,
-                mimeType = imageExport.mimeType
+                name = imageExport.FileName,
+                mimeType = imageExport.MimeType
             };
 
             m_ImageExports.Add(imageExport);
@@ -543,7 +541,7 @@ namespace GLTFast.Export
             CertifyNotDisposed();
 
             var ext = Path.GetExtension(path);
-            var binary = m_Settings.format == GltfFormat.Binary;
+            var binary = m_Settings.Format == GltfFormat.Binary;
             string bufferPath = null;
             if (!binary)
             {
@@ -569,7 +567,7 @@ namespace GLTFast.Export
 
             CertifyNotDisposed();
 
-            if (m_Settings.format != GltfFormat.Binary || GetFinalImageDestination() == ImageDestination.SeparateFile)
+            if (m_Settings.Format != GltfFormat.Binary || GetFinalImageDestination() == ImageDestination.SeparateFile)
             {
                 m_Logger.Error(LogCode.None, "Save to Stream currently only works for self-contained glTF-Binary");
                 return false;
@@ -597,13 +595,13 @@ namespace GLTFast.Export
                 return false;
             }
 
-            var isBinary = m_Settings.format == GltfFormat.Binary;
+            var isBinary = m_Settings.Format == GltfFormat.Binary;
 
             const uint headerSize = 12; // 4 bytes magic + 4 bytes version + 4 bytes length (uint each)
             const uint chunkOverhead = 8; // 4 bytes chunk length + 4 bytes chunk type (uint each)
             if (isBinary)
             {
-                outStream.Write(BitConverter.GetBytes(GltfGlobals.gltfBinaryMagic));
+                outStream.Write(BitConverter.GetBytes(GltfGlobals.GltfBinaryMagic));
                 outStream.Write(BitConverter.GetBytes((uint)2));
 
                 MemoryStream jsonStream = null;
@@ -710,10 +708,10 @@ namespace GLTFast.Export
 
         ImageDestination GetFinalImageDestination()
         {
-            var imageDest = m_Settings.imageDestination;
+            var imageDest = m_Settings.ImageDestination;
             if (imageDest == ImageDestination.Automatic)
             {
-                imageDest = m_Settings.format == GltfFormat.Binary
+                imageDest = m_Settings.Format == GltfFormat.Binary
                     ? ImageDestination.MainBuffer
                     : ImageDestination.SeparateFile;
             }
@@ -943,8 +941,8 @@ namespace GLTFast.Export
                     byteOffset = attrData.offset,
                     componentType = Accessor.GetComponentType(attribute.format),
                     count = vertexCount,
-                    typeEnum = Accessor.GetAccessorAttributeType(attribute.dimension),
                 };
+                accessor.SetAttributeType(Accessor.GetAccessorAttributeType(attribute.dimension));
 
                 var accessorId = AddAccessor(accessor);
 
@@ -1035,10 +1033,7 @@ namespace GLTFast.Export
                     mode = DrawMode.Points;
                 }
 
-                Accessor indexAccessor;
-
-                indexAccessor = new Accessor {
-                    typeEnum = GltfAccessorAttributeType.SCALAR,
+                var indexAccessor = new Accessor {
                     byteOffset = indexOffset,
                     componentType = indexComponentType,
                     count = subMesh.indexCount,
@@ -1046,6 +1041,7 @@ namespace GLTFast.Export
                     // min = new []{}, // TODO
                     // max = new []{}, // TODO
                 };
+                indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
 
                 if (subMesh.topology == MeshTopology.Quads) {
                     indexAccessor.count = indexAccessor.count / 2 * 3;
@@ -1264,8 +1260,8 @@ namespace GLTFast.Export
                     byteOffset = attrData.offset,
                     componentType = Accessor.GetComponentType(attribute.format),
                     count = uMesh.vertexCount,
-                    typeEnum = Accessor.GetAccessorAttributeType(attribute.dimension),
                 };
+                accessor.SetAttributeType(Accessor.GetAccessorAttributeType(attribute.dimension));
 
                 var accessorId = AddAccessor(accessor);
 
@@ -1360,7 +1356,6 @@ namespace GLTFast.Export
 
                 var indexAccessor = new Accessor
                 {
-                    typeEnum = GltfAccessorAttributeType.SCALAR,
                     byteOffset = indexOffset,
                     componentType = indexComponentType,
                     count = subMesh.indexCount,
@@ -1368,6 +1363,7 @@ namespace GLTFast.Export
                     // min = new []{}, // TODO
                     // max = new []{}, // TODO
                 };
+                indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
 
                 if (subMesh.topology == MeshTopology.Quads)
                 {
@@ -1628,7 +1624,7 @@ namespace GLTFast.Export
             {
                 Dictionary<int, string> fileNameOverrides = null;
                 var imageDest = GetFinalImageDestination();
-                var overwrite = m_Settings.fileConflictResolution == FileConflictResolution.Overwrite;
+                var overwrite = m_Settings.FileConflictResolution == FileConflictResolution.Overwrite;
                 if (!overwrite && imageDest == ImageDestination.SeparateFile)
                 {
                     var fileExists = false;
@@ -1660,7 +1656,7 @@ namespace GLTFast.Export
                     for (var imageId = 0; imageId < m_ImageExports.Count; imageId++)
                     {
                         var imageExport = m_ImageExports[imageId];
-                        var fileName = Path.GetFileName(imageExport.fileName);
+                        var fileName = Path.GetFileName(imageExport.FileName);
                         if (GetUniqueFileName(ref fileName))
                         {
                             fileNameOverrides = fileNameOverrides ?? new Dictionary<int, string>();
@@ -1685,7 +1681,7 @@ namespace GLTFast.Export
                             return false;
                         }
 #else
-                        if (m_Settings.fileConflictResolution == FileConflictResolution.Abort)
+                        if (m_Settings.FileConflictResolution == FileConflictResolution.Abort)
                         {
                             return false;
                         }
@@ -1709,7 +1705,7 @@ namespace GLTFast.Export
                     {
                         if (!(fileNameOverrides != null && fileNameOverrides.TryGetValue(imageId, out var fileName)))
                         {
-                            fileName = imageExport.fileName;
+                            fileName = imageExport.FileName;
                         }
                         if (imageExport.Write(Path.Combine(directory, fileName), overwrite))
                         {

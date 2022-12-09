@@ -27,78 +27,80 @@ namespace GLTFast
     [Serializable]
     public class ImportSettings
     {
-
-        /// <summary>
-        /// Defines how node names are created
-        /// </summary>
-        public enum NameImportMethod
-        {
-            /// <summary>
-            /// Use original node names.
-            /// Fallback to mesh's name (if present)
-            /// Fallback to "Node_&lt;index&gt;" as last resort.
-            /// </summary>
-            Original,
-            /// <summary>
-            /// Identical to <see cref="Original">Original</see>, but
-            /// names are made unique (within their hierarchical position)
-            /// by supplementing a continuous number.
-            /// This is required for correct animation target lookup and import continuity.
-            /// </summary>
-            OriginalUnique
-        }
-
-        /// <summary>
-        /// Target animation system
-        /// </summary>
-        public enum AnimationMethod
-        {
-            /// <summary>
-            /// Don't target or import animation
-            /// </summary>
-            None,
-            /// <summary>
-            /// <see href="https://docs.unity3d.com/Manual/Animations.html">Legacy Animation System</see>
-            /// </summary>
-            Legacy,
-            /// <summary>
-            /// <see href="https://docs.unity3d.com/Manual/AnimationOverview.html">Default Animation System (Mecanim)</see>
-            /// </summary>
-            Mecanim
-        }
-
         /// <inheritdoc cref="NameImportMethod"/>
-        [Tooltip("Controls how node names are created.")]
-        public NameImportMethod nodeNameMethod = NameImportMethod.Original;
+        public NameImportMethod NodeNameMethod
+        {
+            get => nodeNameMethod;
+            set => nodeNameMethod = value;
+        }
 
-        /// <inheritdoc cref="AnimationMethod"/>
-        [Tooltip("Target animation system.")]
-        public AnimationMethod animationMethod = AnimationMethod.Legacy;
+        /// <inheritdoc cref="GLTFast.AnimationMethod"/>
+        public AnimationMethod AnimationMethod
+        {
+            get => animationMethod;
+            set => animationMethod = value;
+        }
 
         /// <summary>
         /// Set this property to true to enable mip map generation.
         /// Note: Creating mipmaps from Jpeg/PNG textures is very slow (at the moment).
         /// See https://github.com/atteneder/glTFast/issues/220 for details
         /// </summary>
-        [Tooltip("Controls if mipmaps are created for imported textures.")]
-        public bool generateMipMaps;
+        public bool GenerateMipMaps
+        {
+            get => generateMipMaps;
+            set => generateMipMaps = value;
+        }
 
         /// <summary>
         /// Defines the default minification filter mode for textures that have no such specification in data
         /// </summary>
-        [Tooltip("Minification filter mode fallback if no mode was provided.")]
-        public Sampler.MinFilterMode defaultMinFilterMode = Sampler.MinFilterMode.Linear;
+        public Sampler.MinFilterMode DefaultMinFilterMode
+        {
+            get => defaultMinFilterMode;
+            set => defaultMinFilterMode = value;
+        }
 
         /// <summary>
         /// Define the default magnification filter mode for textures that have no such specification in data
         /// </summary>
-        [Tooltip("Magnification filter mode fallback if no mode was provided.")]
-        public Sampler.MagFilterMode defaultMagFilterMode = Sampler.MagFilterMode.Linear;
+        public Sampler.MagFilterMode DefaultMagFilterMode
+        {
+            get => defaultMagFilterMode;
+            set => defaultMagFilterMode = value;
+        }
 
         /// <summary>
         /// This property defines the anisotropic filtering level for imported textures
         /// </summary>
+        public int AnisotropicFilterLevel
+        {
+            get => anisotropicFilterLevel;
+            set => anisotropicFilterLevel = value;
+        }
+
+        [SerializeField]
+        [Tooltip("Controls how node names are created.")]
+        NameImportMethod nodeNameMethod = NameImportMethod.Original;
+
+        [SerializeField]
+        [Tooltip("Target animation system.")]
+        AnimationMethod animationMethod = AnimationMethod.Legacy;
+
+        [SerializeField]
+        [Tooltip("Controls if mipmaps are created for imported textures.")]
+        bool generateMipMaps;
+
+        [SerializeField]
+        [Tooltip("Minification filter mode fallback if no mode was provided.")]
+        Sampler.MinFilterMode defaultMinFilterMode = Sampler.MinFilterMode.Linear;
+
+        [SerializeField]
+        [Tooltip("Magnification filter mode fallback if no mode was provided.")]
+        Sampler.MagFilterMode defaultMagFilterMode = Sampler.MagFilterMode.Linear;
+
+        [SerializeField]
         [Tooltip("Anisotropic filtering level for imported textures.")]
-        public int anisotropicFilterLevel = 1;
+        int anisotropicFilterLevel = 1;
     }
 }

@@ -37,7 +37,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// The sheen color in linear space.
         /// </summary>
-        public Color sheenColor =>
+        public Color SheenColor =>
             new Color(
                 sheenColorFactor[0],
                 sheenColorFactor[1],

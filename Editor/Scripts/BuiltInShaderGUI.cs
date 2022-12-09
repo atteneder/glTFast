@@ -76,19 +76,19 @@ namespace GLTFast.Editor
                 m_UVTransform = TextureRotationSlider(
                     material,
                     m_UVTransform,
-                    baseColorTextureScaleTransformPropId,
-                    baseColorTextureRotationPropId,
+                    BaseColorTextureScaleTransformProperty,
+                    BaseColorTextureRotationProperty,
                     true,
                     "Base Color Tex Rotation");
                 if (m_UVTransform.HasValue)
                 {
                     if (m_UVTransform.Value.rotation != 0)
                     {
-                        material.EnableKeyword(textureTransformKeyword);
+                        material.EnableKeyword(TextureTransformKeyword);
                     }
                     else
                     {
-                        material.DisableKeyword(textureTransformKeyword);
+                        material.DisableKeyword(TextureTransformKeyword);
                     }
                 }
 
@@ -124,7 +124,7 @@ namespace GLTFast.Editor
                     SetOpaqueMode(material);
                     break;
                 case BlendModeOption.Cutout:
-                    SetAlphaModeMask(material, material.GetFloat(alphaCutoffPropId));
+                    SetAlphaModeMask(material, material.GetFloat(AlphaCutoffProperty));
                     break;
                 case BlendModeOption.Fade:
                     SetAlphaModeBlend(material);

@@ -52,7 +52,8 @@ namespace GLTFast.Schema {
             Translation,
             Rotation,
             Scale,
-            Weights
+            Weights,
+            Pointer
         }
 
         /// <summary>
@@ -85,18 +86,24 @@ namespace GLTFast.Schema {
 
         AnimationChannel.Path m_Path;
 
-        public AnimationChannel.Path pathEnum {
-            get {
-                if ( m_Path == AnimationChannel.Path.Unknown ) {
-                    if (!string.IsNullOrEmpty (path)) {
-                        m_Path = (AnimationChannel.Path)Enum.Parse (typeof(AnimationChannel.Path), path, true);
-                        path = null;
-                        return m_Path;
+        public AnimationChannel.Path GetPath() {
+            if (m_Path == AnimationChannel.Path.Unknown) {
+                if (!string.IsNullOrEmpty(path)) {
+                    try {
+                        m_Path = (AnimationChannel.Path)Enum.Parse(typeof(AnimationChannel.Path), path, true);
                     }
-                    return AnimationChannel.Path.Invalid;
+                    catch (ArgumentException) {
+                        m_Path = AnimationChannel.Path.Invalid;
+                    }
+
+                    path = null;
+                    return m_Path;
                 }
-                return m_Path;
+
+                return AnimationChannel.Path.Invalid;
             }
+
+            return m_Path;
         }
 
         internal void GltfSerialize(JsonWriter writer) {
@@ -134,19 +141,18 @@ namespace GLTFast.Schema {
 
         InterpolationType m_Interpolation;
 
-        public InterpolationType interpolationEnum {
-            get {
-                if ( m_Interpolation == InterpolationType.Unknown ) {
-                    if (!string.IsNullOrEmpty (interpolation)) {
-                        m_Interpolation = (InterpolationType)Enum.Parse (typeof(InterpolationType), interpolation, true);
-                        interpolation = null;
-                        return m_Interpolation;
-                    }
-
-                    m_Interpolation = InterpolationType.Linear;
+        public InterpolationType GetInterpolationType() {
+            if (m_Interpolation == InterpolationType.Unknown) {
+                if (!string.IsNullOrEmpty(interpolation)) {
+                    m_Interpolation = (InterpolationType)Enum.Parse(typeof(InterpolationType), interpolation, true);
+                    interpolation = null;
+                    return m_Interpolation;
                 }
-                return m_Interpolation;
+
+                m_Interpolation = InterpolationType.Linear;
             }
+
+            return m_Interpolation;
         }
 
         /// <summary>

@@ -114,36 +114,36 @@ namespace GLTFast.Loading
         /// True if the download finished and was successful
         /// </summary>
 #if UNITY_2020_1_OR_NEWER
-        public bool success => m_Request!=null && m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
+        public bool Success => m_Request!=null && m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
 #else
-        public bool success => m_Request != null && m_Request.isDone && !m_Request.isNetworkError && !m_Request.isHttpError;
+        public bool Success => m_Request != null && m_Request.isDone && !m_Request.isNetworkError && !m_Request.isHttpError;
 #endif
 
         /// <summary>
         /// If the download failed, error description
         /// </summary>
-        public string error => m_Request == null ? "Request disposed" : m_Request.error;
+        public string Error => m_Request == null ? "Request disposed" : m_Request.error;
 
         /// <summary>
         /// Downloaded data as byte array
         /// </summary>
-        public byte[] data => m_Request?.downloadHandler.data;
+        public byte[] Data => m_Request?.downloadHandler.data;
 
         /// <summary>
         /// Downloaded data as string
         /// </summary>
-        public string text => m_Request?.downloadHandler.text;
+        public string Text => m_Request?.downloadHandler.text;
 
         /// <summary>
         /// True if the requested download is a glTF-Binary file.
         /// False if it is a regular JSON-based glTF file.
         /// Null if the type could not be determined.
         /// </summary>
-        public bool? isBinary
+        public bool? IsBinary
         {
             get
             {
-                if (success)
+                if (Success)
                 {
                     string contentType = m_Request.GetResponseHeader("Content-Type");
                     if (contentType == k_MimeTypeGltfBinary)
@@ -202,7 +202,7 @@ namespace GLTFast.Loading
         }
 
         /// <inheritdoc />
-        public Texture2D texture => (m_Request?.downloadHandler as  DownloadHandlerTexture )?.texture;
+        public Texture2D Texture => (m_Request?.downloadHandler as  DownloadHandlerTexture )?.texture;
     }
 #endif
 }

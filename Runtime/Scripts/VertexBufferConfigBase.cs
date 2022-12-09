@@ -53,7 +53,7 @@ namespace GLTFast
         protected VertexAttributeDescriptor[] m_Descriptors;
         protected ICodeLogger m_Logger;
 
-        public Bounds? bounds { get; protected set; }
+        public Bounds? Bounds { get; protected set; }
 
         protected VertexBufferConfigBase(ICodeLogger logger)
         {
@@ -71,7 +71,7 @@ namespace GLTFast
             int jointsAccessorIndex
             );
         public abstract void ApplyOnMesh(UnityEngine.Mesh msh, MeshUpdateFlags flags = PrimitiveCreateContextBase.defaultMeshUpdateFlags);
-        public abstract int vertexCount { get; }
+        public abstract int VertexCount { get; }
         public abstract void Dispose();
 
         /// <summary>

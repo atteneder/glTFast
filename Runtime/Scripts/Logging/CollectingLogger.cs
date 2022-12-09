@@ -125,17 +125,26 @@ namespace GLTFast.Logging
         /// <summary>
         /// The severeness type of the log message.
         /// </summary>
-        public LogType type;
+        public LogType Type => type;
 
         /// <summary>
         /// Message code
         /// </summary>
-        public LogCode code;
+        public LogCode Code => code;
 
         /// <summary>
         /// Additional, optional message parts
         /// </summary>
-        public string[] messages;
+        public string[] Messages => messages;
+
+        [SerializeField]
+        LogType type;
+
+        [SerializeField]
+        LogCode code;
+
+        [SerializeField]
+        string[] messages;
 
         /// <summary>
         /// Default constructor
@@ -155,7 +164,7 @@ namespace GLTFast.Logging
         /// </summary>
         public void Log()
         {
-            Debug.LogFormat(type, LogOption.NoStacktrace, null, LogMessages.GetFullMessage(code, messages));
+            Debug.LogFormat(Type, LogOption.NoStacktrace, null, LogMessages.GetFullMessage(Code, Messages));
         }
 
         /// <summary>
@@ -164,7 +173,7 @@ namespace GLTFast.Logging
         /// <returns>Log message</returns>
         public override string ToString()
         {
-            return LogMessages.GetFullMessage(code, messages);
+            return LogMessages.GetFullMessage(Code, Messages);
         }
     }
 }

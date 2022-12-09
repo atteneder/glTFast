@@ -62,7 +62,7 @@ namespace GLTFast
         /// <summary>
         /// Currently used render pipeline
         /// </summary>
-        public static RenderPipeline renderPipeline
+        public static RenderPipeline RenderPipeline
         {
             get
             {

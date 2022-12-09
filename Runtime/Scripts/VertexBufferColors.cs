@@ -57,7 +57,7 @@ namespace GLTFast
             Profiler.BeginSample("ScheduleVertexColorJob");
             Profiler.BeginSample("AllocateNativeArray");
             buffers.GetAccessor(colorAccessorIndex, out var colorAcc, out var data, out var byteStride);
-            if (colorAcc.isSparse)
+            if (colorAcc.IsSparse)
             {
                 m_Logger.Error(LogCode.SparseAccessor, "color");
             }
@@ -67,7 +67,7 @@ namespace GLTFast
             var h = GetColors32Job(
                 data,
                 colorAcc.componentType,
-                colorAcc.typeEnum,
+                colorAcc.GetAttributeType(),
                 byteStride,
                 m_Data
             );

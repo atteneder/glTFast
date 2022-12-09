@@ -75,24 +75,24 @@ namespace GLTFast.Export
         /// <summary>
         /// Export to JSON-based or binary format glTF files
         /// </summary>
-        public GltfFormat format = GltfFormat.Json;
+        public GltfFormat Format { get; set; } = GltfFormat.Json;
 
-        /// <inheritdoc cref="ImageDestination"/>
-        public ImageDestination imageDestination = ImageDestination.Automatic;
+        /// <inheritdoc cref="Export.ImageDestination"/>
+        public ImageDestination ImageDestination { get; set; } = ImageDestination.Automatic;
 
-        /// <inheritdoc cref="FileConflictResolution"/>
-        public FileConflictResolution fileConflictResolution = FileConflictResolution.Abort;
+        /// <inheritdoc cref="Export.FileConflictResolution"/>
+        public FileConflictResolution FileConflictResolution { get; set; } = FileConflictResolution.Abort;
 
         /// <summary>
         /// Light intensity values are multiplied by this factor.
         /// </summary>
-        [Tooltip("Light intensity values are multiplied by this factor")]
-        public float lightIntensityFactor = 1.0f;
+        [field: Tooltip("Light intensity values are multiplied by this factor")]
+        public float LightIntensityFactor { get; set; } = 1.0f;
 
         /// <summary>
         /// Component type flags to include or exclude components from export
         /// based on type.
         /// </summary>
-        public ComponentType componentMask = ComponentType.All;
+        public ComponentType ComponentMask { get; set; } = ComponentType.All;
     }
 }

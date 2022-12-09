@@ -66,7 +66,7 @@ namespace GLTFast
             Profiler.BeginSample("AllocateNativeArray");
 
             buffers.GetAccessor(weightsAccessorIndex, out var weightsAcc, out var weightsData, out var weightsByteStride);
-            if (weightsAcc.isSparse)
+            if (weightsAcc.IsSparse)
             {
                 m_Logger.Error(LogCode.SparseAccessor, "bone weights");
             }
@@ -99,7 +99,7 @@ namespace GLTFast
 
             {
                 buffers.GetAccessor(jointsAccessorIndex, out var jointsAcc, out var jointsData, out var jointsByteStride);
-                if (jointsAcc.isSparse)
+                if (jointsAcc.IsSparse)
                 {
                     m_Logger.Error(LogCode.SparseAccessor, "bone joints");
                 }

@@ -62,7 +62,7 @@ namespace GLTFast
 
             Profiler.BeginSample("SetIndices");
             var indexCount = 0;
-            var allBounds = vertexData.bounds;
+            var allBounds = vertexData.Bounds;
             for (var i = 0; i < m_Indices.Length; i++)
             {
                 indexCount += m_Indices[i].Length;
@@ -85,7 +85,7 @@ namespace GLTFast
                     topology = topology,
                     baseVertex = 0,
                     firstVertex = 0,
-                    vertexCount = vertexData.vertexCount
+                    vertexCount = vertexData.VertexCount
                 };
                 if (allBounds.HasValue)
                 {

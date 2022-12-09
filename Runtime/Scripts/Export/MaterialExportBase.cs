@@ -26,33 +26,43 @@ namespace GLTFast.Export
     /// <inheritdoc cref="IMaterialExport"/>
     public abstract class MaterialExportBase : IMaterialExport
     {
+        // These property IDs might be useful for developing custom IMaterialExport implementations,
+        // thus they are public.
+        // ReSharper disable MemberCanBeProtected.Global
+        // ReSharper disable MemberCanBePrivate.Global
 
         /// <summary>
-        /// _BaseColor property
+        /// _BaseColor shader property identifier
         /// </summary>
-        protected static readonly int k_BaseColor = Shader.PropertyToID("_BaseColor");
+        public static readonly int BaseColorProperty = Shader.PropertyToID("_BaseColor");
 
         /// <summary>
-        /// _MainTex property
+        /// _MainTex shader property identifier
         /// </summary>
-        protected static readonly int k_MainTex = Shader.PropertyToID("_MainTex");
+        public static readonly int MainTexProperty = Shader.PropertyToID("_MainTex");
 
         /// <summary>
-        /// _Color property
+        /// _Color shader property identifier
         /// </summary>
-        protected static readonly int k_Color = Shader.PropertyToID("_Color");
+        public static readonly int ColorProperty = Shader.PropertyToID("_Color");
 
         /// <summary>
-        /// _Metallic property
+        /// _Metallic shader property identifier
         /// </summary>
-        protected static readonly int k_Metallic = Shader.PropertyToID("_Metallic");
+        public static readonly int MetallicProperty = Shader.PropertyToID("_Metallic");
 
         /// <summary>
-        /// _Smoothness property
+        /// _Smoothness shader property identifier
         /// </summary>
-        protected static readonly int k_Smoothness = Shader.PropertyToID("_Smoothness");
+        public static readonly int SmoothnessProperty = Shader.PropertyToID("_Smoothness");
 
-        static readonly int k_Cutoff = Shader.PropertyToID("_Cutoff");
+        /// <summary>
+        /// _Cutoff shader property identifier
+        /// </summary>
+        public static readonly int CutoffProperty = Shader.PropertyToID("_Cutoff");
+
+        // ReSharper restore MemberCanBeProtected.Global
+        // ReSharper restore MemberCanBePrivate.Global
 
         /// <summary>
         /// Converts a Unity material into a glTF material
@@ -74,18 +84,18 @@ namespace GLTFast.Export
             switch (uMaterial.GetTag("RenderType", false, ""))
             {
                 case "TransparentCutout":
-                    if (uMaterial.HasProperty(k_Cutoff))
+                    if (uMaterial.HasProperty(CutoffProperty))
                     {
-                        material.alphaCutoff = uMaterial.GetFloat(k_Cutoff);
+                        material.alphaCutoff = uMaterial.GetFloat(CutoffProperty);
                     }
-                    material.alphaModeEnum = Material.AlphaMode.MASK;
+                    material.SetAlphaMode(Material.AlphaMode.Mask);
                     break;
                 case "Transparent":
                 case "Fade":
-                    material.alphaModeEnum = Material.AlphaMode.BLEND;
+                    material.SetAlphaMode(Material.AlphaMode.Blend);
                     break;
                 default:
-                    material.alphaModeEnum = Material.AlphaMode.OPAQUE;
+                    material.SetAlphaMode(Material.AlphaMode.Opaque);
                     break;
             }
         }
@@ -137,7 +147,7 @@ namespace GLTFast.Export
 
             if (GetUnlitColor(uMaterial, out var baseColor))
             {
-                pbr.baseColor = baseColor;
+                pbr.BaseColor = baseColor;
             }
 
             if (uMaterial.HasProperty(mainTexProperty))
@@ -171,14 +181,14 @@ namespace GLTFast.Export
         /// <returns>True if the unlit color was retrieved, false otherwise</returns>
         protected virtual bool GetUnlitColor(UnityEngine.Material uMaterial, out Color baseColor)
         {
-            if (uMaterial.HasProperty(k_BaseColor))
+            if (uMaterial.HasProperty(BaseColorProperty))
             {
-                baseColor = uMaterial.GetColor(k_BaseColor);
+                baseColor = uMaterial.GetColor(BaseColorProperty);
                 return true;
             }
-            if (uMaterial.HasProperty(k_Color))
+            if (uMaterial.HasProperty(ColorProperty))
             {
-                baseColor = uMaterial.GetColor(k_Color);
+                baseColor = uMaterial.GetColor(ColorProperty);
                 return true;
             }
             baseColor = Color.magenta;
@@ -195,7 +205,7 @@ namespace GLTFast.Export
         protected static TextureInfo ExportTextureInfo(
             UnityEngine.Texture texture,
             IGltfWritable gltf,
-            ImageExportBase.Format format = ImageExportBase.Format.Unknown
+            ImageFormat format = ImageFormat.Unknown
             )
         {
             var texture2d = texture as Texture2D;
@@ -270,7 +280,7 @@ namespace GLTFast.Export
                 return false;
             }
 
-            var samplerId = gltf.AddSampler(imageExport.filterMode, imageExport.wrapModeU, imageExport.wrapModeV);
+            var samplerId = gltf.AddSampler(imageExport.FilterMode, imageExport.WrapModeU, imageExport.WrapModeV);
             textureId = gltf.AddTexture(imageId, samplerId);
             return true;
         }

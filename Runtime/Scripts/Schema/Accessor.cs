@@ -160,32 +160,32 @@ namespace GLTFast.Schema
         GltfAccessorAttributeType m_TypeEnum = GltfAccessorAttributeType.Undefined;
 
         /// <summary>
-        /// <see cref="GltfAccessorAttributeType"/> typed view onto <see cref="type"/> string.
+        /// <see cref="GltfAccessorAttributeType"/> typed/cached getter from the <see cref="type"/> string.
         /// </summary>
-        public GltfAccessorAttributeType typeEnum
+        /// <returns>The Accessor's attribute type, if it could be retrieved correctly. <see cref="GltfAccessorAttributeType.Undefined"/> otherwise</returns>
+        public GltfAccessorAttributeType GetAttributeType()
         {
-            get
+            if (m_TypeEnum != GltfAccessorAttributeType.Undefined)
+                return m_TypeEnum;
+
+            if (!string.IsNullOrEmpty(type))
             {
-                if (m_TypeEnum != GltfAccessorAttributeType.Undefined)
-                {
-                    return m_TypeEnum;
-                }
-                else if (!string.IsNullOrEmpty(type))
-                {
-                    m_TypeEnum = (GltfAccessorAttributeType)Enum.Parse(typeof(GltfAccessorAttributeType), type, true);
-                    type = null;
-                    return m_TypeEnum;
-                }
-                else
-                {
-                    return GltfAccessorAttributeType.Undefined;
-                }
+                m_TypeEnum = (GltfAccessorAttributeType)Enum.Parse(typeof(GltfAccessorAttributeType), type, true);
+                type = null;
+                return m_TypeEnum;
             }
-            set
-            {
-                m_TypeEnum = value;
-                type = value.ToString();
-            }
+
+            return GltfAccessorAttributeType.Undefined;
+        }
+
+        /// <summary>
+        /// <see cref="GltfAccessorAttributeType"/> typed setter for the <see cref="type"/> string.
+        /// </summary>
+        /// <param name="type">Attribute type</param>
+        public void SetAttributeType(GltfAccessorAttributeType type)
+        {
+            m_TypeEnum = type;
+            this.type = type.ToString();
         }
 
         /// <summary>
@@ -345,7 +345,7 @@ namespace GLTFast.Schema
         /// <returns>Bounding box enclosing the minimum and maximum values</returns>
         public Bounds? TryGetBounds()
         {
-            Assert.AreEqual(GltfAccessorAttributeType.VEC3, typeEnum);
+            Assert.AreEqual(GltfAccessorAttributeType.VEC3, GetAttributeType());
             if (min != null && min.Length > 2 && max != null && max.Length > 2)
             {
                 var maxBounds = new float3(-min[0], max[1], max[2]);
@@ -388,7 +388,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// True if the accessor is <see href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#sparse-accessors">sparse</see>
         /// </summary>
-        public bool isSparse => sparse != null;
+        public bool IsSparse => sparse != null;
 
         internal void GltfSerialize(JsonWriter writer)
         {

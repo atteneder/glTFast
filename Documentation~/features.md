@@ -20,13 +20,13 @@ All of Unity's platforms are supported. glTFast is tested or was reported to run
 | | |
 | **GameObject**
 | Import   | ✅️ | ✅
-| Export   | [ℹ️][RuntimeExport] | <sup>1</sup> ☑️
+| Export   | <sup>1</sup>[☑️] | <sup>1</sup> ☑️
 | | |
 | **Entities (see [DOTS](#data-oriented-technology-stack))**
 | Import   | [☑️](#data-oriented-technology-stack) | `n/a`
 | Export   |  | `n/a`
 
-<sup>1</sup>: glTF export currently only works on Unity 2020.2 or newer.
+<sup>1</sup>: Experimental. Core features missing
 
 ## Core glTF features
 
@@ -47,7 +47,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | **Basics**
 | Scenes | ✅ | ✅
 | Node hierarchies | ✅ | ✅
-| Cameras | ✅ | 
+| Cameras | ✅ | ✅ 
 | | |
 | **Images**
 | PNG | ✅ | ✅
@@ -66,7 +66,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | **Topologies / Primitive Types**
 | TRIANGLES | ✅ | ✅
 | POINTS | ✅ | ✅
-| <sup>1</sup>LINES | ✅ | ✅
+| LINES | ✅ | ✅
 | LINE_STRIP | ✅ | ✅
 | <sup>1</sup>LINE_LOOP | ✅ | ✅
 | TRIANGLE_STRIP |  | 
@@ -78,7 +78,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Normals | ✅ | ✅
 | Tangents | ✅ | ✅
 | Texture coordinates / UV sets | ✅ | `?`
-| Three or more texture coordinates / UV sets | [issue][UVsets] | `?`
+| Three or more texture coordinates / UV sets | <sup>2</sup>☑️ | `?`
 | Vertex colors | ✅ | `?`
 | Draco mesh compression (via [DracoUnity](https://github.com/atteneder/DracoUnity)) | ✅ | 
 | Implicit (no) indices | ✅ | 
@@ -87,7 +87,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Weights (up to 4 per vertex) | ✅ | 
 | | |
 | **Morph Targets / Blend Shapes**
-| Sparse accessors | <sup>2</sup> ✅ | 
+| Sparse accessors | <sup>3</sup> ✅ | 
 | [Skins][Skins] (sponsored by [Embibe](https://www.embibe.com)) | ✅ | 
 | | |
 | **Animation** 
@@ -97,7 +97,9 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 
 <sup>1</sup>: Untested due to lack of demo files.
 
-<sup>2</sup>: Not on all accessor types; morph targets and vertex positions only
+<sup>2</sup>: Up to eight UV sets can imported, but the glTFast shaders only support two (see [issue][UVsets]).
+
+<sup>3</sup>: Not on all accessor types; morph targets and vertex positions only
 
 ## Extensions
 
@@ -269,7 +271,6 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [MeshOpt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
 [MeshOptPkg]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [newIssue]: https://github.com/atteneder/glTFast/issues/new
-[RuntimeExport]: https://github.com/atteneder/glTFast/issues/259
 [SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
 [Sheen]: https://github.com/atteneder/glTFast/issues/110
 [Skins]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins

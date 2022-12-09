@@ -117,9 +117,9 @@ namespace GLTFast.Editor
                 importSettings = new ImportSettings
                 {
                     // Avoid naming conflicts by default
-                    nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique,
-                    generateMipMaps = true,
-                    animationMethod = ImportSettings.AnimationMethod.Mecanim,
+                    NodeNameMethod = NameImportMethod.OriginalUnique,
+                    GenerateMipMaps = true,
+                    AnimationMethod = AnimationMethod.Mecanim,
                 };
             }
 
@@ -136,19 +136,19 @@ namespace GLTFast.Editor
                 m_ImportedNames = new HashSet<string>();
                 m_ImportedObjects = new HashSet<Object>();
 
-                if (instantiationSettings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never)
+                if (instantiationSettings.SceneObjectCreation == SceneObjectCreation.Never)
                 {
 
                     // There *has* to be a common parent GameObject that gets
                     // added to the ScriptedImporter, so we overrule this
                     // setting.
 
-                    instantiationSettings.sceneObjectCreation = InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes;
+                    instantiationSettings.SceneObjectCreation = SceneObjectCreation.WhenMultipleRootNodes;
                     Debug.LogWarning("SceneObjectCreation setting \"Never\" is not available for Editor (design-time) imports. Falling back to WhenMultipleRootNodes.", this);
                 }
 
                 instantiationLogger = new CollectingLogger();
-                for (var sceneIndex = 0; sceneIndex < m_Gltf.sceneCount; sceneIndex++)
+                for (var sceneIndex = 0; sceneIndex < m_Gltf.SceneCount; sceneIndex++)
                 {
                     var scene = m_Gltf.GetSourceScene(sceneIndex);
                     var sceneName = m_Gltf.GetSceneName(sceneIndex);
@@ -161,8 +161,8 @@ namespace GLTFast.Editor
                     var multipleNodes = scene.nodes.Length > 1;
                     var hasAnimation = false;
 #if UNITY_ANIMATION
-                    if (importSettings.animationMethod != ImportSettings.AnimationMethod.None
-                        && (instantiationSettings.mask & ComponentType.Animation) != 0) {
+                    if (importSettings.AnimationMethod != AnimationMethod.None
+                        && (instantiationSettings.Mask & ComponentType.Animation) != 0) {
                         var animationClips = m_Gltf.GetAnimationClips();
                         if (animationClips != null && animationClips.Length > 0) {
                             hasAnimation = true;
@@ -170,8 +170,8 @@ namespace GLTFast.Editor
                     }
 #endif
 
-                    if (instantiationSettings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
-                        || instantiationSettings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && !multipleNodes)
+                    if (instantiationSettings.SceneObjectCreation == SceneObjectCreation.Never
+                        || instantiationSettings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes && !multipleNodes)
                     {
                         // No scene GameObject was created, so the first
                         // child is the first (and in this case only) node.
@@ -189,13 +189,13 @@ namespace GLTFast.Editor
                         : go.transform;
                     var sceneGo = sceneTransform.gameObject;
                     AddObjectToAsset(ctx, $"scenes/{sceneName}", sceneGo, gltfIcon);
-                    if (sceneIndex == m_Gltf.defaultSceneIndex)
+                    if (sceneIndex == m_Gltf.DefaultSceneIndex)
                     {
                         ctx.SetMainObject(sceneGo);
                     }
                 }
 
-                for (var i = 0; i < m_Gltf.textureCount; i++)
+                for (var i = 0; i < m_Gltf.TextureCount; i++)
                 {
                     var texture = m_Gltf.GetTexture(i);
                     if (texture != null)
@@ -208,7 +208,7 @@ namespace GLTFast.Editor
                     }
                 }
 
-                for (var i = 0; i < m_Gltf.materialCount; i++)
+                for (var i = 0; i < m_Gltf.MaterialCount; i++)
                 {
                     var mat = m_Gltf.GetMaterial(i);
 
@@ -255,7 +255,7 @@ namespace GLTFast.Editor
                         if (animationClip == null) {
                             continue;
                         }
-                        if (importSettings.animationMethod == ImportSettings.AnimationMethod.Mecanim) {
+                        if (importSettings.AnimationMethod == AnimationMethod.Mecanim) {
                             var settings = AnimationUtility.GetAnimationClipSettings(animationClip);
                             settings.loopTime = true;
                             AnimationUtility.SetAnimationClipSettings (animationClip, settings);
@@ -319,7 +319,7 @@ namespace GLTFast.Editor
                 reportItemList.AddRange(instantiationLogger.Items);
             }
 
-            if (reportItemList.Any(x => x.type == LogType.Error || x.type == LogType.Exception))
+            if (reportItemList.Any(x => x.Type == LogType.Error || x.Type == LogType.Exception))
             {
                 Debug.LogError($"Failed to import {assetPath} (see inspector for details)", this);
             }

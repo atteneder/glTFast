@@ -150,11 +150,11 @@ namespace GLTFast
             string path = uri.IsAbsoluteUri ? uri.LocalPath : uri.OriginalString;
             var index = path.LastIndexOf('.', path.Length - 1, Mathf.Min(5, path.Length));
             if (index < 0) return null;
-            if (path.EndsWith(GltfGlobals.glbExt, StringComparison.OrdinalIgnoreCase))
+            if (path.EndsWith(GltfGlobals.GlbExt, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-            if (path.EndsWith(GltfGlobals.gltfExt, StringComparison.OrdinalIgnoreCase))
+            if (path.EndsWith(GltfGlobals.GltfExt, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }

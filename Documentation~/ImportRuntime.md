@@ -6,7 +6,7 @@ You can load a glTF asset from an URL or a file path.
 
 ## Runtime Loading via Component
 
-Add a `GltfAsset` component to a GameObject.
+Add a `GltfAsset` component to a GameObject. It offers a lot of settings for import and instantiation.
 
 ![GltfAsset component][gltfasset_component]
 
@@ -113,9 +113,9 @@ async void Start() {
 
 ### Instantiation
 
-Creating actual GameObjects (or Entities) from the imported data (Meshes, Materials) is called instantiation.
+Creating actual GameObjects (or Entities) from the imported data (nodes, meshes, materials) is called instantiation.
 
-You can customize it by providing an implementation of [`IInstantiator`][IInstantiator] ( see [source][IInstantiator] and the reference implementation [`GameObjectInstantiator`][GameObjectInstantiator] for details).
+You can customize it by providing an implementation of [`IInstantiator`][IInstantiator] (see [source][IInstantiator] and the reference implementation [`GameObjectInstantiator`][GameObjectInstantiator] for details).
 
 Inject your custom instantiation like so
 
@@ -131,7 +131,7 @@ public class YourCustomInstantiator : GLTFast.IInstantiator {
 
 #### GameObjectInstantiator Setup
 
-The [`GameObjectInstantiator`][GameObjectInstantiator] accepts settings (via the constructor's `settings` parameter).
+The [`GameObjectInstantiator`][GameObjectInstantiator] accepts [InstantiationSettings][InstantiationSettings]) via the constructor's `settings` parameter.
 
 ##### `skinUpdateWhenOffscreen`
 
@@ -157,6 +157,14 @@ Two common use-cases are
 2. Boost implausibly low light intensities
 
 See [Physical Light Units in glTF](./LightUnits.md) for a detailed explaination.
+
+##### `sceneObjectCreation`
+
+Determines whether a dedicated GameObject/Entity representing the scene should get created (or the provided root `Transform` is used as scene root; see [SceneObjectCreation][SceneObjectCreation]).
+
+- `Always`: Create a dedicated scene root GameObject/Entity
+- `Never`: Always use the provided `Transform` as scene root.
+- `WhenMultipleRootNodes`: Create a scene object only if there is more than one root level node.
 
 #### Instance Access
 
@@ -215,7 +223,7 @@ You can customize logging by providing an implementation of [`ICodeLogger`][ICod
 
 There are two common implementations bundled. The `ConsoleLogger`, which logs straight to console (the default) and `CollectingLogger`, which stores messages in a list for users to process.
 
-Look into [`ICodeLogger`][ICodeLogger] and [`LogMessages`][[LogMessages]] for details.
+Look into [`ICodeLogger`][ICodeLogger] and [`LogMessages`][LogMessages] for details.
 
 ### Tune loading performance
 
@@ -283,5 +291,7 @@ When you no longer need a loaded instance of a glTF scene you might want to remo
 [IInstantiator]: xref:GLTFast.IInstantiator
 [IMaterialGenerator]: xref:GLTFast.Materials.IMaterialGenerator
 [ImportSettings]: xref:GLTFast.ImportSettings
+[InstantiationSettings]: xref:GLTFast.InstantiationSettings
 [LogMessages]: xref:GLTFast.Logging.LogMessages
 [SceneInstance]: xref:GLTFast.GameObjectInstantiator.SceneInstance
+[SceneObjectCreation]: xref:GLTFast.InstantiationSettings.SceneObjectCreation

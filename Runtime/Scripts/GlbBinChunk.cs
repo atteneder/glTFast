@@ -19,14 +19,14 @@ namespace GLTFast
 {
     readonly struct GlbBinChunk
     {
-        public int start { get; }
+        public int Start { get; }
 
-        public uint length { get; }
+        public uint Length { get; }
 
         public GlbBinChunk(int start, uint length)
         {
-            this.start = start;
-            this.length = length;
+            Start = start;
+            Length = length;
         }
     }
 }

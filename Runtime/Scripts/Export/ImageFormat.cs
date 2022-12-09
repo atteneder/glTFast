@@ -13,20 +13,26 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Materials
+using System;
+
+namespace GLTFast.Export
 {
-
     /// <summary>
-    /// Contains material related constant variables that are required for both
-    /// import (glTF to Unity) and export (Unity to glTF) material conversions.
-    /// TODO: Make const var location consistent
+    /// Exported image file format
     /// </summary>
-    public static class Constants
+    public enum ImageFormat
     {
-
         /// <summary>
-        /// Shader keyword for normal mapping
+        /// Unknown, no preferred file format
         /// </summary>
-        public const string NormalMapKeyword = "_NORMALMAP";
+        Unknown,
+        /// <summary>
+        /// Jpeg file format
+        /// </summary>
+        Jpg,
+        /// <summary>
+        /// PNG (Portable Network Graphics) file format
+        /// </summary>
+        Png
     }
 }

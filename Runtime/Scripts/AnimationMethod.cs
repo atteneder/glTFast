@@ -13,20 +13,26 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Materials
+using System;
+
+namespace GLTFast
 {
-
     /// <summary>
-    /// Contains material related constant variables that are required for both
-    /// import (glTF to Unity) and export (Unity to glTF) material conversions.
-    /// TODO: Make const var location consistent
+    /// Target animation system
     /// </summary>
-    public static class Constants
+    public enum AnimationMethod
     {
-
         /// <summary>
-        /// Shader keyword for normal mapping
+        /// Don't target or import animation
         /// </summary>
-        public const string NormalMapKeyword = "_NORMALMAP";
+        None,
+        /// <summary>
+        /// <see href="https://docs.unity3d.com/Manual/Animations.html">Legacy Animation System</see>
+        /// </summary>
+        Legacy,
+        /// <summary>
+        /// <see href="https://docs.unity3d.com/Manual/AnimationOverview.html">Default Animation System (Mecanim)</see>
+        /// </summary>
+        Mecanim
     }
 }

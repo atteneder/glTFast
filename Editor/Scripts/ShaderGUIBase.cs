@@ -97,11 +97,11 @@ namespace GLTFast.Editor
                 material.SetVector(rotationPropertyId, new Vector4(rotScale.c1.x, rotScale.c0.y, 0, 0));
                 if (newUvTransform.rotation == 0)
                 {
-                    material.DisableKeyword(textureTransformKeyword);
+                    material.DisableKeyword(TextureTransformKeyword);
                 }
                 else
                 {
-                    material.EnableKeyword(textureTransformKeyword);
+                    material.EnableKeyword(TextureTransformKeyword);
                 }
                 return newUvTransform;
             }

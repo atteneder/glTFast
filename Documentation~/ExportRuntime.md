@@ -55,13 +55,14 @@ public class TestExport : MonoBehaviour {
 
 After calling `SaveToFileAndDispose` the GameObjectExport instance becomes invalid. Do not re-use it.
 
-Further, the export can be customized by passing settings and injectables to the `GameObjectExport`'s
+Further, the export can be customized by passing `ExportSettings`, `GameObjectExportSettings` and injectables to the `GameObjectExport`'s
 constructor:
 
 ```c#
-using UnityEngine;
 using GLTFast;
+using UnityEngine;
 using GLTFast.Export;
+using GLTFast.Logging;
 
 public class TestExport : MonoBehaviour {
 
@@ -74,15 +75,31 @@ public class TestExport : MonoBehaviour {
         // errors and warnings the export raised
         var logger = new CollectingLogger();
 
-        // ExportSettings allow you to configure the export
-        // Check its source for details
+        // ExportSettings and GameObjectExportSettings allow you to configure the export
+        // Check their respective source for details
+        
+        // ExportSettings provides generic export settings
         var exportSettings = new ExportSettings {
             format = GltfFormat.Binary,
-            fileConflictResolution = FileConflictResolution.Overwrite
+            fileConflictResolution = FileConflictResolution.Overwrite,
+            // Export everything except cameras or animation
+            componentMask = ~(ComponentType.Camera | ComponentType.Animation),
+            // Boost light intensities 
+            lightIntensityFactor = 100f,
+        };
+
+        // GameObjectExportSettings provides settings specific to a GameObject/Component based hierarchy
+        var gameObjectExportSettings = new GameObjectExportSettings {
+            // Include inactive GameObjects in export
+            onlyActiveInHierarchy = false,
+            // Also export disabled components
+            disabledComponents = true,
+            // Only export GameObjects on certain layers
+            layerMask = LayerMask.GetMask("Default", "MyCustomLayer"),
         };
 
         // GameObjectExport lets you create glTFs from GameObject hierarchies
-        var export = new GameObjectExport( exportSettings, logger: logger);
+        var export = new GameObjectExport( exportSettings, gameObjectExportSettings, logger: logger);
 
         // Example of gathering GameObjects to be exported (recursively)
         var rootLevelNodes = GameObject.FindGameObjectsWithTag("ExportMe");
@@ -91,7 +108,7 @@ public class TestExport : MonoBehaviour {
         export.AddScene(rootLevelNodes, "My new glTF scene");
 
         // Async glTF export
-        bool success = await export.SaveToFileAndDispose(path);
+        var success = await export.SaveToFileAndDispose(path);
 
         if(!success) {
             Debug.LogError("Something went wrong exporting a glTF");

@@ -35,7 +35,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// Diffuse color in linear space.
         /// </summary>
-        public Color diffuseColor =>
+        public Color DiffuseColor =>
             new Color(
                 diffuseFactor[0],
                 diffuseFactor[1],
@@ -56,7 +56,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// Specular color in linear space.
         /// </summary>
-        public Color specularColor =>
+        public Color SpecularColor =>
             new Color(
                 specularFactor[0],
                 specularFactor[1],

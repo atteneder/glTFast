@@ -27,17 +27,17 @@ namespace GLTFast
         /// <summary>
         /// Number of materials
         /// </summary>
-        int materialCount { get; }
+        int MaterialCount { get; }
 
         /// <summary>
         /// Number of images
         /// </summary>
-        int imageCount { get; }
+        int ImageCount { get; }
 
         /// <summary>
         /// Number of textures
         /// </summary>
-        int textureCount { get; }
+        int TextureCount { get; }
 
         /// <summary>
         /// Get a Unity Material by its glTF material index

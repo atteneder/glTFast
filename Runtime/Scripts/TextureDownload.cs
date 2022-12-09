@@ -24,11 +24,11 @@ namespace GLTFast.Loading
     /// </summary>
     abstract class TextureDownloadBase
     {
-        public IDownload download { get; protected set; }
+        public IDownload Download { get; protected set; }
 
         /// <summary>
         /// Executes the texture loading process and assigns the result to
-        /// <see cref="download"/>.
+        /// <see cref="Download"/>.
         /// </summary>
         /// <returns></returns>
         public abstract Task Load();
@@ -48,7 +48,7 @@ namespace GLTFast.Loading
 
         public override async Task Load()
         {
-            download = await m_Task;
+            Download = await m_Task;
         }
     }
 }

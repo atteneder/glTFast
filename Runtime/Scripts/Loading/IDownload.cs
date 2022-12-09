@@ -51,28 +51,28 @@ namespace GLTFast.Loading
         /// <summary>
         /// True, if the request was successful
         /// </summary>
-        bool success { get; }
+        bool Success { get; }
 
         /// <summary>
         /// Error message in case the request failed. Null otherwise.
         /// </summary>
-        string error { get; }
+        string Error { get; }
 
         /// <summary>
         /// Resulting data
         /// </summary>
-        byte[] data { get; }
+        byte[] Data { get; }
 
         /// <summary>
         /// Resulting data as text
         /// </summary>
-        string text { get; }
+        string Text { get; }
 
         /// <summary>
         /// True if the result is a glTF-binary, false if it is not.
         /// No value if determining the glTF type was not possible or failed.
         /// </summary>
-        bool? isBinary { get; }
+        bool? IsBinary { get; }
     }
 
     /// <summary>
@@ -84,6 +84,6 @@ namespace GLTFast.Loading
         /// <summary>
         /// Resulting texture
         /// </summary>
-        Texture2D texture { get; }
+        Texture2D Texture { get; }
     }
 }

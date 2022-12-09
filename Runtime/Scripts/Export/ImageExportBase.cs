@@ -28,50 +28,30 @@ namespace GLTFast.Export
     /// </summary>
     public abstract class ImageExportBase
     {
-
-        /// <summary>
-        /// Exported image file format
-        /// </summary>
-        public enum Format
-        {
-            /// <summary>
-            /// Unknown, no preferred file format
-            /// </summary>
-            Unknown,
-            /// <summary>
-            /// Jpeg file format
-            /// </summary>
-            Jpg,
-            /// <summary>
-            /// PNG (Portable Network Graphics) file format
-            /// </summary>
-            Png
-        }
-
         /// <summary>
         /// Exported texture's file name
         /// </summary>
-        public abstract string fileName { get; }
+        public abstract string FileName { get; }
 
         /// <summary>
         /// Exported texture's mime type
         /// </summary>
-        public abstract string mimeType { get; }
+        public abstract string MimeType { get; }
 
         /// <summary>
         /// Source texture's filter mode
         /// </summary>
-        public abstract FilterMode filterMode { get; }
+        public abstract FilterMode FilterMode { get; }
 
         /// <summary>
         /// Source texture's wrap mode (U direction)
         /// </summary>
-        public abstract TextureWrapMode wrapModeU { get; }
+        public abstract TextureWrapMode WrapModeU { get; }
 
         /// <summary>
         /// Source texture's wrap mode (V direction)
         /// </summary>
-        public abstract TextureWrapMode wrapModeV { get; }
+        public abstract TextureWrapMode WrapModeV { get; }
 
         /// <summary>
         /// Writes image file
@@ -95,7 +75,7 @@ namespace GLTFast.Export
         /// <param name="hasAlpha">True if the texture has an alpha channel</param>
         /// <param name="blitMaterial">Custom blit material</param>
         /// <returns>Encoded texture data</returns>
-        protected static byte[] EncodeTexture(Texture2D texture, Format format, bool hasAlpha = true, Material blitMaterial = null)
+        protected static byte[] EncodeTexture(Texture2D texture, ImageFormat format, bool hasAlpha = true, Material blitMaterial = null)
         {
 
 #if UNITY_IMAGECONVERSION
@@ -142,7 +122,7 @@ namespace GLTFast.Export
                 tmpTexture = true;
             }
 
-            var imageData = format == Format.Png
+            var imageData = format == ImageFormat.Png
                 ? exportTexture.EncodeToPNG()
                 : exportTexture.EncodeToJPG(60);
 
