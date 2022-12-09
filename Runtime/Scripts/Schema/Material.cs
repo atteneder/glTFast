@@ -161,7 +161,7 @@ namespace GLTFast.Schema
             m_AlphaModeEnum = mode;
             if (mode != AlphaMode.Opaque)
             {
-                this.alphaMode = mode.ToString();
+                alphaMode = mode.ToString().ToUpper();
             }
         }
 
