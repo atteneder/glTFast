@@ -8,6 +8,18 @@ These guides will help you upgrade your project to use the latest version of glT
 
 ## Upgrade to 5.0
 
+### General
+
+The API in general was changed considerably to conform closer to Unity's coding standard and the Microsoft's Framework Design Guidelines. If you have custom code, you likely need to update parts of it to the new API. Some notable items:
+
+- PascalCase on properties (first char is upper-case)
+- Removed direct access to fields (replaced by getter-property, where required)
+- More consistent naming of assemblies, namespaces, classes, constants, static members, etc.
+  - Renamed and moved classes/structs to different files.
+- Auto-formatted code for consistent line-endings and code look (a necessary, one-time evil; might be troublesome if you forked glTFast)
+
+There's no exact, comprehensive list of every detailed change. The 5.0.0 changelog entry is quite comprehensive though. If you have issues, feel free to reach out for support.
+
 ### Async Scene Instantiation
 
 The addition of `GltfImport.InstantiateSceneAsync` and `GltfImport.InstantiateMainSceneAsync` now provides an asynchronos way of instantiating glTF scenes. For large scenes this means that the instantiation can be spread over multiple frames, resulting in a smoother frame rate.
