@@ -9,13 +9,13 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 ### Added
 - `settings` parameter to `GameObjectBoundsInstantiator`'s constructor
 - (Import) Support for lights via KHR_lights_punctual extension (#17)
-- (Import) Exclude/include certain features (e.g. camera, animation, lights) via `InstantiationSettings.mask` (of type `ComponentType`)
+- (Import) Exclude/include certain features (e.g. camera, animation, lights) via `InstantiationSettings.Mask` (of type `ComponentType`)
 - DOTS instantiation settings support
 - (Import) Additional load methods in `GltfImport` (#409)
   - `Load` override to load from a `byte[]`
   - `LoadFile` to load from local files
   - `LoadGltfJson` to load a glTF JSON from string
-- (Import) `sceneObjectCreation` instantiation setting. It controls whether/when a GameObject/Entity should be created for the scene. Options: `Always`, `Never`, `WhenSingleRootNode`. (#320)
+- (Import) `SceneObjectCreation` instantiation setting. It controls whether/when a GameObject/Entity should be created for the scene. Options: `Always`, `Never`, `WhenSingleRootNode`. (#320)
 - (Import) Design-time import inspector now offers many more settings (feature parity with run-time settings)
 - Extended access to `IGltfReadable`
   - `GetSourceRoot`
@@ -30,19 +30,24 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - glTF icon assigned to imported glTF assets, `GltfAsset*` components and and various setting classes
 - (Import) Support for up to 8 UV sets (note: glTF shaders still support only two sets; part of #206)
 - `IMaterialGenerator` was extended with support for points topology
-- (Export) `GameObjectExportSettings.disabledComponents` to explicitely enable export of disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`)
-- (Export) `ExportSettings.componentMask` to include or exclude components from export based on type
-- (Export) `GameObjectExportSettings.layerMask` to include or exclude GameObjects from export based on their layer
+- (Export) `GameObjectExportSettings.DisabledComponents` to explicitely enable export of disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`)
+- (Export) `ExportSettings.ComponentMask` to include or exclude components from export based on type
+- (Export) `GameObjectExportSettings.LayerMask` to include or exclude GameObjects from export based on their layer
 - (Import) Async instantiation methods. This helps to ensure a stable frame rate when loading bigger glTF scenes (#205)
 - `GltfGlobals` is public now
-- `GameObjectInstantiator.sceneTransform` is public now
+- `GameObjectInstantiator.SceneTransform` is public now
 ### Changed
+- The API was changed considerably to conform closer to Unity's coding standard and the Microsoft's Framework Design Guidelines. Some notable items:
+  - PascalCase on properties
+  - Removed direct access to fields
+  - More consistent naming of assemblies, namespaces, classes, constants, static members, etc.
+  - Removed majority of Rider code analysis warnings and suggestions
 - Converted a lot of unintentionally public classes, types and properties to internal ones
 - Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
 - Moved logging related code into `GLTFast.Logging` namespace
 - Renamed `Schema.RootChild` to `Schema.NamedObject` and made it abstract
 - Converted  `GameObjectInstantiator.Settings` to `InstantiationSettings`
-- Removed `RenderPipelineUtils.DetectRenderPipeline` in favor of `RenderPipelineUtils.renderPipeline`
+- Removed `RenderPipelineUtils.DetectRenderPipeline` in favor of `RenderPipelineUtils.RenderPipeline`
 - Additional methods/properties (e.g. from class `GameObjectInstantiator`) are virtual, so they can be overriden
 - `GltfImport` implements `IDisposable` now (#194)
 - Support for PNG/Jpeg textures (via built-in packages *Unity Web Request Texture* and *Image Conversion*) is now optional (#321)
@@ -56,7 +61,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - Sped up loading of external KTX textures by avoid making a redundant memory copy.
 - `IDownload` does not derive from `IEnumertor` anymore
 - (Import) Successfully tested mesh primitive draw mode `lines` and removed error message about it being untested
-- (Export) Disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`) are not exported by default (see also: new `GameObjectExportSettings.disabledComponents` setting to get old behavior)
+- (Export) Disabled components (e.g. `MeshRenderer`, `Camera`, or `Light`) are not exported by default (see also: new `GameObjectExportSettings.DisabledComponents` setting to get old behavior)
 - (Export) GameObjects with tag `EditorOnly` (including children) don't get exported (similar to building a scene)
 - Added optional `CancellationToken` parameter to async import/export methods. This is preparation work for proper cancellation. Does not work as expected just yet.
 - Refactored Assembly Definitions
@@ -76,6 +81,11 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
   - `Camera`: `typeEnum` to `GetCameraType`/`SetCameraType`
   - `LightPunctual`: `typeEnum` to `GetLightType`/`SetLightType`
   - `Material`: `alphaModeEnum` to `GetAlphaMode`/`SetAlphaMode`
+- Moved some nested classes into dedicated files and up the namespace hierarchy
+  - `GameObjectInstantiator.SceneInstance` is now `GameObjectSceneInstance`
+  - `ImportSettings.NameImportMethod` is now `NameImportMethod`
+  - `InstantiationSettings.SceneObjectCreation` is now `SceneObjectCreation`
+- `HttpHeader`'s properties are readonly now. A constructor was added as compensation.
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
