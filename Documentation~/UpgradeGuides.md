@@ -77,7 +77,7 @@ There's a new property `Play Automatically`, which is checked by default. You sh
 
 #### Play Automatically when loading from script
 
-You have to explicitely use a [`GameObjectInstantiator`][GameObjectInstantiator]. It provides a [`SceneInstance`][SceneInstance] object which has a `legacyAnimation` property, referencing the `Animation` component. Use it to start or stop playback of any of the animation clips it holds.
+You have to explicitely use a [`GameObjectInstantiator`][GameObjectInstantiator]. It provides a [`SceneInstance`][GameObjectSceneInstance] object which has a `legacyAnimation` property, referencing the `Animation` component. Use it to start or stop playback of any of the animation clips it holds.
 
 ```csharp
 async void Start() {
@@ -89,10 +89,10 @@ async void Start() {
     if (success) {
         
         // Get the SceneInstance to access the instance's properties
-        var sceneInstance = instantiator.sceneInstance;
+        var sceneInstance = instantiator.SceneInstance;
 
         // Play the default (i.e. the first) animation clip
-        var legacyAnimation = instantiator.sceneInstance.legacyAnimation;
+        var legacyAnimation = instantiator.SceneInstance.LegacyAnimation;
         if (legacyAnimation != null) {
             legacyAnimation.Play();
         }
@@ -115,7 +115,7 @@ If a material is used on mesh primitives with different draw modes (e.g. on tria
 
 ### Misc. API Changes
 
-`RenderPipelineUtils.DetectRenderPipeline()` turned to `RenderPipelineUtils.renderPipeline`
+`RenderPipelineUtils.DetectRenderPipeline()` turned to `RenderPipelineUtils.RenderPipeline`
 
 ## Upgrade to 4.5
 
@@ -197,5 +197,5 @@ Users of glTFast 1.x can read [the documentation for it](./gltfast-1.md).
 [GltfImport]: xref:GLTFast.GltfImport
 [IGltfReadable]: xref:GLTFast.IGltfReadable
 [ImgConv]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.ImageConversionModule.html
-[SceneInstance]: xref:GLTFast.GameObjectInstantiator.SceneInstance
+[GameObjectSceneInstance]: xref:GLTFast.GameObjectSceneInstance
 [uwrt]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.UnityWebRequestTextureModule.html

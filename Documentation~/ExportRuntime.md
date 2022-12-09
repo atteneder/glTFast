@@ -80,22 +80,22 @@ public class TestExport : MonoBehaviour {
         
         // ExportSettings provides generic export settings
         var exportSettings = new ExportSettings {
-            format = GltfFormat.Binary,
-            fileConflictResolution = FileConflictResolution.Overwrite,
+            Format = GltfFormat.Binary,
+            FileConflictResolution = FileConflictResolution.Overwrite,
             // Export everything except cameras or animation
-            componentMask = ~(ComponentType.Camera | ComponentType.Animation),
+            ComponentMask = ~(ComponentType.Camera | ComponentType.Animation),
             // Boost light intensities 
-            lightIntensityFactor = 100f,
+            LightIntensityFactor = 100f,
         };
 
         // GameObjectExportSettings provides settings specific to a GameObject/Component based hierarchy
         var gameObjectExportSettings = new GameObjectExportSettings {
             // Include inactive GameObjects in export
-            onlyActiveInHierarchy = false,
+            OnlyActiveInHierarchy = false,
             // Also export disabled components
-            disabledComponents = true,
+            DisabledComponents = true,
             // Only export GameObjects on certain layers
-            layerMask = LayerMask.GetMask("Default", "MyCustomLayer"),
+            LayerMask = LayerMask.GetMask("Default", "MyCustomLayer"),
         };
 
         // GameObjectExport lets you create glTFs from GameObject hierarchies
