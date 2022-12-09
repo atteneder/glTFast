@@ -57,26 +57,7 @@ There are some related package that improve *glTFast* by extending its feature s
 - [KTX/Basis Texture Unity Package][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
 - [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
 
-<details><summary>Alternative: Install via GIT URL</summary>
-
-Add *glTFast* via Unity's Package Manager ( Window -> Package Manager ). Click the ➕ on the top left and choose *Add package from GIT URL*.
-
-![Package Manager -> + -> Add Package from git URL][upm_install]
-
-Enter the following URL:
-
-`https://github.com/atteneder/glTFast.git`
-
-To add more functionality, repeat the last step and also add related packages using these URLs:
-
-- `https://github.com/atteneder/DracoUnity.git` for Draco mesh compression 
-- `https://github.com/atteneder/KtxUnity.git` for KTX texture compression
-
-> Note: You have to have a GIT LFS client (large file support) installed on your system. Otherwise you will get an error that the native library file (dll on Windows) is corrupt!
-
-</details>
-
-*glTFast* 2.x requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
+*glTFast* 5.x requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
 
 ## Usage
 
@@ -168,5 +149,4 @@ limitations under the License.
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [Meshopt]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [unity]: https://unity.com
-[upm_install]: ./Documentation~/Images/upm_install.png  "Unity Package Manager add menu"
 [workflows]: ./Documentation~/index.md#workflows
