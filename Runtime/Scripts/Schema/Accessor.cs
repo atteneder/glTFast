@@ -162,6 +162,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// <see cref="GltfAccessorAttributeType"/> typed/cached getter from the <see cref="type"/> string.
         /// </summary>
+        /// <returns>The Accessor's attribute type, if it could be retrieved correctly. <see cref="GltfAccessorAttributeType.Undefined"/> otherwise</returns>
         public GltfAccessorAttributeType GetAttributeType()
         {
             if (m_TypeEnum != GltfAccessorAttributeType.Undefined)
@@ -180,10 +181,11 @@ namespace GLTFast.Schema
         /// <summary>
         /// <see cref="GltfAccessorAttributeType"/> typed setter for the <see cref="type"/> string.
         /// </summary>
-        public void SetAttributeType(GltfAccessorAttributeType value)
+        /// <param name="type">Attribute type</param>
+        public void SetAttributeType(GltfAccessorAttributeType type)
         {
-            m_TypeEnum = value;
-            type = value.ToString();
+            m_TypeEnum = type;
+            this.type = type.ToString();
         }
 
         /// <summary>

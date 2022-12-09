@@ -199,7 +199,7 @@ namespace GLTFast.Materials {
             if (gltfMaterial.extensions?.KHR_materials_unlit!=null) {
                 material = GetUnlitMaterial(gltfMaterial);
                 materialType = MaterialType.Unlit;
-                shaderMode = gltfMaterial.GetAlphaMode() == AlphaMode.BLEND ? ShaderMode.Blend : ShaderMode.Opaque;
+                shaderMode = gltfMaterial.GetAlphaMode() == AlphaMode.Blend ? ShaderMode.Blend : ShaderMode.Opaque;
             } else {
                 bool isMetallicRoughness = gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness == null;
                 if (isMetallicRoughness) {
@@ -354,7 +354,7 @@ namespace GLTFast.Materials {
                 }
             }
 
-            if (gltfMaterial.GetAlphaMode() == AlphaMode.MASK) {
+            if (gltfMaterial.GetAlphaMode() == AlphaMode.Mask) {
                 SetAlphaModeMask(gltfMaterial, material);
 #if USING_HDRP
                 if (gltfMaterial.extensions?.KHR_materials_unlit != null) {
@@ -370,7 +370,7 @@ namespace GLTFast.Materials {
             }
             if (!renderQueue.HasValue) {
                 if(shaderMode == ShaderMode.Opaque) {
-                    renderQueue = gltfMaterial.GetAlphaMode() == AlphaMode.MASK
+                    renderQueue = gltfMaterial.GetAlphaMode() == AlphaMode.Mask
                         ? RenderQueue.AlphaTest
                         : RenderQueue.Geometry;
                 } else {
@@ -566,7 +566,7 @@ namespace GLTFast.Materials {
             if (gltfMaterial.doubleSided) feature |= MetallicShaderFeatures.DoubleSided;
 
             if (!sm.HasValue) {
-                sm = gltfMaterial.GetAlphaMode() == AlphaMode.BLEND ? ShaderMode.Blend : ShaderMode.Opaque;
+                sm = gltfMaterial.GetAlphaMode() == AlphaMode.Blend ? ShaderMode.Blend : ShaderMode.Opaque;
             }
 
             feature |= (MetallicShaderFeatures)sm;
@@ -590,7 +590,7 @@ namespace GLTFast.Materials {
             var feature = SpecularShaderFeatures.Default;
             if (gltfMaterial.doubleSided) feature |= SpecularShaderFeatures.DoubleSided;
 
-            if (gltfMaterial.GetAlphaMode() != AlphaMode.OPAQUE) {
+            if (gltfMaterial.GetAlphaMode() != AlphaMode.Opaque) {
                 feature |= SpecularShaderFeatures.AlphaBlend;
             }
             return feature;

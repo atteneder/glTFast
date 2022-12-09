@@ -32,31 +32,25 @@ namespace GLTFast.Schema
         /// </summary>
         public enum AlphaMode
         {
-            // Names are identical to glTF specified strings, that's why
-            // inconsistent names are ignored.
-            // ReSharper disable InconsistentNaming
-
             /// <summary>
             /// The alpha value is ignored, and the rendered output is fully
             /// opaque.
             /// </summary>
-            OPAQUE,
+            Opaque,
 
             /// <summary>
             /// The rendered output is either fully opaque or fully transparent
             /// depending on the alpha value and the specified alphaCutoff
             /// value
             /// </summary>
-            MASK,
+            Mask,
 
             /// <summary>
             /// The alpha value is used to composite the source and destination
             /// areas. The rendered output is combined with the background
             /// using the normal painting operation.
             /// </summary>
-            BLEND
-
-            // ReSharper restore InconsistentNaming
+            Blend
         }
 
         /// <summary>
@@ -140,6 +134,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// <see cref="AlphaMode"/> typed and cached getter for <see cref="alphaMode"/> string.
         /// </summary>
+        /// <returns>Alpha mode if it was retrieved correctly. <see cref="AlphaMode.Opaque"/> otherwise</returns>
         public AlphaMode GetAlphaMode()
         {
             if (m_AlphaModeEnum.HasValue)
@@ -154,18 +149,19 @@ namespace GLTFast.Schema
                 return m_AlphaModeEnum.Value;
             }
 
-            return AlphaMode.OPAQUE;
+            return AlphaMode.Opaque;
         }
 
         /// <summary>
         /// <see cref="AlphaMode"/> typed setter for <see cref="alphaMode"/> string.
         /// </summary>
-        public void SetAlphaMode(AlphaMode value)
+        /// <param name="mode">Alpha mode</param>
+        public void SetAlphaMode(AlphaMode mode)
         {
-            m_AlphaModeEnum = value;
-            if (value != AlphaMode.OPAQUE)
+            m_AlphaModeEnum = mode;
+            if (mode != AlphaMode.Opaque)
             {
-                alphaMode = value.ToString();
+                this.alphaMode = mode.ToString();
             }
         }
 

@@ -250,12 +250,12 @@ namespace GLTFast.Materials
             StandardShaderMode shaderMode = StandardShaderMode.Opaque;
             Color baseColorLinear = Color.white;
 
-            if (gltfMaterial.GetAlphaMode() == AlphaMode.MASK)
+            if (gltfMaterial.GetAlphaMode() == AlphaMode.Mask)
             {
                 material.SetFloat(AlphaCutoffProperty, gltfMaterial.alphaCutoff);
                 shaderMode = StandardShaderMode.Cutout;
             }
-            else if (gltfMaterial.GetAlphaMode() == AlphaMode.BLEND)
+            else if (gltfMaterial.GetAlphaMode() == AlphaMode.Blend)
             {
                 SetAlphaModeBlend(material);
                 shaderMode = StandardShaderMode.Fade;

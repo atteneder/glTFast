@@ -42,6 +42,11 @@ namespace GLTFast.Loading
         [SerializeField] string key;
         [SerializeField] string value;
 
+        /// <summary>
+        /// Creates a new HTTP header entry
+        /// </summary>
+        /// <param name="key">Identifier</param>
+        /// <param name="value">Value</param>
         public HttpHeader(string key, string value)
         {
             this.key = key;

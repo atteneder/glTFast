@@ -27,10 +27,10 @@ namespace GLTFast
     /// </summary>
     public abstract class GltfAssetBase : MonoBehaviour
     {
-        /// <inheritdoc cref="GLTFast.ImportSettings"/>
         [SerializeField]
         ImportSettings importSettings;
 
+        /// <inheritdoc cref="GLTFast.ImportSettings"/>
         public ImportSettings ImportSettings
         {
             get => importSettings;

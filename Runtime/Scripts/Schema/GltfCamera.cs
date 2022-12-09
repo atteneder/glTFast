@@ -49,6 +49,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// <see cref="Type"/> typed and cached getter onto <see cref="type"/> string.
         /// </summary>
+        /// <returns>Camera type, if it was retrieved correctly. <see cref="Type.Perspective"/> otherwise</returns>
         public Type GetCameraType()
         {
             if (m_TypeEnum.HasValue)
@@ -71,10 +72,11 @@ namespace GLTFast.Schema
         /// <summary>
         /// <see cref="Type"/> typed setter for <see cref="type"/> string.
         /// </summary>
-        public void SetCameraType(Type value)
+        /// <param name="type">Camera type</param>
+        public void SetCameraType(Type type)
         {
-            type = null;
-            m_TypeEnum = value;
+            this.type = null;
+            m_TypeEnum = type;
         }
 
         /// <inheritdoc cref="CameraOrthographic"/>
