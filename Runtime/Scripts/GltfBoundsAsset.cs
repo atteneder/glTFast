@@ -29,21 +29,25 @@ namespace GLTFast
     /// </summary>
     public class GltfBoundsAsset : GltfAsset
     {
-
         /// <summary>
         /// If true, a box collider encapsulating the glTF scene is created
         /// (only if the built-in Physics module is enabled).
         /// </summary>
-        [Tooltip("If true, a box collider encapsulating the glTF asset is created")]
-        public bool createBoxCollider = true;
+        public bool CreateBoxCollider
+        {
+            get => createBoxCollider;
+            set => createBoxCollider = value;
+        }
 
         /// <summary>
         /// Bounding box of the instantiated glTF scene
         /// </summary>
-        [NonSerialized]
         // ReSharper disable once MemberCanBePrivate.Global
-        public Bounds bounds;
+        public Bounds Bounds { get; private set; }
 
+        [SerializeField]
+        [Tooltip("If true, a box collider encapsulating the glTF asset is created")]
+        bool createBoxCollider = true;
 
         /// <inheritdoc />
         public override async Task<bool> Load(
@@ -60,10 +64,10 @@ namespace GLTFast
             {
                 var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
                 // Auto-Instantiate
-                if (sceneId >= 0)
+                if (SceneId >= 0)
                 {
-                    success = await Importer.InstantiateSceneAsync(instantiator, sceneId);
-                    CurrentSceneId = success ? sceneId : (int?)null;
+                    success = await Importer.InstantiateSceneAsync(instantiator, SceneId);
+                    CurrentSceneId = success ? SceneId : (int?)null;
                 }
                 else
                 {
@@ -106,13 +110,13 @@ namespace GLTFast
             var sceneBounds = instantiator.SceneInstance != null ? instantiator.CalculateBounds() : null;
             if (sceneBounds.HasValue)
             {
-                bounds = sceneBounds.Value;
+                Bounds = sceneBounds.Value;
                 if (createBoxCollider)
                 {
 #if UNITY_PHYSICS
                     var boxCollider = gameObject.AddComponent<BoxCollider>();
-                    boxCollider.center = bounds.center;
-                    boxCollider.size = bounds.size;
+                    boxCollider.center = Bounds.center;
+                    boxCollider.size = Bounds.size;
 #else
                     Debug.LogError("GltfBoundsAsset requires the built-in Physics package to be enabled (in the Package Manager)");
 #endif

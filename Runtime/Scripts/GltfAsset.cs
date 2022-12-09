@@ -32,35 +32,61 @@ namespace GLTFast
         /// URL to load the glTF from
         /// Loading local file paths works by prefixing them with "file://"
         /// </summary>
-        [Tooltip("URL to load the glTF from. Loading local file paths works by prefixing them with \"file://\"")]
-        public string url;
+        public string Url => url;
 
         /// <summary>
         /// Automatically load at start
         /// </summary>
-        [Tooltip("Automatically load at start.")]
-        public bool loadOnStartup = true;
+        public bool LoadOnStartup
+        {
+            get => loadOnStartup;
+            set => loadOnStartup = value;
+        }
 
         /// <summary>
         /// Scene to load (-1 loads glTFs default scene)
         /// </summary>
-        [Tooltip("Override scene to load (-1 loads glTFs default scene)")]
-        public int sceneId = -1;
+        protected int SceneId => sceneId;
 
         /// <summary>
         /// If true, the first animation clip starts playing right after instantiation.
         /// </summary>
-        [Tooltip("If true, the first animation clip starts playing right after instantiation")]
-        public bool playAutomatically = true;
+        public bool PlayAutomatically => playAutomatically;
 
         /// <summary>
         /// If true, url is treated as relative StreamingAssets path
         /// </summary>
-        [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
-        public bool streamingAsset;
+        public bool StreamingAsset => streamingAsset;
 
-        /// <inheritdoc cref="InstantiationSettings"/>
-        public InstantiationSettings instantiationSettings;
+        /// <inheritdoc cref="GLTFast.InstantiationSettings"/>
+        public InstantiationSettings InstantiationSettings
+        {
+            get => instantiationSettings;
+            set => instantiationSettings = value;
+        }
+
+        [SerializeField]
+        [Tooltip("URL to load the glTF from. Loading local file paths works by prefixing them with \"file://\"")]
+        string url;
+
+        [SerializeField]
+        [Tooltip("Automatically load at start.")]
+        bool loadOnStartup = true;
+
+        [SerializeField]
+        [Tooltip("Override scene to load (-1 loads glTFs default scene)")]
+        int sceneId = -1;
+
+        [SerializeField]
+        [Tooltip("If true, the first animation clip starts playing right after instantiation")]
+        bool playAutomatically = true;
+
+        [SerializeField]
+        [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
+        bool streamingAsset;
+
+        [SerializeField]
+        InstantiationSettings instantiationSettings;
 
         /// <summary>
         /// Latest scene's instance.

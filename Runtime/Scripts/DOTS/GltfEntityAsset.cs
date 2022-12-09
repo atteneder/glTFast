@@ -34,19 +34,52 @@ namespace GLTFast {
     /// </summary>
     public class GltfEntityAsset : GltfAssetBase {
 
+        public string Url => url;
+
+        /// <summary>
+        /// Automatically load at start
+        /// </summary>
+        public bool LoadOnStartup
+        {
+            get => loadOnStartup;
+            set => loadOnStartup = value;
+        }
+
+        /// <summary>
+        /// Scene to load (-1 loads glTFs default scene)
+        /// </summary>
+        protected int SceneId => sceneId;
+
+        /// <summary>
+        /// If true, url is treated as relative StreamingAssets path
+        /// </summary>
+        public bool StreamingAsset => streamingAsset;
+
+        /// <inheritdoc cref="GLTFast.InstantiationSettings"/>
+        public InstantiationSettings InstantiationSettings
+        {
+            get => instantiationSettings;
+            set => instantiationSettings = value;
+        }
+
+        [SerializeField]
         [Tooltip("URL to load the glTF from.")]
-        public string url;
+        string url;
 
+        [SerializeField]
         [Tooltip("Automatically load at start.")]
-        public bool loadOnStartup = true;
+        bool loadOnStartup = true;
 
+        [SerializeField]
         [Tooltip("Override scene to load (-1 loads glTFs default scene)")]
-        public int sceneId = -1;
+        int sceneId = -1;
 
+        [SerializeField]
         [Tooltip("If checked, url is treated as relative StreamingAssets path.")]
-        public bool streamingAsset;
+        bool streamingAsset;
 
-        public InstantiationSettings instantiationSettings;
+        [SerializeField]
+        InstantiationSettings instantiationSettings;
 
         Entity m_SceneRoot;
 
@@ -100,11 +133,11 @@ namespace GLTFast {
             entityManager.SetComponentData(m_SceneRoot,new Rotation {Value = transform.rotation});
             entityManager.SetComponentData(m_SceneRoot,new Scale {Value = transform.localScale.x});
             // entityManager.AddBuffer<LinkedEntityGroup>(sceneRoot);
-            return new EntityInstantiator(importer, m_SceneRoot, logger, instantiationSettings);
+            return new EntityInstantiator(Importer, m_SceneRoot, logger, instantiationSettings);
         }
 
         protected override void PostInstantiation(IInstantiator instantiator, bool success) {
-            currentSceneId = success ? importer.defaultSceneIndex : null;
+            CurrentSceneId = success ? Importer.DefaultSceneIndex : null;
         }
 
         /// <summary>
