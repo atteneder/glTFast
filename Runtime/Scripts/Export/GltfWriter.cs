@@ -90,7 +90,6 @@ namespace GLTFast.Export
         const int k_DefaultInnerLoopBatchCount = 512;
 #endif
 
-        // private
         State m_State;
 
         ExportSettings m_Settings;

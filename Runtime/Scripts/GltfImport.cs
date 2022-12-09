@@ -135,12 +135,6 @@ namespace GLTFast
 
         ImportSettings m_Settings;
 
-        // Volatile members
-        // Can be/will get discarded after loading
-
-        /// <summary>
-        /// These members are only used during loading phase.
-        /// </summary>
         byte[][] m_Buffers;
 
         /// <summary>
@@ -212,13 +206,6 @@ namespace GLTFast
         /// </summary>
         HashSet<int> m_MaterialPointsSupport;
         bool m_DefaultMaterialPointsSupport;
-
-
-        // Volatile members - Instantiation
-        //
-        // These members are only used during loading and instantiation phase.
-        // TODO: Provide dispose method to free up memory after all instantiations
-        // happened. Maybe a plain Destroy/OnDestroy.
 
         /// <summary>Main glTF data structure</summary>
         Root m_GltfRoot;
@@ -298,8 +285,6 @@ namespace GLTFast
             m_Logger = logger;
         }
 
-        // Public Static
-
         /// <summary>
         /// Sets the default <see cref="IDeferAgent"/> for subsequently
         /// generated GltfImport instances.
@@ -327,8 +312,6 @@ namespace GLTFast
                 s_DefaultDeferAgent = null;
             }
         }
-
-        // Public
 
         /// <summary>
         /// Load a glTF file (JSON or binary)
