@@ -4,6 +4,8 @@ uid: doc-upgrade-guides
 
 # Upgrade Guides
 
+These guides will help you upgrade your project to use the latest version of glTFast. If you still encounter problems, help us improving this guide and glTFast in general by reaching out by raising an issue.
+
 ## Upgrade to 5.0
 
 ### Async Scene Instantiation
