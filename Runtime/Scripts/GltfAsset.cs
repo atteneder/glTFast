@@ -32,7 +32,8 @@ namespace GLTFast
         /// URL to load the glTF from
         /// Loading local file paths works by prefixing them with "file://"
         /// </summary>
-        public string Url {
+        public string Url
+        {
             get => url;
             set => url = value;
         }
@@ -59,7 +60,8 @@ namespace GLTFast
         /// <summary>
         /// If true, url is treated as relative StreamingAssets path
         /// </summary>
-        public bool StreamingAsset {
+        public bool StreamingAsset
+        {
             get => streamingAsset;
             set => streamingAsset = value;
         }
