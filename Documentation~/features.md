@@ -47,7 +47,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | **Basics**
 | Scenes | ✅ | ✅
 | Node hierarchies | ✅ | ✅
-| Cameras | ✅ | 
+| Cameras | ✅ | ✅ 
 | | |
 | **Images**
 | PNG | ✅ | ✅
@@ -66,7 +66,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | **Topologies / Primitive Types**
 | TRIANGLES | ✅ | ✅
 | POINTS | ✅ | ✅
-| <sup>1</sup>LINES | ✅ | ✅
+| LINES | ✅ | ✅
 | LINE_STRIP | ✅ | ✅
 | <sup>1</sup>LINE_LOOP | ✅ | ✅
 | TRIANGLE_STRIP |  | 
