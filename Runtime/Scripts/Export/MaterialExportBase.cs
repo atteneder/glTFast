@@ -78,14 +78,14 @@ namespace GLTFast.Export
                     {
                         material.alphaCutoff = uMaterial.GetFloat(k_Cutoff);
                     }
-                    material.alphaModeEnum = Material.AlphaMode.MASK;
+                    material.SetAlphaMode(Material.AlphaMode.MASK);
                     break;
                 case "Transparent":
                 case "Fade":
-                    material.alphaModeEnum = Material.AlphaMode.BLEND;
+                    material.SetAlphaMode(Material.AlphaMode.BLEND);
                     break;
                 default:
-                    material.alphaModeEnum = Material.AlphaMode.OPAQUE;
+                    material.SetAlphaMode(Material.AlphaMode.OPAQUE);
                     break;
             }
         }

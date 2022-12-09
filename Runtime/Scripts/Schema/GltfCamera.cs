@@ -47,31 +47,34 @@ namespace GLTFast.Schema
         Type? m_TypeEnum;
 
         /// <summary>
-        /// <see cref="Type"/> typed view onto <see cref="type"/> string.
+        /// <see cref="Type"/> typed and cached getter onto <see cref="type"/> string.
         /// </summary>
-        public Type typeEnum
+        public Type GetCameraType()
         {
-            get
+            if (m_TypeEnum.HasValue)
             {
-                if (m_TypeEnum.HasValue)
-                {
-                    return m_TypeEnum.Value;
-                }
-                if (!string.IsNullOrEmpty(type))
-                {
-                    m_TypeEnum = (Type)Enum.Parse(typeof(Type), type, true);
-                    type = null;
-                    return m_TypeEnum.Value;
-                }
-                if (orthographic != null) m_TypeEnum = Type.Orthographic;
-                if (perspective != null) m_TypeEnum = Type.Perspective;
-                return m_TypeEnum ?? Type.Perspective;
+                return m_TypeEnum.Value;
             }
-            set
+
+            if (!string.IsNullOrEmpty(type))
             {
+                m_TypeEnum = (Type)Enum.Parse(typeof(Type), type, true);
                 type = null;
-                m_TypeEnum = value;
+                return m_TypeEnum.Value;
             }
+
+            if (orthographic != null) m_TypeEnum = Type.Orthographic;
+            if (perspective != null) m_TypeEnum = Type.Perspective;
+            return m_TypeEnum ?? Type.Perspective;
+        }
+
+        /// <summary>
+        /// <see cref="Type"/> typed setter for <see cref="type"/> string.
+        /// </summary>
+        public void SetCameraType(Type value)
+        {
+            type = null;
+            m_TypeEnum = value;
         }
 
         /// <inheritdoc cref="CameraOrthographic"/>

@@ -120,33 +120,34 @@ namespace GLTFast.Schema
         public string filter;
 
         Mode m_ModeEnum = Mode.Undefined;
-        public Mode modeEnum {
-            get {
-                if (m_ModeEnum != Mode.Undefined) {
-                    return m_ModeEnum;
-                }
-                if (!string.IsNullOrEmpty (mode)) {
-                    m_ModeEnum = (Mode)System.Enum.Parse (typeof(Mode), mode, true);
-                    mode = null;
-                    return m_ModeEnum;
-                }
-                return Mode.Undefined;
+        Filter m_FilterEnum = Filter.Undefined;
+
+        public Mode GetMode() {
+            if (m_ModeEnum != Mode.Undefined) {
+                return m_ModeEnum;
             }
+
+            if (!string.IsNullOrEmpty(mode)) {
+                m_ModeEnum = (Mode)System.Enum.Parse(typeof(Mode), mode, true);
+                mode = null;
+                return m_ModeEnum;
+            }
+
+            return Mode.Undefined;
         }
 
-        Filter m_FilterEnum = Filter.Undefined;
-        public Filter filterEnum {
-            get {
-                if (m_FilterEnum != Filter.Undefined) {
-                    return m_FilterEnum;
-                }
-                if (!string.IsNullOrEmpty (filter)) {
-                    m_FilterEnum = (Filter)System.Enum.Parse (typeof(Filter), filter, true);
-                    filter = null;
-                    return m_FilterEnum;
-                }
-                return Filter.None;
+        public Filter GetFilter() {
+            if (m_FilterEnum != Filter.Undefined) {
+                return m_FilterEnum;
             }
+
+            if (!string.IsNullOrEmpty(filter)) {
+                m_FilterEnum = (Filter)System.Enum.Parse(typeof(Filter), filter, true);
+                filter = null;
+                return m_FilterEnum;
+            }
+
+            return Filter.None;
         }
     }
 #endif

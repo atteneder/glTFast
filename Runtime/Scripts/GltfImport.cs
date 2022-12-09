@@ -1696,8 +1696,8 @@ namespace GLTFast
                             meshopt.count,
                             meshopt.byteStride,
                             origBufferView,
-                            meshopt.modeEnum,
-                            meshopt.filterEnum
+                            meshopt.GetMode(),
+                            meshopt.GetFilter()
                         );
                         jobHandlesList.Add(jobHandle);
                         m_MeshoptBufferViews[i] = arr;
@@ -2005,20 +2005,20 @@ namespace GLTFast
 
                         var times = ((AccessorNativeData<float>) m_AccessorData[sampler.input]).data;
 
-                        switch (channel.target.pathEnum) {
+                        switch (channel.target.GetPath()) {
                             case AnimationChannel.Path.Translation: {
                                 var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
-                                AnimationUtils.AddTranslationCurves(m_AnimationClips[i], path, times, values, sampler.interpolationEnum);
+                                AnimationUtils.AddTranslationCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Rotation: {
                                 var values= ((AccessorNativeData<Quaternion>) m_AccessorData[sampler.output]).data;
-                                AnimationUtils.AddRotationCurves(m_AnimationClips[i], path, times, values, sampler.interpolationEnum);
+                                AnimationUtils.AddRotationCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Scale: {
                                 var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
-                                AnimationUtils.AddScaleCurves(m_AnimationClips[i], path, times, values, sampler.interpolationEnum);
+                                AnimationUtils.AddScaleCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Weights: {
@@ -2033,7 +2033,7 @@ namespace GLTFast
                                     path,
                                     times,
                                     values,
-                                    sampler.interpolationEnum,
+                                    sampler.GetInterpolationType(),
                                     mesh.extras?.targetNames
                                     );
 
@@ -2053,7 +2053,7 @@ namespace GLTFast
                                         $"{path}/{primitiveName}",
                                         times,
                                         values,
-                                        sampler.interpolationEnum,
+                                        sampler.GetInterpolationType(),
                                         mesh.extras?.targetNames
                                     );
                                 }
@@ -2061,10 +2061,10 @@ namespace GLTFast
                                 break;
                             }
                             case AnimationChannel.Path.Pointer:
-                                m_Logger?.Warning(LogCode.AnimationTargetPathUnsupported,channel.target.pathEnum.ToString());
+                                m_Logger?.Warning(LogCode.AnimationTargetPathUnsupported,channel.target.GetPath().ToString());
                                 break;
                             default:
-                                m_Logger?.Error(LogCode.AnimationTargetPathUnsupported,channel.target.pathEnum.ToString());
+                                m_Logger?.Error(LogCode.AnimationTargetPathUnsupported,channel.target.GetPath().ToString());
                                 break;
                         }
                     }
@@ -3004,7 +3004,7 @@ namespace GLTFast
 
                     foreach (var channel in animation.channels) {
                         var accessorIndex = animation.samplers[channel.sampler].output;
-                        switch (channel.target.pathEnum) {
+                        switch (channel.target.GetPath()) {
                             case AnimationChannel.Path.Translation:
                                 SetAccessorUsage(accessorIndex,AccessorUsage.Translation);
                                 break;
@@ -3037,7 +3037,7 @@ namespace GLTFast
                     // the accessor only holds meta information
                     continue;
                 }
-                switch (acc.typeEnum)
+                switch (acc.GetAttributeType())
                 {
                     case GltfAccessorAttributeType.SCALAR when m_AccessorUsage[i] == AccessorUsage.IndexFlipped ||
                         m_AccessorUsage[i] == AccessorUsage.Index:
@@ -3380,7 +3380,7 @@ namespace GLTFast
             resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
             Profiler.EndSample();
 
-            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.SCALAR);
+            Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.SCALAR);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             if (accessor.isSparse)
             {
@@ -3476,7 +3476,7 @@ namespace GLTFast
             matrices = new NativeArray<Matrix4x4>(accessor.count, Allocator.Persistent);
             Profiler.EndSample();
 
-            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.MAT4);
+            Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.MAT4);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             if (accessor.isSparse)
             {
@@ -3513,7 +3513,7 @@ namespace GLTFast
             vectors = new NativeArray<Vector3>(accessor.count, Allocator.Persistent);
             Profiler.EndSample();
 
-            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.VEC3);
+            Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.VEC3);
             if (accessor.isSparse)
             {
                 m_Logger.Error(LogCode.SparseAccessor, "Vector3");
@@ -3565,7 +3565,7 @@ namespace GLTFast
             vectors = new NativeArray<Quaternion>(accessor.count, Allocator.Persistent);
             Profiler.EndSample();
 
-            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.VEC4);
+            Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.VEC4);
             if (accessor.isSparse)
             {
                 m_Logger.Error(LogCode.SparseAccessor, "Vector4");
@@ -3621,7 +3621,7 @@ namespace GLTFast
             var accessor = gltf.accessors[accessorIndex];
             var buffer = GetBufferView(accessor.bufferView,accessor.byteOffset);
 
-            Assert.AreEqual(accessor.typeEnum, GltfAccessorAttributeType.SCALAR);
+            Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.SCALAR);
             if (accessor.isSparse) {
                 m_Logger.Error(LogCode.SparseAccessor,"scalars");
             }

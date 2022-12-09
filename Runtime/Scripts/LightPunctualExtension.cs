@@ -39,7 +39,7 @@ namespace GLTFast
         /// <param name="lightIntensityFactor">light intensity conversion factor</param>
         public static void ToUnityLight(this LightPunctual lightSource, Light lightDestination, float lightIntensityFactor)
         {
-            switch (lightSource.typeEnum)
+            switch (lightSource.GetLightType())
             {
                 case LightPunctual.Type.Unknown:
                     break;
@@ -65,7 +65,7 @@ namespace GLTFast
                 : 100_000; // glTF 2.0 spec says infinite, but float.MaxValue
                            // breaks spot lights in URP.
 
-            if (lightSource.typeEnum == LightPunctual.Type.Spot)
+            if (lightSource.GetLightType() == LightPunctual.Type.Spot)
             {
                 lightDestination.spotAngle = lightSource.spot.outerConeAngle * Mathf.Rad2Deg * 2f;
                 lightDestination.innerSpotAngle = lightSource.spot.innerConeAngle * Mathf.Rad2Deg * 2f;
@@ -83,13 +83,13 @@ namespace GLTFast
             switch (lightSource.type)
             {
                 case LightType.Spot:
-                    lightDestination.typeEnum = LightPunctual.Type.Spot;
+                    lightDestination.SetLightType(LightPunctual.Type.Spot);
                     break;
                 case LightType.Directional:
-                    lightDestination.typeEnum = LightPunctual.Type.Directional;
+                    lightDestination.SetLightType(LightPunctual.Type.Directional);
                     break;
                 case LightType.Point:
-                    lightDestination.typeEnum = LightPunctual.Type.Point;
+                    lightDestination.SetLightType(LightPunctual.Type.Point);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

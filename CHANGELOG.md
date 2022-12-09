@@ -67,6 +67,15 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - `IInstantiator` changes
   - `IInstantiator.BeginScene` signature dropped third parameter `AnimationClip[] animationClips` that was depending on built-in Animation module to be enabled.
   - `IInstantiator.AddAnimation` was added. Only available when built-in Animation module is enabled.
+- Converted properties that were hiding conversion logic or caching into methods
+  - `Accessor`: `typeEnum` to `GetAttributeType`/`SetAttributeType`
+  - `BufferView`: `modeEnum` to `GetMode`
+  - `BufferView`: `filterEnum` to `GetFilter`
+  - `AnimationChannelTarget`: `pathEnum` to `GetPath`
+  - `AnimationSampler`: `interpolationEnum` to `GetInterpolationType`
+  - `Camera`: `typeEnum` to `GetCameraType`/`SetCameraType`
+  - `LightPunctual`: `typeEnum` to `GetLightType`/`SetLightType`
+  - `Material`: `alphaModeEnum` to `GetAlphaMode`/`SetAlphaMode`
 ### Removed
 - Obsolete code
   - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)

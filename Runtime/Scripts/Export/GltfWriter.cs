@@ -192,7 +192,7 @@ namespace GLTFast.Export
 
             if (uCamera.orthographic)
             {
-                camera.typeEnum = Camera.Type.Orthographic;
+                camera.SetCameraType(Camera.Type.Orthographic);
                 var oSize = uCamera.orthographicSize;
                 float aspectRatio;
                 var targetTexture = uCamera.targetTexture;
@@ -215,7 +215,7 @@ namespace GLTFast.Export
             }
             else
             {
-                camera.typeEnum = Camera.Type.Perspective;
+                camera.SetCameraType(Camera.Type.Perspective);
                 camera.perspective = new CameraPerspective
                 {
                     yfov = uCamera.fieldOfView * Mathf.Deg2Rad,
@@ -264,7 +264,7 @@ namespace GLTFast.Export
             switch (lightType)
             {
                 case LightType.Spot:
-                    light.typeEnum = LightPunctual.Type.Spot;
+                    light.SetLightType(LightPunctual.Type.Spot);
                     light.spot = new SpotLight
                     {
                         outerConeAngle = uLight.spotAngle * Mathf.Deg2Rad * .5f,
@@ -272,15 +272,15 @@ namespace GLTFast.Export
                     };
                     break;
                 case LightType.Directional:
-                    light.typeEnum = LightPunctual.Type.Directional;
+                    light.SetLightType(LightPunctual.Type.Directional);
                     break;
                 case LightType.Point:
-                    light.typeEnum = LightPunctual.Type.Point;
+                    light.SetLightType(LightPunctual.Type.Point);
                     break;
                 case LightType.Area:
                 case LightType.Disc:
                 default:
-                    light.typeEnum = LightPunctual.Type.Spot;
+                    light.SetLightType(LightPunctual.Type.Spot);
                     light.spot = new SpotLight
                     {
                         outerConeAngle = 45 * Mathf.Deg2Rad * .5f,
@@ -371,7 +371,7 @@ namespace GLTFast.Export
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
             var light = m_Lights[lightId];
-            if (light.typeEnum != LightPunctual.Type.Point)
+            if (light.GetLightType() != LightPunctual.Type.Point)
             {
                 // glTF lights face in the opposite direction, so we create a
                 // helper node that applies the correct rotation.
@@ -1263,8 +1263,8 @@ namespace GLTFast.Export
                     byteOffset = attrData.offset,
                     componentType = Accessor.GetComponentType(attribute.format),
                     count = uMesh.vertexCount,
-                    typeEnum = Accessor.GetAccessorAttributeType(attribute.dimension),
                 };
+                accessor.SetAttributeType(Accessor.GetAccessorAttributeType(attribute.dimension));
 
                 var accessorId = AddAccessor(accessor);
 
@@ -1359,7 +1359,6 @@ namespace GLTFast.Export
 
                 var indexAccessor = new Accessor
                 {
-                    typeEnum = GltfAccessorAttributeType.SCALAR,
                     byteOffset = indexOffset,
                     componentType = indexComponentType,
                     count = subMesh.indexCount,
@@ -1367,6 +1366,7 @@ namespace GLTFast.Export
                     // min = new []{}, // TODO
                     // max = new []{}, // TODO
                 };
+                indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
 
                 if (subMesh.topology == MeshTopology.Quads)
                 {

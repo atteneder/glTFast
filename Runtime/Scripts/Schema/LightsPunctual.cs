@@ -124,29 +124,33 @@ namespace GLTFast.Schema
         Type m_TypeEnum = Type.Unknown;
 
         /// <summary>
-        /// Type of the light
+        /// Returns the type of the light
+        /// It converts the <see cref="type"/> string and caches it.
         /// </summary>
-        public Type typeEnum
+        public Type GetLightType()
         {
-            get
+            if (m_TypeEnum != Type.Unknown)
             {
-                if (m_TypeEnum != Type.Unknown)
-                {
-                    return m_TypeEnum;
-                }
-                if (!string.IsNullOrEmpty(type))
-                {
-                    m_TypeEnum = (Type)Enum.Parse(typeof(Type), type, true);
-                    type = null;
-                    return m_TypeEnum;
-                }
-                return Type.Unknown;
+                return m_TypeEnum;
             }
-            set
+
+            if (!string.IsNullOrEmpty(type))
             {
-                m_TypeEnum = value;
-                type = value.ToString().ToLowerInvariant();
+                m_TypeEnum = (Type)Enum.Parse(typeof(Type), type, true);
+                type = null;
+                return m_TypeEnum;
             }
+
+            return Type.Unknown;
+        }
+
+        /// <summary>
+        /// Sets the type of the light
+        /// </summary>
+        public void SetLightType(Type value)
+        {
+            m_TypeEnum = value;
+            type = value.ToString().ToLowerInvariant();
         }
 
         internal void GltfSerialize(JsonWriter writer)
@@ -165,7 +169,7 @@ namespace GLTFast.Schema
             {
                 writer.AddProperty("intensity", intensity);
             }
-            if (range > 0 && typeEnum != Type.Directional)
+            if (range > 0 && GetLightType() != Type.Directional)
             {
                 writer.AddProperty("range", range);
             }

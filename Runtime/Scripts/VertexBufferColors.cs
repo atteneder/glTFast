@@ -67,7 +67,7 @@ namespace GLTFast
             var h = GetColors32Job(
                 data,
                 colorAcc.componentType,
-                colorAcc.typeEnum,
+                colorAcc.GetAttributeType(),
                 byteStride,
                 m_Data
             );

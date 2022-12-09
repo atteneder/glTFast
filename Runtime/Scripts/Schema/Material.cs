@@ -138,32 +138,34 @@ namespace GLTFast.Schema
         AlphaMode? m_AlphaModeEnum;
 
         /// <summary>
-        /// <see cref="AlphaMode"/> typed view onto <see cref="alphaMode"/> string.
+        /// <see cref="AlphaMode"/> typed and cached getter for <see cref="alphaMode"/> string.
         /// </summary>
-        public AlphaMode alphaModeEnum
+        public AlphaMode GetAlphaMode()
         {
-            get
+            if (m_AlphaModeEnum.HasValue)
             {
-                if (m_AlphaModeEnum.HasValue)
-                {
-                    return m_AlphaModeEnum.Value;
-                }
-                if (!string.IsNullOrEmpty(alphaMode))
-                {
-                    m_AlphaModeEnum = (AlphaMode)System.Enum.Parse(typeof(AlphaMode), alphaMode, true);
-                    alphaMode = null;
-                    return m_AlphaModeEnum.Value;
-                }
-
-                return AlphaMode.OPAQUE;
+                return m_AlphaModeEnum.Value;
             }
-            set
+
+            if (!string.IsNullOrEmpty(alphaMode))
             {
-                m_AlphaModeEnum = value;
-                if (value != AlphaMode.OPAQUE)
-                {
-                    alphaMode = value.ToString();
-                }
+                m_AlphaModeEnum = (AlphaMode)System.Enum.Parse(typeof(AlphaMode), alphaMode, true);
+                alphaMode = null;
+                return m_AlphaModeEnum.Value;
+            }
+
+            return AlphaMode.OPAQUE;
+        }
+
+        /// <summary>
+        /// <see cref="AlphaMode"/> typed setter for <see cref="alphaMode"/> string.
+        /// </summary>
+        public void SetAlphaMode(AlphaMode value)
+        {
+            m_AlphaModeEnum = value;
+            if (value != AlphaMode.OPAQUE)
+            {
+                alphaMode = value.ToString();
             }
         }
 

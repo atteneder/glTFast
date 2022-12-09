@@ -406,7 +406,7 @@ namespace GLTFast
                 return;
             }
             var camera = m_Gltf.GetSourceCamera(cameraIndex);
-            switch (camera.typeEnum)
+            switch (camera.GetCameraType())
             {
                 case Schema.Camera.Type.Orthographic:
                     var o = camera.orthographic;
@@ -559,7 +559,7 @@ namespace GLTFast
             var lightGameObject = m_Nodes[nodeIndex];
             var lightSource = m_Gltf.GetSourceLightPunctual(lightIndex);
 
-            if (lightSource.typeEnum != LightPunctual.Type.Point)
+            if (lightSource.GetLightType() != LightPunctual.Type.Point)
             {
                 // glTF lights' direction is flipped, compared with Unity's, so
                 // we're adding a rotated child GameObject to counteract.
