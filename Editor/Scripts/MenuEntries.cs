@@ -136,7 +136,7 @@ namespace GLTFast.Editor
             {
                 SaveFolderPath = Directory.GetParent(path)?.FullName;
                 var settings = GetDefaultSettings(binary);
-                var goSettings = new GameObjectExportSettings { onlyActiveInHierarchy = false };
+                var goSettings = new GameObjectExportSettings { OnlyActiveInHierarchy = false };
                 var export = new GameObjectExport(settings, gameObjectExportSettings: goSettings, logger: new ConsoleLogger());
                 export.AddScene(gameObjects, name);
                 AsyncHelpers.RunSync(() => export.SaveToFileAndDispose(path));
@@ -152,7 +152,7 @@ namespace GLTFast.Editor
         {
             var settings = new ExportSettings
             {
-                format = binary ? GltfFormat.Binary : GltfFormat.Json
+                Format = binary ? GltfFormat.Binary : GltfFormat.Json
             };
             return settings;
         }

@@ -30,7 +30,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Exports a glTF ORM (occlusion/roughness/metallic) image map
     /// </summary>
-    public class OrmImageExport : ImageExport
+    class OrmImageExport : ImageExport
     {
 
         static Material s_MetalGlossBlitMaterial;

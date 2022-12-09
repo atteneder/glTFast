@@ -13,20 +13,27 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Materials
+using System;
+
+namespace GLTFast
 {
-
     /// <summary>
-    /// Contains material related constant variables that are required for both
-    /// import (glTF to Unity) and export (Unity to glTF) material conversions.
-    /// TODO: Make const var location consistent
+    /// Defines how node names are created
     /// </summary>
-    public static class Constants
+    public enum NameImportMethod
     {
-
         /// <summary>
-        /// Shader keyword for normal mapping
+        /// Use original node names.
+        /// Fallback to mesh's name (if present)
+        /// Fallback to "Node_&lt;index&gt;" as last resort.
         /// </summary>
-        public const string NormalMapKeyword = "_NORMALMAP";
+        Original,
+        /// <summary>
+        /// Identical to <see cref="Original">Original</see>, but
+        /// names are made unique (within their hierarchical position)
+        /// by supplementing a continuous number.
+        /// This is required for correct animation target lookup and import continuity.
+        /// </summary>
+        OriginalUnique
     }
 }

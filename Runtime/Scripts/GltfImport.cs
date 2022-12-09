@@ -1491,7 +1491,7 @@ namespace GLTFast
 #endif
 #if UNITY_WEBREQUEST_TEXTURE
             var forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[imageIndex];
-            return forceSampleLinear || m_Settings.generateMipMaps;
+            return forceSampleLinear || m_Settings.GenerateMipMaps;
 #else
             m_Logger?.Warning(LogCode.UnityWebRequestTextureNotEnabled);
             return true;
@@ -1833,7 +1833,7 @@ namespace GLTFast
                     {
                         if (txt.sampler >= 0)
                         {
-                            sampler.Apply(img, m_Settings.defaultMinFilterMode, m_Settings.defaultMagFilterMode);
+                            sampler.Apply(img, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
                         }
                         imageVariants[imageIndex] = new Dictionary<SamplerKey, Texture2D>();
                         imageVariants[imageIndex][key] = img;
@@ -1853,7 +1853,7 @@ namespace GLTFast
                             newImg.name = $"{img.name}_sampler{txt.sampler}";
                             m_Logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
-                            sampler?.Apply(newImg, m_Settings.defaultMinFilterMode, m_Settings.defaultMagFilterMode);
+                            sampler?.Apply(newImg, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
                             imageVariants[imageIndex][key] = newImg;
                             m_Textures[textureIndex] = newImg;
                         }
@@ -1925,9 +1925,9 @@ namespace GLTFast
 
 #if UNITY_ANIMATION
             if (m_GltfRoot.HasAnimation) {
-                if (m_Settings.nodeNameMethod != ImportSettings.NameImportMethod.OriginalUnique) {
+                if (m_Settings.NodeNameMethod != NameImportMethod.OriginalUnique) {
                     m_Logger?.Info(LogCode.NamingOverride);
-                    m_Settings.nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique;
+                    m_Settings.NodeNameMethod = NameImportMethod.OriginalUnique;
                 }
             }
 #endif
@@ -1938,7 +1938,7 @@ namespace GLTFast
 
             if (m_GltfRoot.nodes != null && m_GltfRoot.nodes.Length > 0)
             {
-                if (m_Settings.nodeNameMethod == ImportSettings.NameImportMethod.OriginalUnique)
+                if (m_Settings.NodeNameMethod == NameImportMethod.OriginalUnique)
                 {
                     parentIndex = CreateUniqueNames();
                 }
@@ -1960,7 +1960,7 @@ namespace GLTFast
             }
 
 #if UNITY_ANIMATION
-            if (m_GltfRoot.HasAnimation && m_Settings.animationMethod != ImportSettings.AnimationMethod.None) {
+            if (m_GltfRoot.HasAnimation && m_Settings.AnimationMethod != AnimationMethod.None) {
 
                 m_AnimationClips = new AnimationClip[m_GltfRoot.animations.Length];
                 for (var i = 0; i < m_GltfRoot.animations.Length; i++) {
@@ -1969,7 +1969,7 @@ namespace GLTFast
                     m_AnimationClips[i].name = animation.name ?? $"Clip_{i}";
 
                     // Legacy Animation requirement
-                    m_AnimationClips[i].legacy = m_Settings.animationMethod == ImportSettings.AnimationMethod.Legacy;
+                    m_AnimationClips[i].legacy = m_Settings.AnimationMethod == AnimationMethod.Legacy;
                     m_AnimationClips[i].wrapMode = WrapMode.Loop;
 
                     for (int j = 0; j < animation.channels.Length; j++) {
@@ -2648,7 +2648,7 @@ namespace GLTFast
 #else
             var textureCreationFlags = TextureCreationFlags.None;
 #endif
-            if (m_Settings.generateMipMaps)
+            if (m_Settings.GenerateMipMaps)
             {
                 textureCreationFlags |= TextureCreationFlags.MipChain;
             }
@@ -2660,7 +2660,7 @@ namespace GLTFast
                 textureCreationFlags
             )
             {
-                anisoLevel = m_Settings.anisotropicFilterLevel,
+                anisoLevel = m_Settings.AnisotropicFilterLevel,
                 name = GetImageName(img, index)
             };
             return txt;

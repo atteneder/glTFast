@@ -22,7 +22,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Wrapper to export a glTF image normal map
     /// </summary>
-    public class NormalImageExport : ImageExport
+    class NormalImageExport : ImageExport
     {
 
         static Material s_NormalBlitMaterial;

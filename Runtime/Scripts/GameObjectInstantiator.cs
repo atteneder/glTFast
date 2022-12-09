@@ -111,8 +111,8 @@ namespace GLTFast
             SceneInstance = new GameObjectSceneInstance();
 
             GameObject sceneGameObject;
-            if (m_Settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
-                || m_Settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && rootNodeIndices.Length == 1)
+            if (m_Settings.SceneObjectCreation == SceneObjectCreation.Never
+                || m_Settings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes && rootNodeIndices.Length == 1)
             {
                 sceneGameObject = m_Parent.gameObject;
             }
@@ -120,7 +120,7 @@ namespace GLTFast
             {
                 sceneGameObject = new GameObject(name ?? "Scene");
                 sceneGameObject.transform.SetParent(m_Parent, false);
-                sceneGameObject.layer = m_Settings.layer;
+                sceneGameObject.layer = m_Settings.Layer;
             }
             SceneTransform = sceneGameObject.transform;
             Profiler.EndSample();
@@ -129,7 +129,7 @@ namespace GLTFast
 #if UNITY_ANIMATION
         /// <inheritdoc />
         public void AddAnimation(AnimationClip[] animationClips) {
-            if ((m_Settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
+            if ((m_Settings.Mask & ComponentType.Animation) != 0 && animationClips != null) {
                 // we want to create an Animator for non-legacy clips, and an Animation component for legacy clips.
                 var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
 // #if UNITY_EDITOR
@@ -204,7 +204,7 @@ namespace GLTFast
             go.transform.localScale = scale;
             go.transform.localPosition = position;
             go.transform.localRotation = rotation;
-            go.layer = m_Settings.layer;
+            go.layer = m_Settings.Layer;
             m_Nodes[nodeIndex] = go;
 
             go.transform.SetParent(
@@ -230,7 +230,7 @@ namespace GLTFast
             int primitiveNumeration = 0
         )
         {
-            if ((m_Settings.mask & ComponentType.Mesh) == 0)
+            if ((m_Settings.Mask & ComponentType.Mesh) == 0)
             {
                 return;
             }
@@ -245,7 +245,7 @@ namespace GLTFast
             {
                 meshGo = new GameObject(meshName);
                 meshGo.transform.SetParent(m_Nodes[nodeIndex].transform, false);
-                meshGo.layer = m_Settings.layer;
+                meshGo.layer = m_Settings.Layer;
             }
 
             Renderer renderer;
@@ -261,7 +261,7 @@ namespace GLTFast
             else
             {
                 var smr = meshGo.AddComponent<SkinnedMeshRenderer>();
-                smr.updateWhenOffscreen = m_Settings.skinUpdateWhenOffscreen;
+                smr.updateWhenOffscreen = m_Settings.SkinUpdateWhenOffscreen;
                 if (joints != null)
                 {
                     var bones = new Transform[joints.Length];
@@ -311,7 +311,7 @@ namespace GLTFast
             int primitiveNumeration = 0
         )
         {
-            if ((m_Settings.mask & ComponentType.Mesh) == 0)
+            if ((m_Settings.Mask & ComponentType.Mesh) == 0)
             {
                 return;
             }
@@ -327,7 +327,7 @@ namespace GLTFast
             for (var i = 0; i < instanceCount; i++)
             {
                 var meshGo = new GameObject($"{meshName}_i{i}");
-                meshGo.layer = m_Settings.layer;
+                meshGo.layer = m_Settings.Layer;
                 var t = meshGo.transform;
                 t.SetParent(m_Nodes[nodeIndex].transform, false);
                 t.localPosition = positions?[i] ?? Vector3.zero;
@@ -344,7 +344,7 @@ namespace GLTFast
         /// <inheritdoc />
         public virtual void AddCamera(uint nodeIndex, uint cameraIndex)
         {
-            if ((m_Settings.mask & ComponentType.Camera) == 0)
+            if ((m_Settings.Mask & ComponentType.Camera) == 0)
             {
                 return;
             }
@@ -455,7 +455,7 @@ namespace GLTFast
                     ? $"Camera-{nodeIndex}"
                     : $"{cameraParent.name}-Camera"
                 );
-            camGo.layer = m_Settings.layer;
+            camGo.layer = m_Settings.Layer;
             var camTrans = camGo.transform;
             var parentTransform = cameraParent.transform;
             camTrans.SetParent(parentTransform, false);
@@ -495,7 +495,7 @@ namespace GLTFast
             uint lightIndex
         )
         {
-            if ((m_Settings.mask & ComponentType.Light) == 0)
+            if ((m_Settings.Mask & ComponentType.Light) == 0)
             {
                 return;
             }
@@ -512,7 +512,7 @@ namespace GLTFast
                 lightGameObject = tmp;
             }
             var light = lightGameObject.AddComponent<Light>();
-            lightSource.ToUnityLight(light, m_Settings.lightIntensityFactor);
+            lightSource.ToUnityLight(light, m_Settings.LightIntensityFactor);
             SceneInstance.AddLight(light);
         }
 

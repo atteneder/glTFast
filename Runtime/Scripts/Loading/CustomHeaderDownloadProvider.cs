@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Serialization;
 
 namespace GLTFast.Loading
 {
@@ -31,12 +32,21 @@ namespace GLTFast.Loading
         /// <summary>
         /// HTTP header key/name
         /// </summary>
-        public string key;
+        public string Key => key;
 
         /// <summary>
         /// HTTP header value
         /// </summary>
-        public string value;
+        public string Value => value;
+
+        [SerializeField] string key;
+        [SerializeField] string value;
+
+        public HttpHeader(string key, string value)
+        {
+            this.key = key;
+            this.value = value;
+        }
     }
 
     /// <summary>
@@ -84,7 +94,7 @@ namespace GLTFast.Loading
             {
                 foreach (var header in m_Headers)
                 {
-                    request.SetRequestHeader(header.key, header.value);
+                    request.SetRequestHeader(header.Key, header.Value);
                 }
             }
         }

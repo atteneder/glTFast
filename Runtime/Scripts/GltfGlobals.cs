@@ -41,18 +41,18 @@ namespace GLTFast
         /// <summary>
         /// glTF-Binary file extension
         /// </summary>
-        public const string glbExt = ".glb";
+        public const string GlbExt = ".glb";
 
         /// <summary>
         /// glTF file extension
         /// </summary>
-        public const string gltfExt = ".gltf";
+        public const string GltfExt = ".gltf";
 
         /// <summary>
         /// First four bytes of a glTF-Binary file are made up of this signature
         /// Represents glTF in ASCII
         /// </summary>
-        public const uint gltfBinaryMagic = 0x46546c67;
+        public const uint GltfBinaryMagic = 0x46546c67;
 
         /// <summary>
         /// Figures out if a byte array contains data of a glTF-Binary
@@ -62,7 +62,7 @@ namespace GLTFast
         public static bool IsGltfBinary(byte[] data)
         {
             var magic = BitConverter.ToUInt32(data, 0);
-            return magic == gltfBinaryMagic;
+            return magic == GltfBinaryMagic;
         }
     }
 }

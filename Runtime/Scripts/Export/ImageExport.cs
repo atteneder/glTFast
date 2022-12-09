@@ -26,7 +26,7 @@ namespace GLTFast.Export
 {
 
     /// <inheritdoc />
-    public class ImageExport : ImageExportBase
+    class ImageExport : ImageExportBase
     {
 
         static Material s_ColorBlitMaterial;

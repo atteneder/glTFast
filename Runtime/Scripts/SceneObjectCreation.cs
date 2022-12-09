@@ -13,20 +13,28 @@
 // limitations under the License.
 //
 
-namespace GLTFast.Materials
+using System;
+
+namespace GLTFast
 {
-
     /// <summary>
-    /// Contains material related constant variables that are required for both
-    /// import (glTF to Unity) and export (Unity to glTF) material conversions.
-    /// TODO: Make const var location consistent
+    /// Scene object creation method. Determines whether or when a
+    /// GameObject/Entity representing the scene should get created.
     /// </summary>
-    public static class Constants
+    public enum SceneObjectCreation
     {
-
         /// <summary>
-        /// Shader keyword for normal mapping
+        /// Never create a scene object.
         /// </summary>
-        public const string NormalMapKeyword = "_NORMALMAP";
+        Never,
+        /// <summary>
+        /// Always create a scene object.
+        /// </summary>
+        Always,
+        /// <summary>
+        /// Create a scene object if there is more than one root level node.
+        /// Otherwise omit creating a scene object.
+        /// </summary>
+        WhenMultipleRootNodes
     }
 }

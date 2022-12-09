@@ -138,7 +138,7 @@ namespace GLTFast.Export
         }
         bool AddGameObject(GameObject gameObject, List<Material> tempMaterials, out int nodeId)
         {
-            if (m_Settings.onlyActiveInHierarchy && !gameObject.activeInHierarchy
+            if (m_Settings.OnlyActiveInHierarchy && !gameObject.activeInHierarchy
                 || gameObject.CompareTag("EditorOnly"))
             {
                 nodeId = -1;
@@ -168,7 +168,7 @@ namespace GLTFast.Export
 
             var transform = gameObject.transform;
 
-            var onIncludedLayer = ((1 << gameObject.layer) & m_Settings.layerMask) != 0;
+            var onIncludedLayer = ((1 << gameObject.layer) & m_Settings.LayerMask) != 0;
 
             if (onIncludedLayer || children != null)
             {
@@ -201,7 +201,7 @@ namespace GLTFast.Export
             {
                 if (gameObject.TryGetComponent(out Renderer renderer))
                 {
-                    if (renderer.enabled || m_Settings.disabledComponents)
+                    if (renderer.enabled || m_Settings.DisabledComponents)
                     {
                         mesh = meshFilter.sharedMesh;
                         renderer.GetSharedMaterials(tempMaterials);
@@ -211,7 +211,7 @@ namespace GLTFast.Export
             else
             if (gameObject.TryGetComponent(out SkinnedMeshRenderer smr))
             {
-                if (smr.enabled || m_Settings.disabledComponents)
+                if (smr.enabled || m_Settings.DisabledComponents)
                 {
                     mesh = smr.sharedMesh;
                     smr.GetSharedMaterials(tempMaterials);
@@ -239,7 +239,7 @@ namespace GLTFast.Export
 
             if (gameObject.TryGetComponent(out Camera camera))
             {
-                if (camera.enabled || m_Settings.disabledComponents)
+                if (camera.enabled || m_Settings.DisabledComponents)
                 {
                     if (m_Writer.AddCamera(camera, out var cameraId))
                     {
@@ -250,7 +250,7 @@ namespace GLTFast.Export
 
             if (gameObject.TryGetComponent(out Light light))
             {
-                if (light.enabled || m_Settings.disabledComponents)
+                if (light.enabled || m_Settings.DisabledComponents)
                 {
                     if (m_Writer.AddLight(light, out var lightId))
                     {

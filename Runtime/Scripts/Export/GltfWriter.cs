@@ -164,7 +164,7 @@ namespace GLTFast.Export
         /// <inheritdoc />
         public void AddMeshToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds)
         {
-            if ((m_Settings.componentMask & ComponentType.Mesh) == 0) return;
+            if ((m_Settings.ComponentMask & ComponentType.Mesh) == 0) return;
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
@@ -180,7 +180,7 @@ namespace GLTFast.Export
         /// <inheritdoc />
         public bool AddCamera(UnityEngine.Camera uCamera, out int cameraId)
         {
-            if ((m_Settings.componentMask & ComponentType.Camera) == 0)
+            if ((m_Settings.ComponentMask & ComponentType.Camera) == 0)
             {
                 cameraId = -1;
                 return false;
@@ -236,7 +236,7 @@ namespace GLTFast.Export
         /// <inheritdoc />
         public bool AddLight(Light uLight, out int lightId)
         {
-            if ((m_Settings.componentMask & ComponentType.Light) == 0)
+            if ((m_Settings.ComponentMask & ComponentType.Light) == 0)
             {
                 lightId = -1;
                 return false;
@@ -339,7 +339,7 @@ namespace GLTFast.Export
                     break;
             }
 
-            light.intensity *= m_Settings.lightIntensityFactor;
+            light.intensity *= m_Settings.LightIntensityFactor;
 
             if (m_Lights == null)
             {
@@ -541,7 +541,7 @@ namespace GLTFast.Export
             CertifyNotDisposed();
 
             var ext = Path.GetExtension(path);
-            var binary = m_Settings.format == GltfFormat.Binary;
+            var binary = m_Settings.Format == GltfFormat.Binary;
             string bufferPath = null;
             if (!binary)
             {
@@ -567,7 +567,7 @@ namespace GLTFast.Export
 
             CertifyNotDisposed();
 
-            if (m_Settings.format != GltfFormat.Binary || GetFinalImageDestination() == ImageDestination.SeparateFile)
+            if (m_Settings.Format != GltfFormat.Binary || GetFinalImageDestination() == ImageDestination.SeparateFile)
             {
                 m_Logger.Error(LogCode.None, "Save to Stream currently only works for self-contained glTF-Binary");
                 return false;
@@ -595,13 +595,13 @@ namespace GLTFast.Export
                 return false;
             }
 
-            var isBinary = m_Settings.format == GltfFormat.Binary;
+            var isBinary = m_Settings.Format == GltfFormat.Binary;
 
             const uint headerSize = 12; // 4 bytes magic + 4 bytes version + 4 bytes length (uint each)
             const uint chunkOverhead = 8; // 4 bytes chunk length + 4 bytes chunk type (uint each)
             if (isBinary)
             {
-                outStream.Write(BitConverter.GetBytes(GltfGlobals.gltfBinaryMagic));
+                outStream.Write(BitConverter.GetBytes(GltfGlobals.GltfBinaryMagic));
                 outStream.Write(BitConverter.GetBytes((uint)2));
 
                 MemoryStream jsonStream = null;
@@ -708,10 +708,10 @@ namespace GLTFast.Export
 
         ImageDestination GetFinalImageDestination()
         {
-            var imageDest = m_Settings.imageDestination;
+            var imageDest = m_Settings.ImageDestination;
             if (imageDest == ImageDestination.Automatic)
             {
-                imageDest = m_Settings.format == GltfFormat.Binary
+                imageDest = m_Settings.Format == GltfFormat.Binary
                     ? ImageDestination.MainBuffer
                     : ImageDestination.SeparateFile;
             }
@@ -1624,7 +1624,7 @@ namespace GLTFast.Export
             {
                 Dictionary<int, string> fileNameOverrides = null;
                 var imageDest = GetFinalImageDestination();
-                var overwrite = m_Settings.fileConflictResolution == FileConflictResolution.Overwrite;
+                var overwrite = m_Settings.FileConflictResolution == FileConflictResolution.Overwrite;
                 if (!overwrite && imageDest == ImageDestination.SeparateFile)
                 {
                     var fileExists = false;

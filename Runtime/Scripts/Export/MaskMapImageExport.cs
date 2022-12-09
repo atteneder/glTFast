@@ -13,6 +13,8 @@
 // limitations under the License.
 //
 
+#if USING_HDRP
+
 using System;
 using System.IO;
 using UnityEngine;
@@ -23,7 +25,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Exports a glTF ORM (occlusion/roughness/metallic) image map
     /// </summary>
-    public class MaskMapImageExport : ImageExport
+    class MaskMapImageExport : ImageExport
     {
 
         static Material s_BlitMaterial;
@@ -70,3 +72,4 @@ namespace GLTFast.Export
         }
     }
 }
+#endif // USING_HDRP

@@ -119,7 +119,7 @@ namespace GLTFast.Export
             }
             if (
                 uMaterial.HasProperty(k_BumpMap)
-                && (uMaterial.IsKeywordEnabled(Materials.Constants.normalMapKeyword)
+                && (uMaterial.IsKeywordEnabled(Materials.Constants.NormalMapKeyword)
                     || uMaterial.IsKeywordEnabled(k_KeywordBumpMap))
             )
             {
@@ -152,7 +152,7 @@ namespace GLTFast.Export
                 );
 
             OrmImageExport ormImageExport = null;
-            var mainTexProperty = k_MainTex;
+            var mainTexProperty = MainTexProperty;
             if (uMaterial.HasProperty(k_BaseMap))
             {
                 mainTexProperty = k_BaseMap;
@@ -189,8 +189,8 @@ namespace GLTFast.Export
                 {
                     metallicFactor = 0,
                     roughnessFactor = 1.0f,
-                    BaseColor = uMaterial.HasProperty(k_BaseColor)
-                        ? uMaterial.GetColor(k_BaseColor)
+                    BaseColor = uMaterial.HasProperty(BaseColorProperty)
+                        ? uMaterial.GetColor(BaseColorProperty)
                         : Color.white
                 };
                 if (mainTex != null)
@@ -277,11 +277,11 @@ namespace GLTFast.Export
 
         static bool IsPbrMetallicRoughness(UnityEngine.Material material)
         {
-            return material.HasProperty(k_Metallic)
+            return material.HasProperty(MetallicProperty)
                 && (
                     HasMetallicGlossMap(material)
                     || material.HasProperty(k_Glossiness)
-                    || material.HasProperty(k_Smoothness)
+                    || material.HasProperty(SmoothnessProperty)
                 );
         }
 
@@ -299,23 +299,23 @@ namespace GLTFast.Export
 
             var hasAlphaSmoothness = uMaterial.IsKeywordEnabled(k_KeywordSmoothnessTextureAlbedoChannelA);
 
-            if (uMaterial.HasProperty(k_BaseColor))
+            if (uMaterial.HasProperty(BaseColorProperty))
             {
-                pbr.BaseColor = uMaterial.GetColor(k_BaseColor);
+                pbr.BaseColor = uMaterial.GetColor(BaseColorProperty);
             }
             else
-            if (uMaterial.HasProperty(k_Color))
+            if (uMaterial.HasProperty(ColorProperty))
             {
-                pbr.BaseColor = uMaterial.GetColor(k_Color);
+                pbr.BaseColor = uMaterial.GetColor(ColorProperty);
             }
 
             if (uMaterial.HasProperty(k_TintColor))
             {
                 //particles use _TintColor instead of _Color
                 float white = 1;
-                if (uMaterial.HasProperty(k_Color))
+                if (uMaterial.HasProperty(ColorProperty))
                 {
-                    var c = uMaterial.GetColor(k_Color);
+                    var c = uMaterial.GetColor(ColorProperty);
                     white = (c.r + c.g + c.b) / 3.0f; //multiply alpha by overall whiteness of TintColor
                 }
 
@@ -354,14 +354,14 @@ namespace GLTFast.Export
                 }
             }
 
-            if (uMaterial.HasProperty(k_Metallic) && !HasMetallicGlossMap(uMaterial))
+            if (uMaterial.HasProperty(MetallicProperty) && !HasMetallicGlossMap(uMaterial))
             {
-                pbr.metallicFactor = uMaterial.GetFloat(k_Metallic);
+                pbr.metallicFactor = uMaterial.GetFloat(MetallicProperty);
             }
 
-            if (uMaterial.HasProperty(k_Glossiness) || uMaterial.HasProperty(k_Smoothness))
+            if (uMaterial.HasProperty(k_Glossiness) || uMaterial.HasProperty(SmoothnessProperty))
             {
-                var smoothnessPropId = uMaterial.HasProperty(k_Smoothness) ? k_Smoothness : k_Glossiness;
+                var smoothnessPropId = uMaterial.HasProperty(SmoothnessProperty) ? SmoothnessProperty : k_Glossiness;
                 var metallicGlossMap = uMaterial.HasProperty(k_MetallicGlossMap) ? uMaterial.GetTexture(k_MetallicGlossMap) : null;
                 var smoothness = uMaterial.GetFloat(smoothnessPropId);
                 pbr.roughnessFactor = (metallicGlossMap != null || hasAlphaSmoothness) && uMaterial.HasProperty(k_GlossMapScale)

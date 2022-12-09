@@ -82,8 +82,8 @@ namespace GLTFast {
                 typeof(LocalToWorld)
             );
 
-            if (m_Settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
-                || m_Settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
+            if (m_Settings.SceneObjectCreation == SceneObjectCreation.Never
+                || m_Settings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes && nodeIndices.Length == 1) {
                 m_SceneParent = new Parent { Value = m_Parent };
             }
             else {
@@ -104,7 +104,7 @@ namespace GLTFast {
 #if UNITY_ANIMATION
         /// <inheritdoc />
         public void AddAnimation(AnimationClip[] animationClips) {
-            if ((m_Settings.mask & ComponentType.Animation) != 0 && animationClips != null) {
+            if ((m_Settings.Mask & ComponentType.Animation) != 0 && animationClips != null) {
                 // TODO: Add animation support
             }
         }
@@ -160,7 +160,7 @@ namespace GLTFast {
             float[] morphTargetWeights = null,
             int primitiveNumeration = 0
         ) {
-            if ((m_Settings.mask & ComponentType.Mesh) == 0) {
+            if ((m_Settings.Mask & ComponentType.Mesh) == 0) {
                 return;
             }
             Profiler.BeginSample("AddPrimitive");
@@ -180,7 +180,7 @@ namespace GLTFast {
             for (var index = 0; index < materialIndices.Length; index++) {
                 var material = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
 
-                RenderMeshUtility.AddComponents(node,m_EntityManager,new RenderMeshDescription(mesh,material,layer:m_Settings.layer,subMeshIndex:index));
+                RenderMeshUtility.AddComponents(node,m_EntityManager,new RenderMeshDescription(mesh,material,layer:m_Settings.Layer,subMeshIndex:index));
                  if(joints!=null || hasMorphTargets) {
                      if (joints != null) {
                          var bones = new Entity[joints.Length];
@@ -214,7 +214,7 @@ namespace GLTFast {
             NativeArray<Vector3>? scales,
             int primitiveNumeration = 0
         ) {
-            if ((m_Settings.mask & ComponentType.Mesh) == 0) {
+            if ((m_Settings.Mask & ComponentType.Mesh) == 0) {
                 return;
             }
             Profiler.BeginSample("AddPrimitiveInstanced");

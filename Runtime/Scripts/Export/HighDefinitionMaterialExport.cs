@@ -61,7 +61,7 @@ namespace GLTFast.Export {
             };
 
             SetAlphaModeAndCutoff(uMaterial, material);
-            material.doubleSided = IsDoubleSided(uMaterial, MaterialGenerator.cullModePropId);
+            material.doubleSided = IsDoubleSided(uMaterial, MaterialGenerator.CullModeProperty);
 
             //
             // Emission
@@ -117,7 +117,7 @@ namespace GLTFast.Export {
             }
 
 
-            var mainTexProperty = uMaterial.HasProperty(k_BaseColorMap) ? k_BaseColorMap : k_MainTex;
+            var mainTexProperty = uMaterial.HasProperty(k_BaseColorMap) ? k_BaseColorMap : MainTexProperty;
 
             if(IsUnlit(uMaterial)) {
                 ExportUnlit(material, uMaterial, mainTexProperty, gltf, logger);
@@ -145,8 +145,8 @@ namespace GLTFast.Export {
             var pbr = new PbrMetallicRoughness { metallicFactor = 0, roughnessFactor = 1.0f };
 
             var metallicUsed = false;
-            if (uMaterial.HasProperty(k_Metallic)) {
-                pbr.metallicFactor = uMaterial.GetFloat(k_Metallic);
+            if (uMaterial.HasProperty(MetallicProperty)) {
+                pbr.metallicFactor = uMaterial.GetFloat(MetallicProperty);
                 metallicUsed = pbr.metallicFactor > 0;
             }
 
@@ -238,16 +238,16 @@ namespace GLTFast.Export {
                 }
             }
 
-            if (uMaterial.HasProperty(k_BaseColor))
+            if (uMaterial.HasProperty(BaseColorProperty))
             {
-                pbr.BaseColor = uMaterial.GetColor(k_BaseColor);
+                pbr.BaseColor = uMaterial.GetColor(BaseColorProperty);
             } else
-            if (uMaterial.HasProperty(k_Color)) {
-                pbr.BaseColor = uMaterial.GetColor(k_Color);
+            if (uMaterial.HasProperty(ColorProperty)) {
+                pbr.BaseColor = uMaterial.GetColor(ColorProperty);
             }
 
-            if(ormImageExport == null && uMaterial.HasProperty(k_Smoothness)) {
-                pbr.roughnessFactor = 1f - uMaterial.GetFloat(k_Smoothness);
+            if(ormImageExport == null && uMaterial.HasProperty(SmoothnessProperty)) {
+                pbr.roughnessFactor = 1f - uMaterial.GetFloat(SmoothnessProperty);
             }
 
             material.pbrMetallicRoughness = pbr;

@@ -35,8 +35,8 @@ namespace GLTFast.Editor
                 m_UVTransform = TextureRotationSlider(
                     material,
                     m_UVTransform,
-                    baseColorTextureScaleTransformPropId,
-                    baseColorTextureRotationPropId,
+                    BaseColorTextureScaleTransformProperty,
+                    BaseColorTextureRotationProperty,
                     label:"Base Color Tex Rotation"
                     );
 
