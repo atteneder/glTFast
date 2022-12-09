@@ -158,7 +158,7 @@ namespace GLTFast.Export {
                 if (mainTex) {
                     if(mainTex is Texture2D) {
                         pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf,
-                            material.alphaModeEnum == Material.AlphaMode.OPAQUE
+                            material.GetAlphaMode() == Material.AlphaMode.OPAQUE
                                 ? ImageExportBase.Format.Jpg
                                 : ImageExportBase.Format.Unknown
                             );
