@@ -135,7 +135,8 @@ namespace GLTFast
 
         ImportSettings m_Settings;
 
-        #region VolatileData
+        // Volatile members
+        // Can be/will get discarded after loading
 
         /// <summary>
         /// These members are only used during loading phase.
@@ -212,17 +213,14 @@ namespace GLTFast
         HashSet<int> m_MaterialPointsSupport;
         bool m_DefaultMaterialPointsSupport;
 
-        #endregion VolatileData
 
-        #region VolatileDataInstantiation
+        // Volatile members - Instantiation
+        //
+        // These members are only used during loading and instantiation phase.
+        // TODO: Provide dispose method to free up memory after all instantiations
+        // happened. Maybe a plain Destroy/OnDestroy.
 
-        /// <summary>
-        /// These members are only used during loading and instantiation phase.
-        /// TODO: Provide dispose method to free up memory after all instantiations
-        /// happened. Maybe a plain Destroy/OnDestroy.
-        /// </summary>
-
-        /// Main glTF data structure
+        /// <summary>Main glTF data structure</summary>
         Root m_GltfRoot;
         UnityEngine.Material[] m_Materials;
         List<UnityEngine.Object> m_Resources;
@@ -247,8 +245,6 @@ namespace GLTFast
         /// </summary>
         public UnityEngine.Material defaultMaterial;
 #endif
-
-        #endregion VolatileDataInstantiation
 
         /// <summary>
         /// True, when loading has finished and glTF can be instantiated
@@ -302,7 +298,8 @@ namespace GLTFast
             m_Logger = logger;
         }
 
-        #region PublicStatic
+        // Public Static
+
         /// <summary>
         /// Sets the default <see cref="IDeferAgent"/> for subsequently
         /// generated GltfImport instances.
@@ -330,9 +327,8 @@ namespace GLTFast
                 s_DefaultDeferAgent = null;
             }
         }
-        #endregion
 
-        #region Public
+        // Public
 
         /// <summary>
         /// Load a glTF file (JSON or binary)
@@ -508,8 +504,6 @@ namespace GLTFast
             return success;
         }
 
-        #region ObsoleteSyncInstantiation
-
         /// <inheritdoc cref="InstantiateMainSceneAsync(Transform,CancellationToken)"/>
         [Obsolete("Use InstantiateMainSceneAsync for increased performance and safety. Consult the Upgrade Guide for instructions.")]
         public bool InstantiateMainScene(Transform parent)
@@ -537,8 +531,6 @@ namespace GLTFast
         {
             return InstantiateSceneAsync(instantiator, sceneIndex).Result;
         }
-
-        #endregion ObsoleteSyncInstantiation
 
         /// <summary>
         /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="defaultSceneIndex"/>)
@@ -879,8 +871,6 @@ namespace GLTFast
             m_SkinsInverseBindMatrices[skinId] = result;
             return result;
         }
-
-        #endregion Public
 
         async Task<bool> LoadFromUri(Uri url, CancellationToken cancellationToken)
         {
@@ -3696,7 +3686,6 @@ namespace GLTFast
 
 #endif // UNITY_ANIMATION
 
-        #region IGltfBuffers
         /// <summary>
         /// Get glTF accessor and its raw data
         /// </summary>
@@ -3785,7 +3774,6 @@ namespace GLTFast
                 }
             }
         }
-        #endregion IGltfBuffers
 
         static ImageFormat GetImageFormatFromMimeType(string mimeType)
         {

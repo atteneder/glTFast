@@ -90,7 +90,7 @@ namespace GLTFast.Export
         const int k_DefaultInnerLoopBatchCount = 512;
 #endif
 
-        #region Private
+        // private
         State m_State;
 
         ExportSettings m_Settings;
@@ -122,7 +122,6 @@ namespace GLTFast.Export
 
         Stream m_BufferStream;
         string m_BufferPath;
-        #endregion Private
 
         /// <summary>
         /// Provides glTF export independent of workflow (GameObjects/Entities)
