@@ -941,8 +941,8 @@ namespace GLTFast.Export
                     byteOffset = attrData.offset,
                     componentType = Accessor.GetComponentType(attribute.format),
                     count = vertexCount,
-                    typeEnum = Accessor.GetAccessorAttributeType(attribute.dimension),
                 };
+                accessor.SetAttributeType(Accessor.GetAccessorAttributeType(attribute.dimension));
 
                 var accessorId = AddAccessor(accessor);
 
@@ -1033,10 +1033,7 @@ namespace GLTFast.Export
                     mode = DrawMode.Points;
                 }
 
-                Accessor indexAccessor;
-
-                indexAccessor = new Accessor {
-                    typeEnum = GltfAccessorAttributeType.SCALAR,
+                var indexAccessor = new Accessor {
                     byteOffset = indexOffset,
                     componentType = indexComponentType,
                     count = subMesh.indexCount,
@@ -1044,6 +1041,7 @@ namespace GLTFast.Export
                     // min = new []{}, // TODO
                     // max = new []{}, // TODO
                 };
+                indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
 
                 if (subMesh.topology == MeshTopology.Quads) {
                     indexAccessor.count = indexAccessor.count / 2 * 3;
