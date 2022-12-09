@@ -31,13 +31,13 @@ namespace GLTFast
         protected string m_MeshName;
         protected int[] m_Materials;
 
-        public int primitiveIndex { get; }
+        public int PrimitiveIndex { get; }
 
         public abstract bool IsCompleted { get; }
 
         protected PrimitiveCreateContextBase(int primitiveIndex, int materialCount, string meshName)
         {
-            this.primitiveIndex = primitiveIndex;
+            this.PrimitiveIndex = primitiveIndex;
             m_Materials = new int[materialCount];
             m_MeshName = meshName;
         }

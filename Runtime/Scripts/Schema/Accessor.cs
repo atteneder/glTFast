@@ -386,7 +386,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// True if the accessor is <see href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#sparse-accessors">sparse</see>
         /// </summary>
-        public bool isSparse => sparse != null;
+        public bool IsSparse => sparse != null;
 
         internal void GltfSerialize(JsonWriter writer)
         {

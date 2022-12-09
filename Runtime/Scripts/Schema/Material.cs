@@ -113,7 +113,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// Emissive color of the material.
         /// </summary>
-        public Color emissive
+        public Color Emissive
         {
             get => new Color(
                 emissiveFactor[0],
@@ -187,12 +187,12 @@ namespace GLTFast.Schema
         /// <summary>
         /// True if the material requires the mesh to have normals.
         /// </summary>
-        public bool requiresNormals => extensions?.KHR_materials_unlit == null;
+        public bool RequiresNormals => extensions?.KHR_materials_unlit == null;
 
         /// <summary>
         /// True if the material requires the mesh to have tangents.
         /// </summary>
-        public bool requiresTangents => normalTexture != null && normalTexture.index >= 0;
+        public bool RequiresTangents => normalTexture != null && normalTexture.index >= 0;
 
         internal void GltfSerialize(JsonWriter writer)
         {

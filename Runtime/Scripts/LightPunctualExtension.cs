@@ -56,7 +56,7 @@ namespace GLTFast
                     throw new ArgumentOutOfRangeException();
             }
 
-            lightDestination.color = lightSource.lightColor.gamma;
+            lightDestination.color = lightSource.LightColor.gamma;
 
             LightAssignIntensity(lightDestination, lightSource, lightIntensityFactor);
 
@@ -95,7 +95,7 @@ namespace GLTFast
                     throw new ArgumentOutOfRangeException();
             }
 
-            lightDestination.lightColor = lightSource.color;
+            lightDestination.LightColor = lightSource.color;
 
             LightAssignIntensity(lightDestination, lightSource, lightIntensityFactor);
 
@@ -115,7 +115,7 @@ namespace GLTFast
         static void LightAssignIntensity(Light lightDestination, LightPunctual lightSource, float lightIntensityFactor)
         {
             var intensity = lightSource.intensity * lightIntensityFactor;
-            var renderPipeline = RenderPipelineUtils.renderPipeline;
+            var renderPipeline = RenderPipelineUtils.RenderPipeline;
             switch (renderPipeline)
             {
                 case RenderPipeline.BuiltIn:
@@ -145,7 +145,7 @@ namespace GLTFast
         static void LightAssignIntensity(LightPunctual lightDestination, Light lightSource, float lightIntensityFactor)
         {
             var intensity = lightSource.intensity / lightIntensityFactor;
-            var renderPipeline = RenderPipelineUtils.renderPipeline;
+            var renderPipeline = RenderPipelineUtils.RenderPipeline;
             switch (renderPipeline)
             {
                 case RenderPipeline.BuiltIn:

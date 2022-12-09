@@ -88,7 +88,7 @@ namespace GLTFast.Schema
         public MeshPrimitiveExtensions extensions;
 
 #if DRACO_UNITY
-        public bool isDracoCompressed => extensions!=null && extensions.KHR_draco_mesh_compression != null;
+        public bool IsDracoCompressed => extensions!=null && extensions.KHR_draco_mesh_compression != null;
 #endif
 
         /// <summary>

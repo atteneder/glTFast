@@ -120,7 +120,7 @@ namespace GLTFast.Schema
         public RootExtension extensions;
 
 #if UNITY_ANIMATION
-        public bool hasAnimation => animations != null && animations.Length > 0;
+        public bool HasAnimation => animations != null && animations.Length > 0;
 #endif // UNITY_ANIMATION
 
         /// <summary>

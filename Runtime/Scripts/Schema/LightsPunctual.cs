@@ -82,7 +82,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// Light's color in linear space
         /// </summary>
-        public Color lightColor
+        public Color LightColor
         {
             get =>
                 new Color(
@@ -161,7 +161,7 @@ namespace GLTFast.Schema
             {
                 writer.AddProperty("name", name);
             }
-            if (lightColor != Color.white)
+            if (LightColor != Color.white)
             {
                 writer.AddArrayProperty("color", color);
             }

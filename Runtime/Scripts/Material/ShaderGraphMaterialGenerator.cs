@@ -194,10 +194,10 @@ namespace GLTFast.Materials {
             if (gltfMaterial.extensions != null) {
                 PbrSpecularGlossiness specGloss = gltfMaterial.extensions.KHR_materials_pbrSpecularGlossiness;
                 if (specGloss != null) {
-                    baseColorLinear = specGloss.diffuseColor;
-                    material.SetVector( diffuseFactorPropId, specGloss.diffuseColor.gamma);
+                    baseColorLinear = specGloss.DiffuseColor;
+                    material.SetVector( diffuseFactorPropId, specGloss.DiffuseColor.gamma);
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
-                    material.SetVector(specularFactorPropId, specGloss.specularColor);
+                    material.SetVector(specularFactorPropId, specGloss.SpecularColor);
 #else
                     material.SetVector(specularFactorPropId, specGloss.specularColor);
 #endif
@@ -233,7 +233,7 @@ namespace GLTFast.Materials {
                 // (according to extension specification)
                 && gltfMaterial.extensions?.KHR_materials_pbrSpecularGlossiness == null)
             {
-                baseColorLinear = gltfMaterial.pbrMetallicRoughness.baseColor;
+                baseColorLinear = gltfMaterial.pbrMetallicRoughness.BaseColor;
 
                 if (materialType != MaterialType.SpecularGlossiness) {
                     // baseColorTexture can be used by both MetallicRoughness AND Unlit materials
@@ -363,8 +363,8 @@ namespace GLTFast.Materials {
 
             material.SetVector(k_BaseColorPropId, baseColorLinear.gamma);
 
-            if(gltfMaterial.emissive != Color.black) {
-                material.SetColor(emissiveFactorPropId, gltfMaterial.emissive);
+            if(gltfMaterial.Emissive != Color.black) {
+                material.SetColor(emissiveFactorPropId, gltfMaterial.Emissive);
                 material.EnableKeyword(k_EmissiveKeyword);
             }
 
@@ -515,7 +515,7 @@ namespace GLTFast.Materials {
                 if (gltfMaterial.extensions.KHR_materials_clearcoat != null &&
                     gltfMaterial.extensions.KHR_materials_clearcoat.clearcoatFactor > 0) feature |= MetallicShaderFeatures.ClearCoat;
                 if (gltfMaterial.extensions.KHR_materials_sheen != null &&
-                    gltfMaterial.extensions.KHR_materials_sheen.sheenColor.maxColorComponent > 0) feature |= MetallicShaderFeatures.Sheen;
+                    gltfMaterial.extensions.KHR_materials_sheen.SheenColor.maxColorComponent > 0) feature |= MetallicShaderFeatures.Sheen;
 
                 if (
                     gltfMaterial.extensions.KHR_materials_transmission != null

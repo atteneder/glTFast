@@ -65,7 +65,7 @@ namespace GLTFast
         /// <summary>
         /// Latest scene's instance.
         /// </summary>
-        public GameObjectInstantiator.SceneInstance sceneInstance { get; protected set; }
+        public GameObjectSceneInstance SceneInstance { get; protected set; }
 
         /// <summary>
         /// Final URL, considering all options (like <seealso cref="streamingAsset"/>)
@@ -117,19 +117,19 @@ namespace GLTFast
         /// <inheritdoc />
         protected override IInstantiator GetDefaultInstantiator(ICodeLogger logger)
         {
-            return new GameObjectInstantiator(importer, transform, logger, instantiationSettings);
+            return new GameObjectInstantiator(Importer, transform, logger, instantiationSettings);
         }
 
         /// <inheritdoc />
         protected override void PostInstantiation(IInstantiator instantiator, bool success)
         {
-            sceneInstance = (instantiator as GameObjectInstantiator)?.sceneInstance;
+            SceneInstance = (instantiator as GameObjectInstantiator)?.SceneInstance;
 #if UNITY_ANIMATION
-            if (sceneInstance != null) {
+            if (SceneInstance != null) {
                 if (playAutomatically) {
-                    var legacyAnimation = sceneInstance.legacyAnimation;
+                    var legacyAnimation = SceneInstance.LegacyAnimation;
                     if (legacyAnimation != null) {
-                        sceneInstance.legacyAnimation.Play();
+                        SceneInstance.LegacyAnimation.Play();
                     }
                 }
             }
@@ -144,7 +144,7 @@ namespace GLTFast
             {
                 Destroy(child.gameObject);
             }
-            sceneInstance = null;
+            SceneInstance = null;
         }
     }
 }

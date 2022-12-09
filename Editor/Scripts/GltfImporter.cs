@@ -148,7 +148,7 @@ namespace GLTFast.Editor
                 }
 
                 instantiationLogger = new CollectingLogger();
-                for (var sceneIndex = 0; sceneIndex < m_Gltf.sceneCount; sceneIndex++)
+                for (var sceneIndex = 0; sceneIndex < m_Gltf.SceneCount; sceneIndex++)
                 {
                     var scene = m_Gltf.GetSourceScene(sceneIndex);
                     var sceneName = m_Gltf.GetSceneName(sceneIndex);
@@ -189,13 +189,13 @@ namespace GLTFast.Editor
                         : go.transform;
                     var sceneGo = sceneTransform.gameObject;
                     AddObjectToAsset(ctx, $"scenes/{sceneName}", sceneGo, gltfIcon);
-                    if (sceneIndex == m_Gltf.defaultSceneIndex)
+                    if (sceneIndex == m_Gltf.DefaultSceneIndex)
                     {
                         ctx.SetMainObject(sceneGo);
                     }
                 }
 
-                for (var i = 0; i < m_Gltf.textureCount; i++)
+                for (var i = 0; i < m_Gltf.TextureCount; i++)
                 {
                     var texture = m_Gltf.GetTexture(i);
                     if (texture != null)
@@ -208,7 +208,7 @@ namespace GLTFast.Editor
                     }
                 }
 
-                for (var i = 0; i < m_Gltf.materialCount; i++)
+                for (var i = 0; i < m_Gltf.MaterialCount; i++)
                 {
                     var mat = m_Gltf.GetMaterial(i);
 

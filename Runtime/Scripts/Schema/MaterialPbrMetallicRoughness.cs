@@ -38,7 +38,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// Base color of the material in linear color space.
         /// </summary>
-        public Color baseColor
+        public Color BaseColor
         {
             get =>
                 new Color(

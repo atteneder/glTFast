@@ -249,7 +249,7 @@ namespace GLTFast.Export
 
             var lightType = uLight.type;
 
-            var renderPipeline = RenderPipelineUtils.renderPipeline;
+            var renderPipeline = RenderPipelineUtils.RenderPipeline;
 #if USING_HDRP
             HDAdditionalLightData lightHd = null;
             if (renderPipeline == RenderPipeline.HighDefinition) {
@@ -288,7 +288,7 @@ namespace GLTFast.Export
                     break;
             }
 
-            light.lightColor = uLight.color.linear;
+            light.LightColor = uLight.color.linear;
             light.range = uLight.range;
 
             switch (renderPipeline)
@@ -452,8 +452,8 @@ namespace GLTFast.Export
             // TODO: KTX encoding
 
             var image = new Image {
-                name = imageExport.fileName,
-                mimeType = imageExport.mimeType
+                name = imageExport.FileName,
+                mimeType = imageExport.MimeType
             };
 
             m_ImageExports.Add(imageExport);
@@ -1656,7 +1656,7 @@ namespace GLTFast.Export
                     for (var imageId = 0; imageId < m_ImageExports.Count; imageId++)
                     {
                         var imageExport = m_ImageExports[imageId];
-                        var fileName = Path.GetFileName(imageExport.fileName);
+                        var fileName = Path.GetFileName(imageExport.FileName);
                         if (GetUniqueFileName(ref fileName))
                         {
                             fileNameOverrides = fileNameOverrides ?? new Dictionary<int, string>();
@@ -1705,7 +1705,7 @@ namespace GLTFast.Export
                     {
                         if (!(fileNameOverrides != null && fileNameOverrides.TryGetValue(imageId, out var fileName)))
                         {
-                            fileName = imageExport.fileName;
+                            fileName = imageExport.FileName;
                         }
                         if (imageExport.Write(Path.Combine(directory, fileName), overwrite))
                         {

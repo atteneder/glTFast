@@ -31,11 +31,11 @@ namespace GLTFast.Export
         /// <inheritdoc />
         public MaskMapImageExport(
             Texture2D maskMap = null,
-            Format format = Format.Unknown)
-            : base(maskMap, format) { }
+            ImageFormat imageFormat = ImageFormat.Unknown)
+            : base(maskMap, imageFormat) { }
 
         /// <inheritdoc />
-        protected override Format format => m_Format != Format.Unknown ? m_Format : Format.Jpg;
+        protected override ImageFormat ImageFormat => m_ImageFormat != ImageFormat.Unknown ? m_ImageFormat : ImageFormat.Jpg;
 
         static Material GetMaskMapBlitMaterial()
         {
@@ -51,7 +51,7 @@ namespace GLTFast.Export
         {
             if (m_Texture != null)
             {
-                imageData = EncodeTexture(m_Texture, format, false, GetMaskMapBlitMaterial());
+                imageData = EncodeTexture(m_Texture, ImageFormat, false, GetMaskMapBlitMaterial());
                 return true;
             }
             imageData = null;

@@ -39,7 +39,7 @@ namespace GLTFast.Export
         /// <summary>
         /// Preferred image format
         /// </summary>
-        protected Format m_Format;
+        protected ImageFormat m_ImageFormat;
 
 #if UNITY_EDITOR
         /// <summary>
@@ -57,37 +57,37 @@ namespace GLTFast.Export
         /// Default constructor
         /// </summary>
         /// <param name="texture">Main source texture</param>
-        /// <param name="format">Export image format</param>
-        public ImageExport(Texture2D texture, Format format = Format.Unknown)
+        /// <param name="imageFormat">Export image format</param>
+        public ImageExport(Texture2D texture, ImageFormat imageFormat = ImageFormat.Unknown)
         {
             m_Texture = texture;
-            m_Format = format;
+            m_ImageFormat = imageFormat;
 #if UNITY_EDITOR
             m_AssetPath = AssetDatabase.GetAssetPath(texture);
 #endif
         }
 
         /// <summary>
-        /// Final export format
+        /// Final export imageFormat
         /// </summary>
-        protected virtual Format format
+        protected virtual ImageFormat ImageFormat
         {
             get
             {
-                if (m_Format != Format.Unknown) return m_Format;
-                return HasAlpha(m_Texture) ? Format.Png : Format.Jpg;
+                if (m_ImageFormat != ImageFormat.Unknown) return m_ImageFormat;
+                return HasAlpha(m_Texture) ? ImageFormat.Png : ImageFormat.Jpg;
             }
         }
 
         /// <inheritdoc />
-        public override string fileName
+        public override string FileName
         {
             get
             {
 #if UNITY_EDITOR
                 if (validAssetPath) {
                     var nameWithoutExtension = Path.GetFileNameWithoutExtension(m_AssetPath);
-                    return $"{nameWithoutExtension}.{fileExtension}";
+                    return $"{nameWithoutExtension}.{FileExtension}";
                 }
 #endif
                 var name = m_Texture.name;
@@ -95,31 +95,31 @@ namespace GLTFast.Export
                 {
                     name = "texture";
                 }
-                return $"{name}.{fileExtension}";
+                return $"{name}.{FileExtension}";
             }
         }
 
         /// <inheritdoc />
-        public override FilterMode filterMode => m_Texture != null ? m_Texture.filterMode : FilterMode.Bilinear;
+        public override FilterMode FilterMode => m_Texture != null ? m_Texture.filterMode : FilterMode.Bilinear;
 
         /// <inheritdoc />
-        public override TextureWrapMode wrapModeU => m_Texture != null ? m_Texture.wrapModeU : TextureWrapMode.Repeat;
+        public override TextureWrapMode WrapModeU => m_Texture != null ? m_Texture.wrapModeU : TextureWrapMode.Repeat;
 
         /// <inheritdoc />
-        public override TextureWrapMode wrapModeV => m_Texture != null ? m_Texture.wrapModeV : TextureWrapMode.Repeat;
+        public override TextureWrapMode WrapModeV => m_Texture != null ? m_Texture.wrapModeV : TextureWrapMode.Repeat;
 
         /// <inheritdoc />
-        public override string mimeType
+        public override string MimeType
         {
             get
             {
-                switch (format)
+                switch (ImageFormat)
                 {
-                    case Format.Jpg:
+                    case ImageFormat.Jpg:
                         return Constants.mimeTypeJPG;
-                    case Format.Png:
+                    case ImageFormat.Png:
                         return Constants.mimeTypePNG;
-                    case Format.Unknown:
+                    case ImageFormat.Unknown:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -130,17 +130,17 @@ namespace GLTFast.Export
         /// File extension according to image format
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        protected string fileExtension
+        protected string FileExtension
         {
             get
             {
-                switch (format)
+                switch (ImageFormat)
                 {
-                    case Format.Jpg:
+                    case ImageFormat.Jpg:
                         return "jpg";
-                    case Format.Png:
+                    case ImageFormat.Png:
                         return "png";
-                    case Format.Unknown:
+                    case ImageFormat.Unknown:
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -156,7 +156,7 @@ namespace GLTFast.Export
         {
             if (m_Texture != null)
             {
-                imageData = EncodeTexture(m_Texture, format, blitMaterial: GetColorBlitMaterial());
+                imageData = EncodeTexture(m_Texture, ImageFormat, blitMaterial: GetColorBlitMaterial());
                 return imageData != null;
             }
             imageData = null;
@@ -167,7 +167,7 @@ namespace GLTFast.Export
         public override bool Write(string filePath, bool overwrite)
         {
 #if UNITY_EDITOR
-            if (validAssetPath && GetFormatFromExtension(m_AssetPath)==format) {
+            if (validAssetPath && GetFormatFromExtension(m_AssetPath)==ImageFormat) {
                 File.Copy(m_AssetPath, filePath, overwrite);
                 return true;
             }
@@ -184,7 +184,7 @@ namespace GLTFast.Export
         public override byte[] GetData()
         {
 #if UNITY_EDITOR
-            if (validAssetPath && GetFormatFromExtension(m_AssetPath)==format) {
+            if (validAssetPath && GetFormatFromExtension(m_AssetPath)==ImageFormat) {
                 return File.ReadAllBytes(m_AssetPath);
             }
 #endif
@@ -249,15 +249,15 @@ namespace GLTFast.Export
         }
 
 #if UNITY_EDITOR
-        static Format GetFormatFromExtension(string assetPath) {
+        static ImageFormat GetFormatFromExtension(string assetPath) {
             if (assetPath.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) {
-                return Format.Png;
+                return ImageFormat.Png;
             }
             if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                 assetPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase)) {
-                return Format.Jpg;
+                return ImageFormat.Jpg;
             }
-            return Format.Unknown;
+            return ImageFormat.Unknown;
         }
 #endif
 

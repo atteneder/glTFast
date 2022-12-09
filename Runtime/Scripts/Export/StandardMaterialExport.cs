@@ -92,7 +92,7 @@ namespace GLTFast.Export
                         // TODO: use maxFactor as emissiveStrength (KHR_materials_emissive_strength)
                     }
 
-                    material.emissive = emissionColor;
+                    material.Emissive = emissionColor;
                 }
 
                 if (uMaterial.HasProperty(k_EmissionMap))
@@ -189,7 +189,7 @@ namespace GLTFast.Export
                 {
                     metallicFactor = 0,
                     roughnessFactor = 1.0f,
-                    baseColor = uMaterial.HasProperty(k_BaseColor)
+                    BaseColor = uMaterial.HasProperty(k_BaseColor)
                         ? uMaterial.GetColor(k_BaseColor)
                         : Color.white
                 };
@@ -204,7 +204,7 @@ namespace GLTFast.Export
                 if (uMaterial.HasProperty(k_TintColor))
                 {
                     //particles use _TintColor instead of _Color
-                    material.pbrMetallicRoughness.baseColor = uMaterial.GetColor(k_TintColor);
+                    material.pbrMetallicRoughness.BaseColor = uMaterial.GetColor(k_TintColor);
                 }
             }
 
@@ -252,7 +252,7 @@ namespace GLTFast.Export
                         ExportTextureTransform(material.pbrMetallicRoughness.metallicRoughnessTexture, uMaterial, k_MetallicGlossMap, gltf);
                     }
 
-                    if (ormImageExport.hasOcclusion)
+                    if (ormImageExport.HasOcclusion)
                     {
                         material.occlusionTexture.index = ormTextureId;
                     }
@@ -301,12 +301,12 @@ namespace GLTFast.Export
 
             if (uMaterial.HasProperty(k_BaseColor))
             {
-                pbr.baseColor = uMaterial.GetColor(k_BaseColor);
+                pbr.BaseColor = uMaterial.GetColor(k_BaseColor);
             }
             else
             if (uMaterial.HasProperty(k_Color))
             {
-                pbr.baseColor = uMaterial.GetColor(k_Color);
+                pbr.BaseColor = uMaterial.GetColor(k_Color);
             }
 
             if (uMaterial.HasProperty(k_TintColor))
@@ -319,7 +319,7 @@ namespace GLTFast.Export
                     white = (c.r + c.g + c.b) / 3.0f; //multiply alpha by overall whiteness of TintColor
                 }
 
-                pbr.baseColor = uMaterial.GetColor(k_TintColor) * white;
+                pbr.BaseColor = uMaterial.GetColor(k_TintColor) * white;
             }
 
             if (uMaterial.HasProperty(mainTexProperty))
@@ -338,8 +338,8 @@ namespace GLTFast.Export
                             // Force RGB for the baseColor, so that the alpha (which is smoothness)
                             // is not used for alpha-opacity
                             hasAlphaSmoothness
-                                ? ImageExportBase.Format.Jpg
-                                : ImageExportBase.Format.Unknown
+                                ? ImageFormat.Jpg
+                                : ImageFormat.Unknown
                         );
                         if (pbr.baseColorTexture != null)
                         {

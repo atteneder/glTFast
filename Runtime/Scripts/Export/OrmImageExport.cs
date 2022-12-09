@@ -46,41 +46,41 @@ namespace GLTFast.Export
         /// <param name="metalGlossTexture">Metal/Gloss texture, as used by Unity Lit/Standard materials</param>
         /// <param name="occlusionTexture">Occlusion texture, as used by Unity Lit/Standard materials</param>
         /// <param name="smoothnessTexture">Smoothness texture, as used by Unity Lit/Standard materials</param>
-        /// <param name="format">Export image format</param>
+        /// <param name="imageFormat">Export image format</param>
         public OrmImageExport(
             Texture2D metalGlossTexture = null,
             Texture2D occlusionTexture = null,
             Texture2D smoothnessTexture = null,
-            Format format = Format.Unknown)
-            : base(metalGlossTexture, format)
+            ImageFormat imageFormat = ImageFormat.Unknown)
+            : base(metalGlossTexture, imageFormat)
         {
             m_OccTexture = occlusionTexture;
             m_SmoothnessTexture = smoothnessTexture;
         }
 
         /// <inheritdoc />
-        public override string fileName
+        public override string FileName
         {
             get
             {
-                if (m_Texture != null) return base.fileName;
+                if (m_Texture != null) return base.FileName;
                 if (m_OccTexture != null && !string.IsNullOrEmpty(m_OccTexture.name))
                 {
-                    return $"{m_OccTexture.name}.{fileExtension}";
+                    return $"{m_OccTexture.name}.{FileExtension}";
                 }
                 if (m_SmoothnessTexture != null && !string.IsNullOrEmpty(m_SmoothnessTexture.name))
                 {
-                    return $"{m_SmoothnessTexture.name}ORM.{fileExtension}";
+                    return $"{m_SmoothnessTexture.name}ORM.{FileExtension}";
                 }
-                return $"ORM.{fileExtension}";
+                return $"ORM.{FileExtension}";
             }
         }
 
         /// <inheritdoc />
-        protected override Format format => m_Format != Format.Unknown ? m_Format : Format.Jpg;
+        protected override ImageFormat ImageFormat => m_ImageFormat != ImageFormat.Unknown ? m_ImageFormat : ImageFormat.Jpg;
 
         /// <inheritdoc />
-        public override FilterMode filterMode
+        public override FilterMode FilterMode
         {
             get
             {
@@ -101,7 +101,7 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
-        public override TextureWrapMode wrapModeU
+        public override TextureWrapMode WrapModeU
         {
             get
             {
@@ -122,7 +122,7 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
-        public override TextureWrapMode wrapModeV
+        public override TextureWrapMode WrapModeV
         {
             get
             {
@@ -145,7 +145,7 @@ namespace GLTFast.Export
         /// <summary>
         /// True if occlusion texture was set
         /// </summary>
-        public bool hasOcclusion => m_OccTexture != null;
+        public bool HasOcclusion => m_OccTexture != null;
 
         /// <summary>
         /// Assigns a Metal/Gloss source texture
@@ -218,7 +218,7 @@ namespace GLTFast.Export
         {
             if (m_Texture != null || m_OccTexture != null || m_SmoothnessTexture != null)
             {
-                imageData = EncodeOrmTexture(m_Texture, m_OccTexture, m_SmoothnessTexture, format);
+                imageData = EncodeOrmTexture(m_Texture, m_OccTexture, m_SmoothnessTexture, ImageFormat);
                 return true;
             }
             imageData = null;
@@ -237,7 +237,7 @@ namespace GLTFast.Export
             Texture2D metalGlossTexture,
             Texture2D occlusionTexture,
             Texture2D smoothnessTexture,
-            Format format
+            ImageFormat format
         )
         {
 #if UNITY_IMAGECONVERSION
@@ -309,7 +309,7 @@ namespace GLTFast.Export
             RenderTexture.ReleaseTemporary(destRenderTexture);
             exportTexture.Apply();
 
-            var imageData = format == Format.Png
+            var imageData = format == ImageFormat.Png
                 ? exportTexture.EncodeToPNG()
                 : exportTexture.EncodeToJPG(60);
 

@@ -78,7 +78,7 @@ namespace GLTFast.Export {
                     // TODO: use maxFactor as emissiveStrength (KHR_materials_emissive_strength)
                 }
 
-                material.emissive = emissionColor;
+                material.Emissive = emissionColor;
             }
 
             if (uMaterial.HasProperty(k_EmissionColorMap)) {
@@ -159,8 +159,8 @@ namespace GLTFast.Export {
                     if(mainTex is Texture2D) {
                         pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf,
                             material.GetAlphaMode() == Material.AlphaMode.OPAQUE
-                                ? ImageExportBase.Format.Jpg
-                                : ImageExportBase.Format.Unknown
+                                ? ImageFormat.Jpg
+                                : ImageFormat.Unknown
                             );
                         ExportTextureTransform(pbr.baseColorTexture, uMaterial, k_BaseColorMap, gltf);
                     } else {
@@ -240,10 +240,10 @@ namespace GLTFast.Export {
 
             if (uMaterial.HasProperty(k_BaseColor))
             {
-                pbr.baseColor = uMaterial.GetColor(k_BaseColor);
+                pbr.BaseColor = uMaterial.GetColor(k_BaseColor);
             } else
             if (uMaterial.HasProperty(k_Color)) {
-                pbr.baseColor = uMaterial.GetColor(k_Color);
+                pbr.BaseColor = uMaterial.GetColor(k_Color);
             }
 
             if(ormImageExport == null && uMaterial.HasProperty(k_Smoothness)) {

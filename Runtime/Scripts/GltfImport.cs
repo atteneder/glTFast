@@ -516,7 +516,7 @@ namespace GLTFast
         }
 
         /// <summary>
-        /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="defaultSceneIndex"/>)
+        /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="DefaultSceneIndex"/>)
         /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
         /// </summary>
         /// <param name="parent">Transform that the scene will get parented to</param>
@@ -533,7 +533,7 @@ namespace GLTFast
         }
 
         /// <summary>
-        /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="defaultSceneIndex"/>)
+        /// Creates an instance of the main scene of the glTF ( "scene" property in the JSON at root level; <seealso cref="DefaultSceneIndex"/>)
         /// If the main scene index is not set, it instantiates nothing (as defined in the glTF 2.0 specification)
         /// </summary>
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
@@ -559,7 +559,7 @@ namespace GLTFast
 
         /// <summary>
         /// Creates an instance of the scene specified by the scene index.
-        /// <seealso cref="sceneCount"/>
+        /// <seealso cref="SceneCount"/>
         /// <seealso cref="GetSceneName"/>
         /// </summary>
         /// <param name="parent">Transform that the scene will get parented to</param>
@@ -581,7 +581,7 @@ namespace GLTFast
 
         /// <summary>
         /// Creates an instance of the scene specified by the scene index.
-        /// <seealso cref="sceneCount"/>
+        /// <seealso cref="SceneCount"/>
         /// <seealso cref="GetSceneName"/>
         /// </summary>
         /// <param name="instantiator">Instantiator implementation; Receives and processes the scene data</param>
@@ -647,27 +647,27 @@ namespace GLTFast
         /// <summary>
         /// Number of materials
         /// </summary>
-        public int materialCount => m_Materials?.Length ?? 0;
+        public int MaterialCount => m_Materials?.Length ?? 0;
 
         /// <summary>
         /// Number of images
         /// </summary>
-        public int imageCount => m_Images?.Length ?? 0;
+        public int ImageCount => m_Images?.Length ?? 0;
 
         /// <summary>
         /// Number of textures
         /// </summary>
-        public int textureCount => m_Textures?.Length ?? 0;
+        public int TextureCount => m_Textures?.Length ?? 0;
 
         /// <summary>
         /// Default scene index
         /// </summary>
-        public int? defaultSceneIndex => m_GltfRoot != null && m_GltfRoot.scene >= 0 ? m_GltfRoot.scene : (int?)null;
+        public int? DefaultSceneIndex => m_GltfRoot != null && m_GltfRoot.scene >= 0 ? m_GltfRoot.scene : (int?)null;
 
         /// <summary>
         /// Number of scenes
         /// </summary>
-        public int sceneCount => m_GltfRoot?.scenes?.Length ?? 0;
+        public int SceneCount => m_GltfRoot?.scenes?.Length ?? 0;
 
         /// <summary>
         /// Get a glTF's scene's name by its index
@@ -859,7 +859,7 @@ namespace GLTFast
         {
 
             var download = await m_DownloadProvider.Request(url);
-            var success = download.success;
+            var success = download.Success;
 
             if (cancellationToken.IsCancellationRequested)
             {
@@ -869,17 +869,17 @@ namespace GLTFast
             if (success)
             {
 
-                var gltfBinary = download.isBinary ?? UriHelper.IsGltfBinary(url);
+                var gltfBinary = download.IsBinary ?? UriHelper.IsGltfBinary(url);
 
                 if (gltfBinary ?? false)
                 {
-                    var data = download.data;
+                    var data = download.Data;
                     download.Dispose();
                     success = await LoadGltfBinaryBuffer(data, url);
                 }
                 else
                 {
-                    var text = download.text;
+                    var text = download.Text;
                     download.Dispose();
                     success = await LoadGltf(text, url);
                 }
@@ -891,7 +891,7 @@ namespace GLTFast
             }
             else
             {
-                m_Logger?.Error(LogCode.Download, download.error, url.ToString());
+                m_Logger?.Error(LogCode.Download, download.Error, url.ToString());
             }
 
             DisposeVolatileData();
@@ -1125,7 +1125,7 @@ namespace GLTFast
                 // Derive image type from texture extension
                 for (int i = 0; i < m_GltfRoot.textures.Length; i++) {
                     var texture = m_GltfRoot.textures[i];
-                    if(texture.isKtx) {
+                    if(texture.IsKtx) {
                         var imgIndex = texture.GetImageIndex();
                         m_ImageFormats[imgIndex] = ImageFormat.Ktx;
                     }
@@ -1254,16 +1254,16 @@ namespace GLTFast
                 foreach (var downloadPair in m_DownloadTasks)
                 {
                     var download = await downloadPair.Value;
-                    if (download.success)
+                    if (download.Success)
                     {
                         Profiler.BeginSample("GetData");
-                        m_Buffers[downloadPair.Key] = download.data;
+                        m_Buffers[downloadPair.Key] = download.Data;
                         download.Dispose();
                         Profiler.EndSample();
                     }
                     else
                     {
-                        m_Logger?.Error(LogCode.BufferLoadFailed, download.error, downloadPair.Key.ToString());
+                        m_Logger?.Error(LogCode.BufferLoadFailed, download.Error, downloadPair.Key.ToString());
                         return false;
                     }
                 }
@@ -1295,7 +1295,7 @@ namespace GLTFast
             foreach (var dl in m_TextureDownloadTasks)
             {
                 await dl.Value.Load();
-                var www = dl.Value.download;
+                var www = dl.Value.Download;
 
                 if (www == null)
                 {
@@ -1303,7 +1303,7 @@ namespace GLTFast
                     return false;
                 }
 
-                if (www.success)
+                if (www.Success)
                 {
                     var imageIndex = dl.Key;
                     Texture2D txt;
@@ -1315,7 +1315,7 @@ namespace GLTFast
                         var forceSampleLinear = m_ImageGamma!=null && !m_ImageGamma[imageIndex];
                         txt = CreateEmptyTexture(m_GltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
-                        txt.LoadImage(www.data,!m_ImageReadable[imageIndex]);
+                        txt.LoadImage(www.Data,!m_ImageReadable[imageIndex]);
 #else
                         m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
                         txt = null;
@@ -1324,7 +1324,7 @@ namespace GLTFast
                     else
                     {
                         Assert.IsTrue(www is ITextureDownload);
-                        txt = ((ITextureDownload)www).texture;
+                        txt = ((ITextureDownload)www).Texture;
                         txt.name = GetImageName(m_GltfRoot.images[imageIndex], imageIndex);
                     }
                     www.Dispose();
@@ -1333,7 +1333,7 @@ namespace GLTFast
                 }
                 else
                 {
-                    m_Logger?.Error(LogCode.TextureDownloadFailed, www.error, dl.Key.ToString());
+                    m_Logger?.Error(LogCode.TextureDownloadFailed, www.Error, dl.Key.ToString());
                     www.Dispose();
                     return false;
                 }
@@ -1359,8 +1359,8 @@ namespace GLTFast
 
         async Task<bool> ProcessKtxDownload(int imageIndex, Task<IDownload> downloadTask) {
             var www = await downloadTask;
-            if(www.success) {
-                var ktxContext = new KtxLoadContext(imageIndex,www.data);
+            if(www.Success) {
+                var ktxContext = new KtxLoadContext(imageIndex,www.Data);
                 www.Dispose();
                 var forceSampleLinear = m_ImageGamma!=null && !m_ImageGamma[imageIndex];
                 var result = await ktxContext.LoadTexture2D(forceSampleLinear);
@@ -1369,7 +1369,7 @@ namespace GLTFast
                     return true;
                 }
             } else {
-                m_Logger?.Error(LogCode.TextureDownloadFailed,www.error,imageIndex.ToString());
+                m_Logger?.Error(LogCode.TextureDownloadFailed,www.Error,imageIndex.ToString());
                 www.Dispose();
             }
             return false;
@@ -1484,7 +1484,7 @@ namespace GLTFast
         {
 
 #if UNITY_EDITOR
-            if (isEditorImport) {
+            if (IsEditorImport) {
                 // Use the original texture at Editor (asset database) import
                 return false;
             }
@@ -1645,8 +1645,8 @@ namespace GLTFast
             }
             var chunk = m_BinChunks[bufferIndex];
             var nativeBuffer = m_NativeBuffers[bufferIndex];
-            var totalOffset = chunk.start + bufferView.byteOffset + offset;
-            Assert.IsTrue(bufferView.byteOffset + offset <= chunk.length);
+            var totalOffset = chunk.Start + bufferView.byteOffset + offset;
+            Assert.IsTrue(bufferView.byteOffset + offset <= chunk.Length);
             Assert.IsTrue(totalOffset + length <= nativeBuffer.Length);
             return new NativeSlice<byte>(
                 m_NativeBuffers[bufferIndex],
@@ -1910,7 +1910,7 @@ namespace GLTFast
 
                     if (primitive.HasValue)
                     {
-                        m_Primitives[primitiveContext.primitiveIndex] = primitive.Value;
+                        m_Primitives[primitiveContext.PrimitiveIndex] = primitive.Value;
                         m_Resources.Add(primitive.Value.mesh);
                     }
                     else
@@ -1924,7 +1924,7 @@ namespace GLTFast
             }
 
 #if UNITY_ANIMATION
-            if (m_GltfRoot.hasAnimation) {
+            if (m_GltfRoot.HasAnimation) {
                 if (m_Settings.nodeNameMethod != ImportSettings.NameImportMethod.OriginalUnique) {
                     m_Logger?.Info(LogCode.NamingOverride);
                     m_Settings.nodeNameMethod = ImportSettings.NameImportMethod.OriginalUnique;
@@ -1960,7 +1960,7 @@ namespace GLTFast
             }
 
 #if UNITY_ANIMATION
-            if (m_GltfRoot.hasAnimation && m_Settings.animationMethod != ImportSettings.AnimationMethod.None) {
+            if (m_GltfRoot.HasAnimation && m_Settings.animationMethod != ImportSettings.AnimationMethod.None) {
 
                 m_AnimationClips = new AnimationClip[m_GltfRoot.animations.Length];
                 for (var i = 0; i < m_GltfRoot.animations.Length; i++) {
@@ -2632,7 +2632,7 @@ namespace GLTFast
         {
             var job = new MemCopyJob();
             job.bufferSize = bufferView.byteLength;
-            fixed (void* src = &(buffer[bufferView.byteOffset + chunk.start]), dst = &(icc.buffer[0]))
+            fixed (void* src = &(buffer[bufferView.byteOffset + chunk.Start]), dst = &(icc.buffer[0]))
             {
                 job.input = src;
                 job.result = dst;
@@ -2730,7 +2730,7 @@ namespace GLTFast
                         morphTargetsContexts[primitive] = morphTargetsContext;
                     }
 #if DRACO_UNITY
-                    var isDraco = primitive.isDracoCompressed;
+                    var isDraco = primitive.IsDracoCompressed;
                     if (isDraco) {
                         continue;
                     }
@@ -2769,11 +2769,11 @@ namespace GLTFast
                     if (primitive.mode == DrawMode.Triangles || primitive.mode == DrawMode.TriangleFan ||
                         primitive.mode == DrawMode.TriangleStrip)
                     {
-                        if (primitive.material < 0 || gltf.materials[primitive.material].requiresNormals)
+                        if (primitive.material < 0 || gltf.materials[primitive.material].RequiresNormals)
                         {
                             mainBufferType |= MainBufferType.Normal;
                         }
-                        if (primitive.material >= 0 && gltf.materials[primitive.material].requiresTangents)
+                        if (primitive.material >= 0 && gltf.materials[primitive.material].RequiresTangents)
                         {
                             mainBufferType |= MainBufferType.Tangent;
                         }
@@ -2978,7 +2978,7 @@ namespace GLTFast
             }
 
 #if UNITY_ANIMATION
-            if (gltf.hasAnimation) {
+            if (gltf.HasAnimation) {
                 for (int i = 0; i < gltf.animations.Length; i++) {
                     var animation = gltf.animations[i];
                     foreach (var sampler in animation.samplers) {
@@ -3099,7 +3099,7 @@ namespace GLTFast
                     {
                         var primitive = cluster[primIndex];
 #if DRACO_UNITY
-                        if (primitive.isDracoCompressed) {
+                        if (primitive.IsDracoCompressed) {
                             Bounds? bounds = null;
                             var posAccessorIndex = primitive?.attributes.POSITION ?? -1;
                             if (posAccessorIndex >= 0 && posAccessorIndex < gltf.accessors.Length) {
@@ -3113,8 +3113,8 @@ namespace GLTFast
                             var dracoContext = new PrimitiveDracoCreateContext(
                                 primitiveIndex,
                                 1,
-                                primitive.material<0 || gltf.materials[primitive.material].requiresNormals,
-                                primitive.material>=0 && gltf.materials[primitive.material].requiresTangents,
+                                primitive.material<0 || gltf.materials[primitive.material].RequiresNormals,
+                                primitive.material>=0 && gltf.materials[primitive.material].RequiresTangents,
                                 mesh.name,
                                 bounds
                                 );
@@ -3208,7 +3208,7 @@ namespace GLTFast
                     {
                         var primitive = cluster[primIndex];
 #if DRACO_UNITY
-                        if( primitive.isDracoCompressed ) {
+                        if( primitive.IsDracoCompressed ) {
                             var c = (PrimitiveDracoCreateContext) context;
                             await m_DeferAgent.BreakPoint();
                             Profiler.BeginSample( "CreatePrimitiveContext");
@@ -3365,7 +3365,7 @@ namespace GLTFast
 
             Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.SCALAR);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
-            if (accessor.isSparse)
+            if (accessor.IsSparse)
             {
                 m_Logger.Error(LogCode.SparseAccessor, "indices");
             }
@@ -3461,7 +3461,7 @@ namespace GLTFast
 
             Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.MAT4);
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
-            if (accessor.isSparse)
+            if (accessor.IsSparse)
             {
                 m_Logger.Error(LogCode.SparseAccessor, "Matrix");
             }
@@ -3497,7 +3497,7 @@ namespace GLTFast
             Profiler.EndSample();
 
             Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.VEC3);
-            if (accessor.isSparse)
+            if (accessor.IsSparse)
             {
                 m_Logger.Error(LogCode.SparseAccessor, "Vector3");
             }
@@ -3549,7 +3549,7 @@ namespace GLTFast
             Profiler.EndSample();
 
             Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.VEC4);
-            if (accessor.isSparse)
+            if (accessor.IsSparse)
             {
                 m_Logger.Error(LogCode.SparseAccessor, "Vector4");
             }
@@ -3605,7 +3605,7 @@ namespace GLTFast
             var buffer = GetBufferView(accessor.bufferView,accessor.byteOffset);
 
             Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.SCALAR);
-            if (accessor.isSparse) {
+            if (accessor.IsSparse) {
                 m_Logger.Error(LogCode.SparseAccessor,"scalars");
             }
 
@@ -3697,7 +3697,7 @@ namespace GLTFast
                 byteStride = bufferView.byteStride;
                 var bufferIndex = bufferView.buffer;
                 var buffer = GetBuffer(bufferIndex);
-                fixed (void* src = &(buffer[accessor.byteOffset + bufferView.byteOffset + m_BinChunks[bufferIndex].start]))
+                fixed (void* src = &(buffer[accessor.byteOffset + bufferView.byteOffset + m_BinChunks[bufferIndex].Start]))
                 {
                     data = src;
                 }
@@ -3726,7 +3726,7 @@ namespace GLTFast
             {
                 var bufferIndex = bufferView.buffer;
                 var buffer = GetBuffer(bufferIndex);
-                fixed (void* src = &(buffer[sparseIndices.byteOffset + bufferView.byteOffset + m_BinChunks[bufferIndex].start]))
+                fixed (void* src = &(buffer[sparseIndices.byteOffset + bufferView.byteOffset + m_BinChunks[bufferIndex].Start]))
                 {
                     data = src;
                 }
@@ -3751,7 +3751,7 @@ namespace GLTFast
             {
                 var bufferIndex = bufferView.buffer;
                 var buffer = GetBuffer(bufferIndex);
-                fixed (void* src = &(buffer[sparseValues.byteOffset + bufferView.byteOffset + m_BinChunks[bufferIndex].start]))
+                fixed (void* src = &(buffer[sparseValues.byteOffset + bufferView.byteOffset + m_BinChunks[bufferIndex].Start]))
                 {
                     data = src;
                 }
@@ -3824,7 +3824,7 @@ namespace GLTFast
         /// Returns true if this import is for an asset, in contrast to
         /// runtime loading.
         /// </summary>
-        static bool isEditorImport => !EditorApplication.isPlaying;
+        static bool IsEditorImport => !EditorApplication.isPlaying;
 #endif // UNITY_EDITOR
     }
 }

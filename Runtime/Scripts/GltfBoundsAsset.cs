@@ -54,24 +54,24 @@ namespace GLTFast
             ICodeLogger logger = null
             )
         {
-            importer = new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
-            var success = await importer.Load(gltfUrl);
+            Importer = new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
+            var success = await Importer.Load(gltfUrl);
             if (success)
             {
                 var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
                 // Auto-Instantiate
                 if (sceneId >= 0)
                 {
-                    success = await importer.InstantiateSceneAsync(instantiator, sceneId);
-                    currentSceneId = success ? sceneId : (int?)null;
+                    success = await Importer.InstantiateSceneAsync(instantiator, sceneId);
+                    CurrentSceneId = success ? sceneId : (int?)null;
                 }
                 else
                 {
-                    success = await importer.InstantiateMainSceneAsync(instantiator);
-                    currentSceneId = importer.defaultSceneIndex;
+                    success = await Importer.InstantiateMainSceneAsync(instantiator);
+                    CurrentSceneId = Importer.DefaultSceneIndex;
                 }
 
-                sceneInstance = instantiator.sceneInstance;
+                SceneInstance = instantiator.SceneInstance;
 
                 if (success)
                 {
@@ -86,8 +86,8 @@ namespace GLTFast
         {
             var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
             var success = await base.InstantiateScene(sceneIndex, instantiator);
-            currentSceneId = success ? sceneIndex : (int?)null;
-            sceneInstance = instantiator.sceneInstance;
+            CurrentSceneId = success ? sceneIndex : (int?)null;
+            SceneInstance = instantiator.SceneInstance;
             if (success)
             {
                 SetBounds(instantiator);
@@ -98,12 +98,12 @@ namespace GLTFast
         /// <inheritdoc />
         protected override IInstantiator GetDefaultInstantiator(ICodeLogger logger)
         {
-            return new GameObjectBoundsInstantiator(importer, transform, logger);
+            return new GameObjectBoundsInstantiator(Importer, transform, logger);
         }
 
         void SetBounds(GameObjectBoundsInstantiator instantiator)
         {
-            var sceneBounds = instantiator.sceneInstance != null ? instantiator.CalculateBounds() : null;
+            var sceneBounds = instantiator.SceneInstance != null ? instantiator.CalculateBounds() : null;
             if (sceneBounds.HasValue)
             {
                 bounds = sceneBounds.Value;

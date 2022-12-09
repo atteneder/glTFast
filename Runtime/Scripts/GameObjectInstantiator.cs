@@ -37,63 +37,6 @@ namespace GLTFast
     /// </summary>
     public class GameObjectInstantiator : IInstantiator
     {
-
-        /// <summary>
-        /// Descriptor of a glTF scene instance
-        /// </summary>
-        public class SceneInstance
-        {
-
-            /// <summary>
-            /// List of instantiated cameras
-            /// </summary>
-            public IReadOnlyList<Camera> cameras => m_Cameras;
-            /// <summary>
-            /// List of instantiated lights
-            /// </summary>
-            public IReadOnlyList<Light> lights => m_Lights;
-
-#if UNITY_ANIMATION
-            /// <summary>
-            /// <see cref="Animation" /> component. Is null if scene has no
-            /// animation clips.
-            /// Only available if the built-in Animation module is enabled.
-            /// </summary>
-            public Animation legacyAnimation { get; private set; }
-#endif
-
-            List<Camera> m_Cameras;
-            List<Light> m_Lights;
-
-            /// <summary>
-            /// Adds a camera
-            /// </summary>
-            /// <param name="camera">Camera to be added</param>
-            internal void AddCamera(Camera camera)
-            {
-                if (m_Cameras == null)
-                {
-                    m_Cameras = new List<Camera>();
-                }
-                m_Cameras.Add(camera);
-            }
-
-            internal void AddLight(Light light)
-            {
-                if (m_Lights == null)
-                {
-                    m_Lights = new List<Light>();
-                }
-                m_Lights.Add(light);
-            }
-
-#if UNITY_ANIMATION
-            internal void SetLegacyAnimation(Animation animation) {
-                legacyAnimation = animation;
-            }
-#endif
-        }
-
         // Developers might want to customize this class by deriving from it.
         // Hence some members need to stay protected (not private)
         // ReSharper disable MemberCanBePrivate.Global
@@ -127,12 +70,12 @@ namespace GLTFast
         /// Transform representing the scene.
         /// Root nodes will get parented to it.
         /// </summary>
-        public Transform sceneTransform { get; protected set; }
+        public Transform SceneTransform { get; protected set; }
 
         /// <summary>
         /// Contains information about the latest instance of a glTF scene
         /// </summary>
-        public SceneInstance sceneInstance { get; protected set; }
+        public GameObjectSceneInstance SceneInstance { get; protected set; }
 
         // ReSharper restore MemberCanBePrivate.Global
 
@@ -165,7 +108,7 @@ namespace GLTFast
             Profiler.BeginSample("BeginScene");
 
             m_Nodes = new Dictionary<uint, GameObject>();
-            sceneInstance = new SceneInstance();
+            SceneInstance = new GameObjectSceneInstance();
 
             GameObject sceneGameObject;
             if (m_Settings.sceneObjectCreation == InstantiationSettings.SceneObjectCreation.Never
@@ -179,7 +122,7 @@ namespace GLTFast
                 sceneGameObject.transform.SetParent(m_Parent, false);
                 sceneGameObject.layer = m_Settings.layer;
             }
-            sceneTransform = sceneGameObject.transform;
+            SceneTransform = sceneGameObject.transform;
             Profiler.EndSample();
         }
 
@@ -227,7 +170,7 @@ namespace GLTFast
 // #endif // UNITY_EDITOR
 
                 if(isLegacyAnimation) {
-                    var animation = sceneTransform.gameObject.AddComponent<Animation>();
+                    var animation = SceneTransform.gameObject.AddComponent<Animation>();
 
                     for (var index = 0; index < animationClips.Length; index++) {
                         var clip = animationClips[index];
@@ -237,10 +180,10 @@ namespace GLTFast
                         }
                     }
 
-                    sceneInstance.SetLegacyAnimation(animation);
+                    SceneInstance.SetLegacyAnimation(animation);
                 }
                 else {
-                    sceneTransform.gameObject.AddComponent<Animator>();
+                    SceneTransform.gameObject.AddComponent<Animator>();
                 }
             }
         }
@@ -265,7 +208,7 @@ namespace GLTFast
             m_Nodes[nodeIndex] = go;
 
             go.transform.SetParent(
-                parentIndex.HasValue ? m_Nodes[parentIndex.Value].transform : sceneTransform,
+                parentIndex.HasValue ? m_Nodes[parentIndex.Value].transform : SceneTransform,
                 false);
         }
 
@@ -523,7 +466,7 @@ namespace GLTFast
             // By default, imported cameras are not enabled by default
             cam.enabled = false;
 
-            sceneInstance.AddCamera(cam);
+            SceneInstance.AddCamera(cam);
 
             var parentScale = parentTransform.localToWorldMatrix.lossyScale;
             localScale = (parentScale.x + parentScale.y + parentScale.y) / 3;
@@ -570,7 +513,7 @@ namespace GLTFast
             }
             var light = lightGameObject.AddComponent<Light>();
             lightSource.ToUnityLight(light, m_Settings.lightIntensityFactor);
-            sceneInstance.AddLight(light);
+            SceneInstance.AddLight(light);
         }
 
         /// <inheritdoc />

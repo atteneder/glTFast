@@ -137,7 +137,7 @@ namespace GLTFast.Export
 
             if (GetUnlitColor(uMaterial, out var baseColor))
             {
-                pbr.baseColor = baseColor;
+                pbr.BaseColor = baseColor;
             }
 
             if (uMaterial.HasProperty(mainTexProperty))
@@ -195,7 +195,7 @@ namespace GLTFast.Export
         protected static TextureInfo ExportTextureInfo(
             UnityEngine.Texture texture,
             IGltfWritable gltf,
-            ImageExportBase.Format format = ImageExportBase.Format.Unknown
+            ImageFormat format = ImageFormat.Unknown
             )
         {
             var texture2d = texture as Texture2D;
@@ -270,7 +270,7 @@ namespace GLTFast.Export
                 return false;
             }
 
-            var samplerId = gltf.AddSampler(imageExport.filterMode, imageExport.wrapModeU, imageExport.wrapModeV);
+            var samplerId = gltf.AddSampler(imageExport.FilterMode, imageExport.WrapModeU, imageExport.WrapModeV);
             textureId = gltf.AddTexture(imageId, samplerId);
             return true;
         }

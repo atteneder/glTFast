@@ -120,7 +120,7 @@ namespace GLTFast
             m_PositionsHandle = GCHandle.Alloc(m_Positions, GCHandleType.Pinned);
 
             var jobCount = 1;
-            if (posAcc.isSparse && posAcc.bufferView >= 0)
+            if (posAcc.IsSparse && posAcc.bufferView >= 0)
             {
                 jobCount++;
             }
@@ -134,7 +134,7 @@ namespace GLTFast
                 m_Normals = new Vector3[posAcc.count];
                 m_NormalsHandle = GCHandle.Alloc(m_Normals, GCHandleType.Pinned);
                 buffers.GetAccessor(normalAccessorIndex, out nrmAcc, out nrmInput, out nrmInputByteStride);
-                if (nrmAcc.isSparse && nrmAcc.bufferView >= 0)
+                if (nrmAcc.IsSparse && nrmAcc.bufferView >= 0)
                 {
                     jobCount += 2;
                 }
@@ -153,7 +153,7 @@ namespace GLTFast
                 m_Tangents = new Vector3[posAcc.count];
                 m_TangentsHandle = GCHandle.Alloc(m_Tangents, GCHandleType.Pinned);
                 buffers.GetAccessor(normalAccessorIndex, out tanAcc, out tanInput, out tanInputByteStride);
-                if (tanAcc.isSparse && tanAcc.bufferView >= 0)
+                if (tanAcc.IsSparse && tanAcc.bufferView >= 0)
                 {
                     jobCount += 2;
                 }
@@ -192,7 +192,7 @@ namespace GLTFast
                         return null;
                     }
                 }
-                if (posAcc.isSparse)
+                if (posAcc.IsSparse)
                 {
                     buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
                     buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
@@ -248,7 +248,7 @@ namespace GLTFast
                             return null;
                         }
                     }
-                    if (nrmAcc.isSparse)
+                    if (nrmAcc.IsSparse)
                     {
                         buffers.GetAccessorSparseIndices(nrmAcc.sparse.indices, out var indexData);
                         buffers.GetAccessorSparseValues(nrmAcc.sparse.values, out var valueData);
@@ -305,7 +305,7 @@ namespace GLTFast
                             return null;
                         }
                     }
-                    if (tanAcc.isSparse)
+                    if (tanAcc.IsSparse)
                     {
                         buffers.GetAccessorSparseIndices(tanAcc.sparse.indices, out var indexData);
                         buffers.GetAccessorSparseValues(tanAcc.sparse.values, out var valueData);

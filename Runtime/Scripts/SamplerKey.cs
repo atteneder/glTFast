@@ -28,9 +28,9 @@ namespace GLTFast
 
         public SamplerKey(Sampler sampler)
         {
-            m_FilterMode = sampler.filterMode;
-            m_WrapModeU = sampler.wrapU;
-            m_WrapModeV = sampler.wrapV;
+            m_FilterMode = sampler.FilterMode;
+            m_WrapModeU = sampler.WrapU;
+            m_WrapModeV = sampler.WrapV;
         }
 
         public SamplerKey(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV)

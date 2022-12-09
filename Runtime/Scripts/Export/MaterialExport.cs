@@ -37,7 +37,7 @@ namespace GLTFast.Export
             if (s_MaterialExport == null)
             {
 
-                var renderPipeline = RenderPipelineUtils.renderPipeline;
+                var renderPipeline = RenderPipelineUtils.RenderPipeline;
 
                 switch (renderPipeline)
                 {

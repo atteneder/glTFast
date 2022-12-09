@@ -186,7 +186,7 @@ namespace GLTFast.Materials
 
             if (s_DefaultMaterialGenerator != null) return s_DefaultMaterialGenerator;
 
-            var renderPipeline = RenderPipelineUtils.renderPipeline;
+            var renderPipeline = RenderPipelineUtils.RenderPipeline;
 
             switch (renderPipeline)
             {
@@ -306,7 +306,7 @@ namespace GLTFast.Materials
                         // this condition
                         if (scaleTransformPropertyId >= 0 && rotationPropertyId >= 0 && uvChannelPropertyId >= 0)
                         {
-                            var isKtx = srcTexture.isKtx;
+                            var isKtx = srcTexture.IsKtx;
                             TrySetTextureTransform(
                                 textureInfo,
                                 material,

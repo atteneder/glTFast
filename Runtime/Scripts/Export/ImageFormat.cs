@@ -13,20 +13,26 @@
 // limitations under the License.
 //
 
-using UnityEngine;
+using System;
 
-namespace GLTFast
+namespace GLTFast.Export
 {
-    readonly struct GlbBinChunk
+    /// <summary>
+    /// Exported image file format
+    /// </summary>
+    public enum ImageFormat
     {
-        public int Start { get; }
-
-        public uint Length { get; }
-
-        public GlbBinChunk(int start, uint length)
-        {
-            Start = start;
-            Length = length;
-        }
+        /// <summary>
+        /// Unknown, no preferred file format
+        /// </summary>
+        Unknown,
+        /// <summary>
+        /// Jpeg file format
+        /// </summary>
+        Jpg,
+        /// <summary>
+        /// PNG (Portable Network Graphics) file format
+        /// </summary>
+        Png
     }
 }
