@@ -127,7 +127,7 @@ namespace GLTFast
 #if USING_HDRP
                 case RenderPipeline.HighDefinition:
                     var lightHd = lightDestination.gameObject.AddComponent<HDAdditionalLightData>();
-                    if (lightSource.typeEnum == LightPunctual.Type.Directional) {
+                    if (lightSource.GetLightType() == LightPunctual.Type.Directional) {
                         lightHd.lightUnit = LightUnit.Lux;
                     }
                     else {
