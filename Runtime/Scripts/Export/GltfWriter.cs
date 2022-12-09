@@ -1681,7 +1681,7 @@ namespace GLTFast.Export
                             return false;
                         }
 #else
-                        if (m_Settings.fileConflictResolution == FileConflictResolution.Abort)
+                        if (m_Settings.FileConflictResolution == FileConflictResolution.Abort)
                         {
                             return false;
                         }
