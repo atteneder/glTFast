@@ -40,12 +40,6 @@ namespace GLTFast.Loading
     }
 
     /// <summary>
-    /// Delegate that allows to edit a <seealso cref="UnityWebRequest"/> before
-    /// its request is sent.
-    /// </summary>
-    public delegate void EditUnityWebRequest(UnityWebRequest request);
-
-    /// <summary>
     /// DownloadProvider that sends HTTP request with custom header entries
     /// </summary>
     public class CustomHeaderDownloadProvider : IDownloadProvider
@@ -107,7 +101,7 @@ namespace GLTFast.Loading
         /// </summary>
         /// <param name="url">URI to request</param>
         /// <param name="editor">Callback that modifies the UnityWebRequest before it's sent</param>
-        public CustomHeaderDownload(Uri url, EditUnityWebRequest editor)
+        public CustomHeaderDownload(Uri url, Action<UnityWebRequest> editor)
         {
             m_Request = UnityWebRequest.Get(url);
             editor(m_Request);
@@ -127,7 +121,7 @@ namespace GLTFast.Loading
         /// <param name="url">URI to request</param>
         /// <param name="nonReadable">If true, resulting texture is not readable (uses less memory)</param>
         /// <param name="editor">Callback that modifies the UnityWebRequest before it's sent</param>
-        public CustomHeaderTextureDownload(Uri url, bool nonReadable, EditUnityWebRequest editor) {
+        public CustomHeaderTextureDownload(Uri url, bool nonReadable, Action<UnityWebRequest> editor) {
             m_Request = CreateRequest(url,nonReadable);
             editor(m_Request);
             m_AsyncOperation = m_Request.SendWebRequest();
