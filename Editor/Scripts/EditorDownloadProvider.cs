@@ -40,7 +40,7 @@ namespace GLTFast.Editor
 
         public EditorDownloadProvider(GltfAssetDependency[] gltfAssetDependencies)
         {
-            previousDependencies = gltfAssetDependencies;
+            previousDependencies = gltfAssetDependencies ?? Array.Empty<GltfAssetDependency>();
         }
 
 #pragma warning disable 1998
