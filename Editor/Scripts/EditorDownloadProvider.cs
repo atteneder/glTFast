@@ -69,10 +69,10 @@ namespace GLTFast.Editor
                     type = GltfAssetDependency.Type.Buffer,
                 };
                 assetDependencies.Add(newDependency);
-                return new Uri(newDependency.originalUri, UriKind.Absolute);
+                return new Uri(newDependency.originalUri, UriKind.Relative);
             }
             
-            return new Uri(previousDependency.assetPath, UriKind.Absolute);
+            return new Uri(previousDependency.assetPath, UriKind.Relative);
         }
     }
 
