@@ -109,7 +109,7 @@ namespace GLTFast.Editor
 
             reportItems = null;
 
-            var downloadProvider = customDownloadProvider ?? new EditorDownloadProvider();
+            var downloadProvider = customDownloadProvider ?? new EditorDownloadProvider(assetDependencies);
             var logger = new CollectingLogger();
 
             m_Gltf = new GltfImport(
@@ -285,12 +285,13 @@ namespace GLTFast.Editor
                     continue;
                 }
 
-                var guid = AssetDatabase.AssetPathToGUID(dependency.originalUri);
-                if (!string.IsNullOrEmpty(guid))
+                var guid = AssetDatabase.AssetPathToGUID(dependency.assetPath);
+                if (string.IsNullOrEmpty(guid))
                 {
                     dependency.assetPath = dependency.originalUri;
-                    ctx.DependsOnSourceAsset(dependency.assetPath);
                 }
+
+                ctx.DependsOnSourceAsset(dependency.assetPath);
 
                 deps.Add(dependency);
             }

@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
@@ -35,33 +36,49 @@ namespace GLTFast.Editor
         }
 
         public List<GltfAssetDependency> innerAssetDependencies = new List<GltfAssetDependency>();
+        private readonly GltfAssetDependency[] previousDependencies;
 
+        public EditorDownloadProvider(GltfAssetDependency[] gltfAssetDependencies)
+        {
+            previousDependencies = gltfAssetDependencies;
+        }
 
 #pragma warning disable 1998
         public async  Task<IDownload> Request(Uri url) {
-            var dependency = new GltfAssetDependency {
-                originalUri = url.OriginalString
-            };
-            assetDependencies.Add(dependency);
-            var req = new SyncFileLoader(url);
+            var req = new SyncFileLoader(GetDependencyFromPreviousImport(url));
             return req;
         }
 
         public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
-            var dependency = new GltfAssetDependency {
-                originalUri = url.OriginalString,
-                type = GltfAssetDependency.Type.Texture
-            };
-            assetDependencies.Add(dependency);
-            var req = new SyncTextureLoader(url);
+            var req = new SyncTextureLoader(GetDependencyFromPreviousImport(url),nonReadable);
             return req;
         }
+
 #pragma warning restore 1998
     }
 
-    class SyncFileLoader : IDownload
+        private Uri GetDependencyFromPreviousImport(Uri url)
+        {
+            var previousDependency = previousDependencies.FirstOrDefault(d => d.originalUri == url.OriginalString);
+
+            if (previousDependency.type == GltfAssetDependency.Type.Unknown)
+            {
+                var newDependency = new GltfAssetDependency
+                {
+                    originalUri = url.OriginalString,
+                    type = GltfAssetDependency.Type.Buffer,
+                };
+                assetDependencies.Add(newDependency);
+                return new Uri(newDependency.originalUri, UriKind.Absolute);
+            }
+            
+            return new Uri(previousDependency.assetPath, UriKind.Absolute);
+        }
+    }
+
+    class SyncFileLoader : IDownload 
     {
-        public SyncFileLoader(Uri url)
+        public SyncFileLoader(Uri url) 
         {
             var path = url.OriginalString;
             if (File.Exists(path))
