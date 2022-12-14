@@ -20,7 +20,7 @@ All of Unity's platforms are supported. glTFast is tested or was reported to run
 | | |
 | **GameObject**
 | Import   | ✅️ | ✅
-| Export   | <sup>1</sup>[☑️] | <sup>1</sup> ☑️
+| Export   | <sup>1</sup>☑️ | <sup>1</sup> ☑️
 | | |
 | **Entities (see [DOTS](#data-oriented-technology-stack))**
 | Import   | [☑️](#data-oriented-technology-stack) | `n/a`
