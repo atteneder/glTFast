@@ -122,5 +122,29 @@ namespace GLTFast.Export
                 *outPtr = tmp;
             }
         }
+
+        [BurstCompile]
+        public unsafe struct ConvertTexCoordFloatJob : IJobParallelFor
+        {
+            public uint byteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (float2*)(input + i * byteStride);
+                var outPtr = (float2*)(output + i * byteStride);
+
+                var tmp = *inPtr;
+                tmp.y = 1 - tmp.y;
+                *outPtr = tmp;
+            }
+        }
     }
 }
