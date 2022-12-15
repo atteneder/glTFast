@@ -297,11 +297,6 @@ namespace GLTFast.Export
             var offset = mat.GetTextureOffset(texPropertyId);
             var scale = mat.GetTextureScale(texPropertyId);
 
-            // Counter measure for Unity/glTF texture coordinate difference
-            // TODO: Offer UV conversion as alternative
-            offset.y = 1 - offset.y;
-            scale.y *= -1;
-
             if (offset != Vector2.zero || scale != Vector2.one)
             {
                 gltf.RegisterExtensionUsage(Extension.TextureTransform);

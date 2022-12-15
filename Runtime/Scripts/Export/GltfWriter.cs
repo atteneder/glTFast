@@ -1185,6 +1185,22 @@ namespace GLTFast.Export
                             outputStreams[attrData.stream]
                             );
                         break;
+                    case VertexAttribute.TexCoord0:
+                    case VertexAttribute.TexCoord1:
+                    case VertexAttribute.TexCoord2:
+                    case VertexAttribute.TexCoord3:
+                    case VertexAttribute.TexCoord4:
+                    case VertexAttribute.TexCoord5:
+                    case VertexAttribute.TexCoord6:
+                    case VertexAttribute.TexCoord7:
+                        await ConvertTexCoordAttribute(
+                            attrData,
+                            (uint)strides[attrData.stream],
+                            vertexCount,
+                            inputStreams[attrData.stream],
+                            outputStreams[attrData.stream]
+                            );
+                        break;
                 }
             }
 
@@ -1589,7 +1605,7 @@ namespace GLTFast.Export
                             var outStream = new NativeArray<Vector2>(uvs.Count, Allocator.TempJob);
                             for (var i = 0; i < uvs.Count; i++)
                             {
-                                outStream[i] = uvs[i];
+                                outStream[i] = new Vector2(uvs[i].x, 1 - uvs[i].y);
                             }
                             bufferViewId = WriteBufferViewToBuffer(
                                 outStream.Reinterpret<byte>(8),
@@ -1786,6 +1802,36 @@ namespace GLTFast.Export
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
         }
+
+        static async Task ConvertTexCoordAttribute(
+            AttributeData attrData,
+            uint byteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+        ) {
+            var job = CreateConvertTexCoordAttributeJob(attrData, byteStride, vertexCount, inputStream, outputStream);
+            while (!job.IsCompleted) {
+                await Task.Yield();
+            }
+            job.Complete(); // TODO: Wait until thread is finished
+        }
+
+        static unsafe JobHandle CreateConvertTexCoordAttributeJob(
+            AttributeData attrData,
+            uint byteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+        ) {
+            var job = new ExportJobs.ConvertTexCoordFloatJob {
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
+                byteStride = byteStride,
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+            }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
+            return job;
+        }
+
 
 #endif // GLTFAST_MESH_DATA
 
