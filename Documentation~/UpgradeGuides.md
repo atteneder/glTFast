@@ -18,7 +18,36 @@ The API in general was changed considerably to conform closer to Unity's coding 
   - Renamed and moved classes/structs to different files.
 - Auto-formatted code for consistent line-endings and code look (a necessary, one-time evil; might be troublesome if you forked glTFast)
 
-There's no exact, comprehensive list of every detailed change. The 5.0.0 changelog entry is quite comprehensive though. If you have issues, feel free to reach out for support.
+If you have issues, please also go through the 5.0.0 changelog entry and feel free to reach out for support.
+
+### Moved or Renamed Types
+
+Some assemblies, classes, structs and enum types have been renamed or moved. Make sure you adopt your code approriately. All entries are within the `GLTFast` namespace.
+
+- Refactored Assembly Definitions
+  - `glTFastSchema` was merged into `glTFast` and thus removed
+  - `glTFastEditor` was renamed to `glTFast.Editor`
+  - `glTFastEditorTests` was renamed to `glTFast.Editor.Tests`
+- Moved logging related code into `GLTFast.Logging` namespace
+- Replaced `CollectingLogger.item` with `.Count` and `.Items` iterator
+- `GameObjectInstantiator.SceneInstance` is now `GameObjectSceneInstance`
+- `ImportSettings.NameImportMethod` is now `NameImportMethod`
+- Converted  `GameObjectInstantiator.Settings` to `InstantiationSettings`
+- `InstantiationSettings.SceneObjectCreation` is now `SceneObjectCreation`
+- Converted properties that were hiding conversion logic or caching into methods
+  - `Accessor`: `typeEnum` to `GetAttributeType`/`SetAttributeType`
+  - `BufferView`: `modeEnum` to `GetMode`
+  - `BufferView`: `filterEnum` to `GetFilter`
+  - `AnimationChannelTarget`: `pathEnum` to `GetPath`
+  - `AnimationSampler`: `interpolationEnum` to `GetInterpolationType`
+  - `Camera`: `typeEnum` to `GetCameraType`/`SetCameraType`
+  - `LightPunctual`: `typeEnum` to `GetLightType`/`SetLightType`
+  - `Material`: `alphaModeEnum` to `GetAlphaMode`/`SetAlphaMode`
+- `HttpHeader`'s properties are readonly now. A constructor was added as compensation.
+- Obsolete code that was finally removed
+  - `GltfImport.Destroy` (was renamed to `GltfImport.Dispose`)
+  - `GLTFast.GltFast` (was renamed to `GltfImport`)
+  - `GltfImport.InstantiateGltf` (was replaced by `InstantiateMainScene` and `InstantiateScene`)
 
 ### Async Scene Instantiation
 
