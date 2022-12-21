@@ -268,6 +268,7 @@ namespace GLTFast
                     for (var j = 0; j < bones.Length; j++)
                     {
                         var jointIndex = joints[j];
+                        if (!m_Nodes.ContainsKey(jointIndex)) continue;
                         bones[j] = m_Nodes[jointIndex].transform;
                     }
                     smr.bones = bones;

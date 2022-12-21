@@ -50,12 +50,11 @@ namespace GLTFast.Editor
         }
 
         public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
-            var req = new SyncTextureLoader(GetDependencyFromPreviousImport(url, GltfAssetDependency.Type.Texture),nonReadable);
+            var req = new SyncTextureLoader(GetDependencyFromPreviousImport(url, GltfAssetDependency.Type.Texture));
             return req;
         }
 
 #pragma warning restore 1998
-    }
 
         private Uri GetDependencyFromPreviousImport(Uri url, GltfAssetDependency.Type type)
         {
