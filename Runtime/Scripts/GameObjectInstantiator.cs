@@ -111,8 +111,11 @@ namespace GLTFast
             SceneInstance = new GameObjectSceneInstance();
 
             GameObject sceneGameObject;
+
+            var isSingleScene = rootNodeIndices is { Length: 1 };
+
             if (m_Settings.SceneObjectCreation == SceneObjectCreation.Never
-                || m_Settings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes && rootNodeIndices.Length == 1)
+                || m_Settings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes && isSingleScene)
             {
                 sceneGameObject = m_Parent.gameObject;
             }
