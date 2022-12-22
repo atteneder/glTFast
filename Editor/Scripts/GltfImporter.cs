@@ -178,7 +178,7 @@ namespace GLTFast.Editor
                     success = AsyncHelpers.RunSync(() => m_Gltf.InstantiateSceneAsync(instantiator, index));
                     if (!success) break;
                     var useFirstChild = true;
-                    var multipleNodes = scene.nodes.Length > 1;
+                    var multipleNodes = scene.nodes is { Length: > 1 };
                     var hasAnimation = false;
 #if UNITY_ANIMATION
                     if (importSettings.AnimationMethod != AnimationMethod.None
@@ -209,7 +209,7 @@ namespace GLTFast.Editor
                         : go.transform;
                     var sceneGo = sceneTransform.gameObject;
                     AddObjectToAsset(ctx, $"scenes/{sceneName}", sceneGo, gltfIcon);
-                    if (sceneIndex == m_Gltf.DefaultSceneIndex)
+                    if (sceneIndex == m_Gltf.DefaultSceneIndex || (m_Gltf.DefaultSceneIndex == null && sceneIndex == 0) )
                     {
                         ctx.SetMainObject(sceneGo);
                     }
