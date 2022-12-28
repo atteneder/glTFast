@@ -209,7 +209,7 @@ namespace GLTFast.Editor
                         : go.transform;
                     var sceneGo = sceneTransform.gameObject;
                     AddObjectToAsset(ctx, $"scenes/{sceneName}", sceneGo, gltfIcon);
-                    if (sceneIndex == m_Gltf.DefaultSceneIndex)
+                    if (sceneIndex == m_Gltf.DefaultSceneIndex || (m_Gltf.DefaultSceneIndex == null && sceneIndex == 0) )
                     {
                         ctx.SetMainObject(sceneGo);
                     }
