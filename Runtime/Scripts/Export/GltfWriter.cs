@@ -924,6 +924,11 @@ namespace GLTFast.Export
             var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
 
             foreach (var attribute in vertexAttributes) {
+                if (attribute.attribute is VertexAttribute.BlendWeight or VertexAttribute.BlendIndices) {
+                    Debug.LogWarning($"Vertex attribute {attribute.attribute} is not supported yet...skipping");
+                    continue;
+                }
+
                 var attrData = new AttributeData {
                     offset = strides[attribute.stream],
                     stream = attribute.stream

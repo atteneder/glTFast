@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Changed
 - (Export) Texture coordinates are now flipped vertically, similar to how it's performed at import. This ensures round-trip consistency (#342).
+### Fixed
+- (Export) Invalid blend indices or blend weights are not exported anymore (as skinning is not supported yet; #556)
 
 ## [5.0.0] - 2022-12-09
 This release contains multiple breaking changes. Please read the [upgrade guide](xref:doc-upgrade-guides#upgrade-to-50) for details.
