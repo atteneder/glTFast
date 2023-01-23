@@ -36,6 +36,15 @@ namespace GLTFast
         internal static Root ParseJson(string json)
         {
 #if JSON_UTILITY
+            return ParseJsonJsonUtility(json);
+#else
+            return ParseJsonNewtonsoftJson(json);
+#endif
+        }
+
+#if JSON_UTILITY || DEBUG
+        internal static Root ParseJsonJsonUtility(string json)
+        {
             // JsonUtility sometimes creates non-null default instances of objects-type members
             // even though there are none in the original JSON.
             // This work-around makes sure not existent JSON nodes will be null in the result.
@@ -237,10 +246,13 @@ namespace GLTFast
             Debug.Log($"JSON throughput: {throughput} bytes/sec ({json.Length} bytes in {elapsedSeconds} seconds)");
 #endif
             return root;
-#else
-            return JsonConvert.DeserializeObject<Root>(json);
-#endif
-
         }
+#endif // JSON_UTILITY || DEBUG
+
+#if JSON_NEWTONSOFT
+        internal static Root ParseJsonNewtonsoftJson(string json) {
+            return JsonConvert.DeserializeObject<Root>(json);
+        }
+#endif // JSON_NEWTONSOFT
     }
 }
