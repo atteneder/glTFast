@@ -43,7 +43,7 @@ namespace GLTFast
         }
 
 #if JSON_UTILITY || DEBUG
-        internal static Root ParseJsonJsonUtility(string json)
+        internal static T ParseJsonJsonUtility<T>(string json) where T : Root
         {
             // JsonUtility sometimes creates non-null default instances of objects-type members
             // even though there are none in the original JSON.
@@ -52,13 +52,13 @@ namespace GLTFast
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 #endif
-            Root root;
+            T root;
 
             // Step one: main JSON parsing
             Profiler.BeginSample("JSON main");
             try
             {
-                root = JsonUtility.FromJson<Root>(json);
+                root = JsonUtility.FromJson<T>(json);
             }
             catch (System.ArgumentException)
             {
