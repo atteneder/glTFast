@@ -924,7 +924,9 @@ namespace GLTFast.Export
             var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
 
             foreach (var attribute in vertexAttributes) {
-                if (attribute.attribute is VertexAttribute.BlendWeight or VertexAttribute.BlendIndices) {
+                if (attribute.attribute == VertexAttribute.BlendWeight 
+                    || attribute.attribute == VertexAttribute.BlendIndices) 
+                {
                     Debug.LogWarning($"Vertex attribute {attribute.attribute} is not supported yet...skipping");
                     continue;
                 }
