@@ -327,7 +327,24 @@ namespace GLTFast
             CancellationToken cancellationToken = default
             )
         {
-            return await Load(new Uri(url, UriKind.RelativeOrAbsolute), importSettings, cancellationToken);
+            return await LoadWithCustomSchema<Root>(new Uri(url, UriKind.RelativeOrAbsolute), importSettings, cancellationToken);
+        }
+        
+        /// <summary>
+        /// Load a glTF file (JSON or binary)
+        /// The URL can be a file path (using the "file://" scheme) or a web address.
+        /// </summary>
+        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadWithCustomSchema<T>(
+            string url,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+        ) where T : Root
+        {
+            return await LoadWithCustomSchema<T>(new Uri(url, UriKind.RelativeOrAbsolute), importSettings, cancellationToken);
         }
 
         /// <summary>
@@ -345,7 +362,25 @@ namespace GLTFast
             )
         {
             m_Settings = importSettings ?? new ImportSettings();
-            return await LoadFromUri(url, cancellationToken);
+            return await LoadFromUri<Root>(url, cancellationToken);
+        }
+        
+        /// <summary>
+        /// Load a glTF file (JSON or binary)
+        /// The URL can be a file path (using the "file://" scheme) or a web address.
+        /// </summary>
+        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadWithCustomSchema<T>(
+            Uri url,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+        ) where T : Root
+        {
+            m_Settings = importSettings ?? new ImportSettings();
+            return await LoadFromUri<T>(url, cancellationToken);
         }
 
         /// <summary>
@@ -478,7 +513,7 @@ namespace GLTFast
             )
         {
             m_Settings = importSettings ?? new ImportSettings();
-            var success = await LoadGltf(json, uri);
+            var success = await LoadGltf<Root>(json, uri);
             if (success) await LoadContent();
             success = success && await Prepare();
             DisposeVolatileData();
@@ -855,7 +890,7 @@ namespace GLTFast
             return result;
         }
 
-        async Task<bool> LoadFromUri(Uri url, CancellationToken cancellationToken)
+        async Task<bool> LoadFromUri<T>(Uri url, CancellationToken cancellationToken) where T : Root
         {
 
             var download = await m_DownloadProvider.Request(url);
@@ -881,7 +916,7 @@ namespace GLTFast
                 {
                     var text = download.Text;
                     download.Dispose();
-                    success = await LoadGltf(text, url);
+                    success = await LoadGltf<T>(text, url);
                 }
                 if (success)
                 {
@@ -928,7 +963,7 @@ namespace GLTFast
             return success;
         }
 
-        async Task<bool> ParseJsonAndLoadBuffers(string json, Uri baseUri)
+        async Task<bool> ParseJsonAndLoadBuffers<T>(string json, Uri baseUri) where T : Root
         {
 
             var predictedTime = json.Length / (float)k_JsonParseSpeed;
@@ -937,13 +972,13 @@ namespace GLTFast
             {
                 // JSON is larger than threshold
                 // => parse in a thread
-                m_GltfRoot = await Task.Run(() => JsonParser.ParseJson(json));
+                m_GltfRoot = await Task.Run(() => JsonParser.ParseJson<T>(json));
             }
             else
 #endif
             {
                 // Parse immediately on main thread
-                m_GltfRoot = JsonParser.ParseJson(json);
+                m_GltfRoot = JsonParser.ParseJson<T>(json);
                 // Loading subsequent buffers and images has to start asap.
                 // That's why parsing JSON right away is *very* important.
             }
@@ -1065,10 +1100,10 @@ namespace GLTFast
             return true;
         }
 
-        async Task<bool> LoadGltf(string json, Uri url)
+        async Task<bool> LoadGltf<T>(string json, Uri url) where T : Root
         {
             var baseUri = UriHelper.GetBaseUri(url);
-            var success = await ParseJsonAndLoadBuffers(json, baseUri);
+            var success = await ParseJsonAndLoadBuffers<T>(json, baseUri);
             if (success) await LoadImages(baseUri);
             return success;
         }
@@ -1558,7 +1593,7 @@ namespace GLTFast
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength);
                     Profiler.EndSample();
 
-                    var success = await ParseJsonAndLoadBuffers(json, baseUri);
+                    var success = await ParseJsonAndLoadBuffers<Schema.Root>(json, baseUri);
 
                     if (!success)
                     {

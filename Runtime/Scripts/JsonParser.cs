@@ -33,10 +33,10 @@ namespace GLTFast
 
     static class JsonParser
     {
-        internal static Root ParseJson(string json)
+        internal static Root ParseJson<T>(string json) where T : Root
         {
 #if JSON_UTILITY
-            return ParseJsonJsonUtility(json);
+            return ParseJsonJsonUtility<T>(json);
 #else
             return ParseJsonNewtonsoftJson(json);
 #endif
