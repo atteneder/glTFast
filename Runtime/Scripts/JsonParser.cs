@@ -38,7 +38,7 @@ namespace GLTFast
 #if JSON_UTILITY
             return ParseJsonJsonUtility<T>(json);
 #else
-            return ParseJsonNewtonsoftJson(json);
+            return ParseJsonNewtonsoftJson<T>(json);
 #endif
         }
 
@@ -250,8 +250,8 @@ namespace GLTFast
 #endif // JSON_UTILITY || DEBUG
 
 #if JSON_NEWTONSOFT
-        internal static Root ParseJsonNewtonsoftJson(string json) {
-            return JsonConvert.DeserializeObject<Root>(json);
+        internal static T ParseJsonNewtonsoftJson<T>(string json) where T : Root {
+            return JsonConvert.DeserializeObject<T>(json);
         }
 #endif // JSON_NEWTONSOFT
     }
