@@ -412,6 +412,11 @@ namespace GLTFast.Schema
         /// </summary>
         public bool IsSparse => sparse != null;
 
+        /// <summary>
+        /// Byte size of one element
+        /// </summary>
+        public int ElementByteSize => GetAccessorAttributeTypeLength(GetAttributeType()) * GetComponentTypeSize(componentType);
+        
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
