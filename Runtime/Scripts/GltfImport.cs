@@ -1602,7 +1602,7 @@ namespace GLTFast
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength);
                     Profiler.EndSample();
 
-                    var success = await ParseJsonAndLoadBuffers<Schema.Root>(json, baseUri);
+                    var success = await ParseJsonAndLoadBuffers<Root>(json, baseUri);
 
                     if (!success)
                     {
