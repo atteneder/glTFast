@@ -275,7 +275,7 @@ namespace GLTFast
                         bones[j] = m_Nodes[jointIndex].transform;
                     }
                     smr.bones = bones;
-                    if (rootJoint.HasValue)
+                    if (rootJoint.HasValue && m_Nodes.ContainsKey(rootJoint.Value))
                     {
                         smr.rootBone = m_Nodes[rootJoint.Value].transform;
                     }
