@@ -417,6 +417,12 @@ namespace GLTFast.Schema
         /// </summary>
         public int ElementByteSize => GetAccessorAttributeTypeLength(GetAttributeType()) * GetComponentTypeSize(componentType);
         
+        /// <summary>
+        /// Overall, byte size.
+        /// Ignores interleaved or sparse accessors
+        /// </summary>
+        public int ByteSize => ElementByteSize * count;
+        
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();

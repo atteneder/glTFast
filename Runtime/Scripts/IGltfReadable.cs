@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using Unity.Collections;
 using UnityEngine;
 
 namespace GLTFast
@@ -132,5 +133,9 @@ namespace GLTFast
         /// <param name="skinId">glTF skin index</param>
         /// <returns>Corresponding bind poses</returns>
         Matrix4x4[] GetBindPoses(int skinId);
+
+        /// <param name="accessorIndex"></param>
+        /// <returns></returns>
+        public NativeSlice<byte> GetAccessor(int accessorIndex);
     }
 }

@@ -889,6 +889,15 @@ namespace GLTFast
             m_SkinsInverseBindMatrices[skinId] = result;
             return result;
         }
+        
+        /// <inheritdoc />
+        public NativeSlice<byte> GetAccessor(int accessorIndex) {
+            if (m_GltfRoot?.accessors == null || accessorIndex < 0 || accessorIndex >= m_GltfRoot?.accessors.Length) {
+                return new NativeSlice<byte>();
+            }
+            var accessor = m_GltfRoot.accessors[accessorIndex];
+            return GetBufferView(accessor.bufferView, accessor.byteOffset, accessor.ByteSize);
+        }
 
         async Task<bool> LoadFromUri<T>(Uri url, CancellationToken cancellationToken) where T : Root
         {
