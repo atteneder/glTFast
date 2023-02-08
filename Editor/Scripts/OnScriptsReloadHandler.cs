@@ -41,7 +41,7 @@ namespace GLTFast
             {
                 if (s_Request.Status == StatusCode.Success) {
                     foreach (var package in s_Request.Result) {
-                        if (package.name == "com.atteneder.gltfast") {
+                        if (package.name == GltfGlobals.GltfPackageName) {
                             var version = package.version;
                             if (Export.Constants.version != version) {
                                 Debug.LogWarning($"Version mismatch in Constants.cs (is {Export.Constants.version}, should be {version}). Please update!");

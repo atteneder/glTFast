@@ -102,9 +102,9 @@ namespace GLTFast.Materials {
 
 #if UNITY_EDITOR
 #if UNITY_SHADER_GRAPH_12_OR_NEWER || USING_HDRP_10_OR_NEWER
-        const string k_ShaderPathPrefix = "Packages/com.atteneder.gltfast/Runtime/Shader/";
+        const string k_ShaderPathPrefix = "Packages/" + GltfGlobals.GltfPackageName + "/Runtime/Shader/";
 #else
-        const string k_ShaderPathPrefix = "Packages/com.atteneder.gltfast/Runtime/Shader/Legacy/";
+        const string k_ShaderPathPrefix = "Packages/" + GltfGlobals.GltfPackageName + "/Runtime/Shader/Legacy/";
 #endif
 #else
         const string k_ShaderGraphsPrefix = "Shader Graphs/";
