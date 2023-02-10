@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 
+using GLTFast.Extensions;
 using GLTFast.Jobs;
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
@@ -132,6 +133,8 @@ namespace GLTFast
         IDownloadProvider m_DownloadProvider;
         IMaterialGenerator m_MaterialGenerator;
         IDeferAgent m_DeferAgent;
+
+        Dictionary<Type, ImportInstance> m_Extensions;
 
         ImportSettings m_Settings;
 
@@ -311,6 +314,30 @@ namespace GLTFast
             {
                 s_DefaultDeferAgent = null;
             }
+        }
+
+        /// <summary>
+        /// TODO: Write docs
+        /// </summary>
+        /// <param name="extension"></param>
+        /// <typeparam name="T"></typeparam>
+        public void AddExtension<T>(T extension) where T : ImportInstance
+        {
+            if (m_Extensions == null)
+            {
+                m_Extensions = new Dictionary<Type, ImportInstance>();
+            }
+            m_Extensions[typeof(T)] = extension;
+        }
+
+        /// <summary>
+        /// TODO: Write docs
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T GetExtensionInstance<T>() where T : ImportInstance
+        {
+            return (T)m_Extensions[typeof(T)];
         }
 
         /// <summary>
@@ -641,6 +668,12 @@ namespace GLTFast
         /// </summary>
         public void Dispose()
         {
+
+            foreach (var extension in m_Extensions)
+            {
+                extension.Value.Dispose();
+            }
+            m_Extensions = null;
 
             m_NodeNames = null;
 
