@@ -31,20 +31,27 @@ namespace GLTFast
 
         public JobHandle jobHandle;
         int[][] m_Indices;
+        int[] m_PrimitiveIndices;
 
         public GCHandle calculatedIndicesHandle;
 
         public MeshTopology topology;
 
-        public PrimitiveCreateContext(int primitiveIndex, int materialCount, string meshName)
-            : base(primitiveIndex, materialCount, meshName)
+        public PrimitiveCreateContext(int primitiveIndex, int subMeshCount, string meshName)
+            : base(primitiveIndex, subMeshCount, meshName)
         {
-            m_Indices = new int[materialCount][];
+            m_Indices = new int[subMeshCount][];
+            m_PrimitiveIndices = new int[subMeshCount];
         }
 
         public void SetIndices(int subMesh, int[] indices)
         {
             m_Indices[subMesh] = indices;
+        }
+
+        public void SetPrimitiveIndex(int subMesh, int primitiveIndex)
+        {
+            m_PrimitiveIndices[subMesh] = primitiveIndex;
         }
 
         public override bool IsCompleted => jobHandle.IsCompleted;
@@ -152,7 +159,7 @@ namespace GLTFast
 
             Profiler.EndSample();
 
-            return new Primitive(msh, m_Materials);
+            return new Primitive(msh, m_Materials, m_PrimitiveIndices);
         }
 
         void Dispose()

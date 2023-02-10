@@ -37,13 +37,13 @@ namespace GLTFast {
 
         public PrimitiveDracoCreateContext(
             int primitiveIndex,
-            int materialCount,
+            int subMeshCount,
             bool needsNormals,
             bool needsTangents,
             string meshName,
             Bounds? bounds
             )
-            : base(primitiveIndex, materialCount, meshName)
+            : base(primitiveIndex, subMeshCount, meshName)
         {
             m_NeedsNormals = needsNormals;
             m_NeedsTangents = needsTangents;
@@ -106,7 +106,11 @@ namespace GLTFast {
             // Profiler.EndSample();
 #endif
 
-            return new Primitive(mesh,m_Materials);
+            return new Primitive(
+                mesh,
+                m_Materials,
+                new []{0} // With Draco, only single primitive meshes are supported
+                );
         }
     }
 }

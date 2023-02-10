@@ -16,15 +16,18 @@
 namespace GLTFast
 {
 
-    struct Primitive
+    readonly struct Primitive
     {
-        public UnityEngine.Mesh mesh;
-        public int[] materialIndices;
+        public readonly UnityEngine.Mesh mesh;
+        public readonly int[] materialIndices;
+        public readonly int[] primitiveIndices;
+        // public Dictionary<Extension, ExtensionImportInstance> extensionData;
 
-        public Primitive(UnityEngine.Mesh mesh, int[] materialIndex)
+        public Primitive(UnityEngine.Mesh mesh, int[] materialIndices, int[] primitiveIndices)
         {
             this.mesh = mesh;
-            this.materialIndices = materialIndex;
+            this.materialIndices = materialIndices;
+            this.primitiveIndices = primitiveIndices;
         }
     }
 }

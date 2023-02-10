@@ -35,10 +35,10 @@ namespace GLTFast
 
         public abstract bool IsCompleted { get; }
 
-        protected PrimitiveCreateContextBase(int primitiveIndex, int materialCount, string meshName)
+        protected PrimitiveCreateContextBase(int primitiveIndex, int subMeshCount, string meshName)
         {
-            this.PrimitiveIndex = primitiveIndex;
-            m_Materials = new int[materialCount];
+            PrimitiveIndex = primitiveIndex;
+            m_Materials = new int[subMeshCount];
             m_MeshName = meshName;
         }
 
