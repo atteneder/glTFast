@@ -134,8 +134,13 @@ namespace GLTFast
         /// <returns>Corresponding bind poses</returns>
         Matrix4x4[] GetBindPoses(int skinId);
 
-        /// <param name="accessorIndex"></param>
-        /// <returns></returns>
-        public NativeSlice<byte> GetAccessor(int accessorIndex);
+        /// <summary>
+        /// Creates a generic byte-array view into an accessor.
+        /// Only available during loading phase as underlying buffers are disposed right afterwards.
+        /// </summary>
+        /// <param name="accessorIndex">glTF accessor index</param>
+        /// <returns>Valid byte-slice view into accessor's data if parameter was correct and buffers are available.
+        /// Zero-length slice otherwise.</returns>
+        NativeSlice<byte> GetAccessor(int accessorIndex);
     }
 }
