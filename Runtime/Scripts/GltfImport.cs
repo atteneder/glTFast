@@ -2726,6 +2726,8 @@ namespace GLTFast
             }
         }
 
+        public event Action LoadAccessorDataEvent;
+
         async Task<bool> LoadAccessorData(Root gltf)
         {
 
@@ -2741,6 +2743,9 @@ namespace GLTFast
 
             // Iterate all primitive vertex attributes and remember the accessors usage.
             m_AccessorUsage = new AccessorUsage[gltf.accessors.Length];
+
+            LoadAccessorDataEvent?.Invoke();
+
             int totalPrimitives = 0;
             for (int meshIndex = 0; meshIndex < meshCount; meshIndex++)
             {
