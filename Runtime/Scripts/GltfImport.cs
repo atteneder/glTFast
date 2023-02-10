@@ -329,7 +329,7 @@ namespace GLTFast
         {
             return await LoadWithCustomSchema<Root>(new Uri(url, UriKind.RelativeOrAbsolute), importSettings, cancellationToken);
         }
-        
+
         /// <summary>
         /// Load a glTF file (JSON or binary)
         /// The URL can be a file path (using the "file://" scheme) or a web address.
@@ -364,7 +364,7 @@ namespace GLTFast
             m_Settings = importSettings ?? new ImportSettings();
             return await LoadFromUri<Root>(url, cancellationToken);
         }
-        
+
         /// <summary>
         /// Load a glTF file (JSON or binary)
         /// The URL can be a file path (using the "file://" scheme) or a web address.
@@ -889,10 +889,12 @@ namespace GLTFast
             m_SkinsInverseBindMatrices[skinId] = result;
             return result;
         }
-        
+
         /// <inheritdoc />
-        public NativeSlice<byte> GetAccessor(int accessorIndex) {
-            if (m_GltfRoot?.accessors == null || accessorIndex < 0 || accessorIndex >= m_GltfRoot?.accessors.Length) {
+        public NativeSlice<byte> GetAccessor(int accessorIndex)
+        {
+            if (m_GltfRoot?.accessors == null || accessorIndex < 0 || accessorIndex >= m_GltfRoot?.accessors.Length)
+            {
                 return new NativeSlice<byte>();
             }
             var accessor = m_GltfRoot.accessors[accessorIndex];

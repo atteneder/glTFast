@@ -172,7 +172,7 @@ namespace GLTFast.Schema
         [JsonProperty("type")]
         public GltfAccessorAttributeType typeEnum = GltfAccessorAttributeType.Undefined;
 #endif
-        
+
         /// <summary>
         /// <see cref="GltfAccessorAttributeType"/> typed/cached getter from the <see cref="type"/> string.
         /// </summary>
@@ -416,13 +416,13 @@ namespace GLTFast.Schema
         /// Byte size of one element
         /// </summary>
         public int ElementByteSize => GetAccessorAttributeTypeLength(GetAttributeType()) * GetComponentTypeSize(componentType);
-        
+
         /// <summary>
         /// Overall, byte size.
         /// Ignores interleaved or sparse accessors
         /// </summary>
         public int ByteSize => ElementByteSize * count;
-        
+
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
