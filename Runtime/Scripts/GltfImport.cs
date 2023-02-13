@@ -337,7 +337,7 @@ namespace GLTFast
         /// <returns></returns>
         public T GetExtensionInstance<T>() where T : ImportInstance
         {
-            return (T)m_Extensions[typeof(T)];
+            return (T)m_Extensions?[typeof(T)];
         }
 
         /// <summary>
@@ -668,12 +668,14 @@ namespace GLTFast
         /// </summary>
         public void Dispose()
         {
-
-            foreach (var extension in m_Extensions)
+            if (m_Extensions != null)
             {
-                extension.Value.Dispose();
+                foreach (var extension in m_Extensions)
+                {
+                    extension.Value.Dispose();
+                }
+                m_Extensions = null;
             }
-            m_Extensions = null;
 
             m_NodeNames = null;
 
