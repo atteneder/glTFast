@@ -15,6 +15,8 @@
 
 using System.IO;
 using System.Runtime.CompilerServices;
+using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 
 [assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
 
@@ -295,6 +297,182 @@ namespace GLTFast.Schema
             }
 
             writer.Close();
+        }
+
+        /// <summary>
+        /// Detects if a secondary null-check is necessary.
+        /// </summary>
+        /// <returns>True if a secondary parse against the FakeSchema is required. False otherwise</returns>
+        internal bool JsonUtilitySecondParseRequired()
+        {
+            Profiler.BeginSample("JsonUtilitySecondParseRequired");
+            var check = false;
+            if (materials != null)
+            {
+                foreach (var mat in materials)
+                {
+                    // mat.extension is always set (not null), because JsonUtility constructs a default
+                    // if any of mat.extension's members is not null, it is because there was
+                    // a legit extensions node in JSON => we have to check which ones
+                    if (mat.extensions.KHR_materials_unlit != null)
+                    {
+                        check = true;
+                    }
+                    else
+                    {
+                        // otherwise dump the wrongfully constructed MaterialExtension
+                        mat.extensions = null;
+                    }
+                }
+            }
+            if (accessors != null)
+            {
+                foreach (var accessor in accessors)
+                {
+                    if (accessor.sparse.indices == null || accessor.sparse.values == null)
+                    {
+                        // If indices and values members are null, `sparse` is likely
+                        // an auto-instance by the JsonUtility and not present in JSON.
+                        // Therefore we remove it:
+                        accessor.sparse = null;
+                    }
+#if GLTFAST_SAFE
+                    else {
+                        // This is very likely a valid sparse accessor.
+                        // However, an empty sparse property ( "sparse": {} ) would break
+                        // glTFast, so better do a thorough follow-up check
+                        check = true;
+                    }
+#endif // GLTFAST_SAFE
+                }
+            }
+#if DRACO_UNITY
+            if(!check && meshes!=null) {
+                foreach (var mesh in meshes) {
+                    if (mesh.primitives != null) {
+                        foreach (var primitive in mesh.primitives) {
+                            if (primitive.extensions?.KHR_draco_mesh_compression != null) {
+                                check = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+#endif
+            Profiler.EndSample();
+            return check;
+        }
+
+        internal void JsonUtilityCleanupAgainstSecondParse(FakeSchema.Root fakeRoot)
+        {
+            Profiler.BeginSample("JsonUtilityCleanup");
+
+            if (materials != null)
+            {
+                for (var i = 0; i < materials.Length; i++)
+                {
+                    var mat = materials[i];
+                    if (mat.extensions == null) continue;
+                    Assert.AreEqual(mat.name, fakeRoot.materials[i].name);
+                    var fake = fakeRoot.materials[i].extensions;
+                    if (fake.KHR_materials_unlit == null)
+                    {
+                        mat.extensions.KHR_materials_unlit = null;
+                    }
+
+                    if (fake.KHR_materials_pbrSpecularGlossiness == null)
+                    {
+                        mat.extensions.KHR_materials_pbrSpecularGlossiness = null;
+                    }
+
+                    if (fake.KHR_materials_transmission == null)
+                    {
+                        mat.extensions.KHR_materials_transmission = null;
+                    }
+
+                    if (fake.KHR_materials_clearcoat == null)
+                    {
+                        mat.extensions.KHR_materials_clearcoat = null;
+                    }
+
+                    if (fake.KHR_materials_sheen == null)
+                    {
+                        mat.extensions.KHR_materials_sheen = null;
+                    }
+                }
+            }
+
+#if GLTFAST_SAFE
+            if (accessors != null) {
+                for (var i = 0; i < accessors.Length; i++) {
+                    var sparse = fakeRoot.accessors[i].sparse;
+                    if (sparse?.indices == null || sparse.values == null) {
+                        accessors[i].sparse = null;
+                    }
+                }
+            }
+#endif
+
+#if DRACO_UNITY
+            if (meshes != null) {
+                for (var i = 0; i < meshes.Length; i++) {
+                    var mesh = meshes[i];
+                    Assert.AreEqual(mesh.name, fakeRoot.meshes[i].name);
+                    for (var j = 0; j < mesh.primitives.Length; j++) {
+                        var primitive = mesh.primitives[j];
+                        if (primitive.extensions == null ) continue;
+                        var fake = fakeRoot.meshes[i].primitives[j];
+                        if (fake.extensions.KHR_draco_mesh_compression == null) {
+                            // TODO: Differentiate Primitive extensions here
+                            // since Draco is the only primitive extension, we
+                            // remove the whole extensions property.
+                            // primitive.extensions.KHR_draco_mesh_compression = null;
+                            primitive.extensions = null;
+                        }
+                    }
+                }
+            }
+#endif
+            Profiler.EndSample();
+        }
+
+        /// <summary>
+        /// Generic checks and cleanups
+        /// </summary>
+        public virtual void JsonUtilityCleanup()
+        {
+            if (nodes != null)
+            {
+                foreach (var t in nodes)
+                {
+                    var e = t.extensions;
+                    if (e != null)
+                    {
+                        // Check if GPU instancing extension is valid
+                        if (e.EXT_mesh_gpu_instancing?.attributes == null)
+                        {
+                            e.EXT_mesh_gpu_instancing = null;
+                        }
+                        // Check if Lights extension is valid
+                        if ((e.KHR_lights_punctual?.light ?? -1) < 0)
+                        {
+                            e.KHR_lights_punctual = null;
+                        }
+                        // Unset `extension` if none of them was valid
+                        if (e.EXT_mesh_gpu_instancing == null &&
+                            e.KHR_lights_punctual == null)
+                        {
+                            t.extensions = null;
+                        }
+                    }
+                }
+            }
+
+            if (extensions != null && !extensions.JsonUtilityCleanup())
+            {
+                extensions = null;
+            }
         }
     }
 }

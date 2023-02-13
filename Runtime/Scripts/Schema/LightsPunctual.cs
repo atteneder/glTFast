@@ -44,6 +44,11 @@ namespace GLTFast.Schema
             writer.CloseArray();
             writer.Close();
         }
+
+        public bool JsonUtilityCleanup()
+        {
+            return lights != null;
+        }
     }
 
     /// <summary>
