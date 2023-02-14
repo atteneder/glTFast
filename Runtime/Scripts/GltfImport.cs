@@ -2333,6 +2333,13 @@ namespace GLTFast
 
         async Task InstantiateSceneInternal(Root gltf, IInstantiator instantiator, int sceneId)
         {
+            if (m_Extensions != null)
+            {
+                foreach (var extension in m_Extensions)
+                {
+                    extension.Value.Inject(instantiator);
+                }
+            }
 
             async Task IterateNodes(uint nodeIndex, uint? parentIndex, Action<uint, uint?> callback)
             {
