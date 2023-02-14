@@ -22,7 +22,7 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
-#if JSON_NEWTONSOFT
+#if JSON_NEWTONSOFT || (DEBUG && NEWTONSOFT_JSON)
 using Newtonsoft.Json;
 #endif
 
@@ -97,7 +97,7 @@ namespace GLTFast
         }
 #endif // JSON_UTILITY || DEBUG
 
-#if JSON_NEWTONSOFT
+#if JSON_NEWTONSOFT || (DEBUG && NEWTONSOFT_JSON)
         internal static T ParseJsonNewtonsoftJson<T>(string json) where T : Root {
             return JsonConvert.DeserializeObject<T>(json);
         }
