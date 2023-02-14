@@ -295,6 +295,20 @@ namespace GLTFast
             }
 
             renderer.sharedMaterials = materials;
+            
+            MeshAdded?.Invoke(
+                meshGo,
+                nodeIndex,
+                meshName,
+                mesh,
+                materialIndices,
+                meshIndex,
+                subMeshPrimitiveIndices,
+                joints,
+                rootJoint,
+                morphTargetWeights,
+                primitiveNumeration
+                );
         }
 
         /// <inheritdoc />
@@ -525,7 +539,27 @@ namespace GLTFast
                     m_Nodes[nodeIndex].SetActive(true);
                 }
             }
+            
+            EndSceneCompleted?.Invoke();
+
             Profiler.EndSample();
         }
+        
+        public delegate void MeshAddedDelegate(
+            GameObject gameObject,
+            uint nodeIndex,
+            string meshName,
+            Mesh mesh,
+            int[] materialIndices,
+            int meshIndex,
+            int[] subMeshPrimitiveIndices,
+            uint[] joints = null,
+            uint? rootJoint = null,
+            float[] morphTargetWeights = null,
+            int primitiveNumeration = 0
+        );
+
+        public event MeshAddedDelegate MeshAdded;
+        public event Action EndSceneCompleted;
     }
 }
