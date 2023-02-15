@@ -75,7 +75,7 @@ namespace GLTFast
 
             if (m_NodeBounds != null)
             {
-                var meshBounds = GetTransformedBounds(mesh.bounds, m_Nodes[nodeIndex].transform.localToWorldMatrix);
+                var meshBounds = GetTransformedBounds(mesh.bounds, m_Parent.worldToLocalMatrix * m_Nodes[nodeIndex].transform.localToWorldMatrix);
                 if (m_NodeBounds.TryGetValue(nodeIndex, out var prevBounds))
                 {
                     meshBounds.Encapsulate(prevBounds);
