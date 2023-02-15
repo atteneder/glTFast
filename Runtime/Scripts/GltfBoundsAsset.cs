@@ -102,7 +102,7 @@ namespace GLTFast
         /// <inheritdoc />
         protected override IInstantiator GetDefaultInstantiator(ICodeLogger logger)
         {
-            return new GameObjectBoundsInstantiator(Importer, transform, logger);
+            return new GameObjectBoundsInstantiator(Importer, transform, logger, InstantiationSettings);
         }
 
         void SetBounds(GameObjectBoundsInstantiator instantiator)
