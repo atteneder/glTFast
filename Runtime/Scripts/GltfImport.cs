@@ -278,6 +278,8 @@ namespace GLTFast
                     defaultDeferAgentGameObject.AddComponent<DefaultDeferAgent>();
                 }
                 m_DeferAgent = s_DefaultDeferAgent;
+
+                ExtensionRegistry.InjectAllExtensions(this);
             }
             else
             {

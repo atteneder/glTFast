@@ -51,17 +51,29 @@ namespace GLTFast.Extensions
         {
             if (extensions == null)
             {
-                extensions = new List<ExtensionBase>();
+                RegisterDefaultExtensions();
             }
             extensions.Add(extension);
         }
 
         public static void InjectAllExtensions(GltfImport gltfImport)
         {
+            if (extensions == null)
+            {
+                RegisterDefaultExtensions();
+            }
             foreach (var extension in extensions)
             {
                 extension.CreateImportInstance(gltfImport);
             }
+        }
+
+        static void RegisterDefaultExtensions()
+        {
+            extensions = new List<ExtensionBase>();
+
+            // Register all extensions
+            // TODO: Investigate if extensions can be auto-registered via reflection
         }
     }
 }
