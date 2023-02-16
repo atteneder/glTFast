@@ -488,7 +488,7 @@ namespace GLTFast
             )
         {
             m_Settings = importSettings ?? new ImportSettings();
-            var success = await LoadGltfBinaryBuffer(bytes, uri);
+            var success = await LoadGltfBinaryBuffer<Root>(bytes, uri);
             if (success) await LoadContent();
             success = success && await Prepare();
             DisposeVolatileData();
@@ -921,7 +921,7 @@ namespace GLTFast
                 {
                     var data = download.Data;
                     download.Dispose();
-                    success = await LoadGltfBinaryBuffer(data, url);
+                    success = await LoadGltfBinaryBuffer<T>(data, url);
                 }
                 else
                 {
@@ -1544,7 +1544,7 @@ namespace GLTFast
 #endif
         }
 
-        async Task<bool> LoadGltfBinaryBuffer(byte[] bytes, Uri uri = null)
+        async Task<bool> LoadGltfBinaryBuffer<T>(byte[] bytes, Uri uri = null) where T : Root
         {
             Profiler.BeginSample("LoadGltfBinary.Phase1");
 
@@ -1604,7 +1604,7 @@ namespace GLTFast
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength);
                     Profiler.EndSample();
 
-                    var success = await ParseJsonAndLoadBuffers<Root>(json, baseUri);
+                    var success = await ParseJsonAndLoadBuffers<T>(json, baseUri);
 
                     if (!success)
                     {
