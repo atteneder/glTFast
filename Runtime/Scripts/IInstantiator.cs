@@ -91,10 +91,8 @@ namespace GLTFast
         void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            Primitive meshResult,
             int meshIndex,
-            int[] subMeshPrimitiveIndices,
             uint[] joints = null,
             uint? rootJoint = null,
             float[] morphTargetWeights = null,
@@ -120,10 +118,8 @@ namespace GLTFast
         void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            Primitive meshResult,
             int meshIndex,
-            int[] subMeshPrimitiveIndices,
             uint instanceCount,
             NativeArray<Vector3>? positions,
             NativeArray<Quaternion>? rotations,

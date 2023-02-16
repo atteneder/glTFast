@@ -222,10 +222,8 @@ namespace GLTFast
         public virtual void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            Primitive meshResult,
             int meshIndex,
-            int[] subMeshPrimitiveIndices,
             uint[] joints = null,
             uint? rootJoint = null,
             float[] morphTargetWeights = null,
@@ -252,11 +250,11 @@ namespace GLTFast
 
             Renderer renderer;
 
-            var hasMorphTargets = mesh.blendShapeCount > 0;
+            var hasMorphTargets = meshResult.mesh.blendShapeCount > 0;
             if (joints == null && !hasMorphTargets)
             {
                 var mf = meshGo.AddComponent<MeshFilter>();
-                mf.mesh = mesh;
+                mf.mesh = meshResult.mesh;
                 var mr = meshGo.AddComponent<MeshRenderer>();
                 renderer = mr;
             }
@@ -278,7 +276,7 @@ namespace GLTFast
                         smr.rootBone = m_Nodes[rootJoint.Value].transform;
                     }
                 }
-                smr.sharedMesh = mesh;
+                smr.sharedMesh = meshResult.mesh;
                 if (morphTargetWeights != null)
                 {
                     for (var i = 0; i < morphTargetWeights.Length; i++)
@@ -290,10 +288,10 @@ namespace GLTFast
                 renderer = smr;
             }
 
-            var materials = new Material[materialIndices.Length];
+            var materials = new Material[meshResult.materialIndices.Length];
             for (var index = 0; index < materials.Length; index++)
             {
-                var material = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                var material = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
                 materials[index] = material;
             }
 
@@ -304,10 +302,8 @@ namespace GLTFast
         public virtual void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            Primitive meshResult,
             int meshIndex,
-            int[] subMeshPrimitiveIndices,
             uint instanceCount,
             NativeArray<Vector3>? positions,
             NativeArray<Quaternion>? rotations,
@@ -320,10 +316,10 @@ namespace GLTFast
                 return;
             }
 
-            var materials = new Material[materialIndices.Length];
+            var materials = new Material[meshResult.materialIndices.Length];
             for (var index = 0; index < materials.Length; index++)
             {
-                var material = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                var material = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
                 material.enableInstancing = true;
                 materials[index] = material;
             }
@@ -339,7 +335,7 @@ namespace GLTFast
                 t.localScale = scales?[i] ?? Vector3.one;
 
                 var mf = meshGo.AddComponent<MeshFilter>();
-                mf.mesh = mesh;
+                mf.mesh = meshResult.mesh;
                 Renderer renderer = meshGo.AddComponent<MeshRenderer>();
                 renderer.sharedMaterials = materials;
             }

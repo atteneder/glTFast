@@ -2377,10 +2377,8 @@ namespace GLTFast
                             instantiator.AddPrimitive(
                                 nodeIndex,
                                 primitiveName,
-                                mesh,
-                                primitive.materialIndices,
+                                primitive,
                                 node.mesh,
-                                primitive.primitiveIndices,
                                 joints,
                                 rootJoint,
                                 gltf.meshes[node.mesh].weights,
@@ -2420,10 +2418,8 @@ namespace GLTFast
                             instantiator.AddPrimitiveInstanced(
                                 nodeIndex,
                                 primitiveName,
-                                mesh,
-                                m_Primitives[i].materialIndices,
+                                m_Primitives[i],
                                 node.mesh,
-                                primitive.primitiveIndices,
                                 instanceCount,
                                 positions,
                                 rotations,

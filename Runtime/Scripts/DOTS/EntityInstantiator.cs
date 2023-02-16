@@ -153,8 +153,8 @@ namespace GLTFast {
         public virtual void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            Primitive meshResult,
+            int meshIndex,
             uint[] joints = null,
             uint? rootJoint = null,
             float[] morphTargetWeights = null,
@@ -175,12 +175,22 @@ namespace GLTFast {
                 m_EntityManager.SetComponentData(node, new Parent { Value = m_Nodes[nodeIndex] });
             }
 
-            var hasMorphTargets = mesh.blendShapeCount > 0;
+            var hasMorphTargets = meshResult.mesh.blendShapeCount > 0;
 
-            for (var index = 0; index < materialIndices.Length; index++) {
-                var material = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+            for (var index = 0; index < meshResult.materialIndices.Length; index++) {
+                var material = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
 
-                RenderMeshUtility.AddComponents(node,m_EntityManager,new RenderMeshDescription(mesh,material,layer:m_Settings.Layer,subMeshIndex:index));
+                RenderMeshUtility.AddComponents(
+                    node,
+                    m_EntityManager,
+                    new RenderMeshDescription(
+                        meshResult.mesh,
+                        material,
+                        layer:m_Settings.Layer,
+                        subMeshIndex:index
+                        )
+                    );
+
                  if(joints!=null || hasMorphTargets) {
                      if (joints != null) {
                          var bones = new Entity[joints.Length];
@@ -206,8 +216,8 @@ namespace GLTFast {
         public void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            Primitive meshResult,
+            int meshIndex,
             uint instanceCount,
             NativeArray<Vector3>? positions,
             NativeArray<Quaternion>? rotations,
@@ -218,10 +228,14 @@ namespace GLTFast {
                 return;
             }
             Profiler.BeginSample("AddPrimitiveInstanced");
-            foreach (var materialIndex in materialIndices) {
+            foreach (var materialIndex in meshResult.materialIndices) {
                 var material = m_Gltf.GetMaterial(materialIndex) ?? m_Gltf.GetDefaultMaterial();
                 material.enableInstancing = true;
-                var renderMeshDescription = new RenderMeshDescription(mesh, material, subMeshIndex:materialIndex);
+                var renderMeshDescription = new RenderMeshDescription(
+                    meshResult.mesh,
+                    material,
+                    subMeshIndex:materialIndex
+                    );
                 var prototype = m_EntityManager.CreateEntity(m_NodeArchetype);
                 RenderMeshUtility.AddComponents(prototype,m_EntityManager,renderMeshDescription);
                 if (scales.HasValue) {

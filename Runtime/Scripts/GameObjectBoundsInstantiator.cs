@@ -54,10 +54,8 @@ namespace GLTFast
         public override void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            Primitive meshResult,
             int meshIndex,
-            int[] subMeshPrimitiveIndices,
             uint[] joints = null,
             uint? rootJoint = null,
             float[] morphTargetWeights = null,
@@ -67,10 +65,8 @@ namespace GLTFast
             base.AddPrimitive(
                 nodeIndex,
                 meshName,
-                mesh,
-                materialIndices,
+                meshResult,
                 meshIndex,
-                subMeshPrimitiveIndices,
                 joints,
                 rootJoint,
                 morphTargetWeights,
@@ -79,7 +75,7 @@ namespace GLTFast
 
             if (m_NodeBounds != null)
             {
-                var meshBounds = GetTransformedBounds(mesh.bounds, m_Parent.worldToLocalMatrix * m_Nodes[nodeIndex].transform.localToWorldMatrix);
+                var meshBounds = GetTransformedBounds(meshResult.mesh.bounds, m_Parent.worldToLocalMatrix * m_Nodes[nodeIndex].transform.localToWorldMatrix);
                 if (m_NodeBounds.TryGetValue(nodeIndex, out var prevBounds))
                 {
                     meshBounds.Encapsulate(prevBounds);
