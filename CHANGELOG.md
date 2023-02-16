@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Accessor.ElementByteSize`: Byte size of one element of that accessor
 - `Accessor.ByteSize`: Overall byte size
 - `IGltfReadable.GetAccessor`: Generic byte-array view into an accessor
+- `IJsonParser` to support custom JSON parsers, using `JsonUtility` as the default
+- `JsonParser.SetDefaultImplementation`: Set a custom `IJsonParser`
 
 ## [5.0.4] - 2023-03-30
 ### Fixed
