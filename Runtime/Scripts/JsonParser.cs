@@ -26,7 +26,7 @@ namespace GLTFast
         internal static Root ParseJson<T>(string json) where T : Root
         {
             if (k_DefaultJsonParser is null)
-                SetDefaultImplementation<GltfJsonUtilityParser>();
+                SetDefaultParser<GltfJsonUtilityParser>();
 
             if (k_DefaultJsonParser is null)
                 throw new InvalidOperationException(
@@ -35,7 +35,7 @@ namespace GLTFast
             return k_DefaultJsonParser.ParseJson<T>(json);
         }
 
-        public static void SetDefaultImplementation<T>() where T : IGltfJsonParser, new()
+        public static void SetDefaultParser<T>() where T : IGltfJsonParser, new()
         {
             k_DefaultJsonParser = new T();
         }

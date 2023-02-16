@@ -16,7 +16,6 @@
 using GLTFast.Schema;
 
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 
 namespace GLTFast
