@@ -1,4 +1,4 @@
-// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2023 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,23 +21,23 @@ namespace GLTFast
 
     static class JsonParser
     {
-        static IJsonImplementation k_DefaultJsonImplementation;
+        static IGltfJsonParser k_DefaultJsonParser;
 
         internal static Root ParseJson<T>(string json) where T : Root
         {
-            if (k_DefaultJsonImplementation is null)
-                SetDefaultImplementation<JsonUtilityImplementation>();
+            if (k_DefaultJsonParser is null)
+                SetDefaultImplementation<GltfJsonUtilityParser>();
 
-            if (k_DefaultJsonImplementation is null)
+            if (k_DefaultJsonParser is null)
                 throw new InvalidOperationException(
-                    $"{nameof(JsonParser)}.{nameof(k_DefaultJsonImplementation)} is null!");
+                    $"{nameof(JsonParser)}.{nameof(k_DefaultJsonParser)} is null!");
 
-            return k_DefaultJsonImplementation.ParseJson<T>(json);
+            return k_DefaultJsonParser.ParseJson<T>(json);
         }
 
-        public static void SetDefaultImplementation<T>() where T : IJsonImplementation, new()
+        public static void SetDefaultImplementation<T>() where T : IGltfJsonParser, new()
         {
-            k_DefaultJsonImplementation = new T();
+            k_DefaultJsonParser = new T();
         }
     }
 }
