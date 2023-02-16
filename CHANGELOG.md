@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- Support for alternative JSON parsing via Newtonsoft JSON
+- Support for deserializing custom data via custom glTF JSON schema class
+- `Accessor.ElementByteSize`: Byte size of one element of that accessor
+- `Accessor.ByteSize`: Overall byte size
+- `IGltfReadable.GetAccessor`: Generic byte-array view into an accessor
+
 ## [5.0.4] - 2023-03-30
 ### Fixed
 - Texture transform offset is calculated correctly now
