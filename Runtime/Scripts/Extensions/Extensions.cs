@@ -37,6 +37,7 @@ namespace GLTFast.Extensions
 
     public abstract class ImportInstance : IDisposable
     {
+        public abstract bool SupportsExtension(string extensionName);
         public abstract void Inject(GltfImport gltfImport);
         public abstract void Inject(IInstantiator instantiator);
         public abstract void Dispose();

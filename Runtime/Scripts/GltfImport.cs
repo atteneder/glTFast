@@ -1088,61 +1088,51 @@ namespace GLTFast
         /// </summary>
         /// <param name="gltfRoot"></param>
         /// <returns>False if a required extension is not supported. True otherwise.</returns>
-        bool CheckExtensionSupport(Root gltfRoot)
-        {
-            if (gltfRoot.extensionsRequired != null)
-            {
-                foreach (var ext in gltfRoot.extensionsRequired)
-                {
-                    var supported = k_SupportedExtensions.Contains(ext);
-                    if (!supported)
-                    {
-#if !DRACO_UNITY
-                        if (ext == ExtensionName.DracoMeshCompression)
-                        {
-                            m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ext);
+        bool CheckExtensionSupport(Root gltfRoot) {
+            if (!CheckExtensionSupport(gltfRoot.extensionsRequired)) {
+                return false;
+            }
+            CheckExtensionSupport(gltfRoot.extensionsUsed, false);
+            return true;
+        }
+
+        bool CheckExtensionSupport(IEnumerable<string> extensions, bool required = true) {
+            if (extensions == null)
+                return true;
+            foreach (var ext in extensions) {
+                var supported = k_SupportedExtensions.Contains(ext);
+                if (!supported && m_Extensions != null) {
+                    foreach (var extension in m_Extensions) {
+                        if (extension.Value.SupportsExtension(ext)) {
+                            supported = true;
+                            break;
                         }
-                        else
-#endif
-#if !KTX_UNITY
-                        if (ext == ExtensionName.TextureBasisUniversal)
-                        {
-                            m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
-                        }
-                        else
-#endif
-                        {
-                            m_Logger?.Error(LogCode.ExtensionUnsupported, ext);
-                        }
-                        return false;
                     }
                 }
-            }
-            if (gltfRoot.extensionsUsed != null)
-            {
-                foreach (var ext in gltfRoot.extensionsUsed)
-                {
-                    var supported = k_SupportedExtensions.Contains(ext);
-                    if (!supported)
-                    {
+                if(!supported) {
 #if !DRACO_UNITY
-                        if (ext == ExtensionName.DracoMeshCompression)
-                        {
-                            m_Logger?.Warning(LogCode.PackageMissing, "DracoUnity", ext);
-                        }
-                        else
+                    if (ext == ExtensionName.DracoMeshCompression)
+                    {
+                        m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ext);
+                        
+                    }
 #endif
 #if !KTX_UNITY
-                        if (ext == ExtensionName.TextureBasisUniversal)
-                        {
-                            m_Logger?.Warning(LogCode.PackageMissing, "KtxUnity", ext);
-                        }
-                        else
+                    if (ext == ExtensionName.TextureBasisUniversal)
+                    {
+                        m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
+                    }
+                    else
 #endif
-                        {
+                    {
+                        if (required) {
+                            m_Logger?.Error(LogCode.ExtensionUnsupported, ext);
+                        }
+                        else {
                             m_Logger?.Warning(LogCode.ExtensionUnsupported, ext);
                         }
                     }
+                    return false;
                 }
             }
             return true;
