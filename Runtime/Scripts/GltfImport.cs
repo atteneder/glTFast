@@ -2729,7 +2729,7 @@ namespace GLTFast
         /// <summary>Is called when retrieving data from accessors should be performed/started.</summary>
         public event Action LoadAccessorDataEvent;
 
-        /// <summary>Is called when a mesh and its primitives are assigned to a <see cref="Primitive"/> and
+        /// <summary>Is called when a mesh and its primitives are assigned to a <see cref="MeshResult"/> and
         /// sub-meshes. Parameters are MeshResult index, mesh index and per sub-mesh primitive index</summary>
         public event Action<int, int, int[]> MeshResultAssigned;
 
