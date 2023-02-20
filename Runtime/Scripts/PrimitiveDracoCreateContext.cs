@@ -36,6 +36,7 @@ namespace GLTFast {
         public override bool IsCompleted => m_DracoTask!=null && m_DracoTask.IsCompleted;
 
         public PrimitiveDracoCreateContext(
+            int meshIndex,
             int primitiveIndex,
             int subMeshCount,
             bool needsNormals,
@@ -43,7 +44,7 @@ namespace GLTFast {
             string meshName,
             Bounds? bounds
             )
-            : base(primitiveIndex, subMeshCount, meshName)
+            : base(meshIndex, primitiveIndex, subMeshCount, meshName)
         {
             m_NeedsNormals = needsNormals;
             m_NeedsTangents = needsTangents;
@@ -107,9 +108,10 @@ namespace GLTFast {
 #endif
 
             return new Primitive(
-                mesh,
+                MeshIndex,
+                new []{0}, // With Draco, only single primitive meshes are supported
                 m_Materials,
-                new []{0} // With Draco, only single primitive meshes are supported
+                mesh
                 );
         }
     }

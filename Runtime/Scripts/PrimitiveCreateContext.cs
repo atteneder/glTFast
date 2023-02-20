@@ -37,8 +37,13 @@ namespace GLTFast
 
         public MeshTopology topology;
 
-        public PrimitiveCreateContext(int primitiveIndex, int subMeshCount, string meshName)
-            : base(primitiveIndex, subMeshCount, meshName)
+        public PrimitiveCreateContext(
+            int meshIndex,
+            int primitiveIndex, 
+            int subMeshCount,
+            string meshName
+            )
+            : base(meshIndex, primitiveIndex, subMeshCount, meshName)
         {
             m_Indices = new int[subMeshCount][];
             m_PrimitiveIndices = new int[subMeshCount];
@@ -159,7 +164,7 @@ namespace GLTFast
 
             Profiler.EndSample();
 
-            return new Primitive(msh, m_Materials, m_PrimitiveIndices);
+            return new Primitive(MeshIndex, m_PrimitiveIndices, m_Materials, msh);
         }
 
         void Dispose()

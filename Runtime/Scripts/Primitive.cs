@@ -24,22 +24,31 @@ namespace GLTFast
     /// </summary>
     public readonly struct Primitive
     {
-        /// <summary>Converted Unity Mesh</summary>
-        public readonly UnityEngine.Mesh mesh;
-
-        /// <summary>glTF material index per sub-mesh</summary>
-        public readonly int[] materialIndices;
+        /// <summary>Original glTF mesh index</summary>
+        public readonly int meshIndex;
 
         /// <summary>Original glTF mesh primitive index per sub-mesh</summary>
         public readonly int[] primitiveIndices;
+        
+        /// <summary>glTF material index per sub-mesh</summary>
+        public readonly int[] materialIndices;
+        
+        /// <summary>Converted Unity Mesh</summary>
+        public readonly UnityEngine.Mesh mesh;
 
         // public readonly Dictionary<Extension, object> extensionData;
 
-        public Primitive(UnityEngine.Mesh mesh, int[] materialIndices, int[] primitiveIndices)
+        public Primitive(
+            int meshIndex,
+            int[] primitiveIndices,
+            int[] materialIndices,
+            UnityEngine.Mesh mesh
+            )
         {
-            this.mesh = mesh;
-            this.materialIndices = materialIndices;
+            this.meshIndex = meshIndex;
             this.primitiveIndices = primitiveIndices;
+            this.materialIndices = materialIndices;
+            this.mesh = mesh;
         }
     }
 }

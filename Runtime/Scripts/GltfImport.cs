@@ -3155,6 +3155,7 @@ namespace GLTFast
                                 m_Logger.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
                             }
                             var dracoContext = new PrimitiveDracoCreateContext(
+                                meshIndex,
                                 primitiveIndex,
                                 1,
                                 primitive.material<0 || gltf.materials[primitive.material].RequiresNormals,
@@ -3170,7 +3171,12 @@ namespace GLTFast
                             PrimitiveCreateContext c;
                             if (context == null)
                             {
-                                c = new PrimitiveCreateContext(primitiveIndex, cluster.Count, mesh.name);
+                                c = new PrimitiveCreateContext(
+                                    meshIndex,
+                                    primitiveIndex,
+                                    cluster.Count,
+                                    mesh.name
+                                    );
                             }
                             else
                             {
