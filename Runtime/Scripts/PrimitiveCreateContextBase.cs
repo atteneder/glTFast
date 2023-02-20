@@ -55,6 +55,6 @@ namespace GLTFast
 
         public MorphTargetsContext morphTargetsContext;
 
-        public abstract Task<Primitive?> CreatePrimitive();
+        public abstract Task<MeshResult?> CreatePrimitive();
     }
 }

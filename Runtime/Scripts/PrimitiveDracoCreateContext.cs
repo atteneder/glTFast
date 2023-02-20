@@ -63,7 +63,7 @@ namespace GLTFast {
                 );
         }
 
-        public override async Task<Primitive?> CreatePrimitive() {
+        public override async Task<MeshResult?> CreatePrimitive() {
 
             var mesh = m_DracoTask.Result;
             m_DracoTask.Dispose();
@@ -107,7 +107,7 @@ namespace GLTFast {
             // Profiler.EndSample();
 #endif
 
-            return new Primitive(
+            return new MeshResult(
                 MeshIndex,
                 new []{0}, // With Draco, only single primitive meshes are supported
                 m_Materials,

@@ -219,7 +219,7 @@ namespace GLTFast
         /// </summary>
         string[] m_NodeNames;
 
-        Primitive[] m_Primitives;
+        MeshResult[] m_Primitives;
         int[] m_MeshPrimitiveIndex;
         Matrix4x4[][] m_SkinsInverseBindMatrices;
 #if UNITY_ANIMATION
@@ -2887,7 +2887,7 @@ namespace GLTFast
             {
                 m_MeshPrimitiveIndex[meshCount] = totalPrimitives;
             }
-            m_Primitives = new Primitive[totalPrimitives];
+            m_Primitives = new MeshResult[totalPrimitives];
             m_PrimitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
             var tmpList = new List<JobHandle>(mainBufferTypes.Count);
             m_VertexAttributes = new Dictionary<MeshPrimitive, VertexBufferConfigBase>(mainBufferTypes.Count);

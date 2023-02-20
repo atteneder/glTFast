@@ -153,7 +153,7 @@ namespace GLTFast {
         public virtual void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            Primitive meshResult,
+            MeshResult meshResult,
             int meshIndex,
             uint[] joints = null,
             uint? rootJoint = null,
@@ -216,7 +216,7 @@ namespace GLTFast {
         public void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,
-            Primitive meshResult,
+            MeshResult meshResult,
             int meshIndex,
             uint instanceCount,
             NativeArray<Vector3>? positions,

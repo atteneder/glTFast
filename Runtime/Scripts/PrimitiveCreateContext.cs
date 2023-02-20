@@ -61,7 +61,7 @@ namespace GLTFast
 
         public override bool IsCompleted => jobHandle.IsCompleted;
 
-        public override async Task<Primitive?> CreatePrimitive()
+        public override async Task<MeshResult?> CreatePrimitive()
         {
             Profiler.BeginSample("CreatePrimitive");
             jobHandle.Complete();
@@ -164,7 +164,7 @@ namespace GLTFast
 
             Profiler.EndSample();
 
-            return new Primitive(MeshIndex, m_PrimitiveIndices, m_Materials, msh);
+            return new MeshResult(MeshIndex, m_PrimitiveIndices, m_Materials, msh);
         }
 
         void Dispose()

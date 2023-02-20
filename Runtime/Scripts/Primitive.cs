@@ -22,7 +22,7 @@ namespace GLTFast
     /// glTF meshes and Unity Meshes do not necessarily relate one-to-one. One glTF mesh (with multiple primitives)
     /// might be converted to multiple Unity Meshes (e.g. because of incompatible vertex buffer structure).
     /// </summary>
-    public readonly struct Primitive
+    public readonly struct MeshResult
     {
         /// <summary>Original glTF mesh index</summary>
         public readonly int meshIndex;
@@ -38,7 +38,7 @@ namespace GLTFast
 
         // public readonly Dictionary<Extension, object> extensionData;
 
-        public Primitive(
+        public MeshResult(
             int meshIndex,
             int[] primitiveIndices,
             int[] materialIndices,
