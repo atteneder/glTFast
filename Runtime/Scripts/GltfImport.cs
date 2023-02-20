@@ -1088,33 +1088,41 @@ namespace GLTFast
         /// </summary>
         /// <param name="gltfRoot"></param>
         /// <returns>False if a required extension is not supported. True otherwise.</returns>
-        bool CheckExtensionSupport(Root gltfRoot) {
-            if (!CheckExtensionSupport(gltfRoot.extensionsRequired)) {
+        bool CheckExtensionSupport(Root gltfRoot)
+        {
+            if (!CheckExtensionSupport(gltfRoot.extensionsRequired))
+            {
                 return false;
             }
             CheckExtensionSupport(gltfRoot.extensionsUsed, false);
             return true;
         }
 
-        bool CheckExtensionSupport(IEnumerable<string> extensions, bool required = true) {
+        bool CheckExtensionSupport(IEnumerable<string> extensions, bool required = true)
+        {
             if (extensions == null)
                 return true;
-            foreach (var ext in extensions) {
+            foreach (var ext in extensions)
+            {
                 var supported = k_SupportedExtensions.Contains(ext);
-                if (!supported && m_Extensions != null) {
-                    foreach (var extension in m_Extensions) {
-                        if (extension.Value.SupportsExtension(ext)) {
+                if (!supported && m_Extensions != null)
+                {
+                    foreach (var extension in m_Extensions)
+                    {
+                        if (extension.Value.SupportsExtension(ext))
+                        {
                             supported = true;
                             break;
                         }
                     }
                 }
-                if(!supported) {
+                if (!supported)
+                {
 #if !DRACO_UNITY
                     if (ext == ExtensionName.DracoMeshCompression)
                     {
                         m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ext);
-                        
+
                     }
 #endif
 #if !KTX_UNITY
@@ -1125,10 +1133,12 @@ namespace GLTFast
                     else
 #endif
                     {
-                        if (required) {
+                        if (required)
+                        {
                             m_Logger?.Error(LogCode.ExtensionUnsupported, ext);
                         }
-                        else {
+                        else
+                        {
                             m_Logger?.Warning(LogCode.ExtensionUnsupported, ext);
                         }
                     }
