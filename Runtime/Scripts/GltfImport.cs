@@ -3263,9 +3263,11 @@ namespace GLTFast
 
                     PrimitiveCreateContextBase context = m_PrimitiveContexts[i];
 
-                    if (MeshResultAssigned != null) {
+                    if (MeshResultAssigned != null)
+                    {
                         var primitiveIndices = new int[cluster.Count];
-                        for (var subMeshIndex = 0; subMeshIndex < cluster.Count; subMeshIndex++) {
+                        for (var subMeshIndex = 0; subMeshIndex < cluster.Count; subMeshIndex++)
+                        {
                             var subMesh = cluster[subMeshIndex];
                             primitiveIndices[subMeshIndex] = subMesh.Item1;
 
@@ -3276,7 +3278,7 @@ namespace GLTFast
                             );
                         }
                     }
-                    
+
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++)
                     {
                         var primitiveTuple = cluster[primIndex];

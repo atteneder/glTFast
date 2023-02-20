@@ -39,7 +39,7 @@ namespace GLTFast
 
         public PrimitiveCreateContext(
             int meshIndex,
-            int primitiveIndex, 
+            int primitiveIndex,
             int subMeshCount,
             string meshName
             )

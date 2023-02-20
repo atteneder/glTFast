@@ -295,7 +295,7 @@ namespace GLTFast
             }
 
             renderer.sharedMaterials = materials;
-            
+
             MeshAdded?.Invoke(
                 meshGo,
                 nodeIndex,
@@ -536,12 +536,12 @@ namespace GLTFast
                     m_Nodes[nodeIndex].SetActive(true);
                 }
             }
-            
+
             EndSceneCompleted?.Invoke();
 
             Profiler.EndSample();
         }
-        
+
         public delegate void MeshAddedDelegate(
             GameObject gameObject,
             uint nodeIndex,

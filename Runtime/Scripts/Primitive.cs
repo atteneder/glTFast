@@ -29,10 +29,10 @@ namespace GLTFast
 
         /// <summary>Original glTF mesh primitive index per sub-mesh</summary>
         public readonly int[] primitiveIndices;
-        
+
         /// <summary>glTF material index per sub-mesh</summary>
         public readonly int[] materialIndices;
-        
+
         /// <summary>Converted Unity Mesh</summary>
         public readonly UnityEngine.Mesh mesh;
 

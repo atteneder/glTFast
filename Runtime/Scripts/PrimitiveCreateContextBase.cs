@@ -41,7 +41,8 @@ namespace GLTFast
             int primitiveIndex,
             int subMeshCount,
             string meshName
-            ) {
+            )
+        {
             MeshIndex = meshIndex;
             PrimitiveIndex = primitiveIndex;
             m_Materials = new int[subMeshCount];
