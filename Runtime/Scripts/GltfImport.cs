@@ -2726,6 +2726,7 @@ namespace GLTFast
             }
         }
 
+        /// <summary>Is called when retrieving data from accessors should be performed/started.</summary>
         public event Action LoadAccessorDataEvent;
 
         /// <summary>Is called when a mesh and its primitives are assigned to a <see cref="Primitive"/> and
