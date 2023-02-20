@@ -2242,8 +2242,6 @@ namespace GLTFast
             }
             m_VertexAttributes = null;
 
-            m_PrimitiveContexts = null;
-
             // Unpin managed buffer arrays
             if (m_BufferHandles != null)
             {
