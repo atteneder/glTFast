@@ -2728,6 +2728,10 @@ namespace GLTFast
 
         public event Action LoadAccessorDataEvent;
 
+        /// <summary>Is called when a mesh and its primitives are assigned to a <see cref="Primitive"/> and
+        /// sub-meshes. Parameters are MeshResult index, mesh index and per sub-mesh primitive index</summary>
+        public event Action<int, int, int[]> MeshResultAssigned;
+
         async Task<bool> LoadAccessorData(Root gltf)
         {
 
@@ -3258,6 +3262,20 @@ namespace GLTFast
 
                     PrimitiveCreateContextBase context = m_PrimitiveContexts[i];
 
+                    if (MeshResultAssigned != null) {
+                        var primitiveIndices = new int[cluster.Count];
+                        for (var subMeshIndex = 0; subMeshIndex < cluster.Count; subMeshIndex++) {
+                            var subMesh = cluster[subMeshIndex];
+                            primitiveIndices[subMeshIndex] = subMesh.Item1;
+
+                            MeshResultAssigned?.Invoke(
+                                m_MeshPrimitiveIndex[meshIndex], // MeshResult index
+                                meshIndex, // glTF mesh index
+                                primitiveIndices
+                            );
+                        }
+                    }
+                    
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++)
                     {
                         var primitiveTuple = cluster[primIndex];
