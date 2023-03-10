@@ -254,7 +254,7 @@ namespace GLTFast.Logging
     public static class LogMessages
     {
 #if GLTFAST_REPORT
-        const string k_LinkProjectSetupTextureSupport = "See https://github.com/atteneder/glTFast/blob/main/Documentation~/ProjectSetup.md#texture-support for details.";
+        static readonly string k_LinkProjectSetupTextureSupport = $"See {GltfGlobals.GltfPackageName}/Documentation~/ProjectSetup.md#texture-support for details.";
 
         static readonly Dictionary<LogCode, string> k_FullMessages = new Dictionary<LogCode, string>() {
             { LogCode.AccessorAttributeTypeUnknown, "Unknown GLTFAccessorAttributeType" },
@@ -296,10 +296,10 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             { LogCode.MissingImageURL, "Image URL missing" },
             { LogCode.MorphTargetContextFail, "Retrieving morph target failed" },
             { LogCode.NamingOverride, "Overriding naming method to be OriginalUnique (animation requirement)" },
-            { LogCode.PackageMissing, "{0} package needs to be installed in order to support glTF extension {1}!\nSee https://github.com/atteneder/glTFast#installing for instructions" },
+            { LogCode.PackageMissing, $"{{0}} package needs to be installed in order to support glTF extension {{1}}!\nSee {GltfGlobals.GltfPackageName}/README.md#installing for instructions" },
             { LogCode.PrimitiveModeUnsupported, "Primitive mode {0} is untested" },
             { LogCode.RemapUnsupported, "{0} remap is not fully supported" },
-            { LogCode.ShaderMissing, "Shader \"{0}\" is missing. Make sure to include it in the build (see https://github.com/atteneder/glTFast/blob/main/Documentation%7E/ProjectSetup.md#materials-and-shader-variants )" },
+            { LogCode.ShaderMissing, $"Shader \"{{0}}\" is missing. Make sure to include it in the build (see {GltfGlobals.GltfPackageName}/Documentation~/ProjectSetup.md#materials-and-shader-variants )" },
             { LogCode.SkinMissing, "Skin missing" },
             { LogCode.SparseAccessor, "Sparse Accessor not supported ({0})" },
             { LogCode.TextureDownloadFailed, "Download texture {1} failed: {0}" },
