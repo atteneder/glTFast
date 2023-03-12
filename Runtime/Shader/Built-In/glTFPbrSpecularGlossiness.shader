@@ -19,6 +19,7 @@ Shader "glTF/PbrSpecularGlossiness"
 {
     Properties
     {
+        [HideInInspector] _MainTex ("My Texture", 2D) = "white" { }
         [MainColor] baseColorFactor("Diffuse", Color) = (1,1,1,1)
         [MainTexture] baseColorTexture("Diffuse Tex", 2D) = "white" {}
         baseColorTexture_Rotation ("Diffuse Tex Rotation", Vector) = (0,0,0,0)

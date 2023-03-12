@@ -22,6 +22,7 @@
 
 Shader "glTF/Unlit" {
 Properties {
+    [HideInInspector] _MainTex ("My Texture", 2D) = "white" { }
     [MainColor] baseColorFactor ("Main Color", Color) = (1,1,1,1)
     [MainTexture] baseColorTexture ("Base (RGB)", 2D) = "white" {}
     baseColorTexture_Rotation ("Texture rotation", Vector) = (0,0,0,0)

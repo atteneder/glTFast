@@ -19,6 +19,7 @@ Shader "glTF/PbrMetallicRoughness"
 {
     Properties
     {
+        [HideInInspector] _MainTex ("My Texture", 2D) = "white" { }
         [MainColor] baseColorFactor("Base Color", Color) = (1,1,1,1)
         [MainTexture] baseColorTexture("Base Color Tex", 2D) = "white" {}
         baseColorTexture_Rotation ("Base Color Tex Rotation", Vector) = (0,0,0,0)

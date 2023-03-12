@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Compiler error when using .NET Framework on 2021.3 and newer (#550)
 - `GltfBoundsAsset`'s instantiation settings are applied now
 - `GltfBoundsAsset`'s `BoxCollider` is positioned correctly, even if GameObject is not at scene origin (#565)
+- Shader 'glTF/PbrMetallicRoughness' doesn't have a texture property '_MainTex' in build-in pipline
 
 ## [5.0.0] - 2022-12-09
 This release contains multiple breaking changes. Please read the [upgrade guide](xref:doc-upgrade-guides#upgrade-to-50) for details.
