@@ -202,7 +202,10 @@ namespace GLTFast.Loading
         }
 
         /// <inheritdoc />
-        public Texture2D Texture => (m_Request?.downloadHandler as  DownloadHandlerTexture )?.texture;
+        public Texture2D GetTexture(bool linear)
+        {
+            return (m_Request?.downloadHandler as DownloadHandlerTexture)?.texture;
+        }
     }
 #endif
 }

@@ -122,16 +122,19 @@ namespace GLTFast.Editor
 
     class SyncTextureLoader : SyncFileLoader, ITextureDownload
     {
+        private Texture2D texture;
 
-        public Texture2D Texture { get; private set; }
-
-        public override bool Success => Texture != null;
+        public override bool Success => texture != null;
+        public Texture2D GetTexture(bool forceSampleLinear)
+        {
+            return texture;
+        }
 
         public SyncTextureLoader(Uri url)
             : base(url)
         {
-            Texture = AssetDatabase.LoadAssetAtPath<Texture2D>(url.OriginalString);
-            if (Texture == null)
+            texture = AssetDatabase.LoadAssetAtPath<Texture2D>(url.OriginalString);
+            if (texture == null)
             {
                 Error = $"Couldn't load texture at {url.OriginalString}";
             }
@@ -140,7 +143,7 @@ namespace GLTFast.Editor
         public override void Dispose()
         {
             base.Dispose();
-            Texture = null;
+            texture = null;
         }
     }
 }

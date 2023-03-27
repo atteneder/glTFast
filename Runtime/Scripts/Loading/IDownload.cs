@@ -84,6 +84,6 @@ namespace GLTFast.Loading
         /// <summary>
         /// Resulting texture
         /// </summary>
-        Texture2D Texture { get; }
+        Texture2D GetTexture(bool forceSampleLinear);
     }
 }

@@ -1309,10 +1309,11 @@ namespace GLTFast
                     Texture2D txt;
                     // TODO: Loading Jpeg/PNG textures like this creates major frame stalls. Main thread is waiting
                     // on Render thread, which is occupied by Gfx.UploadTextureData for 19 ms for a 2k by 2k texture
+                    
+                    var forceSampleLinear = m_ImageGamma!=null && !m_ImageGamma[imageIndex];
                     if (LoadImageFromBytes(imageIndex))
                     {
 #if UNITY_IMAGECONVERSION
-                        var forceSampleLinear = m_ImageGamma!=null && !m_ImageGamma[imageIndex];
                         txt = CreateEmptyTexture(m_GltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
                         txt.LoadImage(www.Data,!m_ImageReadable[imageIndex]);
@@ -1324,7 +1325,7 @@ namespace GLTFast
                     else
                     {
                         Assert.IsTrue(www is ITextureDownload);
-                        txt = ((ITextureDownload)www).Texture;
+                        txt = ((ITextureDownload)www).GetTexture(forceSampleLinear);
                         txt.name = GetImageName(m_GltfRoot.images[imageIndex], imageIndex);
                     }
                     www.Dispose();
