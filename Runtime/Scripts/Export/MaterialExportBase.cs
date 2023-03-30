@@ -304,7 +304,7 @@ namespace GLTFast.Export
                 def.extensions.KHR_texture_transform = new TextureTransform
                 {
                     scale = new[] { scale.x, scale.y },
-                    offset = new[] { offset.x, offset.y }
+                    offset = new[] { offset.x, 1 - offset.y - scale.y }
                 };
             }
         }
