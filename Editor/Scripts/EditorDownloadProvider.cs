@@ -49,7 +49,7 @@ namespace GLTFast.Editor
             return req;
         }
 
-        public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable) {
+        public async Task<ITextureDownload> RequestTexture(Uri url,bool nonReadable,bool forceLinear) {
             var req = new SyncTextureLoader(GetDependencyFromPreviousImport(url, GltfAssetDependency.Type.Texture));
             return req;
         }
@@ -125,9 +125,9 @@ namespace GLTFast.Editor
         private Texture2D texture;
 
         public override bool Success => texture != null;
-        public Texture2D GetTexture(bool forceSampleLinear)
+        public IDisposableTexture GetTexture(bool forceSampleLinear)
         {
-            return texture;
+            return texture.ToDisposableTexture();
         }
 
         public SyncTextureLoader(Uri url)

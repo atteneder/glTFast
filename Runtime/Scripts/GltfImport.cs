@@ -64,7 +64,6 @@ using Debug = UnityEngine.Debug;
 
 namespace GLTFast
 {
-
     using Loading;
     using Logging;
     using Materials;
@@ -177,7 +176,7 @@ namespace GLTFast
         /// Loaded glTF images (Raw texture without sampler settings)
         /// <seealso cref="m_Textures"/>
         /// </summary>
-        Texture2D[] m_Images;
+        IDisposableTexture[] m_Images;
 
         /// <summary>
         /// In glTF a texture is an image with a certain sampler setting applied.
@@ -185,7 +184,7 @@ namespace GLTFast
         /// other way around.
         /// /// <seealso cref="m_Images"/>
         /// </summary>
-        Texture2D[] m_Textures;
+        IDisposableTexture[] m_Textures;
 
         ImageFormat[] m_ImageFormats;
         bool[] m_ImageReadable;
@@ -211,6 +210,8 @@ namespace GLTFast
         Root m_GltfRoot;
         UnityEngine.Material[] m_Materials;
         List<UnityEngine.Object> m_Resources;
+
+        private List<IDisposable> m_DisposableResources;
 
         /// <summary>
         /// Unity's animation system addresses target GameObjects by hierarchical name.
@@ -620,6 +621,13 @@ namespace GLTFast
                 }
             }
 
+            void DisposeDisposables(IEnumerable<IDisposable> objects)
+            {
+                if (objects != null)
+                    foreach (var disposable in objects)
+                        disposable.Dispose();
+            }
+
             DisposeArray(m_Materials);
             m_Materials = null;
 
@@ -627,8 +635,7 @@ namespace GLTFast
             DisposeArray(m_AnimationClips);
             m_AnimationClips = null;
 #endif
-
-            DisposeArray(m_Textures);
+            DisposeDisposables(m_Textures);
             m_Textures = null;
 
             if (m_AccessorData != null)
@@ -642,6 +649,9 @@ namespace GLTFast
 
             DisposeArray(m_Resources);
             m_Resources = null;
+            
+            DisposeDisposables(m_DisposableResources);
+            m_DisposableResources = null;
         }
 
         /// <summary>
@@ -715,7 +725,7 @@ namespace GLTFast
         {
             if (m_Images != null && index >= 0 && index < m_Images.Length)
             {
-                return m_Images[index];
+                return m_Images[index].Texture;
             }
             return null;
         }
@@ -729,7 +739,7 @@ namespace GLTFast
         {
             if (m_Textures != null && index >= 0 && index < m_Textures.Length)
             {
-                return m_Textures[index];
+                return m_Textures[index].Texture;
             }
             return null;
         }
@@ -1081,7 +1091,7 @@ namespace GLTFast
 
                 Profiler.BeginSample("LoadImages.Prepare");
 
-                m_Images = new Texture2D[m_GltfRoot.images.Length];
+                m_Images = new IDisposableTexture[m_GltfRoot.images.Length];
                 m_ImageFormats = new ImageFormat[m_GltfRoot.images.Length];
 
                 if (QualitySettings.activeColorSpace == ColorSpace.Linear)
@@ -1193,7 +1203,7 @@ namespace GLTFast
                                 // Not Inside buffer
                                 if (!string.IsNullOrEmpty(img.uri))
                                 {
-                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), !m_ImageReadable[imageIndex], imgFormat == ImageFormat.Ktx);
+                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), !m_ImageReadable[imageIndex], imgFormat == ImageFormat.Ktx, m_ImageGamma != null && !m_ImageGamma[imageIndex]);
                                 }
                                 else
                                 {
@@ -1241,7 +1251,7 @@ namespace GLTFast
             // TODO: Investigate alternative: native texture creation in worker thread
             bool forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[imageIndex];
             var txt = CreateEmptyTexture(img, imageIndex, forceSampleLinear);
-            txt.LoadImage(data,!m_ImageReadable[imageIndex]);
+            txt.Texture.LoadImage(data,!m_ImageReadable[imageIndex]);
             m_Images[imageIndex] = txt;
             Profiler.EndSample();
         }
@@ -1306,7 +1316,7 @@ namespace GLTFast
                 if (www.Success)
                 {
                     var imageIndex = dl.Key;
-                    Texture2D txt;
+                    IDisposableTexture txt;
                     // TODO: Loading Jpeg/PNG textures like this creates major frame stalls. Main thread is waiting
                     // on Render thread, which is occupied by Gfx.UploadTextureData for 19 ms for a 2k by 2k texture
                     
@@ -1316,7 +1326,7 @@ namespace GLTFast
 #if UNITY_IMAGECONVERSION
                         txt = CreateEmptyTexture(m_GltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
-                        txt.LoadImage(www.Data,!m_ImageReadable[imageIndex]);
+                        txt.Texture.LoadImage(www.Data,!m_ImageReadable[imageIndex]);
 #else
                         m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
                         txt = null;
@@ -1326,7 +1336,7 @@ namespace GLTFast
                     {
                         Assert.IsTrue(www is ITextureDownload);
                         txt = ((ITextureDownload)www).GetTexture(forceSampleLinear);
-                        txt.name = GetImageName(m_GltfRoot.images[imageIndex], imageIndex);
+                        txt.Texture.name = GetImageName(m_GltfRoot.images[imageIndex], imageIndex);
                     }
                     www.Dispose();
                     m_Images[imageIndex] = txt;
@@ -1438,7 +1448,7 @@ namespace GLTFast
             return new Tuple<byte[], string>(data, mimeType);
         }
 
-        void LoadImage(int imageIndex, Uri url, bool nonReadable, bool isKtx)
+        void LoadImage(int imageIndex, Uri url, bool nonReadable, bool isKtx, bool forceLinear)
         {
 
             Profiler.BeginSample("LoadTexture");
@@ -1462,7 +1472,7 @@ namespace GLTFast
 #if UNITY_IMAGECONVERSION
                 var downloadTask = LoadImageFromBytes(imageIndex)
                     ? (TextureDownloadBase) new TextureDownload<IDownload>(m_DownloadProvider.Request(url))
-                    : new TextureDownload<ITextureDownload>(m_DownloadProvider.RequestTexture(url,nonReadable));
+                    : new TextureDownload<ITextureDownload>(m_DownloadProvider.RequestTexture(url,nonReadable,forceLinear));
                 if(m_TextureDownloadTasks==null) {
                     m_TextureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
                 }
@@ -1722,12 +1732,13 @@ namespace GLTFast
             }
 
             m_Resources = new List<UnityEngine.Object>();
+            m_DisposableResources = new List<IDisposable>();
 
             if (m_GltfRoot.images != null && m_GltfRoot.textures != null && m_GltfRoot.materials != null)
             {
                 if (m_Images == null)
                 {
-                    m_Images = new Texture2D[m_GltfRoot.images.Length];
+                    m_Images = new IDisposableTexture[m_GltfRoot.images.Length];
                 }
                 else
                 {
@@ -1791,7 +1802,7 @@ namespace GLTFast
                         {
                             jh.jobHandle.Complete();
 #if UNITY_IMAGECONVERSION
-                            m_Images[jh.imageIndex].LoadImage(jh.buffer,!m_ImageReadable[jh.imageIndex]);
+                            m_Images[jh.imageIndex].Texture.LoadImage(jh.buffer,!m_ImageReadable[jh.imageIndex]);
 #endif
                             jh.gcHandle.Free();
                             m_ImageCreateContexts.RemoveAt(i);
@@ -1811,7 +1822,7 @@ namespace GLTFast
             if (m_Images != null && m_GltfRoot.textures != null)
             {
                 SamplerKey defaultKey = new SamplerKey(new Sampler());
-                m_Textures = new Texture2D[m_GltfRoot.textures.Length];
+                m_Textures = new IDisposableTexture[m_GltfRoot.textures.Length];
                 var imageVariants = new Dictionary<SamplerKey, Texture2D>[m_Images.Length];
                 for (int textureIndex = 0; textureIndex < m_GltfRoot.textures.Length; textureIndex++)
                 {
@@ -1834,29 +1845,29 @@ namespace GLTFast
                     {
                         if (txt.sampler >= 0)
                         {
-                            sampler.Apply(img, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
+                            sampler.Apply(img.Texture, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
                         }
                         imageVariants[imageIndex] = new Dictionary<SamplerKey, Texture2D>();
-                        imageVariants[imageIndex][key] = img;
+                        imageVariants[imageIndex][key] = img.Texture;
                         m_Textures[textureIndex] = img;
                     }
                     else
                     {
                         if (imageVariants[imageIndex].TryGetValue(key, out var imgVariant))
                         {
-                            m_Textures[textureIndex] = imgVariant;
+                            m_Textures[textureIndex] = imgVariant.ToDisposableTexture();
                         }
                         else
                         {
-                            var newImg = UnityEngine.Object.Instantiate(img);
+                            var newImg = UnityEngine.Object.Instantiate(img.Texture);
                             m_Resources.Add(newImg);
 #if DEBUG
-                            newImg.name = $"{img.name}_sampler{txt.sampler}";
+                            newImg.name = $"{img.Texture.name}_sampler{txt.sampler}";
                             m_Logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
                             sampler?.Apply(newImg, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
                             imageVariants[imageIndex][key] = newImg;
-                            m_Textures[textureIndex] = newImg;
+                            m_Textures[textureIndex] = newImg.ToDisposableTexture();
                         }
                     }
                 }
@@ -2565,9 +2576,10 @@ namespace GLTFast
             for (int i = 0; i < m_Images.Length; i++)
             {
                 Profiler.BeginSample("CreateTexturesFromBuffers.ImageFormat");
-                if (m_Images[i] != null)
+                var image = m_Images[i];
+                if (image != null)
                 {
-                    m_Resources.Add(m_Images[i]);
+                    m_DisposableResources.Add(m_Images[i]);
                 }
                 var img = srcImages[i];
                 ImageFormat imgFormat = m_ImageFormats[i];
@@ -2621,7 +2633,7 @@ namespace GLTFast
                             contexts.Add(icc);
 
                             m_Images[i] = txt;
-                            m_Resources.Add(txt);
+                            m_DisposableResources.Add(txt);
                             Profiler.EndSample();
                         }
                     }
@@ -2642,7 +2654,7 @@ namespace GLTFast
             return job;
         }
 
-        Texture2D CreateEmptyTexture(Image img, int index, bool forceSampleLinear)
+        IDisposableTexture CreateEmptyTexture(Image img, int index, bool forceSampleLinear)
         {
 #if UNITY_2022_1_OR_NEWER
             var textureCreationFlags = TextureCreationFlags.DontUploadUponCreate | TextureCreationFlags.DontInitializePixels;
@@ -2664,7 +2676,7 @@ namespace GLTFast
                 anisoLevel = m_Settings.AnisotropicFilterLevel,
                 name = GetImageName(img, index)
             };
-            return txt;
+            return txt.ToDisposableTexture();
         }
 
         static string GetImageName(Image img, int index)
@@ -2672,7 +2684,7 @@ namespace GLTFast
             return string.IsNullOrEmpty(img.name) ? $"image_{index}" : img.name;
         }
 
-        static void SafeDestroy(UnityEngine.Object obj)
+        internal static void SafeDestroy(UnityEngine.Object obj)
         {
 #if UNITY_EDITOR
             if (!Application.isPlaying) {

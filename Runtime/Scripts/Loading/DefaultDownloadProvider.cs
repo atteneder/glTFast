@@ -47,7 +47,7 @@ namespace GLTFast.Loading
         /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
         /// <returns>Object representing the request</returns>
 #pragma warning disable CS1998
-        public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable)
+        public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable, bool forceLinear)
         {
 #pragma warning restore CS1998
 #if UNITY_WEBREQUEST_TEXTURE
@@ -202,9 +202,9 @@ namespace GLTFast.Loading
         }
 
         /// <inheritdoc />
-        public Texture2D GetTexture(bool linear)
+        public IDisposableTexture GetTexture(bool linear)
         {
-            return (m_Request?.downloadHandler as DownloadHandlerTexture)?.texture;
+            return (m_Request?.downloadHandler as DownloadHandlerTexture)?.texture.ToDisposableTexture();
         }
     }
 #endif

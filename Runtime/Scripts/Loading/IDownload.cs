@@ -38,8 +38,9 @@ namespace GLTFast.Loading
         /// </summary>
         /// <param name="url">URI to request</param>
         /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
+        /// <param name="forceLinear">Force linear color space</param>
         /// <returns>Object representing the request</returns>
-        Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable);
+        Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable, bool forceLinear);
     }
 
     /// <summary>
@@ -84,6 +85,6 @@ namespace GLTFast.Loading
         /// <summary>
         /// Resulting texture
         /// </summary>
-        Texture2D GetTexture(bool forceSampleLinear);
+        IDisposableTexture GetTexture(bool forceSampleLinear);
     }
 }
