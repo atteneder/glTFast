@@ -256,9 +256,9 @@ namespace GLTFast
             var hasMorphTargets = mesh.blendShapeCount > 0;
             if (joints == null && !hasMorphTargets)
             {
-                var mf = meshGo.AddComponent<MeshFilter>();
+                var mf = meshGo.AddComponent<MeshFilter>() ?? meshGo.GetComponent<MeshFilter>();
                 mf.mesh = mesh;
-                var mr = meshGo.AddComponent<MeshRenderer>();
+                var mr = meshGo.AddComponent<MeshRenderer>() ?? meshGo.GetComponent<MeshRenderer>();
                 renderer = mr;
             }
             else
