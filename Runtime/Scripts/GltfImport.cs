@@ -649,7 +649,7 @@ namespace GLTFast
 
             DisposeArray(m_Resources);
             m_Resources = null;
-            
+
             DisposeDisposables(m_DisposableResources);
             m_DisposableResources = null;
         }
@@ -1319,7 +1319,7 @@ namespace GLTFast
                     IDisposableTexture txt;
                     // TODO: Loading Jpeg/PNG textures like this creates major frame stalls. Main thread is waiting
                     // on Render thread, which is occupied by Gfx.UploadTextureData for 19 ms for a 2k by 2k texture
-                    
+
                     var forceSampleLinear = m_ImageGamma!=null && !m_ImageGamma[imageIndex];
                     if (LoadImageFromBytes(imageIndex))
                     {
@@ -1376,7 +1376,7 @@ namespace GLTFast
                 var forceSampleLinear = m_ImageGamma!=null && !m_ImageGamma[imageIndex];
                 var result = await ktxContext.LoadTexture2D(forceSampleLinear);
                 if (result.errorCode == ErrorCode.Success) {
-                    m_Images[imageIndex] = result.texture;
+                    m_Images[imageIndex] = result.texture.ToDisposableTexture();
                     return true;
                 }
             } else {
@@ -3822,7 +3822,7 @@ namespace GLTFast
                 var i = kTask.Result.index;
                 if (kTask.Result.result.errorCode == ErrorCode.Success) {
                     var ktx = m_KtxLoadContextsBuffer[i];
-                    m_Images[ktx.imageIndex] = kTask.Result.result.texture;
+                    m_Images[ktx.imageIndex] = kTask.Result.result.texture.ToDisposableTexture();
                     await m_DeferAgent.BreakPoint();
                 }
                 ktxTasks.Remove(kTask);
