@@ -739,7 +739,7 @@ namespace GLTFast
         {
             if (m_Textures != null && index >= 0 && index < m_Textures.Length)
             {
-                return m_Textures[index].Texture;
+                return m_Textures[index]?.Texture;
             }
             return null;
         }
@@ -1108,7 +1108,8 @@ namespace GLTFast
                         )
                         {
                             var imageIndex = m_GltfRoot.textures[txtInfo.index].GetImageIndex();
-                            m_ImageGamma[imageIndex] = true;
+                            if (imageIndex >= 0)
+                                m_ImageGamma[imageIndex] = true;
                         }
                     }
 
@@ -1137,7 +1138,8 @@ namespace GLTFast
                     var texture = m_GltfRoot.textures[i];
                     if(texture.IsKtx) {
                         var imgIndex = texture.GetImageIndex();
-                        m_ImageFormats[imgIndex] = ImageFormat.Ktx;
+                        if (imgIndex >= 0)
+                            m_ImageFormats[imgIndex] = ImageFormat.Ktx;
                     }
                 }
 #endif // KTX_UNITY
@@ -1148,11 +1150,15 @@ namespace GLTFast
                 foreach (var txt in m_GltfRoot.textures)
                 {
                     var imageIndex = txt.GetImageIndex();
-                    if (imageVariants[imageIndex] == null)
+
+                    if (imageIndex >= 0)
                     {
-                        imageVariants[imageIndex] = new HashSet<int>();
+                        if (imageVariants[imageIndex] == null)
+                        {
+                            imageVariants[imageIndex] = new HashSet<int>();
+                        }
+                        imageVariants[imageIndex].Add(txt.sampler);
                     }
-                    imageVariants[imageIndex].Add(txt.sampler);
                 }
 
                 m_ImageReadable = new bool[m_Images.Length];
@@ -1840,34 +1846,38 @@ namespace GLTFast
                     }
 
                     var imageIndex = txt.GetImageIndex();
-                    var img = m_Images[imageIndex];
-                    if (imageVariants[imageIndex] == null)
+
+                    if (imageIndex >= 0)
                     {
-                        if (txt.sampler >= 0)
+                        var img = m_Images[imageIndex];
+                        if (imageVariants[imageIndex] == null)
                         {
-                            sampler.Apply(img.Texture, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
-                        }
-                        imageVariants[imageIndex] = new Dictionary<SamplerKey, Texture2D>();
-                        imageVariants[imageIndex][key] = img.Texture;
-                        m_Textures[textureIndex] = img;
-                    }
-                    else
-                    {
-                        if (imageVariants[imageIndex].TryGetValue(key, out var imgVariant))
-                        {
-                            m_Textures[textureIndex] = imgVariant.ToDisposableTexture();
+                            if (txt.sampler >= 0)
+                            {
+                                sampler.Apply(img.Texture, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
+                            }
+                            imageVariants[imageIndex] = new Dictionary<SamplerKey, Texture2D>();
+                            imageVariants[imageIndex][key] = img.Texture;
+                            m_Textures[textureIndex] = img;
                         }
                         else
                         {
-                            var newImg = UnityEngine.Object.Instantiate(img.Texture);
-                            m_Resources.Add(newImg);
+                            if (imageVariants[imageIndex].TryGetValue(key, out var imgVariant))
+                            {
+                                m_Textures[textureIndex] = imgVariant.ToDisposableTexture();
+                            }
+                            else
+                            {
+                                var newImg = UnityEngine.Object.Instantiate(img.Texture);
+                                m_Resources.Add(newImg);
 #if DEBUG
-                            newImg.name = $"{img.Texture.name}_sampler{txt.sampler}";
-                            m_Logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
+                                newImg.name = $"{img.Texture.name}_sampler{txt.sampler}";
+                                m_Logger?.Warning(LogCode.ImageMultipleSamplers,imageIndex.ToString());
 #endif
-                            sampler?.Apply(newImg, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
-                            imageVariants[imageIndex][key] = newImg;
-                            m_Textures[textureIndex] = newImg.ToDisposableTexture();
+                                sampler?.Apply(newImg, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
+                                imageVariants[imageIndex][key] = newImg;
+                                m_Textures[textureIndex] = newImg.ToDisposableTexture();
+                            }
                         }
                     }
                 }
