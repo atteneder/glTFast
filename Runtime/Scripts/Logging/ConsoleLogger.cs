@@ -24,10 +24,12 @@ namespace GLTFast.Logging
     /// </summary>
     public class ConsoleLogger : ICodeLogger
     {
+        public LogCode LastErrorCode { get; private set; }
 
         /// <inheritdoc />
         public void Error(LogCode code, params string[] messages)
         {
+            LastErrorCode = code;
             Debug.LogError(LogMessages.GetFullMessage(code, messages));
         }
 
