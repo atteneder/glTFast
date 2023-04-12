@@ -101,7 +101,13 @@ namespace GLTFast.Materials {
         // ReSharper restore MemberCanBeProtected.Global
         
         public static string k_ShaderGraphsPrefix = "Shader Graphs/";
-
+#if UNITY_EDITOR
+#if UNITY_SHADER_GRAPH_12_OR_NEWER || USING_HDRP_10_OR_NEWER
+        public static string k_ShaderPathPrefix = "Packages/com.atteneder.gltfast/Runtime/Shader/";
+#else
+        public static string k_ShaderPathPrefix = "Packages/com.atteneder.gltfast/Runtime/Shader/Legacy/";
+#endif
+#endif
         const string k_OcclusionKeyword = "_OCCLUSION";
         const string k_EmissiveKeyword = "_EMISSIVE";
 
@@ -485,9 +491,21 @@ namespace GLTFast.Materials {
 #endif
         }
 
-        Shader LoadShaderByName(string shaderName) {
-
-            return FindShader($"{k_ShaderGraphsPrefix}{shaderName}", Logger);
+        Shader LoadShaderByName(string shaderName)
+        {
+            var loadedShader = FindShader($"{k_ShaderGraphsPrefix}{shaderName}", Logger);
+#if UNITY_EDITOR
+            if (loadedShader == null)
+            {
+                var shaderPath = $"{k_ShaderPathPrefix}{shaderName}.shadergraph";
+                var shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderPath);
+                if (shader == null) {
+                    Logger?.Error($"Cannot load shader at path {shaderPath}");
+                }
+                return shader;
+            }
+#endif
+            return loadedShader;
         }
 
         protected virtual void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
