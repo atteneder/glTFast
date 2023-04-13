@@ -57,6 +57,10 @@ namespace GLTFast
         /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_transform/README.md">KHR_texture_transform</see> glTF extension
         /// </summary>
         TextureTransform,
+        /// <summary>
+        /// <see href="https://github.com/ux3d/glTF/blob/extensions/KHR_animation_pointer/extensions/2.0/Khronos/KHR_animation_pointer/README.md">KHR_texture_transform</see> glTF extension
+        /// </summary>
+        AnimationPointer
     }
 
     /// <summary>
@@ -104,6 +108,10 @@ namespace GLTFast
         /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> glTF extension
         /// </summary>
         public const string LightsPunctual = "KHR_lights_punctual";
+        /// <summary>
+        /// <see href="https://github.com/ux3d/glTF/blob/extensions/KHR_animation_pointer/extensions/2.0/Khronos/KHR_animation_pointer/README.md">KHR_texture_transform</see> glTF extension
+        /// </summary>
+        public const string AnimationPointer = "KHR_animation_pointer";
 
         /// <summary>
         /// Returns the official name of the glTF extension
@@ -114,6 +122,8 @@ namespace GLTFast
         {
             switch (extension)
             {
+                case Extension.AnimationPointer:
+                    return AnimationPointer;
                 case Extension.DracoMeshCompression:
                     return DracoMeshCompression;
                 case Extension.LightsPunctual:

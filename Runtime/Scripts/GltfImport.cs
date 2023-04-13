@@ -118,6 +118,9 @@ namespace GLTFast
 #if MESHOPT
             ExtensionName.MeshoptCompression,
 #endif
+#if UNITY_ANIMATION
+            ExtensionName.AnimationPointer,
+#endif
             ExtensionName.MaterialsPbrSpecularGlossiness,
             ExtensionName.MaterialsUnlit,
             ExtensionName.TextureTransform,
@@ -125,6 +128,7 @@ namespace GLTFast
             ExtensionName.MaterialsTransmission,
             ExtensionName.MeshGPUInstancing,
             ExtensionName.LightsPunctual,
+
         };
 
         static IDeferAgent s_DefaultDeferAgent;
@@ -210,6 +214,7 @@ namespace GLTFast
         /// <summary>Main glTF data structure</summary>
         Root m_GltfRoot;
         UnityEngine.Material[] m_Materials;
+
         List<UnityEngine.Object> m_Resources;
 
         /// <summary>
@@ -224,6 +229,10 @@ namespace GLTFast
         Matrix4x4[][] m_SkinsInverseBindMatrices;
 #if UNITY_ANIMATION
         AnimationClip[] m_AnimationClips;
+        Dictionary<int, List<int>> m_CameraLookup;
+        Dictionary<int, List<int>> m_LightLookup;
+        Dictionary<int, List<int>> m_MaterialLookup;
+        Dictionary<int, List<int>> m_NodeLookup;
 #endif
 
 #if UNITY_EDITOR
@@ -1721,6 +1730,7 @@ namespace GLTFast
             }
 
             m_Resources = new List<UnityEngine.Object>();
+            m_MaterialLookup = new Dictionary<int, List<int>>();
 
             if (m_GltfRoot.images != null && m_GltfRoot.textures != null && m_GltfRoot.materials != null)
             {
@@ -1961,6 +1971,71 @@ namespace GLTFast
 
 #if UNITY_ANIMATION
             if (m_GltfRoot.HasAnimation && m_Settings.AnimationMethod != AnimationMethod.None) {
+                // Enumerate for KHR_animation_pointer
+                if (Array.IndexOf(m_GltfRoot.extensionsUsed, ExtensionName.AnimationPointer) > -1) {
+
+                    m_CameraLookup = new Dictionary<int, List<int>>();
+                    m_LightLookup = new Dictionary<int, List<int>>();
+                    m_NodeLookup = new Dictionary<int, List<int>>();
+
+
+                    for (int nodeId = 0; nodeId < m_GltfRoot.nodes.Length; nodeId++) {
+                        var node = m_GltfRoot.nodes[nodeId];
+
+                        if (m_GltfRoot.nodes[nodeId].mesh > 0) {
+                            if (!m_NodeLookup.ContainsKey(m_GltfRoot.nodes[nodeId].mesh)) {
+                                m_NodeLookup.Add(node.mesh, new List<int>());
+                            }
+                            m_NodeLookup[node.mesh].Add(nodeId);
+                        }
+
+                        if(node.camera > 0) {
+                            if(!m_CameraLookup.ContainsKey(node.camera)) {
+                                m_CameraLookup.Add(node.camera, new List<int>());
+                            }
+                            m_CameraLookup[node.camera].Add(nodeId);
+                        }
+
+                        if(node.extensions?.KHR_lights_punctual != null && node.extensions.KHR_lights_punctual.light >= 0) {
+                            if(!m_LightLookup.ContainsKey(node.extensions.KHR_lights_punctual.light)) {
+                                m_LightLookup.Add(node.extensions.KHR_lights_punctual.light, new List<int>());
+                            }
+                            m_LightLookup[node.extensions.KHR_lights_punctual.light].Add(nodeId);
+                        }
+                    }
+
+                    var primMaterialLookup = new Dictionary<int, List<int>>();
+
+                    for (int meshId = 0; meshId < m_GltfRoot.meshes.Length; meshId++) {
+                        var mesh = m_GltfRoot.meshes[meshId];
+                        
+                        foreach (var primitive in mesh.primitives) {
+                            if (!primMaterialLookup.ContainsKey(primitive.material)) {
+                                primMaterialLookup.Add(primitive.material, new List<int>());
+                            }
+                            primMaterialLookup[primitive.material].Add(meshId);
+                        }
+                    }
+
+                    m_MaterialLookup = new Dictionary<int, List<int>>();
+
+                    for (int materialId = 0; materialId < m_GltfRoot.materials.Length; materialId++) {
+                        if (primMaterialLookup.ContainsKey(materialId))
+                        {
+                            if(!m_MaterialLookup.ContainsKey(materialId)) {
+                                m_MaterialLookup.Add(materialId, new List<int>());
+                            }
+
+                            foreach (var meshId in primMaterialLookup[materialId])
+                            {
+                                if (m_NodeLookup.ContainsKey(meshId))
+                                {
+                                    m_MaterialLookup[materialId].AddRange(m_NodeLookup[meshId]);
+                                }
+                            }
+                        }
+                    }
+                }
 
                 m_AnimationClips = new AnimationClip[m_GltfRoot.animations.Length];
                 for (var i = 0; i < m_GltfRoot.animations.Length; i++) {
@@ -1984,27 +2059,29 @@ namespace GLTFast
                             continue;
                         }
 
-                        var path = AnimationUtils.CreateAnimationPath(channel.target.node,m_NodeNames,parentIndex);
-
                         var times = ((AccessorNativeData<float>) m_AccessorData[sampler.input]).data;
 
                         switch (channel.target.GetPath()) {
                             case AnimationChannel.Path.Translation: {
+                                var path = AnimationUtils.CreateAnimationPath(channel.target.node,m_NodeNames,parentIndex);
                                 var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
                                 AnimationUtils.AddTranslationCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Rotation: {
+                                var path = AnimationUtils.CreateAnimationPath(channel.target.node,m_NodeNames,parentIndex);
                                 var values= ((AccessorNativeData<Quaternion>) m_AccessorData[sampler.output]).data;
                                 AnimationUtils.AddRotationCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Scale: {
+                                var path = AnimationUtils.CreateAnimationPath(channel.target.node,m_NodeNames,parentIndex);
                                 var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
                                 AnimationUtils.AddScaleCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Weights: {
+                                var path = AnimationUtils.CreateAnimationPath(channel.target.node,m_NodeNames,parentIndex);
                                 var values= ((AccessorNativeData<float>) m_AccessorData[sampler.output]).data;
                                 var node = m_GltfRoot.nodes[channel.target.node];
                                 if (node.mesh < 0 || node.mesh >= m_GltfRoot.meshes.Length) {
@@ -2043,9 +2120,41 @@ namespace GLTFast
                                 // HACK END
                                 break;
                             }
-                            case AnimationChannel.Path.Pointer:
-                                m_Logger?.Warning(LogCode.AnimationTargetPathUnsupported,channel.target.GetPath().ToString());
+                            case AnimationChannel.Path.Pointer: {
+                                var rawPointer = channel.target.extensions.KHR_animation_pointer.pointer;
+                                var pointerData = new AnimationPointerData(rawPointer);
+
+                                if (pointerData.TargetId < 0)
+                                    break;
+
+                                var nodeList = new List<int>();
+
+                                switch(pointerData.PointerType) {
+                                    case PointerType.Camera:
+                                        nodeList = m_CameraLookup[pointerData.TargetId];
+                                        break;
+                                    case PointerType.Material:
+                                        nodeList = m_MaterialLookup[pointerData.TargetId];
+                                        break;
+                                    case PointerType.Light:
+                                        nodeList = m_LightLookup[pointerData.TargetId];
+                                        break;
+                                }
+
+                                foreach (var nodeId in nodeList) {
+                                    var path = AnimationUtils.CreateAnimationPath(nodeId,m_NodeNames,parentIndex);
+
+                                    AnimationUtils.AddCurve(
+                                        m_AnimationClips[i],
+                                        path,
+                                        pointerData,
+                                        times,
+                                        m_AccessorData[sampler.output],
+                                        sampler.GetInterpolationType()
+                                    ); 
+                                }
                                 break;
+                            }
                             default:
                                 m_Logger?.Error(LogCode.AnimationTargetPathUnsupported,channel.target.GetPath().ToString());
                                 break;
@@ -3000,6 +3109,9 @@ namespace GLTFast
                             case AnimationChannel.Path.Weights:
                                 SetAccessorUsage(accessorIndex,AccessorUsage.Weight);
                                 break;
+                            case AnimationChannel.Path.Pointer:
+                                SetAccessorUsage(accessorIndex,AccessorUsage.Pointer);
+                                break;
                         }
                     }
                 }
@@ -3079,6 +3191,47 @@ namespace GLTFast
                         m_AccessorData[i] = ads;
                         break;
                     }
+
+                    // Pointers
+                    case GltfAccessorAttributeType.SCALAR when m_AccessorUsage[i]==AccessorUsage.Pointer:
+                    {
+                        var ads = new AccessorNativeData<float>();
+                        GetScalarJob(gltf, i, out var times, out var jh);
+                        if (times.HasValue) {
+                            ads.data = times.Value;
+                        }
+                        if (jh.HasValue) {
+                            tmpList.Add(jh.Value);
+                        }
+                        m_AccessorData[i] = ads;
+                        break;
+                    }
+                    case GltfAccessorAttributeType.VEC2 when m_AccessorUsage[i]==AccessorUsage.Pointer:
+                    {
+                        var ads = new AccessorNativeData<Vector2>();
+                        GetVector2Job(gltf, i, out ads.data, out var jh);
+                        tmpList.Add(jh.Value);
+                        m_AccessorData[i] = ads;
+                        break;
+                    }
+                    case GltfAccessorAttributeType.VEC3 when m_AccessorUsage[i]==AccessorUsage.Pointer:
+                    {
+                        var ads = new AccessorNativeData<Vector3>();
+                        GetVector3Job(gltf, i, out ads.data, out var jh, false);
+                        tmpList.Add(jh.Value);
+                        m_AccessorData[i] = ads;
+                        break;
+                    }
+                    case GltfAccessorAttributeType.VEC4 when m_AccessorUsage[i]==AccessorUsage.Pointer:
+                    {
+                        var ads = new AccessorNativeData<Vector4>();
+                        GetVector4Job(gltf, i, out ads.data, out var jh);
+                        tmpList.Add(jh.Value);
+                        m_AccessorData[i] = ads;
+                        break;
+                    }
+
+                    
 #endif
                 }
                 Profiler.EndSample();
@@ -3486,6 +3639,45 @@ namespace GLTFast
             Profiler.EndSample();
         }
 
+        unsafe void GetVector2Job(Root gltf, int accessorIndex, out NativeArray<Vector2> vectors, out JobHandle? jobHandle)
+        {
+            Profiler.BeginSample("GetVector2Job");
+            var accessor = gltf.accessors[accessorIndex];
+            var bufferView = GetBufferView(accessor.bufferView, accessor.byteOffset);
+
+            Profiler.BeginSample("Alloc");
+            vectors = new NativeArray<Vector2>(accessor.count, Allocator.Persistent);
+            Profiler.EndSample();
+
+            Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.VEC2);
+            if (accessor.IsSparse)
+            {
+                m_Logger.Error(LogCode.SparseAccessor, "Vector2");
+            }
+
+            Profiler.BeginSample("CreateJob");
+            switch (accessor.componentType)
+            {
+                case GltfComponentType.Float:
+                    {
+                        var job = new MemCopyJob
+                        {
+                            input = (float*)bufferView.GetUnsafeReadOnlyPtr(),
+                            bufferSize = accessor.count * 8,
+                            result = (float*)vectors.GetUnsafePtr()
+                        };
+                        jobHandle = job.Schedule();
+                        break;
+                    }
+                default:
+                    m_Logger?.Error(LogCode.IndexFormatInvalid, accessor.componentType.ToString());
+                    jobHandle = null;
+                    break;
+            }
+            Profiler.EndSample();
+            Profiler.EndSample();
+        }
+
         unsafe void GetVector3Job(Root gltf, int accessorIndex, out NativeArray<Vector3> vectors, out JobHandle? jobHandle, bool flip)
         {
             Profiler.BeginSample("GetVector3Job");
@@ -3664,6 +3856,46 @@ namespace GLTFast
                 // Non-normalized
                 m_Logger?.Error(LogCode.AnimationFormatInvalid, accessor.componentType.ToString());
             }
+            Profiler.EndSample();
+        }
+
+        unsafe void GetVector4Job(Root gltf, int accessorIndex, out NativeArray<Vector4> vectors, out JobHandle? jobHandle)
+        {
+            Profiler.BeginSample("GetVector4Job");
+            // index
+            var accessor = gltf.accessors[accessorIndex];
+            var bufferView = GetBufferView(accessor.bufferView, accessor.byteOffset);
+
+            Profiler.BeginSample("Alloc");
+            vectors = new NativeArray<Vector4>(accessor.count, Allocator.Persistent);
+            Profiler.EndSample();
+
+            Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.VEC4);
+            if (accessor.IsSparse)
+            {
+                m_Logger.Error(LogCode.SparseAccessor, "Vector4");
+            }
+
+            Profiler.BeginSample("CreateJob");
+            switch (accessor.componentType)
+            {
+                case GltfComponentType.Float:
+                    {
+                        var job = new MemCopyJob
+                        {
+                            input = (float*)bufferView.GetUnsafeReadOnlyPtr(),
+                            bufferSize = accessor.count * 16,
+                            result = (float*)vectors.GetUnsafePtr()
+                        };
+                        jobHandle = job.Schedule();
+                        break;
+                    }
+                default:
+                    m_Logger?.Error(LogCode.IndexFormatInvalid, accessor.componentType.ToString());
+                    jobHandle = null;
+                    break;
+            }
+            Profiler.EndSample();
             Profiler.EndSample();
         }
 

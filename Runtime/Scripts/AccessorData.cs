@@ -38,7 +38,8 @@ namespace GLTFast
         Rotation = 1 << 11,
         Scale = 1 << 12,
         Weight = 1 << 13,
-        RequiredForInstantiation = 1 << 14
+        RequiredForInstantiation = 1 << 14,
+        Pointer = 1 << 15,
     }
 
     abstract class AccessorDataBase

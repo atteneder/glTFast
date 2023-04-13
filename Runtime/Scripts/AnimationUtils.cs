@@ -30,20 +30,406 @@ namespace GLTFast {
 
         const float k_TimeEpsilon = 0.00001f;
 
+        public static void AddCurve(AnimationClip clip, string animationPath, AnimationPointerData data, NativeArray<float> times, AccessorDataBase values, InterpolationType interpolationType) {
+            switch(data.accessorType) {
+                case GltfAccessorAttributeType.SCALAR:
+                    var scalarVals = ((AccessorNativeData<float>)values).data;
+                    AddScalarCurve(clip, animationPath, data.AnimationProperties[0], data.AnimationTargetType, times, scalarVals, interpolationType);
+                    break;
+                case GltfAccessorAttributeType.VEC2:
+                    var float2Vals = ((AccessorNativeData<Vector2>)values).data.Reinterpret<float2>();
+                    AddVec2Curves(clip, animationPath, data.AnimationProperties, data.AnimationTargetType, times, float2Vals, interpolationType);
+                    break;
+                case GltfAccessorAttributeType.VEC3:
+                    var float3Vals = ((AccessorNativeData<Vector3>)values).data.Reinterpret<float3>();
+                    AddVec3Curves(clip, animationPath, data.AnimationProperties, data.AnimationTargetType, times, float3Vals, interpolationType);
+                    break;
+                case GltfAccessorAttributeType.VEC4:
+                    var float4Vals = ((AccessorNativeData<Vector4>)values).data.Reinterpret<float4>();
+                    AddVec4Curves(clip, animationPath, data.AnimationProperties, data.AnimationTargetType, times, float4Vals, interpolationType);
+                    break;
+            }
+        }
+
         public static void AddTranslationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType) {
             // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
             var values = translations.Reinterpret<float3>();
-            AddVec3Curves(clip, animationPath, "localPosition.", times, values, interpolationType);
+            string[] translationNames = {
+                "localPosition.x",
+                "localPosition.y",
+                "localPosition.z"
+            };
+            AddVec3Curves(clip, animationPath, translationNames, typeof(Transform), times, values, interpolationType);
         }
 
         public static void AddScaleCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType) {
             // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
             var values = translations.Reinterpret<float3>();
-            AddVec3Curves(clip, animationPath, "localScale.", times, values, interpolationType);
+            string[] scaleNames = {
+                "localScale.x",
+                "localScale.y",
+                "localScale.z"
+            };
+            AddVec3Curves(clip, animationPath, scaleNames, typeof(Transform), times, values, interpolationType);
         }
 
-        public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Quaternion> quaternions, InterpolationType interpolationType) {
-            Profiler.BeginSample("AnimationUtils.AddRotationCurves");
+        public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Quaternion> rotations, InterpolationType interpolationType) {
+            string[] rotationNames = {
+                "localRotation.x",
+                "localRotation.y",
+                "localRotation.z",
+                "localRotation.w"
+            };
+            AddQuaternionCurves(clip, animationPath, rotationNames, typeof(Transform), times, rotations, interpolationType);
+        }
+
+        public static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyName, Type targetType, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddScalarCurve");
+            var curve = new AnimationCurve();
+
+#if DEBUG
+            uint duplicates = 0;
+#endif
+
+            switch (interpolationType) {
+                case InterpolationType.Step: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        curve.AddKey( new Keyframe(time, value, float.PositiveInfinity, 0) );
+                    }
+                    break;
+                }
+                case InterpolationType.CubicSpline: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var inTangent = values[i*3];
+                        var value = values[i*3 + 1];
+                        var outTangent = values[i*3 + 2];
+                        curve.AddKey( new Keyframe(time, value, inTangent, outTangent, .5f, .5f ) );
+                    }
+                    break;
+                }
+                default: { // LINEAR
+                    var prevTime = times[0];
+                    var prevValue = values[0];
+                    float inTangent = values[0];
+
+                    for (var i = 1; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+
+                        if (prevTime >= time) {
+                            // Time value is not increasing, so we ignore this keyframe
+                            // This happened on some Sketchfab files (see #298)
+#if DEBUG
+                            duplicates++;
+#endif
+                            continue;
+                        }
+
+                        var dT = time - prevTime;
+                        var dV = value - prevValue;
+                        float outTangent;
+                        if (dT < k_TimeEpsilon) {
+                            outTangent = (dV < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                        } else {
+                            outTangent = dV / dT;
+                        }
+
+                        curve.AddKey( new Keyframe(prevTime, prevValue, inTangent, outTangent ) );
+
+                        inTangent = outTangent;
+                        prevTime = time;
+                        prevValue = value;
+                    }
+
+                    curve.AddKey( new Keyframe(prevTime, prevValue, inTangent, 0 ) );
+
+                    break;
+                }
+            }
+
+            clip.SetCurve(animationPath, targetType, propertyName, curve);
+            Profiler.EndSample();
+#if DEBUG
+            if (duplicates > 0) {
+                ReportDuplicateKeyframes();
+            }
+#endif
+        }
+
+        public static void AddVec2Curves(AnimationClip clip, string animationPath, string[] propertyNames, Type targetType, NativeArray<float> times, NativeArray<float2> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddVec2Curves");
+            var curveX = new AnimationCurve();
+            var curveY = new AnimationCurve();
+
+#if DEBUG
+            uint duplicates = 0;
+#endif
+
+            switch (interpolationType) {
+                case InterpolationType.Step: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        curveX.AddKey( new Keyframe(time, value.x, float.PositiveInfinity, 0) );
+                        curveY.AddKey( new Keyframe(time, value.y, float.PositiveInfinity, 0) );
+                    }
+                    break;
+                }
+                case InterpolationType.CubicSpline: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var inTangent = values[i*3];
+                        var value = values[i*3 + 1];
+                        var outTangent = values[i*3 + 2];
+                        curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
+                        curveY.AddKey( new Keyframe(time, value.y, inTangent.y, outTangent.y, .5f, .5f ) );
+                    }
+                    break;
+                }
+                default: { // LINEAR
+                    var prevTime = times[0];
+                    var prevValue = values[0];
+                    var inTangent = new float2(0f);
+
+                    for (var i = 1; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+
+                        if (prevTime >= time) {
+                            // Time value is not increasing, so we ignore this keyframe
+                            // This happened on some Sketchfab files (see #298)
+#if DEBUG
+                            duplicates++;
+#endif
+                            continue;
+                        }
+
+                        var dT = time - prevTime;
+                        var dV = value - prevValue;
+                        float2 outTangent;
+                        if (dT < k_TimeEpsilon) {
+                            outTangent.x = (dV.x < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.y = (dV.y < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                        } else {
+                            outTangent = dV / dT;
+                        }
+
+                        curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, outTangent.x ) );
+                        curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, outTangent.y ) );
+
+                        inTangent = outTangent;
+                        prevTime = time;
+                        prevValue = value;
+                    }
+
+                    curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, 0 ) );
+                    curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, 0 ) );
+
+                    break;
+                }
+            }
+
+            clip.SetCurve(animationPath, targetType, propertyNames[0], curveX);
+            clip.SetCurve(animationPath, targetType, propertyNames[1], curveY);
+            Profiler.EndSample();
+#if DEBUG
+            if (duplicates > 0) {
+                ReportDuplicateKeyframes();
+            }
+#endif
+        }
+
+        public static void AddVec3Curves(AnimationClip clip, string animationPath, string[] propertyNames, Type targetType, NativeArray<float> times, NativeArray<float3> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddVec3Curves");
+            var curveX = new AnimationCurve();
+            var curveY = new AnimationCurve();
+            var curveZ = new AnimationCurve();
+
+#if DEBUG
+            uint duplicates = 0;
+#endif
+
+            switch (interpolationType) {
+                case InterpolationType.Step: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        curveX.AddKey( new Keyframe(time, value.x, float.PositiveInfinity, 0) );
+                        curveY.AddKey( new Keyframe(time, value.y, float.PositiveInfinity, 0) );
+                        curveZ.AddKey( new Keyframe(time, value.z, float.PositiveInfinity, 0) );
+                    }
+                    break;
+                }
+                case InterpolationType.CubicSpline: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var inTangent = values[i*3];
+                        var value = values[i*3 + 1];
+                        var outTangent = values[i*3 + 2];
+                        curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
+                        curveY.AddKey( new Keyframe(time, value.y, inTangent.y, outTangent.y, .5f, .5f ) );
+                        curveZ.AddKey( new Keyframe(time, value.z, inTangent.z, outTangent.z, .5f, .5f ) );
+                    }
+                    break;
+                }
+                default: { // LINEAR
+                    var prevTime = times[0];
+                    var prevValue = values[0];
+                    var inTangent = new float3(0f);
+
+                    for (var i = 1; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+
+                        if (prevTime >= time) {
+                            // Time value is not increasing, so we ignore this keyframe
+                            // This happened on some Sketchfab files (see #298)
+#if DEBUG
+                            duplicates++;
+#endif
+                            continue;
+                        }
+
+                        var dT = time - prevTime;
+                        var dV = value - prevValue;
+                        float3 outTangent;
+                        if (dT < k_TimeEpsilon) {
+                            outTangent.x = (dV.x < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.y = (dV.y < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.z = (dV.z < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                        } else {
+                            outTangent = dV / dT;
+                        }
+
+                        curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, outTangent.x ) );
+                        curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, outTangent.y ) );
+                        curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, outTangent.z ) );
+
+                        inTangent = outTangent;
+                        prevTime = time;
+                        prevValue = value;
+                    }
+
+                    curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, 0 ) );
+                    curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, 0 ) );
+                    curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, 0 ) );
+
+                    break;
+                }
+            }
+
+            clip.SetCurve(animationPath, targetType, propertyNames[0], curveX);
+            clip.SetCurve(animationPath, targetType, propertyNames[1], curveY);
+            clip.SetCurve(animationPath, targetType, propertyNames[2], curveZ);
+            Profiler.EndSample();
+#if DEBUG
+            if (duplicates > 0) {
+                ReportDuplicateKeyframes();
+            }
+#endif
+        }
+
+        public static void AddVec4Curves(AnimationClip clip, string animationPath, string[] propertyNames, Type targetType, NativeArray<float> times, NativeArray<float4> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddVec4Curves");
+            var curveX = new AnimationCurve();
+            var curveY = new AnimationCurve();
+            var curveZ = new AnimationCurve();
+            var curveW = new AnimationCurve();
+
+#if DEBUG
+            uint duplicates = 0;
+#endif
+
+            switch (interpolationType) {
+                case InterpolationType.Step: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        curveX.AddKey( new Keyframe(time, value.x, float.PositiveInfinity, 0) );
+                        curveY.AddKey( new Keyframe(time, value.y, float.PositiveInfinity, 0) );
+                        curveZ.AddKey( new Keyframe(time, value.z, float.PositiveInfinity, 0) );
+                        curveW.AddKey( new Keyframe(time, value.w, float.PositiveInfinity, 0) );
+                    }
+                    break;
+                }
+                case InterpolationType.CubicSpline: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var inTangent = values[i*3];
+                        var value = values[i*3 + 1];
+                        var outTangent = values[i*3 + 2];
+                        curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
+                        curveY.AddKey( new Keyframe(time, value.y, inTangent.y, outTangent.y, .5f, .5f ) );
+                        curveZ.AddKey( new Keyframe(time, value.z, inTangent.z, outTangent.z, .5f, .5f ) );
+                        curveW.AddKey( new Keyframe(time, value.w, inTangent.w, outTangent.w, .5f, .5f ) );
+                    }
+                    break;
+                }
+                default: { // LINEAR
+                    var prevTime = times[0];
+                    var prevValue = values[0];
+                    var inTangent = new float4(0f);
+
+                    for (var i = 1; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+
+                        if (prevTime >= time) {
+                            // Time value is not increasing, so we ignore this keyframe
+                            // This happened on some Sketchfab files (see #298)
+#if DEBUG
+                            duplicates++;
+#endif
+                            continue;
+                        }
+
+                        var dT = time - prevTime;
+                        var dV = value - prevValue;
+                        float4 outTangent;
+                        if (dT < k_TimeEpsilon) {
+                            outTangent.x = (dV.x < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.y = (dV.y < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.z = (dV.z < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.w = (dV.z < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                        } else {
+                            outTangent = dV / dT;
+                        }
+
+                        curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, outTangent.x ) );
+                        curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, outTangent.y ) );
+                        curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, outTangent.z ) );
+                        curveW.AddKey( new Keyframe(prevTime, prevValue.w, inTangent.w, outTangent.w ) );
+
+                        inTangent = outTangent;
+                        prevTime = time;
+                        prevValue = value;
+                    }
+
+                    curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, 0 ) );
+                    curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, 0 ) );
+                    curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, 0 ) );
+                    curveW.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.w, 0 ) );
+
+                    break;
+                }
+            }
+            clip.SetCurve(animationPath, targetType, propertyNames[0], curveX);
+            clip.SetCurve(animationPath, targetType, propertyNames[1], curveY);
+            clip.SetCurve(animationPath, targetType, propertyNames[2], curveZ);
+            clip.SetCurve(animationPath, targetType, propertyNames[3], curveW);
+            Profiler.EndSample();
+#if DEBUG
+            if (duplicates > 0) {
+                ReportDuplicateKeyframes();
+            }
+#endif
+        }
+
+        public static void AddQuaternionCurves(AnimationClip clip, string animationPath, string[] propertyNames, Type targetType, NativeArray<float> times, NativeArray<Quaternion> quaternions, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddQuaternionCurves");
             var rotX = new AnimationCurve();
             var rotY = new AnimationCurve();
             var rotZ = new AnimationCurve();
@@ -135,10 +521,10 @@ namespace GLTFast {
                 }
             }
 
-            clip.SetCurve(animationPath, typeof(Transform), "localRotation.x", rotX);
-            clip.SetCurve(animationPath, typeof(Transform), "localRotation.y", rotY);
-            clip.SetCurve(animationPath, typeof(Transform), "localRotation.z", rotZ);
-            clip.SetCurve(animationPath, typeof(Transform), "localRotation.w", rotW);
+            clip.SetCurve(animationPath, targetType, propertyNames[0], rotX);
+            clip.SetCurve(animationPath, targetType, propertyNames[1], rotY);
+            clip.SetCurve(animationPath, targetType, propertyNames[2], rotZ);
+            clip.SetCurve(animationPath, targetType, propertyNames[3], rotW);
             Profiler.EndSample();
 
 #if DEBUG
@@ -186,7 +572,7 @@ namespace GLTFast {
 
             for (var i = 0; i < morphTargetCount; i++) {
                 var morphTargetName = morphTargetNames==null ? i.ToString() : morphTargetNames[i];
-                AddScalarCurve(
+                AddBlendCurve(
                     clip,
                     animationPath,
                     morphTargetName,
@@ -200,98 +586,9 @@ namespace GLTFast {
             Profiler.EndSample();
         }
 
-        static void AddVec3Curves(AnimationClip clip, string animationPath, string propertyPrefix, NativeArray<float> times, NativeArray<float3> values, InterpolationType interpolationType) {
-            Profiler.BeginSample("AnimationUtils.AddVec3Curves");
-            var curveX = new AnimationCurve();
-            var curveY = new AnimationCurve();
-            var curveZ = new AnimationCurve();
 
-#if DEBUG
-            uint duplicates = 0;
-#endif
-
-            switch (interpolationType) {
-                case InterpolationType.Step: {
-                    for (var i = 0; i < times.Length; i++) {
-                        var time = times[i];
-                        var value = values[i];
-                        curveX.AddKey( new Keyframe(time, value.x, float.PositiveInfinity, 0) );
-                        curveY.AddKey( new Keyframe(time, value.y, float.PositiveInfinity, 0) );
-                        curveZ.AddKey( new Keyframe(time, value.z, float.PositiveInfinity, 0) );
-                    }
-                    break;
-                }
-                case InterpolationType.CubicSpline: {
-                    for (var i = 0; i < times.Length; i++) {
-                        var time = times[i];
-                        var inTangent = values[i*3];
-                        var value = values[i*3 + 1];
-                        var outTangent = values[i*3 + 2];
-                        curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
-                        curveY.AddKey( new Keyframe(time, value.y, inTangent.y, outTangent.y, .5f, .5f ) );
-                        curveZ.AddKey( new Keyframe(time, value.z, inTangent.z, outTangent.z, .5f, .5f ) );
-                    }
-                    break;
-                }
-                default: { // LINEAR
-                    var prevTime = times[0];
-                    var prevValue = values[0];
-                    var inTangent = new float3(0f);
-
-                    for (var i = 1; i < times.Length; i++) {
-                        var time = times[i];
-                        var value = values[i];
-
-                        if (prevTime >= time) {
-                            // Time value is not increasing, so we ignore this keyframe
-                            // This happened on some Sketchfab files (see #298)
-#if DEBUG
-                            duplicates++;
-#endif
-                            continue;
-                        }
-
-                        var dT = time - prevTime;
-                        var dV = value - prevValue;
-                        float3 outTangent;
-                        if (dT < k_TimeEpsilon) {
-                            outTangent.x = (dV.x < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
-                            outTangent.y = (dV.y < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
-                            outTangent.z = (dV.z < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
-                        } else {
-                            outTangent = dV / dT;
-                        }
-
-                        curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, outTangent.x ) );
-                        curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, outTangent.y ) );
-                        curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, outTangent.z ) );
-
-                        inTangent = outTangent;
-                        prevTime = time;
-                        prevValue = value;
-                    }
-
-                    curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, 0 ) );
-                    curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, 0 ) );
-                    curveZ.AddKey( new Keyframe(prevTime, prevValue.z, inTangent.z, 0 ) );
-
-                    break;
-                }
-            }
-
-            clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}x", curveX);
-            clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}y", curveY);
-            clip.SetCurve(animationPath, typeof(Transform), $"{propertyPrefix}z", curveZ);
-            Profiler.EndSample();
-#if DEBUG
-            if (duplicates > 0) {
-                ReportDuplicateKeyframes();
-            }
-#endif
-        }
-
-        static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyPrefix, int curveIndex, int valueStride, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
-            Profiler.BeginSample("AnimationUtils.AddScalarCurve");
+        public static void AddBlendCurve(AnimationClip clip, string animationPath, string propertyPrefix, int curveIndex, int valueStride, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
+            Profiler.BeginSample("AnimationUtils.AddBlendCurve");
             var curve = new AnimationCurve();
 
 #if DEBUG
@@ -369,6 +666,87 @@ namespace GLTFast {
 #endif
         }
 
+        public static void AddTexSTCurves(AnimationClip clip, string animationPath, string propertyPrefix, NativeArray<float> times, NativeArray<Vector2> values, InterpolationType interpolationType, bool zw = false) {
+            Profiler.BeginSample("AnimationUtils.AddTexSTCurves");
+            var curveX = new AnimationCurve();
+            var curveY = new AnimationCurve();
+
+#if DEBUG
+            uint duplicates = 0;
+#endif
+
+            switch (interpolationType) {
+                case InterpolationType.Step: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                        curveX.AddKey( new Keyframe(time, value.x, float.PositiveInfinity, 0) );
+                        curveY.AddKey( new Keyframe(time, value.y, float.PositiveInfinity, 0) );
+                    }
+                    break;
+                }
+                case InterpolationType.CubicSpline: {
+                    for (var i = 0; i < times.Length; i++) {
+                        var time = times[i];
+                        var inTangent = values[i*3];
+                        var value = values[i*3 + 1];
+                        var outTangent = values[i*3 + 2];
+                        curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
+                        curveY.AddKey( new Keyframe(time, value.y, inTangent.y, outTangent.y, .5f, .5f ) );
+                    }
+                    break;
+                }
+                default: { // LINEAR
+                    var prevTime = times[0];
+                    var prevValue = values[0];
+                    var inTangent = new float2(0f);
+
+                    for (var i = 1; i < times.Length; i++) {
+                        var time = times[i];
+                        var value = values[i];
+                
+                        if (prevTime >= time) {
+                            // Time value is not increasing, so we ignore this keyframe
+                            // This happened on some Sketchfab files (see #298)
+#if DEBUG
+                            duplicates++;
+#endif
+                            continue;
+                        }
+
+                        var dT = time - prevTime;
+                        var dV = value - prevValue;
+                        float2 outTangent;
+                        if (dT < k_TimeEpsilon) {
+                            outTangent.x = (dV.x < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                            outTangent.y = (dV.y < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
+                        } else {
+                            outTangent = dV / dT;
+                        }
+                        curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, outTangent.x ) );
+                        curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, outTangent.y ) );
+
+                        inTangent = outTangent;
+                        prevTime = time;
+                        prevValue = value;
+                    }
+
+                    curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, 0 ) );
+                    curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, 0 ) );
+
+                    break;
+                }
+            }
+            clip.SetCurve(animationPath, typeof(MeshRenderer), $"{propertyPrefix}{(zw?"z":"x")}", curveX);
+            clip.SetCurve(animationPath, typeof(MeshRenderer), $"{propertyPrefix}{(zw?"w":"y")}", curveY);
+            Profiler.EndSample();
+#if DEBUG
+            if (duplicates > 0) {
+                ReportDuplicateKeyframes();
+            }
+#endif
+        }
+        
 #if DEBUG
         static void ReportDuplicateKeyframes() {
             Debug.LogError("Time of subsequent animation keyframes is not increasing (glTF-Validator error ACCESSOR_ANIMATION_INPUT_NON_INCREASING)");

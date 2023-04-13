@@ -353,11 +353,10 @@ namespace GLTFast.Materials
             )
         {
             var hasTransform = false;
-            // Scale (x,y) and Transform (z,w)
-            var textureScaleTranslation = new float4(
-                1, 1,// scale
-                0, 0 // translation
-                );
+
+            var textureScale = new float2(1, 1);
+            var textureOffset = new float2(0, 0);
+            float textureRotation = 0.0f;
 
             var texCoord = textureInfo.texCoord;
 
@@ -372,36 +371,29 @@ namespace GLTFast.Materials
 
                 if (tt.offset != null)
                 {
-                    textureScaleTranslation.z = tt.offset[0];
-                    textureScaleTranslation.w = 1 - tt.offset[1];
+                    textureOffset.x = tt.offset[0];
+                    textureOffset.y = tt.offset[1];
                 }
                 if (tt.scale != null)
                 {
-                    textureScaleTranslation.x = tt.scale[0];
-                    textureScaleTranslation.y = tt.scale[1];
+                    textureScale.x = tt.scale[0];
+                    textureScale.y = tt.scale[1];
                 }
                 if (tt.rotation != 0)
                 {
-                    var cos = math.cos(tt.rotation);
-                    var sin = math.sin(tt.rotation);
-
-                    var newRot = new Vector2(textureScaleTranslation.x * sin, textureScaleTranslation.y * -sin);
-
-                    Assert.IsTrue(rotationPropertyId >= 0, "Texture rotation property invalid!");
-                    material.SetVector(rotationPropertyId, newRot);
-
-                    textureScaleTranslation.x *= cos;
-                    textureScaleTranslation.y *= cos;
-
-                    textureScaleTranslation.z -= newRot.y; // move offset to move rotation point (horizontally)
+                    textureRotation = tt.rotation;
                 }
-                else
-                {
-                    // Make sure the rotation is properly zeroed
-                    material.SetVector(rotationPropertyId, Vector4.zero);
-                }
+            }
 
-                textureScaleTranslation.w -= textureScaleTranslation.y; // move offset to move flip axis point (vertically)
+            if (flipY)
+            {
+                hasTransform = true;
+                // Hack: flipY is set in shader using the empty Y channel in the rotation property.
+            }
+
+            if (hasTransform)
+            {
+                material.EnableKeyword(TextureTransformKeyword);
             }
 
             if (texCoord != 0)
@@ -417,22 +409,14 @@ namespace GLTFast.Materials
                 }
             }
 
-            if (flipY)
-            {
-                hasTransform = true;
-                textureScaleTranslation.w = 1 - textureScaleTranslation.w; // flip offset in Y
-                textureScaleTranslation.y = -textureScaleTranslation.y; // flip scale in Y
-            }
+            // TODO: What are these used for?
+            //material.SetTextureOffset(texturePropertyId, textureOffset);
+            //material.SetTextureScale(texturePropertyId, textureScale);
 
-            if (hasTransform)
-            {
-                material.EnableKeyword(TextureTransformKeyword);
-            }
-
-            material.SetTextureOffset(texturePropertyId, textureScaleTranslation.zw);
-            material.SetTextureScale(texturePropertyId, textureScaleTranslation.xy);
+            Assert.IsTrue(rotationPropertyId >= 0, "Texture rotation property invalid!");
+            material.SetVector(rotationPropertyId, new Vector2(textureRotation, flipY ? 1 : 0));
             Assert.IsTrue(scaleTransformPropertyId >= 0, "Texture scale/transform property invalid!");
-            material.SetVector(scaleTransformPropertyId, textureScaleTranslation);
+            material.SetVector(scaleTransformPropertyId, new float4(textureScale, textureOffset));
         }
 
         /// <summary>
