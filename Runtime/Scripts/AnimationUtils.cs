@@ -30,23 +30,29 @@ namespace GLTFast {
 
         const float k_TimeEpsilon = 0.00001f;
 
-        public static void AddCurve(AnimationClip clip, string animationPath, AnimationPointerData data, NativeArray<float> times, AccessorDataBase values, InterpolationType interpolationType) {
-            switch(data.accessorType) {
+        public static void AddCurve(AnimationClip clip, string animationPath, AnimationPointerData pointerData, NativeArray<float> times, AccessorDataBase values, InterpolationType interpolationType) {
+            switch(pointerData.accessorType) {
                 case GltfAccessorAttributeType.SCALAR:
                     var scalarVals = ((AccessorNativeData<float>)values).data;
-                    AddScalarCurve(clip, animationPath, data.AnimationProperties[0], data.AnimationTargetType, times, scalarVals, interpolationType);
+                    AddScalarCurve(clip, animationPath, pointerData.AnimationProperties[0], pointerData.AnimationTargetType, times, scalarVals, interpolationType);
                     break;
                 case GltfAccessorAttributeType.VEC2:
                     var float2Vals = ((AccessorNativeData<Vector2>)values).data.Reinterpret<float2>();
-                    AddVec2Curves(clip, animationPath, data.AnimationProperties, data.AnimationTargetType, times, float2Vals, interpolationType);
+                    AddVec2Curves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, float2Vals, interpolationType);
                     break;
                 case GltfAccessorAttributeType.VEC3:
                     var float3Vals = ((AccessorNativeData<Vector3>)values).data.Reinterpret<float3>();
-                    AddVec3Curves(clip, animationPath, data.AnimationProperties, data.AnimationTargetType, times, float3Vals, interpolationType);
+                    AddVec3Curves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, float3Vals, interpolationType);
                     break;
                 case GltfAccessorAttributeType.VEC4:
+                    // Special case for quaternions.
+                    if(pointerData.Target.Equals("rotation")) {
+                        var quaternionVals = ((AccessorNativeData<Vector4>)values).data.Reinterpret<Quaternion>();
+                        AddQuaternionCurves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, quaternionVals, interpolationType);
+                        break;
+                    }
                     var float4Vals = ((AccessorNativeData<Vector4>)values).data.Reinterpret<float4>();
-                    AddVec4Curves(clip, animationPath, data.AnimationProperties, data.AnimationTargetType, times, float4Vals, interpolationType);
+                    AddVec4Curves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, float4Vals, interpolationType);
                     break;
             }
         }

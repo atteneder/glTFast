@@ -45,17 +45,17 @@ namespace GLTFast {
                     break;
                 case string p when p.StartsWith("/meshes/"):
                     PointerType = PointerType.Mesh;
-                    if (pointerPath[^7..].Equals("weights")) {
-                        AnimationTargetType = typeof(UnityEngine.MeshRenderer);
-                    } else {
-                        AnimationTargetType = typeof(Transform);
-                    }
+                    AnimationTargetType = typeof(UnityEngine.MeshRenderer);
                     TargetId = ParseTargetId(pointerPath["/meshes/".Length..]);
                     Target = pointerPath[$"/meshes/{TargetId}/".Length..];
                     break;
                 case string p when p.StartsWith("/nodes/"):
                     PointerType = PointerType.Node;
-                    AnimationTargetType = typeof(UnityEngine.MeshRenderer);
+                    if (pointerPath[^7..].Equals("weights")) {
+                        AnimationTargetType = typeof(UnityEngine.MeshRenderer);
+                    } else {
+                        AnimationTargetType = typeof(Transform);
+                    }
                     TargetId = ParseTargetId(pointerPath["/nodes/".Length..]);
                     Target = pointerPath[$"/nodes/{TargetId}/".Length..];
                     break;
@@ -81,6 +81,21 @@ namespace GLTFast {
             string template;
             switch(target) {
                 // Core
+                case "rotation":
+                    template = "localRotation.";
+                    AnimationProperties = new[] {$"{template}x", $"{template}y", $"{template}z", $"{template}w"};
+                    accessorType = GltfAccessorAttributeType.VEC4;
+                    break;
+                case "scale":
+                    template = "localScale.";
+                    AnimationProperties = new [] {$"{template}x", $"{template}y", $"{template}z"};
+                    accessorType =GltfAccessorAttributeType.VEC3;
+                    break;
+                case "translation":
+                    template = "localPosition.";
+                    AnimationProperties = new [] {$"{template}x", $"{template}y", $"{template}z"};
+                    accessorType =GltfAccessorAttributeType.VEC3;
+                    break;
                 case "pbrMetallicRoughness/baseColorFactor":
                     template = "material.baseColorFactor.";
                     AnimationProperties = new[] {$"{template}r", $"{template}g", $"{template}b", $"{template}a"};
@@ -111,6 +126,7 @@ namespace GLTFast {
                     AnimationProperties = new[] {"material.occlusionTexture_strength"};
                     accessorType = GltfAccessorAttributeType.SCALAR;
                     break;
+
                 // KHR_materials_transmission
                 case "extensions/KHR_materials_transmission/transmissionFactor":
                     AnimationProperties = new[] {"material.transmissionFactor"};
@@ -130,6 +146,22 @@ namespace GLTFast {
                     break;
                 case "pbrMetallicRoughness/baseColorTexture/extensions/KHR_texture_transform/rotation":
                     AnimationProperties = new[] {"material.baseColorTexture_Rotation"};
+                    accessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+
+                // KHR_texture_transform
+                case "pbrMetallicRoughness/normalTexture/extensions/KHR_texture_transform/scale":
+                    template = "material.normalTexture_ST.";
+                    AnimationProperties = new[] {$"{template}x", $"{template}y"};
+                    accessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "pbrMetallicRoughness/normalTexture/extensions/KHR_texture_transform/offset":
+                    template = "material.normalTexture_ST.";
+                    AnimationProperties = new[] {$"{template}z", $"{template}w"};
+                    accessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "pbrMetallicRoughness/normalTexture/extensions/KHR_texture_transform/rotation":
+                    AnimationProperties = new[] {"material.normalTexture_Rotation"};
                     accessorType = GltfAccessorAttributeType.SCALAR;
                     break;
                 default:

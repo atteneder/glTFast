@@ -2139,6 +2139,9 @@ namespace GLTFast
                                     case PointerType.Light:
                                         nodeList = m_LightLookup[pointerData.TargetId];
                                         break;
+                                    case PointerType.Node:
+                                        nodeList.Add(pointerData.TargetId);
+                                        break;
                                 }
 
                                 foreach (var nodeId in nodeList) {
