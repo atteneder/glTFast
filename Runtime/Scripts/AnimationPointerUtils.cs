@@ -148,8 +148,6 @@ namespace GLTFast {
                     AnimationProperties = new[] {"material.baseColorTexture_Rotation"};
                     accessorType = GltfAccessorAttributeType.SCALAR;
                     break;
-
-                // KHR_texture_transform
                 case "pbrMetallicRoughness/normalTexture/extensions/KHR_texture_transform/scale":
                     template = "material.normalTexture_ST.";
                     AnimationProperties = new[] {$"{template}x", $"{template}y"};

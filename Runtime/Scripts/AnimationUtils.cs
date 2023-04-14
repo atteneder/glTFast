@@ -42,7 +42,9 @@ namespace GLTFast {
                     break;
                 case GltfAccessorAttributeType.VEC3:
                     var float3Vals = ((AccessorNativeData<Vector3>)values).data.Reinterpret<float3>();
-                    AddVec3Curves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, float3Vals, interpolationType);
+                    // Special case for translations (x is flipped in unity).
+                    bool flip = pointerData.Target.Equals("translation");
+                    AddVec3Curves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, float3Vals, interpolationType, flip);
                     break;
                 case GltfAccessorAttributeType.VEC4:
                     // Special case for quaternions.
@@ -248,7 +250,7 @@ namespace GLTFast {
 #endif
         }
 
-        public static void AddVec3Curves(AnimationClip clip, string animationPath, string[] propertyNames, Type targetType, NativeArray<float> times, NativeArray<float3> values, InterpolationType interpolationType) {
+        public static void AddVec3Curves(AnimationClip clip, string animationPath, string[] propertyNames, Type targetType, NativeArray<float> times, NativeArray<float3> values, InterpolationType interpolationType, bool flip = false) {
             Profiler.BeginSample("AnimationUtils.AddVec3Curves");
             var curveX = new AnimationCurve();
             var curveY = new AnimationCurve();
@@ -263,6 +265,9 @@ namespace GLTFast {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
+                        if(flip) {
+                            value.x *= -1;
+                        }
                         curveX.AddKey( new Keyframe(time, value.x, float.PositiveInfinity, 0) );
                         curveY.AddKey( new Keyframe(time, value.y, float.PositiveInfinity, 0) );
                         curveZ.AddKey( new Keyframe(time, value.z, float.PositiveInfinity, 0) );
@@ -273,8 +278,17 @@ namespace GLTFast {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var inTangent = values[i*3];
+                        if(flip) {
+                            inTangent.x *= -1;
+                        }
                         var value = values[i*3 + 1];
+                        if(flip) {
+                            value.x *= -1;
+                        }
                         var outTangent = values[i*3 + 2];
+                        if(flip) {
+                            outTangent.x *= -1;
+                        }
                         curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
                         curveY.AddKey( new Keyframe(time, value.y, inTangent.y, outTangent.y, .5f, .5f ) );
                         curveZ.AddKey( new Keyframe(time, value.z, inTangent.z, outTangent.z, .5f, .5f ) );
@@ -284,12 +298,17 @@ namespace GLTFast {
                 default: { // LINEAR
                     var prevTime = times[0];
                     var prevValue = values[0];
+                    if(flip) {
+                        prevValue.x *= -1;
+                    }
                     var inTangent = new float3(0f);
 
                     for (var i = 1; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
-
+                        if(flip) {
+                            value.x *= -1;
+                        }
                         if (prevTime >= time) {
                             // Time value is not increasing, so we ignore this keyframe
                             // This happened on some Sketchfab files (see #298)
