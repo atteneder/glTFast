@@ -2140,12 +2140,47 @@ namespace GLTFast
                                         nodeList = m_LightLookup[pointerData.TargetId];
                                         break;
                                     case PointerType.Node:
+                                    case PointerType.Mesh:
                                         nodeList.Add(pointerData.TargetId);
                                         break;
                                 }
 
                                 foreach (var nodeId in nodeList) {
                                     var path = AnimationUtils.CreateAnimationPath(nodeId,m_NodeNames,parentIndex);
+
+                                    if(pointerData.Target.Equals("weights")) {
+                                        // TODO: Copied code from standard weights above. needs refactor.
+                                        var values = ((AccessorNativeData<float>) m_AccessorData[sampler.output]).data;
+                                        var node = m_GltfRoot.nodes[pointerData.TargetId];
+                                        if (node.mesh < 0 || node.mesh >= m_GltfRoot.meshes.Length) {
+                                            break;
+                                        }
+                                        var mesh = m_GltfRoot.meshes[node.mesh];
+                                        AnimationUtils.AddMorphTargetWeightCurves(
+                                            m_AnimationClips[i],
+                                            path,
+                                            times,
+                                            values,
+                                            sampler.GetInterpolationType(),
+                                            mesh.extras?.targetNames
+                                            );
+
+                                        var meshName = string.IsNullOrEmpty(mesh.name) ? k_PrimitiveName : mesh.name;
+                                        var primitiveCount = m_MeshPrimitiveIndex[node.mesh + 1] - m_MeshPrimitiveIndex[node.mesh];
+                                        for (var k = 1; k < primitiveCount; k++) {
+                                            var primitiveName = $"{meshName}_{k}";
+                                            AnimationUtils.AddMorphTargetWeightCurves(
+                                                m_AnimationClips[i],
+                                                $"{path}/{primitiveName}",
+                                                times,
+                                                values,
+                                                sampler.GetInterpolationType(),
+                                                mesh.extras?.targetNames
+                                            );
+                                        }
+                                        // TODO: End
+                                        break;
+                                    }
 
                                     AnimationUtils.AddCurve(
                                         m_AnimationClips[i],

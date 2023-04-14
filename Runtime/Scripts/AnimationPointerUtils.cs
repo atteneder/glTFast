@@ -89,12 +89,12 @@ namespace GLTFast {
                 case "scale":
                     template = "localScale.";
                     AnimationProperties = new [] {$"{template}x", $"{template}y", $"{template}z"};
-                    accessorType =GltfAccessorAttributeType.VEC3;
+                    accessorType = GltfAccessorAttributeType.VEC3;
                     break;
                 case "translation":
                     template = "localPosition.";
                     AnimationProperties = new [] {$"{template}x", $"{template}y", $"{template}z"};
-                    accessorType =GltfAccessorAttributeType.VEC3;
+                    accessorType = GltfAccessorAttributeType.VEC3;
                     break;
                 case "pbrMetallicRoughness/baseColorFactor":
                     template = "material.baseColorFactor.";
