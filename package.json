@@ -1,7 +1,7 @@
 {
-  "name": "com.unity.cloud.gltfast",
+  "name": "com.atteneder.gltfast",
   "version": "5.1.0",
-  "displayName": "Unity Cloud glTFast",
+  "displayName": "glTFast",
   "description": "Use glTFast to import and export glTF 3D files efficiently at runtime or in the Editor",
   "unity": "2019.4",
   "keywords": [
@@ -15,6 +15,11 @@
     "universal",
     "basisu"
   ],
+  "author": {
+    "name": "Andreas Atteneder",
+    "email": "andreas.atteneder@gmail.com",
+    "url": "https://pixel.engineer"
+  },
   "dependencies": {
     "com.unity.modules.jsonserialize": "1.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
