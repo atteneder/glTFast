@@ -1,12 +1,14 @@
 {
     "name": "glTFast.Editor",
+    "rootNamespace": "",
     "references": [
         "Unity.Mathematics",
         "glTFast",
         "glTFast.Export",
         "UnityEngine.TestTools.Graphics",
         "Unity.RenderPipelines.HighDefinition.Runtime",
-        "com.unity.formats.gltf.validator.Editor"
+        "com.unity.formats.gltf.validator.Editor",
+        "Area28.Unity.Guid"
     ],
     "includePlatforms": [
         "Editor"

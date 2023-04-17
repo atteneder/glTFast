@@ -48,6 +48,12 @@ namespace GLTFast.Schema
             m_Stream.Write("\":");
             m_Separation = false;
         }
+        public void AddGuid(string guid)
+        {
+            Separate();
+            m_Stream.Write($@"""extras"": {{""guid"": ""{guid}""}}");
+            m_Separation = false;
+        }
 
         public void AddObject()
         {

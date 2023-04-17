@@ -172,12 +172,15 @@ namespace GLTFast.Export
 
             if (onIncludedLayer || children != null)
             {
+                gameObject.TryGetComponent<A28.GuidComponent>(out A28.GuidComponent guidComponent);
+                string guid = guidComponent?.GuidString;
                 nodeId = (int)m_Writer.AddNode(
                     transform.localPosition,
                     transform.localRotation,
                     transform.localScale,
                     children,
-                    gameObject.name
+                    gameObject.name,
+                    guid
                     );
 
                 if (onIncludedLayer)

@@ -42,7 +42,8 @@ namespace GLTFast.Export
             quaternion? rotation = null,
             float3? scale = null,
             uint[] children = null,
-            string name = null
+            string name = null,
+            string guid = null
         );
 
         /// <summary>

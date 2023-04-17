@@ -149,12 +149,13 @@ namespace GLTFast.Export
             quaternion? rotation = null,
             float3? scale = null,
             uint[] children = null,
-            string name = null
+            string name = null,
+            string guid = null
         )
         {
             CertifyNotDisposed();
             m_State = State.ContentAdded;
-            var node = CreateNode(translation, rotation, scale, name);
+            var node = CreateNode(translation, rotation, scale, name, guid);
             node.children = children;
             m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
@@ -1866,11 +1867,12 @@ namespace GLTFast.Export
             float3? translation = null,
             quaternion? rotation = null,
             float3? scale = null,
-            string name = null
+            string name = null,
+            string guid = null
         )
         {
             var parent = m_Nodes[parentId];
-            var node = CreateNode(translation, rotation, scale, name);
+            var node = CreateNode(translation, rotation, scale, name, guid);
             m_Nodes.Add(node);
             var nodeId = (uint)m_Nodes.Count - 1;
             if (parent.children == null)
@@ -1891,12 +1893,14 @@ namespace GLTFast.Export
             float3? translation = null,
             quaternion? rotation = null,
             float3? scale = null,
-            string name = null
+            string name = null,
+            string guid = null
             )
         {
             var node = new Node
             {
                 name = name,
+                guid = guid
             };
             if (translation.HasValue && !translation.Equals(float3.zero))
             {

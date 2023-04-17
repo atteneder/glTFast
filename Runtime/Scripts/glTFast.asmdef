@@ -1,5 +1,6 @@
 {
     "name": "glTFast",
+    "rootNamespace": "",
     "references": [
         "Unity.Mathematics",
         "Unity.Burst",
@@ -9,7 +10,8 @@
         "Ktx",
         "Unity.Meshopt.Decompress",
         "Unity.RenderPipelines.Universal.Runtime",
-        "Unity.RenderPipelines.HighDefinition.Runtime"
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Area28.Unity.Guid"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

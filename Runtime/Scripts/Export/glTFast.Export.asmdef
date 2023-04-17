@@ -1,11 +1,13 @@
 {
     "name": "glTFast.Export",
+    "rootNamespace": "",
     "references": [
         "glTFast",
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.RenderPipelines.Universal.Runtime",
-        "Unity.RenderPipelines.HighDefinition.Runtime"
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Area28.Unity.Guid"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -73,6 +73,8 @@ namespace GLTFast.Schema
         /// <inheritdoc cref="NodeExtensions"/>
         public NodeExtensions extensions;
 
+        public string guid = null;
+
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
@@ -122,6 +124,11 @@ namespace GLTFast.Schema
             {
                 writer.AddProperty("extensions");
                 extensions.GltfSerialize(writer);
+            }
+
+            if (guid != null)
+            {
+                writer.AddGuid(guid);
             }
             writer.Close();
         }
