@@ -25,17 +25,17 @@
             "define": "DRACO_UNITY"
         },
         {
-            "name": "com.atteneder.ktx",
+            "name": "com.unity.cloud.ktx",
             "expression": "",
             "define": "KTX_UNITY"
         },
         {
-            "name": "com.atteneder.ktx",
+            "name": "com.unity.cloud.ktx",
             "expression": "1.3.0",
             "define": "KTX_UNITY_1_3_OR_NEWER"
         },
         {
-            "name": "com.atteneder.ktx",
+            "name": "com.unity.cloud.ktx",
             "expression": "2.2.1",
             "define": "KTX_UNITY_2_2_OR_NEWER"
         },

@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
     <ui:VisualElement name="Header" class="header section" style="align-items: center;">
         <Style src="GltfImporter-style.uss" />
-        <ui:VisualElement name="gltf-logo" style="background-image: url(&apos;/Packages/com.atteneder.gltfast/Editor/UI/gltf-logo.png&apos;); width: 48px; height: 24px; -unity-background-image-tint-color: rgba(210, 210, 210, 255);" />
+        <ui:VisualElement name="gltf-logo" style="background-image: url(&apos;/Packages/com.unity.cloud.gltfast/Editor/UI/gltf-logo.png&apos;); width: 48px; height: 24px; -unity-background-image-tint-color: rgba(210, 210, 210, 255);" />
         <ui:Label text="Settings" name="Headline" class="h1" style="margin: 0;"/>
     </ui:VisualElement>
     <ui:VisualElement name="ImportSettings" class="section">

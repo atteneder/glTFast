@@ -18,7 +18,7 @@
 // glTFast is on the path to being official, so it should have highest priority as importer by default
 // This define is included for completeness.
 // Other glTF importers should specify this via AsmDef dependency, for example
-// `com.atteneder.gltfast@3.0.0: HAVE_GLTFAST` and then checking here `#if HAVE_GLTFAST`
+// `com.unity.cloud.gltfast@3.0.0: HAVE_GLTFAST` and then checking here `#if HAVE_GLTFAST`
 #if false
 #define ANOTHER_IMPORTER_HAS_HIGHER_PRIORITY
 #endif
