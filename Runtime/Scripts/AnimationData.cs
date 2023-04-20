@@ -75,7 +75,7 @@ namespace GLTFast {
             switch (pointerPath) {
                 case string p when p.StartsWith("/cameras/"):
                     data.TargetType = TargetType.Camera;
-                    data.AnimationClipType = typeof(UnityEngine.Camera);
+                    data.AnimationClipType = typeof(AnimationCameraGameObject);
                     data.TargetId = ParsePointerTargetId(pointerPath["/cameras/".Length..]);
                     data.TargetProperty = pointerPath[$"/cameras/{data.TargetId}/".Length..];
                     break;
@@ -128,6 +128,34 @@ namespace GLTFast {
                     data.AccessorType = GltfAccessorAttributeType.VEC3;
                     break;
                 case "weights":
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+                case "orthographic/xmag":
+                    data.PropertyNames = new [] {"xMag"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+                case "orthographic/ymag":
+                    data.PropertyNames = new [] {"yMag"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+                case "orthographic/zfar":
+                    data.PropertyNames = new [] {"farClipPlane"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+                case "orthographic/znear":
+                    data.PropertyNames = new [] {"nearClipPlane"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+                case "perspective/yfov":
+                    data.PropertyNames = new [] {"fov"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+                case "perspective/zfar":
+                    data.PropertyNames = new [] {"farClipPlane"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+                case "perspective/znear":
+                    data.PropertyNames = new [] {"nearClipPlane"};
                     data.AccessorType = GltfAccessorAttributeType.SCALAR;
                     break;
                 case "pbrMetallicRoughness/baseColorFactor":

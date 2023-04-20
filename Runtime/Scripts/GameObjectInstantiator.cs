@@ -394,6 +394,16 @@ namespace GLTFast
             cam.nearClipPlane = nearClipPlane * localScale;
             cam.farClipPlane = farClipPlane * localScale;
 
+#if UNITY_ANIMATION
+            var camAnim = cam.transform.parent.gameObject.AddComponent<AnimationCameraGameObject>();
+            camAnim.orthographic = false;
+            camAnim.localScale = localScale;
+            camAnim.targetCamera = cam;
+            camAnim.fov = cam.fieldOfView;
+            camAnim.nearClipPlane = nearClipPlane;
+            camAnim.farClipPlane = farClipPlane;
+#endif
+
             // // If the aspect ratio is given and does not match the
             // // screen's aspect ratio, the viewport rect is reduced
             // // to match the glTFs aspect ratio (box fit)
@@ -430,6 +440,17 @@ namespace GLTFast
                 nearClipPlane,
                 farValue
             );
+
+#if UNITY_ANIMATION
+            var camAnim = cam.transform.parent.gameObject.AddComponent<AnimationCameraGameObject>();
+            camAnim.orthographic = true;
+            camAnim.localScale = localScale;
+            camAnim.targetCamera = cam;
+            camAnim.xMag = horizontal;
+            camAnim.yMag = vertical;
+            camAnim.nearClipPlane = nearClipPlane;
+            camAnim.farClipPlane = farValue;
+#endif
 
             // // If the aspect ratio does not match the
             // // screen's aspect ratio, the viewport rect is reduced
