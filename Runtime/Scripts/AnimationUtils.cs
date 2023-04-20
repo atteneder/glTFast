@@ -30,65 +30,40 @@ namespace GLTFast {
 
         const float k_TimeEpsilon = 0.00001f;
 
-        public static void AddCurve(AnimationClip clip, string animationPath, AnimationPointerData pointerData, NativeArray<float> times, AccessorDataBase values, InterpolationType interpolationType) {
-            switch(pointerData.accessorType) {
+        public static void AddCurve(AnimationClip clip, string animationPath, AnimationData animData, NativeArray<float> times, AccessorDataBase values, InterpolationType interpolationType) {
+            switch(animData.AccessorType) {
                 case GltfAccessorAttributeType.SCALAR:
                     var scalarVals = ((AccessorNativeData<float>)values).data;
-                    AddScalarCurve(clip, animationPath, pointerData.AnimationProperties[0], pointerData.AnimationTargetType, times, scalarVals, interpolationType);
+                    AddScalarCurve(clip, animationPath, animData.PropertyNames[0], animData.AnimationClipType, times, scalarVals, interpolationType);
                     break;
                 case GltfAccessorAttributeType.VEC2:
                     var float2Vals = ((AccessorNativeData<Vector2>)values).data.Reinterpret<float2>();
-                    AddVec2Curves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, float2Vals, interpolationType);
+                    AddVec2Curves(clip, animationPath, animData.PropertyNames, animData.AnimationClipType, times, float2Vals, interpolationType);
                     break;
                 case GltfAccessorAttributeType.VEC3:
                     var float3Vals = ((AccessorNativeData<Vector3>)values).data.Reinterpret<float3>();
-                    // Special case for translations (x is flipped in unity).
-                    bool flip = pointerData.Target.Equals("translation");
-                    AddVec3Curves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, float3Vals, interpolationType, flip);
+                    // Special case for translations (x is flipped in Unity).
+                    bool flip = animData.TargetProperty.Equals("translation");
+                    AddVec3Curves(clip, animationPath, animData.PropertyNames, animData.AnimationClipType, times, float3Vals, interpolationType, flip);
                     break;
                 case GltfAccessorAttributeType.VEC4:
-                    // Special case for quaternions.
-                    if(pointerData.Target.Equals("rotation")) {
-                        var quaternionVals = ((AccessorNativeData<Vector4>)values).data.Reinterpret<Quaternion>();
-                        AddQuaternionCurves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, quaternionVals, interpolationType);
+                    // Special cases for quaternions.
+                    // Pointer rotation that requires y and z components flipping.
+                    if (animData.TargetProperty.Equals("rotation")) {
+                        var quaternionVals = ((AccessorNativeData<Vector4>)values).data.Reinterpret<quaternion>();
+                        AddQuaternionCurves(clip, animationPath, animData.PropertyNames, animData.AnimationClipType, times, quaternionVals, interpolationType, true);
+                        break;
+                    }
+                    // An original rotation that already has the correct y and z.
+                    else if(animData.TargetProperty.Equals("rotationNative")) {
+                        var quaternionVals = ((AccessorNativeData<Vector4>)values).data.Reinterpret<quaternion>();
+                        AddQuaternionCurves(clip, animationPath, animData.PropertyNames, animData.AnimationClipType, times, quaternionVals, interpolationType);
                         break;
                     }
                     var float4Vals = ((AccessorNativeData<Vector4>)values).data.Reinterpret<float4>();
-                    AddVec4Curves(clip, animationPath, pointerData.AnimationProperties, pointerData.AnimationTargetType, times, float4Vals, interpolationType);
+                    AddVec4Curves(clip, animationPath, animData.PropertyNames, animData.AnimationClipType, times, float4Vals, interpolationType);
                     break;
             }
-        }
-
-        public static void AddTranslationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType) {
-            // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
-            var values = translations.Reinterpret<float3>();
-            string[] translationNames = {
-                "localPosition.x",
-                "localPosition.y",
-                "localPosition.z"
-            };
-            AddVec3Curves(clip, animationPath, translationNames, typeof(Transform), times, values, interpolationType);
-        }
-
-        public static void AddScaleCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Vector3> translations, InterpolationType interpolationType) {
-            // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
-            var values = translations.Reinterpret<float3>();
-            string[] scaleNames = {
-                "localScale.x",
-                "localScale.y",
-                "localScale.z"
-            };
-            AddVec3Curves(clip, animationPath, scaleNames, typeof(Transform), times, values, interpolationType);
-        }
-
-        public static void AddRotationCurves(AnimationClip clip, string animationPath, NativeArray<float> times, NativeArray<Quaternion> rotations, InterpolationType interpolationType) {
-            string[] rotationNames = {
-                "localRotation.x",
-                "localRotation.y",
-                "localRotation.z",
-                "localRotation.w"
-            };
-            AddQuaternionCurves(clip, animationPath, rotationNames, typeof(Transform), times, rotations, interpolationType);
         }
 
         public static void AddScalarCurve(AnimationClip clip, string animationPath, string propertyName, Type targetType, NativeArray<float> times, NativeArray<float> values, InterpolationType interpolationType) {
@@ -278,15 +253,11 @@ namespace GLTFast {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var inTangent = values[i*3];
-                        if(flip) {
-                            inTangent.x *= -1;
-                        }
                         var value = values[i*3 + 1];
-                        if(flip) {
-                            value.x *= -1;
-                        }
                         var outTangent = values[i*3 + 2];
                         if(flip) {
+                            inTangent.x *= -1;
+                            value.x *= -1;
                             outTangent.x *= -1;
                         }
                         curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
@@ -453,15 +424,12 @@ namespace GLTFast {
 #endif
         }
 
-        public static void AddQuaternionCurves(AnimationClip clip, string animationPath, string[] propertyNames, Type targetType, NativeArray<float> times, NativeArray<Quaternion> quaternions, InterpolationType interpolationType) {
+        public static void AddQuaternionCurves(AnimationClip clip, string animationPath, string[] propertyNames, Type targetType, NativeArray<float> times, NativeArray<quaternion> values, InterpolationType interpolationType, bool flip = false) {
             Profiler.BeginSample("AnimationUtils.AddQuaternionCurves");
             var rotX = new AnimationCurve();
             var rotY = new AnimationCurve();
             var rotZ = new AnimationCurve();
             var rotW = new AnimationCurve();
-
-            // TODO: Refactor interface to use Unity.Mathematics types and remove this Reinterpret
-            var values = quaternions.Reinterpret<quaternion>();
 
 #if DEBUG
             uint duplicates = 0;
@@ -472,6 +440,10 @@ namespace GLTFast {
                     for (var i = 0; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
+                        if(flip) {
+                            value.value.y *= -1;
+                            value.value.z *= -1;
+                        }
                         rotX.AddKey( new Keyframe(time, value.value.x, float.PositiveInfinity, 0) );
                         rotY.AddKey( new Keyframe(time, value.value.y, float.PositiveInfinity, 0) );
                         rotZ.AddKey( new Keyframe(time, value.value.z, float.PositiveInfinity, 0) );
@@ -485,6 +457,14 @@ namespace GLTFast {
                         var inTangent = values[i*3];
                         var value = values[i*3 + 1];
                         var outTangent = values[i*3 + 2];
+                        if (flip) {
+                            inTangent.value.y *= -1;
+                            inTangent.value.z *= -1;
+                            value.value.y *= -1;
+                            value.value.z *= -1;
+                            outTangent.value.y *= -1;
+                            outTangent.value.z *= -1;
+                        }
                         rotX.AddKey( new Keyframe(time, value.value.x, inTangent.value.x, outTangent.value.x, .5f, .5f ) );
                         rotY.AddKey( new Keyframe(time, value.value.y, inTangent.value.y, outTangent.value.y, .5f, .5f ) );
                         rotZ.AddKey( new Keyframe(time, value.value.z, inTangent.value.z, outTangent.value.z, .5f, .5f ) );
@@ -495,11 +475,19 @@ namespace GLTFast {
                 default: { // LINEAR
                     var prevTime = times[0];
                     var prevValue = values[0];
+                    if (flip) {
+                        prevValue.value.y *= -1;
+                        prevValue.value.z *= -1;
+                    }
                     var inTangent = new quaternion(new float4(0f));
 
                     for (var i = 1; i < times.Length; i++) {
                         var time = times[i];
                         var value = values[i];
+                        if (flip) {
+                            value.value.y *= -1;
+                            value.value.z *= -1;
+                        }
 
                         if (prevTime >= time) {
                             // Time value is not increasing, so we ignore this keyframe
@@ -683,87 +671,6 @@ namespace GLTFast {
             }
 
             clip.SetCurve(animationPath, typeof(SkinnedMeshRenderer), $"blendShape.{propertyPrefix}", curve);
-            Profiler.EndSample();
-#if DEBUG
-            if (duplicates > 0) {
-                ReportDuplicateKeyframes();
-            }
-#endif
-        }
-
-        public static void AddTexSTCurves(AnimationClip clip, string animationPath, string propertyPrefix, NativeArray<float> times, NativeArray<Vector2> values, InterpolationType interpolationType, bool zw = false) {
-            Profiler.BeginSample("AnimationUtils.AddTexSTCurves");
-            var curveX = new AnimationCurve();
-            var curveY = new AnimationCurve();
-
-#if DEBUG
-            uint duplicates = 0;
-#endif
-
-            switch (interpolationType) {
-                case InterpolationType.Step: {
-                    for (var i = 0; i < times.Length; i++) {
-                        var time = times[i];
-                        var value = values[i];
-                        curveX.AddKey( new Keyframe(time, value.x, float.PositiveInfinity, 0) );
-                        curveY.AddKey( new Keyframe(time, value.y, float.PositiveInfinity, 0) );
-                    }
-                    break;
-                }
-                case InterpolationType.CubicSpline: {
-                    for (var i = 0; i < times.Length; i++) {
-                        var time = times[i];
-                        var inTangent = values[i*3];
-                        var value = values[i*3 + 1];
-                        var outTangent = values[i*3 + 2];
-                        curveX.AddKey( new Keyframe(time, value.x, inTangent.x, outTangent.x, .5f, .5f ) );
-                        curveY.AddKey( new Keyframe(time, value.y, inTangent.y, outTangent.y, .5f, .5f ) );
-                    }
-                    break;
-                }
-                default: { // LINEAR
-                    var prevTime = times[0];
-                    var prevValue = values[0];
-                    var inTangent = new float2(0f);
-
-                    for (var i = 1; i < times.Length; i++) {
-                        var time = times[i];
-                        var value = values[i];
-                
-                        if (prevTime >= time) {
-                            // Time value is not increasing, so we ignore this keyframe
-                            // This happened on some Sketchfab files (see #298)
-#if DEBUG
-                            duplicates++;
-#endif
-                            continue;
-                        }
-
-                        var dT = time - prevTime;
-                        var dV = value - prevValue;
-                        float2 outTangent;
-                        if (dT < k_TimeEpsilon) {
-                            outTangent.x = (dV.x < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
-                            outTangent.y = (dV.y < 0f) ^ (dT < 0f) ? float.NegativeInfinity : float.PositiveInfinity;
-                        } else {
-                            outTangent = dV / dT;
-                        }
-                        curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, outTangent.x ) );
-                        curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, outTangent.y ) );
-
-                        inTangent = outTangent;
-                        prevTime = time;
-                        prevValue = value;
-                    }
-
-                    curveX.AddKey( new Keyframe(prevTime, prevValue.x, inTangent.x, 0 ) );
-                    curveY.AddKey( new Keyframe(prevTime, prevValue.y, inTangent.y, 0 ) );
-
-                    break;
-                }
-            }
-            clip.SetCurve(animationPath, typeof(MeshRenderer), $"{propertyPrefix}{(zw?"z":"x")}", curveX);
-            clip.SetCurve(animationPath, typeof(MeshRenderer), $"{propertyPrefix}{(zw?"w":"y")}", curveY);
             Profiler.EndSample();
 #if DEBUG
             if (duplicates > 0) {
