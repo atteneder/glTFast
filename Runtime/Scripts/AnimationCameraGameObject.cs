@@ -54,7 +54,7 @@ public class AnimationCameraGameObject : MonoBehaviour {
         }
 
         if(fov != fovOld) {
-            targetCamera.fieldOfView = fov  * Mathf.Rad2Deg;
+            targetCamera.fieldOfView = fov * Mathf.Rad2Deg;
             fovOld = fov;
         }
 

@@ -210,20 +210,97 @@ namespace GLTFast {
                     data.PropertyNames = new[] {"material.baseColorTexture_Rotation"};
                     data.AccessorType = GltfAccessorAttributeType.SCALAR;
                     break;
-                case "pbrMetallicRoughness/normalTexture/extensions/KHR_texture_transform/scale":
+
+                case "pbrMetallicRoughness/metallicRoughnessTexture/extensions/KHR_texture_transform/scale":
+                    template = "material.metallicRoughnessTextureTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}x", $"{template}y"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "pbrMetallicRoughness/metallicRoughnessTexture/extensions/KHR_texture_transform/offset":
+                    template = "material.metallicRoughnessTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}z", $"{template}w"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "pbrMetallicRoughness/metallicRoughnessTexture/extensions/KHR_texture_transform/rotation":
+                    data.PropertyNames = new[] {"material.metallicRoughnessTexture_Rotation"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+
+                case "normalTexture/extensions/KHR_texture_transform/scale":
                     template = "material.normalTexture_ST.";
                     data.PropertyNames = new[] {$"{template}x", $"{template}y"};
                     data.AccessorType = GltfAccessorAttributeType.VEC2;
                     break;
-                case "pbrMetallicRoughness/normalTexture/extensions/KHR_texture_transform/offset":
+                case "normalTexture/extensions/KHR_texture_transform/offset":
                     template = "material.normalTexture_ST.";
                     data.PropertyNames = new[] {$"{template}z", $"{template}w"};
                     data.AccessorType = GltfAccessorAttributeType.VEC2;
                     break;
-                case "pbrMetallicRoughness/normalTexture/extensions/KHR_texture_transform/rotation":
+                case "normalTexture/extensions/KHR_texture_transform/rotation":
                     data.PropertyNames = new[] {"material.normalTexture_Rotation"};
                     data.AccessorType = GltfAccessorAttributeType.SCALAR;
                     break;
+
+                case "occlusionTexture/extensions/KHR_texture_transform/scale":
+                    template = "material.occlusionTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}x", $"{template}y"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "occlusionTexture/extensions/KHR_texture_transform/offset":
+                    template = "material.occlusionTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}z", $"{template}w"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "occlusionTexture/extensions/KHR_texture_transform/rotation":
+                    data.PropertyNames = new[] {"material.occlusionTexture_Rotation"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+
+                case "emissiveTexture/extensions/KHR_texture_transform/scale":
+                    template = "material.emissiveTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}x", $"{template}y"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "emissiveTexture/extensions/KHR_texture_transform/offset":
+                    template = "material.emissiveTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}z", $"{template}w"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "emissiveTexture/extensions/KHR_texture_transform/rotation":
+                    data.PropertyNames = new[] {"material.emissiveTexture_Rotation"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+
+                case "extensions/KHR_materials_pbrSpecularGlossiness/diffuseTexture/extensions/KHR_texture_transform/scale":
+                    template = "material.diffuseTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}x", $"{template}y"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "extensions/KHR_materials_pbrSpecularGlossiness/diffuseTexture/extensions/KHR_texture_transform/offset":
+                    template = "material.diffuseTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}z", $"{template}w"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "extensions/KHR_materials_pbrSpecularGlossiness/diffuseTexture/extensions/KHR_texture_transform/rotation":
+                    data.PropertyNames = new[] {"material.diffuseTexture_Rotation"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+                
+                case "extensions/KHR_materials_pbrSpecularGlossiness/specularGlossinessTexture/extensions/KHR_texture_transform/scale":
+                    template = "material.specularGlossinessTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}x", $"{template}y"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "extensions/KHR_materials_pbrSpecularGlossiness/specularGlossinessTexture/extensions/KHR_texture_transform/offset":
+                    template = "material.specularGlossinessTexture_ST.";
+                    data.PropertyNames = new[] {$"{template}z", $"{template}w"};
+                    data.AccessorType = GltfAccessorAttributeType.VEC2;
+                    break;
+                case "extensions/KHR_materials_pbrSpecularGlossiness/specularGlossinessTexture/extensions/KHR_texture_transform/rotation":
+                    data.PropertyNames = new[] {"material.specularGlossinessTexture_Rotation"};
+                    data.AccessorType = GltfAccessorAttributeType.SCALAR;
+                    break;
+
                 default:
 #if DEBUG
                     Debug.LogWarning($"glTF animation pointer {pointerPath} is not supported.");
