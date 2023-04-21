@@ -26,7 +26,7 @@ public class AnimationCameraGameObject : MonoBehaviour {
         }
     }
 
-    void Update() {
+    void LateUpdate() {
         bool orthoChanged = false;
         if(farClipPlane != farClipPlaneOld) {
             if(orthographic) {
