@@ -1193,7 +1193,8 @@ namespace GLTFast
                                 // Not Inside buffer
                                 if (!string.IsNullOrEmpty(img.uri))
                                 {
-                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), !m_ImageReadable[imageIndex], imgFormat == ImageFormat.Ktx);
+                                    var markNonReadable = !m_ImageReadable[imageIndex] && !m_Settings.ReadWriteEnabled;
+                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), markNonReadable, imgFormat == ImageFormat.Ktx);
                                 }
                                 else
                                 {
@@ -1241,7 +1242,8 @@ namespace GLTFast
             // TODO: Investigate alternative: native texture creation in worker thread
             bool forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[imageIndex];
             var txt = CreateEmptyTexture(img, imageIndex, forceSampleLinear);
-            txt.LoadImage(data,!m_ImageReadable[imageIndex]);
+            var markNonReadable = !m_ImageReadable[imageIndex] && !m_Settings.ReadWriteEnabled;
+            txt.LoadImage(data, markNonReadable);
             m_Images[imageIndex] = txt;
             Profiler.EndSample();
         }
@@ -1315,7 +1317,8 @@ namespace GLTFast
                         var forceSampleLinear = m_ImageGamma!=null && !m_ImageGamma[imageIndex];
                         txt = CreateEmptyTexture(m_GltfRoot.images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
-                        txt.LoadImage(www.Data,!m_ImageReadable[imageIndex]);
+                        var markNonReadable = !m_ImageReadable[imageIndex] && !m_Settings.ReadWriteEnabled;
+                        txt.LoadImage(www.Data, markNonReadable);
 #else
                         m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
                         txt = null;
@@ -1790,7 +1793,8 @@ namespace GLTFast
                         {
                             jh.jobHandle.Complete();
 #if UNITY_IMAGECONVERSION
-                            m_Images[jh.imageIndex].LoadImage(jh.buffer,!m_ImageReadable[jh.imageIndex]);
+                            var markNonReadable = !m_ImageReadable[jh.imageIndex] && !m_Settings.ReadWriteEnabled;
+                            m_Images[jh.imageIndex].LoadImage(jh.buffer, markNonReadable);
 #endif
                             jh.gcHandle.Free();
                             m_ImageCreateContexts.RemoveAt(i);

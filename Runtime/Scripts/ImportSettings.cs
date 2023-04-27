@@ -71,6 +71,15 @@ namespace GLTFast
         }
 
         /// <summary>
+        /// Load textures as read/write enabled. Could reduce import performance.
+        /// </summary>
+        public bool ReadWriteEnabled
+        {
+            get => readWriteEnabled;
+            set => readWriteEnabled = value;
+        }
+
+        /// <summary>
         /// This property defines the anisotropic filtering level for imported textures
         /// </summary>
         public int AnisotropicFilterLevel
@@ -98,6 +107,10 @@ namespace GLTFast
         [SerializeField]
         [Tooltip("Magnification filter mode fallback if no mode was provided.")]
         Sampler.MagFilterMode defaultMagFilterMode = Sampler.MagFilterMode.Linear;
+
+        [SerializeField]
+        [Tooltip("Load textures as read/write enabled. Could reduce import performance.")]
+        bool readWriteEnabled = false;
 
         [SerializeField]
         [Tooltip("Anisotropic filtering level for imported textures.")]
