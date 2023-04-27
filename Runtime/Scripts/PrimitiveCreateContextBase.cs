@@ -31,14 +31,21 @@ namespace GLTFast
         protected string m_MeshName;
         protected int[] m_Materials;
 
+        public int MeshIndex { get; }
         public int PrimitiveIndex { get; }
 
         public abstract bool IsCompleted { get; }
 
-        protected PrimitiveCreateContextBase(int primitiveIndex, int materialCount, string meshName)
+        protected PrimitiveCreateContextBase(
+            int meshIndex,
+            int primitiveIndex,
+            int subMeshCount,
+            string meshName
+            )
         {
-            this.PrimitiveIndex = primitiveIndex;
-            m_Materials = new int[materialCount];
+            MeshIndex = meshIndex;
+            PrimitiveIndex = primitiveIndex;
+            m_Materials = new int[subMeshCount];
             m_MeshName = meshName;
         }
 
@@ -49,6 +56,6 @@ namespace GLTFast
 
         public MorphTargetsContext morphTargetsContext;
 
-        public abstract Task<Primitive?> CreatePrimitive();
+        public abstract Task<MeshResult?> CreatePrimitive();
     }
 }

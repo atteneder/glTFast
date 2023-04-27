@@ -36,14 +36,15 @@ namespace GLTFast {
         public override bool IsCompleted => m_DracoTask!=null && m_DracoTask.IsCompleted;
 
         public PrimitiveDracoCreateContext(
+            int meshIndex,
             int primitiveIndex,
-            int materialCount,
+            int subMeshCount,
             bool needsNormals,
             bool needsTangents,
             string meshName,
             Bounds? bounds
             )
-            : base(primitiveIndex, materialCount, meshName)
+            : base(meshIndex, primitiveIndex, subMeshCount, meshName)
         {
             m_NeedsNormals = needsNormals;
             m_NeedsTangents = needsTangents;
@@ -62,7 +63,7 @@ namespace GLTFast {
                 );
         }
 
-        public override async Task<Primitive?> CreatePrimitive() {
+        public override async Task<MeshResult?> CreatePrimitive() {
 
             var mesh = m_DracoTask.Result;
             m_DracoTask.Dispose();
@@ -106,7 +107,12 @@ namespace GLTFast {
             // Profiler.EndSample();
 #endif
 
-            return new Primitive(mesh,m_Materials);
+            return new MeshResult(
+                MeshIndex,
+                new []{0}, // With Draco, only single primitive meshes are supported
+                m_Materials,
+                mesh
+                );
         }
     }
 }

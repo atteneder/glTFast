@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IJsonParser` to support custom JSON parsers, using `JsonUtility` as the default
 - `JsonParser.SetDefaultParser`: Set a custom `IJsonParser`
 - `JsonParser.SetDefaultImplementation`: Set a custom `IJsonParser`
+- `GameObjectInstantiator` events that allow further instantiation customizations
+  - `NodeCreated`
+  - `MeshAdded`
+  - `EndSceneCompleted`
 
 ## [5.0.4] - 2023-03-30
 ### Fixed

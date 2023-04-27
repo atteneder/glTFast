@@ -166,7 +166,7 @@ namespace GLTFast
         /// by Vertex Attribute and Morph Target usage (Primitives with identical vertex
         /// data will be clustered; <see cref="MeshPrimitive.Equals(object)"/>).
         /// </summary>
-        Dictionary<MeshPrimitive, List<MeshPrimitive>>[] m_MeshPrimitiveCluster;
+        Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>[] m_MeshPrimitiveCluster;
         List<ImageCreateContext> m_ImageCreateContexts;
 #if KTX
         List<KtxLoadContextBase> m_KtxLoadContextsBuffer;
@@ -219,7 +219,7 @@ namespace GLTFast
         /// </summary>
         string[] m_NodeNames;
 
-        Primitive[] m_Primitives;
+        MeshResult[] m_Primitives;
         int[] m_MeshPrimitiveIndex;
         Matrix4x4[][] m_SkinsInverseBindMatrices;
 #if UNITY_ANIMATION
@@ -2242,8 +2242,6 @@ namespace GLTFast
             }
             m_VertexAttributes = null;
 
-            m_PrimitiveContexts = null;
-
             // Unpin managed buffer arrays
             if (m_BufferHandles != null)
             {
@@ -2377,8 +2375,7 @@ namespace GLTFast
                             instantiator.AddPrimitive(
                                 nodeIndex,
                                 primitiveName,
-                                mesh,
-                                primitive.materialIndices,
+                                primitive,
                                 joints,
                                 rootJoint,
                                 gltf.meshes[node.mesh].weights,
@@ -2418,8 +2415,7 @@ namespace GLTFast
                             instantiator.AddPrimitiveInstanced(
                                 nodeIndex,
                                 primitiveName,
-                                mesh,
-                                m_Primitives[i].materialIndices,
+                                m_Primitives[i],
                                 instanceCount,
                                 positions,
                                 rotations,
@@ -2730,6 +2726,13 @@ namespace GLTFast
             }
         }
 
+        /// <summary>Is called when retrieving data from accessors should be performed/started.</summary>
+        public event Action LoadAccessorDataEvent;
+
+        /// <summary>Is called when a mesh and its primitives are assigned to a <see cref="MeshResult"/> and
+        /// sub-meshes. Parameters are MeshResult index, mesh index and per sub-mesh primitive index</summary>
+        public event Action<int, int, int[]> MeshResultAssigned;
+
         async Task<bool> LoadAccessorData(Root gltf)
         {
 
@@ -2737,7 +2740,9 @@ namespace GLTFast
 
             var mainBufferTypes = new Dictionary<MeshPrimitive, MainBufferType>();
             var meshCount = gltf.meshes?.Length ?? 0;
-            m_MeshPrimitiveCluster = gltf.meshes == null ? null : new Dictionary<MeshPrimitive, List<MeshPrimitive>>[meshCount];
+            m_MeshPrimitiveCluster = gltf.meshes == null 
+                ? null
+                : new Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>[meshCount];
             Dictionary<MeshPrimitive, MorphTargetsContext> morphTargetsContexts = null;
 #if DEBUG
             var perAttributeMeshCollection = new Dictionary<Attributes,HashSet<int>>();
@@ -2745,21 +2750,24 @@ namespace GLTFast
 
             // Iterate all primitive vertex attributes and remember the accessors usage.
             m_AccessorUsage = new AccessorUsage[gltf.accessors.Length];
+
+            LoadAccessorDataEvent?.Invoke();
+
             int totalPrimitives = 0;
             for (int meshIndex = 0; meshIndex < meshCount; meshIndex++)
             {
                 var mesh = gltf.meshes[meshIndex];
                 m_MeshPrimitiveIndex[meshIndex] = totalPrimitives;
-                var cluster = new Dictionary<MeshPrimitive, List<MeshPrimitive>>();
+                var cluster = new Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>();
 
-                foreach (var primitive in mesh.primitives)
+                for (var primIndex = 0; primIndex < mesh.primitives.Length; primIndex++)
                 {
-
+                    var primitive = mesh.primitives[primIndex];
                     if (!cluster.ContainsKey(primitive))
                     {
-                        cluster[primitive] = new List<MeshPrimitive>();
+                        cluster[primitive] = new List<(int MeshIndex, MeshPrimitive Primitive)>();
                     }
-                    cluster[primitive].Add(primitive);
+                    cluster[primitive].Add((primIndex, primitive));
 
                     if (primitive.targets != null)
                     {
@@ -2889,7 +2897,7 @@ namespace GLTFast
             {
                 m_MeshPrimitiveIndex[meshCount] = totalPrimitives;
             }
-            m_Primitives = new Primitive[totalPrimitives];
+            m_Primitives = new MeshResult[totalPrimitives];
             m_PrimitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
             var tmpList = new List<JobHandle>(mainBufferTypes.Count);
             m_VertexAttributes = new Dictionary<MeshPrimitive, VertexBufferConfigBase>(mainBufferTypes.Count);
@@ -3143,7 +3151,7 @@ namespace GLTFast
 
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++)
                     {
-                        var primitive = cluster[primIndex];
+                        var (gltfPrimitiveIndex, primitive) = cluster[primIndex];
 #if DRACO_UNITY
                         if (primitive.IsDracoCompressed) {
                             Bounds? bounds = null;
@@ -3157,6 +3165,7 @@ namespace GLTFast
                                 m_Logger.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
                             }
                             var dracoContext = new PrimitiveDracoCreateContext(
+                                meshIndex,
                                 primitiveIndex,
                                 1,
                                 primitive.material<0 || gltf.materials[primitive.material].RequiresNormals,
@@ -3172,13 +3181,19 @@ namespace GLTFast
                             PrimitiveCreateContext c;
                             if (context == null)
                             {
-                                c = new PrimitiveCreateContext(primitiveIndex, cluster.Count, mesh.name);
+                                c = new PrimitiveCreateContext(
+                                    meshIndex,
+                                    primitiveIndex,
+                                    cluster.Count,
+                                    mesh.name
+                                    );
                             }
                             else
                             {
                                 c = context as PrimitiveCreateContext;
                             }
                             // PreparePrimitiveIndices(gltf,primitive,ref c,primIndex);
+                            c.SetPrimitiveIndex(primIndex, gltfPrimitiveIndex);
                             context = c;
                         }
 
@@ -3250,9 +3265,26 @@ namespace GLTFast
 
                     PrimitiveCreateContextBase context = m_PrimitiveContexts[i];
 
+                    if (MeshResultAssigned != null)
+                    {
+                        var primitiveIndices = new int[cluster.Count];
+                        for (var subMeshIndex = 0; subMeshIndex < cluster.Count; subMeshIndex++)
+                        {
+                            var subMesh = cluster[subMeshIndex];
+                            primitiveIndices[subMeshIndex] = subMesh.Item1;
+
+                            MeshResultAssigned?.Invoke(
+                                m_MeshPrimitiveIndex[meshIndex], // MeshResult index
+                                meshIndex, // glTF mesh index
+                                primitiveIndices
+                            );
+                        }
+                    }
+
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++)
                     {
-                        var primitive = cluster[primIndex];
+                        var primitiveTuple = cluster[primIndex];
+                        var primitive = primitiveTuple.Item2;
 #if DRACO_UNITY
                         if( primitive.IsDracoCompressed ) {
                             var c = (PrimitiveDracoCreateContext) context;

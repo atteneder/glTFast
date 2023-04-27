@@ -80,8 +80,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="nodeIndex">Index of the node</param>
         /// <param name="meshName">Mesh's name</param>
-        /// <param name="mesh">The actual Mesh</param>
-        /// <param name="materialIndices">Material indices. Should be used to query the material</param>
+        /// <param name="meshResult">The converted Mesh</param>
         /// <param name="joints">If a skin was attached, the joint indices. Null otherwise</param>
         /// <param name="rootJoint">Root joint node index, if present</param>
         /// <param name="morphTargetWeights">Morph target weights, if present</param>
@@ -89,8 +88,7 @@ namespace GLTFast
         void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            MeshResult meshResult,
             uint[] joints = null,
             uint? rootJoint = null,
             float[] morphTargetWeights = null,
@@ -104,8 +102,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="nodeIndex">Index of the node</param>
         /// <param name="meshName">Mesh's name</param>
-        /// <param name="mesh">The actual Mesh</param>
-        /// <param name="materialIndices">Material indices. Should be used to query the material</param>
+        /// <param name="meshResult">The converted Mesh</param>
         /// <param name="instanceCount">Number of instances</param>
         /// <param name="positions">Instance positions</param>
         /// <param name="rotations">Instance rotations</param>
@@ -114,8 +111,7 @@ namespace GLTFast
         void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            MeshResult meshResult,
             uint instanceCount,
             NativeArray<Vector3>? positions,
             NativeArray<Quaternion>? rotations,
