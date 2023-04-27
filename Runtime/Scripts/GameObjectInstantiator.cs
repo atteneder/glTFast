@@ -210,6 +210,8 @@ namespace GLTFast
             go.transform.SetParent(
                 parentIndex.HasValue ? m_Nodes[parentIndex.Value].transform : SceneTransform,
                 false);
+
+            NodeCreated?.Invoke(nodeIndex, go);
         }
 
         /// <inheritdoc />
@@ -542,6 +544,11 @@ namespace GLTFast
             Profiler.EndSample();
         }
 
+        public delegate void NodeCreatedDelegate(
+            uint nodeIndex,
+            GameObject gameObject
+        );
+
         public delegate void MeshAddedDelegate(
             GameObject gameObject,
             uint nodeIndex,
@@ -553,6 +560,7 @@ namespace GLTFast
             int primitiveNumeration = 0
         );
 
+        public event NodeCreatedDelegate NodeCreated;
         public event MeshAddedDelegate MeshAdded;
         public event Action EndSceneCompleted;
     }
