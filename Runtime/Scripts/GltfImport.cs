@@ -166,7 +166,7 @@ namespace GLTFast
         /// by Vertex Attribute and Morph Target usage (Primitives with identical vertex
         /// data will be clustered; <see cref="MeshPrimitive.Equals(object)"/>).
         /// </summary>
-        Dictionary<MeshPrimitive, List<Tuple<int, MeshPrimitive>>>[] m_MeshPrimitiveCluster;
+        Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>[] m_MeshPrimitiveCluster;
         List<ImageCreateContext> m_ImageCreateContexts;
 #if KTX
         List<KtxLoadContextBase> m_KtxLoadContextsBuffer;
@@ -2740,7 +2740,9 @@ namespace GLTFast
 
             var mainBufferTypes = new Dictionary<MeshPrimitive, MainBufferType>();
             var meshCount = gltf.meshes?.Length ?? 0;
-            m_MeshPrimitiveCluster = gltf.meshes == null ? null : new Dictionary<MeshPrimitive, List<Tuple<int, MeshPrimitive>>>[meshCount];
+            m_MeshPrimitiveCluster = gltf.meshes == null 
+                ? null
+                : new Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>[meshCount];
             Dictionary<MeshPrimitive, MorphTargetsContext> morphTargetsContexts = null;
 #if DEBUG
             var perAttributeMeshCollection = new Dictionary<Attributes,HashSet<int>>();
@@ -2756,16 +2758,16 @@ namespace GLTFast
             {
                 var mesh = gltf.meshes[meshIndex];
                 m_MeshPrimitiveIndex[meshIndex] = totalPrimitives;
-                var cluster = new Dictionary<MeshPrimitive, List<Tuple<int, MeshPrimitive>>>();
+                var cluster = new Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>();
 
                 for (var primIndex = 0; primIndex < mesh.primitives.Length; primIndex++)
                 {
                     var primitive = mesh.primitives[primIndex];
                     if (!cluster.ContainsKey(primitive))
                     {
-                        cluster[primitive] = new List<Tuple<int, MeshPrimitive>>();
+                        cluster[primitive] = new List<(int MeshIndex, MeshPrimitive Primitive)>();
                     }
-                    cluster[primitive].Add(new Tuple<int, MeshPrimitive>(primIndex, primitive));
+                    cluster[primitive].Add((primIndex, primitive));
 
                     if (primitive.targets != null)
                     {
