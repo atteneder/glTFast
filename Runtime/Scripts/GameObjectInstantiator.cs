@@ -544,11 +544,17 @@ namespace GLTFast
             Profiler.EndSample();
         }
 
+        /// <summary>
+        /// Information for when a node's GameObject has been created.
+        /// </summary>
         public delegate void NodeCreatedDelegate(
             uint nodeIndex,
             GameObject gameObject
         );
 
+        /// <summary>
+        /// Provides information for when a mesh was added to a node GameObject
+        /// </summary>
         public delegate void MeshAddedDelegate(
             GameObject gameObject,
             uint nodeIndex,
@@ -560,8 +566,11 @@ namespace GLTFast
             int primitiveNumeration = 0
         );
 
+        /// <summary>Invoked when a node's GameObject has been created.</summary>
         public event NodeCreatedDelegate NodeCreated;
+        /// <summary>Invoked after a mesh was added to a node GameObject</summary>
         public event MeshAddedDelegate MeshAdded;
+        /// <summary>Invoked after a scene has been instantiated.</summary>
         public event Action EndSceneCompleted;
     }
 }
