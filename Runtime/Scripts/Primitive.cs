@@ -38,6 +38,13 @@ namespace GLTFast
 
         // public readonly Dictionary<Extension, object> extensionData;
 
+        /// <summary>
+        /// MeshResult Constructor
+        /// </summary>
+        /// <param name="meshIndex">Original glTF mesh index</param>
+        /// <param name="primitiveIndices">Original glTF mesh primitive index per sub-mesh</param>
+        /// <param name="materialIndices">glTF material index per sub-mesh</param>
+        /// <param name="mesh">Converted Unity Mesh</param>
         public MeshResult(
             int meshIndex,
             int[] primitiveIndices,

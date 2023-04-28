@@ -20,8 +20,13 @@ using UnityEngine.Profiling;
 
 namespace GLTFast
 {
+    /// <summary>
+    /// glTF JSON parser implemented with Unity JsonUtility
+    /// </summary>
+    /// <seealso href="https://docs.unity3d.com/ScriptReference/JsonUtility.html"/>
     public class GltfJsonUtilityParser : IGltfJsonParser
     {
+        /// <inheritdoc/>
         public Root ParseJson<T>(string json) where T : Root
         {
             // JsonUtility sometimes creates non-null default instances of objects-type members

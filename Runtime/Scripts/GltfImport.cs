@@ -337,6 +337,7 @@ namespace GLTFast
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <typeparam name="T">Custom schema type that the glTF JSON is deserialization to.</typeparam>
         /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> LoadWithCustomSchema<T>(
             string url,
@@ -372,6 +373,7 @@ namespace GLTFast
         /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <typeparam name="T">Custom schema type that the glTF JSON is deserialization to.</typeparam>
         /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> LoadWithCustomSchema<T>(
             Uri url,
