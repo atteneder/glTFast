@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 
+using GLTFast.Extensions;
 using GLTFast.Jobs;
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
@@ -132,6 +133,8 @@ namespace GLTFast
         IDownloadProvider m_DownloadProvider;
         IMaterialGenerator m_MaterialGenerator;
         IDeferAgent m_DeferAgent;
+
+        Dictionary<Type, ImportInstance> m_Extensions;
 
         ImportSettings m_Settings;
 
@@ -275,6 +278,8 @@ namespace GLTFast
                     defaultDeferAgentGameObject.AddComponent<DefaultDeferAgent>();
                 }
                 m_DeferAgent = s_DefaultDeferAgent;
+
+                ExtensionRegistry.InjectAllExtensions(this);
             }
             else
             {
@@ -311,6 +316,30 @@ namespace GLTFast
             {
                 s_DefaultDeferAgent = null;
             }
+        }
+
+        /// <summary>
+        /// Adds an import extension. To be called before any loading is initiated.
+        /// </summary>
+        /// <param name="extension">The import extension to add.</param>
+        /// <typeparam name="T">Type of the import extension</typeparam>
+        public void AddExtension<T>(T extension) where T : ImportInstance
+        {
+            if (m_Extensions == null)
+            {
+                m_Extensions = new Dictionary<Type, ImportInstance>();
+            }
+            m_Extensions[typeof(T)] = extension;
+        }
+
+        /// <summary>
+        /// Queries the import extension of a particular type.
+        /// </summary>
+        /// <typeparam name="T">Type of the import extension</typeparam>
+        /// <returns>The import extension that was previously added. False if there was none.</returns>
+        public T GetExtensionInstance<T>() where T : ImportInstance
+        {
+            return (T)m_Extensions?[typeof(T)];
         }
 
         /// <summary>
@@ -643,6 +672,14 @@ namespace GLTFast
         /// </summary>
         public void Dispose()
         {
+            if (m_Extensions != null)
+            {
+                foreach (var extension in m_Extensions)
+                {
+                    extension.Value.Dispose();
+                }
+                m_Extensions = null;
+            }
 
             m_NodeNames = null;
 
@@ -1055,59 +1092,59 @@ namespace GLTFast
         /// <returns>False if a required extension is not supported. True otherwise.</returns>
         bool CheckExtensionSupport(Root gltfRoot)
         {
-            if (gltfRoot.extensionsRequired != null)
+            if (!CheckExtensionSupport(gltfRoot.extensionsRequired))
             {
-                foreach (var ext in gltfRoot.extensionsRequired)
+                return false;
+            }
+            CheckExtensionSupport(gltfRoot.extensionsUsed, false);
+            return true;
+        }
+
+        bool CheckExtensionSupport(IEnumerable<string> extensions, bool required = true)
+        {
+            if (extensions == null)
+                return true;
+            foreach (var ext in extensions)
+            {
+                var supported = k_SupportedExtensions.Contains(ext);
+                if (!supported && m_Extensions != null)
                 {
-                    var supported = k_SupportedExtensions.Contains(ext);
-                    if (!supported)
+                    foreach (var extension in m_Extensions)
                     {
-#if !DRACO_UNITY
-                        if (ext == ExtensionName.DracoMeshCompression)
+                        if (extension.Value.SupportsExtension(ext))
                         {
-                            m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ext);
+                            supported = true;
+                            break;
                         }
-                        else
+                    }
+                }
+                if (!supported)
+                {
+#if !DRACO_UNITY
+                    if (ext == ExtensionName.DracoMeshCompression)
+                    {
+                        m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ext);
+
+                    }
 #endif
 #if !KTX_UNITY
-                        if (ext == ExtensionName.TextureBasisUniversal)
-                        {
-                            m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
-                        }
-                        else
+                    if (ext == ExtensionName.TextureBasisUniversal)
+                    {
+                        m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
+                    }
+                    else
 #endif
+                    {
+                        if (required)
                         {
                             m_Logger?.Error(LogCode.ExtensionUnsupported, ext);
                         }
-                        return false;
-                    }
-                }
-            }
-            if (gltfRoot.extensionsUsed != null)
-            {
-                foreach (var ext in gltfRoot.extensionsUsed)
-                {
-                    var supported = k_SupportedExtensions.Contains(ext);
-                    if (!supported)
-                    {
-#if !DRACO_UNITY
-                        if (ext == ExtensionName.DracoMeshCompression)
-                        {
-                            m_Logger?.Warning(LogCode.PackageMissing, "DracoUnity", ext);
-                        }
                         else
-#endif
-#if !KTX_UNITY
-                        if (ext == ExtensionName.TextureBasisUniversal)
-                        {
-                            m_Logger?.Warning(LogCode.PackageMissing, "KtxUnity", ext);
-                        }
-                        else
-#endif
                         {
                             m_Logger?.Warning(LogCode.ExtensionUnsupported, ext);
                         }
                     }
+                    return false;
                 }
             }
             return true;
@@ -2300,6 +2337,13 @@ namespace GLTFast
 
         async Task InstantiateSceneInternal(Root gltf, IInstantiator instantiator, int sceneId)
         {
+            if (m_Extensions != null)
+            {
+                foreach (var extension in m_Extensions)
+                {
+                    extension.Value.Inject(instantiator);
+                }
+            }
 
             async Task IterateNodes(uint nodeIndex, uint? parentIndex, Action<uint, uint?> callback)
             {
