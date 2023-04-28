@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Custom Extension API (`GLTFast.Extensions` namespace)
 - Support for alternative JSON parsing via Newtonsoft JSON
 - Support for deserializing custom data via custom glTF JSON schema class
 - `Accessor.ElementByteSize`: Byte size of one element of that accessor
