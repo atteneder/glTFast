@@ -319,10 +319,10 @@ namespace GLTFast
         }
 
         /// <summary>
-        /// TODO: Write docs
+        /// Adds an import extension. To be called before any loading is initiated.
         /// </summary>
-        /// <param name="extension"></param>
-        /// <typeparam name="T"></typeparam>
+        /// <param name="extension">The import extension to add.</param>
+        /// <typeparam name="T">Type of the import extension</typeparam>
         public void AddExtension<T>(T extension) where T : ImportInstance
         {
             if (m_Extensions == null)
@@ -333,10 +333,10 @@ namespace GLTFast
         }
 
         /// <summary>
-        /// TODO: Write docs
+        /// Queries the import extension of a particular type.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="T">Type of the import extension</typeparam>
+        /// <returns>The import extension that was previously added. False if there was none.</returns>
         public T GetExtensionInstance<T>() where T : ImportInstance
         {
             return (T)m_Extensions?[typeof(T)];
