@@ -25,12 +25,12 @@ namespace GLTFast.Extensions
         public abstract void CreateImportInstance(GltfImport gltfImport);
     }
 
-    public abstract class Extension<ImportType> : ExtensionBase
-        where ImportType : ImportInstance, new()
+    public abstract class Extension<TImport> : ExtensionBase
+        where TImport : ImportInstance, new()
     {
         public override void CreateImportInstance(GltfImport gltfImport)
         {
-            var instance = new ImportType();
+            var instance = new TImport();
             instance.Inject(gltfImport);
         }
     }
@@ -45,36 +45,32 @@ namespace GLTFast.Extensions
 
     public static class ExtensionRegistry
     {
-
-        static List<ExtensionBase> extensions;
+        static List<ExtensionBase> s_Extensions;
 
         public static void RegisterExtension(ExtensionBase extension)
         {
-            if (extensions == null)
-            {
-                RegisterDefaultExtensions();
-            }
-            extensions.Add(extension);
+            CertifyDefaultExtensionsRegistered();
+            s_Extensions.Add(extension);
         }
 
-        public static void InjectAllExtensions(GltfImport gltfImport)
+        internal static void InjectAllExtensions(GltfImport gltfImport)
         {
-            if (extensions == null)
-            {
-                RegisterDefaultExtensions();
-            }
-            foreach (var extension in extensions)
+            CertifyDefaultExtensionsRegistered();
+            foreach (var extension in s_Extensions)
             {
                 extension.CreateImportInstance(gltfImport);
             }
         }
 
-        static void RegisterDefaultExtensions()
+        static void CertifyDefaultExtensionsRegistered()
         {
-            extensions = new List<ExtensionBase>();
+            if (s_Extensions == null)
+            {
+                s_Extensions = new List<ExtensionBase>();
 
-            // Register all extensions
-            // TODO: Investigate if extensions can be auto-registered via reflection
+                // TODO: Register all default extensions
+                // TODO: Investigate if extensions can be auto-registered via reflection
+            }
         }
     }
 }
