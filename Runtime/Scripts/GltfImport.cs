@@ -625,7 +625,7 @@ namespace GLTFast
             {
                 if (objects != null)
                     foreach (var disposable in objects)
-                        disposable.Dispose();
+                        disposable?.Dispose();
             }
 
             DisposeArray(m_Materials);
