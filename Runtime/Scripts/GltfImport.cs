@@ -529,6 +529,31 @@ namespace GLTFast
         }
 
         /// <summary>
+        /// Load a glTF-binary asset from a byte array.
+        /// </summary>
+        /// <param name="bytes">byte array containing glTF-binary</param>
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadGltfBinaryWithCustomSchema<T>(
+            byte[] bytes,
+            Uri uri = null,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+        ) where T : Root
+        {
+            m_Settings = importSettings ?? new ImportSettings();
+            var success = await LoadGltfBinaryBuffer<T>(bytes, uri);
+            if (success) await LoadContent();
+            success = success && await Prepare();
+            DisposeVolatileData();
+            LoadingError = !success;
+            LoadingDone = true;
+            return success;
+        }
+
+        /// <summary>
         /// Load a glTF JSON from a string
         /// </summary>
         /// <param name="json">glTF JSON</param>
