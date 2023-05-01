@@ -1854,10 +1854,10 @@ namespace GLTFast
                         {
                             if (txt.sampler >= 0)
                             {
-                                sampler.Apply(img.Texture, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
+                                sampler.Apply(img?.Texture, m_Settings.DefaultMinFilterMode, m_Settings.DefaultMagFilterMode);
                             }
                             imageVariants[imageIndex] = new Dictionary<SamplerKey, Texture2D>();
-                            imageVariants[imageIndex][key] = img.Texture;
+                            imageVariants[imageIndex][key] = img?.Texture;
                             m_Textures[textureIndex] = img;
                         }
                         else
@@ -1868,7 +1868,7 @@ namespace GLTFast
                             }
                             else
                             {
-                                var newImg = UnityEngine.Object.Instantiate(img.Texture);
+                                var newImg = UnityEngine.Object.Instantiate(img?.Texture);
                                 m_Resources.Add(newImg);
 #if DEBUG
                                 newImg.name = $"{img.Texture.name}_sampler{txt.sampler}";
