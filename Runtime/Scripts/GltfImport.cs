@@ -278,8 +278,6 @@ namespace GLTFast
                     defaultDeferAgentGameObject.AddComponent<DefaultDeferAgent>();
                 }
                 m_DeferAgent = s_DefaultDeferAgent;
-
-                ExtensionRegistry.InjectAllExtensions(this);
             }
             else
             {
@@ -288,6 +286,8 @@ namespace GLTFast
             m_MaterialGenerator = materialGenerator ?? MaterialGenerator.GetDefaultMaterialGenerator();
 
             m_Logger = logger;
+
+            ExtensionRegistry.InjectAllExtensions(this);
         }
 
         /// <summary>
