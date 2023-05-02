@@ -1342,7 +1342,7 @@ namespace GLTFast
                     {
                         Assert.IsTrue(www is ITextureDownload);
                         txt = ((ITextureDownload)www).GetTexture(forceSampleLinear);
-                        txt.Texture.name = GetImageName(m_GltfRoot.images[imageIndex], imageIndex);
+                        txt.Texture.name = GetImageName(imageIndex);
                     }
                     www.Dispose();
                     m_Images[imageIndex] = txt;
@@ -1897,6 +1897,8 @@ namespace GLTFast
                         this,
                         pointsSupport
                     );
+
+                    material.name = $"material_{i}";
                     m_Materials[i] = material;
                     m_MaterialGenerator.SetLogger(null);
                     Profiler.EndSample();
@@ -1988,7 +1990,7 @@ namespace GLTFast
                 for (var i = 0; i < m_GltfRoot.animations.Length; i++) {
                     var animation = m_GltfRoot.animations[i];
                     m_AnimationClips[i] = new AnimationClip();
-                    m_AnimationClips[i].name = animation.name ?? $"Clip_{i}";
+                    m_AnimationClips[i].name = $"clip_{i}";
 
                     // Legacy Animation requirement
                     m_AnimationClips[i].legacy = m_Settings.AnimationMethod == AnimationMethod.Legacy;
@@ -2684,14 +2686,14 @@ namespace GLTFast
             )
             {
                 anisoLevel = m_Settings.AnisotropicFilterLevel,
-                name = GetImageName(img, index)
+                name = GetImageName(index)
             };
             return txt.ToDisposableTexture();
         }
 
-        static string GetImageName(Image img, int index)
+        static string GetImageName(int index)
         {
-            return string.IsNullOrEmpty(img.name) ? $"image_{index}" : img.name;
+            return $"image_{index}";
         }
 
         internal static void SafeDestroy(UnityEngine.Object obj)
