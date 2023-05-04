@@ -1,5 +1,5 @@
 {
-  "name": "com.atteneder.gltfast",
+  "name": "nl.netherlands3d.gltfast",
   "version": "5.0.0",
   "displayName": "glTFast",
   "description": "Use glTFast to import and export glTF 3D files efficiently at runtime or in the Editor",
