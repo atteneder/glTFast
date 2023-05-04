@@ -1,5 +1,7 @@
 # glTFast for Unity
 
+> **This is a fork for Netherlands3D because of issues with too many Shader Variants in combination with WebGL. Unless working in the context of Netherlands3D it is not recommended to use this library.**
+
 <p align="center">
 <img src="./Documentation~/Images/unity-gltf-logos.png" alt="Unity and glTF logos side by side" />
 </p>
