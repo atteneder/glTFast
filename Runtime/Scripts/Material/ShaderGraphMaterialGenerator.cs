@@ -102,9 +102,9 @@ namespace GLTFast.Materials {
 
 #if UNITY_EDITOR
 #if UNITY_SHADER_GRAPH_12_OR_NEWER || USING_HDRP_10_OR_NEWER
-        const string k_ShaderPathPrefix = "Packages/com.atteneder.gltfast/Runtime/Shader/";
+        const string k_ShaderPathPrefix = "Packages/nl.netherlands3d/glTFast/Runtime/Shader/";
 #else
-        const string k_ShaderPathPrefix = "Packages/com.atteneder.gltfast/Runtime/Shader/Legacy/";
+        const string k_ShaderPathPrefix = "Packages/nl.netherlands3d/glTFast/Runtime/Shader/Legacy/";
 #endif
 #else
         const string k_ShaderGraphsPrefix = "Shader Graphs/";
@@ -496,6 +496,7 @@ namespace GLTFast.Materials {
         Shader LoadShaderByName(string shaderName) {
 #if UNITY_EDITOR
             var shaderPath = $"{k_ShaderPathPrefix}{shaderName}.shadergraph";
+            Debug.Log(shaderPath);
             var shader = AssetDatabase.LoadAssetAtPath<Shader>(shaderPath);
             if (shader == null) {
                 Logger?.Error($"Cannot load shader at path {shaderPath}");
