@@ -181,6 +181,7 @@ namespace GLTFast.Schema
             }
             if (extensions != null)
             {
+                writer.AddProperty("extensions");
                 extensions.GltfSerialize(writer);
             }
             writer.Close();
@@ -310,12 +311,14 @@ namespace GLTFast.Schema
 
         internal void GltfSerialize(JsonWriter writer)
         {
+            writer.AddObject();
 #if DRACO_UNITY
             if (KHR_draco_mesh_compression != null) {
                 writer.AddProperty("KHR_draco_mesh_compression");
                 KHR_draco_mesh_compression.GltfSerialize(writer);
             }
 #endif
+            writer.Close();
         }
     }
 
@@ -326,7 +329,11 @@ namespace GLTFast.Schema
         public Attributes attributes;
 
         internal void GltfSerialize(JsonWriter writer) {
-            throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
+            writer.AddObject();
+            writer.AddProperty("bufferView", bufferView);
+            writer.AddProperty("attributes");
+            attributes.GltfSerialize(writer);
+            writer.Close();
         }
     }
 #endif
