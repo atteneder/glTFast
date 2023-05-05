@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace GLTFast.Utils
 {
 
-    static class AsyncHelpers
+    public static class AsyncHelpers
     {
         /// <summary>
         /// Executes an async Task&lt;T&gt; method which has a void return value synchronously
