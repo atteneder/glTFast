@@ -296,19 +296,11 @@ namespace GLTFast.Schema
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static GltfAccessorAttributeType GetAccessorAttributeType(int dimension)
         {
-            switch (dimension)
+            if (dimension < 1 || dimension > 4)
             {
-                case 1:
-                    return GltfAccessorAttributeType.SCALAR;
-                case 2:
-                    return GltfAccessorAttributeType.VEC2;
-                case 3:
-                    return GltfAccessorAttributeType.VEC3;
-                case 4:
-                    return GltfAccessorAttributeType.VEC4;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(dimension), dimension, null);
+                throw new ArgumentOutOfRangeException(nameof(dimension), dimension, null);
             }
+            return (GltfAccessorAttributeType)dimension;
         }
 
         /// <summary>
