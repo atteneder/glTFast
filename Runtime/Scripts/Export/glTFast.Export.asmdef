@@ -6,7 +6,8 @@
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.RenderPipelines.Universal.Runtime",
-        "Unity.RenderPipelines.HighDefinition.Runtime"
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "DracoEncoder"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -30,6 +31,11 @@
             "name": "com.unity.modules.imageconversion",
             "expression": "",
             "define": "UNITY_IMAGECONVERSION"
+        },
+        {
+            "name": "com.atteneder.draco",
+            "expression": "3.1.0",
+            "define": "DRACO_UNITY"
         }
     ],
     "noEngineReferences": false

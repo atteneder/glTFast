@@ -25,6 +25,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
+#if DRACO_UNITY
+using Draco.Encoder;
+#endif
 using GLTFast.Schema;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -742,7 +745,7 @@ namespace GLTFast.Export
 
         async Task<bool> Bake(string bufferPath, string directory)
         {
-            if (m_Meshes != null)
+            if (m_Meshes != null && m_Meshes.Count > 0)
             {
 #if GLTFAST_MESH_DATA
                 await BakeMeshes();
@@ -899,10 +902,36 @@ namespace GLTFast.Export
 
         async Task BakeMeshes() {
             Profiler.BeginSample("AcquireReadOnlyMeshData");
+
+#if DRACO_UNITY
+            if ((m_Settings.Compression & Compression.Draco) != 0)
+            {
+                RegisterExtensionUsage(Extension.DracoMeshCompression,true);
+                if (m_Settings.DracoSettings == null)
+                {
+                    //Ensure fallback to default settings
+                    m_Settings.DracoSettings = new DracoExportSettings();
+                }
+                if ((m_Settings.Compression & Compression.Uncompressed) != 0)
+                {
+                    m_Logger.Warning(LogCode.UncompressedFallbackNotSupported);
+                }
+            }
+#endif
+
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             Profiler.EndSample();
-            for (var meshId = 0; meshId < m_Meshes.Count; meshId++) {
-                await BakeMesh(meshId, meshDataArray[meshId]);
+            for (var meshId = 0; meshId < m_Meshes.Count; meshId++)
+            {
+#if DRACO_UNITY
+                if ((m_Settings.Compression & Compression.Draco) != 0) {
+                    BakeMeshDraco(meshId, meshDataArray[meshId]);
+                }
+                else
+#endif
+                {
+                    await BakeMesh(meshId, meshDataArray[meshId]);
+                }
                 await m_DeferAgent.BreakPoint();
             }
             meshDataArray.Dispose();
@@ -1227,6 +1256,136 @@ namespace GLTFast.Export
                 m_Accessors[attrData.accessorId].bufferView = bufferViewIds[attrData.stream];
             }
         }
+
+#if DRACO_UNITY
+        void BakeMeshDraco(int meshId, UnityEngine.Mesh.MeshData meshData) 
+        {
+            var mesh = m_Meshes[meshId];
+            var unityMesh = m_UnityMeshes[meshId];
+
+            var results = DracoEncoder.EncodeMesh(
+                unityMesh,
+                meshData,
+                m_Settings.DracoSettings.encodingSpeed,
+                m_Settings.DracoSettings.decodingSpeed,
+                m_Settings.DracoSettings.positionQuantization,
+                m_Settings.DracoSettings.normalQuantization,
+                m_Settings.DracoSettings.texCoordQuantization,
+                m_Settings.DracoSettings.colorQuantization
+            );
+
+            if (results == null) return;
+            
+            mesh.primitives = new MeshPrimitive[results.Length];
+            for (var submesh = 0; submesh < results.Length; submesh++) {
+                var encodeResult = results[submesh];
+                var bufferViewId = WriteBufferViewToBuffer(encodeResult.data);
+
+                var attributes = new Attributes();
+                var dracoAttributes = new Attributes();
+
+                foreach (var (vertexAttribute, dracoId) in encodeResult.vertexAttributes)
+                {
+                    var accessor = new Accessor {
+                        componentType = GltfComponentType.Float,
+                        count = (int)encodeResult.vertexCount
+                    };
+
+                    var accessorId = AddAccessor(accessor);
+
+                    switch (vertexAttribute) {
+                        case VertexAttribute.Position:
+                            attributes.POSITION = accessorId;
+                            dracoAttributes.POSITION = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC3);
+                            
+                            var submeshDesc = unityMesh.GetSubMesh(submesh);
+                            var bounds = submeshDesc.bounds;
+                            var center = bounds.center;
+                            var extents = bounds.extents;
+                            accessor.min = new[]
+                            {
+                                center.x-extents.x,
+                                center.y-extents.y,
+                                center.z-extents.z
+                            };
+                            accessor.max = new[]
+                            {
+                                center.x+extents.x,
+                                center.y+extents.y,
+                                center.z+extents.z
+                            };
+                            break;
+                        case VertexAttribute.Normal:
+                            attributes.NORMAL = accessorId;
+                            dracoAttributes.NORMAL = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC3);
+                            break;
+                        case VertexAttribute.Tangent:
+                            attributes.TANGENT = accessorId;
+                            dracoAttributes.TANGENT = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC4);
+                            break;
+                        case VertexAttribute.Color:
+                            attributes.COLOR_0 = accessorId;
+                            dracoAttributes.COLOR_0 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC3);
+                            break;
+                        case VertexAttribute.TexCoord0:
+                            attributes.TEXCOORD_0 = accessorId;
+                            dracoAttributes.TEXCOORD_0 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            break;
+                        case VertexAttribute.TexCoord1:
+                            attributes.TEXCOORD_1 = accessorId;
+                            dracoAttributes.TEXCOORD_1 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            break;
+                        case VertexAttribute.TexCoord2:
+                            attributes.TEXCOORD_2 = accessorId;
+                            dracoAttributes.TEXCOORD_2 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            break;
+                        case VertexAttribute.TexCoord3:
+                            attributes.TEXCOORD_3 = accessorId;
+                            dracoAttributes.TEXCOORD_3 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            break;
+                        case VertexAttribute.TexCoord4:
+                            attributes.TEXCOORD_4 = accessorId;
+                            dracoAttributes.TEXCOORD_4 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            break;
+                        case VertexAttribute.TexCoord5:
+                            attributes.TEXCOORD_5 = accessorId;
+                            dracoAttributes.TEXCOORD_5 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            break;
+                        case VertexAttribute.TexCoord6:
+                            attributes.TEXCOORD_6 = accessorId;
+                            dracoAttributes.TEXCOORD_6 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            break;
+                        case VertexAttribute.TexCoord7:
+                            attributes.TEXCOORD_7 = accessorId;
+                            dracoAttributes.TEXCOORD_7 = (int) dracoId;
+                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            break;
+                    }
+                }
+
+                mesh.primitives[submesh] = new MeshPrimitive {
+                    extensions = new MeshPrimitiveExtensions {
+                        KHR_draco_mesh_compression = new MeshPrimitiveDracoExtension {
+                            bufferView = bufferViewId,
+                            attributes = dracoAttributes
+                        }
+                    },
+                    attributes = attributes
+                };
+            }
+        }
+#endif // DRACO_UNITY
 
         int AddAccessor(Accessor accessor) {
             m_Accessors = m_Accessors ?? new List<Accessor>();
