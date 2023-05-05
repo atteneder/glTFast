@@ -1284,20 +1284,21 @@ namespace GLTFast.Export
                 var attributes = new Attributes();
                 var dracoAttributes = new Attributes();
 
-                foreach (var (vertexAttribute, dracoId) in encodeResult.vertexAttributes)
+                foreach (var (vertexAttribute, attribute) in encodeResult.vertexAttributes)
                 {
                     var accessor = new Accessor {
                         componentType = GltfComponentType.Float,
                         count = (int)encodeResult.vertexCount
                     };
+                    var attributeType = Accessor.GetAccessorAttributeType(attribute.dimensions);
+                    accessor.SetAttributeType(attributeType);
 
                     var accessorId = AddAccessor(accessor);
 
                     switch (vertexAttribute) {
                         case VertexAttribute.Position:
                             attributes.POSITION = accessorId;
-                            dracoAttributes.POSITION = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC3);
+                            dracoAttributes.POSITION = (int) attribute.identifier;
                             
                             var submeshDesc = unityMesh.GetSubMesh(submesh);
                             var bounds = submeshDesc.bounds;
@@ -1318,58 +1319,47 @@ namespace GLTFast.Export
                             break;
                         case VertexAttribute.Normal:
                             attributes.NORMAL = accessorId;
-                            dracoAttributes.NORMAL = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC3);
+                            dracoAttributes.NORMAL = (int) attribute.identifier;
                             break;
                         case VertexAttribute.Tangent:
                             attributes.TANGENT = accessorId;
-                            dracoAttributes.TANGENT = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC4);
+                            dracoAttributes.TANGENT = (int) attribute.identifier;
                             break;
                         case VertexAttribute.Color:
                             attributes.COLOR_0 = accessorId;
-                            dracoAttributes.COLOR_0 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC3);
+                            dracoAttributes.COLOR_0 = (int) attribute.identifier;
                             break;
                         case VertexAttribute.TexCoord0:
                             attributes.TEXCOORD_0 = accessorId;
-                            dracoAttributes.TEXCOORD_0 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            dracoAttributes.TEXCOORD_0 = (int) attribute.identifier;
                             break;
                         case VertexAttribute.TexCoord1:
                             attributes.TEXCOORD_1 = accessorId;
-                            dracoAttributes.TEXCOORD_1 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            dracoAttributes.TEXCOORD_1 = (int) attribute.identifier;
                             break;
                         case VertexAttribute.TexCoord2:
                             attributes.TEXCOORD_2 = accessorId;
-                            dracoAttributes.TEXCOORD_2 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            dracoAttributes.TEXCOORD_2 = (int) attribute.identifier;
                             break;
                         case VertexAttribute.TexCoord3:
                             attributes.TEXCOORD_3 = accessorId;
-                            dracoAttributes.TEXCOORD_3 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            dracoAttributes.TEXCOORD_3 = (int) attribute.identifier;
                             break;
                         case VertexAttribute.TexCoord4:
                             attributes.TEXCOORD_4 = accessorId;
-                            dracoAttributes.TEXCOORD_4 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            dracoAttributes.TEXCOORD_4 = (int) attribute.identifier;
                             break;
                         case VertexAttribute.TexCoord5:
                             attributes.TEXCOORD_5 = accessorId;
-                            dracoAttributes.TEXCOORD_5 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            dracoAttributes.TEXCOORD_5 = (int) attribute.identifier;
                             break;
                         case VertexAttribute.TexCoord6:
                             attributes.TEXCOORD_6 = accessorId;
-                            dracoAttributes.TEXCOORD_6 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            dracoAttributes.TEXCOORD_6 = (int) attribute.identifier;
                             break;
                         case VertexAttribute.TexCoord7:
                             attributes.TEXCOORD_7 = accessorId;
-                            dracoAttributes.TEXCOORD_7 = (int) dracoId;
-                            accessor.SetAttributeType(GltfAccessorAttributeType.VEC2);
+                            dracoAttributes.TEXCOORD_7 = (int) attribute.identifier;
                             break;
                     }
                 }
