@@ -43,17 +43,17 @@ namespace GLTFast
             try
             {
                 root = JsonUtility.FromJson<T>(json);
+                if (root == null)
+                    return null;
             }
             catch (System.ArgumentException)
             {
                 return null;
             }
-
-            if (root == null)
+            finally
             {
-                return null;
+                Profiler.EndSample();
             }
-            Profiler.EndSample();
 
             // Detect, if a secondary null-check is necessary.
             if (root.JsonUtilitySecondParseRequired())
