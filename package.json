@@ -1,6 +1,6 @@
 {
   "name": "nl.netherlands3d.gltfast",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "displayName": "glTFast",
   "description": "Use glTFast to import and export glTF 3D files efficiently at runtime or in the Editor",
   "unity": "2019.4",
