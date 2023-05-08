@@ -1116,7 +1116,7 @@ namespace GLTFast.Export
                         await Task.Yield();
                     }
                     Profiler.BeginSample("IndexJobUInt16QuadsPostWork");
-                    job.Complete(); // TODO: Wait until thread is finished
+                    job.Complete();
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(ushort)),
                         byteAlignment:sizeof(ushort)
@@ -1136,7 +1136,7 @@ namespace GLTFast.Export
                         await Task.Yield();
                     }
                     Profiler.BeginSample("IndexJobUInt16TrisPostWork");
-                    job.Complete(); // TODO: Wait until thread is finished
+                    job.Complete();
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(ushort)),
                         byteAlignment:sizeof(ushort)
@@ -1159,7 +1159,7 @@ namespace GLTFast.Export
                         await Task.Yield();
                     }
                     Profiler.BeginSample("IndexJobUInt32QuadsPostWork");
-                    job.Complete(); // TODO: Wait until thread is finished
+                    job.Complete();
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(uint)),
                         byteAlignment:sizeof(uint)
@@ -1179,7 +1179,7 @@ namespace GLTFast.Export
                         await Task.Yield();
                     }
                     Profiler.BeginSample("IndexJobUInt32TrisPostWork");
-                    job.Complete(); // TODO: Wait until thread is finished
+                    job.Complete();
                     indexBufferViewId = WriteBufferViewToBuffer(
                         destIndices.Reinterpret<byte>(sizeof(uint)),
                         byteAlignment:sizeof(uint)
@@ -1923,7 +1923,7 @@ namespace GLTFast.Export
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
-            job.Complete(); // TODO: Wait until thread is finished
+            job.Complete();
         }
 
         static unsafe JobHandle CreateConvertPositionAttributeJob(
@@ -1954,7 +1954,7 @@ namespace GLTFast.Export
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
-            job.Complete(); // TODO: Wait until thread is finished
+            job.Complete();
         }
 
         static unsafe JobHandle CreateConvertTangentAttributeJob(
@@ -1983,7 +1983,7 @@ namespace GLTFast.Export
             while (!job.IsCompleted) {
                 await Task.Yield();
             }
-            job.Complete(); // TODO: Wait until thread is finished
+            job.Complete();
         }
 
         static unsafe JobHandle CreateConvertTexCoordAttributeJob(
