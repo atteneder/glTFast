@@ -34,7 +34,7 @@
         },
         {
             "name": "com.atteneder.draco",
-            "expression": "3.1.0",
+            "expression": "5.0.0-preview.0",
             "define": "DRACO_UNITY"
         }
     ],

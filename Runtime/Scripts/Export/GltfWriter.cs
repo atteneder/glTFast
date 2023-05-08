@@ -918,6 +918,7 @@ namespace GLTFast.Export
                 }
             }
 #endif
+            var tasks = new List<Task>(m_Meshes.Count);
 
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             Profiler.EndSample();
@@ -925,15 +926,17 @@ namespace GLTFast.Export
             {
 #if DRACO_UNITY
                 if ((m_Settings.Compression & Compression.Draco) != 0) {
-                    BakeMeshDraco(meshId, meshDataArray[meshId]);
+                    tasks.Add(BakeMeshDraco(meshId, meshDataArray[meshId]));
                 }
                 else
 #endif
                 {
-                    await BakeMesh(meshId, meshDataArray[meshId]);
+                    tasks.Add(BakeMesh(meshId, meshDataArray[meshId]));
                 }
                 await m_DeferAgent.BreakPoint();
             }
+
+            await Task.WhenAll(tasks);
             meshDataArray.Dispose();
         }
 
@@ -1258,12 +1261,12 @@ namespace GLTFast.Export
         }
 
 #if DRACO_UNITY
-        void BakeMeshDraco(int meshId, UnityEngine.Mesh.MeshData meshData) 
+        async Task BakeMeshDraco(int meshId, UnityEngine.Mesh.MeshData meshData) 
         {
             var mesh = m_Meshes[meshId];
             var unityMesh = m_UnityMeshes[meshId];
 
-            var results = DracoEncoder.EncodeMesh(
+            var results = await DracoEncoder.EncodeMesh(
                 unityMesh,
                 meshData,
                 m_Settings.DracoSettings.encodingSpeed,
