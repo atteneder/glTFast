@@ -1364,6 +1364,15 @@ namespace GLTFast.Export
                     }
                 }
 
+                var indexAccessor = new Accessor
+                {
+                    componentType = GltfComponentType.UnsignedInt,
+                    count = (int)encodeResult.indexCount
+                };
+                indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
+
+                var indicesId = AddAccessor(indexAccessor);
+                
                 mesh.primitives[submesh] = new MeshPrimitive {
                     extensions = new MeshPrimitiveExtensions {
                         KHR_draco_mesh_compression = new MeshPrimitiveDracoExtension {
@@ -1371,7 +1380,8 @@ namespace GLTFast.Export
                             attributes = dracoAttributes
                         }
                     },
-                    attributes = attributes
+                    attributes = attributes,
+                    indices = indicesId
                 };
             }
         }
