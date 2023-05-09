@@ -55,7 +55,7 @@ namespace GLTFast.Editor
 #else
     [ScriptedImporter(1, null, overrideExts: new[] { "gltf","glb" })]
 #endif
-    public class GltfImporter : ScriptedImporter 
+    public class GltfImporter : ScriptedImporter
     {
 
         [SerializeField]
@@ -93,18 +93,18 @@ namespace GLTFast.Editor
         //     // TODO: Texture files with relative URIs should be included here
         //     return null;
         // }
-        
+
         public void SetupCustomMaterialGenerator(IMaterialGenerator materialGenerator)
         {
             customMaterialGenerator = materialGenerator;
         }
-        
+
         public void SetupCustomGltfDownloadProvider(IEditorDownloadProvider downloadProvider)
         {
             customDownloadProvider = downloadProvider;
         }
-        
-        public override void OnImportAsset(AssetImportContext ctx) 
+
+        public override void OnImportAsset(AssetImportContext ctx)
         {
 
             reportItems = null;
@@ -118,7 +118,7 @@ namespace GLTFast.Editor
                 customMaterialGenerator,
                 logger
                 );
-            
+
             // we clean the overrides to avoid future imports with incorrect data
             customDownloadProvider = null;
             customMaterialGenerator = null;
@@ -208,6 +208,9 @@ namespace GLTFast.Editor
                         ? go.transform.GetChild(0)
                         : go.transform;
                     var sceneGo = sceneTransform.gameObject;
+
+                    PreProcessGameObjects(sceneGo);
+
                     AddObjectToAsset(ctx, $"scenes/{sceneName}", sceneGo, gltfIcon);
                     if (sceneIndex == m_Gltf.DefaultSceneIndex || (m_Gltf.DefaultSceneIndex == null && sceneIndex == 0) )
                     {
@@ -216,7 +219,7 @@ namespace GLTFast.Editor
                 }
 
                 CreateTextureAssets(ctx);
-                
+
                 CreateMaterialAssets(ctx);
 
                 var meshes = m_Gltf.GetMeshes();
@@ -315,6 +318,11 @@ namespace GLTFast.Editor
             reportItems = reportItemList.ToArray();
         }
 
+        protected virtual void PreProcessGameObjects(GameObject sceneGo)
+        {
+
+        }
+
         protected virtual void CreateMaterialAssets(AssetImportContext ctx)
         {
             for (var i = 0; i < m_Gltf.MaterialCount; i++)
@@ -323,7 +331,7 @@ namespace GLTFast.Editor
 
                 // Overriding double-sided for GI baking
                 // Resolves problems with meshes that are not a closed
-                // volume at a potential minor cost of baking speed. 
+                // volume at a potential minor cost of baking speed.
                 mat.doubleSidedGI = true;
 
                 if (mat != null)
@@ -356,7 +364,7 @@ namespace GLTFast.Editor
                 }
             }
         }
-        
+
         void AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj, Texture2D thumbnail = null)
         {
             if (m_ImportedObjects.Contains(obj))
