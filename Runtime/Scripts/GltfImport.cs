@@ -1990,7 +1990,7 @@ namespace GLTFast
                 for (var i = 0; i < m_GltfRoot.animations.Length; i++) {
                     var animation = m_GltfRoot.animations[i];
                     m_AnimationClips[i] = new AnimationClip();
-                    m_AnimationClips[i].name = $"clip_{i}";
+                    m_AnimationClips[i].name = animation.name ?? $"Clip_{i}";
 
                     // Legacy Animation requirement
                     m_AnimationClips[i].legacy = m_Settings.AnimationMethod == AnimationMethod.Legacy;
