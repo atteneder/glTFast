@@ -1,5 +1,6 @@
 {
     "name": "glTFast.Export",
+    "rootNamespace": "GLTFast.Export",
     "references": [
         "glTFast",
         "Unity.Mathematics",
