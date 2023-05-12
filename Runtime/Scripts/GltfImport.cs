@@ -535,6 +535,7 @@ namespace GLTFast
         /// <param name="uri">Base URI for relative paths of external buffers or images</param>
         /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <typeparam name="T">Custom schema type that the glTF JSON is deserialization to.</typeparam>
         /// <returns>True if loading was successful, false otherwise</returns>
         public async Task<bool> LoadGltfBinaryWithCustomSchema<T>(
             byte[] bytes,
