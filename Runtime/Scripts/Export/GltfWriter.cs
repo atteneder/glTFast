@@ -1900,7 +1900,7 @@ namespace GLTFast.Export
             var node = new Node
             {
                 name = name,
-                guid = guid
+                extras = new Node.Extras(guid)
             };
             if (translation.HasValue && !translation.Equals(float3.zero))
             {

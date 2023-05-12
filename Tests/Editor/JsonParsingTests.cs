@@ -471,5 +471,32 @@ namespace GLTFast.Tests
             gltf = JsonParser.ParseJson(@"garbage");
             Assert.IsNull(gltf);
         }
+        
+        [Test]
+        public void A28Guid()
+        {
+            var gltf = JsonParser.ParseJson(@"
+{
+    ""nodes"": [
+        {
+            ""extensions"": {},
+            ""name"": ""Node1"",
+            ""extras"": {""guid"": ""48a855b4b5934f7aa9e0ece96e8fcfaf""}
+        }
+    ]
+}
+"
+            );
+
+            Assert.NotNull(gltf);
+            Assert.NotNull(gltf.nodes, "No nodes");
+            Assert.AreEqual(1, gltf.nodes.Length, "Invalid nodes quantity");
+
+            var node = gltf.nodes[0];
+            Assert.NotNull(node);
+            Assert.NotNull(node.extras);
+            Assert.NotNull(node.extras.guid);
+            Assert.AreEqual(node.extras.guid, "48a855b4b5934f7aa9e0ece96e8fcfaf", "Guid does not match");
+        }
     }
 }

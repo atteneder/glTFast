@@ -63,7 +63,8 @@ namespace GLTFast
             uint? parentIndex,
             Vector3 position,
             Quaternion rotation,
-            Vector3 scale
+            Vector3 scale,
+            string guid
             );
 
         /// <summary>

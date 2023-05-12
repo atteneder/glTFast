@@ -22,6 +22,7 @@ using UnityEngine.Profiling;
 using Camera = UnityEngine.Camera;
 using Material = UnityEngine.Material;
 using Mesh = UnityEngine.Mesh;
+using A28;
 
 // #if UNITY_EDITOR && UNITY_ANIMATION
 // using UnityEditor.Animations;
@@ -195,7 +196,8 @@ namespace GLTFast
             uint? parentIndex,
             Vector3 position,
             Quaternion rotation,
-            Vector3 scale
+            Vector3 scale,
+            string guid
         )
         {
             var go = new GameObject();
@@ -210,6 +212,10 @@ namespace GLTFast
             go.transform.SetParent(
                 parentIndex.HasValue ? m_Nodes[parentIndex.Value].transform : SceneTransform,
                 false);
+
+            if (guid == null) return;
+            var guidComponent = go.AddComponent<GuidComponent>();
+            guidComponent.GuidString = guid;
         }
 
         /// <inheritdoc />

@@ -2275,7 +2275,7 @@ namespace GLTFast
                 Profiler.BeginSample("CreateHierarchy");
                 var node = m_GltfRoot.nodes[nodeIndex];
                 node.GetTransform(out var position, out var rotation, out var scale);
-                instantiator.CreateNode(nodeIndex, parentIndex, position, rotation, scale);
+                instantiator.CreateNode(nodeIndex, parentIndex, position, rotation, scale, node.extras.guid);
                 Profiler.EndSample();
             }
 
