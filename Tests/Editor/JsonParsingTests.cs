@@ -24,7 +24,7 @@ namespace GLTFast.Tests
         [Test]
         public void MaterialExtensions()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var gltf = JsonParser.ParseJson<Root>(@"
 {
     ""materials"" : [
         {
@@ -168,7 +168,7 @@ namespace GLTFast.Tests
         [Test]
         public void SparseAccessors()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var gltf = JsonParser.ParseJson<Root>(@"
 {
     ""accessors"" : [ {
         ""bufferView"" : 0,
@@ -245,7 +245,7 @@ namespace GLTFast.Tests
         [Test]
         public void MeshTargetNames()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var gltf = JsonParser.ParseJson<Root>(@"
 {
     ""meshes"": [
         {
@@ -287,7 +287,7 @@ namespace GLTFast.Tests
         [Test]
         public void MinMagFilter()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var gltf = JsonParser.ParseJson<Root>(@"
 {
     ""samplers"": [{
         },{
@@ -363,7 +363,7 @@ namespace GLTFast.Tests
         [Test]
         public void UnknownNodeExtension()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var gltf = JsonParser.ParseJson<Root>(@"
 {
     ""nodes"": [
         {
@@ -465,10 +465,10 @@ namespace GLTFast.Tests
         [Test]
         public void ParseGarbage()
         {
-            var gltf = JsonParser.ParseJson(@"");
+            var gltf = JsonParser.ParseJson<Root>(@"");
             Assert.IsNull(gltf);
 
-            gltf = JsonParser.ParseJson(@"garbage");
+            gltf = JsonParser.ParseJson<Root>(@"garbage");
             Assert.IsNull(gltf);
         }
     }

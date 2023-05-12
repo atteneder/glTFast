@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 
+using GLTFast.Extensions;
 using GLTFast.Jobs;
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
@@ -133,6 +134,8 @@ namespace GLTFast
         IMaterialGenerator m_MaterialGenerator;
         IDeferAgent m_DeferAgent;
 
+        Dictionary<Type, ImportInstance> m_Extensions;
+
         ImportSettings m_Settings;
 
         byte[][] m_Buffers;
@@ -166,7 +169,7 @@ namespace GLTFast
         /// by Vertex Attribute and Morph Target usage (Primitives with identical vertex
         /// data will be clustered; <see cref="MeshPrimitive.Equals(object)"/>).
         /// </summary>
-        Dictionary<MeshPrimitive, List<MeshPrimitive>>[] m_MeshPrimitiveCluster;
+        Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>[] m_MeshPrimitiveCluster;
         List<ImageCreateContext> m_ImageCreateContexts;
 #if KTX
         List<KtxLoadContextBase> m_KtxLoadContextsBuffer;
@@ -219,7 +222,7 @@ namespace GLTFast
         /// </summary>
         string[] m_NodeNames;
 
-        Primitive[] m_Primitives;
+        MeshResult[] m_Primitives;
         int[] m_MeshPrimitiveIndex;
         Matrix4x4[][] m_SkinsInverseBindMatrices;
 #if UNITY_ANIMATION
@@ -283,6 +286,8 @@ namespace GLTFast
             m_MaterialGenerator = materialGenerator ?? MaterialGenerator.GetDefaultMaterialGenerator();
 
             m_Logger = logger;
+
+            ExtensionRegistry.InjectAllExtensions(this);
         }
 
         /// <summary>
@@ -314,6 +319,30 @@ namespace GLTFast
         }
 
         /// <summary>
+        /// Adds an import extension. To be called before any loading is initiated.
+        /// </summary>
+        /// <param name="extension">The import extension to add.</param>
+        /// <typeparam name="T">Type of the import extension</typeparam>
+        public void AddExtension<T>(T extension) where T : ImportInstance
+        {
+            if (m_Extensions == null)
+            {
+                m_Extensions = new Dictionary<Type, ImportInstance>();
+            }
+            m_Extensions[typeof(T)] = extension;
+        }
+
+        /// <summary>
+        /// Queries the import extension of a particular type.
+        /// </summary>
+        /// <typeparam name="T">Type of the import extension</typeparam>
+        /// <returns>The import extension that was previously added. False if there was none.</returns>
+        public T GetExtensionInstance<T>() where T : ImportInstance
+        {
+            return (T)m_Extensions?[typeof(T)];
+        }
+
+        /// <summary>
         /// Load a glTF file (JSON or binary)
         /// The URL can be a file path (using the "file://" scheme) or a web address.
         /// </summary>
@@ -327,7 +356,25 @@ namespace GLTFast
             CancellationToken cancellationToken = default
             )
         {
-            return await Load(new Uri(url, UriKind.RelativeOrAbsolute), importSettings, cancellationToken);
+            return await LoadWithCustomSchema<Root>(new Uri(url, UriKind.RelativeOrAbsolute), importSettings, cancellationToken);
+        }
+
+        /// <summary>
+        /// Load a glTF file (JSON or binary)
+        /// The URL can be a file path (using the "file://" scheme) or a web address.
+        /// </summary>
+        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <typeparam name="T">Custom schema type that the glTF JSON is deserialization to.</typeparam>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadWithCustomSchema<T>(
+            string url,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+        ) where T : Root
+        {
+            return await LoadWithCustomSchema<T>(new Uri(url, UriKind.RelativeOrAbsolute), importSettings, cancellationToken);
         }
 
         /// <summary>
@@ -345,7 +392,26 @@ namespace GLTFast
             )
         {
             m_Settings = importSettings ?? new ImportSettings();
-            return await LoadFromUri(url, cancellationToken);
+            return await LoadFromUri<Root>(url, cancellationToken);
+        }
+
+        /// <summary>
+        /// Load a glTF file (JSON or binary)
+        /// The URL can be a file path (using the "file://" scheme) or a web address.
+        /// </summary>
+        /// <param name="url">Uniform Resource Locator. Can be a file path (using the "file://" scheme) or a web address.</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <typeparam name="T">Custom schema type that the glTF JSON is deserialization to.</typeparam>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadWithCustomSchema<T>(
+            Uri url,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+        ) where T : Root
+        {
+            m_Settings = importSettings ?? new ImportSettings();
+            return await LoadFromUri<T>(url, cancellationToken);
         }
 
         /// <summary>
@@ -453,7 +519,32 @@ namespace GLTFast
             )
         {
             m_Settings = importSettings ?? new ImportSettings();
-            var success = await LoadGltfBinaryBuffer(bytes, uri);
+            var success = await LoadGltfBinaryBuffer<Root>(bytes, uri);
+            if (success) await LoadContent();
+            success = success && await Prepare();
+            DisposeVolatileData();
+            LoadingError = !success;
+            LoadingDone = true;
+            return success;
+        }
+
+        /// <summary>
+        /// Load a glTF-binary asset from a byte array.
+        /// </summary>
+        /// <param name="bytes">byte array containing glTF-binary</param>
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadGltfBinaryWithCustomSchema<T>(
+            byte[] bytes,
+            Uri uri = null,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default
+        ) where T : Root
+        {
+            m_Settings = importSettings ?? new ImportSettings();
+            var success = await LoadGltfBinaryBuffer<T>(bytes, uri);
             if (success) await LoadContent();
             success = success && await Prepare();
             DisposeVolatileData();
@@ -478,7 +569,7 @@ namespace GLTFast
             )
         {
             m_Settings = importSettings ?? new ImportSettings();
-            var success = await LoadGltf(json, uri);
+            var success = await LoadGltf<Root>(json, uri);
             if (success) await LoadContent();
             success = success && await Prepare();
             DisposeVolatileData();
@@ -606,6 +697,14 @@ namespace GLTFast
         /// </summary>
         public void Dispose()
         {
+            if (m_Extensions != null)
+            {
+                foreach (var extension in m_Extensions)
+                {
+                    extension.Value.Dispose();
+                }
+                m_Extensions = null;
+            }
 
             m_NodeNames = null;
 
@@ -855,7 +954,18 @@ namespace GLTFast
             return result;
         }
 
-        async Task<bool> LoadFromUri(Uri url, CancellationToken cancellationToken)
+        /// <inheritdoc />
+        public NativeSlice<byte> GetAccessor(int accessorIndex)
+        {
+            if (m_GltfRoot?.accessors == null || accessorIndex < 0 || accessorIndex >= m_GltfRoot?.accessors.Length)
+            {
+                return new NativeSlice<byte>();
+            }
+            var accessor = m_GltfRoot.accessors[accessorIndex];
+            return GetBufferView(accessor.bufferView, accessor.byteOffset, accessor.ByteSize);
+        }
+
+        async Task<bool> LoadFromUri<T>(Uri url, CancellationToken cancellationToken) where T : Root
         {
 
             var download = await m_DownloadProvider.Request(url);
@@ -875,13 +985,13 @@ namespace GLTFast
                 {
                     var data = download.Data;
                     download.Dispose();
-                    success = await LoadGltfBinaryBuffer(data, url);
+                    success = await LoadGltfBinaryBuffer<T>(data, url);
                 }
                 else
                 {
                     var text = download.Text;
                     download.Dispose();
-                    success = await LoadGltf(text, url);
+                    success = await LoadGltf<T>(text, url);
                 }
                 if (success)
                 {
@@ -928,7 +1038,7 @@ namespace GLTFast
             return success;
         }
 
-        async Task<bool> ParseJsonAndLoadBuffers(string json, Uri baseUri)
+        async Task<bool> ParseJsonAndLoadBuffers<T>(string json, Uri baseUri) where T : Root
         {
 
             var predictedTime = json.Length / (float)k_JsonParseSpeed;
@@ -937,13 +1047,13 @@ namespace GLTFast
             {
                 // JSON is larger than threshold
                 // => parse in a thread
-                m_GltfRoot = await Task.Run(() => JsonParser.ParseJson(json));
+                m_GltfRoot = await Task.Run(() => JsonParser.ParseJson<T>(json));
             }
             else
 #endif
             {
                 // Parse immediately on main thread
-                m_GltfRoot = JsonParser.ParseJson(json);
+                m_GltfRoot = JsonParser.ParseJson<T>(json);
                 // Loading subsequent buffers and images has to start asap.
                 // That's why parsing JSON right away is *very* important.
             }
@@ -1007,68 +1117,68 @@ namespace GLTFast
         /// <returns>False if a required extension is not supported. True otherwise.</returns>
         bool CheckExtensionSupport(Root gltfRoot)
         {
-            if (gltfRoot.extensionsRequired != null)
+            if (!CheckExtensionSupport(gltfRoot.extensionsRequired))
             {
-                foreach (var ext in gltfRoot.extensionsRequired)
+                return false;
+            }
+            CheckExtensionSupport(gltfRoot.extensionsUsed, false);
+            return true;
+        }
+
+        bool CheckExtensionSupport(IEnumerable<string> extensions, bool required = true)
+        {
+            if (extensions == null)
+                return true;
+            foreach (var ext in extensions)
+            {
+                var supported = k_SupportedExtensions.Contains(ext);
+                if (!supported && m_Extensions != null)
                 {
-                    var supported = k_SupportedExtensions.Contains(ext);
-                    if (!supported)
+                    foreach (var extension in m_Extensions)
                     {
-#if !DRACO_UNITY
-                        if (ext == ExtensionName.DracoMeshCompression)
+                        if (extension.Value.SupportsExtension(ext))
                         {
-                            m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ext);
+                            supported = true;
+                            break;
                         }
-                        else
+                    }
+                }
+                if (!supported)
+                {
+#if !DRACO_UNITY
+                    if (ext == ExtensionName.DracoMeshCompression)
+                    {
+                        m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ext);
+
+                    }
 #endif
 #if !KTX_UNITY
-                        if (ext == ExtensionName.TextureBasisUniversal)
-                        {
-                            m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
-                        }
-                        else
+                    if (ext == ExtensionName.TextureBasisUniversal)
+                    {
+                        m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
+                    }
+                    else
 #endif
+                    {
+                        if (required)
                         {
                             m_Logger?.Error(LogCode.ExtensionUnsupported, ext);
                         }
-                        return false;
-                    }
-                }
-            }
-            if (gltfRoot.extensionsUsed != null)
-            {
-                foreach (var ext in gltfRoot.extensionsUsed)
-                {
-                    var supported = k_SupportedExtensions.Contains(ext);
-                    if (!supported)
-                    {
-#if !DRACO_UNITY
-                        if (ext == ExtensionName.DracoMeshCompression)
-                        {
-                            m_Logger?.Warning(LogCode.PackageMissing, "DracoUnity", ext);
-                        }
                         else
-#endif
-#if !KTX_UNITY
-                        if (ext == ExtensionName.TextureBasisUniversal)
-                        {
-                            m_Logger?.Warning(LogCode.PackageMissing, "KtxUnity", ext);
-                        }
-                        else
-#endif
                         {
                             m_Logger?.Warning(LogCode.ExtensionUnsupported, ext);
                         }
                     }
+                    return false;
                 }
             }
             return true;
         }
 
-        async Task<bool> LoadGltf(string json, Uri url)
+        async Task<bool> LoadGltf<T>(string json, Uri url) where T : Root
         {
             var baseUri = UriHelper.GetBaseUri(url);
-            var success = await ParseJsonAndLoadBuffers(json, baseUri);
+            var success = await ParseJsonAndLoadBuffers<T>(json, baseUri);
             if (success) await LoadImages(baseUri);
             return success;
         }
@@ -1498,7 +1608,7 @@ namespace GLTFast
 #endif
         }
 
-        async Task<bool> LoadGltfBinaryBuffer(byte[] bytes, Uri uri = null)
+        async Task<bool> LoadGltfBinaryBuffer<T>(byte[] bytes, Uri uri = null) where T : Root
         {
             Profiler.BeginSample("LoadGltfBinary.Phase1");
 
@@ -1558,7 +1668,7 @@ namespace GLTFast
                     string json = System.Text.Encoding.UTF8.GetString(bytes, index, (int)chLength);
                     Profiler.EndSample();
 
-                    var success = await ParseJsonAndLoadBuffers(json, baseUri);
+                    var success = await ParseJsonAndLoadBuffers<T>(json, baseUri);
 
                     if (!success)
                     {
@@ -2196,8 +2306,6 @@ namespace GLTFast
             }
             m_VertexAttributes = null;
 
-            m_PrimitiveContexts = null;
-
             // Unpin managed buffer arrays
             if (m_BufferHandles != null)
             {
@@ -2254,6 +2362,13 @@ namespace GLTFast
 
         async Task InstantiateSceneInternal(Root gltf, IInstantiator instantiator, int sceneId)
         {
+            if (m_Extensions != null)
+            {
+                foreach (var extension in m_Extensions)
+                {
+                    extension.Value.Inject(instantiator);
+                }
+            }
 
             async Task IterateNodes(uint nodeIndex, uint? parentIndex, Action<uint, uint?> callback)
             {
@@ -2331,8 +2446,7 @@ namespace GLTFast
                             instantiator.AddPrimitive(
                                 nodeIndex,
                                 primitiveName,
-                                mesh,
-                                primitive.materialIndices,
+                                primitive,
                                 joints,
                                 rootJoint,
                                 gltf.meshes[node.mesh].weights,
@@ -2372,8 +2486,7 @@ namespace GLTFast
                             instantiator.AddPrimitiveInstanced(
                                 nodeIndex,
                                 primitiveName,
-                                mesh,
-                                m_Primitives[i].materialIndices,
+                                m_Primitives[i],
                                 instanceCount,
                                 positions,
                                 rotations,
@@ -2684,6 +2797,13 @@ namespace GLTFast
             }
         }
 
+        /// <summary>Is called when retrieving data from accessors should be performed/started.</summary>
+        public event Action LoadAccessorDataEvent;
+
+        /// <summary>Is called when a mesh and its primitives are assigned to a <see cref="MeshResult"/> and
+        /// sub-meshes. Parameters are MeshResult index, mesh index and per sub-mesh primitive index</summary>
+        public event Action<int, int, int[]> MeshResultAssigned;
+
         async Task<bool> LoadAccessorData(Root gltf)
         {
 
@@ -2691,7 +2811,9 @@ namespace GLTFast
 
             var mainBufferTypes = new Dictionary<MeshPrimitive, MainBufferType>();
             var meshCount = gltf.meshes?.Length ?? 0;
-            m_MeshPrimitiveCluster = gltf.meshes == null ? null : new Dictionary<MeshPrimitive, List<MeshPrimitive>>[meshCount];
+            m_MeshPrimitiveCluster = gltf.meshes == null 
+                ? null
+                : new Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>[meshCount];
             Dictionary<MeshPrimitive, MorphTargetsContext> morphTargetsContexts = null;
 #if DEBUG
             var perAttributeMeshCollection = new Dictionary<Attributes,HashSet<int>>();
@@ -2699,21 +2821,24 @@ namespace GLTFast
 
             // Iterate all primitive vertex attributes and remember the accessors usage.
             m_AccessorUsage = new AccessorUsage[gltf.accessors.Length];
+
+            LoadAccessorDataEvent?.Invoke();
+
             int totalPrimitives = 0;
             for (int meshIndex = 0; meshIndex < meshCount; meshIndex++)
             {
                 var mesh = gltf.meshes[meshIndex];
                 m_MeshPrimitiveIndex[meshIndex] = totalPrimitives;
-                var cluster = new Dictionary<MeshPrimitive, List<MeshPrimitive>>();
+                var cluster = new Dictionary<MeshPrimitive, List<(int MeshIndex, MeshPrimitive Primitive)>>();
 
-                foreach (var primitive in mesh.primitives)
+                for (var primIndex = 0; primIndex < mesh.primitives.Length; primIndex++)
                 {
-
+                    var primitive = mesh.primitives[primIndex];
                     if (!cluster.ContainsKey(primitive))
                     {
-                        cluster[primitive] = new List<MeshPrimitive>();
+                        cluster[primitive] = new List<(int MeshIndex, MeshPrimitive Primitive)>();
                     }
-                    cluster[primitive].Add(primitive);
+                    cluster[primitive].Add((primIndex, primitive));
 
                     if (primitive.targets != null)
                     {
@@ -2843,7 +2968,7 @@ namespace GLTFast
             {
                 m_MeshPrimitiveIndex[meshCount] = totalPrimitives;
             }
-            m_Primitives = new Primitive[totalPrimitives];
+            m_Primitives = new MeshResult[totalPrimitives];
             m_PrimitiveContexts = new PrimitiveCreateContextBase[totalPrimitives];
             var tmpList = new List<JobHandle>(mainBufferTypes.Count);
             m_VertexAttributes = new Dictionary<MeshPrimitive, VertexBufferConfigBase>(mainBufferTypes.Count);
@@ -3097,7 +3222,7 @@ namespace GLTFast
 
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++)
                     {
-                        var primitive = cluster[primIndex];
+                        var (gltfPrimitiveIndex, primitive) = cluster[primIndex];
 #if DRACO_UNITY
                         if (primitive.IsDracoCompressed) {
                             Bounds? bounds = null;
@@ -3111,6 +3236,7 @@ namespace GLTFast
                                 m_Logger.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
                             }
                             var dracoContext = new PrimitiveDracoCreateContext(
+                                meshIndex,
                                 primitiveIndex,
                                 1,
                                 primitive.material<0 || gltf.materials[primitive.material].RequiresNormals,
@@ -3126,13 +3252,19 @@ namespace GLTFast
                             PrimitiveCreateContext c;
                             if (context == null)
                             {
-                                c = new PrimitiveCreateContext(primitiveIndex, cluster.Count, mesh.name);
+                                c = new PrimitiveCreateContext(
+                                    meshIndex,
+                                    primitiveIndex,
+                                    cluster.Count,
+                                    mesh.name
+                                    );
                             }
                             else
                             {
                                 c = context as PrimitiveCreateContext;
                             }
                             // PreparePrimitiveIndices(gltf,primitive,ref c,primIndex);
+                            c.SetPrimitiveIndex(primIndex, gltfPrimitiveIndex);
                             context = c;
                         }
 
@@ -3204,9 +3336,26 @@ namespace GLTFast
 
                     PrimitiveCreateContextBase context = m_PrimitiveContexts[i];
 
+                    if (MeshResultAssigned != null)
+                    {
+                        var primitiveIndices = new int[cluster.Count];
+                        for (var subMeshIndex = 0; subMeshIndex < cluster.Count; subMeshIndex++)
+                        {
+                            var subMesh = cluster[subMeshIndex];
+                            primitiveIndices[subMeshIndex] = subMesh.Item1;
+
+                            MeshResultAssigned?.Invoke(
+                                m_MeshPrimitiveIndex[meshIndex], // MeshResult index
+                                meshIndex, // glTF mesh index
+                                primitiveIndices
+                            );
+                        }
+                    }
+
                     for (int primIndex = 0; primIndex < cluster.Count; primIndex++)
                     {
-                        var primitive = cluster[primIndex];
+                        var primitiveTuple = cluster[primIndex];
+                        var primitive = primitiveTuple.Item2;
 #if DRACO_UNITY
                         if( primitive.IsDracoCompressed ) {
                             var c = (PrimitiveDracoCreateContext) context;

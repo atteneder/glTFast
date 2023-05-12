@@ -44,6 +44,12 @@ namespace GLTFast.Schema
             writer.CloseArray();
             writer.Close();
         }
+
+        /// <inheritdoc cref="RootExtension.JsonUtilityCleanup"/>
+        public bool JsonUtilityCleanup()
+        {
+            return lights != null;
+        }
     }
 
     /// <summary>

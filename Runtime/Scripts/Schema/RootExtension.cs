@@ -37,5 +37,19 @@ namespace GLTFast.Schema
             }
             writer.Close();
         }
+
+        /// <summary>
+        /// Cleans up invalid parsing artifacts created by JsonUtility.
+        /// </summary>
+        /// <returns>True if element itself still holds value. False if it can be safely removed.</returns>
+        public virtual bool JsonUtilityCleanup()
+        {
+            if (KHR_lights_punctual != null && !KHR_lights_punctual.JsonUtilityCleanup())
+            {
+                KHR_lights_punctual = null;
+            }
+
+            return KHR_lights_punctual != null;
+        }
     }
 }

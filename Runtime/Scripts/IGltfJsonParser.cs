@@ -1,4 +1,4 @@
-// Copyright 2020-2022 Andreas Atteneder
+// Copyright 2020-2023 Andreas Atteneder
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,18 +13,21 @@
 // limitations under the License.
 //
 
+using GLTFast.Schema;
+
 namespace GLTFast
 {
-
-    struct Primitive
+    /// <summary>
+    /// Provides a mechanism for deserializing glTF JSON.
+    /// </summary>
+    public interface IGltfJsonParser
     {
-        public UnityEngine.Mesh mesh;
-        public int[] materialIndices;
-
-        public Primitive(UnityEngine.Mesh mesh, int[] materialIndex)
-        {
-            this.mesh = mesh;
-            this.materialIndices = materialIndex;
-        }
+        /// <summary>
+        /// Deserializes glTF JSON.
+        /// </summary>
+        /// <param name="json">Source glTF JSON.</param>
+        /// <typeparam name="T">Custom schema type that the glTF JSON is deserialization to.</typeparam>
+        /// <returns>Deserialized glTF schema object of Type <see cref="T"/></returns>
+        Root ParseJson<T>(string json) where T : Root;
     }
 }

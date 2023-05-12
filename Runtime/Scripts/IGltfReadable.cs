@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using Unity.Collections;
 using UnityEngine;
 
 namespace GLTFast
@@ -132,5 +133,14 @@ namespace GLTFast
         /// <param name="skinId">glTF skin index</param>
         /// <returns>Corresponding bind poses</returns>
         Matrix4x4[] GetBindPoses(int skinId);
+
+        /// <summary>
+        /// Creates a generic byte-array view into an accessor.
+        /// Only available during loading phase as underlying buffers are disposed right afterwards.
+        /// </summary>
+        /// <param name="accessorIndex">glTF accessor index</param>
+        /// <returns>Valid byte-slice view into accessor's data if parameter was correct and buffers are available.
+        /// Zero-length slice otherwise.</returns>
+        NativeSlice<byte> GetAccessor(int accessorIndex);
     }
 }
