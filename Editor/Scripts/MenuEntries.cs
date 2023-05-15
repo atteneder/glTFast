@@ -139,11 +139,14 @@ namespace GLTFast.Editor
                 var goSettings = new GameObjectExportSettings { OnlyActiveInHierarchy = false };
                 var export = new GameObjectExport(settings, gameObjectExportSettings: goSettings, logger: new ConsoleLogger());
                 export.AddScene(gameObjects, name);
-                AsyncHelpers.RunSync(() => export.SaveToFileAndDispose(path));
+                var success = AsyncHelpers.RunSync(() => export.SaveToFileAndDispose(path));
 
 #if GLTF_VALIDATOR
-                var report = Validator.Validate(path);
-                report.Log();
+                if (success)
+                {
+                    var report = Validator.Validate(path);
+                    report.Log();
+                }
 #endif
             }
         }
