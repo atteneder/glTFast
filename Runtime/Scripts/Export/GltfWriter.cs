@@ -1306,73 +1306,32 @@ namespace GLTFast.Export
 
                     var accessorId = AddAccessor(accessor);
 
-                    switch (vertexAttribute) {
-                        case VertexAttribute.Position:
-                            attributes.POSITION = accessorId;
-                            dracoAttributes.POSITION = (int) attribute.identifier;
-                            
-                            var submeshDesc = unityMesh.GetSubMesh(submesh);
-                            var bounds = submeshDesc.bounds;
-                            var center = bounds.center;
-                            var extents = bounds.extents;
-                            accessor.min = new[]
-                            {
-                                center.x-extents.x,
-                                center.y-extents.y,
-                                center.z-extents.z
-                            };
-                            accessor.max = new[]
-                            {
-                                center.x+extents.x,
-                                center.y+extents.y,
-                                center.z+extents.z
-                            };
-                            break;
-                        case VertexAttribute.Normal:
-                            attributes.NORMAL = accessorId;
-                            dracoAttributes.NORMAL = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.Tangent:
-                            attributes.TANGENT = accessorId;
-                            dracoAttributes.TANGENT = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.Color:
-                            attributes.COLOR_0 = accessorId;
-                            dracoAttributes.COLOR_0 = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.TexCoord0:
-                            attributes.TEXCOORD_0 = accessorId;
-                            dracoAttributes.TEXCOORD_0 = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.TexCoord1:
-                            attributes.TEXCOORD_1 = accessorId;
-                            dracoAttributes.TEXCOORD_1 = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.TexCoord2:
-                            attributes.TEXCOORD_2 = accessorId;
-                            dracoAttributes.TEXCOORD_2 = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.TexCoord3:
-                            attributes.TEXCOORD_3 = accessorId;
-                            dracoAttributes.TEXCOORD_3 = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.TexCoord4:
-                            attributes.TEXCOORD_4 = accessorId;
-                            dracoAttributes.TEXCOORD_4 = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.TexCoord5:
-                            attributes.TEXCOORD_5 = accessorId;
-                            dracoAttributes.TEXCOORD_5 = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.TexCoord6:
-                            attributes.TEXCOORD_6 = accessorId;
-                            dracoAttributes.TEXCOORD_6 = (int) attribute.identifier;
-                            break;
-                        case VertexAttribute.TexCoord7:
-                            attributes.TEXCOORD_7 = accessorId;
-                            dracoAttributes.TEXCOORD_7 = (int) attribute.identifier;
-                            break;
+                    if (vertexAttribute == VertexAttribute.Position)
+                    {
+                        var submeshDesc = unityMesh.GetSubMesh(submesh);
+                        var bounds = submeshDesc.bounds;
+                        var center = bounds.center;
+                        var extents = bounds.extents;
+                        accessor.min = new[]
+                        {
+                            center.x-extents.x,
+                            center.y-extents.y,
+                            center.z-extents.z
+                        };
+                        accessor.max = new[]
+                        {
+                            center.x+extents.x,
+                            center.y+extents.y,
+                            center.z+extents.z
+                        };
                     }
+                    SetAttributesByType(
+                        vertexAttribute,
+                        attributes,
+                        dracoAttributes,
+                        accessorId,
+                        (int)attribute.identifier
+                        );
                 }
 
                 var indexAccessor = new Accessor
@@ -1394,6 +1353,67 @@ namespace GLTFast.Export
                     attributes = attributes,
                     indices = indicesId
                 };
+            }
+        }
+
+        static void SetAttributesByType(
+            VertexAttribute type,
+            Attributes attributes,
+            Attributes dracoAttributes,
+            int accessorId,
+            int dracoId
+            )
+        {
+            switch (type)
+            {
+                case VertexAttribute.Position:
+                    attributes.POSITION = accessorId;
+                    dracoAttributes.POSITION = dracoId;
+                    break;
+                case VertexAttribute.Normal:
+                    attributes.NORMAL = accessorId;
+                    dracoAttributes.NORMAL = dracoId;
+                    break;
+                case VertexAttribute.Tangent:
+                    attributes.TANGENT = accessorId;
+                    dracoAttributes.TANGENT = dracoId;
+                    break;
+                case VertexAttribute.Color:
+                    attributes.COLOR_0 = accessorId;
+                    dracoAttributes.COLOR_0 = dracoId;
+                    break;
+                case VertexAttribute.TexCoord0:
+                    attributes.TEXCOORD_0 = accessorId;
+                    dracoAttributes.TEXCOORD_0 = dracoId;
+                    break;
+                case VertexAttribute.TexCoord1:
+                    attributes.TEXCOORD_1 = accessorId;
+                    dracoAttributes.TEXCOORD_1 = dracoId;
+                    break;
+                case VertexAttribute.TexCoord2:
+                    attributes.TEXCOORD_2 = accessorId;
+                    dracoAttributes.TEXCOORD_2 = dracoId;
+                    break;
+                case VertexAttribute.TexCoord3:
+                    attributes.TEXCOORD_3 = accessorId;
+                    dracoAttributes.TEXCOORD_3 = dracoId;
+                    break;
+                case VertexAttribute.TexCoord4:
+                    attributes.TEXCOORD_4 = accessorId;
+                    dracoAttributes.TEXCOORD_4 = dracoId;
+                    break;
+                case VertexAttribute.TexCoord5:
+                    attributes.TEXCOORD_5 = accessorId;
+                    dracoAttributes.TEXCOORD_5 = dracoId;
+                    break;
+                case VertexAttribute.TexCoord6:
+                    attributes.TEXCOORD_6 = accessorId;
+                    dracoAttributes.TEXCOORD_6 = dracoId;
+                    break;
+                case VertexAttribute.TexCoord7:
+                    attributes.TEXCOORD_7 = accessorId;
+                    dracoAttributes.TEXCOORD_7 = dracoId;
+                    break;
             }
         }
 #endif // DRACO_UNITY
