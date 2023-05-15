@@ -745,10 +745,13 @@ namespace GLTFast.Export
 
         async Task<bool> Bake(string bufferPath, string directory)
         {
+            var success = true;
+            
             if (m_Meshes != null && m_Meshes.Count > 0)
             {
 #if GLTFAST_MESH_DATA
-                await BakeMeshes();
+                success = await BakeMeshes();
+                if (!success) return false;
 #else
                 await BakeMeshesLegacy();
 #endif
@@ -756,7 +759,7 @@ namespace GLTFast.Export
 
             AssignMaterialsToMeshes();
 
-            var success = await BakeImages(directory);
+            success = await BakeImages(directory);
 
             if (!success) return false;
 
@@ -900,13 +903,13 @@ namespace GLTFast.Export
 
 #if GLTFAST_MESH_DATA
 
-        async Task BakeMeshes() {
+        async Task<bool> BakeMeshes() {
             Profiler.BeginSample("AcquireReadOnlyMeshData");
 
-#if DRACO_UNITY
             if ((m_Settings.Compression & Compression.Draco) != 0)
             {
-                RegisterExtensionUsage(Extension.DracoMeshCompression,true);
+#if DRACO_UNITY
+                RegisterExtensionUsage(Extension.DracoMeshCompression);
                 if (m_Settings.DracoSettings == null)
                 {
                     //Ensure fallback to default settings
@@ -916,8 +919,11 @@ namespace GLTFast.Export
                 {
                     m_Logger.Warning(LogCode.UncompressedFallbackNotSupported);
                 }
-            }
+#else
+                m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ExtensionName.DracoMeshCompression);
+                return false;
 #endif
+            }
             var tasks = new List<Task>(m_Meshes.Count);
 
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
@@ -925,7 +931,8 @@ namespace GLTFast.Export
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++)
             {
 #if DRACO_UNITY
-                if ((m_Settings.Compression & Compression.Draco) != 0) {
+                if ((m_Settings.Compression & Compression.Draco) != 0)
+                {
                     tasks.Add(BakeMeshDraco(meshId, meshDataArray[meshId]));
                 }
                 else
@@ -938,6 +945,7 @@ namespace GLTFast.Export
 
             await Task.WhenAll(tasks);
             meshDataArray.Dispose();
+            return true;
         }
 
         async Task BakeMesh(int meshId, UnityEngine.Mesh.MeshData meshData) {
