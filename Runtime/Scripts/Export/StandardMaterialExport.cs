@@ -51,6 +51,8 @@ namespace GLTFast.Export
         static readonly int k_MetallicGlossMap = Shader.PropertyToID("_MetallicGlossMap");
         static readonly int k_Glossiness = Shader.PropertyToID("_Glossiness");
         static readonly int k_GlossMapScale = Shader.PropertyToID("_GlossMapScale");
+        static readonly int k_Tex = Shader.PropertyToID("_Tex");
+        static readonly int k_MainTex = Shader.PropertyToID("_MainTex");
 
         /// <summary>
         /// Converts a Unity material to a glTF material.
@@ -75,6 +77,43 @@ namespace GLTFast.Export
 
             SetAlphaModeAndCutoff(uMaterial, material);
             material.doubleSided = IsDoubleSided(uMaterial, k_Cull);
+            string skyboxShader = uMaterial.shader.name;
+            material.skyboxStruct.isSkybox = skyboxShader.StartsWith("Skybox/");
+            if (material.skyboxStruct.isSkybox)
+            {
+                switch (skyboxShader)
+                {
+                    case "Skybox/6Sided":
+                        // TODO 6-sided texture export not yet implemented
+                        material.skyboxStruct.skyboxMode =
+                            Material.SkyboxMode.SixSided;
+                        break;
+                    case "Skybox/Cubemap":
+                        material.skyboxStruct.skyboxMode =
+                            Material.SkyboxMode.CubeMap;
+
+                        // Convert texture type to Texture2D
+                        string url = UnityEditor.AssetDatabase.GetAssetPath(
+                            uMaterial.GetTexture(k_Tex));
+                        Texture2D tex = new Texture2D(2, 2);
+                        tex.LoadImage(System.IO.File.ReadAllBytes(url));
+                        uMaterial.mainTexture = tex;
+
+                        ExportUnlit(material,
+                            uMaterial, k_MainTex, gltf, logger);
+                        break;
+                    case "Skybox/Panoramic":
+                        material.skyboxStruct.skyboxMode =
+                            Material.SkyboxMode.CubeMap;
+                        ExportUnlit(material,
+                            uMaterial, k_MainTex, gltf, logger);
+                        break;
+                    case "Skybox/Procedural":
+                        material.skyboxStruct.skyboxMode =
+                            Material.SkyboxMode.Procedural;
+                        break;
+                }
+            }
 
             if (uMaterial.IsKeywordEnabled(k_KeywordEmission))
             {

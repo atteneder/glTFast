@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using Newtonsoft.Json;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -51,6 +52,32 @@ namespace GLTFast.Schema
             /// using the normal painting operation.
             /// </summary>
             Blend
+        }
+
+        /// <summary>
+        /// The material's skybox mode enumeration specifying the type of skybox
+        /// and usage of the attached texture(s)
+        /// </summary>
+        public enum SkyboxMode
+        {
+            /// <summary>
+            /// In 6-sided mode, 6 textures are provided to form the cube map.
+            /// </summary>
+            SixSided,
+
+            /// <summary>
+            /// In cube map mode, a single equi-rectangular texture is used
+            /// to create the cube map. This mode is combined with Unity's
+            /// Panoramic skybox, since the texture usage is the same.
+            /// </summary>
+            CubeMap,
+
+            /// <summary>
+            /// Procedural skyboxes are created with code rather than textures,
+            /// so the relevant properties are specified for skybox replication
+            /// upon import.
+            /// </summary>
+            Procedural
         }
 
         /// <summary>
@@ -166,6 +193,21 @@ namespace GLTFast.Schema
         }
 
         /// <summary>
+        /// Structure to store skybox material properties
+        /// </summary>
+        public struct SkyboxStruct
+        {
+            public bool isSkybox;
+            public SkyboxMode skyboxMode;
+            public override string ToString()
+            {
+                return JsonConvert.SerializeObject(this);
+            }
+        };
+
+        public SkyboxStruct skyboxStruct;
+
+        /// <summary>
         /// Specifies the cutoff threshold when in `MASK` mode. If the alpha value is greater than
         /// or equal to this value then it is rendered as fully opaque, otherwise, it is rendered
         /// as fully transparent. This value is ignored for other modes.
@@ -234,6 +276,10 @@ namespace GLTFast.Schema
             if (doubleSided)
             {
                 writer.AddProperty("doubleSided", doubleSided);
+            }
+            if (skyboxStruct.isSkybox)
+            {
+                writer.AddProperty("extras", skyboxStruct);
             }
             if (extensions != null)
             {

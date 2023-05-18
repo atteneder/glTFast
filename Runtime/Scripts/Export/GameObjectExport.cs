@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -74,9 +75,13 @@ namespace GLTFast.Export
             var rootNodes = new List<uint>(gameObjects.Length);
             var tempMaterials = new List<Material>();
             var success = true;
-            for (var index = 0; index < gameObjects.Length; index++)
+            List<GameObject> gameObjectList = gameObjects.ToList();
+            GameObject skybox = CreateSkyboxObject();
+            gameObjectList.Add(skybox);
+
+            for (var index = 0; index < gameObjectList.Count; index++)
             {
-                var gameObject = gameObjects[index];
+                var gameObject = gameObjectList[index];
                 success &= AddGameObject(gameObject, tempMaterials, out var nodeId);
                 if (nodeId >= 0)
                 {
@@ -88,7 +93,53 @@ namespace GLTFast.Export
                 m_Writer.AddScene(rootNodes.ToArray(), name);
             }
 
+            GameObject.DestroyImmediate(skybox);
+
             return success;
+        }
+
+        GameObject CreateSkyboxObject()
+        {
+            GameObject skybox =
+                GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Material skyboxMaterial = RenderSettings.skybox;
+            skybox.name = skyboxMaterial.shader.name.Replace("/", "_");
+            skybox.GetComponent<MeshRenderer>().sharedMaterial = skyboxMaterial;
+
+            if (skyboxMaterial.HasProperty("_Rotation"))
+            {
+                Vector3 rotation =
+                    new Vector3(0, skyboxMaterial.GetFloat("_Rotation"), 0);
+
+                // Cube map has different rotation when exported as 'Panoramic'
+                if (skyboxMaterial.shader.name == "Skybox/Cubemap")
+                {
+                    rotation.y += 90;
+                }
+
+                skybox.transform.eulerAngles = rotation;
+            }
+
+            if (skybox.name.Contains("Procedural"))
+            {
+                // Serialise procedural skybox properties into Transform (hack)
+                float sunSize =
+                    skyboxMaterial.IsKeywordEnabled("_SUNDISK_NONE") ? 0 :
+                    skyboxMaterial.GetFloat("_SunSize");
+                Debug.Log("Sun size: " + sunSize);
+                skybox.transform.position = new Vector3(
+                    sunSize,
+                    skyboxMaterial.GetFloat("_Exposure"),
+                    skyboxMaterial.GetFloat("_AtmosphereThickness"));
+                Color skyTint = skyboxMaterial.GetColor("_SkyTint");
+                skybox.transform.eulerAngles =
+                    new Vector3(skyTint.r, skyTint.g, skyTint.b);
+                Color ground = skyboxMaterial.GetColor("_GroundColor");
+                skybox.transform.localScale =
+                    new Vector3(ground.r, ground.g, ground.b);
+            }
+
+            return skybox;
         }
 
         /// <summary>
