@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 
+using System;
 using UnityEngine;
 
 namespace GLTFast.Export
@@ -66,6 +67,20 @@ namespace GLTFast.Export
         /// </summary>
         Overwrite
     }
+    
+    /// <summary>
+    /// Compression
+    /// </summary>
+    [Flags]
+    public enum Compression
+    {
+        /// <summary>No compression</summary>
+        Uncompressed = 1,
+        /// <summary>Replace existing files with newly created ones</summary>
+        MeshOpt = 1 << 1,
+        /// <summary>Replace existing files with newly created ones</summary>
+        Draco = 1 << 2,
+    }
 
     /// <summary>
     /// glTF export settings
@@ -94,5 +109,12 @@ namespace GLTFast.Export
         /// based on type.
         /// </summary>
         public ComponentType ComponentMask { get; set; } = ComponentType.All;
+        
+        /// <summary>
+        /// Type of compression to apply
+        /// </summary>
+        public Compression Compression  { get; set; } = Compression.Uncompressed;
+        
+        public DracoExportSettings DracoSettings { get; set; }
     }
 }

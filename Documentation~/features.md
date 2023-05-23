@@ -80,7 +80,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Texture coordinates / UV sets | ✅ | `?`
 | Three or more texture coordinates / UV sets | <sup>2</sup>☑️ | `?`
 | Vertex colors | ✅ | `?`
-| Draco mesh compression (via [DracoUnity](https://github.com/atteneder/DracoUnity)) | ✅ | 
+| Draco mesh compression (via [DracoUnity](https://github.com/atteneder/DracoUnity)) | ✅ | ✅
 | Implicit (no) indices | ✅ | 
 | Per primitive material | ✅ | ✅
 | Joints (up to 4 per vertex) | ✅ | 
@@ -109,7 +109,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 |------------| ------ | ------
 | | |
 | **Khronos**
-| KHR_draco_mesh_compression | ✅ | 
+| KHR_draco_mesh_compression | ✅ | ✅
 | KHR_materials_pbrSpecularGlossiness | ✅ | 
 | KHR_materials_unlit | ✅ | ✅
 | KHR_texture_transform | ✅ | ✅

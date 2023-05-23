@@ -121,4 +121,23 @@ public class TestExport : MonoBehaviour {
 
 > Exporting to a `Stream` currently only works for self-contained glTF-Binary files (where the binary buffer and all textures are included in the `.glb` file). Trying other export settings will fail.
 
+### Draco Compression
+
+glTFast supports applying [Google Draco 3D Data compression][Draco] to meshes. This requires the [DracoUnity][DracoUnity] package to be installed.
+
+```csharp
+// ExportSettings provides generic export settings
+var exportSettings = new ExportSettings {
+    ...
+    // Enable Draco compression
+    Compression = Compression.Draco,
+    // Tweak the Draco compression settings
+    DracoSettings = new DracoExportSettings {
+        positionQuantization = 12
+    }
+};
+```
+
 [asmdef]: https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html
+[Draco]: https://google.github.io/draco/
+[DracoUnity]: https://github.com/atteneder/DracoUnity
