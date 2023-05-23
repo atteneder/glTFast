@@ -115,6 +115,9 @@ namespace GLTFast.Export
         /// </summary>
         public Compression Compression  { get; set; } = Compression.Uncompressed;
         
+        /// <summary>
+        /// Draco compression export settings
+        /// </summary>
         public DracoExportSettings DracoSettings { get; set; }
     }
 }
