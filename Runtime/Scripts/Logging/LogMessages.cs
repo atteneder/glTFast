@@ -235,10 +235,6 @@ namespace GLTFast.Logging
         /// </summary>
         TypeUnsupported,
         /// <summary>
-        /// Fallback to uncompressed meshes/bufferViews is not supported. 
-        /// </summary>
-        UncompressedFallbackNotSupported,
-        /// <summary>
         /// Support for direct Jpeg/PNG texture download is not enabled
         /// </summary>
         UnityWebRequestTextureNotEnabled,
@@ -250,6 +246,10 @@ namespace GLTFast.Logging
         /// UV set index is not supported in current render pipeline
         /// </summary>
         UVMulti,
+        /// <summary>
+        /// Fallback to uncompressed meshes/bufferViews is not supported. 
+        /// </summary>
+        UncompressedFallbackNotSupported,
     }
 
     /// <summary>
