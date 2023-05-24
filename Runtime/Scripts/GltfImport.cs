@@ -1898,7 +1898,7 @@ namespace GLTFast
                         pointsSupport
                     );
 
-                    material.name = $"material_{i}";
+                    material.name = m_Settings.NormalizeMaterialNames ? $"material_{i}" : m_Materials[i].name;
                     m_Materials[i] = material;
                     m_MaterialGenerator.SetLogger(null);
                     Profiler.EndSample();

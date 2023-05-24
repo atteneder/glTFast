@@ -79,6 +79,13 @@ namespace GLTFast
             set => anisotropicFilterLevel = value;
         }
 
+        public bool NormalizeMaterialNames
+        {
+            get => normalizeMaterialNames;
+
+            set => normalizeMaterialNames = value;
+        }
+
         [SerializeField]
         [Tooltip("Controls how node names are created.")]
         NameImportMethod nodeNameMethod = NameImportMethod.Original;
@@ -102,5 +109,9 @@ namespace GLTFast
         [SerializeField]
         [Tooltip("Anisotropic filtering level for imported textures.")]
         int anisotropicFilterLevel = 1;
+
+        [SerializeField]
+        [Tooltip("Normalizes all material names to file friendly names")]
+        bool normalizeMaterialNames;
     }
 }
