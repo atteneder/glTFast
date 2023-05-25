@@ -246,6 +246,10 @@ namespace GLTFast.Logging
         /// UV set index is not supported in current render pipeline
         /// </summary>
         UVMulti,
+        /// <summary>
+        /// Fallback to uncompressed meshes/bufferViews is not supported. 
+        /// </summary>
+        UncompressedFallbackNotSupported,
     }
 
     /// <summary>
@@ -309,6 +313,7 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             { LogCode.TopologyPointsMaterialUnsupported, "Could not find material that supports points topology" },
             { LogCode.TopologyUnsupported, "Unsupported topology {0}" },
             { LogCode.TypeUnsupported, "Unsupported {0} type {1}" },
+            { LogCode.UncompressedFallbackNotSupported, "Fallback to uncompressed meshes/bufferViews is not supported" },
             { LogCode.UnityWebRequestTextureNotEnabled, $"PNG/Jpeg textures load slower because built-in package \"Unity Web Request Texture\" is not enabled. {k_LinkProjectSetupTextureSupport}" },
             { LogCode.UVLimit, "Only eight UV sets will get imported" },
             { LogCode.UVMulti, "UV set index {0} is not supported in current render pipeline" },
