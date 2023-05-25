@@ -426,7 +426,10 @@ namespace GLTFast.Schema
         }
 
         /// <summary>
-        /// Generic checks and cleanups
+        /// Cleans up invalid parsing artifacts created by <see cref="GltfJsonUtilityParser"/>.
+        /// If you inherit a custom Root class (for use with
+        /// <see cref="GltfImport.LoadWithCustomSchema&lt;T&gt;(string,ImportSettings,System.Threading.CancellationToken)"/>
+        /// ) you can override this method to perform sanity checks on the deserialized, custom properties.
         /// </summary>
         public virtual void JsonUtilityCleanup()
         {

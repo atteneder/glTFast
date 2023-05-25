@@ -27,7 +27,7 @@ namespace GLTFast.Schema
         }
 
         /// <summary>
-        /// Cleans up invalid parsing artifacts created by JsonUtility.
+        /// Cleans up invalid parsing artifacts created by <see cref="GltfJsonUtilityParser"/>.
         /// </summary>
         /// <returns>True if element itself still holds value. False if it can be safely removed.</returns>
         public virtual bool JsonUtilityCleanup()
