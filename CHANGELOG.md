@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Support for Draco mesh compressed exports
 ### Changed
 - Added proper root namespace to all assembly definitions
+- License and copyright notices
 
 ## [5.0.4] - 2023-03-30
 ### Fixed
