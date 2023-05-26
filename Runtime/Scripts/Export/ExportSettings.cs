@@ -107,5 +107,12 @@ namespace GLTFast.Export
         /// Draco compression export settings
         /// </summary>
         public DracoExportSettings DracoSettings { get; set; }
+
+        /// <summary>
+        /// If true, the export results will not differ on repeated exports. This comes at the cost of potentially
+        /// longer export times on scenes with multiple, large meshes.
+        /// This can be a requirement for certain asset pipelines or automated tests.
+        /// </summary>
+        public bool deterministic = false;
     }
 }

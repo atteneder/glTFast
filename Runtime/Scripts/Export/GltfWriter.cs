@@ -912,26 +912,39 @@ namespace GLTFast.Export
                 return false;
 #endif
             }
-            var tasks = new List<Task>(m_Meshes.Count);
+            var tasks = m_Settings.deterministic ? null : new List<Task>(m_Meshes.Count);
 
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             Profiler.EndSample();
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++)
             {
+                Task task;
 #if DRACO_UNITY
                 if ((m_Settings.Compression & Compression.Draco) != 0)
                 {
-                    tasks.Add(BakeMeshDraco(meshId, meshDataArray[meshId]));
+                    task = BakeMeshDraco(meshId, meshDataArray[meshId]);
                 }
                 else
 #endif
                 {
-                    tasks.Add(BakeMesh(meshId, meshDataArray[meshId]));
+                    task = BakeMesh(meshId, meshDataArray[meshId]);
+                }
+                
+                if (m_Settings.deterministic)
+                {
+                    await task;
+                }
+                else
+                {
+                    tasks.Add(task);
                 }
                 await m_DeferAgent.BreakPoint();
             }
 
-            await Task.WhenAll(tasks);
+            if (!m_Settings.deterministic)
+            {
+                await Task.WhenAll(tasks);
+            }
             meshDataArray.Dispose();
             return true;
         }
