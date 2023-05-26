@@ -113,6 +113,6 @@ namespace GLTFast.Export
         /// longer export times on scenes with multiple, large meshes.
         /// This can be a requirement for certain asset pipelines or automated tests.
         /// </summary>
-        public bool deterministic = false;
+        public bool Deterministic { get; set; }
     }
 }

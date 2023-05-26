@@ -912,7 +912,7 @@ namespace GLTFast.Export
                 return false;
 #endif
             }
-            var tasks = m_Settings.deterministic ? null : new List<Task>(m_Meshes.Count);
+            var tasks = m_Settings.Deterministic ? null : new List<Task>(m_Meshes.Count);
 
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             Profiler.EndSample();
@@ -930,7 +930,7 @@ namespace GLTFast.Export
                     task = BakeMesh(meshId, meshDataArray[meshId]);
                 }
                 
-                if (m_Settings.deterministic)
+                if (m_Settings.Deterministic)
                 {
                     await task;
                 }
@@ -941,7 +941,7 @@ namespace GLTFast.Export
                 await m_DeferAgent.BreakPoint();
             }
 
-            if (!m_Settings.deterministic)
+            if (!m_Settings.Deterministic)
             {
                 await Task.WhenAll(tasks);
             }
