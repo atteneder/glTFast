@@ -37,15 +37,15 @@ namespace GLTFast.Materials
         /// Converts a glTF material into a Unity <see cref="Material"/>.
         /// <cref>gltfMaterial</cref> might reference textures, which can be queried from <cref>gltf</cref>
         /// </summary>
+        /// <param name="materialIndex">Index of the material in the GLTF</param>
         /// <param name="gltfMaterial">Source glTF material</param>
         /// <param name="gltf">Interface to a loaded glTF's resources (e.g. textures)</param>
         /// <param name="pointsSupport">If true, material has to support meshes with points topology <seealso cref="MeshTopology.Points"/></param>
         /// <returns>Generated Unity Material</returns>
-        UnityEngine.Material GenerateMaterial(
+        UnityEngine.Material GenerateMaterial(int materialIndex,
             Material gltfMaterial,
             IGltfReadable gltf,
-            bool pointsSupport = false
-            );
+            bool pointsSupport = false);
 
         /// <summary>
         /// Is called prior to <seealso cref="GenerateMaterial"/>. The logger should be used

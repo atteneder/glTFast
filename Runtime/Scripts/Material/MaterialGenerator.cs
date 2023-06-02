@@ -24,6 +24,7 @@ using GLTFast.Schema;
 using UnityEngine;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
+using Material = GLTFast.Schema.Material;
 #if USING_URP
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -266,11 +267,10 @@ namespace GLTFast.Materials
         }
 
         /// <inheritdoc />
-        public abstract UnityEngine.Material GenerateMaterial(
-            Schema.Material gltfMaterial,
+        public abstract UnityEngine.Material GenerateMaterial(int materialIndex,
+            Material gltfMaterial,
             IGltfReadable gltf,
-            bool pointsSupport = false
-            );
+            bool pointsSupport = false);
 
         /// <inheritdoc />
         public void SetLogger(ICodeLogger logger)

@@ -1893,12 +1893,12 @@ namespace GLTFast
                     m_MaterialGenerator.SetLogger(m_Logger);
                     var pointsSupport = GetMaterialPointsSupport(i);
                     var material = m_MaterialGenerator.GenerateMaterial(
+                        i,
                         m_GltfRoot.materials[i],
                         this,
                         pointsSupport
                     );
 
-                    material.name = m_Settings.NormalizeMaterialNames ? $"material_{i}" : m_GltfRoot.materials[i].name;
                     m_Materials[i] = material;
                     m_MaterialGenerator.SetLogger(null);
                     Profiler.EndSample();

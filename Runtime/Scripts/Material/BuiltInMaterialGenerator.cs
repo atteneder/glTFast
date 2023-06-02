@@ -215,6 +215,7 @@ namespace GLTFast.Materials
 
         /// <inheritdoc />
         public override Material GenerateMaterial(
+            int materialIndex,
             Schema.Material gltfMaterial,
             IGltfReadable gltf,
             bool pointsSupport = false

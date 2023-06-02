@@ -99,7 +99,7 @@ namespace GLTFast.Materials {
 
         // ReSharper restore MemberCanBePrivate.Global
         // ReSharper restore MemberCanBeProtected.Global
-        
+
         public static string k_ShaderGraphsPrefix = "Shader Graphs/";
 #if UNITY_EDITOR
 #if UNITY_SHADER_GRAPH_12_OR_NEWER || USING_HDRP_10_OR_NEWER
@@ -180,6 +180,7 @@ namespace GLTFast.Materials {
 
         /// <inheritdoc />
         public override Material GenerateMaterial(
+            int materialIndex,
             Schema.Material gltfMaterial,
             IGltfReadable gltf,
             bool pointsSupport = false
