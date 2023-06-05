@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Runtime tests
 - (Export) Setting for deterministic export (limits concurrency to ensure consistent output)
+- Support for [Entities 1.0][Entities1.0]
 ### Changed
 - Optimized `Accessor.GetAccessorAttributeType`
 
@@ -856,6 +857,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 
 [0.3.0]: https://github.com/atteneder/glTFast/compare/v0.3.0...v0.2.0
 [0.2.0]: https://github.com/atteneder/glTFast/compare/v0.2.0...v0.1.0
+[Entities1.0]: https://docs.unity3d.com/Packages/com.unity.entities@1.0
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [DanDovi]: https://github.com/DanDovi
 [DracoUnity]: https://github.com/atteneder/DracoUnity

@@ -7,7 +7,10 @@
         "Unity.Collections",
         "Unity.Transforms",
         "Unity.Mathematics",
+        "Unity.Mathematics.Extensions",
+        "Unity.Mathematics.Extensions.Hybrid",
         "Unity.Entities.Hybrid",
+        "Unity.Entities.Graphics",
         "Unity.Rendering.Hybrid",
         "Unity.Burst"
     ],
@@ -28,6 +31,11 @@
             "name": "com.unity.modules.animation",
             "expression": "1.0.0",
             "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.unity.entities.graphics",
+            "expression": "1.0.10",
+            "define": "UNITY_ENTITIES_GRAPHICS"
         }
     ],
     "noEngineReferences": false
