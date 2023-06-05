@@ -24,6 +24,7 @@ namespace GLTFast {
     /// Intermediate solution and drop-in replacement for GltfAsset
     /// TODO: To be replaced with a pure ECS concept
     /// </summary>
+    [BurstCompile]
     public class GltfEntityAsset : GltfAssetBase {
 
         public string Url => url;
@@ -132,13 +133,14 @@ namespace GLTFast {
             entityManager.SetComponentData(m_SceneRoot,new Scale {Value = transform.localScale.x});
             // entityManager.AddBuffer<LinkedEntityGroup>(sceneRoot);
 #else
+            var transformCached = transform;
             entityManager.SetComponentData(
                 m_SceneRoot,
                 new LocalTransform
                 {
-                    Position = transform.position,
-                    Rotation = transform.rotation,
-                    Scale = transform.localScale.x,
+                    Position = transformCached.position,
+                    Rotation = transformCached.rotation,
+                    Scale = transformCached.localScale.x,
                 });
             entityManager.SetComponentData(m_SceneRoot, new LocalToWorld{Value = float4x4.identity});
 #endif
@@ -154,32 +156,38 @@ namespace GLTFast {
         /// </summary>
         public override void ClearScenes() {
             if (m_SceneRoot != Entity.Null) {
-                DestroyEntityHierarchy(m_SceneRoot);
+                var world = World.DefaultGameObjectInjectionWorld;
+                var entityManager = world.EntityManager;
+                DestroyEntityHierarchy(ref m_SceneRoot, ref entityManager);
                 m_SceneRoot = Entity.Null;
             }
         }
 
+#if UNITY_ENTITIES_GRAPHICS
         [BurstCompile]
-        static void DestroyEntityHierarchy(Entity rootEntity) {
-            var world = World.DefaultGameObjectInjectionWorld;
-            var entityManager = world.EntityManager;
+#endif
+        static void DestroyEntityHierarchy(ref Entity rootEntity, ref EntityManager entityManager) {
             var ecb = new EntityCommandBuffer(Allocator.Temp);
-
-            void DestroyEntity(Entity entity) {
-                if (entityManager.HasComponent<Child>(entity)) {
-                    var children = entityManager.GetBuffer<Child>(entity);
-                    foreach (var child in children) {
-                        DestroyEntity(child.Value);
-                    }
-                }
-
-                ecb.DestroyEntity(entity);
-            }
-
-            DestroyEntity(rootEntity);
-            
+            DestroyEntity(ref rootEntity, ref entityManager, ref ecb);
             ecb.Playback(entityManager);
             ecb.Dispose();
+        }
+
+#if UNITY_ENTITIES_GRAPHICS
+        [BurstCompile]
+#endif
+        static void DestroyEntity(ref Entity entity, ref EntityManager entityManager, ref EntityCommandBuffer ecb)
+        {
+            if (entityManager.HasComponent<Child>(entity)) {
+                var children = entityManager.GetBuffer<Child>(entity);
+                foreach (var child in children)
+                {
+                    var c = child.Value;
+                    DestroyEntity(ref c, ref entityManager, ref ecb);
+                }
+            }
+
+            ecb.DestroyEntity(entity);
         }
     }
 }

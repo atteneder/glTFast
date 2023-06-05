@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for [Entities 1.0][Entities1.0]
 ### Changed
 - Optimized `Accessor.GetAccessorAttributeType`
+- Optimized `GltfEntityAsset.ClearScenes` via Burst
 
 ## [5.1.0] - 2023-05-25
 ### Added
