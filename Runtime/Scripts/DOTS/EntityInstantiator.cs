@@ -132,7 +132,7 @@ namespace GLTFast {
             m_EntityManager.SetComponentData(node,new Rotation {Value = rotation});
             SetEntityScale(node, scale);
 #else
-            var isUniformScale = Math.Abs(scale.x - scale.y) < k_Epsilon && Math.Abs(scale.x - scale.z) < k_Epsilon;
+            var isUniformScale = IsUniform(scale);
             m_EntityManager.SetComponentData(
                 node,
                 new LocalTransform
@@ -335,25 +335,37 @@ namespace GLTFast {
             for (var index = 0; index < materialIndices.Length; index++)
             {
                 var prototype = m_EntityManager.CreateEntity(m_NodeArchetype);
-                if (scales.HasValue) {
-                    m_EntityManager.AddComponent<PostTransformMatrix>(prototype);
-                }
+                m_EntityManager.SetEnabled(prototype, true);
 
                 for (var i = 0; i < instanceCount; i++) {
                     var instance = i>0 ? m_EntityManager.Instantiate(prototype) : prototype;
-                    
-                    m_EntityManager.SetComponentData(instance,new LocalTransform
+
+                    var transform = new LocalTransform
                     {
                         Position = positions?[i] ?? Vector3.zero,
-                        Rotation = rotations?[i] ?? Quaternion.identity
-                    });
-                    m_EntityManager.SetComponentData(instance, new Parent { Value = m_Nodes[nodeIndex] });
-                    if (scales.HasValue) {
-                        m_EntityManager.SetComponentData(instance,new PostTransformMatrix() {Value = float4x4.Scale(scales.Value[i])});
+                        Rotation = rotations?[i] ?? Quaternion.identity,
+                        Scale = 1
+                    };
+                    if (scales.HasValue)
+                    {
+                        var scale = scales.Value[i];
+                        var isUniformScale = IsUniform(scale);
+                        if (!isUniformScale)
+                        {
+                            m_EntityManager.AddComponent<PostTransformMatrix>(instance);
+                            m_EntityManager.SetComponentData(instance,new PostTransformMatrix {Value = float4x4.Scale(scale)});
+                        }
+                        else
+                        {
+                            transform.Scale = scale.x;
+                        }
                     }
                     
+                    m_EntityManager.SetComponentData(instance,transform);
+                    m_EntityManager.SetComponentData(instance, new Parent { Value = m_Nodes[nodeIndex] });
+                    
                     RenderMeshUtility.AddComponents(
-                        prototype,
+                        instance,
                         m_EntityManager,
                         renderMeshDescription,
                         renderMeshArray,
@@ -394,6 +406,11 @@ namespace GLTFast {
                 m_EntityManager.SetEnabled(entity, true);
             }
             Profiler.EndSample();
+        }
+
+        static bool IsUniform(Vector3 scale)
+        {
+            return Math.Abs(scale.x - scale.y) < k_Epsilon && Math.Abs(scale.x - scale.z) < k_Epsilon;
         }
     }
 }
