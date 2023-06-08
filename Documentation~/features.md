@@ -231,7 +231,7 @@ Other shaders might (partially) work if they have similar properties (with ident
 
 Unity's [Data-Oriented Technology Stack (DOTS)][DOTS] allows users to create high performance gameplay. glTFast has experimental import support for it.
 
-Instead of traditional GameObjects, glTFast will instantiate Entities with Hybrid Renderer (version 2) components.
+Instead of traditional GameObjects, glTFast will instantiate [Entities][Entities] and render them via [Entities Graphics][EntitiesGraphics].
 
 Possibly incomplete list of things that are known to not work with Entities yet:
 
@@ -243,8 +243,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 
 ### DOTS Setup
 
-- First, go through the official [DOTS project setup](https://docs.unity3d.com/Packages/com.unity.entities@0.17/manual/install_setup.html)
-- Make sure to enable [Hybrid Renderer V2](https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@0.11/manual/creating-a-new-hybrid-renderer-project.html)
+- Install the [Entities Graphics][EntitiesGraphics] package
 - Use `GltfEntityAsset` instead of `GltfAsset`
 - For customized behavior, use the `EntityInstantiator` instead of the `GameObjectInstantiator`
 
@@ -262,9 +261,11 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 - `n/a`: Not available
 
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
-[AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166  
+[AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166
 [ClearCoat]: https://github.com/atteneder/glTFast/issues/68
 [DOTS]: https://unity.com/dots
+[Entities]: https://docs.unity3d.com/Packages/com.unity.entities@latest
+[EntitiesGraphics]: https://docs.unity3d.com/Packages/com.unity.entities.graphics@latest
 [HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [IBL]: https://github.com/atteneder/glTFast/issues/108
 [IOR]: https://github.com/atteneder/glTFast/issues/207

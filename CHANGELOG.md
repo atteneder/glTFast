@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Runtime tests
 - (Export) Setting for deterministic export (limits concurrency to ensure consistent output)
-- Support for [Entities 1.0][Entities1.0]
+- (DOTS) Support for [Entities 1.0][Entities1.0]
 ### Changed
 - Optimized `Accessor.GetAccessorAttributeType`
 - Optimized `GltfEntityAsset.ClearScenes` via Burst
