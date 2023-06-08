@@ -314,6 +314,12 @@ namespace GLTFast {
 #else
             
             var materials = new Material[materialIndices.Length];
+            for (var index = 0; index < materialIndices.Length; index++)
+            {
+                materials[index] = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                materials[index].enableInstancing = true;
+            }
+            
             var filterSettings = RenderFilterSettings.Default;
             filterSettings.ShadowCastingMode = ShadowCastingMode.Off;
             filterSettings.ReceiveShadows = false;
@@ -328,9 +334,6 @@ namespace GLTFast {
             var renderMeshArray = new RenderMeshArray(materials, new[] { mesh });
             for (var index = 0; index < materialIndices.Length; index++)
             {
-                materials[index] = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
-                materials[index].enableInstancing = true;
-
                 var prototype = m_EntityManager.CreateEntity(m_NodeArchetype);
                 if (scales.HasValue) {
                     m_EntityManager.AddComponent<PostTransformMatrix>(prototype);
