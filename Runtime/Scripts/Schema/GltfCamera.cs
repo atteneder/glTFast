@@ -46,6 +46,16 @@ namespace GLTFast.Schema
 
         Type? m_TypeEnum;
 
+        private readonly Dictionary<string, Type?> cameraTypesTable = new()
+        {
+            {"ORTHOGRAPHIC", Type.Orthographic},
+            {"Orthographic", Type.Orthographic},
+            {"orthographic", Type.Orthographic},
+            {"PERSPECTIVE", Type.Perspective},
+            {"Perspective", Type.Perspective},
+            {"perspective", Type.Perspective},
+        };
+        
         /// <summary>
         /// <see cref="Type"/> typed and cached getter onto <see cref="type"/> string.
         /// </summary>
@@ -56,14 +66,18 @@ namespace GLTFast.Schema
             {
                 return m_TypeEnum.Value;
             }
-
+            
             if (!string.IsNullOrEmpty(type))
             {
-                m_TypeEnum = (Type)Enum.Parse(typeof(Type), type, true);
+                if (!cameraTypesTable.TryGetValue(type, out m_TypeEnum))
+                {
+                    m_TypeEnum = (Type)Enum.Parse(typeof(Type), type, true);
+                    cameraTypesTable.Add(type, m_TypeEnum);
+                }
                 type = null;
                 return m_TypeEnum.Value;
             }
-
+            
             if (orthographic != null) m_TypeEnum = Type.Orthographic;
             if (perspective != null) m_TypeEnum = Type.Perspective;
             return m_TypeEnum ?? Type.Perspective;

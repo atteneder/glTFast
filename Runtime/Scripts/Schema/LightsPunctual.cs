@@ -123,6 +123,19 @@ namespace GLTFast.Schema
         [NonSerialized]
         Type m_TypeEnum = Type.Unknown;
 
+        private readonly Dictionary<string, Type> lightTypesTable = new()
+        {
+            { "SPOT", Type.Spot },
+            { "Spot", Type.Spot },
+            { "spot", Type.Spot },
+            { "DIRECTIONAL", Type.Directional },
+            { "Directional", Type.Directional },
+            { "directional", Type.Directional },
+            { "POINT", Type.Point },
+            { "Point", Type.Point },
+            { "point", Type.Point },
+        };
+        
         /// <summary>
         /// Returns the type of the light
         /// It converts the <see cref="type"/> string and caches it.
@@ -134,14 +147,18 @@ namespace GLTFast.Schema
             {
                 return m_TypeEnum;
             }
-
+            
             if (!string.IsNullOrEmpty(type))
             {
-                m_TypeEnum = (Type)Enum.Parse(typeof(Type), type, true);
+                if (!lightTypesTable.TryGetValue(type, out m_TypeEnum))
+                {
+                    m_TypeEnum = (Type)Enum.Parse(typeof(Type), type, true);
+                    lightTypesTable.Add(type, m_TypeEnum);
+                }
+                
                 type = null;
                 return m_TypeEnum;
             }
-
             return Type.Unknown;
         }
 

@@ -18,7 +18,6 @@
 using System;
 
 namespace GLTFast.Schema {
-
     [Serializable]
     public class GltfAnimation : NamedObject
     {
@@ -28,13 +27,11 @@ namespace GLTFast.Schema {
         /// targets.
         /// </summary>
         public AnimationChannel[] channels;
-
         /// <summary>
         /// An array of samplers that combines input and output accessors with an
         /// interpolation algorithm to define a keyframe graph (but not its target).
         /// </summary>
         public AnimationSampler[] samplers;
-
         internal void GltfSerialize(JsonWriter writer) {
             writer.AddObject();
             GltfSerializeRoot(writer);
@@ -42,7 +39,6 @@ namespace GLTFast.Schema {
             throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
-
     [Serializable]
     public class AnimationChannel
     {
@@ -55,62 +51,69 @@ namespace GLTFast.Schema {
             Weights,
             Pointer
         }
-
         /// <summary>
         /// The index of a sampler in this animation used to compute the value for the
         /// target, e.g., a node's translation, rotation, or scale (TRS).
         /// </summary>
         public int sampler;
-
         /// <summary>
         /// The index of the node and TRS property to target.
         /// </summary>
         public AnimationChannelTarget target;
-
         internal void GltfSerialize(JsonWriter writer) {
             throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
-
     [Serializable]
     public class AnimationChannelTarget {
         /// <summary>
         /// The index of the node to target.
         /// </summary>
         public int node;
-
         /// <summary>
         /// The name of the node's TRS property to modify.
         /// </summary>
         public string path;
-
         AnimationChannel.Path m_Path;
-
+        private Dictionary<string, AnimationChannel.Path> animationChannelPathTable = new()
+        {
+            { "TRANSLATION", AnimationChannel.Path.Translation },
+            { "Translation", AnimationChannel.Path.Translation },
+            { "translation", AnimationChannel.Path.Translation },
+            { "ROTATION", AnimationChannel.Path.Rotation },
+            { "Rotation", AnimationChannel.Path.Rotation },
+            { "rotation", AnimationChannel.Path.Rotation },
+            { "SCALE", AnimationChannel.Path.Scale },
+            { "Scale", AnimationChannel.Path.Scale },
+            { "scale", AnimationChannel.Path.Scale },
+            { "WEIGHTS", AnimationChannel.Path.Weights },
+            { "Weights", AnimationChannel.Path.Weights },
+            { "weights", AnimationChannel.Path.Weights },
+        };
         public AnimationChannel.Path GetPath() {
             if (m_Path == AnimationChannel.Path.Unknown) {
                 if (!string.IsNullOrEmpty(path)) {
                     try {
-                        m_Path = (AnimationChannel.Path)Enum.Parse(typeof(AnimationChannel.Path), path, true);
+                        if (!animationChannelPathTable.TryGetValue(path, out m_Path))
+                        {
+                            m_Path = (AnimationChannel.Path)Enum.Parse(typeof(AnimationChannel.Path), path, true);
+                            animationChannelPathTable.Add(path, m_Path);
+                        }
                     }
                     catch (ArgumentException) {
                         m_Path = AnimationChannel.Path.Invalid;
                     }
-
                     path = null;
                     return m_Path;
                 }
-
                 return AnimationChannel.Path.Invalid;
             }
-
             return m_Path;
         }
-
         internal void GltfSerialize(JsonWriter writer) {
             throw new NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
-
     public enum InterpolationType
     {
         Unknown,
@@ -118,7 +121,6 @@ namespace GLTFast.Schema {
         Step,
         CubicSpline
     }
-
     [Serializable]
     public class AnimationSampler
     {
@@ -129,7 +131,6 @@ namespace GLTFast.Schema {
         /// i.e., `time[n + 1] > time[n]`
         /// </summary>
         public int input;
-
         /// <summary>
         /// Interpolation algorithm. When an animation targets a node's rotation,
         /// and the animation's interpolation is `\"LINEAR\"`, spherical linear
@@ -138,23 +139,36 @@ namespace GLTFast.Schema {
         /// of the first point of the timeframe, until the next timeframe.
         /// </summary>
         public string interpolation;
-
         InterpolationType m_Interpolation;
-
-        public InterpolationType GetInterpolationType() {
-            if (m_Interpolation == InterpolationType.Unknown) {
-                if (!string.IsNullOrEmpty(interpolation)) {
+        private readonly Dictionary<string, InterpolationType> interpolationTypesTable =
+            new()
+            {
+                { "LINEAR", InterpolationType.Linear },
+                { "Linear", InterpolationType.Linear },
+                { "linear", InterpolationType.Linear },
+                { "STEP", InterpolationType.Step },
+                { "Step", InterpolationType.Step },
+                { "step", InterpolationType.Step },
+                { "CUBICSPLINE", InterpolationType.CubicSpline },
+                { "Cubicspline", InterpolationType.CubicSpline },
+                { "cubicspline", InterpolationType.CubicSpline },
+            };
+        public InterpolationType GetInterpolationType()
+        {
+            if (m_Interpolation != InterpolationType.Unknown) return m_Interpolation;
+            if (!string.IsNullOrEmpty(interpolation))
+            {
+                if (!interpolationTypesTable.TryGetValue(interpolation, out m_Interpolation))
+                {
                     m_Interpolation = (InterpolationType)Enum.Parse(typeof(InterpolationType), interpolation, true);
-                    interpolation = null;
-                    return m_Interpolation;
+                    interpolationTypesTable.Add(interpolation, m_Interpolation);
                 }
-
-                m_Interpolation = InterpolationType.Linear;
+                interpolation = null;
+                return m_Interpolation;
             }
-
+            m_Interpolation = InterpolationType.Linear;
             return m_Interpolation;
         }
-
         /// <summary>
         /// The index of an accessor, containing keyframe output values. Output and input
         /// accessors must have the same `count`. When sampler is used with TRS target,

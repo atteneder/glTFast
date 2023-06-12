@@ -159,23 +159,55 @@ namespace GLTFast.Schema
         [NonSerialized]
         GltfAccessorAttributeType m_TypeEnum = GltfAccessorAttributeType.Undefined;
 
+        private readonly Dictionary<string, GltfAccessorAttributeType> accessorAttributesTable =
+            new()
+            {
+                {"SCALAR", GltfAccessorAttributeType.SCALAR},
+                {"Scalar", GltfAccessorAttributeType.SCALAR},
+                {"scalar", GltfAccessorAttributeType.SCALAR},
+                
+                {"VEC2", GltfAccessorAttributeType.VEC2},
+                {"Vec2", GltfAccessorAttributeType.VEC2},
+                {"vec2", GltfAccessorAttributeType.VEC2},
+                
+                {"VEC3", GltfAccessorAttributeType.VEC3},
+                {"Vec3", GltfAccessorAttributeType.VEC3},
+                {"vec3", GltfAccessorAttributeType.VEC3},
+
+                {"VEC4", GltfAccessorAttributeType.VEC4},
+                {"Vec4", GltfAccessorAttributeType.VEC4},
+                {"vec4", GltfAccessorAttributeType.VEC4},
+                
+                {"MAT2", GltfAccessorAttributeType.MAT2},
+                {"Mat2", GltfAccessorAttributeType.MAT2},
+                {"mat2", GltfAccessorAttributeType.MAT2},
+                
+                {"MAT3", GltfAccessorAttributeType.MAT3},
+                {"Mat3", GltfAccessorAttributeType.MAT3},
+                {"mat3", GltfAccessorAttributeType.MAT3},
+
+                {"MAT4", GltfAccessorAttributeType.MAT4},
+                {"Mat4", GltfAccessorAttributeType.MAT4},
+                {"mat4", GltfAccessorAttributeType.MAT4},
+            };
+
         /// <summary>
         /// <see cref="GltfAccessorAttributeType"/> typed/cached getter from the <see cref="type"/> string.
         /// </summary>
         /// <returns>The Accessor's attribute type, if it could be retrieved correctly. <see cref="GltfAccessorAttributeType.Undefined"/> otherwise</returns>
         public GltfAccessorAttributeType GetAttributeType()
         {
-            if (m_TypeEnum != GltfAccessorAttributeType.Undefined)
-                return m_TypeEnum;
-
-            if (!string.IsNullOrEmpty(type))
+            if (m_TypeEnum != GltfAccessorAttributeType.Undefined) return m_TypeEnum;
+            if (string.IsNullOrEmpty(type)) return GltfAccessorAttributeType.Undefined;
+            
+            if (!accessorAttributesTable.TryGetValue(type, out m_TypeEnum))
             {
                 m_TypeEnum = (GltfAccessorAttributeType)Enum.Parse(typeof(GltfAccessorAttributeType), type, true);
-                type = null;
-                return m_TypeEnum;
+                accessorAttributesTable.Add(type, m_TypeEnum);
             }
-
-            return GltfAccessorAttributeType.Undefined;
+            
+            type = null;
+            return m_TypeEnum;
         }
 
         /// <summary>

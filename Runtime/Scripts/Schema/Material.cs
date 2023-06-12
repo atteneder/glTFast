@@ -131,6 +131,19 @@ namespace GLTFast.Schema
 
         AlphaMode? m_AlphaModeEnum;
 
+        private readonly Dictionary<string, AlphaMode?> alphaModesTable = new()
+        {
+            {"OPAQUE", AlphaMode.Opaque},
+            {"Opaque", AlphaMode.Opaque},
+            {"opaque", AlphaMode.Opaque},
+            {"MASK", AlphaMode.Mask},
+            {"Mask", AlphaMode.Mask},
+            {"mask", AlphaMode.Mask},
+            {"BLEND", AlphaMode.Blend},
+            {"Blend", AlphaMode.Blend},
+            {"blend", AlphaMode.Blend},
+        };
+        
         /// <summary>
         /// <see cref="AlphaMode"/> typed and cached getter for <see cref="alphaMode"/> string.
         /// </summary>
@@ -138,17 +151,19 @@ namespace GLTFast.Schema
         public AlphaMode GetAlphaMode()
         {
             if (m_AlphaModeEnum.HasValue)
-            {
                 return m_AlphaModeEnum.Value;
-            }
-
+            
             if (!string.IsNullOrEmpty(alphaMode))
             {
-                m_AlphaModeEnum = (AlphaMode)System.Enum.Parse(typeof(AlphaMode), alphaMode, true);
+                if (!alphaModesTable.TryGetValue(alphaMode, out m_AlphaModeEnum))
+                {
+                    m_AlphaModeEnum = (AlphaMode)Enum.Parse(typeof(AlphaMode), alphaMode, true);
+                    alphaModesTable.Add(alphaMode, m_AlphaModeEnum);
+                }
                 alphaMode = null;
                 return m_AlphaModeEnum.Value;
             }
-
+            
             return AlphaMode.Opaque;
         }
 
