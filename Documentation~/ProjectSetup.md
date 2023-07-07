@@ -26,6 +26,7 @@ Depending on the Unity version and render pipeline in use, different shader grap
   - Universal render pipe 12 or newer
   - High-Definition render pipe 10 or newer
   - Built-in render pipe (experimental opt-in; see below)
+- Shader graphs in folder `Runtime/Shader/HDRP` for HDRP-specific material types
 - Shader graphs in folder `Runtime/Shader/Legacy` for older Universal / High-Definition render pipe versions
 - Shaders in folder `Runtime/Shader/Built-In` for the built-in render pipeline
 

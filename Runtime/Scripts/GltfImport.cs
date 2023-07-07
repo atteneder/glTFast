@@ -113,6 +113,7 @@ namespace GLTFast
             ExtensionName.MaterialsTransmission,
             ExtensionName.MeshGPUInstancing,
             ExtensionName.LightsPunctual,
+            ExtensionName.MaterialsClearcoat,
         };
 
         static IDeferAgent s_DefaultDeferAgent;

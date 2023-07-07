@@ -36,7 +36,7 @@ namespace GLTFast.Schema
         /// <summary>
         /// The clearcoat normal map texture.
         /// </summary>
-        public TextureInfo clearcoatNormalTexture;
+        public NormalTextureInfo clearcoatNormalTexture;
 
         internal void GltfSerialize(JsonWriter writer)
         {

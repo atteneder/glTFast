@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runtime tests
 - (Export) Setting for deterministic export (limits concurrency to ensure consistent output)
 - (DOTS) Support for [Entities 1.0][Entities1.0]
+- (Import) Clearcoat material support in HDRP and URP (via [KHR_materials_clearcoat](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_clearcoat/) extension)
 ### Changed
 - Optimized `Accessor.GetAccessorAttributeType`
 - Optimized `GltfEntityAsset.ClearScenes` via Burst
