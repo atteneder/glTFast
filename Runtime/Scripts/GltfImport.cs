@@ -44,6 +44,9 @@ using KtxUnity;
 #if MESHOPT
 using Meshoptimizer;
 #endif
+#if WEBP
+using WebP;
+#endif
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Collections;
 using Unity.Jobs;
@@ -125,6 +128,9 @@ namespace GLTFast
             ExtensionName.MaterialsTransmission,
             ExtensionName.MeshGPUInstancing,
             ExtensionName.LightsPunctual,
+#if WEBP
+            ExtensionName.TextureWebP
+#endif
         };
 
         static IDeferAgent s_DefaultDeferAgent;
