@@ -27,6 +27,9 @@ namespace GLTFast.Schema
         // ReSharper disable once InconsistentNaming
         public TextureBasisUniversal KHR_texture_basisu;
 
+        /// <inheritdoc cref="Extension.TextureWebP"/>
+        public TextureBasisUniversal EXT_texture_webp;
+
         internal void GltfSerialize(JsonWriter writer)
         {
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
