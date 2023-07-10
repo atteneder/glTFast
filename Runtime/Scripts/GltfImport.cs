@@ -1802,8 +1802,26 @@ namespace GLTFast
                         if (jh.jobHandle.IsCompleted)
                         {
                             jh.jobHandle.Complete();
+
+#if WEBP
+                            if (m_ImageFormats[jh.imageIndex] == ImageFormat.Webp)
+                            {
+                                var t = m_Images[jh.imageIndex];
+                                m_Images[jh.imageIndex] = Texture2DExt.CreateTexture2DFromWebP(jh.buffer, t.mipmapCount > 0, t.isDataSRGB, out var webpError, null, !m_ImageReadable[jh.imageIndex]);
+                                m_Resources.Remove(t);
+                                m_Resources.Add(m_Images[jh.imageIndex]);
+                                SafeDestroy(t);
+                                if (webpError != Error.Success)
+                                    throw new Exception($"Webp error: {webpError}");
+                            }
+#endif
+#if WEBP && UNITY_IMAGECONVERSION
+                            else
+#endif
 #if UNITY_IMAGECONVERSION
-                            m_Images[jh.imageIndex].LoadImage(jh.buffer,!m_ImageReadable[jh.imageIndex]);
+                            { 
+                                m_Images[jh.imageIndex].LoadImage(jh.buffer, !m_ImageReadable[jh.imageIndex]);
+                            }
 #endif
                             jh.gcHandle.Free();
                             m_ImageCreateContexts.RemoveAt(i);
