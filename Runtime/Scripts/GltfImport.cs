@@ -3784,6 +3784,8 @@ namespace GLTFast
                 case "ktx":
                 case "ktx2":
                     return ImageFormat.Ktx;
+                case "webp":
+                    return ImageFormat.Webp;
                 default:
                     return ImageFormat.Unknown;
             }
