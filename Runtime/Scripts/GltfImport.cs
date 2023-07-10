@@ -1034,6 +1034,13 @@ namespace GLTFast
                         }
                         else
 #endif
+#if !WEBP
+                        if (ext == ExtensionName.TextureWebP)
+                        {
+                            m_Logger?.Error(LogCode.PackageMissing, "Unity.WebP", ext);
+                        }
+                        else
+#endif
                         {
                             m_Logger?.Error(LogCode.ExtensionUnsupported, ext);
                         }
