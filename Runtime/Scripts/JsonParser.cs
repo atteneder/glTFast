@@ -111,6 +111,27 @@ namespace GLTFast
                 }
             }
 #endif
+#if WEBP
+            if (root.textures != null)
+            {
+                for (int i = 0; i < root.textures.Length; i++)
+                {
+                    var tex = root.textures[i];
+                    // tex.extension is always set (not null), because JsonUtility constructs a default
+                    // if any of tex.extension's members is not null, it is because there was
+                    // a legit extensions node in JSON => we have to check which ones
+                    if (tex.extensions.KHR_texture_basisu != null)
+                    {
+                        check = true;
+                    }
+                    else
+                    {
+                        // otherwise dump the wrongfully constructed MaterialExtension
+                        tex.extensions = null;
+                    }
+                }
+            }
+#endif
             Profiler.EndSample();
 
             // Step three:
@@ -189,6 +210,29 @@ namespace GLTFast
                     }
                 }
 #endif
+
+#if WEBP
+                if (root.textures != null)
+                {
+                    for (var i = 0; i < root.textures.Length; i++)
+                    {
+                        var tex = root.textures[i];
+                        if (tex.extensions == null) continue;
+                        Assert.AreEqual(tex.name, fakeRoot.textures[i].name);
+                        var fake = fakeRoot.textures[i].extensions;
+                        if (fake.KHR_texture_basisu == null)
+                        {
+                            tex.extensions.KHR_texture_basisu = null;
+                        }
+
+                        if (fake.EXT_texture_webp == null)
+                        {
+                            tex.extensions.EXT_texture_webp = null;
+                        }
+                    }
+                }
+#endif
+
                 Profiler.EndSample();
             }
 
