@@ -701,8 +701,9 @@ namespace GLTFast
             return defaultMaterial;
 #else
             m_MaterialGenerator.SetLogger(m_Logger);
-            return m_MaterialGenerator.GetDefaultMaterial(m_DefaultMaterialPointsSupport);
+            var defaultMaterial = m_MaterialGenerator.GetDefaultMaterial(m_DefaultMaterialPointsSupport);
             m_MaterialGenerator.SetLogger(null);
+            return defaultMaterial;
 #endif
         }
 
