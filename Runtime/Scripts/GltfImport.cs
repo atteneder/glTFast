@@ -157,7 +157,7 @@ namespace GLTFast
 
         Dictionary<int, Task<IDownload>> m_DownloadTasks;
 #if KTX
-        Dictionary<int,Task<IDownload>> m_KtxDownloadTasks;
+        Dictionary<int,Task<IDownload>> m_ImageDownloadTasks;
 #endif
         Dictionary<int, TextureDownloadBase> m_TextureDownloadTasks;
 
@@ -924,10 +924,10 @@ namespace GLTFast
                 m_TextureDownloadTasks.Clear();
             }
 
-#if KTX
-            if (m_KtxDownloadTasks != null) {
-                success = success && await WaitForKtxDownloads();
-                m_KtxDownloadTasks.Clear();
+#if KTX || WEBP
+            if (m_ImageDownloadTasks != null) {
+                success = success && await WaitForImageDownloads();
+                m_ImageDownloadTasks.Clear();
             }
 #endif // KTX_UNITY
 
@@ -1206,7 +1206,7 @@ namespace GLTFast
                                 // Not Inside buffer
                                 if (!string.IsNullOrEmpty(img.uri))
                                 {
-                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), !m_ImageReadable[imageIndex], imgFormat == ImageFormat.Ktx);
+                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), !m_ImageReadable[imageIndex], imgFormat);
                                 }
                                 else
                                 {
@@ -1355,12 +1355,25 @@ namespace GLTFast
         }
 
 
-#if KTX
-        async Task<bool> WaitForKtxDownloads() {
-            var tasks = new Task<bool>[m_KtxDownloadTasks.Count];
+#if KTX || WEBP
+        async Task<bool> WaitForImageDownloads() {
+            var tasks = new Task<bool>[m_ImageDownloadTasks.Count];
             var i = 0;
-            foreach( var dl in m_KtxDownloadTasks ) {
-                tasks[i] = ProcessKtxDownload(dl.Key, dl.Value);
+            foreach( var dl in m_ImageDownloadTasks ) {
+                switch(m_ImageFormats[dl.Key])
+                {
+                    case ImageFormat.Ktx:
+#if KTX
+                        tasks[i] = ProcessKtxDownload(dl.Key, dl.Value);
+#endif
+                        break;
+
+                    case ImageFormat.Webp:
+#if WEBP
+                        tasks[i] = ProcessWebpDownload(dl.Key, dl.Value);
+#endif
+                        break;
+                }
                 i++;
             }
             await Task.WhenAll(tasks);
@@ -1370,6 +1383,7 @@ namespace GLTFast
             return true;
         }
 
+#if KTX
         async Task<bool> ProcessKtxDownload(int imageIndex, Task<IDownload> downloadTask) {
             var www = await downloadTask;
             if(www.Success) {
@@ -1387,7 +1401,35 @@ namespace GLTFast
             }
             return false;
         }
-#endif // KTX_UNITY
+#endif
+
+#if WEBP
+        async Task<bool> ProcessWebpDownload(int imageIndex, Task<IDownload> downloadTask)
+        {
+            var www = await downloadTask;
+            if (www.Success)
+            {
+                var forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[imageIndex];
+                // TODO: Make sure this only happens on main thread if needed.
+                var result = Texture2DExt.CreateTexture2DFromWebP(www.Data, false, forceSampleLinear, out var webpError, null, !m_ImageReadable[imageIndex]);
+                if (webpError == Error.Success)
+                {
+                    m_Images[imageIndex] = result;
+                    return true;
+                }
+                throw new Exception($"Webp error: {webpError}");
+            }
+            else
+            {
+                m_Logger?.Error(LogCode.TextureDownloadFailed, www.Error, imageIndex.ToString());
+                www.Dispose();
+            }
+            return false;
+        }
+#endif
+
+
+#endif
 
         void LoadBuffer(int index, Uri url)
         {
@@ -1450,40 +1492,57 @@ namespace GLTFast
             return new Tuple<byte[], string>(data, mimeType);
         }
 
-        void LoadImage(int imageIndex, Uri url, bool nonReadable, bool isKtx)
+        void LoadImage(int imageIndex, Uri url, bool nonReadable, ImageFormat imgFormat)
         {
 
             Profiler.BeginSample("LoadTexture");
 
-            if (isKtx)
+            switch(imgFormat)
             {
+                case ImageFormat.Ktx:
 #if KTX
-                var downloadTask = m_DownloadProvider.Request(url);
-                if(m_KtxDownloadTasks==null) {
-                    m_KtxDownloadTasks = new Dictionary<int, Task<IDownload>>();
-                }
-                m_KtxDownloadTasks.Add(imageIndex, downloadTask);
+                    AddImageDownloadTask(imageIndex, url);
+                    break;
 #else
-                m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
-                Profiler.EndSample();
-                return;
+                    m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
+                    Profiler.EndSample();
+                    return;
 #endif // KTX_UNITY
-            }
-            else
-            {
-#if UNITY_IMAGECONVERSION
-                var downloadTask = LoadImageFromBytes(imageIndex)
-                    ? (TextureDownloadBase) new TextureDownload<IDownload>(m_DownloadProvider.Request(url))
-                    : new TextureDownload<ITextureDownload>(m_DownloadProvider.RequestTexture(url,nonReadable));
-                if(m_TextureDownloadTasks==null) {
-                    m_TextureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
-                }
-                m_TextureDownloadTasks.Add(imageIndex, downloadTask);
+                case ImageFormat.Webp:
+#if WEBP
+                    AddImageDownloadTask(imageIndex, url);
+                    break;
 #else
-                m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
+                    m_Logger?.Error(LogCode.PackageMissing, "Unity.WebP", ExtensionName.TextureWebP);
+                    Profiler.EndSample();
+                    return;
 #endif
+
+                default:
+#if UNITY_IMAGECONVERSION
+                    var textureDownload = LoadImageFromBytes(imageIndex)
+                        ? (TextureDownloadBase) new TextureDownload<IDownload>(m_DownloadProvider.Request(url))
+                        : new TextureDownload<ITextureDownload>(m_DownloadProvider.RequestTexture(url,nonReadable));
+                    if(m_TextureDownloadTasks==null) {
+                        m_TextureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
+                    }
+                    m_TextureDownloadTasks.Add(imageIndex, textureDownload);
+#else
+                    m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
+#endif
+                    break;
             }
             Profiler.EndSample();
+        }
+
+        private void AddImageDownloadTask(int imageIndex, Uri url)
+        {
+            var downloadTask = m_DownloadProvider.Request(url);
+            if (m_ImageDownloadTasks == null)
+            {
+                m_ImageDownloadTasks = new Dictionary<int, Task<IDownload>>();
+            }
+            m_ImageDownloadTasks.Add(imageIndex, downloadTask);
         }
 
         /// <summary>
