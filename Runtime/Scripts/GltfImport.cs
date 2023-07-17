@@ -1867,17 +1867,9 @@ namespace GLTFast
 #if WEBP
                             if (m_ImageFormats[jh.imageIndex] == ImageFormat.Webp)
                             {
-                                var t = m_Images[jh.imageIndex];
-                                var linear =
-#if UNITY_2022_1_OR_NEWER
-                                    !t.isDataSRGB;
-#else
-                                    !GraphicsFormatUtility.IsSRGBFormat(t.graphicsFormat);
-#endif
-                                m_Images[jh.imageIndex] = Texture2DExt.CreateTexture2DFromWebP(jh.buffer, t.mipmapCount > 0, linear, out var webpError, null, !m_ImageReadable[jh.imageIndex]);
-                                m_Resources.Remove(t);
+                                var forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[jh.imageIndex];
+                                m_Images[jh.imageIndex] = Texture2DExt.CreateTexture2DFromWebP(jh.buffer, m_Settings.GenerateMipMaps, forceSampleLinear, out var webpError, null, !m_ImageReadable[jh.imageIndex]);
                                 m_Resources.Add(m_Images[jh.imageIndex]);
-                                SafeDestroy(t);
                                 if (webpError != Error.Success)
                                     throw new Exception($"Webp error: {webpError}");
                             }
@@ -2700,7 +2692,24 @@ namespace GLTFast
                         }
                         else if(imgFormat == ImageFormat.Webp)
                         {
-#if !WEBP
+#if WEBP
+                            // Variation of block below: Defer texture creation until later. (Unity.WebP has no API for decoding into an existing texture with automatic resizing anyway.)
+                            Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBufferWebP");
+                            var bufferView = bufferViews[img.bufferView];
+                            var buffer = GetBuffer(bufferView.buffer);
+                            var chunk = m_BinChunks[bufferView.buffer];
+
+                            var icc = new ImageCreateContext();
+                            icc.imageIndex = i;
+                            icc.buffer = new byte[bufferView.byteLength];
+                            icc.gcHandle = GCHandle.Alloc(icc.buffer, GCHandleType.Pinned);
+
+                            var job = CreateMemCopyJob(bufferView, buffer, chunk, icc);
+                            icc.jobHandle = job.Schedule();
+
+                            contexts.Add(icc);
+                            Profiler.EndSample();
+#else
                             //TODO: Can we make this just a warning if there is a valid fallback image present for all textures where this is referenced? Applies to KTX as well.
                             m_Logger?.Error(LogCode.PackageMissing, "Unity.WebP", ExtensionName.TextureWebP);
 #endif
