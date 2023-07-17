@@ -1357,8 +1357,17 @@ namespace GLTFast
             return true;
         }
 
-
 #if IMAGEDOWNLOADS
+        void AddImageDownloadTask(int imageIndex, Uri url)
+        {
+            var downloadTask = m_DownloadProvider.Request(url);
+            if (m_ImageDownloadTasks == null)
+            {
+                m_ImageDownloadTasks = new Dictionary<int, Task<IDownload>>();
+            }
+            m_ImageDownloadTasks.Add(imageIndex, downloadTask);
+        }
+
         async Task<bool> WaitForImageDownloads() {
             var tasks = new Task<bool>[m_ImageDownloadTasks.Count];
             var i = 0;
@@ -1510,7 +1519,7 @@ namespace GLTFast
                     m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
                     Profiler.EndSample();
                     return;
-#endif // KTX_UNITY
+#endif
                 case ImageFormat.Webp:
 #if WEBP
                     AddImageDownloadTask(imageIndex, url);
@@ -1536,16 +1545,6 @@ namespace GLTFast
                     break;
             }
             Profiler.EndSample();
-        }
-
-        private void AddImageDownloadTask(int imageIndex, Uri url)
-        {
-            var downloadTask = m_DownloadProvider.Request(url);
-            if (m_ImageDownloadTasks == null)
-            {
-                m_ImageDownloadTasks = new Dictionary<int, Task<IDownload>>();
-            }
-            m_ImageDownloadTasks.Add(imageIndex, downloadTask);
         }
 
         /// <summary>
