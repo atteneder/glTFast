@@ -22,6 +22,9 @@
 #elif KTX_UNITY
 #warning You have to update KtxUnity to enable support for KTX textures in glTFast
 #endif
+#if KTX || WEBP
+#define IMAGEDOWNLOADS
+#endif
 
 // #define MEASURE_TIMINGS
 
@@ -43,6 +46,9 @@ using KtxUnity;
 #endif
 #if MESHOPT
 using Meshoptimizer;
+#endif
+#if WEBP
+using WebP;
 #endif
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Collections;
@@ -125,6 +131,9 @@ namespace GLTFast
             ExtensionName.MaterialsTransmission,
             ExtensionName.MeshGPUInstancing,
             ExtensionName.LightsPunctual,
+#if WEBP
+            ExtensionName.TextureWebP
+#endif
         };
 
         static IDeferAgent s_DefaultDeferAgent;
@@ -150,8 +159,8 @@ namespace GLTFast
         GlbBinChunk[] m_BinChunks;
 
         Dictionary<int, Task<IDownload>> m_DownloadTasks;
-#if KTX
-        Dictionary<int,Task<IDownload>> m_KtxDownloadTasks;
+#if IMAGEDOWNLOADS
+        Dictionary<int,Task<IDownload>> m_ImageDownloadTasks;
 #endif
         Dictionary<int, TextureDownloadBase> m_TextureDownloadTasks;
 
@@ -918,12 +927,12 @@ namespace GLTFast
                 m_TextureDownloadTasks.Clear();
             }
 
-#if KTX
-            if (m_KtxDownloadTasks != null) {
-                success = success && await WaitForKtxDownloads();
-                m_KtxDownloadTasks.Clear();
+#if IMAGEDOWNLOADS
+            if (m_ImageDownloadTasks != null) {
+                success = success && await WaitForImageDownloads();
+                m_ImageDownloadTasks.Clear();
             }
-#endif // KTX_UNITY
+#endif
 
             return success;
         }
@@ -1025,6 +1034,13 @@ namespace GLTFast
                         if (ext == ExtensionName.TextureBasisUniversal)
                         {
                             m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
+                        }
+                        else
+#endif
+#if !WEBP
+                        if (ext == ExtensionName.TextureWebP)
+                        {
+                            m_Logger?.Error(LogCode.PackageMissing, "Unity.WebP", ext);
                         }
                         else
 #endif
@@ -1193,7 +1209,7 @@ namespace GLTFast
                                 // Not Inside buffer
                                 if (!string.IsNullOrEmpty(img.uri))
                                 {
-                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), !m_ImageReadable[imageIndex], imgFormat == ImageFormat.Ktx);
+                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), !m_ImageReadable[imageIndex], imgFormat);
                                 }
                                 else
                                 {
@@ -1341,13 +1357,35 @@ namespace GLTFast
             return true;
         }
 
+#if IMAGEDOWNLOADS
+        void AddImageDownloadTask(int imageIndex, Uri url)
+        {
+            var downloadTask = m_DownloadProvider.Request(url);
+            if (m_ImageDownloadTasks == null)
+            {
+                m_ImageDownloadTasks = new Dictionary<int, Task<IDownload>>();
+            }
+            m_ImageDownloadTasks.Add(imageIndex, downloadTask);
+        }
 
-#if KTX
-        async Task<bool> WaitForKtxDownloads() {
-            var tasks = new Task<bool>[m_KtxDownloadTasks.Count];
+        async Task<bool> WaitForImageDownloads() {
+            var tasks = new Task<bool>[m_ImageDownloadTasks.Count];
             var i = 0;
-            foreach( var dl in m_KtxDownloadTasks ) {
-                tasks[i] = ProcessKtxDownload(dl.Key, dl.Value);
+            foreach( var dl in m_ImageDownloadTasks ) {
+                switch(m_ImageFormats[dl.Key])
+                {
+                    case ImageFormat.Ktx:
+#if KTX
+                        tasks[i] = ProcessKtxDownload(dl.Key, dl.Value);
+#endif
+                        break;
+
+                    case ImageFormat.Webp:
+#if WEBP
+                        tasks[i] = ProcessWebpDownload(dl.Key, dl.Value);
+#endif
+                        break;
+                }
                 i++;
             }
             await Task.WhenAll(tasks);
@@ -1357,6 +1395,7 @@ namespace GLTFast
             return true;
         }
 
+#if KTX
         async Task<bool> ProcessKtxDownload(int imageIndex, Task<IDownload> downloadTask) {
             var www = await downloadTask;
             if(www.Success) {
@@ -1374,7 +1413,35 @@ namespace GLTFast
             }
             return false;
         }
-#endif // KTX_UNITY
+#endif
+
+#if WEBP
+        async Task<bool> ProcessWebpDownload(int imageIndex, Task<IDownload> downloadTask)
+        {
+            var www = await downloadTask;
+            if (www.Success)
+            {
+                var forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[imageIndex];
+                // TODO: Make sure this only happens on main thread if needed.
+                var result = Texture2DExt.CreateTexture2DFromWebP(www.Data, false, forceSampleLinear, out var webpError, null, !m_ImageReadable[imageIndex]);
+                if (webpError == Error.Success)
+                {
+                    m_Images[imageIndex] = result;
+                    return true;
+                }
+                throw new Exception($"Webp error: {webpError}");
+            }
+            else
+            {
+                m_Logger?.Error(LogCode.TextureDownloadFailed, www.Error, imageIndex.ToString());
+                www.Dispose();
+            }
+            return false;
+        }
+#endif
+
+
+#endif
 
         void LoadBuffer(int index, Uri url)
         {
@@ -1437,38 +1504,45 @@ namespace GLTFast
             return new Tuple<byte[], string>(data, mimeType);
         }
 
-        void LoadImage(int imageIndex, Uri url, bool nonReadable, bool isKtx)
+        void LoadImage(int imageIndex, Uri url, bool nonReadable, ImageFormat imgFormat)
         {
 
             Profiler.BeginSample("LoadTexture");
 
-            if (isKtx)
+            switch(imgFormat)
             {
+                case ImageFormat.Ktx:
 #if KTX
-                var downloadTask = m_DownloadProvider.Request(url);
-                if(m_KtxDownloadTasks==null) {
-                    m_KtxDownloadTasks = new Dictionary<int, Task<IDownload>>();
-                }
-                m_KtxDownloadTasks.Add(imageIndex, downloadTask);
+                    AddImageDownloadTask(imageIndex, url);
+                    break;
 #else
-                m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
-                Profiler.EndSample();
-                return;
-#endif // KTX_UNITY
-            }
-            else
-            {
-#if UNITY_IMAGECONVERSION
-                var downloadTask = LoadImageFromBytes(imageIndex)
-                    ? (TextureDownloadBase) new TextureDownload<IDownload>(m_DownloadProvider.Request(url))
-                    : new TextureDownload<ITextureDownload>(m_DownloadProvider.RequestTexture(url,nonReadable));
-                if(m_TextureDownloadTasks==null) {
-                    m_TextureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
-                }
-                m_TextureDownloadTasks.Add(imageIndex, downloadTask);
-#else
-                m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
+                    m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
+                    Profiler.EndSample();
+                    return;
 #endif
+                case ImageFormat.Webp:
+#if WEBP
+                    AddImageDownloadTask(imageIndex, url);
+                    break;
+#else
+                    m_Logger?.Error(LogCode.PackageMissing, "Unity.WebP", ExtensionName.TextureWebP);
+                    Profiler.EndSample();
+                    return;
+#endif
+
+                default:
+#if UNITY_IMAGECONVERSION
+                    var textureDownload = LoadImageFromBytes(imageIndex)
+                        ? (TextureDownloadBase) new TextureDownload<IDownload>(m_DownloadProvider.Request(url))
+                        : new TextureDownload<ITextureDownload>(m_DownloadProvider.RequestTexture(url,nonReadable));
+                    if(m_TextureDownloadTasks==null) {
+                        m_TextureDownloadTasks = new Dictionary<int, TextureDownloadBase>();
+                    }
+                    m_TextureDownloadTasks.Add(imageIndex, textureDownload);
+#else
+                    m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
+#endif
+                    break;
             }
             Profiler.EndSample();
         }
@@ -1789,8 +1863,24 @@ namespace GLTFast
                         if (jh.jobHandle.IsCompleted)
                         {
                             jh.jobHandle.Complete();
+
+#if WEBP
+                            if (m_ImageFormats[jh.imageIndex] == ImageFormat.Webp)
+                            {
+                                var forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[jh.imageIndex];
+                                m_Images[jh.imageIndex] = Texture2DExt.CreateTexture2DFromWebP(jh.buffer, m_Settings.GenerateMipMaps, forceSampleLinear, out var webpError, null, !m_ImageReadable[jh.imageIndex]);
+                                m_Resources.Add(m_Images[jh.imageIndex]);
+                                if (webpError != Error.Success)
+                                    throw new Exception($"Webp error: {webpError}");
+                            }
+#endif
+#if WEBP && UNITY_IMAGECONVERSION
+                            else
+#endif
 #if UNITY_IMAGECONVERSION
-                            m_Images[jh.imageIndex].LoadImage(jh.buffer,!m_ImageReadable[jh.imageIndex]);
+                            { 
+                                m_Images[jh.imageIndex].LoadImage(jh.buffer, !m_ImageReadable[jh.imageIndex]);
+                            }
 #endif
                             jh.gcHandle.Free();
                             m_ImageCreateContexts.RemoveAt(i);
@@ -2599,6 +2689,30 @@ namespace GLTFast
 #else
                             m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
 #endif // KTX_UNITY
+                        }
+                        else if(imgFormat == ImageFormat.Webp)
+                        {
+#if WEBP
+                            // Variation of block below: Defer texture creation until later. (Unity.WebP has no API for decoding into an existing texture with automatic resizing anyway.)
+                            Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBufferWebP");
+                            var bufferView = bufferViews[img.bufferView];
+                            var buffer = GetBuffer(bufferView.buffer);
+                            var chunk = m_BinChunks[bufferView.buffer];
+
+                            var icc = new ImageCreateContext();
+                            icc.imageIndex = i;
+                            icc.buffer = new byte[bufferView.byteLength];
+                            icc.gcHandle = GCHandle.Alloc(icc.buffer, GCHandleType.Pinned);
+
+                            var job = CreateMemCopyJob(bufferView, buffer, chunk, icc);
+                            icc.jobHandle = job.Schedule();
+
+                            contexts.Add(icc);
+                            Profiler.EndSample();
+#else
+                            //TODO: Can we make this just a warning if there is a valid fallback image present for all textures where this is referenced? Applies to KTX as well.
+                            m_Logger?.Error(LogCode.PackageMissing, "Unity.WebP", ExtensionName.TextureWebP);
+#endif
                         }
                         else
                         {
@@ -3771,6 +3885,8 @@ namespace GLTFast
                 case "ktx":
                 case "ktx2":
                     return ImageFormat.Ktx;
+                case "webp":
+                    return ImageFormat.Webp;
                 default:
                     return ImageFormat.Unknown;
             }

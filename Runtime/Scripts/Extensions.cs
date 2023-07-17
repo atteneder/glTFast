@@ -57,6 +57,10 @@ namespace GLTFast
         /// <see href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_transform/README.md">KHR_texture_transform</see> glTF extension
         /// </summary>
         TextureTransform,
+        /// <summary>
+        /// <see cref="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_texture_webp/README.md">EXT_texture_webp</see> glTF extension
+        /// </summary>
+        TextureWebP
     }
 
     /// <summary>
@@ -104,6 +108,10 @@ namespace GLTFast
         /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> glTF extension
         /// </summary>
         public const string LightsPunctual = "KHR_lights_punctual";
+        /// <summary>
+        /// <see cref="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_texture_webp/README.md">WebP</see> glTF extension
+        /// </summary>
+        public const string TextureWebP = "EXT_texture_webp";
 
         /// <summary>
         /// Returns the official name of the glTF extension
@@ -132,6 +140,8 @@ namespace GLTFast
                     return TextureBasisUniversal;
                 case Extension.TextureTransform:
                     return TextureTransform;
+                case Extension.TextureWebP:
+                    return TextureWebP;
                 default:
                     return null;
             }

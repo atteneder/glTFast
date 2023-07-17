@@ -50,6 +50,12 @@ namespace GLTFast.Schema
                 {
                     return extensions.KHR_texture_basisu.source;
                 }
+#if WEBP
+                if (extensions.EXT_texture_webp != null && extensions.EXT_texture_webp.source >= 0)
+                {
+                    return extensions.EXT_texture_webp.source;
+                }
+#endif
             }
             return source;
         }

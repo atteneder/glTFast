@@ -56,6 +56,7 @@ There are some related package that improve *glTFast* by extending its feature s
 - [Draco 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
 - [KTX/Basis Texture Unity Package][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
 - [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
+- [Unity.WebP][Unity.WebP] (provides support for [EXT_texture_webp][ExtWebP], not affiliated with Unity Technologies)
 
 *glTFast* 5.x requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
 
@@ -140,6 +141,7 @@ limitations under the License.
 [ExtBasisU]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu
 [ExtDraco]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression
 [ExtMeshopt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
+[ExtWebP]: https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_texture_webp
 [gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
 [gltf]: https://www.khronos.org/gltf
 [gltfasset_component]: ./Documentation~/Images/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
@@ -148,5 +150,6 @@ limitations under the License.
 [khronos]: https://www.khronos.org
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [Meshopt]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
+[Unity.WebP]: https://github.com/netpyoung/unity.webp
 [unity]: https://unity.com
 [workflows]: ./Documentation~/index.md#workflows

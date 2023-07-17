@@ -28,6 +28,8 @@ namespace GLTFast.FakeSchema
         /// </summary>
         public Material[] materials;
 
+        public Texture[] textures;
+
 #if GLTFAST_SAFE
         public Accessor[] accessors;
 #endif
