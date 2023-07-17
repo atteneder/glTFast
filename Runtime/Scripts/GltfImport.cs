@@ -1868,11 +1868,11 @@ namespace GLTFast
                                 var t = m_Images[jh.imageIndex];
                                 var linear =
 #if UNITY_2022_1_OR_NEWER
-                                    t.isDataSRGB;
+                                    !t.isDataSRGB;
 #else
-                                    GraphicsFormatUtility.IsSRGBFormat(t.graphicsFormat);
+                                    !GraphicsFormatUtility.IsSRGBFormat(t.graphicsFormat);
 #endif
-                                m_Images[jh.imageIndex] = Texture2DExt.CreateTexture2DFromWebP(jh.buffer, t.mipmapCount > 0, !linear, out var webpError, null, !m_ImageReadable[jh.imageIndex]);
+                                m_Images[jh.imageIndex] = Texture2DExt.CreateTexture2DFromWebP(jh.buffer, t.mipmapCount > 0, linear, out var webpError, null, !m_ImageReadable[jh.imageIndex]);
                                 m_Resources.Remove(t);
                                 m_Resources.Add(m_Images[jh.imageIndex]);
                                 SafeDestroy(t);
