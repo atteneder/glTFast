@@ -111,7 +111,6 @@ namespace GLTFast
                 }
             }
 #endif
-#if WEBP
             if (root.textures != null)
             {
                 for (int i = 0; i < root.textures.Length; i++)
@@ -131,7 +130,6 @@ namespace GLTFast
                     }
                 }
             }
-#endif
             Profiler.EndSample();
 
             // Step three:
@@ -211,7 +209,6 @@ namespace GLTFast
                 }
 #endif
 
-#if WEBP
                 if (root.textures != null)
                 {
                     for (var i = 0; i < root.textures.Length; i++)
@@ -224,14 +221,14 @@ namespace GLTFast
                         {
                             tex.extensions.KHR_texture_basisu = null;
                         }
-
+#if WEBP
                         if (fake.EXT_texture_webp == null)
                         {
                             tex.extensions.EXT_texture_webp = null;
                         }
+#endif
                     }
                 }
-#endif
 
                 Profiler.EndSample();
             }
