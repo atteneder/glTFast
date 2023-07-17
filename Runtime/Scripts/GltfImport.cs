@@ -22,6 +22,9 @@
 #elif KTX_UNITY
 #warning You have to update KtxUnity to enable support for KTX textures in glTFast
 #endif
+#if KTX || WEBP
+#define IMAGEDOWNLOADS
+#endif
 
 // #define MEASURE_TIMINGS
 
@@ -156,7 +159,7 @@ namespace GLTFast
         GlbBinChunk[] m_BinChunks;
 
         Dictionary<int, Task<IDownload>> m_DownloadTasks;
-#if KTX
+#if IMAGEDOWNLOADS
         Dictionary<int,Task<IDownload>> m_ImageDownloadTasks;
 #endif
         Dictionary<int, TextureDownloadBase> m_TextureDownloadTasks;
@@ -924,12 +927,12 @@ namespace GLTFast
                 m_TextureDownloadTasks.Clear();
             }
 
-#if KTX || WEBP
+#if IMAGEDOWNLOADS
             if (m_ImageDownloadTasks != null) {
                 success = success && await WaitForImageDownloads();
                 m_ImageDownloadTasks.Clear();
             }
-#endif // KTX_UNITY
+#endif
 
             return success;
         }
@@ -1355,7 +1358,7 @@ namespace GLTFast
         }
 
 
-#if KTX || WEBP
+#if IMAGEDOWNLOADS
         async Task<bool> WaitForImageDownloads() {
             var tasks = new Task<bool>[m_ImageDownloadTasks.Count];
             var i = 0;
