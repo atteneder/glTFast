@@ -2698,6 +2698,13 @@ namespace GLTFast
                             m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
 #endif // KTX_UNITY
                         }
+                        else if(imgFormat == ImageFormat.Webp)
+                        {
+#if !WEBP
+                            //TODO: Can we make this just a warning if there is a valid fallback image present for all textures where this is referenced? Applies to KTX as well.
+                            m_Logger?.Error(LogCode.PackageMissing, "Unity.WebP", ExtensionName.TextureWebP);
+#endif
+                        }
                         else
                         {
                             Profiler.BeginSample("CreateTexturesFromBuffers.ExtractBuffer");
