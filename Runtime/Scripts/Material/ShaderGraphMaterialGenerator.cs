@@ -423,7 +423,7 @@ namespace GLTFast.Materials {
                 material.EnableKeyword(k_EmissiveKeyword);
             }
 
-            if (gltfMaterial.extensions?.KHR_materials_clearcoat.clearcoatFactor > 0)
+            if (gltfMaterial.extensions?.KHR_materials_clearcoat?.clearcoatFactor > 0)
             {
                 var clearcoat = gltfMaterial.extensions.KHR_materials_clearcoat;
                 material.SetFloat(ClearcoatProperty, clearcoat.clearcoatFactor);

@@ -116,7 +116,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | KHR_mesh_quantization | ✅ | 
 | KHR_texture_basisu | ✅ | 
 | KHR_lights_punctual | ✅ | ✅
-| KHR_materials_clearcoat | ✅ | 
+| KHR_materials_clearcoat | ✅ | ✅
 | KHR_materials_sheen | [ℹ️][Sheen] | 
 | KHR_materials_transmission | [ℹ️][Transmission] | 
 | KHR_materials_variants | [ℹ️][Variants] | 
@@ -213,7 +213,7 @@ Other shaders might (partially) work if they have similar properties (with ident
 | Vertex colors                 | `?` | `?` | `?` |
 | Multiple UV sets              | `?` | `?` | `?` |
 | Texture Transform             | ✅ | ✅ | ✅ |
-| Clear coat                    |  |  | `n/a` |
+| Clear coat                    | `n/a` | ✅ | `n/a` |
 | Sheen                         | `?` | `?` | `n/a` |
 | Transmission                  |  |  | `n/a` |
 | Variants                      |  |  |  |

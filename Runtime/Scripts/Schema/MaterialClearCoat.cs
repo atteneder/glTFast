@@ -41,8 +41,32 @@ namespace GLTFast.Schema
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
+
+            if (clearcoatFactor > 0)
+            {
+                writer.AddProperty("clearcoatFactor", clearcoatFactor);
+            }
+            if (clearcoatTexture != null)
+            {
+                writer.AddProperty("clearcoatTexture");
+                clearcoatTexture.GltfSerialize(writer);
+            }
+            if (clearcoatRoughnessFactor > 0)
+            {
+                writer.AddProperty("clearcoatRoughnessFactor", clearcoatRoughnessFactor);
+            }
+            if (clearcoatRoughnessTexture != null)
+            {
+                writer.AddProperty("clearcoatRoughnessTexture");
+                clearcoatRoughnessTexture.GltfSerialize(writer);
+            }
+            if (clearcoatNormalTexture != null)
+            {
+                writer.AddProperty("clearcoatNormalTexture");
+                clearcoatNormalTexture.GltfSerialize(writer);
+            }
+
             writer.Close();
-            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
 
     }
