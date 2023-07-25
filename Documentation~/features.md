@@ -116,7 +116,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | KHR_mesh_quantization | ✅ | 
 | KHR_texture_basisu | ✅ | 
 | KHR_lights_punctual | ✅ | ✅
-| KHR_materials_clearcoat | ✅ | ✅
+| KHR_materials_clearcoat | [ℹ️][ClearCoat] | 
 | KHR_materials_sheen | [ℹ️][Sheen] | 
 | KHR_materials_transmission | [ℹ️][Transmission] | 
 | KHR_materials_variants | [ℹ️][Variants] | 
@@ -168,9 +168,9 @@ Not investigated yet:
 | Vertex colors                 | ✅  | ✅   | ✅       |
 | Multiple UV sets              | ✅<sup>2</sup>  | ✅<sup>2</sup>   | ✅<sup>2</sup>       |
 | Texture Transform             | ✅  | ✅   | ✅       |
-| Clear coat                    | ☑️<sup>3</sup>  | ✅  | [⛔️][ClearCoat] |
+| Clear coat                    | [ℹ️][ClearCoat] | [ℹ️][ClearCoat] | [⛔️][ClearCoat] |
 | Sheen                         | [ℹ️][Sheen] | [ℹ️][Sheen] | [⛔️][Sheen] |
-| Transmission                  | [☑️][Transmission]<sup>4</sup> | [☑️][Transmission]<sup>5</sup> | [☑️][Transmission]<sup>5</sup> |
+| Transmission                  | [☑️][Transmission]<sup>3</sup> | [☑️][Transmission]<sup>4</sup> | [☑️][Transmission]<sup>4</sup> |
 | Variants                      | [ℹ️][Variants] | [ℹ️][Variants] | [ℹ️][Variants] |
 | IOR                           | [ℹ️][IOR]      | [ℹ️][IOR]      | [⛔️][IOR]      |
 | Specular                      | [ℹ️][Specular] | [ℹ️][Specular] | [⛔️][Specular] |
@@ -181,11 +181,9 @@ Not investigated yet:
 
 <sup>2</sup>: Two sets of texture coordinates (as required by the glTF 2.0 specification) are supported, but not three or more ([issue][UVSets])
 
-<sup>3</sup>: Only supports Universal Render Pipeline versions >= 12.0; Only coat mask and smoothness are supported, other coat related properties, such as coat normal, are not supported
+<sup>3</sup>: There are two approximation implementations for transmission in Universal render pipeline. If the Opaque Texture is enabled (in the Universal RP Asset settings), it is sampled to provide proper transmissive filtering. The downside of this approach is transparent objects are not rendered on top of each other. If the opaque texture is not available, the common approximation (see <sup>4</sup> below) is used.
 
-<sup>4</sup>: There are two approximation implementations for transmission in Universal render pipeline. If the Opaque Texture is enabled (in the Universal RP Asset settings), it is sampled to provide proper transmissive filtering. The downside of this approach is transparent objects are not rendered on top of each other. If the opaque texture is not available, the common approximation (see <sup>4</sup> below) is used.
-
-<sup>5</sup>: Transmission in Built-In and HD render pipeline does not support transmission textures and is only 100% correct in certain cases like clear glass (100% transmission, white base color). Otherwise it's an approximation.
+<sup>4</sup>: Transmission in Built-In and HD render pipeline does not support transmission textures and is only 100% correct in certain cases like clear glass (100% transmission, white base color). Otherwise it's an approximation.
 
 ### Material Export
 
@@ -213,7 +211,7 @@ Other shaders might (partially) work if they have similar properties (with ident
 | Vertex colors                 | `?` | `?` | `?` |
 | Multiple UV sets              | `?` | `?` | `?` |
 | Texture Transform             | ✅ | ✅ | ✅ |
-| Clear coat                    | `n/a` | ✅ | `n/a` |
+| Clear coat                    |  |  | `n/a` |
 | Sheen                         | `?` | `?` | `n/a` |
 | Transmission                  |  |  | `n/a` |
 | Variants                      |  |  |  |
