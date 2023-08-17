@@ -1,4 +1,4 @@
-# glTFast for Unity
+# Unity Cloud glTFast
 
 <p align="center">
 <img src="./Documentation~/Images/unity-gltf-logos.png" alt="Unity and glTF logos side by side" />
@@ -9,7 +9,7 @@
 [![GitHub license](https://img.shields.io/github/license/atteneder/glTFast)](https://github.com/atteneder/glTFast/blob/main/LICENSE.md)
 ![Code coverage result](./Documentation~/Images/badge_linecoverage.svg "Code coverage result badge")
 
-*glTFast* enables use of [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
+*Unity Cloud glTFast* enables use of [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
 
 It focuses on speed, memory efficiency and a small build footprint while also providing:
 
@@ -22,7 +22,7 @@ Check out the [demo project](https://github.com/atteneder/glTFastDemo) and try t
 
 ## Features
 
-*glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
+*Unity Cloud glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
 
 See the [comprehensive list of supported features and extensions](./Documentation~/features.md).
 
@@ -45,19 +45,19 @@ Read more about the workflows in the [documentation][workflows].
 
 The easiest way to install is to download and open the [Installer Package](https://package-installer.glitch.me/v1/installer/OpenUPM/com.atteneder.gltfast?registry=https%3A%2F%2Fpackage.openupm.com&scope=com.atteneder)
 
-It runs a script that installs *glTFast* via a [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html).
+It runs a script that installs *Unity Cloud glTFast* via a [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html).
 
-Afterwards *glTFast* and further, optional packages are listed in the *Package Manager* (under *My Registries*) and can be installed and updated from there.
+Afterwards *Unity Cloud glTFast* and further, optional packages are listed in the *Package Manager* (under *My Registries*) and can be installed and updated from there.
 
 ### Optional Packages
 
-There are some related package that improve *glTFast* by extending its feature set.
+There are some related package that improve *Unity Cloud glTFast* by extending its feature set.
 
 - [Draco 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
 - [KTX/Basis Texture Unity Package][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
 - [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
 
-*glTFast* 5.x requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
+*Unity Cloud glTFast* 5.x requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
 
 ## Usage
 
@@ -84,7 +84,7 @@ Move or copy *glTF* files into your project's *Assets* folder, similar to other 
 
 ![Editor Import][import-gif]
 
-*glTFast* will import them to native Unity prefabs and add them to the asset database.
+*Unity Cloud glTFast* will import them to native Unity prefabs and add them to the asset database.
 
 See [Editor Import](./Documentation~/ImportEditor.md) in the documentation for details.
 
@@ -99,23 +99,17 @@ created [via script](./Documentation~/ExportEditor.md#export-via-script).
 
 ❗ IMPORTANT ❗
 
-*glTFast* uses custom shader graphs that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
+*Unity Cloud glTFast* uses custom shader graphs that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
 
 Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/ProjectSetup.md#materials-and-shader-variants) for details.
 
 ## Get involved
 
-Contributions in the form of ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *glTFast*.
-
-## Supporters
-
-[Unity Technologies][unity]
-
-Thanks to [Embibe][embibe] for sponsoring the development of skin support! ❤️
+Contributions in the form of ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *Unity Cloud glTFast*.
 
 ## License
 
-Copyright 2023 Unity Technologies and the glTFast authors
+Copyright 2023 Unity Technologies and the Unity Cloud glTFast authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use files in this repository except in compliance with the License.
