@@ -1,7 +1,16 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if NEWTONSOFT_JSON && GLTFAST_USE_NEWTONSOFT_JSON
+#define JSON_NEWTONSOFT
+#else
+#define JSON_UTILITY
+#endif
+
 using System;
+#if JSON_NEWTONSOFT
+using Newtonsoft.Json;
+#endif
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -71,6 +80,9 @@ namespace GLTFast.Schema
         /// RGB value for light's color in linear space
         /// </summary>
         [SerializeField]
+#if JSON_NEWTONSOFT
+        [JsonProperty]
+#endif
         float[] color = { 1, 1, 1 };
 
         /// <summary>
