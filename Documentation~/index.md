@@ -1,6 +1,6 @@
-# glTFast Documentation
+# Unity glTFast Documentation
 
-*glTFast* enables use of [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
+*Unity glTFast* enables use of [glTF&trade; (GL Transmission Format)][gltf] asset files in [Unity][unity].
 
 It focuses on speed, memory efficiency and a small build footprint while also providing:
 
@@ -11,7 +11,7 @@ It focuses on speed, memory efficiency and a small build footprint while also pr
 
 ## Features
 
-*glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
+*Unity glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
 
 See the [comprehensive list of supported features and extensions](./features.md).
 
@@ -35,7 +35,7 @@ Load and instantiate glTF files at runtime in your game/application via Script o
 #### Benefits of Runtime Import
 
 - Efficiently load dynamic and/or third-party assets
-    - Make use of state-of-the art mesh and texture compression methods, like KTX/Basis Universal, Draco and meshoptimizer.
+    - Make use of state-of-the art mesh and texture compression methods, like KTX&trade;/Basis Universal, Draco and meshoptimizer.
 - No need to re-build your application or Asset Bundles upon Unity version upgrades
 
 *glTF* was specifically designed for vendor-independent transmission and runtime loading and naturally plays its strengths there.
@@ -83,7 +83,19 @@ Allows your Unity-powered application/game to export scenes/GameObjects to glTF 
 
 > Note: This feature is coming soon (see [issue](https://github.com/atteneder/glTFast/issues/259))
 
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][khronos].
+
+*KTX&trade;* and the KTX logo are trademarks of the [The Khronos Group Inc][khronos].
+
+*Draco* is a trademark of [*Google LLC*][GoogleLLC].
+
 [gltf]: https://www.khronos.org/gltf
 [gltf-projects]: https://github.khronos.org/glTF-Project-Explorer
-[unity]: https://unity.com
 [gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
+[GoogleLLC]: https://about.google/
+[khronos]: https://www.khronos.org
+[unity]: https://unity.com

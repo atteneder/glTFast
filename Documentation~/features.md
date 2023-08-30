@@ -2,7 +2,7 @@
 
 ## Platforms
 
-All of Unity's platforms are supported. glTFast is tested or was reported to run on:
+All of Unity's platforms are supported. *Unity glTFast* is tested or was reported to run on:
 
 - WebGL
 - iOS
@@ -28,7 +28,7 @@ All of Unity's platforms are supported. glTFast is tested or was reported to run
 
 <sup>1</sup>: Experimental. Core features missing
 
-## Core glTF features
+## Core glTF&trade; features
 
 The glTF 2.0 specification is fully supported, with only a few minor remarks.
 
@@ -52,7 +52,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | **Images**
 | PNG | ✅ | ✅
 | Jpeg | ✅ | ✅
-| KTX with Basis Universal compression (via [KtxUnity](https://github.com/atteneder/KtxUnity)) | ✅ | 
+| KTX&trade; with Basis Universal compression (via [KtxUnity]) | ✅ | 
 | | |
 | **Texture sampler**
 | Filtering  | ✅ with [limitations](./KnownIssues.md) | ✅ with [limitations](./KnownIssues.md) |
@@ -80,7 +80,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Texture coordinates / UV sets | ✅ | `?`
 | Three or more texture coordinates / UV sets | <sup>2</sup>☑️ | `?`
 | Vertex colors | ✅ | `?`
-| Draco mesh compression (via [DracoUnity](https://github.com/atteneder/DracoUnity)) | ✅ | ✅
+| Draco mesh compression (via [DracoUnity]) | ✅ | ✅
 | Implicit (no) indices | ✅ | 
 | Per primitive material | ✅ | ✅
 | Joints (up to 4 per vertex) | ✅ | 
@@ -88,7 +88,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | | |
 | **Morph Targets / Blend Shapes**
 | Sparse accessors | <sup>3</sup> ✅ | 
-| [Skins][Skins] (sponsored by [Embibe](https://www.embibe.com)) | ✅ | 
+| [Skins][Skins] | ✅ | 
 | | |
 | **Animation** 
 | via legacy Animation System | ✅ | 
@@ -97,13 +97,13 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 
 <sup>1</sup>: Untested due to lack of demo files.
 
-<sup>2</sup>: Up to eight UV sets can imported, but the glTFast shaders only support two (see [issue][UVsets]).
+<sup>2</sup>: Up to eight UV sets can imported, but *Unity glTFast* shaders only support two (see [issue][UVsets]).
 
 <sup>3</sup>: Not on all accessor types; morph targets and vertex positions only
 
 ## Extensions
 
-### Official Khronos extensions
+### Official Khronos&reg; extensions
 
 | | Import | Export
 |------------| ------ | ------
@@ -229,9 +229,9 @@ Other shaders might (partially) work if they have similar properties (with ident
 
 > ⚠️ Note: DOTS is highly experimental and many features don't work yet. Do not use it for production ready projects!
 
-Unity's [Data-Oriented Technology Stack (DOTS)][DOTS] allows users to create high performance gameplay. glTFast has experimental import support for it.
+Unity's [Data-Oriented Technology Stack (DOTS)][DOTS] allows users to create high performance gameplay. *Unity glTFast* has experimental import support for it.
 
-Instead of traditional GameObjects, glTFast will instantiate [Entities][Entities] and render them via [Entities Graphics][EntitiesGraphics].
+Instead of traditional GameObjects, *Unity glTFast* will instantiate [Entities][Entities] and render them via [Entities Graphics][EntitiesGraphics].
 
 Possibly incomplete list of things that are known to not work with Entities yet:
 
@@ -249,7 +249,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 
 ## Unity Version Support
 
-*glTFast* requires Unity 2019.4 or newer.
+*Unity glTFast* requires Unity 2020.1 or newer.
 
 ## Legend
 
@@ -260,15 +260,29 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 - `?`: Unknown / Untested
 - `n/a`: Not available
 
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][Unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][Khronos].
+
+*KTX&trade;* and the KTX logo are trademarks of the [The Khronos Group Inc][Khronos].
+
+*Draco* is a trademark of [*Google LLC*][GoogleLLC].
+
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
 [AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166
 [ClearCoat]: https://github.com/atteneder/glTFast/issues/68
+[DracoUnity]: https://github.com/atteneder/DracoUnity
 [DOTS]: https://unity.com/dots
 [Entities]: https://docs.unity3d.com/Packages/com.unity.entities@latest
 [EntitiesGraphics]: https://docs.unity3d.com/Packages/com.unity.entities.graphics@latest
+[GoogleLLC]: https://about.google/
 [HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [IBL]: https://github.com/atteneder/glTFast/issues/108
 [IOR]: https://github.com/atteneder/glTFast/issues/207
+[Khronos]: https://www.khronos.org
+[KtxUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest
 [MeshOpt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
 [MeshOptPkg]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [newIssue]: https://github.com/atteneder/glTFast/issues/new
@@ -277,6 +291,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [Skins]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins
 [Specular]: https://github.com/atteneder/glTFast/issues/208
 [Transmission]: https://github.com/atteneder/glTFast/issues/111
+[Unity]: https://unity.com
 [URP]: https://unity.com/srp/universal-render-pipeline
 [UVsets]: https://github.com/atteneder/glTFast/issues/206
 [Variants]: https://github.com/atteneder/glTFast/issues/112

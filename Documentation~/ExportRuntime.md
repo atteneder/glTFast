@@ -1,6 +1,6 @@
 # Runtime Export
 
-You can export individual GameObjects or entire scenes to glTF files at runtime.
+You can export individual GameObjects or entire scenes to glTF&trade; files at runtime.
 
 ## Include Required Shaders
 
@@ -123,7 +123,7 @@ public class TestExport : MonoBehaviour {
 
 ### Draco Compression
 
-glTFast supports applying [Google Draco 3D Data compression][Draco] to meshes. This requires the [DracoUnity][DracoUnity] package to be installed.
+*Unity glTFast* supports applying [Google Draco 3D Data compression][Draco] to meshes. This requires the [DracoUnity][DracoUnity] package to be installed.
 
 ```csharp
 // ExportSettings provides generic export settings
@@ -137,7 +137,17 @@ var exportSettings = new ExportSettings {
     }
 };
 ```
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][khronos].
+
+*Draco* is a trademark of [*Google LLC*][GoogleLLC].
 
 [asmdef]: https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html
 [Draco]: https://google.github.io/draco/
 [DracoUnity]: https://github.com/atteneder/DracoUnity
+[GoogleLLC]: https://about.google/
+[khronos]: https://www.khronos.org
+[unity]: https://unity.com

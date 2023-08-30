@@ -1,4 +1,4 @@
-# Physical Light Units in glTF
+# Physical Light Units in glTF&trade;
 
 Material emission and light intensities in glTF have physical units.
 
@@ -18,7 +18,7 @@ An additional problem is, hardly any glTF viewer that lacks exposure control adj
 
 ### Adjusting Values
 
-*glTFast* lets you multiply light intensities by an arbitrary factor (which defaults to 1.0) to make them fit your scene's lighting.
+*Unity glTFast* lets you multiply light intensities by an arbitrary factor (which defaults to 1.0) to make them fit your scene's lighting.
 
 #### Physically Plausible Values in exposure-unaware Render Pipelines
 
@@ -74,9 +74,17 @@ Source: [Wikipedia][lux-illuminance]
 
 Source: [Wikipedia][lum-flux]
 
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][khronos].
+
 [cd]: https://en.wikipedia.org/wiki/Candela
 [hdrp-plu]: https://docs.unity3d.com/Packages/com.unity.render-pipelines.high-definition@13.1/manual/Physical-Light-Units.html
+[khronos]: https://www.khronos.org
 [lx]: https://en.wikipedia.org/wiki/Lux
 [lux-illuminance]: https://en.wikipedia.org/wiki/Lux#Illuminance
 [lum-flux]: https://en.wikipedia.org/wiki/Luminous_flux#Examples
 [nit]: https://en.wikipedia.org/wiki/Candela_per_square_metre
+[unity]: https://unity.com
