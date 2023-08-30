@@ -1,18 +1,5 @@
 # Features
 
-## Platforms
-
-All of Unity's platforms are supported. *Unity glTFast* is tested or was reported to run on:
-
-- WebGL
-- iOS
-- Android
-- Windows
-- macOS
-- Linux
-- Universal Windows Platform
-- Lumin (Magic Leap)
-
 ## Workflows
 
 |          | Runtime | Editor (design-time)
