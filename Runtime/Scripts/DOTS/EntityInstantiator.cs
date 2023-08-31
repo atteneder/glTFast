@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if UNITY_ENTITIES_GRAPHICS || UNITY_DOTS_HYBRID 
+#if UNITY_ENTITIES_GRAPHICS || UNITY_DOTS_HYBRID
 
 using System;
 using System.Collections.Generic;
@@ -67,7 +67,7 @@ namespace GLTFast {
                 typeof(Translation),
                 typeof(Rotation),
                 typeof(LocalToParent),
-#else 
+#else
                 typeof(LocalTransform),
 #endif
                 typeof(Parent),
@@ -79,7 +79,7 @@ namespace GLTFast {
                 typeof(Translation),
                 typeof(Rotation),
                 typeof(LocalToWorld)
-#else 
+#else
                 typeof(LocalTransform)
 #endif
             );
@@ -240,18 +240,18 @@ namespace GLTFast {
             {
                 materials[index] = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
             }
-            
+
             var filterSettings = RenderFilterSettings.Default;
             filterSettings.ShadowCastingMode = ShadowCastingMode.Off;
             filterSettings.ReceiveShadows = false;
             filterSettings.Layer = m_Settings.Layer;
-            
+
             var renderMeshDescription = new RenderMeshDescription
             {
                 FilterSettings = filterSettings,
                 LightProbeUsage = LightProbeUsage.Off,
             };
-            
+
             var renderMeshArray = new RenderMeshArray(materials, new[] { mesh });
 
             for (var index = 0; index < materialIndices.Length; index++)
@@ -267,7 +267,7 @@ namespace GLTFast {
                         (sbyte)index
                         )
                     );
-                
+
                 m_EntityManager.SetComponentData(node, new RenderBounds {Value = mesh.bounds.ToAABB()} );
             }
 
@@ -312,19 +312,19 @@ namespace GLTFast {
                 }
             }
 #else
-            
+
             var materials = new Material[materialIndices.Length];
             for (var index = 0; index < materialIndices.Length; index++)
             {
                 materials[index] = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
                 materials[index].enableInstancing = true;
             }
-            
+
             var filterSettings = RenderFilterSettings.Default;
             filterSettings.ShadowCastingMode = ShadowCastingMode.Off;
             filterSettings.ReceiveShadows = false;
             filterSettings.Layer = m_Settings.Layer;
-            
+
             var renderMeshDescription = new RenderMeshDescription
             {
                 FilterSettings = filterSettings,
@@ -360,10 +360,10 @@ namespace GLTFast {
                             transform.Scale = scale.x;
                         }
                     }
-                    
+
                     m_EntityManager.SetComponentData(instance,transform);
                     m_EntityManager.SetComponentData(instance, new Parent { Value = m_Nodes[nodeIndex] });
-                    
+
                     RenderMeshUtility.AddComponents(
                         instance,
                         m_EntityManager,
@@ -372,7 +372,7 @@ namespace GLTFast {
                         MaterialMeshInfo.FromRenderMeshArrayIndices(index, 0, (sbyte) index)
                     );
                 }
-                
+
             }
 #endif
             Profiler.EndSample();

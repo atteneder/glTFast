@@ -40,7 +40,7 @@ namespace GLTFast
         /// glTF package name
         /// </summary>
         public const string GltfPackageName = "com.unity.cloud.gltfast";
-        
+
         /// <summary>
         /// First four bytes of a glTF-Binary file are made up of this signature
         /// Represents glTF in ASCII

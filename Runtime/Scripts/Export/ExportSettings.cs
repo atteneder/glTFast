@@ -55,7 +55,7 @@ namespace GLTFast.Export
         /// </summary>
         Overwrite
     }
-    
+
     /// <summary>
     /// Compression
     /// </summary>
@@ -97,12 +97,12 @@ namespace GLTFast.Export
         /// based on type.
         /// </summary>
         public ComponentType ComponentMask { get; set; } = ComponentType.All;
-        
+
         /// <summary>
         /// Type of compression to apply
         /// </summary>
-        public Compression Compression  { get; set; } = Compression.Uncompressed;
-        
+        public Compression Compression { get; set; } = Compression.Uncompressed;
+
         /// <summary>
         /// Draco compression export settings
         /// </summary>

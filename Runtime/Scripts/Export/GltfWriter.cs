@@ -734,7 +734,7 @@ namespace GLTFast.Export
         async Task<bool> Bake(string bufferPath, string directory)
         {
             var success = true;
-            
+
             if (m_Meshes != null && m_Meshes.Count > 0)
             {
 #if GLTFAST_MESH_DATA
@@ -929,7 +929,7 @@ namespace GLTFast.Export
                 {
                     task = BakeMesh(meshId, meshDataArray[meshId]);
                 }
-                
+
                 if (m_Settings.Deterministic)
                 {
                     await task;
@@ -965,8 +965,8 @@ namespace GLTFast.Export
             var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
 
             foreach (var attribute in vertexAttributes) {
-                if (attribute.attribute == VertexAttribute.BlendWeight 
-                    || attribute.attribute == VertexAttribute.BlendIndices) 
+                if (attribute.attribute == VertexAttribute.BlendWeight
+                    || attribute.attribute == VertexAttribute.BlendIndices)
                 {
                     Debug.LogWarning($"Vertex attribute {attribute.attribute} is not supported yet...skipping");
                     continue;
@@ -1270,7 +1270,7 @@ namespace GLTFast.Export
         }
 
 #if DRACO_UNITY
-        async Task BakeMeshDraco(int meshId, UnityEngine.Mesh.MeshData meshData) 
+        async Task BakeMeshDraco(int meshId, UnityEngine.Mesh.MeshData meshData)
         {
             var mesh = m_Meshes[meshId];
             var unityMesh = m_UnityMeshes[meshId];
@@ -1287,7 +1287,7 @@ namespace GLTFast.Export
             );
 
             if (results == null) return;
-            
+
             mesh.primitives = new MeshPrimitive[results.Length];
             for (var submesh = 0; submesh < results.Length; submesh++) {
                 var encodeResult = results[submesh];
@@ -1343,7 +1343,7 @@ namespace GLTFast.Export
                 indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
 
                 var indicesId = AddAccessor(indexAccessor);
-                
+
                 mesh.primitives[submesh] = new MeshPrimitive {
                     extensions = new MeshPrimitiveExtensions {
                         KHR_draco_mesh_compression = new MeshPrimitiveDracoExtension {
