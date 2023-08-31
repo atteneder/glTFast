@@ -34,12 +34,12 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | **Basics**
 | Scenes | ✅ | ✅
 | Node hierarchies | ✅ | ✅
-| Cameras | ✅ | ✅ 
+| Cameras | ✅ | ✅
 | | |
 | **Images**
 | PNG | ✅ | ✅
 | Jpeg | ✅ | ✅
-| KTX&trade; with Basis Universal compression (via [KtxUnity]) | ✅ | 
+| KTX&trade; with Basis Universal compression (via [KtxUnity]) | ✅ |
 | | |
 | **Texture sampler**
 | Filtering  | ✅ with [limitations](./KnownIssues.md) | ✅ with [limitations](./KnownIssues.md) |
@@ -56,8 +56,8 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | LINES | ✅ | ✅
 | LINE_STRIP | ✅ | ✅
 | <sup>1</sup>LINE_LOOP | ✅ | ✅
-| TRIANGLE_STRIP |  | 
-| TRIANGLE_FAN |  | 
+| TRIANGLE_STRIP |  |
+| TRIANGLE_FAN |  |
 | Quads | `n/a` | ✅ via triangulation
 | | |
 | **Meshes**
@@ -67,20 +67,20 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Texture coordinates / UV sets | ✅ | `?`
 | Three or more texture coordinates / UV sets | <sup>2</sup>☑️ | `?`
 | Vertex colors | ✅ | `?`
-| Draco mesh compression (via [DracoUnity]) | ✅ | ✅
-| Implicit (no) indices | ✅ | 
+| Draco&trade; mesh compression (via [DracoUnity]) | ✅ | ✅
+| Implicit (no) indices | ✅ |
 | Per primitive material | ✅ | ✅
-| Joints (up to 4 per vertex) | ✅ | 
-| Weights (up to 4 per vertex) | ✅ | 
+| Joints (up to 4 per vertex) | ✅ |
+| Weights (up to 4 per vertex) | ✅ |
 | | |
 | **Morph Targets / Blend Shapes**
-| Sparse accessors | <sup>3</sup> ✅ | 
-| [Skins][Skins] | ✅ | 
+| Sparse accessors | <sup>3</sup> ✅ |
+| [Skins][Skins] | ✅ |
 | | |
-| **Animation** 
-| via legacy Animation System | ✅ | 
-| via Playable API ([issue][AnimationPlayables]) |  | 
-| via Mecanim ([issue][AnimationMecanim]) |  | 
+| **Animation**
+| via legacy Animation System | ✅ |
+| via Playable API ([issue][AnimationPlayables]) |  |
+| via Mecanim ([issue][AnimationMecanim]) |  |
 
 <sup>1</sup>: Untested due to lack of demo files.
 
@@ -97,25 +97,25 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | | |
 | **Khronos**
 | KHR_draco_mesh_compression | ✅ | ✅
-| KHR_materials_pbrSpecularGlossiness | ✅ | 
+| KHR_materials_pbrSpecularGlossiness | ✅ |
 | KHR_materials_unlit | ✅ | ✅
 | KHR_texture_transform | ✅ | ✅
-| KHR_mesh_quantization | ✅ | 
-| KHR_texture_basisu | ✅ | 
+| KHR_mesh_quantization | ✅ |
+| KHR_texture_basisu | ✅ |
 | KHR_lights_punctual | ✅ | ✅
-| KHR_materials_clearcoat | [ℹ️][ClearCoat] | 
-| KHR_materials_sheen | [ℹ️][Sheen] | 
-| KHR_materials_transmission | [ℹ️][Transmission] | 
-| KHR_materials_variants | [ℹ️][Variants] | 
-| KHR_materials_ior | [ℹ️][IOR] | 
-| KHR_materials_specular | [ℹ️][Specular] | 
-| KHR_materials_volume | [ℹ️][Volume] | 
+| KHR_materials_clearcoat | [ℹ️][ClearCoat] |
+| KHR_materials_sheen | [ℹ️][Sheen] |
+| KHR_materials_transmission | [ℹ️][Transmission] |
+| KHR_materials_variants | [ℹ️][Variants] |
+| KHR_materials_ior | [ℹ️][IOR] |
+| KHR_materials_specular | [ℹ️][Specular] |
+| KHR_materials_volume | [ℹ️][Volume] |
 | KHR_xmp_json_ld |️ |
 | | |
 | **Vendor**
-| <sup>1</sup>EXT_mesh_gpu_instancing | ✅ | 
-| EXT_meshopt_compression | ✅ | 
-| EXT_lights_image_based | [ℹ️][IBL] | 
+| <sup>1</sup>EXT_mesh_gpu_instancing | ✅ |
+| EXT_meshopt_compression | ✅ |
+| EXT_lights_image_based | [ℹ️][IBL] |
 
 <sup>1</sup>: Without support for custom vertex attributes (e.g. `_ID`)
 
@@ -177,11 +177,11 @@ Not investigated yet:
 Material export is currently only tested on the following shaders:
 
 - Universal and High Definition render pipeline
-  - `Lit` 
-  - `Unlit` 
+  - `Lit`
+  - `Unlit`
 - Built-In render pipeline
-  - `Standard` 
-  - `Unlit` 
+  - `Standard`
+  - `Unlit`
 
 Other shaders might (partially) work if they have similar properties (with identical names).
 
@@ -255,7 +255,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 
 *KTX&trade;* and the KTX logo are trademarks of the [The Khronos Group Inc][Khronos].
 
-*Draco* is a trademark of [*Google LLC*][GoogleLLC].
+*Draco&trade;* is a trademark of [*Google LLC*][GoogleLLC].
 
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
 [AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166
@@ -272,8 +272,6 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [KtxUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest
 [MeshOpt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
 [MeshOptPkg]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
-[newIssue]: https://github.com/atteneder/glTFast/issues/new
-[SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
 [Sheen]: https://github.com/atteneder/glTFast/issues/110
 [Skins]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins
 [Specular]: https://github.com/atteneder/glTFast/issues/208

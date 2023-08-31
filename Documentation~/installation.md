@@ -30,7 +30,7 @@ The Editor installs the latest available version of the package and any dependen
 
 To use the package, you require the following:
 
-* A Unity version of 2020.1 or later. In the Unity Hub, go to **Installs** > **Official releases** to find the latest Long Term Support version.
+- A Unity version of 2020.1 or later. In the Unity Hub, go to **Installs** > **Official releases** to find the latest Long Term Support version.
 
 ## Trademarks
 
@@ -40,4 +40,3 @@ To use the package, you require the following:
 
 [khronos]: https://www.khronos.org
 [unity]: https://unity.com
-

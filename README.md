@@ -72,7 +72,7 @@ var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-See [Runtime Loading via Script](./Documentation~/ImportRuntime.md#runtime-loading-via-script) in the documentation for more details and instructions how to [customize the loading behaviour](./Documentation~/ImportRuntime.md#customize-loading-behavior) via script.
+See [Runtime Loading via Script](./Documentation~/ImportRuntime.md#runtime-loading-via-script) in the documentation for more details and instructions how to [customize the loading behavior](./Documentation~/ImportRuntime.md#customize-loading-behavior) via script.
 
 ### Editor Import
 
@@ -99,7 +99,7 @@ created [via script](./Documentation~/ExportEditor.md#export-via-script).
 
 Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/ProjectSetup.md#materials-and-shader-variants) for details.
 
-## Get involved
+## Contribution
 
 Contributions in the form of ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *Unity glTFast*.
 
@@ -127,7 +127,7 @@ limitations under the License.
 
 *KTX&trade;* and the KTX logo are trademarks of the [The Khronos Group Inc][khronos].
 
-*Draco* is a trademark of [*Google LLC*][GoogleLLC].
+*Draco&trade;* is a trademark of [*Google LLC*][GoogleLLC].
 
 [DracoUnity]: https://github.com/atteneder/DracoUnity
 [ExtBasisU]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu

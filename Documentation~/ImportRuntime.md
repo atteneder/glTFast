@@ -43,12 +43,12 @@ async void LoadGltfBinaryFromMemory() {
 
 Loading via script allows you to:
 
-- Custom download or file loading behaviour (see [`IDownloadProvider`][IDownload])
-- Customize loading behaviour (like texture settings) via [`ImportSettings`](#import-settings)
+- Custom download or file loading behavior (see [`IDownloadProvider`][IDownload])
+- Customize loading behavior (like texture settings) via [`ImportSettings`](#import-settings)
 - Custom material generation (see [`IMaterialGenerator`][IMaterialGenerator]])
 - Customize [instantiation](#instantiation)
-- Load glTF once and instantiate its scenes many times (see example [below](#custom-post-loading-behaviour))
-- Access data of glTF scene (for example get material; see example [below](#custom-post-loading-behaviour))
+- Load glTF once and instantiate its scenes many times (see example [below](#custom-post-loading-behavior))
+- Access data of glTF scene (for example get material; see example [below](#custom-post-loading-behavior))
 - [Logging](#logging) allow reacting and communicating incidents during loading and instantiation
 - Tweak and optimize loading performance
 
@@ -80,9 +80,9 @@ async void Start()
 }
 ```
 
-### Custom Post-Loading Behaviour
+### Custom Post-Loading Behavior
 
-The async `Load` method can be awaited and followed up by custom behaviour.
+The async `Load` method can be awaited and followed up by custom behavior.
 
 ```C#
 async void Start() {
@@ -142,7 +142,7 @@ You can disable this by setting `SkinUpdateWhenOffscreen` to false.
 
 ##### `Layer`
 
-Instantated `GameObject`s will be assigned to this [layer](https://docs.unity3d.com/Manual/Layers.html).
+Instantiated `GameObject`s will be assigned to this [layer](https://docs.unity3d.com/Manual/Layers.html).
 
 ##### `Mask`
 
@@ -157,7 +157,7 @@ Two common use-cases are
 1. Scale-down (physically correct) intensities to compensate for the missing exposure control (or high sensitivity) of a render pipeline (e.g. Universal or Built-in Render Pipeline)
 2. Boost implausibly low light intensities
 
-See [Physical Light Units in glTF](./LightUnits.md) for a detailed explaination.
+See [Physical Light Units in glTF](./LightUnits.md) for a detailed explanation.
 
 ##### `SceneObjectCreation`
 
@@ -213,7 +213,7 @@ async void Start()
 
 ### Logging
 
-When loading a glTF file, *Unity glTFast* logs messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those log messages. Examples:
+When loading a glTF file, *Unity glTFast* logs messages of varying severity (errors, warnings or infos). Developers can choose what to make of those log messages. Examples:
 
 - Log to console in readable form
 - Feed the information into an analytics framework
@@ -221,7 +221,7 @@ When loading a glTF file, *Unity glTFast* logs messages of varying severity (err
 
 The provided component `GltfAsset` logs all of those messages to the console by default.  
 
-You can customize logging by providing an implementation of [`ICodeLogger`][ICodeLogger] to methods like `GltfImport.Load` or `GltfImport.InstanciateMainScene`.
+You can customize logging by providing an implementation of [`ICodeLogger`][ICodeLogger] to methods like `GltfImport.Load` or `GltfImport.InstantiateMainScene`.
 
 There are two common implementations bundled. The `ConsoleLogger`, which logs straight to console (the default) and `CollectingLogger`, which stores messages in a list for users to process.
 
@@ -277,7 +277,7 @@ async Task CustomDeferAgentPerGltfImport() {
 ```
 
 > Note 1: Depending on your glTF scene, using the `UninterruptedDeferAgent` may block the main thread for up to multiple seconds. Be sure to not do this during critical game play action.
-
+>
 > Note2 : Using the `TimeBudgetPerFrameDeferAgent` does **not** guarantee a stutter free frame rate. This is because some sub tasks of the loading routine (like uploading a texture to the GPU) may take too long, cannot be interrupted and **have** to be done on the main thread.
 
 ### Disposing Resources

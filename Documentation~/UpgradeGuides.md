@@ -22,7 +22,7 @@ If you have issues, please also go through the 5.0.0 changelog entry and feel fr
 
 ### Moved or Renamed Types
 
-Some assemblies, classes, structs and enum types have been renamed or moved. Make sure you adopt your code approriately. All entries are within the `GLTFast` namespace.
+Some assemblies, classes, structs and enum types have been renamed or moved. Make sure you adopt your code appropriately. All entries are within the `GLTFast` namespace.
 
 - Refactored Assembly Definitions
   - `glTFastSchema` was merged into `glTFast` and thus removed
@@ -51,11 +51,11 @@ Some assemblies, classes, structs and enum types have been renamed or moved. Mak
 
 ### Async Scene Instantiation
 
-The addition of `GltfImport.InstantiateSceneAsync` and `GltfImport.InstantiateMainSceneAsync` now provides an asynchronos way of instantiating glTF&trade; scenes. For large scenes this means that the instantiation can be spread over multiple frames, resulting in a smoother frame rate.
+The addition of `GltfImport.InstantiateSceneAsync` and `GltfImport.InstantiateMainSceneAsync` now provides an asynchronous way of instantiating glTF&trade; scenes. For large scenes this means that the instantiation can be spread over multiple frames, resulting in a smoother frame rate.
 
-The existing, synchronos instantiation methods `GltfImport.InstantiateScene` and `GltfImport.InstantiateMainScene` (including overloads) have been marked obsolete and will be removed eventually. Though they still work, it's recommended to update your code to use the async variants.
+The existing, synchronous instantiation methods `GltfImport.InstantiateScene` and `GltfImport.InstantiateMainScene` (including overloads) have been marked obsolete and will be removed eventually. Though they still work, it's recommended to update your code to use the async variants.
 
-Since loading a glTF (the step before instantiation) has been async before, chances are high your enclosing method is already async, as it should be. 
+Since loading a glTF (the step before instantiation) has been async before, chances are high your enclosing method is already async, as it should be.
 
 ```csharp
 async void Start() {
@@ -106,7 +106,7 @@ There's a new property `Play Automatically`, which is checked by default. You sh
 
 #### Play Automatically when loading from script
 
-You have to explicitely use a [`GameObjectInstantiator`][GameObjectInstantiator]. It provides a [`SceneInstance`][GameObjectSceneInstance] object which has a `legacyAnimation` property, referencing the `Animation` component. Use it to start or stop playback of any of the animation clips it holds.
+You have to explicitly use a [`GameObjectInstantiator`][GameObjectInstantiator]. It provides a [`SceneInstance`][GameObjectSceneInstance] object which has a `legacyAnimation` property, referencing the `Animation` component. Use it to start or stop playback of any of the animation clips it holds.
 
 ```csharp
 async void Start() {
@@ -133,8 +133,8 @@ async void Start() {
 
 Rendering meshes with points topology/draw mode (Point clouds) requires special shaders (with a `PSIZE` vertex output). For that reason the `pointsSupport` parameter (`bool`; optional) was added to
 
-- `IMaterialGenerator.GetDefaultMaterial` 
-- `IMaterialGenerator.GenerateMaterial` 
+- `IMaterialGenerator.GetDefaultMaterial`
+- `IMaterialGenerator.GenerateMaterial`
 
 If `pointsSupport` is true, the generated material has to support meshes with points topology.
 
@@ -154,7 +154,7 @@ New shader graphs are used with certain Universal and High Definition render pip
 
 ### Coordinate system conversion change
 
-When upgrading from an older version to 4.x or newer the most notable difference is the imported models' orentation. They will appear 180° rotated around the up-axis (Y).
+When upgrading from an older version to 4.x or newer the most notable difference is the imported models' orientation. They will appear 180° rotated around the up-axis (Y).
 
 ![GltfAsset component][gltfast3to4]
 
@@ -179,7 +179,7 @@ See [Logging](ImportRuntime.md#logging) above.
 
 *Unity glTFast* 4.0 introduces scene-based instantiation. While most glTF assets contain only one scene they could consist of multiple scenes and optionally have one of declared the default scene.
 
-The old behaviour was, that all of the glTF's content was loaded. The new interface allows you to load the default scene or any scene of choice. If none of the scenes was declared the default scene (by setting the `scene` property), no objects are instantiated (as defined in the glTF specification).
+The old behavior was, that all of the glTF's content was loaded. The new interface allows you to load the default scene or any scene of choice. If none of the scenes was declared the default scene (by setting the `scene` property), no objects are instantiated (as defined in the glTF specification).
 
 [`GltfImport`][GltfImport] (formerly named `GLTFast`) provides the following properties and methods for scene instantiation:
 

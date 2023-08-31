@@ -2,13 +2,13 @@
 
 Material emission and light intensities in glTF have physical units.
 
-| Light type        | Unit                                  | 
+| Light type        | Unit                                  |
 |-------------------| ------------------------------------- |
 | Point/Spot        | [Candela (lumen per steradian)][cd]   |
 | Directional       | [Lux (lumen per square meter)][lx]    |
 | Emissive Material | [Nit (candela per square meter)][nit] |
 
-But these units are only a part of the equation, since the perceived brightness of a light depends on the sensitivity of the viewer. In case of a physical camera, the sensitivity is controlled by its aperture, exposure time and film sensititity (ISO). For example, a candle might light up an entire dark room, but is barely noticable on a bright, sunny day. That's because the camera settings are adjusted to the overall brightness of the scene. This is called exosure control.
+But these units are only a part of the equation, since the perceived brightness of a light depends on the sensitivity of the viewer. In case of a physical camera, the sensitivity is controlled by its aperture, exposure time and film sensitivity (ISO). For example, a candle might light up an entire dark room, but is barely noticeable on a bright, sunny day. That's because the camera settings are adjusted to the overall brightness of the scene. This is called exposure control.
 
 Unfortunately exposure control is not yet specified in glTF. Also, many render pipelines (e.g. Universal and Built-in Render Pipeline) do not integrate this concept. They can be thought of having a fixed exposure with a high sensitivity, so that a light with low, single-digit intensity value is enough to bring a scene to full illumination. The implication is that in those exposure-unaware render pipelines correct, physical light units have to be scaled down in order not to overexpose the scene.
 
