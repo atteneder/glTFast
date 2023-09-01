@@ -6,6 +6,43 @@ uid: doc-upgrade-guides
 
 These guides will help you upgrade your project to use the latest version of *Unity glTFast*. If you still encounter problems, help us improving this guide and *Unity glTFast* in general by reaching out by raising an issue.
 
+## Unity Fork
+
+With the release of version 5.2.0 the package name and identifier were changed to *Unity glTFast* (`com.unity.cloud.gltfast`) for the following reasons:
+
+- Better integration into Unity internal development processes (including quality assurance and support)
+- Distribution via the Unity Package Manager (no scoped libraries required anymore)
+
+For now, both the Unity variant and the original version will receive updates.
+
+### Transition to *Unity glTFast*
+
+The C# namespaces are identical between the variants, so all you need to do is:
+
+- Removed original *glTFast* (with package identifier `com.atteneder.gltfast`).
+- Add *Unity glTFast* (`com.unity.cloud.gltfast`).
+- Update assembly definition references (if your project had any).
+- Update any dependencies in your packages manifest (if your package had any)
+
+#### Transition Depending Packages
+
+Unity forks have been created for *KtxUnity* and *DracoUnity* as well. If you've used them in conjunction with *glTFast*, you need to transition them to the Unity variants as well.
+
+See their respective upgrade guides
+
+- Upgrade to [*KTX for Unity*](https://docs.unity3d.com/Packages/com.unity.cloud.ktx@3.0/manual/upgrade-guide.html)
+- Upgrade to *Draco for Unity* (coming soon)
+
+### Keep using the original glTFast
+
+The original *glTFast* (`com.atteneder.gltfast`) as well as *KtxUnity* and *DracoUnity* will still receive identical updates for now. You may choose to continue using them.
+
+If you've installed the packages via the installer script (i.e. via [OpenUPM][OpenUPM] scoped registry - the recommended way), you don't need to change anything. You'll receive updates as usual.
+
+If you've cloned the package via GIT, make sure to switch to the `openupm` branch to make sure the package identifier and name remain the original.
+
+See [Original *glTFast*](./Original.md) for instructions to install the original version from scratch.
+
 ## Upgrade to 5.0
 
 ### General
@@ -229,6 +266,7 @@ In the future materials can be created before textures are available/downloaded 
 [GltfImport]: xref:GLTFast.GltfImport
 [IGltfReadable]: xref:GLTFast.IGltfReadable
 [ImgConv]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.ImageConversionModule.html
+[OpenUPM]: https://openupm.com/
 [khronos]: https://www.khronos.org
 [unity]: https://unity.com
 [uwrt]: https://docs.unity3d.com/2021.3/Documentation/ScriptReference/UnityEngine.UnityWebRequestTextureModule.html

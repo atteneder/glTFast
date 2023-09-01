@@ -45,11 +45,13 @@ In the Name field, enter `com.unity.cloud.gltfast`.
 Select Add.
 The Editor installs the latest available version of the package and any dependent packages.
 
+> **NOTE:** This package originally had the identifier `com.atteneder.gltfast`. Consult the [upgrade guide](./Documentation~/UpgradeGuides.md#unity-fork) to learn how to switch to the Unity version (`com.unity.cloud.gltfast`) or [install the original package](./Documentation~/Original.md).
+
 ### Optional Packages
 
 There are some related package that improve *Unity glTFast* by extending its feature set.
 
-- [Draco 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
+- [Draco&trade; 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
 - [KTX&trade; for Unity][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
 - [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
 
@@ -123,7 +125,7 @@ limitations under the License.
 
 *Unity&reg;* is a registered trademark of [Unity Technologies][unity].
 
-*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][khronos].
+*Khronos&reg;* is a registered trademark and [glTF&trade;][gltf] is a trademark of [The Khronos Group Inc][khronos].
 
 *KTX&trade;* and the KTX logo are trademarks of the [The Khronos Group Inc][khronos].
 
