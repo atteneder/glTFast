@@ -1,18 +1,5 @@
 # Features
 
-## Platforms
-
-All of Unity's platforms are supported. glTFast is tested or was reported to run on:
-
-- WebGL
-- iOS
-- Android
-- Windows
-- macOS
-- Linux
-- Universal Windows Platform
-- Lumin (Magic Leap)
-
 ## Workflows
 
 |          | Runtime | Editor (design-time)
@@ -28,7 +15,7 @@ All of Unity's platforms are supported. glTFast is tested or was reported to run
 
 <sup>1</sup>: Experimental. Core features missing
 
-## Core glTF features
+## Core glTF&trade; features
 
 The glTF 2.0 specification is fully supported, with only a few minor remarks.
 
@@ -47,12 +34,12 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | **Basics**
 | Scenes | ✅ | ✅
 | Node hierarchies | ✅ | ✅
-| Cameras | ✅ | ✅ 
+| Cameras | ✅ | ✅
 | | |
 | **Images**
 | PNG | ✅ | ✅
 | Jpeg | ✅ | ✅
-| KTX with Basis Universal compression (via [KtxUnity](https://github.com/atteneder/KtxUnity)) | ✅ | 
+| KTX&trade; with Basis Universal compression (via [KtxUnity]) | ✅ |
 | | |
 | **Texture sampler**
 | Filtering  | ✅ with [limitations](./KnownIssues.md) | ✅ with [limitations](./KnownIssues.md) |
@@ -69,8 +56,8 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | LINES | ✅ | ✅
 | LINE_STRIP | ✅ | ✅
 | <sup>1</sup>LINE_LOOP | ✅ | ✅
-| TRIANGLE_STRIP |  | 
-| TRIANGLE_FAN |  | 
+| TRIANGLE_STRIP |  |
+| TRIANGLE_FAN |  |
 | Quads | `n/a` | ✅ via triangulation
 | | |
 | **Meshes**
@@ -80,55 +67,55 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Texture coordinates / UV sets | ✅ | `?`
 | Three or more texture coordinates / UV sets | <sup>2</sup>☑️ | `?`
 | Vertex colors | ✅ | `?`
-| Draco mesh compression (via [DracoUnity](https://github.com/atteneder/DracoUnity)) | ✅ | ✅
-| Implicit (no) indices | ✅ | 
+| Draco&trade; mesh compression (via [DracoUnity]) | ✅ | ✅
+| Implicit (no) indices | ✅ |
 | Per primitive material | ✅ | ✅
-| Joints (up to 4 per vertex) | ✅ | 
-| Weights (up to 4 per vertex) | ✅ | 
+| Joints (up to 4 per vertex) | ✅ |
+| Weights (up to 4 per vertex) | ✅ |
 | | |
 | **Morph Targets / Blend Shapes**
-| Sparse accessors | <sup>3</sup> ✅ | 
-| [Skins][Skins] (sponsored by [Embibe](https://www.embibe.com)) | ✅ | 
+| Sparse accessors | <sup>3</sup> ✅ |
+| [Skins][Skins] | ✅ |
 | | |
-| **Animation** 
-| via legacy Animation System | ✅ | 
-| via Playable API ([issue][AnimationPlayables]) |  | 
-| via Mecanim ([issue][AnimationMecanim]) |  | 
+| **Animation**
+| via legacy Animation System | ✅ |
+| via Playable API ([issue][AnimationPlayables]) |  |
+| via Mecanim ([issue][AnimationMecanim]) |  |
 
 <sup>1</sup>: Untested due to lack of demo files.
 
-<sup>2</sup>: Up to eight UV sets can imported, but the glTFast shaders only support two (see [issue][UVsets]).
+<sup>2</sup>: Up to eight UV sets can imported, but *Unity glTFast* shaders only support two (see [issue][UVsets]).
 
 <sup>3</sup>: Not on all accessor types; morph targets and vertex positions only
 
 ## Extensions
 
-### Official Khronos extensions
+### Official Khronos&reg; extensions
 
 | | Import | Export
 |------------| ------ | ------
 | | |
 | **Khronos**
 | KHR_draco_mesh_compression | ✅ | ✅
-| KHR_materials_pbrSpecularGlossiness | ✅ | 
+| KHR_materials_pbrSpecularGlossiness | ✅ |
 | KHR_materials_unlit | ✅ | ✅
 | KHR_texture_transform | ✅ | ✅
-| KHR_mesh_quantization | ✅ | 
-| KHR_texture_basisu | ✅ | 
+| KHR_mesh_quantization | ✅ |
+| KHR_texture_basisu | ✅ |
 | KHR_lights_punctual | ✅ | ✅
-| KHR_materials_clearcoat | [ℹ️][ClearCoat] | 
-| KHR_materials_sheen | [ℹ️][Sheen] | 
-| KHR_materials_transmission | [ℹ️][Transmission] | 
-| KHR_materials_variants | [ℹ️][Variants] | 
-| KHR_materials_ior | [ℹ️][IOR] | 
-| KHR_materials_specular | [ℹ️][Specular] | 
-| KHR_materials_volume | [ℹ️][Volume] | 
+| KHR_materials_clearcoat | [ℹ️][ClearCoat] |
+| KHR_materials_sheen | [ℹ️][Sheen] |
+| KHR_materials_transmission | [ℹ️][Transmission] |
+| KHR_materials_variants | [ℹ️][Variants] |
+| KHR_materials_ior | [ℹ️][IOR] |
+| KHR_materials_specular | [ℹ️][Specular] |
+| KHR_materials_volume | [ℹ️][Volume] |
 | KHR_xmp_json_ld |️ |
 | | |
 | **Vendor**
-| <sup>1</sup>EXT_mesh_gpu_instancing | ✅ | 
-| EXT_meshopt_compression | ✅ | 
-| EXT_lights_image_based | [ℹ️][IBL] | 
+| <sup>1</sup>EXT_mesh_gpu_instancing | ✅ |
+| EXT_meshopt_compression | ✅ |
+| EXT_lights_image_based | [ℹ️][IBL] |
 
 <sup>1</sup>: Without support for custom vertex attributes (e.g. `_ID`)
 
@@ -190,11 +177,11 @@ Not investigated yet:
 Material export is currently only tested on the following shaders:
 
 - Universal and High Definition render pipeline
-  - `Lit` 
-  - `Unlit` 
+  - `Lit`
+  - `Unlit`
 - Built-In render pipeline
-  - `Standard` 
-  - `Unlit` 
+  - `Standard`
+  - `Unlit`
 
 Other shaders might (partially) work if they have similar properties (with identical names).
 
@@ -229,9 +216,9 @@ Other shaders might (partially) work if they have similar properties (with ident
 
 > ⚠️ Note: DOTS is highly experimental and many features don't work yet. Do not use it for production ready projects!
 
-Unity's [Data-Oriented Technology Stack (DOTS)][DOTS] allows users to create high performance gameplay. glTFast has experimental import support for it.
+Unity's [Data-Oriented Technology Stack (DOTS)][DOTS] allows users to create high performance gameplay. *Unity glTFast* has experimental import support for it.
 
-Instead of traditional GameObjects, glTFast will instantiate Entities with Hybrid Renderer (version 2) components.
+Instead of traditional GameObjects, *Unity glTFast* will instantiate [Entities][Entities] and render them via [Entities Graphics][EntitiesGraphics].
 
 Possibly incomplete list of things that are known to not work with Entities yet:
 
@@ -243,14 +230,13 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 
 ### DOTS Setup
 
-- First, go through the official [DOTS project setup](https://docs.unity3d.com/Packages/com.unity.entities@0.17/manual/install_setup.html)
-- Make sure to enable [Hybrid Renderer V2](https://docs.unity3d.com/Packages/com.unity.rendering.hybrid@0.11/manual/creating-a-new-hybrid-renderer-project.html)
+- Install the [Entities Graphics][EntitiesGraphics] package
 - Use `GltfEntityAsset` instead of `GltfAsset`
 - For customized behavior, use the `EntityInstantiator` instead of the `GameObjectInstantiator`
 
 ## Unity Version Support
 
-*glTFast* requires Unity 2019.4 or newer.
+*Unity glTFast* requires Unity 2020.1 or newer.
 
 ## Legend
 
@@ -261,21 +247,36 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 - `?`: Unknown / Untested
 - `n/a`: Not available
 
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][Unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][Khronos].
+
+*KTX&trade;* and the KTX logo are trademarks of the [The Khronos Group Inc][Khronos].
+
+*Draco&trade;* is a trademark of [*Google LLC*][GoogleLLC].
+
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
-[AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166  
+[AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166
 [ClearCoat]: https://github.com/atteneder/glTFast/issues/68
+[DracoUnity]: https://github.com/atteneder/DracoUnity
 [DOTS]: https://unity.com/dots
+[Entities]: https://docs.unity3d.com/Packages/com.unity.entities@latest
+[EntitiesGraphics]: https://docs.unity3d.com/Packages/com.unity.entities.graphics@latest
+[GoogleLLC]: https://about.google/
 [HDRP]: https://unity.com/srp/High-Definition-Render-Pipeline
 [IBL]: https://github.com/atteneder/glTFast/issues/108
 [IOR]: https://github.com/atteneder/glTFast/issues/207
+[Khronos]: https://www.khronos.org
+[KtxUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest
 [MeshOpt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
 [MeshOptPkg]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
-[newIssue]: https://github.com/atteneder/glTFast/issues/new
-[SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
 [Sheen]: https://github.com/atteneder/glTFast/issues/110
 [Skins]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins
 [Specular]: https://github.com/atteneder/glTFast/issues/208
 [Transmission]: https://github.com/atteneder/glTFast/issues/111
+[Unity]: https://unity.com
 [URP]: https://unity.com/srp/universal-render-pipeline
 [UVsets]: https://github.com/atteneder/glTFast/issues/206
 [Variants]: https://github.com/atteneder/glTFast/issues/112

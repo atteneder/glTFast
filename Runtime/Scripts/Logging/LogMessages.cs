@@ -235,7 +235,7 @@ namespace GLTFast.Logging
         /// </summary>
         UVMulti,
         /// <summary>
-        /// Fallback to uncompressed meshes/bufferViews is not supported. 
+        /// Fallback to uncompressed meshes/bufferViews is not supported.
         /// </summary>
         UncompressedFallbackNotSupported,
     }

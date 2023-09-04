@@ -8,4 +8,12 @@
 
 <sup>1</sup>: A Unity API limitation.
 
-[SamplerFilter]: https://github.com/atteneder/glTFast/issues/61 
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][Unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][Khronos].
+
+[Khronos]: https://www.khronos.org
+[SamplerFilter]: https://github.com/atteneder/glTFast/issues/61
+[Unity]: https://unity.com

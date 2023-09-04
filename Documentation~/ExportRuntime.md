@@ -1,6 +1,6 @@
 # Runtime Export
 
-You can export individual GameObjects or entire scenes to glTF files at runtime.
+You can export individual GameObjects or entire scenes to glTF&trade; files at runtime.
 
 ## Include Required Shaders
 
@@ -12,7 +12,7 @@ The easiest way to include them is to add `glTFExport.shadervariants` to the lis
 
 > Note: The `GLTFast.Export` namespace can only be used if you reference both `glTFast` and `glTFast.Export` Assemblies in your [Assembly Definition][asmdef].
 
-Here's a step-by-step guilde to export a GameObject hierarchy/scene from script
+Here's a step-by-step guide to export a GameObject hierarchy/scene from script
 
 - Create an instance of `GLTFast.Export.GameObjectExport`
 - Add content via `AddScene`
@@ -21,7 +21,6 @@ Here's a step-by-step guilde to export a GameObject hierarchy/scene from script
   - Call `SaveToStreamAndDispose` to export to a `System.IO.Stream`
 
 glTF export might create more than one file. For example the binary buffer is usually a separate `.bin` file and textures might be separate files as well.
-
 
 ```c#
 using UnityEngine;
@@ -71,7 +70,7 @@ public class TestExport : MonoBehaviour {
 
     async void AdvancedExport() {
 
-        // CollectingLogger lets you programatically go through
+        // CollectingLogger lets you programmatically go through
         // errors and warnings the export raised
         var logger = new CollectingLogger();
 
@@ -123,7 +122,7 @@ public class TestExport : MonoBehaviour {
 
 ### Draco Compression
 
-glTFast supports applying [Google Draco 3D Data compression][Draco] to meshes. This requires the [DracoUnity][DracoUnity] package to be installed.
+*Unity glTFast* supports applying [Google Draco&trade; 3D Data compression][Draco] to meshes. This requires the [DracoUnity][DracoUnity] package to be installed.
 
 ```csharp
 // ExportSettings provides generic export settings
@@ -138,6 +137,17 @@ var exportSettings = new ExportSettings {
 };
 ```
 
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][khronos].
+
+*Draco&trade;* is a trademark of [*Google LLC*][GoogleLLC].
+
 [asmdef]: https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html
 [Draco]: https://google.github.io/draco/
 [DracoUnity]: https://github.com/atteneder/DracoUnity
+[GoogleLLC]: https://about.google/
+[khronos]: https://www.khronos.org
+[unity]: https://unity.com

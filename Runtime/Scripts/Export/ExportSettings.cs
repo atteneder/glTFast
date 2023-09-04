@@ -55,7 +55,7 @@ namespace GLTFast.Export
         /// </summary>
         Overwrite
     }
-    
+
     /// <summary>
     /// Compression
     /// </summary>
@@ -97,15 +97,22 @@ namespace GLTFast.Export
         /// based on type.
         /// </summary>
         public ComponentType ComponentMask { get; set; } = ComponentType.All;
-        
+
         /// <summary>
         /// Type of compression to apply
         /// </summary>
-        public Compression Compression  { get; set; } = Compression.Uncompressed;
-        
+        public Compression Compression { get; set; } = Compression.Uncompressed;
+
         /// <summary>
         /// Draco compression export settings
         /// </summary>
         public DracoExportSettings DracoSettings { get; set; }
+
+        /// <summary>
+        /// If true, the export results will not differ on repeated exports. This comes at the cost of potentially
+        /// longer export times on scenes with multiple, large meshes.
+        /// This can be a requirement for certain asset pipelines or automated tests.
+        /// </summary>
+        public bool Deterministic { get; set; }
     }
 }
