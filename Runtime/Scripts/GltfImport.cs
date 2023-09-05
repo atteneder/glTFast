@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 
-using GLTFast.Extensions;
+using GLTFast.Addons;
 using GLTFast.Jobs;
 #if MEASURE_TIMINGS
 using GLTFast.Tests;
@@ -122,7 +122,7 @@ namespace GLTFast
         IMaterialGenerator m_MaterialGenerator;
         IDeferAgent m_DeferAgent;
 
-        Dictionary<Type, ImportInstance> m_Extensions;
+        Dictionary<Type, ImportAddonInstance> m_ImportInstances;
 
         ImportSettings m_Settings;
 
@@ -275,7 +275,7 @@ namespace GLTFast
 
             m_Logger = logger;
 
-            ExtensionRegistry.InjectAllExtensions(this);
+            ImportAddonRegistry.InjectAllAddons(this);
         }
 
         /// <summary>
@@ -307,27 +307,35 @@ namespace GLTFast
         }
 
         /// <summary>
-        /// Adds an import extension. To be called before any loading is initiated.
+        /// Adds an import add-on instance. To be called before any loading is initiated.
         /// </summary>
-        /// <param name="extension">The import extension to add.</param>
-        /// <typeparam name="T">Type of the import extension</typeparam>
-        public void AddExtension<T>(T extension) where T : ImportInstance
+        /// <param name="importInstance">The import instance to add.</param>
+        /// <typeparam name="T">Type of the import instance</typeparam>
+        public void AddImportAddonInstance<T>(T importInstance) where T : ImportAddonInstance
         {
-            if (m_Extensions == null)
+            if (m_ImportInstances == null)
             {
-                m_Extensions = new Dictionary<Type, ImportInstance>();
+                m_ImportInstances = new Dictionary<Type, ImportAddonInstance>();
             }
-            m_Extensions[typeof(T)] = extension;
+            m_ImportInstances[typeof(T)] = importInstance;
         }
 
         /// <summary>
-        /// Queries the import extension of a particular type.
+        /// Queries the import instance of a particular type.
         /// </summary>
-        /// <typeparam name="T">Type of the import extension</typeparam>
-        /// <returns>The import extension that was previously added. False if there was none.</returns>
-        public T GetExtensionInstance<T>() where T : ImportInstance
+        /// <typeparam name="T">Type of the import instance</typeparam>
+        /// <returns>The import instance that was previously added. False if there was none.</returns>
+        public T GetImportAddonInstance<T>() where T : ImportAddonInstance
         {
-            return (T)m_Extensions?[typeof(T)];
+            if (m_ImportInstances == null)
+                return null;
+
+            if (m_ImportInstances.TryGetValue(typeof(T), out var addonInstance))
+            {
+                return (T)addonInstance;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -686,13 +694,13 @@ namespace GLTFast
         /// </summary>
         public void Dispose()
         {
-            if (m_Extensions != null)
+            if (m_ImportInstances != null)
             {
-                foreach (var extension in m_Extensions)
+                foreach (var importInstance in m_ImportInstances)
                 {
-                    extension.Value.Dispose();
+                    importInstance.Value.Dispose();
                 }
-                m_Extensions = null;
+                m_ImportInstances = null;
             }
 
             m_NodeNames = null;
@@ -1121,11 +1129,11 @@ namespace GLTFast
             foreach (var ext in extensions)
             {
                 var supported = k_SupportedExtensions.Contains(ext);
-                if (!supported && m_Extensions != null)
+                if (!supported && m_ImportInstances != null)
                 {
-                    foreach (var extension in m_Extensions)
+                    foreach (var extension in m_ImportInstances)
                     {
-                        if (extension.Value.SupportsExtension(ext))
+                        if (extension.Value.SupportsGltfExtension(ext))
                         {
                             supported = true;
                             break;
@@ -2351,9 +2359,9 @@ namespace GLTFast
 
         async Task InstantiateSceneInternal(Root gltf, IInstantiator instantiator, int sceneId)
         {
-            if (m_Extensions != null)
+            if (m_ImportInstances != null)
             {
-                foreach (var extension in m_Extensions)
+                foreach (var extension in m_ImportInstances)
                 {
                     extension.Value.Inject(instantiator);
                 }
