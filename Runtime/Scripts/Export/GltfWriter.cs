@@ -569,7 +569,7 @@ namespace GLTFast.Export
 
             if (m_Settings.Format != GltfFormat.Binary || GetFinalImageDestination() == ImageDestination.SeparateFile)
             {
-                m_Logger.Error(LogCode.None, "Save to Stream currently only works for self-contained glTF-Binary");
+                m_Logger?.Error(LogCode.None, "Save to Stream currently only works for self-contained glTF-Binary");
                 return false;
             }
 
