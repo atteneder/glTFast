@@ -419,10 +419,10 @@ namespace GLTFast
                 m_Logger?.Error(LogCode.Download, "Stream not readable");
                 return false;
             }
-            var magic = new byte[4];
-            var bytesRead = await stream.ReadAsync(magic, 0, magic.Length, cancellationToken);
+            var firstBytes = new byte[4];
+            var bytesRead = await stream.ReadAsync(firstBytes, 0, firstBytes.Length, cancellationToken);
 
-            if (bytesRead != magic.Length)
+            if (bytesRead != firstBytes.Length)
             {
                 m_Logger?.Error(LogCode.Download, "Failed reading first bytes");
                 return false;
@@ -430,7 +430,7 @@ namespace GLTFast
 
             if (cancellationToken.IsCancellationRequested) return false;
 
-            if (GltfGlobals.IsGltfBinary(magic))
+            if (GltfGlobals.IsGltfBinary(firstBytes))
             {
                 // Read the rest of the header
                 byte[] bytes = new byte[8];
@@ -443,10 +443,10 @@ namespace GLTFast
                 // Length of the entire glTF, including the header
                 var length = BitConverter.ToInt32(bytes, 4);
                 var data = new byte[length];
-                Array.Copy(magic, data, magic.Length);
-                Array.Copy(bytes, 0, data, magic.Length, bytes.Length);
+                Array.Copy(firstBytes, data, firstBytes.Length);
+                Array.Copy(bytes, 0, data, firstBytes.Length, bytes.Length);
                 // The amount of bytes we've already read
-                int offset = magic.Length + bytes.Length;
+                int offset = firstBytes.Length + bytes.Length;
                 int toRead = length - offset;
                 read = await stream.ReadAsync(data, offset, toRead, cancellationToken);
 
@@ -459,7 +459,7 @@ namespace GLTFast
                 return await LoadGltfBinary(data, uri, importSettings, cancellationToken);
             }
             var reader = new StreamReader(stream);
-            string json = System.Text.Encoding.UTF8.GetString(magic) + await reader.ReadToEndAsync();
+            string json = System.Text.Encoding.UTF8.GetString(firstBytes) + await reader.ReadToEndAsync();
             reader.Dispose();
 
             return !cancellationToken.IsCancellationRequested 
