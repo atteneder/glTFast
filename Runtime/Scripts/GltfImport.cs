@@ -391,50 +391,79 @@ namespace GLTFast
             CancellationToken cancellationToken = default
             )
         {
-            var firstBytes = new byte[4];
-
 #if UNITY_2021_3_OR_NEWER && NET_STANDARD_2_1
             await using
 #endif
             var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
-            var bytesRead = await fs.ReadAsync(firstBytes, 0, firstBytes.Length, cancellationToken);
+            bool result = await LoadStream(fs, uri, importSettings, cancellationToken);
+            fs.Dispose();
+            return result;
+        }
 
-            if (bytesRead != firstBytes.Length)
+        /// <summary>
+        /// Load glTF from a stream.
+        /// </summary>
+        /// <param name="stream">Stream of the glTF or glTF-Binary</param>
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadStream(
+            Stream stream,
+            Uri uri = null,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (!stream.CanRead)
             {
-                m_Logger?.Error(LogCode.Download, "Failed reading first bytes", localPath);
+                m_Logger?.Error(LogCode.Download, "Stream not readable");
+                return false;
+            }
+            var magic = new byte[4];
+            var bytesRead = await stream.ReadAsync(magic, 0, magic.Length, cancellationToken);
+
+            if (bytesRead != magic.Length)
+            {
+                m_Logger?.Error(LogCode.Download, "Failed reading first bytes");
                 return false;
             }
 
             if (cancellationToken.IsCancellationRequested) return false;
 
-            if (GltfGlobals.IsGltfBinary(firstBytes))
+            if (GltfGlobals.IsGltfBinary(magic))
             {
-                var data = new byte[fs.Length];
-                for (var i = 0; i < firstBytes.Length; i++)
+                // Read the rest of the header
+                byte[] bytes = new byte[8];
+                var read = await stream.ReadAsync(bytes, 0, bytes.Length);
+                if (read != bytes.Length)
                 {
-                    data[i] = firstBytes[i];
+                    m_Logger?.Error(LogCode.Download, "Failed reading length");
+                    return false;
                 }
-                var length = (int)fs.Length - 4;
-                var read = await fs.ReadAsync(data, 4, length, cancellationToken);
-                fs.Close();
-                if (read != length)
+                // Length of the entire glTF, including the header
+                var length = BitConverter.ToInt32(bytes, 4);
+                var data = new byte[length];
+                Array.Copy(magic, data, magic.Length);
+                Array.Copy(bytes, 0, data, magic.Length, bytes.Length);
+                // The amount of bytes we've already read
+                int offset = magic.Length + bytes.Length;
+                int toRead = length - offset;
+                read = await stream.ReadAsync(data, offset, toRead, cancellationToken);
+
+                if (read != toRead)
                 {
-                    m_Logger?.Error(LogCode.Download, "Failed reading data", localPath);
+                    m_Logger?.Error(LogCode.Download, "Failed reading data");
                     return false;
                 }
 
                 return await LoadGltfBinary(data, uri, importSettings, cancellationToken);
             }
-            fs.Close();
+            var reader = new StreamReader(stream);
+            string json = System.Text.Encoding.UTF8.GetString(magic) + await reader.ReadToEndAsync();
+            reader.Dispose();
 
-            return await LoadGltfJson(
-#if UNITY_2021_3_OR_NEWER
-                await File.ReadAllTextAsync(localPath,cancellationToken),
-#else
-                File.ReadAllText(localPath),
-#endif
-                uri,
-                importSettings, cancellationToken);
+            return !cancellationToken.IsCancellationRequested 
+                && await LoadGltfJson(json, uri, importSettings, cancellationToken);
         }
 
         /// <summary>
