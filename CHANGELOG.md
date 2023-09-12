@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Compiler errors and warnings on Unity 2023.2 (and newer) due to using obsolete types.
+
 ## [5.2.0-pre.2] - 2023-09-12
 
 ### Fixed

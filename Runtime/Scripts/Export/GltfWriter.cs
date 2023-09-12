@@ -245,9 +245,12 @@ namespace GLTFast.Export
             HDAdditionalLightData lightHd = null;
             if (renderPipeline == RenderPipeline.HighDefinition) {
                 lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
+#if !UNITY_2023_2_OR_NEWER
+                // For newer HDRP versions, the generic `uLight.type` works just fine
                 if (lightHd!=null && lightHd.type == HDLightType.Area) {
-                    lightType = LightType.Area;
+                    lightType = LightType.Rectangle;
                 }
+#endif
             }
 #endif
 
@@ -267,7 +270,7 @@ namespace GLTFast.Export
                 case LightType.Point:
                     light.SetLightType(LightPunctual.Type.Point);
                     break;
-                case LightType.Area:
+                case LightType.Rectangle:
                 case LightType.Disc:
                 default:
                     light.SetLightType(LightPunctual.Type.Spot);
@@ -309,6 +312,7 @@ namespace GLTFast.Export
                         light.intensity = uLight.intensity;
                     }
                     else {
+#if !UNITY_2023_2_OR_NEWER
                         switch (lightHd.type) {
                             case HDLightType.Spot:
                             case HDLightType.Point:
@@ -322,6 +326,21 @@ namespace GLTFast.Export
                                 light.intensity = lightHd.intensity;
                                 break;
                         }
+#else
+                        switch (lightType) {
+                            case LightType.Spot:
+                            case LightType.Point:
+                                light.intensity = GetIntensity(LightUnit.Candela);
+                                break;
+                            case LightType.Directional:
+                                light.intensity = GetIntensity(LightUnit.Lux);
+                                break;
+                            case LightType.Rectangle:
+                            default:
+                                light.intensity = lightHd.intensity;
+                                break;
+                        }
+#endif
                     }
                     break;
 #endif
