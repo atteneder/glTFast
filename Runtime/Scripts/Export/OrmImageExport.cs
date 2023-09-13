@@ -281,7 +281,7 @@ namespace GLTFast.Export
             var exportTexture = new Texture2D(
                 width,
                 height,
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2023_2_OR_NEWER
                 // ~20 times faster texture construction
                 SystemInfo.IsFormatSupported(GraphicsFormat.R8G8B8_UNorm, GraphicsFormatUsage.Sample)
                     ? GraphicsFormat.R8G8B8_UNorm
