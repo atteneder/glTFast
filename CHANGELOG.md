@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Pull changes from 5.2.0-pre.1
+- Pull changes from 5.2.0
 
 ## [6.0.0-pre.2] - 2023-05-25
 
@@ -31,9 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `MeshAdded`
   - `EndSceneCompleted`
 
-## [Unreleased]
-
-## [5.2.0-pre.1] - 2023-08-31
+## [5.2.0] - 2023-09-14
 
 ### Added
 - Runtime tests
@@ -43,6 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Optimized `Accessor.GetAccessorAttributeType`
 - Optimized `GltfEntityAsset.ClearScenes` via Burst
+- Bump minimum unity version from 2019.4.7f1 to 2019.4.40f1
+
+### Fixed
+- Compiler errors and warnings on Unity 2023.2 (and newer) due to using obsolete types.
 
 ## [5.1.0] - 2023-05-25
 

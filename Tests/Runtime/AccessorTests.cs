@@ -9,7 +9,7 @@ using GLTFast.Schema;
 
 namespace GLTFast.Tests
 {
-    public class AccessorTests
+    class AccessorTests
     {
         [Test]
         public void GetAccessorAttributeType()
