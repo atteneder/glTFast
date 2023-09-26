@@ -244,10 +244,10 @@ namespace GLTFast {
                  }
             }
 #else
-            var materials = new Material[materialIndices.Length];
-            for (var index = 0; index < materialIndices.Length; index++)
+            var materials = new Material[meshResult.materialIndices.Length];
+            for (var index = 0; index < meshResult.materialIndices.Length; index++)
             {
-                materials[index] = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                materials[index] = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
             }
 
             var filterSettings = RenderFilterSettings.Default;
@@ -261,9 +261,9 @@ namespace GLTFast {
                 LightProbeUsage = LightProbeUsage.Off,
             };
 
-            var renderMeshArray = new RenderMeshArray(materials, new[] { mesh });
+            var renderMeshArray = new RenderMeshArray(materials, new[] { meshResult.mesh });
 
-            for (var index = 0; index < materialIndices.Length; index++)
+            for (var index = 0; index < meshResult.materialIndices.Length; index++)
             {
                 RenderMeshUtility.AddComponents(
                     node,
@@ -277,7 +277,7 @@ namespace GLTFast {
                         )
                     );
 
-                m_EntityManager.SetComponentData(node, new RenderBounds {Value = mesh.bounds.ToAABB()} );
+                m_EntityManager.SetComponentData(node, new RenderBounds {Value = meshResult.mesh.bounds.ToAABB()} );
             }
 
 #endif
@@ -325,10 +325,10 @@ namespace GLTFast {
             }
 #else
 
-            var materials = new Material[materialIndices.Length];
-            for (var index = 0; index < materialIndices.Length; index++)
+            var materials = new Material[meshResult.materialIndices.Length];
+            for (var index = 0; index < meshResult.materialIndices.Length; index++)
             {
-                materials[index] = m_Gltf.GetMaterial(materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                materials[index] = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
                 materials[index].enableInstancing = true;
             }
 
@@ -343,8 +343,8 @@ namespace GLTFast {
                 LightProbeUsage = LightProbeUsage.Off,
             };
 
-            var renderMeshArray = new RenderMeshArray(materials, new[] { mesh });
-            for (var index = 0; index < materialIndices.Length; index++)
+            var renderMeshArray = new RenderMeshArray(materials, new[] { meshResult.mesh });
+            for (var index = 0; index < meshResult.materialIndices.Length; index++)
             {
                 var prototype = m_EntityManager.CreateEntity(m_NodeArchetype);
                 m_EntityManager.SetEnabled(prototype, true);
