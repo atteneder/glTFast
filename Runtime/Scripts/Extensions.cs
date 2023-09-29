@@ -45,6 +45,10 @@ namespace GLTFast
         /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_transform/README.md">KHR_texture_transform</a> glTF extension
         /// </summary>
         TextureTransform,
+        /// <summary>
+        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_clearcoat">KHR_materials_clearcoat</a> glTF extension
+        /// </summary>
+        MaterialsClearcoat,
     }
 
     /// <summary>
@@ -92,6 +96,10 @@ namespace GLTFast
         /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</a> glTF extension
         /// </summary>
         public const string LightsPunctual = "KHR_lights_punctual";
+        /// <summary>
+        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_clearcoat">KHR_materials_clearcoat</a> glTF extension
+        /// </summary>
+        public const string MaterialsClearcoat = "KHR_materials_clearcoat";
 
         /// <summary>
         /// Returns the official name of the glTF extension
@@ -120,6 +128,8 @@ namespace GLTFast
                     return TextureBasisUniversal;
                 case Extension.TextureTransform:
                     return TextureTransform;
+                case Extension.MaterialsClearcoat:
+                    return MaterialsClearcoat;
                 default:
                     return null;
             }

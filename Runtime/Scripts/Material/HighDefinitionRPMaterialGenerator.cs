@@ -36,15 +36,38 @@ namespace GLTFast.Materials {
         static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
         static readonly int k_DoubleSidedConstantsPropId = Shader.PropertyToID("_DoubleSidedConstants");
 
+        /// <summary>Name of the stack lit shader graph used for advanced PBR materials</summary>
+        public const string MetallicStackLitShader = "HDRP/glTF-pbrMetallicRoughnessStackLit";
+
+        static bool s_MetallicStackLitShaderQueried;
+        static Shader s_MetallicStackLitShader;
+
 #if !UNITY_SHADER_GRAPH_12_OR_NEWER
-        protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
+        
+        /// <summary>
+        /// Forces non-legacy shader graph for HDRP 10.x
+        /// </summary>
+        /// <param name="features">Shader features</param>
+        /// <returns>Shader name</returns>
+        // TODO: Drop it when 2020 support is dropped
+        protected override string GetMetallicShaderName(MetallicShaderFeatures features) {
             return MetallicShader;
         }
 
+        /// <summary>
+        /// Forces non-legacy shader graph for HDRP 10.x
+        /// </summary>
+        /// <param name="features">Shader features</param>
+        /// <returns>Shader name</returns>
         protected override string GetSpecularShaderName(SpecularShaderFeatures features) {
             return SpecularShader;
         }
 
+        /// <summary>
+        /// Forces non-legacy shader graph for HDRP 10.x
+        /// </summary>
+        /// <param name="features">Shader features</param>
+        /// <returns>Shader name</returns>
         protected override string GetUnlitShaderName(UnlitShaderFeatures features) {
             return UnlitShader;
         }
@@ -86,7 +109,7 @@ namespace GLTFast.Materials {
                 material.SetShaderPassEnabled(ShaderPassDepthOnlyPass, false);
 
                 material.SetFloat(AlphaDstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
-#endif
+#endif // USING_HDRP_10_OR_NEWER
                 material.SetOverrideTag(RenderTypeTag,TransparentRenderType);
                 material.SetShaderPassEnabled(DistortionVectorsPass,false);
                 material.SetFloat(DstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
@@ -99,6 +122,31 @@ namespace GLTFast.Materials {
         }
 
 #if USING_HDRP_10_OR_NEWER
+        /// <summary>
+        /// Picks more advanced StackLit based shader graph, if any material feature requires it.
+        /// </summary>
+        /// <param name="features">Material features</param>
+        /// <returns>Shader capable of rendering the features</returns>
+        protected override Shader GetMetallicShader(MetallicShaderFeatures features)
+        {
+            if ((features & MetallicShaderFeatures.ClearCoat) != 0)
+            {
+                if (!s_MetallicStackLitShaderQueried) 
+                {
+                    s_MetallicStackLitShader = LoadShaderByName(MetallicStackLitShader);
+                    if (s_MetallicStackLitShader == null)
+                    {
+                        // Fallback to regular shader graph
+                        s_MetallicStackLitShader = base.GetMetallicShader(features);
+                    }
+                    s_MetallicStackLitShaderQueried = true;
+                }
+                return s_MetallicStackLitShader;
+            }
+
+            return base.GetMetallicShader(features);
+        }
+  
         protected override void SetShaderModeBlend(Schema.MaterialBase gltfMaterial, Material material) {
 
             material.DisableKeyword(AlphaTestOnKeyword);
@@ -125,7 +173,7 @@ namespace GLTFast.Materials {
             material.SetFloat(DstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(SrcBlendProperty, (int) BlendMode.SrcAlpha);//5
         }
-#endif
+#endif // USING_HDRP_10_OR_NEWER
     }
 }
 #endif // USING_URP
