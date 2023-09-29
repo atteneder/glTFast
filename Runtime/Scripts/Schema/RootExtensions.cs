@@ -8,7 +8,7 @@ namespace GLTFast.Schema
     /// glTF root extensions
     /// </summary>
     [System.Serializable]
-    public class RootExtension
+    public class RootExtensions
     {
 
         /// <inheritdoc cref="LightsPunctual"/>

@@ -19,14 +19,14 @@ namespace GLTFast.Addons
     /// <summary>
     /// Extension base class.
     /// </summary>
-    /// <typeparam name="TImport"><see cref="ImportAddonInstance"/> based type, that is constructed per <see cref="GltfImport"/></typeparam>
-    public abstract class ImportAddon<TImport> : ImportAddon
-        where TImport : ImportAddonInstance, new()
+    /// <typeparam name="TInstance">Type of the addon instance, that that is constructed per <see cref="GltfImport"/>.</typeparam>
+    public abstract class ImportAddon<TInstance> : ImportAddon
+        where TInstance : ImportAddonInstance, new()
     {
         /// <inheritdoc />
         public override void CreateImportInstance(GltfImport gltfImport)
         {
-            var instance = new TImport();
+            var instance = new TInstance();
             instance.Inject(gltfImport);
         }
     }

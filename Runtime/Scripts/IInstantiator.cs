@@ -86,7 +86,7 @@ namespace GLTFast
         /// <summary>
         /// Called for adding a Primitive/Mesh to a Node that uses
         /// GPU instancing (EXT_mesh_gpu_instancing) to render the same mesh/material combination many times.
-        /// Similar to/called instead of <seealso cref="AddPrimitive"/>, without joints/skin support.
+        /// Similar to/called instead of <see cref="AddPrimitive"/>, without joints/skin support.
         /// </summary>
         /// <param name="nodeIndex">Index of the node</param>
         /// <param name="meshName">Mesh's name</param>

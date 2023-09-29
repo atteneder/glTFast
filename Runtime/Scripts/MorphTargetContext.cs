@@ -113,7 +113,7 @@ namespace GLTFast
                 jobCount++;
             }
 
-            Accessor nrmAcc = null;
+            AccessorBase nrmAcc = null;
             void* nrmInput = null;
             int nrmInputByteStride = 0;
 
@@ -132,7 +132,7 @@ namespace GLTFast
                 }
             }
 
-            Accessor tanAcc = null;
+            AccessorBase tanAcc = null;
             void* tanInput = null;
             int tanInputByteStride = 0;
 
@@ -182,13 +182,13 @@ namespace GLTFast
                 }
                 if (posAcc.IsSparse)
                 {
-                    buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
-                    buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
+                    buffers.GetAccessorSparseIndices(posAcc.Sparse.Indices, out var posIndexData);
+                    buffers.GetAccessorSparseValues(posAcc.Sparse.Values, out var posValueData);
                     var sparseJobHandle = VertexBufferConfigBase.GetVector3SparseJob(
                         posIndexData,
                         posValueData,
-                        posAcc.sparse.count,
-                        posAcc.sparse.indices.componentType,
+                        posAcc.Sparse.count,
+                        posAcc.Sparse.Indices.componentType,
                         posAcc.componentType,
                         (float3*)dest,
                         12,
@@ -238,13 +238,13 @@ namespace GLTFast
                     }
                     if (nrmAcc.IsSparse)
                     {
-                        buffers.GetAccessorSparseIndices(nrmAcc.sparse.indices, out var indexData);
-                        buffers.GetAccessorSparseValues(nrmAcc.sparse.values, out var valueData);
+                        buffers.GetAccessorSparseIndices(nrmAcc.Sparse.Indices, out var indexData);
+                        buffers.GetAccessorSparseValues(nrmAcc.Sparse.Values, out var valueData);
                         var sparseJobHandle = VertexBufferConfigBase.GetVector3SparseJob(
                             indexData,
                             valueData,
-                            nrmAcc.sparse.count,
-                            nrmAcc.sparse.indices.componentType,
+                            nrmAcc.Sparse.count,
+                            nrmAcc.Sparse.Indices.componentType,
                             nrmAcc.componentType,
                             (float3*)dest,
                             12,
@@ -295,13 +295,13 @@ namespace GLTFast
                     }
                     if (tanAcc.IsSparse)
                     {
-                        buffers.GetAccessorSparseIndices(tanAcc.sparse.indices, out var indexData);
-                        buffers.GetAccessorSparseValues(tanAcc.sparse.values, out var valueData);
+                        buffers.GetAccessorSparseIndices(tanAcc.Sparse.Indices, out var indexData);
+                        buffers.GetAccessorSparseValues(tanAcc.Sparse.Values, out var valueData);
                         var sparseJobHandle = VertexBufferConfigBase.GetVector3SparseJob(
                             indexData,
                             valueData,
-                            tanAcc.sparse.count,
-                            tanAcc.sparse.indices.componentType,
+                            tanAcc.Sparse.count,
+                            tanAcc.Sparse.Indices.componentType,
                             tanAcc.componentType,
                             (float3*)dest,
                             12,

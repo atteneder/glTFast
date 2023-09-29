@@ -16,7 +16,7 @@ namespace GLTFast.Schema
         /// </summary>
         public string name;
 
-        internal void GltfSerializeRoot(JsonWriter writer)
+        internal void GltfSerializeName(JsonWriter writer)
         {
             if (!string.IsNullOrEmpty(name))
             {

@@ -8,8 +8,9 @@ namespace GLTFast
 {
 
     /// <summary>
-    /// Makes GameObject survive scene changes (<seealso cref="DontDestroyOnLoad"/>)
+    /// Makes GameObject survive scene changes
     /// </summary>
+    /// <seealso cref="UnityEngine.Object.DontDestroyOnLoad"/>
     public class DontDestroyOnLoad : MonoBehaviour
     {
         void Awake()

@@ -52,7 +52,7 @@ namespace GLTFast.Export
         /// <summary>
         /// Returns the exported and encoded texture data
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Encoded texture data.</returns>
         public abstract byte[] GetData();
 
         /// <summary>

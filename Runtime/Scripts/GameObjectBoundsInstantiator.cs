@@ -17,7 +17,7 @@ namespace GLTFast
 
         Dictionary<uint, Bounds> m_NodeBounds;
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="GameObjectInstantiator(IGltfReadable,Transform,ICodeLogger,InstantiationSettings)"/>
         public GameObjectBoundsInstantiator(
             IGltfReadable gltf,
             Transform parent,

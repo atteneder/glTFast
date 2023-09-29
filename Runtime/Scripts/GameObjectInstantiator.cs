@@ -7,6 +7,9 @@ using GLTFast.Schema;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Profiling;
+#if UNITY_ANIMATION
+using Animation = UnityEngine.Animation;
+#endif
 using Camera = UnityEngine.Camera;
 using Material = UnityEngine.Material;
 using Mesh = UnityEngine.Mesh;
@@ -351,7 +354,7 @@ namespace GLTFast
             switch (camera.GetCameraType())
             {
                 case Schema.Camera.Type.Orthographic:
-                    var o = camera.orthographic;
+                    var o = camera.Orthographic;
                     AddCameraOrthographic(
                         nodeIndex,
                         o.znear,
@@ -362,7 +365,7 @@ namespace GLTFast
                     );
                     break;
                 case Schema.Camera.Type.Perspective:
-                    var p = camera.perspective;
+                    var p = camera.Perspective;
                     AddCameraPerspective(
                         nodeIndex,
                         p.yfov,
@@ -535,6 +538,8 @@ namespace GLTFast
         /// <summary>
         /// Information for when a node's GameObject has been created.
         /// </summary>
+        /// <param name="nodeIndex">Index of the corresponding glTF node.</param>
+        /// <param name="gameObject">GameObject that was created.</param>
         public delegate void NodeCreatedDelegate(
             uint nodeIndex,
             GameObject gameObject
@@ -543,6 +548,14 @@ namespace GLTFast
         /// <summary>
         /// Provides information for when a mesh was added to a node GameObject
         /// </summary>
+        /// <param name="gameObject">GameObject that holds the Msh.</param>
+        /// <param name="nodeIndex">Index of the node</param>
+        /// <param name="meshName">Mesh's name</param>
+        /// <param name="meshResult">The converted Mesh</param>
+        /// <param name="joints">If a skin was attached, the joint indices. Null otherwise</param>
+        /// <param name="rootJoint">Root joint node index, if present</param>
+        /// <param name="morphTargetWeights">Morph target weights, if present</param>
+        /// <param name="primitiveNumeration">Primitives are numerated per Node, starting with 0</param>
         public delegate void MeshAddedDelegate(
             GameObject gameObject,
             uint nodeIndex,

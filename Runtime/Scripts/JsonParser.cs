@@ -1,12 +1,6 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NEWTONSOFT_JSON && GLTFAST_USE_NEWTONSOFT_JSON
-#define JSON_NEWTONSOFT
-#else
-#define JSON_UTILITY
-#endif
-
 using System;
 
 namespace GLTFast
@@ -17,14 +11,10 @@ namespace GLTFast
     {
         static IGltfJsonParser k_DefaultJsonParser;
 
-        internal static Root ParseJson<T>(string json) where T : Root
+        internal static T ParseJson<T>(string json) where T : RootBase
         {
             if (k_DefaultJsonParser is null)
-#if JSON_NEWTONSOFT
-                SetDefaultParser<GltfNewtonsoftJsonParser>();
-#else
                 SetDefaultParser<GltfJsonUtilityParser>();
-#endif
 
             if (k_DefaultJsonParser is null)
                 throw new InvalidOperationException(

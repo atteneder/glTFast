@@ -175,7 +175,7 @@ namespace GLTFast.Materials
         /// the currently used render pipeline.
         /// </summary>
         /// <returns>The default material generator</returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="InvalidOperationException">Is thrown when the default material generator couldn't be determined based on the current render pipeline.</exception>
         public static IMaterialGenerator GetDefaultMaterialGenerator()
         {
 
@@ -206,7 +206,7 @@ namespace GLTFast.Materials
                     return s_DefaultMaterialGenerator;
 #endif
                 default:
-                    throw new Exception($"Could not determine default MaterialGenerator (render pipeline {renderPipeline})");
+                    throw new InvalidOperationException($"Could not determine default MaterialGenerator (render pipeline {renderPipeline})");
             }
         }
 
@@ -233,7 +233,7 @@ namespace GLTFast.Materials
         /// <summary>
         /// Creates a fallback material to be assigned to nodes without a material.
         /// </summary>
-        /// <param name="pointsSupport">If true, material has to support meshes with points topology <seealso cref="MeshTopology.Points"/></param>
+        /// <param name="pointsSupport">If true, material has to support meshes with <see cref="MeshTopology.Points">points</see> topology</param>
         /// <returns>fallback material</returns>
         protected abstract UnityEngine.Material GenerateDefaultMaterial(bool pointsSupport = false);
 
@@ -255,7 +255,7 @@ namespace GLTFast.Materials
 
         /// <inheritdoc />
         public abstract UnityEngine.Material GenerateMaterial(
-            Schema.Material gltfMaterial,
+            MaterialBase gltfMaterial,
             IGltfReadable gltf,
             bool pointsSupport = false
             );
@@ -278,7 +278,7 @@ namespace GLTFast.Materials
         /// <param name="uvChannelPropertyId">UV channel selection property</param>
         /// <returns>True if texture assignment was successful, false otherwise.</returns>
         protected bool TrySetTexture(
-            TextureInfo textureInfo,
+            TextureInfoBase textureInfo,
             UnityEngine.Material material,
             IGltfReadable gltf,
             int texturePropertyId,
@@ -331,7 +331,7 @@ namespace GLTFast.Materials
         // }
 
         void TrySetTextureTransform(
-            TextureInfo textureInfo,
+            TextureInfoBase textureInfo,
             UnityEngine.Material material,
             int texturePropertyId,
             int scaleTransformPropertyId = -1,
@@ -349,10 +349,10 @@ namespace GLTFast.Materials
 
             var texCoord = textureInfo.texCoord;
 
-            if (textureInfo.extensions?.KHR_texture_transform != null)
+            if (textureInfo.Extensions?.KHR_texture_transform != null)
             {
                 hasTransform = true;
-                var tt = textureInfo.extensions.KHR_texture_transform;
+                var tt = textureInfo.Extensions.KHR_texture_transform;
                 if (tt.texCoord >= 0)
                 {
                     texCoord = tt.texCoord;

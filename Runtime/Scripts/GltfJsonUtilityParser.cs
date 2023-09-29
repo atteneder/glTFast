@@ -15,7 +15,7 @@ namespace GLTFast
     public class GltfJsonUtilityParser : IGltfJsonParser
     {
         /// <inheritdoc/>
-        public Root ParseJson<T>(string json) where T : Root
+        public T ParseJson<T>(string json) where T : RootBase
         {
             // JsonUtility sometimes creates non-null default instances of objects-type members
             // even though there are none in the original JSON.

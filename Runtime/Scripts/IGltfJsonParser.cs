@@ -16,6 +16,6 @@ namespace GLTFast
         /// <param name="json">Source glTF JSON.</param>
         /// <typeparam name="T">Custom schema type that the glTF JSON is deserialization to.</typeparam>
         /// <returns>Deserialized glTF schema object of Type <see cref="T"/></returns>
-        Root ParseJson<T>(string json) where T : Root;
+        T ParseJson<T>(string json) where T : RootBase;
     }
 }

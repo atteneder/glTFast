@@ -8,7 +8,7 @@ namespace GLTFast.Schema
     /// TextureInfo extensions
     /// </summary>
     [System.Serializable]
-    public class TextureInfoExtension
+    public class TextureInfoExtensions
     {
 
         /// <inheritdoc cref="Extension.TextureTransform"/>

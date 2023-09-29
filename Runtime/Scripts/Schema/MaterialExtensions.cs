@@ -8,7 +8,7 @@ namespace GLTFast.Schema
     /// Material extensions.
     /// </summary>
     [System.Serializable]
-    public class MaterialExtension
+    public class MaterialExtensions
     {
 
         // Names are identical to glTF specified property names, that's why

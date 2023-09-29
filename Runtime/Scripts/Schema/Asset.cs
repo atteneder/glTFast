@@ -8,7 +8,7 @@ namespace GLTFast.Schema
     /// Metadata about the glTF asset.
     /// </summary>
     [System.Serializable]
-    public class Asset
+    public class Asset : NamedObject
     {
         /// <summary>
         /// A copyright message suitable for display to credit the content creator.

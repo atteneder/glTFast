@@ -62,28 +62,28 @@ namespace GLTFast
         /// and break subsequent scene instantiation.
         /// </summary>
         /// <returns>De-serialized glTF root object</returns>
-        Schema.Root GetSourceRoot();
+        Schema.RootBase GetSourceRoot();
 
         /// <summary>
         /// Get source (de-serialized glTF) camera
         /// </summary>
         /// <param name="index">glTF camera index</param>
         /// <returns>De-serialized glTF camera</returns>
-        Schema.Camera GetSourceCamera(uint index);
+        Schema.CameraBase GetSourceCamera(uint index);
 
         /// <summary>
         /// Get source (de-serialized glTF) material
         /// </summary>
         /// <param name="index">glTF material index</param>
         /// <returns>De-serialized glTF material</returns>
-        Schema.Material GetSourceMaterial(int index = 0);
+        Schema.MaterialBase GetSourceMaterial(int index = 0);
 
         /// <summary>
         /// Get source (de-serialized glTF) node
         /// </summary>
         /// <param name="index">glTF node index</param>
         /// <returns>De-serialized glTF node</returns>
-        Schema.Node GetSourceNode(int index = 0);
+        Schema.NodeBase GetSourceNode(int index = 0);
 
         /// <summary>
         /// Get source (de-serialized glTF) scene
@@ -97,7 +97,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="index">glTF texture index</param>
         /// <returns>De-serialized glTF texture</returns>
-        Schema.Texture GetSourceTexture(int index = 0);
+        Schema.TextureBase GetSourceTexture(int index = 0);
 
         /// <summary>
         /// Get source (de-serialized glTF) image

@@ -5,12 +5,34 @@ using Unity.Mathematics;
 
 namespace GLTFast.Schema
 {
+    /// <inheritdoc />
+    [System.Serializable]
+    public class NormalTextureInfo : NormalTextureInfoBase<TextureInfoExtensions> { }
+
+    /// <inheritdoc />
+    /// <typeparam name="TExtensions">normalTextureInfo extension type</typeparam>
+    [System.Serializable]
+    public abstract class NormalTextureInfoBase<TExtensions> : NormalTextureInfoBase
+        where TExtensions : TextureInfoExtensions, new()
+    {
+        /// <inheritdoc cref="Extensions"/>
+        public TExtensions extensions;
+
+        /// <inheritdoc />
+        public override TextureInfoExtensions Extensions => extensions;
+
+        internal override void SetTextureTransform(TextureTransform textureTransform)
+        {
+            extensions = extensions ?? new TExtensions();
+            extensions.KHR_texture_transform = textureTransform;
+        }
+    }
 
     /// <summary>
     /// Normal map specific texture info
     /// </summary>
     [System.Serializable]
-    public class NormalTextureInfo : TextureInfo
+    public abstract class NormalTextureInfoBase : TextureInfoBase
     {
 
         /// <summary>

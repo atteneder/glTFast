@@ -11,8 +11,8 @@ namespace GLTFast.Schema
     /// existing glTF material definition. A sheen layer is a common technique
     /// used in Physically-Based Rendering to represent cloth and fabric
     /// materials, for example.
-    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_sheen"/>
     /// </summary>
+    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_sheen"/>
     [System.Serializable]
     public class Sheen
     {

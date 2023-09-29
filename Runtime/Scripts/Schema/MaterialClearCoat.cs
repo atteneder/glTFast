@@ -7,8 +7,8 @@ namespace GLTFast.Schema
     /// <summary>
     /// This extension defines a clear coating that can be layered on top of an
     /// existing glTF material definition.
-    /// <seealso href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_clearcoat/README.md"/>
     /// </summary>
+    /// <seealso href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_clearcoat/README.md"/>
     [System.Serializable]
     public class ClearCoat
     {

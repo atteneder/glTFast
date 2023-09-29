@@ -19,7 +19,7 @@
     "com.unity.modules.jsonserialize": "1.0.0",
     "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.mathematics": "1.2.6",
-    "com.unity.burst": "1.8.2"
+    "com.unity.burst": "1.8.8"
   },
   "type": "library",
   "unityRelease": "48f1"

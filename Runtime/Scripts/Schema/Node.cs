@@ -1,25 +1,37 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NEWTONSOFT_JSON && GLTFAST_USE_NEWTONSOFT_JSON
-#define JSON_NEWTONSOFT
-#else
-#define JSON_UTILITY
-#endif
-
-#if JSON_NEWTONSOFT
-using Newtonsoft.Json.Linq;
-#endif
-
 namespace GLTFast.Schema
 {
+    /// <inheritdoc />
+    [System.Serializable]
+    public class Node : NodeBase<NodeExtensions> { }
+
+    /// <inheritdoc />
+    /// <typeparam name="TExtensions">Node extensions type</typeparam>
+    [System.Serializable]
+    public abstract class NodeBase<TExtensions> : NodeBase
+        where TExtensions : NodeExtensions
+    {
+        /// <inheritdoc cref="Extensions"/>
+        public TExtensions extensions;
+
+        /// <inheritdoc />
+        public override NodeExtensions Extensions => extensions;
+
+        /// <inheritdoc />
+        internal override void UnsetExtensions()
+        {
+            extensions = null;
+        }
+    }
 
     /// <summary>
     /// An object defining the hierarchy relations and the local transform of
     /// its content.
     /// </summary>
     [System.Serializable]
-    public class Node : NamedObject
+    public abstract class NodeBase : NamedObject
     {
 
         /// <summary>
@@ -60,6 +72,7 @@ namespace GLTFast.Schema
         // public double[] weights;
 
         /// <summary>
+        /// The index of the skin (in <see cref="RootBase.Skins"/> referenced by this node.
         /// </summary>
         public int skin = -1;
 
@@ -69,16 +82,17 @@ namespace GLTFast.Schema
         public int camera = -1;
 
         /// <inheritdoc cref="NodeExtensions"/>
-        public NodeExtensions extensions;
+        public abstract NodeExtensions Extensions { get; }
 
-#if JSON_NEWTONSOFT
-        public JToken extras;
-#endif
+        /// <summary>
+        /// Sets <see cref="Extensions"/> to null.
+        /// </summary>
+        internal abstract void UnsetExtensions();
 
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
-            GltfSerializeRoot(writer);
+            GltfSerializeName(writer);
 
             if (children != null)
             {
@@ -120,12 +134,42 @@ namespace GLTFast.Schema
                 writer.AddProperty("camera", camera);
             }
 
-            if (extensions != null)
+            if (Extensions != null)
             {
                 writer.AddProperty("extensions");
-                extensions.GltfSerialize(writer);
+                Extensions.GltfSerialize(writer);
             }
             writer.Close();
+        }
+
+        /// <summary>
+        /// Cleans up invalid parsing artifacts created by <see cref="GltfJsonUtilityParser"/>.
+        /// If you inherit a custom Node class (for use with
+        /// <see cref="GltfImport.LoadWithCustomSchema&lt;T&gt;(string,ImportSettings,System.Threading.CancellationToken)"/>
+        /// ) you can override this method to perform sanity checks on the deserialized, custom properties.
+        /// </summary>
+        public virtual void JsonUtilityCleanup()
+        {
+            var e = Extensions;
+            if (e != null)
+            {
+                // Check if GPU instancing extension is valid
+                if (e.EXT_mesh_gpu_instancing?.attributes == null)
+                {
+                    e.EXT_mesh_gpu_instancing = null;
+                }
+                // Check if Lights extension is valid
+                if ((e.KHR_lights_punctual?.light ?? -1) < 0)
+                {
+                    e.KHR_lights_punctual = null;
+                }
+                // Unset `extension` if none of them was valid
+                if (e.EXT_mesh_gpu_instancing == null &&
+                    e.KHR_lights_punctual == null)
+                {
+                    UnsetExtensions();
+                }
+            }
         }
     }
 

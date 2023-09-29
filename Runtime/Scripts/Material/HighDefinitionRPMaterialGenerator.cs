@@ -50,7 +50,7 @@ namespace GLTFast.Materials {
         }
 #endif // !UNITY_SHADER_GRAPH_12_OR_NEWER
 
-        protected override void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
+        protected override void SetDoubleSided(Schema.MaterialBase gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
 
             material.EnableKeyword(k_DoubleSidedOnKeyword);
@@ -65,7 +65,7 @@ namespace GLTFast.Materials {
         }
 #endif // USING_HDRP_10_OR_NEWER
 
-        protected override void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
+        protected override void SetAlphaModeMask(Schema.MaterialBase gltfMaterial, Material material) {
             base.SetAlphaModeMask(gltfMaterial,material);
 
             material.SetFloat(k_AlphaCutoffEnable, 1);
@@ -73,7 +73,7 @@ namespace GLTFast.Materials {
             material.SetShaderPassEnabled(MotionVectorsPass, false);
 
 
-            if (gltfMaterial.extensions?.KHR_materials_unlit != null) {
+            if (gltfMaterial.Extensions?.KHR_materials_unlit != null) {
 #if USING_HDRP_10_OR_NEWER
                 material.EnableKeyword(SurfaceTypeTransparentKeyword);
                 material.EnableKeyword(DisableSsrTransparentKeyword);
@@ -99,7 +99,7 @@ namespace GLTFast.Materials {
         }
 
 #if USING_HDRP_10_OR_NEWER
-        protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
+        protected override void SetShaderModeBlend(Schema.MaterialBase gltfMaterial, Material material) {
 
             material.DisableKeyword(AlphaTestOnKeyword);
             material.EnableKeyword(SurfaceTypeTransparentKeyword);

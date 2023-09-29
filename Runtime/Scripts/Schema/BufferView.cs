@@ -1,9 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if MESHOPT
-using Meshoptimizer;
-#endif
+using System;
 
 namespace GLTFast.Schema
 {
@@ -15,30 +13,25 @@ namespace GLTFast.Schema
     //     ElementArrayBuffer = 34963,
     // }
 
-    /// <summary>
-    /// Base class; Consists of a byte size and offset
-    /// </summary>
-    [System.Serializable]
-    public abstract class BufferSlice
-    {
-        /// <summary>
-        /// The offset into the buffer in bytes.
-        /// <minimum>0</minimum>
-        /// </summary>
-        public int byteOffset;
+    /// <inheritdoc/>
+    [Serializable]
+    public class BufferView : BufferViewBase<BufferViewExtensions> { }
 
-        /// <summary>
-        /// The length of the bufferView in bytes.
-        /// <minimum>0</minimum>
-        /// </summary>
-        public int byteLength;
+    /// <inheritdoc/>
+    [Serializable]
+    public class BufferViewBase<TExtensions> : BufferViewBase
+    where TExtensions : BufferViewExtensions
+    {
+        /// <inheritdoc cref="Extensions"/>
+        public TExtensions extensions;
+
+        /// <inheritdoc cref="BufferViewBase.Extensions"/>
+        public override BufferViewExtensions Extensions => extensions;
     }
 
-    /// <summary>
-    /// Adds buffer index and byte stride to <seealso cref="BufferSlice"/>
-    /// </summary>
-    [System.Serializable]
-    public class BufferViewBase : BufferSlice
+    /// <inheritdoc cref="IBufferView"/>
+    [Serializable]
+    public abstract class BufferViewBase : NamedObject, IBufferView
     {
         /// <summary>
         /// The index of the buffer.
@@ -46,26 +39,36 @@ namespace GLTFast.Schema
         public int buffer;
 
         /// <summary>
+        /// The offset into the buffer in bytes.
+        /// </summary>
+        public int byteOffset;
+
+        /// <summary>
+        /// The length of the bufferView in bytes.
+        /// </summary>
+        public int byteLength;
+
+        /// <summary>
         /// The stride, in bytes, between vertex attributes or other interleaved data.
         /// When this is zero, data is tightly packed.
-        /// <minimum>0</minimum>
-        /// <maximum>255</maximum>
         /// </summary>
         public int byteStride = -1;
-    }
 
-    /// <summary>
-    /// A view into a buffer generally representing a subset of the buffer.
-    /// </summary>
-    [System.Serializable]
-    public class BufferView : BufferViewBase
-    {
         /// <summary>
         /// The target that the WebGL buffer should be bound to.
         /// All valid values correspond to WebGL enums.
         /// When this is not provided, the bufferView contains animation or skin data.
         /// </summary>
         public int target;
+
+        /// <inheritdoc cref="IBufferView.Buffer"/>
+        public int Buffer => buffer;
+
+        /// <inheritdoc cref="IBufferView.ByteOffset"/>
+        public int ByteOffset => byteOffset;
+
+        /// <inheritdoc cref="IBufferView.ByteLength"/>
+        public int ByteLength => byteLength;
 
         internal void GltfSerialize(JsonWriter writer)
         {
@@ -87,56 +90,7 @@ namespace GLTFast.Schema
             writer.Close();
         }
 
-#if MESHOPT
-        public BufferViewExtensions extensions;
-#endif
+        /// <inheritdoc cref="BufferViewExtensions"/>
+        public abstract BufferViewExtensions Extensions { get; }
     }
-
-#if MESHOPT
-    [System.Serializable]
-    public class BufferViewExtensions {
-        // ReSharper disable InconsistentNaming
-        public BufferViewMeshoptExtension EXT_meshopt_compression;
-        // ReSharper restore InconsistentNaming
-    }
-
-    [System.Serializable]
-    public class BufferViewMeshoptExtension : BufferViewBase {
-
-        public int count;
-        public string mode;
-        public string filter;
-
-        Mode m_ModeEnum = Mode.Undefined;
-        Filter m_FilterEnum = Filter.Undefined;
-
-        public Mode GetMode() {
-            if (m_ModeEnum != Mode.Undefined) {
-                return m_ModeEnum;
-            }
-
-            if (!string.IsNullOrEmpty(mode)) {
-                m_ModeEnum = (Mode)System.Enum.Parse(typeof(Mode), mode, true);
-                mode = null;
-                return m_ModeEnum;
-            }
-
-            return Mode.Undefined;
-        }
-
-        public Filter GetFilter() {
-            if (m_FilterEnum != Filter.Undefined) {
-                return m_FilterEnum;
-            }
-
-            if (!string.IsNullOrEmpty(filter)) {
-                m_FilterEnum = (Filter)System.Enum.Parse(typeof(Filter), filter, true);
-                filter = null;
-                return m_FilterEnum;
-            }
-
-            return Filter.None;
-        }
-    }
-#endif
 }

@@ -19,7 +19,7 @@ namespace GLTFast.Export
         /// Provides the default material exporter
         /// </summary>
         /// <returns>Default material export</returns>
-        /// <exception cref="Exception"></exception>
+        /// <exception cref="InvalidOperationException">Is thrown when the default material export couldn't be determined based on the current render pipeline.</exception>
         public static IMaterialExport GetDefaultMaterialExport()
         {
             if (s_MaterialExport == null)
@@ -39,7 +39,7 @@ namespace GLTFast.Export
                         break;
 #endif
                     default:
-                        throw new Exception($"Could not determine default MaterialExport (render pipeline {renderPipeline})");
+                        throw new InvalidOperationException($"Could not determine default MaterialExport (render pipeline {renderPipeline})");
                 }
             }
             return s_MaterialExport;

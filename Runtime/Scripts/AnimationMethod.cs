@@ -15,11 +15,11 @@ namespace GLTFast
         /// </summary>
         None,
         /// <summary>
-        /// <see href="https://docs.unity3d.com/Manual/Animations.html">Legacy Animation System</see>
+        /// <a href="https://docs.unity3d.com/Manual/Animations.html">Legacy Animation System</a>
         /// </summary>
         Legacy,
         /// <summary>
-        /// <see href="https://docs.unity3d.com/Manual/AnimationOverview.html">Default Animation System (Mecanim)</see>
+        /// <a href="https://docs.unity3d.com/Manual/AnimationOverview.html">Default Animation System (Mecanim)</a>
         /// </summary>
         Mecanim
     }

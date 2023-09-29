@@ -6,8 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Value array JSON parsing tests
+- String/enum conversions tests
+
 ### Changed
 - Pull changes from 5.2.0
+- Renamed `GltfAnimation` to `Animation` for consistent naming.
+
+### Fixed
+- Added Obsolete attribute to public schema class fields that are for serialization only and should not get modified directly.
+- More robust parsing of (invalid) enum values
 
 ## [6.0.0-pre.2] - 2023-05-25
 
@@ -25,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IGltfReadable.GetAccessor`: Generic byte-array view into an accessor
 - `IJsonParser` to support custom JSON parsers, using `JsonUtility` as the default
 - `JsonParser.SetDefaultParser`: Set a custom `IJsonParser`
-- `JsonParser.SetDefaultImplementation`: Set a custom `IJsonParser`
 - `GameObjectInstantiator` events that allow further instantiation customizations
   - `NodeCreated`
   - `MeshAdded`

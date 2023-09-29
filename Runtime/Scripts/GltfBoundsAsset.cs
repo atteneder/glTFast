@@ -13,7 +13,7 @@ namespace GLTFast
 
     /// <summary>
     /// Base component for code-less loading of glTF files
-    /// Extends <seealso cref="GltfAsset"/> with bounding box calculation
+    /// Extends <see cref="GltfAsset"/> with bounding box calculation
     /// </summary>
     public class GltfBoundsAsset : GltfAsset
     {

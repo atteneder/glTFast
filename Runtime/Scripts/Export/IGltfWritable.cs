@@ -75,8 +75,8 @@ namespace GLTFast.Export
         /// <summary>
         /// Creates a glTF texture from with a given image index
         /// </summary>
-        /// <param name="imageId">glTF image index returned by <seealso cref="AddImage"/></param>
-        /// <param name="samplerId">glTF sampler index returned by <seealso cref="AddSampler"/></param>
+        /// <param name="imageId">glTF image index returned by <see cref="AddImage"/></param>
+        /// <param name="samplerId">glTF sampler index returned by <see cref="AddSampler"/></param>
         /// <returns>glTF texture index</returns>
         int AddTexture(int imageId, int samplerId);
 

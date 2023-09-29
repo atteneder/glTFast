@@ -8,7 +8,7 @@ namespace GLTFast.Schema
     /// Texture extensions
     /// </summary>
     [System.Serializable]
-    public class TextureExtension
+    public class TextureExtensions
     {
 
         /// <inheritdoc cref="Extension.TextureBasisUniversal"/>
@@ -23,8 +23,8 @@ namespace GLTFast.Schema
 
     /// <summary>
     /// Basis Universal texture extension
-    /// <seealso cref="Extension.TextureBasisUniversal"/>
     /// </summary>
+    /// <seealso cref="Extension.TextureBasisUniversal"/>
     [System.Serializable]
     public class TextureBasisUniversal
     {

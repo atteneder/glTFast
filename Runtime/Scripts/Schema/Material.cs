@@ -1,17 +1,87 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace GLTFast.Schema
 {
+    /// <inheritdoc />
+    [Serializable]
+    public class Material : MaterialBase<
+        MaterialExtensions,
+        NormalTextureInfo,
+        OcclusionTextureInfo,
+        PbrMetallicRoughness,
+        TextureInfo,
+        TextureInfoExtensions
+    >
+    { }
+
+    /// <inheritdoc />
+    /// <typeparam name="TExtensions">Material extensions type</typeparam>
+    /// <typeparam name="TNormalTextureInfo">normalTextureInfo type</typeparam>
+    /// <typeparam name="TOcclusionTextureInfo">occlusionTextureInfo type</typeparam>
+    /// <typeparam name="TPbrMetallicRoughness">PBR Metallic Roughness type</typeparam>
+    /// <typeparam name="TTextureInfo">textureInfo type</typeparam>
+    /// <typeparam name="TTextureInfoExtensions">textureInfo extensions type</typeparam>
+    [Serializable]
+    public abstract class MaterialBase<
+        TExtensions,
+        TNormalTextureInfo,
+        TOcclusionTextureInfo,
+        TPbrMetallicRoughness,
+        TTextureInfo,
+        TTextureInfoExtensions
+        > : MaterialBase
+    where TExtensions : MaterialExtensions
+    where TNormalTextureInfo : NormalTextureInfoBase
+    where TOcclusionTextureInfo : OcclusionTextureInfoBase
+    where TPbrMetallicRoughness : PbrMetallicRoughnessBase
+    where TTextureInfo : TextureInfoBase
+    where TTextureInfoExtensions : TextureInfoExtensions
+    {
+
+        /// <inheritdoc cref="EmissiveTexture"/>
+        public TTextureInfo emissiveTexture;
+        /// <inheritdoc cref="Extensions"/>
+        public TExtensions extensions;
+        /// <inheritdoc cref="NormalTexture"/>
+        public TNormalTextureInfo normalTexture;
+        /// <inheritdoc cref="OcclusionTexture"/>
+        public TOcclusionTextureInfo occlusionTexture;
+        /// <inheritdoc cref="PbrMetallicRoughness"/>
+        public TPbrMetallicRoughness pbrMetallicRoughness;
+
+        /// <inheritdoc />
+        public override MaterialExtensions Extensions => extensions;
+
+        /// <inheritdoc />
+        internal override void UnsetExtensions()
+        {
+            extensions = null;
+        }
+
+        /// <inheritdoc />
+        public override PbrMetallicRoughnessBase PbrMetallicRoughness => pbrMetallicRoughness;
+
+        /// <inheritdoc />
+        public override NormalTextureInfoBase NormalTexture => normalTexture;
+
+        /// <inheritdoc />
+        public override OcclusionTextureInfoBase OcclusionTexture => occlusionTexture;
+
+        /// <inheritdoc />
+        public override TextureInfoBase EmissiveTexture => emissiveTexture;
+    }
 
     /// <summary>
     /// The material appearance of a primitive.
     /// </summary>
-    [System.Serializable]
-    public class Material : NamedObject
+    [Serializable]
+    public abstract class MaterialBase : NamedObject
     {
 
         /// <summary>
@@ -44,14 +114,18 @@ namespace GLTFast.Schema
         /// <summary>
         /// Material extensions.
         /// </summary>
-        public MaterialExtension extensions;
+        public abstract MaterialExtensions Extensions { get; }
 
+        /// <summary>
+        /// Sets <see cref="Extensions"/> to null.
+        /// </summary>
+        internal abstract void UnsetExtensions();
 
         /// <summary>
         /// A set of parameter values that are used to define the metallic-roughness
         /// material model from Physically-Based Rendering (PBR) methodology.
         /// </summary>
-        public PbrMetallicRoughness pbrMetallicRoughness;
+        public abstract PbrMetallicRoughnessBase PbrMetallicRoughness { get; }
 
         // /// <summary>
         // /// A set of parameter values used to light flat-shaded materials
@@ -62,47 +136,44 @@ namespace GLTFast.Schema
         /// A tangent space normal map. Each texel represents the XYZ components of a
         /// normal vector in tangent space.
         /// </summary>
-        public NormalTextureInfo normalTexture;
+        public abstract NormalTextureInfoBase NormalTexture { get; }
 
         /// <summary>
         /// The occlusion map is a greyscale texture, with white indicating areas that
         /// should receive full indirect lighting and black indicating no indirect
         /// lighting.
         /// </summary>
-        public OcclusionTextureInfo occlusionTexture;
+        public abstract OcclusionTextureInfoBase OcclusionTexture { get; }
 
         /// <summary>
         /// The emissive map controls the color and intensity of the light being emitted
         /// by the material. This texture contains RGB components in sRGB color space.
         /// If a fourth component (A) is present, it is ignored.
         /// </summary>
-        public TextureInfo emissiveTexture;
+        public abstract TextureInfoBase EmissiveTexture { get; }
 
         /// <summary>
         /// The RGB components of the emissive color of the material.
         /// If an emissiveTexture is specified, this value is multiplied with the texel
         /// values.
-        /// <items>
-        ///  <minimum>0.0</minimum>
-        ///  <maximum>1.0</maximum>
-        /// </items>
-        /// <minItems>3</minItems>
-        /// <maxItems>3</maxItems>
         /// </summary>
-        [SerializeField]
-        float[] emissiveFactor = { 0, 0, 0 };
+        // Field is public for unified serialization only. Warn via Obsolete attribute.
+        [Obsolete("Use Emissive for access.")]
+        public float[] emissiveFactor = { 0, 0, 0 };
 
         /// <summary>
         /// Emissive color of the material.
         /// </summary>
         public Color Emissive
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             get => new Color(
                 emissiveFactor[0],
                 emissiveFactor[1],
                 emissiveFactor[2]
                 );
             set => emissiveFactor = new[] { value.r, value.g, value.b };
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>
@@ -114,7 +185,8 @@ namespace GLTFast.Schema
         /// the source and destination areas. The rendered output is combined with the background
         /// using the normal painting operation (i.e. the Porter and Duff over operator).
         /// </summary>
-        [SerializeField]
+        // Field is public for unified serialization only. Warn via Obsolete attribute.
+        [Obsolete("Use GetAlphaMode and SetAlphaMode for access.")]
         public string alphaMode;
 
         AlphaMode? m_AlphaModeEnum;
@@ -130,14 +202,13 @@ namespace GLTFast.Schema
                 return m_AlphaModeEnum.Value;
             }
 
-            if (!string.IsNullOrEmpty(alphaMode))
-            {
-                m_AlphaModeEnum = (AlphaMode)System.Enum.Parse(typeof(AlphaMode), alphaMode, true);
-                alphaMode = null;
-                return m_AlphaModeEnum.Value;
-            }
-
-            return AlphaMode.Opaque;
+#pragma warning disable CS0618 // Type or member is obsolete
+            m_AlphaModeEnum = Enum.TryParse<AlphaMode>(alphaMode, true, out var alphaModeEnum)
+                ? alphaModeEnum
+                : AlphaMode.Opaque;
+            alphaMode = null;
+#pragma warning restore CS0618 // Type or member is obsolete
+            return m_AlphaModeEnum.Value;
         }
 
         /// <summary>
@@ -147,10 +218,9 @@ namespace GLTFast.Schema
         public void SetAlphaMode(AlphaMode mode)
         {
             m_AlphaModeEnum = mode;
-            if (mode != AlphaMode.Opaque)
-            {
-                alphaMode = mode.ToString().ToUpper();
-            }
+#pragma warning disable CS0618 // Type or member is obsolete
+            alphaMode = null;
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>
@@ -171,37 +241,38 @@ namespace GLTFast.Schema
         /// <summary>
         /// True if the material requires the mesh to have normals.
         /// </summary>
-        public bool RequiresNormals => extensions?.KHR_materials_unlit == null;
+        public bool RequiresNormals => Extensions?.KHR_materials_unlit == null;
 
         /// <summary>
         /// True if the material requires the mesh to have tangents.
         /// </summary>
-        public bool RequiresTangents => normalTexture != null && normalTexture.index >= 0;
+        public bool RequiresTangents => NormalTexture != null && NormalTexture.index >= 0;
 
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
-            GltfSerializeRoot(writer);
-            if (pbrMetallicRoughness != null)
+            GltfSerializeName(writer);
+            if (PbrMetallicRoughness != null)
             {
                 writer.AddProperty("pbrMetallicRoughness");
-                pbrMetallicRoughness.GltfSerialize(writer);
+                PbrMetallicRoughness.GltfSerialize(writer);
             }
-            if (normalTexture != null)
+            if (NormalTexture != null)
             {
                 writer.AddProperty("normalTexture");
-                normalTexture.GltfSerialize(writer);
+                NormalTexture.GltfSerialize(writer);
             }
-            if (occlusionTexture != null)
+            if (OcclusionTexture != null)
             {
                 writer.AddProperty("occlusionTexture");
-                occlusionTexture.GltfSerialize(writer);
+                OcclusionTexture.GltfSerialize(writer);
             }
-            if (emissiveTexture != null)
+            if (EmissiveTexture != null)
             {
                 writer.AddProperty("emissiveTexture");
-                emissiveTexture.GltfSerialize(writer);
+                EmissiveTexture.GltfSerialize(writer);
             }
+#pragma warning disable CS0618 // Type or member is obsolete
             if (emissiveFactor != null
                 && (
                     emissiveFactor[0] > Constants.epsilon
@@ -211,9 +282,10 @@ namespace GLTFast.Schema
             {
                 writer.AddArrayProperty("emissiveFactor", emissiveFactor);
             }
-            if (!string.IsNullOrEmpty(alphaMode))
+#pragma warning restore CS0618 // Type or member is obsolete
+            if (m_AlphaModeEnum.HasValue && m_AlphaModeEnum.Value != AlphaMode.Opaque)
             {
-                writer.AddProperty("alphaMode", alphaMode);
+                writer.AddProperty("alphaMode", m_AlphaModeEnum.Value.ToString().ToUpper());
             }
             if (math.abs(alphaCutoff - .5f) > Constants.epsilon)
             {
@@ -223,10 +295,10 @@ namespace GLTFast.Schema
             {
                 writer.AddProperty("doubleSided", doubleSided);
             }
-            if (extensions != null)
+            if (Extensions != null)
             {
                 writer.AddProperty("extensions");
-                extensions.GltfSerialize(writer);
+                Extensions.GltfSerialize(writer);
             }
             writer.Close();
         }
