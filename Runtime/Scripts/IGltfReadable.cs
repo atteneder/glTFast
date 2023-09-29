@@ -9,6 +9,8 @@ using Material = UnityEngine.Material;
 namespace GLTFast
 {
 
+    /// <inheritdoc />
+    /// <typeparam name="TRoot">glTF root (de-serialized glTF JSON) class type</typeparam>
     public interface IGltfReadable<out TRoot> : IGltfReadable
         where TRoot : RootBase
     {

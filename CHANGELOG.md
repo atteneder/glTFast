@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Pull changes from 5.2.0
 - Renamed `GltfAnimation` to `Animation` for consistent naming.
+- Bumped Burst dependency version to 1.8.4
+- Bumped Mathematics dependency version to 1.3.1
 
 ### Removed
 - Support for deserializing custom data via custom glTF JSON schema class

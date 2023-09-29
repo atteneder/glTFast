@@ -43,7 +43,7 @@ namespace GLTFast.Materials {
         static Shader s_MetallicStackLitShader;
 
 #if !UNITY_SHADER_GRAPH_12_OR_NEWER
-        
+
         /// <summary>
         /// Forces non-legacy shader graph for HDRP 10.x
         /// </summary>
@@ -131,7 +131,7 @@ namespace GLTFast.Materials {
         {
             if ((features & MetallicShaderFeatures.ClearCoat) != 0)
             {
-                if (!s_MetallicStackLitShaderQueried) 
+                if (!s_MetallicStackLitShaderQueried)
                 {
                     s_MetallicStackLitShader = LoadShaderByName(MetallicStackLitShader);
                     if (s_MetallicStackLitShader == null)
@@ -146,7 +146,7 @@ namespace GLTFast.Materials {
 
             return base.GetMetallicShader(features);
         }
-  
+
         protected override void SetShaderModeBlend(Schema.MaterialBase gltfMaterial, Material material) {
 
             material.DisableKeyword(AlphaTestOnKeyword);

@@ -60,10 +60,16 @@ namespace GLTFast
     using Materials;
     using Schema;
 
+    /// <summary>
+    /// Loads a glTF's content, converts it to Unity resources and is able to
+    /// feed it to an <see cref="IInstantiator"/> for instantiation.
+    /// Uses the efficient and fast JsonUtility/<see cref="GltfJsonUtilityParser"/> for JSON parsing.
+    /// </summary>
     public class GltfImport : GltfImportBase<Root>
     {
         static GltfJsonUtilityParser s_Parser;
 
+        /// <inheritdoc cref="GltfImportBase(IDownloadProvider,IDeferAgent,IMaterialGenerator,ICodeLogger"/>
         public GltfImport(
             IDownloadProvider downloadProvider = null,
             IDeferAgent deferAgent = null,
@@ -71,6 +77,7 @@ namespace GLTFast
             ICodeLogger logger = null
         ) : base(downloadProvider, deferAgent, materialGenerator, logger) { }
 
+        /// <inheritdoc />
         protected override RootBase ParseJson(string json)
         {
             s_Parser ??= new GltfJsonUtilityParser();
@@ -78,9 +85,12 @@ namespace GLTFast
         }
     }
 
+    /// <inheritdoc cref="GltfImportBase"/>
+    /// <typeparam name="TRoot">Root schema class to use for de-serialization.</typeparam>
     public abstract class GltfImportBase<TRoot> : GltfImportBase, IGltfReadable<TRoot>
         where TRoot : RootBase
     {
+        /// <inheritdoc cref="GltfImportBase(IDownloadProvider,IDeferAgent,IMaterialGenerator,ICodeLogger"/>
         public GltfImportBase(
             IDownloadProvider downloadProvider = null,
             IDeferAgent deferAgent = null,
@@ -90,6 +100,7 @@ namespace GLTFast
 
         TRoot m_Root;
 
+        /// <inheritdoc />
         protected override RootBase Root
         {
             get => m_Root;
@@ -1013,6 +1024,11 @@ namespace GLTFast
             return success;
         }
 
+        /// <summary>
+        /// De-serializes a glTF JSON string and returns the glTF root schema object.
+        /// </summary>
+        /// <param name="json">glTF JSON</param>
+        /// <returns>De-serialized glTF root object.</returns>
         protected abstract RootBase ParseJson(string json);
 
         async Task<bool> ParseJsonAndLoadBuffers(string json, Uri baseUri)

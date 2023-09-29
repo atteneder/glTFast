@@ -74,7 +74,7 @@ namespace GLTFast.Materials {
         {
             if ((features & MetallicShaderFeatures.ClearCoat) != 0)
             {
-                if (!s_MetallicClearcoatShaderQueried) 
+                if (!s_MetallicClearcoatShaderQueried)
                 {
                     s_MetallicClearcoatShader = LoadShaderByName(MetallicClearcoatShader);
                     if (s_MetallicClearcoatShader == null)

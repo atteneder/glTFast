@@ -13,6 +13,11 @@ using Root = GLTFast.Newtonsoft.Schema.Root;
 
 namespace GLTFast.Newtonsoft
 {
+    /// <summary>
+    /// Loads a glTF's content, converts it to Unity resources and is able to
+    /// feed it to an <see cref="IInstantiator"/> for instantiation.
+    /// Uses the powerful Newtonsoft JSON and flexible <see cref="Root"/> schema class for JSON de-serialization.
+    /// </summary>
     public class GltfImport : GltfImportBase<Root>
     {
         public GltfImport(
