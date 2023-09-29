@@ -25,7 +25,7 @@ namespace GLTFast.Addons
         /// Injects this import instance into a <see cref="GltfImport"/>
         /// </summary>
         /// <param name="gltfImport"><see cref="GltfImport"/> to be injected into.</param>
-        public abstract void Inject(GltfImport gltfImport);
+        public abstract void Inject(GltfImportBase gltfImport);
 
         /// <summary>
         /// Injects this import instance into an instantiator.

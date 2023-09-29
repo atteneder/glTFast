@@ -3,7 +3,7 @@
 
 using System;
 #if NEWTONSOFT_JSON
-using GLTFast.Newtonsoft;
+using Newtonsoft.Json;
 #endif
 using GLTFast.Schema;
 #if MESHOPT
@@ -22,18 +22,17 @@ namespace GLTFast.Tests.JsonParsing
     {
         Root m_Gltf;
 #if NEWTONSOFT_JSON
-        Root m_GltfNewtonsoft;
+        Newtonsoft.Schema.Root m_GltfNewtonsoft;
 #endif
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             var jsonUtilityParser = new GltfJsonUtilityParser();
-            m_Gltf = jsonUtilityParser.ParseJson<Root>(k_EnumTypesJson);
+            m_Gltf = (Root)jsonUtilityParser.ParseJson(k_EnumTypesJson);
 
 #if NEWTONSOFT_JSON
-            var newtonsoftJsonParser = new GltfNewtonsoftJsonParser();
-            m_GltfNewtonsoft = newtonsoftJsonParser.ParseJson<Root>(k_EnumTypesJson);
+            m_GltfNewtonsoft = JsonConvert.DeserializeObject<Newtonsoft.Schema.Root>(k_EnumTypesJson);
 #endif
         }
 
@@ -349,7 +348,7 @@ namespace GLTFast.Tests.JsonParsing
 #pragma warning restore CS0618 // Type or member is obsolete
         }
 
-        static void CheckResultAccessor(Root gltf)
+        static void CheckResultAccessor(RootBase gltf)
         {
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.Accessors);
@@ -359,7 +358,7 @@ namespace GLTFast.Tests.JsonParsing
         }
 
 #if UNITY_ANIMATION
-        static void CheckResultAnimation(Root gltf)
+        static void CheckResultAnimation(RootBase gltf)
         {
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.Animations);
@@ -374,7 +373,7 @@ namespace GLTFast.Tests.JsonParsing
         }
 #endif
 
-        static void CheckResultCamera(Root gltf)
+        static void CheckResultCamera(RootBase gltf)
         {
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.Cameras);
@@ -383,7 +382,7 @@ namespace GLTFast.Tests.JsonParsing
         }
 
 #if MESHOPT
-        static void CheckResultMeshopt(Root gltf)
+        static void CheckResultMeshopt(RootBase gltf)
         {
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.BufferViews);
@@ -393,30 +392,30 @@ namespace GLTFast.Tests.JsonParsing
             Assert.AreEqual(Filter.Exponential, gltf.BufferViews[0].Extensions?.EXT_meshopt_compression.GetFilter());
         }
 #endif
-        static void CheckResultRootExtensions(Root gltf)
+        static void CheckResultRootExtensions(RootBase gltf)
         {
             Assert.NotNull(gltf);
-            Assert.NotNull(gltf.extensions);
-            Assert.NotNull(gltf.extensions.KHR_lights_punctual);
-            Assert.NotNull(gltf.extensions.KHR_lights_punctual.lights);
-            Assert.AreEqual(1, gltf.extensions.KHR_lights_punctual.lights.Length);
-            Assert.AreEqual(LightPunctual.Type.Directional, gltf.extensions.KHR_lights_punctual.lights[0].GetLightType());
+            Assert.NotNull(gltf.Extensions);
+            Assert.NotNull(gltf.Extensions.KHR_lights_punctual);
+            Assert.NotNull(gltf.Extensions.KHR_lights_punctual.lights);
+            Assert.AreEqual(1, gltf.Extensions.KHR_lights_punctual.lights.Length);
+            Assert.AreEqual(LightPunctual.Type.Directional, gltf.Extensions.KHR_lights_punctual.lights[0].GetLightType());
         }
 
-        static void CheckResultMaterials(Root gltf)
+        static void CheckResultMaterials(RootBase gltf)
         {
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.Materials);
             Assert.AreEqual(1, gltf.Materials.Count);
             Assert.AreEqual(Material.AlphaMode.Mask, gltf.Materials[0].GetAlphaMode());
-            Assert.NotNull(gltf.meshes);
-            Assert.AreEqual(1, gltf.meshes.Length);
-            Assert.NotNull(gltf.meshes[0].primitives);
-            Assert.AreEqual(1, gltf.meshes[0].primitives.Length);
-            Assert.AreEqual(DrawMode.LineStrip, gltf.meshes[0].primitives[0].mode);
+            Assert.NotNull(gltf.Meshes);
+            Assert.AreEqual(1, gltf.Meshes.Count);
+            Assert.NotNull(gltf.Meshes[0].Primitives);
+            Assert.AreEqual(1, gltf.Meshes[0].Primitives.Count);
+            Assert.AreEqual(DrawMode.LineStrip, gltf.Meshes[0].Primitives[0].mode);
         }
 
-        static void CheckResultSamplers(Root gltf)
+        static void CheckResultSamplers(RootBase gltf)
         {
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.Samplers);

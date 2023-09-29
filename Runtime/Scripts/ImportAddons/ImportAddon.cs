@@ -13,7 +13,7 @@ namespace GLTFast.Addons
         /// Creates an import instance that is assigned to a <see cref="GltfImport"/>
         /// </summary>
         /// <param name="gltfImport">GltfImport the import instance is assigned to.</param>
-        public abstract void CreateImportInstance(GltfImport gltfImport);
+        public abstract void CreateImportInstance(GltfImportBase gltfImport);
     }
 
     /// <summary>
@@ -24,7 +24,7 @@ namespace GLTFast.Addons
         where TInstance : ImportAddonInstance, new()
     {
         /// <inheritdoc />
-        public override void CreateImportInstance(GltfImport gltfImport)
+        public override void CreateImportInstance(GltfImportBase gltfImport)
         {
             var instance = new TInstance();
             instance.Inject(gltfImport);

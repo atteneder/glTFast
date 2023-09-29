@@ -35,7 +35,7 @@ namespace GLTFast.Tests
                 return false;
             }
 
-            public override void Inject(GltfImport gltfImport)
+            public override void Inject(GltfImportBase gltfImport)
             {
                 gltfImport.AddImportAddonInstance(this);
             }
@@ -52,7 +52,7 @@ namespace GLTFast.Tests
                 return false;
             }
 
-            public override void Inject(GltfImport gltfImport)
+            public override void Inject(GltfImportBase gltfImport)
             {
                 gltfImport.AddImportAddonInstance(this);
             }

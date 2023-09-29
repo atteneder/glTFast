@@ -14,7 +14,7 @@ namespace GLTFast.Tests
         public void MaterialExtensions()
         {
             var jsonParser = new GltfJsonUtilityParser();
-            var gltf = jsonParser.ParseJson<Root>(@"
+            var gltf = jsonParser.ParseJson(@"
 {
     ""materials"" : [
         {
@@ -159,7 +159,7 @@ namespace GLTFast.Tests
         public void SparseAccessors()
         {
             var jsonParser = new GltfJsonUtilityParser();
-            var gltf = jsonParser.ParseJson<Root>(@"
+            var gltf = jsonParser.ParseJson(@"
 {
     ""accessors"" : [ {
         ""bufferView"" : 0,
@@ -237,7 +237,7 @@ namespace GLTFast.Tests
         public void MeshTargetNames()
         {
             var jsonParser = new GltfJsonUtilityParser();
-            var gltf = jsonParser.ParseJson<Root>(@"
+            var gltf = jsonParser.ParseJson(@"
 {
     ""meshes"": [
         {
@@ -258,29 +258,29 @@ namespace GLTFast.Tests
             );
 
             Assert.NotNull(gltf);
-            Assert.NotNull(gltf.meshes, "No materials");
-            Assert.AreEqual(2, gltf.meshes.Length, "Invalid materials quantity");
+            Assert.NotNull(gltf.Meshes, "No materials");
+            Assert.AreEqual(2, gltf.Meshes.Count, "Invalid materials quantity");
 
-            var mat = gltf.meshes[0];
+            var mat = gltf.Meshes[0];
             Assert.NotNull(mat);
-            Assert.NotNull(mat.extras);
-            Assert.NotNull(mat.extras.targetNames);
-            Assert.NotNull(mat.extras.targetNames);
-            Assert.AreEqual(2, mat.extras.targetNames.Length, "Invalid targetNames quantity");
-            Assert.AreEqual("Key 1", mat.extras.targetNames[0]);
-            Assert.AreEqual("Key 2", mat.extras.targetNames[1]);
+            Assert.NotNull(mat.Extras);
+            Assert.NotNull(mat.Extras.targetNames);
+            Assert.NotNull(mat.Extras.targetNames);
+            Assert.AreEqual(2, mat.Extras.targetNames.Length, "Invalid targetNames quantity");
+            Assert.AreEqual("Key 1", mat.Extras.targetNames[0]);
+            Assert.AreEqual("Key 2", mat.Extras.targetNames[1]);
 
-            mat = gltf.meshes[1];
+            mat = gltf.Meshes[1];
             Assert.NotNull(mat);
-            Assert.NotNull(mat.extras);
-            Assert.IsNull(mat.extras.targetNames);
+            Assert.NotNull(mat.Extras);
+            Assert.IsNull(mat.Extras.targetNames);
         }
 
         [Test]
         public void MinMagFilter()
         {
             var jsonParser = new GltfJsonUtilityParser();
-            var gltf = jsonParser.ParseJson<Root>(@"
+            var gltf = jsonParser.ParseJson(@"
 {
     ""samplers"": [{
         },{
@@ -357,7 +357,7 @@ namespace GLTFast.Tests
         public void UnknownNodeExtension()
         {
             var jsonParser = new GltfJsonUtilityParser();
-            var gltf = jsonParser.ParseJson<Root>(@"
+            var gltf = jsonParser.ParseJson(@"
 {
     ""nodes"": [
         {
@@ -460,10 +460,10 @@ namespace GLTFast.Tests
         public void ParseGarbage()
         {
             var jsonParser = new GltfJsonUtilityParser();
-            var gltf = jsonParser.ParseJson<Root>(@"");
+            var gltf = jsonParser.ParseJson(@"");
             Assert.IsNull(gltf);
 
-            gltf = jsonParser.ParseJson<Root>(@"garbage");
+            gltf = jsonParser.ParseJson(@"garbage");
             Assert.IsNull(gltf);
         }
     }

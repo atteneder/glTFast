@@ -3,10 +3,10 @@
 
 using System;
 
-#if NEWTONSOFT_JSON
-using GLTFast.Newtonsoft;
-#endif
 using GLTFast.Schema;
+#if NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
 using NUnit.Framework;
 using UnityEngine;
 
@@ -129,8 +129,7 @@ $@"
                 }
             }";
 
-            var jsonParser = new GltfNewtonsoftJsonParser();
-            var gltf = jsonParser.ParseJson<GLTFast.Newtonsoft.Schema.Root>(json);
+            var gltf = JsonConvert.DeserializeObject<Newtonsoft.Schema.Root>(json);
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.extensions);
             Assert.NotNull(gltf.extensions.KHR_lights_punctual);
@@ -155,8 +154,7 @@ $@"
                 }}
             }}";
 
-            var jsonParser = new GltfNewtonsoftJsonParser();
-            var gltf = jsonParser.ParseJson<GLTFast.Newtonsoft.Schema.Root>(json);
+            var gltf = JsonConvert.DeserializeObject<Newtonsoft.Schema.Root>(json);
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.extensions);
             Assert.IsNull(gltf.extensions.KHR_lights_punctual);
@@ -169,13 +167,13 @@ $@"
         public void CustomExtensionJsonUtility()
         {
             var jsonParser = new GltfJsonUtilityParser();
-            var gltf = jsonParser.ParseJson<Root>(k_CustomExtensionJson);
+            var gltf = jsonParser.ParseJson(k_CustomExtensionJson);
             Assert.NotNull(gltf);
-            Assert.NotNull(gltf.extensions);
-            Assert.NotNull(gltf.extensions.KHR_lights_punctual);
-            Assert.NotNull(gltf.extensions.KHR_lights_punctual.lights);
-            Assert.AreEqual(1, gltf.extensions.KHR_lights_punctual.lights.Length);
-            Assert.AreEqual(LightPunctual.Type.Directional, gltf.extensions.KHR_lights_punctual.lights[0].GetLightType());
+            Assert.NotNull(gltf.Extensions);
+            Assert.NotNull(gltf.Extensions.KHR_lights_punctual);
+            Assert.NotNull(gltf.Extensions.KHR_lights_punctual.lights);
+            Assert.AreEqual(1, gltf.Extensions.KHR_lights_punctual.lights.Length);
+            Assert.AreEqual(LightPunctual.Type.Directional, gltf.Extensions.KHR_lights_punctual.lights[0].GetLightType());
         }
 
         [Test]
@@ -184,8 +182,7 @@ $@"
 #if !NEWTONSOFT_JSON
             Assert.Ignore("Requires Newtonsoft JSON package to be installed.");
 #else
-            var jsonParser = new GltfNewtonsoftJsonParser();
-            var gltf = jsonParser.ParseJson<GLTFast.Newtonsoft.Schema.Root>(k_CustomExtensionJson);
+            var gltf = JsonConvert.DeserializeObject<Newtonsoft.Schema.Root>(k_CustomExtensionJson);
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.extensions);
             Assert.NotNull(gltf.extensions.KHR_lights_punctual);
@@ -359,8 +356,7 @@ $@"
     }}]
 }}";
 
-            var jsonParser = new GltfNewtonsoftJsonParser();
-            var gltf = jsonParser.ParseJson<GLTFast.Newtonsoft.Schema.Root>(json);
+            var gltf = JsonConvert.DeserializeObject<Newtonsoft.Schema.Root>(json);
 
             CertifyCustomData(gltf, 48);
             CertifyCustomExtensions(gltf.extensions);
@@ -565,8 +561,7 @@ $@"
 }
             ";
 
-            var jsonParser = new GltfNewtonsoftJsonParser();
-            var gltf = jsonParser.ParseJson<GLTFast.Newtonsoft.Schema.Root>(json);
+            var gltf = JsonConvert.DeserializeObject<Newtonsoft.Schema.Root>(json);
 
             Assert.NotNull(gltf);
             Assert.IsNull(gltf.extras);

@@ -4,10 +4,9 @@
 using System;
 using NUnit.Framework;
 using UnityEngine;
-using GLTFast.Schema;
 
 #if NEWTONSOFT_JSON
-using GLTFast.Newtonsoft;
+using Newtonsoft.Json;
 #endif
 
 namespace GLTFast.Tests.JsonParsing
@@ -154,52 +153,13 @@ namespace GLTFast.Tests.JsonParsing
 }
 ";
 
-        [Serializable]
-        class NodeExtras
-        {
-            public float floatProp;
-            public int intProp;
-            public string stringProp;
-            public float[] eulerAngles;
-            public int[] intArrayProp;
-            public float[] rotation;
-            public float[] color;
-        }
-
-        [Serializable]
-        class CNode : Node
-        {
-            public NodeExtras extras;
-        }
-
-        [Serializable]
-        class CRoot : Root
-        {
-            public new CNode[] nodes;
-        }
-
         [Test]
-        public void JsonUtility()
-        {
-            var jsonParser = new GltfJsonUtilityParser();
-            Root gltf = jsonParser.ParseJson<CRoot>(k_ExtrasDataJson);
-
-            Assert.NotNull(gltf);
-            Assert.NotNull(gltf.nodes);
-            Assert.GreaterOrEqual(gltf.nodes.Length, 1);
-            Assert.NotNull(gltf.nodes[0]);
-
-            AssertResultJsonUtility(gltf);
-        }
-
-        [Test]
-        public void NewtonsoftJson()
+        public void ExtrasDataTest()
         {
 #if !NEWTONSOFT_JSON
             Assert.Ignore("Requires Newtonsoft JSON package to be installed.");
 #else
-            var jsonParser = new GltfNewtonsoftJsonParser();
-            var gltf = jsonParser.ParseJson<GLTFast.Newtonsoft.Schema.Root>(k_ExtrasDataJson);
+            var gltf = JsonConvert.DeserializeObject<Newtonsoft.Schema.Root>(k_ExtrasDataJson);
 
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.nodes);
@@ -256,52 +216,5 @@ namespace GLTFast.Tests.JsonParsing
             Assert.AreEqual(1.0f, colorValues[3]);
         }
 #endif
-
-        static void AssertResultJsonUtility(Root gltf)
-        {
-            var r = (CRoot)gltf;
-            Assert.NotNull(r);
-            Assert.NotNull(r.nodes);
-            Assert.AreEqual(1, r.nodes.Length);
-            var n = r.nodes[0];
-            Assert.NotNull(n);
-            var e = n.extras;
-            Assert.NotNull(e);
-
-            Assert.NotNull(e.floatProp);
-            Assert.AreEqual(3.4700000286102295f, e.floatProp, "JSON value mismatch");
-
-            Assert.NotNull(e.intProp);
-            Assert.AreEqual(42, e.intProp, "JSON value mismatch");
-
-            Assert.NotNull(e.stringProp);
-            Assert.AreEqual("Yadiya", e.stringProp, "JSON value mismatch");
-
-            Assert.NotNull(e.eulerAngles);
-            Assert.AreEqual(3, e.eulerAngles.Length);
-            Assert.AreEqual(1.0f, e.eulerAngles[0]);
-            Assert.AreEqual(1.0f, e.eulerAngles[1]);
-            Assert.AreEqual(1.0f, e.eulerAngles[2]);
-
-            Assert.NotNull(e.intArrayProp);
-            Assert.AreEqual(3, e.intArrayProp.Length);
-            Assert.AreEqual(1, e.intArrayProp[0]);
-            Assert.AreEqual(1, e.intArrayProp[1]);
-            Assert.AreEqual(1, e.intArrayProp[2]);
-
-            Assert.NotNull(e.rotation);
-            Assert.AreEqual(4, e.rotation.Length);
-            Assert.AreEqual(0.8199999928474426f, e.rotation[0]);
-            Assert.AreEqual(0.8199999928474426f, e.rotation[1]);
-            Assert.AreEqual(0.8199999928474426f, e.rotation[2]);
-            Assert.AreEqual(0.8199999928474426f, e.rotation[3]);
-
-            Assert.NotNull(e.color);
-            Assert.AreEqual(4, e.color.Length);
-            Assert.AreEqual(1.0f, e.color[0]);
-            Assert.AreEqual(1.0f, e.color[1]);
-            Assert.AreEqual(1.0f, e.color[2]);
-            Assert.AreEqual(1.0f, e.color[3]);
-        }
     }
 }

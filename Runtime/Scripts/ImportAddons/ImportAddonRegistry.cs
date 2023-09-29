@@ -29,7 +29,7 @@ namespace GLTFast.Addons
         /// Injects all registered import add-ons into a <see cref="GltfImport"/>.
         /// </summary>
         /// <param name="gltfImport">Target <see cref="GltfImport"/></param>
-        internal static void InjectAllAddons(GltfImport gltfImport)
+        internal static void InjectAllAddons(GltfImportBase gltfImport)
         {
             CertifyDefaultAddonsRegistered();
             foreach (var importAddon in s_Addons)

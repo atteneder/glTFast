@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-#if NEWTONSOFT_JSON
-using GLTFast.Newtonsoft;
-#endif
 using GLTFast.Schema;
+#if NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
 using NUnit.Framework;
 using UnityEngine;
 
@@ -18,18 +18,17 @@ namespace GLTFast.Tests.JsonParsing
     {
         Root m_Gltf;
 #if NEWTONSOFT_JSON
-        Root m_GltfNewtonsoft;
+        GLTFast.Newtonsoft.Schema.Root m_GltfNewtonsoft;
 #endif
 
         [OneTimeSetUp]
         public void OneTimeSetUp()
         {
             var jsonUtilityParser = new GltfJsonUtilityParser();
-            m_Gltf = jsonUtilityParser.ParseJson<Root>(k_ValueArraysJson);
+            m_Gltf = (Root)jsonUtilityParser.ParseJson(k_ValueArraysJson);
 
 #if NEWTONSOFT_JSON
-            var newtonsoftJsonParser = new GltfNewtonsoftJsonParser();
-            m_GltfNewtonsoft = newtonsoftJsonParser.ParseJson<Root>(k_ValueArraysJson);
+            m_GltfNewtonsoft = JsonConvert.DeserializeObject<GLTFast.Newtonsoft.Schema.Root>(k_ValueArraysJson);
 #endif
         }
 
@@ -113,7 +112,7 @@ namespace GLTFast.Tests.JsonParsing
 #endif
         }
 
-        static void CheckResultAccessor(Root gltf)
+        static void CheckResultAccessor(RootBase gltf)
         {
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.Accessors);
@@ -122,15 +121,15 @@ namespace GLTFast.Tests.JsonParsing
             CheckFloatArray(gltf.Accessors[0].min, 3, -1, -2, -3);
         }
 
-        static void CheckResultLightPunctualColor(Root gltf)
+        static void CheckResultLightPunctualColor(RootBase gltf)
         {
-            var lights = gltf?.extensions?.KHR_lights_punctual?.lights;
+            var lights = gltf?.Extensions?.KHR_lights_punctual?.lights;
             Assert.NotNull(lights);
             Assert.AreEqual(1, lights.Length);
             Assert.AreEqual(new Color(.1f, .2f, .3f), lights[0].LightColor);
         }
 
-        static void CheckResultMaterialValues(Root gltf)
+        static void CheckResultMaterialValues(RootBase gltf)
         {
             Assert.NotNull(gltf);
             Assert.NotNull(gltf.Materials);
@@ -151,15 +150,15 @@ namespace GLTFast.Tests.JsonParsing
             Assert.AreEqual(new Color(.1f, .2f, .3f), ext.KHR_materials_pbrSpecularGlossiness.SpecularColor);
         }
 
-        static void CheckResultMeshWeights(Root gltf)
+        static void CheckResultMeshWeights(RootBase gltf)
         {
-            Assert.NotNull(gltf?.meshes);
-            Assert.AreEqual(1, gltf.meshes.Length);
-            var mesh = gltf.meshes[0];
+            Assert.NotNull(gltf?.Meshes);
+            Assert.AreEqual(1, gltf.Meshes.Count);
+            var mesh = gltf.Meshes[0];
             CheckFloatArray(mesh.weights, 5, 1, 2, 3, 4, 5);
         }
 
-        static void CheckResultNodeValues(Root gltf)
+        static void CheckResultNodeValues(RootBase gltf)
         {
             Assert.NotNull(gltf?.Nodes);
             Assert.AreEqual(1, gltf.Nodes.Count);

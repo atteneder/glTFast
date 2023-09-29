@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pull changes from 5.2.0
 - Renamed `GltfAnimation` to `Animation` for consistent naming.
 
+### Removed
+- Support for deserializing custom data via custom glTF JSON schema class
+
 ### Fixed
 - Added Obsolete attribute to public schema class fields that are for serialization only and should not get modified directly.
 - More robust parsing of (invalid) enum values
