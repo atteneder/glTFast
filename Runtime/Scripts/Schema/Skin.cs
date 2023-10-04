@@ -30,7 +30,7 @@ namespace GLTFast.Schema
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
-            GltfSerializeRoot(writer);
+            GltfSerializeName(writer);
             writer.Close();
             throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }

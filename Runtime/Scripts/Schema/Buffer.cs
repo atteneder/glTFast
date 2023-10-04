@@ -8,7 +8,7 @@ namespace GLTFast.Schema
     /// A buffer points to binary geometry, animation, or skins.
     /// </summary>
     [System.Serializable]
-    public class Buffer
+    public class Buffer : NamedObject
     {
 
         /// <summary>

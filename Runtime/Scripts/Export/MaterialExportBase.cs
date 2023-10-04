@@ -128,7 +128,7 @@ namespace GLTFast.Export
         {
 
             gltf.RegisterExtensionUsage(Extension.MaterialsUnlit);
-            material.extensions = material.extensions ?? new MaterialExtension();
+            material.extensions = material.extensions ?? new MaterialExtensions();
             material.extensions.KHR_materials_unlit = new MaterialUnlit();
 
             var pbr = material.pbrMetallicRoughness ?? new PbrMetallicRoughness();
@@ -255,10 +255,10 @@ namespace GLTFast.Export
         /// Adds an ImageExport to the glTF.
         /// No conversions or channel swizzling
         /// </summary>
-        /// <param name="gltf"></param>
-        /// <param name="imageExport"></param>
-        /// <param name="textureId"></param>
-        /// <returns>glTF texture ID</returns>
+        /// <param name="gltf">glTF to add the image to.</param>
+        /// <param name="imageExport">Texture generator to be added</param>
+        /// <param name="textureId">Resulting texture index.</param>
+        /// <returns>True if the texture was added, false otherwise.</returns>
         protected static bool AddImageExport(IGltfWritable gltf, ImageExportBase imageExport, out int textureId)
         {
             var imageId = gltf.AddImage(imageExport);
@@ -280,7 +280,7 @@ namespace GLTFast.Export
         /// <param name="mat">Source Material</param>
         /// <param name="texPropertyId">Texture property to fetch transformation from</param>
         /// <param name="gltf">Context glTF to export to (for registering extension usage)</param>
-        protected static void ExportTextureTransform(TextureInfo def, UnityEngine.Material mat, int texPropertyId, IGltfWritable gltf)
+        protected static void ExportTextureTransform(TextureInfoBase def, UnityEngine.Material mat, int texPropertyId, IGltfWritable gltf)
         {
             var offset = mat.GetTextureOffset(texPropertyId);
             var scale = mat.GetTextureScale(texPropertyId);
@@ -288,12 +288,11 @@ namespace GLTFast.Export
             if (offset != Vector2.zero || scale != Vector2.one)
             {
                 gltf.RegisterExtensionUsage(Extension.TextureTransform);
-                def.extensions = def.extensions ?? new TextureInfoExtension();
-                def.extensions.KHR_texture_transform = new TextureTransform
+                def.SetTextureTransform(new TextureTransform
                 {
                     scale = new[] { scale.x, scale.y },
                     offset = new[] { offset.x, 1 - offset.y - scale.y }
-                };
+                });
             }
         }
     }

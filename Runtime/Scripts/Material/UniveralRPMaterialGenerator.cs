@@ -24,6 +24,12 @@ namespace GLTFast.Materials {
 #if USING_URP_12_OR_NEWER
         static readonly int k_AlphaClipPropId = Shader.PropertyToID("_AlphaClip");
         static readonly int k_SurfacePropId = Shader.PropertyToID("_Surface");
+
+        /// <summary>Name of the shader graph with clearcoat support</summary>
+        public const string MetallicClearcoatShader = "URP/glTF-pbrMetallicRoughness-Clearcoat";
+
+        static bool s_MetallicClearcoatShaderQueried;
+        static Shader s_MetallicClearcoatShader;
 #endif
 
         public UniversalRPMaterialGenerator(UniversalRenderPipelineAsset renderPipelineAsset) {
@@ -31,31 +37,17 @@ namespace GLTFast.Materials {
         }
 
 #if USING_URP_12_OR_NEWER
-#if !UNITY_SHADER_GRAPH_12_OR_NEWER
-        protected override string GetMetallicShaderName(MetallicShaderFeatures metallicShaderFeatures) {
-            return SHADER_METALLIC;
-        }
-
-        protected override string GetSpecularShaderName(SpecularShaderFeatures features) {
-            return SHADER_SPECULAR;
-        }
-
-        protected override string GetUnlitShaderName(UnlitShaderFeatures features) {
-            return SHADER_UNLIT;
-        }
-#endif
-
-        protected override void SetDoubleSided(Schema.Material gltfMaterial, Material material) {
+        protected override void SetDoubleSided(Schema.MaterialBase gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
             material.SetFloat(CullProperty, (int)CullMode.Off);
         }
 
-        protected override void SetAlphaModeMask(Schema.Material gltfMaterial, Material material) {
+        protected override void SetAlphaModeMask(MaterialBase gltfMaterial, Material material) {
             base.SetAlphaModeMask(gltfMaterial, material);
             material.SetFloat(k_AlphaClipPropId, 1);
         }
 
-        protected override void SetShaderModeBlend(Schema.Material gltfMaterial, Material material) {
+        protected override void SetShaderModeBlend(MaterialBase gltfMaterial, Material material) {
             material.SetOverrideTag(RenderTypeTag, TransparentRenderType);
             material.EnableKeyword(SurfaceTypeTransparentKeyword);
             material.EnableKeyword(DisableSsrTransparentKeyword);
@@ -72,16 +64,41 @@ namespace GLTFast.Materials {
             material.SetFloat(k_SurfacePropId, 1);
             material.SetFloat(ZWriteProperty, 0);
         }
+
+        /// <summary>
+        /// Picks the shader graph with clearcoat support, if any material feature requires it.
+        /// </summary>
+        /// <param name="features">Material features</param>
+        /// <returns>Shader capable of rendering the features</returns>
+        protected override Shader GetMetallicShader(MetallicShaderFeatures features)
+        {
+            if ((features & MetallicShaderFeatures.ClearCoat) != 0)
+            {
+                if (!s_MetallicClearcoatShaderQueried)
+                {
+                    s_MetallicClearcoatShader = LoadShaderByName(MetallicClearcoatShader);
+                    if (s_MetallicClearcoatShader == null)
+                    {
+                        // Fallback to regular shader graph
+                        s_MetallicClearcoatShader = base.GetMetallicShader(features);
+                    }
+                    s_MetallicClearcoatShaderQueried = true;
+                }
+                return s_MetallicClearcoatShader;
+            }
+
+            return base.GetMetallicShader(features);
+        }
 #endif
 
-        protected override ShaderMode? ApplyTransmissionShaderFeatures(Schema.Material gltfMaterial) {
+        protected override ShaderMode? ApplyTransmissionShaderFeatures(Schema.MaterialBase gltfMaterial) {
             if (!s_SupportsCameraOpaqueTexture) {
                 // Fall back to makeshift approximation via premultiply or blend
                 return base.ApplyTransmissionShaderFeatures(gltfMaterial);
             }
 
-            if (gltfMaterial?.extensions?.KHR_materials_transmission != null
-                && gltfMaterial.extensions.KHR_materials_transmission.transmissionFactor > 0f)
+            if (gltfMaterial?.Extensions?.KHR_materials_transmission != null
+                && gltfMaterial.Extensions.KHR_materials_transmission.transmissionFactor > 0f)
             {
                 return ShaderMode.Blend;
             }

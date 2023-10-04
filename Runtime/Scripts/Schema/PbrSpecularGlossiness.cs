@@ -9,8 +9,8 @@ namespace GLTFast.Schema
     /// <summary>
     /// This extension defines the specular-glossiness material model from
     /// Physically-Based Rendering (PBR).
-    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness"/>
     /// </summary>
+    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness"/>
     [System.Serializable]
     public class PbrSpecularGlossiness
     {

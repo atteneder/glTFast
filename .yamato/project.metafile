@@ -13,8 +13,6 @@ test_editors:
     version: 2021.3.15f1
   - name: 2020.3
     version: 2020.3.42f1
-  - name: 2019.4
-    version: 2019.4.40f1
 
 upm_test_platforms:
   - name: win

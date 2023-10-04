@@ -8,8 +8,8 @@ namespace GLTFast.Schema
 
     /// <summary>
     /// The topology type of primitives to render
-    /// <seealso href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_mesh_primitive_mode"/>
     /// </summary>
+    /// <seealso href="https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#_mesh_primitive_mode"/>
     public enum DrawMode
     {
         /// <summary>Points</summary>
@@ -28,11 +28,34 @@ namespace GLTFast.Schema
         TriangleFan = 6
     }
 
+    /// <inheritdoc />
+    [Serializable]
+    public class MeshPrimitive : MeshPrimitiveBase<MeshPrimitiveExtensions> { }
+
+    /// <inheritdoc />
+    /// <typeparam name="TExtensions">Mesh primitive extensions type</typeparam>
+    [Serializable]
+    public class MeshPrimitiveBase<TExtensions> : MeshPrimitiveBase
+    where TExtensions : MeshPrimitiveExtensions
+    {
+        /// <inheritdoc cref="Extensions"/>
+        public TExtensions extensions;
+
+        /// <inheritdoc />
+        public override MeshPrimitiveExtensions Extensions => extensions;
+
+        /// <inheritdoc />
+        internal override void UnsetExtensions()
+        {
+            extensions = null;
+        }
+    }
+
     /// <summary>
     /// Geometry to be rendered with the given material.
     /// </summary>
     [Serializable]
-    public class MeshPrimitive : ICloneable
+    public abstract class MeshPrimitiveBase : ICloneable
     {
 
         /// <summary>
@@ -73,10 +96,15 @@ namespace GLTFast.Schema
         public MorphTarget[] targets;
 
         /// <inheritdoc cref="MeshPrimitiveExtensions"/>
-        public MeshPrimitiveExtensions extensions;
+        public abstract MeshPrimitiveExtensions Extensions { get; }
+
+        /// <summary>`
+        /// Sets <see cref="Extensions"/> to null.
+        /// </summary>
+        internal abstract void UnsetExtensions();
 
 #if DRACO_UNITY
-        public bool IsDracoCompressed => extensions!=null && extensions.KHR_draco_mesh_compression != null;
+        public bool IsDracoCompressed => Extensions!=null && Extensions.KHR_draco_mesh_compression != null;
 #endif
 
         /// <summary>
@@ -93,7 +121,7 @@ namespace GLTFast.Schema
             {
                 return false;
             }
-            var b = (MeshPrimitive)obj;
+            var b = (MeshPrimitiveBase)obj;
 
             if (attributes.Equals(b.attributes))
             {
@@ -167,10 +195,10 @@ namespace GLTFast.Schema
                 }
                 writer.CloseArray();
             }
-            if (extensions != null)
+            if (Extensions != null)
             {
                 writer.AddProperty("extensions");
-                extensions.GltfSerialize(writer);
+                Extensions.GltfSerialize(writer);
             }
             writer.Close();
         }

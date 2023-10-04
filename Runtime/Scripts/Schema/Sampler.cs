@@ -209,7 +209,7 @@ namespace GLTFast.Schema
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
-            GltfSerializeRoot(writer);
+            GltfSerializeName(writer);
             // Assuming MagFilterMode.Linear is the project's default, only
             // serialize valid, non-default values
             if (magFilter == MagFilterMode.Nearest)

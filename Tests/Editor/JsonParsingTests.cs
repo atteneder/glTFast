@@ -7,12 +7,14 @@ using UnityEngine;
 
 namespace GLTFast.Tests
 {
+    [Category("JsonParsing")]
     class JsonParsingTests
     {
         [Test]
         public void MaterialExtensions()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var jsonParser = new GltfJsonUtilityParser();
+            var gltf = jsonParser.ParseJson(@"
 {
     ""materials"" : [
         {
@@ -74,89 +76,90 @@ namespace GLTFast.Tests
             );
 
             Assert.NotNull(gltf);
-            Assert.NotNull(gltf.materials, "No materials");
-            Assert.AreEqual(8, gltf.materials.Length, "Invalid material quantity");
+            Assert.NotNull(gltf.Materials, "No materials");
+            Assert.AreEqual(8, gltf.Materials.Count, "Invalid material quantity");
 
-            var none = gltf.materials[0];
+            var none = gltf.Materials[0];
             Assert.NotNull(none);
             Assert.AreEqual("noExtension", none.name);
-            Assert.IsNull(none.extensions);
+            Assert.IsNull(none.Extensions);
 
-            var empty = gltf.materials[1];
+            var empty = gltf.Materials[1];
             Assert.NotNull(empty);
             Assert.AreEqual("emptyExtension", empty.name);
-            Assert.NotNull(empty.extensions);
-            Assert.IsNull(empty.extensions.KHR_materials_unlit);
-            Assert.IsNull(empty.extensions.KHR_materials_pbrSpecularGlossiness);
-            Assert.IsNull(empty.extensions.KHR_materials_clearcoat);
-            Assert.IsNull(empty.extensions.KHR_materials_sheen);
-            Assert.IsNull(empty.extensions.KHR_materials_transmission);
+            Assert.NotNull(empty.Extensions);
+            Assert.IsNull(empty.Extensions.KHR_materials_unlit);
+            Assert.IsNull(empty.Extensions.KHR_materials_pbrSpecularGlossiness);
+            Assert.IsNull(empty.Extensions.KHR_materials_clearcoat);
+            Assert.IsNull(empty.Extensions.KHR_materials_sheen);
+            Assert.IsNull(empty.Extensions.KHR_materials_transmission);
 
-            var unlit = gltf.materials[2];
+            var unlit = gltf.Materials[2];
             Assert.NotNull(unlit);
             Assert.AreEqual("unlit", unlit.name);
-            Assert.NotNull(unlit.extensions);
-            Assert.NotNull(unlit.extensions.KHR_materials_unlit);
-            Assert.IsNull(unlit.extensions.KHR_materials_pbrSpecularGlossiness);
-            Assert.IsNull(unlit.extensions.KHR_materials_clearcoat);
-            Assert.IsNull(unlit.extensions.KHR_materials_sheen);
-            Assert.IsNull(unlit.extensions.KHR_materials_transmission);
+            Assert.NotNull(unlit.Extensions);
+            Assert.NotNull(unlit.Extensions.KHR_materials_unlit);
+            Assert.IsNull(unlit.Extensions.KHR_materials_pbrSpecularGlossiness);
+            Assert.IsNull(unlit.Extensions.KHR_materials_clearcoat);
+            Assert.IsNull(unlit.Extensions.KHR_materials_sheen);
+            Assert.IsNull(unlit.Extensions.KHR_materials_transmission);
 
-            var specGloss = gltf.materials[3];
+            var specGloss = gltf.Materials[3];
             Assert.NotNull(specGloss);
             Assert.AreEqual("specularGlossiness", specGloss.name);
-            Assert.NotNull(specGloss.extensions);
-            Assert.IsNull(specGloss.extensions.KHR_materials_unlit);
-            Assert.NotNull(specGloss.extensions.KHR_materials_pbrSpecularGlossiness);
-            Assert.IsNull(specGloss.extensions.KHR_materials_clearcoat);
-            Assert.IsNull(specGloss.extensions.KHR_materials_sheen);
-            Assert.IsNull(specGloss.extensions.KHR_materials_transmission);
+            Assert.NotNull(specGloss.Extensions);
+            Assert.IsNull(specGloss.Extensions.KHR_materials_unlit);
+            Assert.NotNull(specGloss.Extensions.KHR_materials_pbrSpecularGlossiness);
+            Assert.IsNull(specGloss.Extensions.KHR_materials_clearcoat);
+            Assert.IsNull(specGloss.Extensions.KHR_materials_sheen);
+            Assert.IsNull(specGloss.Extensions.KHR_materials_transmission);
 
-            var transmission = gltf.materials[4];
+            var transmission = gltf.Materials[4];
             Assert.NotNull(transmission);
             Assert.AreEqual("transmission", transmission.name);
-            Assert.NotNull(transmission.extensions);
-            Assert.IsNull(transmission.extensions.KHR_materials_unlit);
-            Assert.IsNull(transmission.extensions.KHR_materials_pbrSpecularGlossiness);
-            Assert.IsNull(transmission.extensions.KHR_materials_clearcoat);
-            Assert.IsNull(transmission.extensions.KHR_materials_sheen);
-            Assert.NotNull(transmission.extensions.KHR_materials_transmission);
+            Assert.NotNull(transmission.Extensions);
+            Assert.IsNull(transmission.Extensions.KHR_materials_unlit);
+            Assert.IsNull(transmission.Extensions.KHR_materials_pbrSpecularGlossiness);
+            Assert.IsNull(transmission.Extensions.KHR_materials_clearcoat);
+            Assert.IsNull(transmission.Extensions.KHR_materials_sheen);
+            Assert.NotNull(transmission.Extensions.KHR_materials_transmission);
 
-            var clearcoat = gltf.materials[5];
+            var clearcoat = gltf.Materials[5];
             Assert.NotNull(clearcoat);
             Assert.AreEqual("clearcoat", clearcoat.name);
-            Assert.NotNull(clearcoat.extensions);
-            Assert.IsNull(clearcoat.extensions.KHR_materials_unlit);
-            Assert.IsNull(clearcoat.extensions.KHR_materials_pbrSpecularGlossiness);
-            Assert.NotNull(clearcoat.extensions.KHR_materials_clearcoat);
-            Assert.IsNull(clearcoat.extensions.KHR_materials_sheen);
-            Assert.IsNull(clearcoat.extensions.KHR_materials_transmission);
+            Assert.NotNull(clearcoat.Extensions);
+            Assert.IsNull(clearcoat.Extensions.KHR_materials_unlit);
+            Assert.IsNull(clearcoat.Extensions.KHR_materials_pbrSpecularGlossiness);
+            Assert.NotNull(clearcoat.Extensions.KHR_materials_clearcoat);
+            Assert.IsNull(clearcoat.Extensions.KHR_materials_sheen);
+            Assert.IsNull(clearcoat.Extensions.KHR_materials_transmission);
 
-            var sheen = gltf.materials[6];
+            var sheen = gltf.Materials[6];
             Assert.NotNull(sheen);
             Assert.AreEqual("sheen", sheen.name);
-            Assert.NotNull(sheen.extensions);
-            Assert.IsNull(sheen.extensions.KHR_materials_unlit);
-            Assert.IsNull(sheen.extensions.KHR_materials_pbrSpecularGlossiness);
-            Assert.IsNull(sheen.extensions.KHR_materials_clearcoat);
-            Assert.NotNull(sheen.extensions.KHR_materials_sheen);
-            Assert.IsNull(sheen.extensions.KHR_materials_transmission);
+            Assert.NotNull(sheen.Extensions);
+            Assert.IsNull(sheen.Extensions.KHR_materials_unlit);
+            Assert.IsNull(sheen.Extensions.KHR_materials_pbrSpecularGlossiness);
+            Assert.IsNull(sheen.Extensions.KHR_materials_clearcoat);
+            Assert.NotNull(sheen.Extensions.KHR_materials_sheen);
+            Assert.IsNull(sheen.Extensions.KHR_materials_transmission);
 
-            var all = gltf.materials[7];
+            var all = gltf.Materials[7];
             Assert.NotNull(all);
             Assert.AreEqual("all", all.name);
-            Assert.NotNull(all.extensions);
-            Assert.NotNull(all.extensions.KHR_materials_unlit);
-            Assert.NotNull(all.extensions.KHR_materials_pbrSpecularGlossiness);
-            Assert.NotNull(all.extensions.KHR_materials_clearcoat);
-            Assert.NotNull(all.extensions.KHR_materials_sheen);
-            Assert.NotNull(all.extensions.KHR_materials_transmission);
+            Assert.NotNull(all.Extensions);
+            Assert.NotNull(all.Extensions.KHR_materials_unlit);
+            Assert.NotNull(all.Extensions.KHR_materials_pbrSpecularGlossiness);
+            Assert.NotNull(all.Extensions.KHR_materials_clearcoat);
+            Assert.NotNull(all.Extensions.KHR_materials_sheen);
+            Assert.NotNull(all.Extensions.KHR_materials_transmission);
         }
 
         [Test]
         public void SparseAccessors()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var jsonParser = new GltfJsonUtilityParser();
+            var gltf = jsonParser.ParseJson(@"
 {
     ""accessors"" : [ {
         ""bufferView"" : 0,
@@ -201,25 +204,25 @@ namespace GLTFast.Tests
             );
 
             Assert.NotNull(gltf);
-            Assert.NotNull(gltf.accessors, "No accessors");
-            Assert.AreEqual(3, gltf.accessors.Length, "Invalid accessor quantity");
+            Assert.NotNull(gltf.Accessors, "No accessors");
+            Assert.AreEqual(3, gltf.Accessors.Count, "Invalid accessor quantity");
 
-            var regular = gltf.accessors[0];
+            var regular = gltf.Accessors[0];
             Assert.NotNull(regular);
-            Assert.IsNull(regular.sparse);
+            Assert.IsNull(regular.Sparse);
 
-            var sparse = gltf.accessors[1];
+            var sparse = gltf.Accessors[1];
             Assert.NotNull(sparse);
             Assert.AreEqual(14, sparse.count);
-            Assert.NotNull(sparse.sparse);
-            Assert.AreEqual(3, sparse.sparse.count);
-            Assert.NotNull(sparse.sparse.indices);
-            Assert.AreEqual(2, sparse.sparse.indices.bufferView);
-            Assert.AreEqual(0, sparse.sparse.indices.byteOffset);
-            Assert.AreEqual(GltfComponentType.UnsignedShort, sparse.sparse.indices.componentType);
-            Assert.NotNull(sparse.sparse.values);
-            Assert.AreEqual(3, sparse.sparse.values.bufferView);
-            Assert.AreEqual(0, sparse.sparse.values.byteOffset);
+            Assert.NotNull(sparse.Sparse);
+            Assert.AreEqual(3, sparse.Sparse.count);
+            Assert.NotNull(sparse.Sparse.Indices);
+            Assert.AreEqual(2, sparse.Sparse.Indices.bufferView);
+            Assert.AreEqual(0, sparse.Sparse.Indices.byteOffset);
+            Assert.AreEqual(GltfComponentType.UnsignedShort, sparse.Sparse.Indices.componentType);
+            Assert.NotNull(sparse.Sparse.Values);
+            Assert.AreEqual(3, sparse.Sparse.Values.bufferView);
+            Assert.AreEqual(0, sparse.Sparse.Values.byteOffset);
 
 #if GLTFAST_SAFE
             var invalid = gltf.accessors[2];
@@ -233,7 +236,8 @@ namespace GLTFast.Tests
         [Test]
         public void MeshTargetNames()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var jsonParser = new GltfJsonUtilityParser();
+            var gltf = jsonParser.ParseJson(@"
 {
     ""meshes"": [
         {
@@ -254,28 +258,29 @@ namespace GLTFast.Tests
             );
 
             Assert.NotNull(gltf);
-            Assert.NotNull(gltf.meshes, "No materials");
-            Assert.AreEqual(2, gltf.meshes.Length, "Invalid materials quantity");
+            Assert.NotNull(gltf.Meshes, "No materials");
+            Assert.AreEqual(2, gltf.Meshes.Count, "Invalid materials quantity");
 
-            var mat = gltf.meshes[0];
+            var mat = gltf.Meshes[0];
             Assert.NotNull(mat);
-            Assert.NotNull(mat.extras);
-            Assert.NotNull(mat.extras.targetNames);
-            Assert.NotNull(mat.extras.targetNames);
-            Assert.AreEqual(2, mat.extras.targetNames.Length, "Invalid targetNames quantity");
-            Assert.AreEqual("Key 1", mat.extras.targetNames[0]);
-            Assert.AreEqual("Key 2", mat.extras.targetNames[1]);
+            Assert.NotNull(mat.Extras);
+            Assert.NotNull(mat.Extras.targetNames);
+            Assert.NotNull(mat.Extras.targetNames);
+            Assert.AreEqual(2, mat.Extras.targetNames.Length, "Invalid targetNames quantity");
+            Assert.AreEqual("Key 1", mat.Extras.targetNames[0]);
+            Assert.AreEqual("Key 2", mat.Extras.targetNames[1]);
 
-            mat = gltf.meshes[1];
+            mat = gltf.Meshes[1];
             Assert.NotNull(mat);
-            Assert.NotNull(mat.extras);
-            Assert.IsNull(mat.extras.targetNames);
+            Assert.NotNull(mat.Extras);
+            Assert.IsNull(mat.Extras.targetNames);
         }
 
         [Test]
         public void MinMagFilter()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var jsonParser = new GltfJsonUtilityParser();
+            var gltf = jsonParser.ParseJson(@"
 {
     ""samplers"": [{
         },{
@@ -303,45 +308,45 @@ namespace GLTFast.Tests
             );
 
             Assert.NotNull(gltf);
-            Assert.NotNull(gltf.samplers, "No samplers");
-            Assert.AreEqual(8, gltf.samplers.Length, "Invalid samplers quantity");
+            Assert.NotNull(gltf.Samplers, "No samplers");
+            Assert.AreEqual(8, gltf.Samplers.Count, "Invalid samplers quantity");
 
-            var sampler0 = gltf.samplers[0];
+            var sampler0 = gltf.Samplers[0];
             Assert.NotNull(sampler0);
             Assert.AreEqual(Sampler.MagFilterMode.None, sampler0.magFilter);
             Assert.AreEqual(Sampler.MinFilterMode.None, sampler0.minFilter);
 
-            var sampler1 = gltf.samplers[1];
+            var sampler1 = gltf.Samplers[1];
             Assert.NotNull(sampler1);
             Assert.AreEqual((Sampler.MagFilterMode)100, sampler1.magFilter);
             Assert.AreEqual((Sampler.MinFilterMode)100, sampler1.minFilter);
 
-            var sampler2 = gltf.samplers[2];
+            var sampler2 = gltf.Samplers[2];
             Assert.NotNull(sampler2);
             Assert.AreEqual(Sampler.MagFilterMode.Nearest, sampler2.magFilter);
             Assert.AreEqual(Sampler.MinFilterMode.Nearest, sampler2.minFilter);
 
-            var sampler3 = gltf.samplers[3];
+            var sampler3 = gltf.Samplers[3];
             Assert.NotNull(sampler3);
             Assert.AreEqual(Sampler.MagFilterMode.Linear, sampler3.magFilter);
             Assert.AreEqual(Sampler.MinFilterMode.Linear, sampler3.minFilter);
 
-            var sampler4 = gltf.samplers[4];
+            var sampler4 = gltf.Samplers[4];
             Assert.NotNull(sampler4);
             Assert.AreEqual(Sampler.MagFilterMode.None, sampler4.magFilter);
             Assert.AreEqual(Sampler.MinFilterMode.NearestMipmapNearest, sampler4.minFilter);
 
-            var sampler5 = gltf.samplers[5];
+            var sampler5 = gltf.Samplers[5];
             Assert.NotNull(sampler5);
             Assert.AreEqual(Sampler.MagFilterMode.None, sampler5.magFilter);
             Assert.AreEqual(Sampler.MinFilterMode.LinearMipmapNearest, sampler5.minFilter);
 
-            var sampler6 = gltf.samplers[6];
+            var sampler6 = gltf.Samplers[6];
             Assert.NotNull(sampler6);
             Assert.AreEqual(Sampler.MagFilterMode.None, sampler6.magFilter);
             Assert.AreEqual(Sampler.MinFilterMode.NearestMipmapLinear, sampler6.minFilter);
 
-            var sampler7 = gltf.samplers[7];
+            var sampler7 = gltf.Samplers[7];
             Assert.NotNull(sampler7);
             Assert.AreEqual(Sampler.MagFilterMode.None, sampler7.magFilter);
             Assert.AreEqual(Sampler.MinFilterMode.LinearMipmapLinear, sampler7.minFilter);
@@ -351,7 +356,8 @@ namespace GLTFast.Tests
         [Test]
         public void UnknownNodeExtension()
         {
-            var gltf = JsonParser.ParseJson(@"
+            var jsonParser = new GltfJsonUtilityParser();
+            var gltf = jsonParser.ParseJson(@"
 {
     ""nodes"": [
         {
@@ -410,53 +416,54 @@ namespace GLTFast.Tests
             );
 
             Assert.NotNull(gltf);
-            Assert.NotNull(gltf.nodes, "No nodes");
-            Assert.AreEqual(6, gltf.nodes.Length, "Invalid nodes quantity");
+            Assert.NotNull(gltf.Nodes, "No nodes");
+            Assert.AreEqual(6, gltf.Nodes.Count, "Invalid nodes quantity");
 
-            var node0 = gltf.nodes[0];
+            var node0 = gltf.Nodes[0];
             Assert.NotNull(node0);
-            Assert.IsNull(node0.extensions);
+            Assert.IsNull(node0.Extensions);
 
-            var node1 = gltf.nodes[1];
+            var node1 = gltf.Nodes[1];
             Assert.NotNull(node1);
-            Assert.IsNull(node1.extensions);
+            Assert.IsNull(node1.Extensions);
 
-            var node2 = gltf.nodes[2];
+            var node2 = gltf.Nodes[2];
             Assert.NotNull(node2);
-            Assert.IsNull(node2.extensions);
+            Assert.IsNull(node2.Extensions);
 
-            var node3 = gltf.nodes[3];
+            var node3 = gltf.Nodes[3];
             Assert.NotNull(node3);
-            Assert.NotNull(node3.extensions);
-            Assert.NotNull(node3.extensions.EXT_mesh_gpu_instancing);
-            Assert.NotNull(node3.extensions.EXT_mesh_gpu_instancing.attributes);
-            Assert.AreEqual(42, node3.extensions.EXT_mesh_gpu_instancing.attributes.TRANSLATION);
-            Assert.IsNull(node3.extensions.KHR_lights_punctual);
+            Assert.NotNull(node3.Extensions);
+            Assert.NotNull(node3.Extensions.EXT_mesh_gpu_instancing);
+            Assert.NotNull(node3.Extensions.EXT_mesh_gpu_instancing.attributes);
+            Assert.AreEqual(42, node3.Extensions.EXT_mesh_gpu_instancing.attributes.TRANSLATION);
+            Assert.IsNull(node3.Extensions.KHR_lights_punctual);
 
-            var node4 = gltf.nodes[4];
+            var node4 = gltf.Nodes[4];
             Assert.NotNull(node4);
-            Assert.NotNull(node4.extensions);
-            Assert.IsNull(node4.extensions.EXT_mesh_gpu_instancing);
-            Assert.NotNull(node4.extensions.KHR_lights_punctual);
-            Assert.AreEqual(42, node4.extensions.KHR_lights_punctual.light);
+            Assert.NotNull(node4.Extensions);
+            Assert.IsNull(node4.Extensions.EXT_mesh_gpu_instancing);
+            Assert.NotNull(node4.Extensions.KHR_lights_punctual);
+            Assert.AreEqual(42, node4.Extensions.KHR_lights_punctual.light);
 
-            var node5 = gltf.nodes[5];
+            var node5 = gltf.Nodes[5];
             Assert.NotNull(node5);
-            Assert.NotNull(node5.extensions);
-            Assert.NotNull(node5.extensions.EXT_mesh_gpu_instancing);
-            Assert.NotNull(node5.extensions.EXT_mesh_gpu_instancing.attributes);
-            Assert.AreEqual(13, node5.extensions.EXT_mesh_gpu_instancing.attributes.TRANSLATION);
-            Assert.NotNull(node5.extensions.KHR_lights_punctual);
-            Assert.AreEqual(42, node5.extensions.KHR_lights_punctual.light);
+            Assert.NotNull(node5.Extensions);
+            Assert.NotNull(node5.Extensions.EXT_mesh_gpu_instancing);
+            Assert.NotNull(node5.Extensions.EXT_mesh_gpu_instancing.attributes);
+            Assert.AreEqual(13, node5.Extensions.EXT_mesh_gpu_instancing.attributes.TRANSLATION);
+            Assert.NotNull(node5.Extensions.KHR_lights_punctual);
+            Assert.AreEqual(42, node5.Extensions.KHR_lights_punctual.light);
         }
 
         [Test]
         public void ParseGarbage()
         {
-            var gltf = JsonParser.ParseJson(@"");
+            var jsonParser = new GltfJsonUtilityParser();
+            var gltf = jsonParser.ParseJson(@"");
             Assert.IsNull(gltf);
 
-            gltf = JsonParser.ParseJson(@"garbage");
+            gltf = jsonParser.ParseJson(@"garbage");
             Assert.IsNull(gltf);
         }
     }

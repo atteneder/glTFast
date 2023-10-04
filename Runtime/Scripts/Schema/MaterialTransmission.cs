@@ -6,8 +6,8 @@ namespace GLTFast.Schema
 
     /// <summary>
     /// Extension for optical transparency (transmission)
-    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_transmission"/>
     /// </summary>
+    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_transmission"/>
     [System.Serializable]
     public class Transmission
     {

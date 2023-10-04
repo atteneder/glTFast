@@ -19,7 +19,6 @@ namespace GLTFast.Schema
 
         /// <summary>
         /// The image's MIME type.
-        /// <minLength>1</minLength>
         /// </summary>
         public string mimeType;
 
@@ -32,7 +31,7 @@ namespace GLTFast.Schema
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
-            GltfSerializeRoot(writer);
+            GltfSerializeName(writer);
             if (!string.IsNullOrEmpty(uri))
             {
                 writer.AddProperty("uri", uri);

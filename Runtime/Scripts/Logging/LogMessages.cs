@@ -241,7 +241,7 @@ namespace GLTFast.Logging
     }
 
     /// <summary>
-    /// Converts <seealso cref="LogCode"/> to human readable and understandable message string.
+    /// Converts <see cref="LogCode"/> to human readable and understandable message string.
     /// </summary>
     public static class LogMessages
     {
@@ -309,7 +309,7 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
 #endif
 
         /// <summary>
-        /// Converts a <seealso cref="LogCode"/> to human readable and understandable message string.
+        /// Converts a <see cref="LogCode"/> to human readable and understandable message string.
         /// </summary>
         /// <param name="code">Input LogCode</param>
         /// <param name="messages">Additional message parts (te be filled into final message)</param>
