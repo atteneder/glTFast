@@ -378,6 +378,7 @@ $@"
             CertifyCustomExtensions(gltf.accessors[0].sparse.values.extensions);
             CertifyCustomExtras(gltf.accessors[0].sparse.values.extras);
 
+#if UNITY_ANIMATION
             CertifyCustomData(gltf.animations[0], 43);
             CertifyCustomExtensions(gltf.animations[0].extensions);
             CertifyCustomExtras(gltf.animations[0].extras);
@@ -393,6 +394,7 @@ $@"
             CertifyCustomData(gltf.animations[0].samplers[0], 431);
             CertifyCustomExtensions(gltf.animations[0].samplers[0].extensions);
             CertifyCustomExtras(gltf.animations[0].samplers[0].extras);
+#endif
 
             CertifyCustomData(gltf.asset, 44);
             CertifyCustomExtensions(gltf.asset.extensions);
@@ -570,8 +572,10 @@ $@"
             Assert.IsNull(gltf.accessors[0].extras);
             Assert.IsNull(gltf.accessors[0].extensions);
 
+#if UNITY_ANIMATION
             Assert.IsNull(gltf.animations[0].extras);
             Assert.IsNull(gltf.animations[0].extensions);
+#endif
 
             Assert.IsNull(gltf.asset.extras);
             Assert.IsNull(gltf.asset.extensions);
