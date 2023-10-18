@@ -1,15 +1,10 @@
-# glTFast for Unity
+# Unity glTFast
 
 <p align="center">
 <img src="./Documentation~/Images/unity-gltf-logos.png" alt="Unity and glTF logos side by side" />
 </p>
 
-[![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
-[![GitHub issues](https://img.shields.io/github/issues/atteneder/glTFast)](https://github.com/atteneder/glTFast/issues)
-[![GitHub license](https://img.shields.io/github/license/atteneder/glTFast)](https://github.com/atteneder/glTFast/blob/main/LICENSE.md)
-![Code coverage result](./Documentation~/Images/badge_linecoverage.svg "Code coverage result badge")
-
-*glTFast* enables use of [glTF™ (GL Transmission Format)][gltf] asset files in [Unity][unity].
+*Unity glTFast* enables use of [glTF&trade; (GL Transmission Format)][gltf] asset files in [Unity][unity].
 
 It focuses on speed, memory efficiency and a small build footprint while also providing:
 
@@ -18,11 +13,9 @@ It focuses on speed, memory efficiency and a small build footprint while also pr
 - Robustness and Stability
 - Customization and extensibility for advanced users
 
-Check out the [demo project](https://github.com/atteneder/glTFastDemo) and try the [WebGL Demo][gltfast-web-demo].
-
 ## Features
 
-*glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
+*Unity glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
 
 See the [comprehensive list of supported features and extensions](./Documentation~/features.md).
 
@@ -43,21 +36,26 @@ Read more about the workflows in the [documentation][workflows].
 
 ## Installing
 
-The easiest way to install is to download and open the [Installer Package](https://package-installer.glitch.me/v1/installer/OpenUPM/com.atteneder.gltfast?registry=https%3A%2F%2Fpackage.openupm.com&scope=com.atteneder)
+To install the *Unity glTFast* package, follow these steps:
 
-It runs a script that installs *glTFast* via a [scoped registry](https://docs.unity3d.com/Manual/upm-scoped.html).
+In your Unity project, go to Windows > Package Manager.
+On the status bar, select the Add (+) button.
+From the Add menu, select Add + package by name. Name and Version fields appear.
+In the Name field, enter `com.unity.cloud.gltfast`.
+Select Add.
+The Editor installs the latest available version of the package and any dependent packages.
 
-Afterwards *glTFast* and further, optional packages are listed in the *Package Manager* (under *My Registries*) and can be installed and updated from there.
+> **NOTE:** This package originally had the identifier `com.atteneder.gltfast`. Consult the [upgrade guide](./Documentation~/UpgradeGuides.md#unity-fork) to learn how to switch to the Unity version (`com.unity.cloud.gltfast`) or [install the original package](./Documentation~/Original.md).
 
 ### Optional Packages
 
-There are some related package that improve *glTFast* by extending its feature set.
+There are some related package that improve *Unity glTFast* by extending its feature set.
 
-- [Draco 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
-- [KTX/Basis Texture Unity Package][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
+- [Draco&trade; 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
+- [KTX&trade; for Unity][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
 - [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
 
-*glTFast* 5.x requires Unity 2019.3 or newer. For older Unity versions see [Legacy Installation](./Documentation~/gltfast-1.md).
+*Unity glTFast* 5.x requires Unity 2020.1 or newer.
 
 ## Usage
 
@@ -76,15 +74,15 @@ var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf";
 ```
 
-See [Runtime Loading via Script](./Documentation~/ImportRuntime.md#runtime-loading-via-script) in the documentation for more details and instructions how to [customize the loading behaviour](./Documentation~/ImportRuntime.md#customize-loading-behavior) via script.
+See [Runtime Loading via Script](./Documentation~/ImportRuntime.md#runtime-loading-via-script) in the documentation for more details and instructions how to [customize the loading behavior](./Documentation~/ImportRuntime.md#customize-loading-behavior) via script.
 
 ### Editor Import
 
-Move or copy *glTF* files into your project's *Assets* folder, similar to other 3D formats:
+Move or copy glTF files into your project's *Assets* folder, similar to other 3D formats:
 
 ![Editor Import][import-gif]
 
-*glTFast* will import them to native Unity prefabs and add them to the asset database.
+*Unity glTFast* will import them to native Unity prefabs and add them to the asset database.
 
 See [Editor Import](./Documentation~/ImportEditor.md) in the documentation for details.
 
@@ -99,23 +97,17 @@ created [via script](./Documentation~/ExportEditor.md#export-via-script).
 
 ❗ IMPORTANT ❗
 
-*glTFast* uses custom shader graphs that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
+*Unity glTFast* uses custom shader graphs that you **have** to include in builds in order to make materials work. If materials are fine in the Unity Editor but not in builds, chances are some shaders (or variants) are missing.
 
 Read the section *Materials and Shader Variants* in the [Documentation](./Documentation~/ProjectSetup.md#materials-and-shader-variants) for details.
 
-## Get involved
+## Contribution
 
-Contributions in the form of ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *glTFast*.
-
-## Supporters
-
-[Unity Technologies][unity]
-
-Thanks to [Embibe][embibe] for sponsoring the development of skin support! ❤️
+Contributions in the form of ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *Unity glTFast*.
 
 ## License
 
-Copyright 2023 Unity Technologies and the glTFast authors
+Copyright 2023 Unity Technologies and the Unity glTFast authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use files in this repository except in compliance with the License.
@@ -131,11 +123,14 @@ limitations under the License.
 
 ## Trademarks
 
-*Unity* is a registered trademark of [Unity Technologies][unity].
+*Unity&reg;* is a registered trademark of [Unity Technologies][unity].
 
-*Khronos®* is a registered trademark and *glTF™* is a trademark of [The Khronos Group Inc][khronos].
+*Khronos&reg;* is a registered trademark and [glTF&trade;][gltf] is a trademark of [The Khronos Group Inc][khronos].
 
-[embibe]: https://www.embibe.com
+*KTX&trade;* and the KTX logo are trademarks of the [The Khronos Group Inc][khronos].
+
+*Draco&trade;* is a trademark of [*Google LLC*][GoogleLLC].
+
 [DracoUnity]: https://github.com/atteneder/DracoUnity
 [ExtBasisU]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu
 [ExtDraco]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression
@@ -143,10 +138,10 @@ limitations under the License.
 [gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
 [gltf]: https://www.khronos.org/gltf
 [gltfasset_component]: ./Documentation~/Images/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
-[gltfast-web-demo]: https://gltf.pixel.engineer
+[GoogleLLC]: https://about.google/
 [import-gif]: ./Documentation~/Images/import.gif  "Video showing glTF files being copied into the Assets folder and imported"
 [khronos]: https://www.khronos.org
-[KtxUnity]: https://github.com/atteneder/KtxUnity
+[KtxUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest
 [Meshopt]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [unity]: https://unity.com
 [workflows]: ./Documentation~/index.md#workflows

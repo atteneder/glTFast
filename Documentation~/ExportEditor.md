@@ -18,3 +18,12 @@ Clicking any of these will open a file selection dialog. If additional files are
 ## Export via Script
 
 Exporting via script works exactly the same as [Runtime Export](ExportRuntime.md), with the exception that you don't need to [include the required shaders](ExportRuntime.md#include-required-shaders).
+
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][khronos].
+
+[khronos]: https://www.khronos.org
+[unity]: https://unity.com

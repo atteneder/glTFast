@@ -13,19 +13,19 @@ namespace GLTFast.Export
 
         /// <summary>Encoding speed level. 0 means slow and small. 10 is fastest.</summary>
         public int encodingSpeed = 0;
-        
+
         /// <summary>Decoding speed level. 0 means slow and small. 10 is fastest.</summary>
         public int decodingSpeed = 4;
-        
+
         /// <summary>Positional quantization.</summary>
         public int positionQuantization = 14;
-        
+
         /// <summary>Normal quantization.</summary>
         public int normalQuantization = 10;
-        
+
         /// <summary>Texture coordinate quantization.</summary>
         public int texCoordQuantization = 12;
-        
+
         /// <summary>Color quantization.</summary>
         public int colorQuantization = 8;
     }

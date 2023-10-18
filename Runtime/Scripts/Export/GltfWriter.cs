@@ -245,9 +245,12 @@ namespace GLTFast.Export
             HDAdditionalLightData lightHd = null;
             if (renderPipeline == RenderPipeline.HighDefinition) {
                 lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
+#if !UNITY_2023_2_OR_NEWER
+                // For newer HDRP versions, the generic `uLight.type` works just fine
                 if (lightHd!=null && lightHd.type == HDLightType.Area) {
-                    lightType = LightType.Area;
+                    lightType = LightType.Rectangle;
                 }
+#endif
             }
 #endif
 
@@ -267,7 +270,7 @@ namespace GLTFast.Export
                 case LightType.Point:
                     light.SetLightType(LightPunctual.Type.Point);
                     break;
-                case LightType.Area:
+                case LightType.Rectangle:
                 case LightType.Disc:
                 default:
                     light.SetLightType(LightPunctual.Type.Spot);
@@ -309,6 +312,7 @@ namespace GLTFast.Export
                         light.intensity = uLight.intensity;
                     }
                     else {
+#if !UNITY_2023_2_OR_NEWER
                         switch (lightHd.type) {
                             case HDLightType.Spot:
                             case HDLightType.Point:
@@ -322,6 +326,21 @@ namespace GLTFast.Export
                                 light.intensity = lightHd.intensity;
                                 break;
                         }
+#else
+                        switch (lightType) {
+                            case LightType.Spot:
+                            case LightType.Point:
+                                light.intensity = GetIntensity(LightUnit.Candela);
+                                break;
+                            case LightType.Directional:
+                                light.intensity = GetIntensity(LightUnit.Lux);
+                                break;
+                            case LightType.Rectangle:
+                            default:
+                                light.intensity = lightHd.intensity;
+                                break;
+                        }
+#endif
                     }
                     break;
 #endif
@@ -734,7 +753,7 @@ namespace GLTFast.Export
         async Task<bool> Bake(string bufferPath, string directory)
         {
             var success = true;
-            
+
             if (m_Meshes != null && m_Meshes.Count > 0)
             {
 #if GLTFAST_MESH_DATA
@@ -912,26 +931,39 @@ namespace GLTFast.Export
                 return false;
 #endif
             }
-            var tasks = new List<Task>(m_Meshes.Count);
+            var tasks = m_Settings.Deterministic ? null : new List<Task>(m_Meshes.Count);
 
             var meshDataArray = UnityEngine.Mesh.AcquireReadOnlyMeshData(m_UnityMeshes);
             Profiler.EndSample();
             for (var meshId = 0; meshId < m_Meshes.Count; meshId++)
             {
+                Task task;
 #if DRACO_UNITY
                 if ((m_Settings.Compression & Compression.Draco) != 0)
                 {
-                    tasks.Add(BakeMeshDraco(meshId, meshDataArray[meshId]));
+                    task = BakeMeshDraco(meshId, meshDataArray[meshId]);
                 }
                 else
 #endif
                 {
-                    tasks.Add(BakeMesh(meshId, meshDataArray[meshId]));
+                    task = BakeMesh(meshId, meshDataArray[meshId]);
+                }
+
+                if (m_Settings.Deterministic)
+                {
+                    await task;
+                }
+                else
+                {
+                    tasks.Add(task);
                 }
                 await m_DeferAgent.BreakPoint();
             }
 
-            await Task.WhenAll(tasks);
+            if (!m_Settings.Deterministic)
+            {
+                await Task.WhenAll(tasks);
+            }
             meshDataArray.Dispose();
             return true;
         }
@@ -952,8 +984,8 @@ namespace GLTFast.Export
             var attrDataDict = new Dictionary<VertexAttribute, AttributeData>();
 
             foreach (var attribute in vertexAttributes) {
-                if (attribute.attribute == VertexAttribute.BlendWeight 
-                    || attribute.attribute == VertexAttribute.BlendIndices) 
+                if (attribute.attribute == VertexAttribute.BlendWeight
+                    || attribute.attribute == VertexAttribute.BlendIndices)
                 {
                     Debug.LogWarning($"Vertex attribute {attribute.attribute} is not supported yet...skipping");
                     continue;
@@ -1257,7 +1289,7 @@ namespace GLTFast.Export
         }
 
 #if DRACO_UNITY
-        async Task BakeMeshDraco(int meshId, UnityEngine.Mesh.MeshData meshData) 
+        async Task BakeMeshDraco(int meshId, UnityEngine.Mesh.MeshData meshData)
         {
             var mesh = m_Meshes[meshId];
             var unityMesh = m_UnityMeshes[meshId];
@@ -1274,7 +1306,7 @@ namespace GLTFast.Export
             );
 
             if (results == null) return;
-            
+
             mesh.primitives = new MeshPrimitive[results.Length];
             for (var submesh = 0; submesh < results.Length; submesh++) {
                 var encodeResult = results[submesh];
@@ -1330,7 +1362,7 @@ namespace GLTFast.Export
                 indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
 
                 var indicesId = AddAccessor(indexAccessor);
-                
+
                 mesh.primitives[submesh] = new MeshPrimitive {
                     extensions = new MeshPrimitiveExtensions {
                         KHR_draco_mesh_compression = new MeshPrimitiveDracoExtension {

@@ -20,7 +20,6 @@ feedback on how to optimally perform your changes or reasons for not doing it.
 Lastly, if you're looking for input on what to contribute browse the GitHub
 issues, especially ones with the `help wanted` or `good first issue` label.
 
-
 ## Git Branches
 
 The main branch corresponds to the most recent version of the project. Note
@@ -36,8 +35,8 @@ contains the following:
 
 ## Contributor License Agreements
 
-When you open a pull request, you will be asked to acknolwedge our Contributor
+When you open a pull request, you will be asked to acknowledge our Contributor
 License Agreement. You will have to confirm that your Contributions are your
 original creation and that you have complete right and authority to make your
 Contributions. We allow both individual contributions and contributions made on
-behalf of companies. 
+behalf of companies.

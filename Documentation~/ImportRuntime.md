@@ -1,6 +1,6 @@
 # Runtime Loading
 
-You can load a glTF asset from an URL or a file path.
+You can load a glTF&trade; asset from an URL or a file path.
 
 > Note: glTFs are loaded via [UnityWebRequests](https://docs.unity3d.com/ScriptReference/Networking.UnityWebRequest.html). File paths have to be prefixed with `file://` in the Unity Editor and on certain platforms (e.g. iOS).
 
@@ -43,12 +43,12 @@ async void LoadGltfBinaryFromMemory() {
 
 Loading via script allows you to:
 
-- Custom download or file loading behaviour (see [`IDownloadProvider`][IDownload])
-- Customize loading behaviour (like texture settings) via [`ImportSettings`](#import-settings)
+- Custom download or file loading behavior (see [`IDownloadProvider`][IDownload])
+- Customize loading behavior (like texture settings) via [`ImportSettings`](#import-settings)
 - Custom material generation (see [`IMaterialGenerator`][IMaterialGenerator]])
 - Customize [instantiation](#instantiation)
-- Load glTF once and instantiate its scenes many times (see example [below](#custom-post-loading-behaviour))
-- Access data of glTF scene (for example get material; see example [below](#custom-post-loading-behaviour))
+- Load glTF once and instantiate its scenes many times (see example [below](#custom-post-loading-behavior))
+- Access data of glTF scene (for example get material; see example [below](#custom-post-loading-behavior))
 - [Logging](#logging) allow reacting and communicating incidents during loading and instantiation
 - Tweak and optimize loading performance
 
@@ -80,9 +80,9 @@ async void Start()
 }
 ```
 
-### Custom Post-Loading Behaviour
+### Custom Post-Loading Behavior
 
-The async `Load` method can be awaited and followed up by custom behaviour.
+The async `Load` method can be awaited and followed up by custom behavior.
 
 ```C#
 async void Start() {
@@ -142,7 +142,7 @@ You can disable this by setting `SkinUpdateWhenOffscreen` to false.
 
 ##### `Layer`
 
-Instantated `GameObject`s will be assigned to this [layer](https://docs.unity3d.com/Manual/Layers.html).
+Instantiated `GameObject`s will be assigned to this [layer](https://docs.unity3d.com/Manual/Layers.html).
 
 ##### `Mask`
 
@@ -157,7 +157,7 @@ Two common use-cases are
 1. Scale-down (physically correct) intensities to compensate for the missing exposure control (or high sensitivity) of a render pipeline (e.g. Universal or Built-in Render Pipeline)
 2. Boost implausibly low light intensities
 
-See [Physical Light Units in glTF](./LightUnits.md) for a detailed explaination.
+See [Physical Light Units in glTF](./LightUnits.md) for a detailed explanation.
 
 ##### `SceneObjectCreation`
 
@@ -213,7 +213,7 @@ async void Start()
 
 ### Logging
 
-When loading a glTF file, glTFast logs messages of varying severity (errors, warnigns or infos). Developers can choose what to make of those log messages. Examples:
+When loading a glTF file, *Unity glTFast* logs messages of varying severity (errors, warnings or infos). Developers can choose what to make of those log messages. Examples:
 
 - Log to console in readable form
 - Feed the information into an analytics framework
@@ -221,7 +221,7 @@ When loading a glTF file, glTFast logs messages of varying severity (errors, war
 
 The provided component `GltfAsset` logs all of those messages to the console by default.  
 
-You can customize logging by providing an implementation of [`ICodeLogger`][ICodeLogger] to methods like `GltfImport.Load` or `GltfImport.InstanciateMainScene`.
+You can customize logging by providing an implementation of [`ICodeLogger`][ICodeLogger] to methods like `GltfImport.Load` or `GltfImport.InstantiateMainScene`.
 
 There are two common implementations bundled. The `ConsoleLogger`, which logs straight to console (the default) and `CollectingLogger`, which stores messages in a list for users to process.
 
@@ -229,7 +229,7 @@ Look into [`ICodeLogger`][ICodeLogger] and [`LogMessages`][LogMessages] for deta
 
 ### Tune loading performance
 
-When loading glTFs, *glTFast* let's you optimize towards one of two diametrical goals
+When loading glTFs, *Unity glTFast* let's you optimize towards one of two diametrical goals
 
 - A stable frame rate
 - Fastest loading time
@@ -238,7 +238,7 @@ By default each `GltfAsset` instance tries not to block the main thread for long
 
 If you load many glTF files at once, by default they won't be aware of each other and collectively might block the main game loop for too long.
 
-You can solve this by using a common "defer agent". It decides if work should continue right now or at the next game loop iteration. *glTFast* comes with two defer agents
+You can solve this by using a common "defer agent". It decides if work should continue right now or at the next game loop iteration. *Unity glTFast* comes with two defer agents
 
 - `TimeBudgetPerFrameDeferAgent` for stable frame rate
 - `UninterruptedDeferAgent` for fastest, uninterrupted loading
@@ -277,12 +277,18 @@ async Task CustomDeferAgentPerGltfImport() {
 ```
 
 > Note 1: Depending on your glTF scene, using the `UninterruptedDeferAgent` may block the main thread for up to multiple seconds. Be sure to not do this during critical game play action.
-
+>
 > Note2 : Using the `TimeBudgetPerFrameDeferAgent` does **not** guarantee a stutter free frame rate. This is because some sub tasks of the loading routine (like uploading a texture to the GPU) may take too long, cannot be interrupted and **have** to be done on the main thread.
 
 ### Disposing Resources
 
 When you no longer need a loaded instance of a glTF scene you might want to remove it and free up all its resources (mainly memory). For that purpose [`GltfImport`][GltfImport] implements `IDisposable`. Calling [`GltfImport.Dispose`][GltfImportDispose] will destroy all its resources, regardless whether there's still an instance that might references them.
+
+## Trademarks
+
+*Unity&reg;* is a registered trademark of [Unity Technologies][Unity].
+
+*Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][Khronos].
 
 [GltfImport]: xref:GLTFast.GltfImport
 [GltfImportDispose]: xref:GLTFast.GltfImport.Dispose
@@ -294,6 +300,8 @@ When you no longer need a loaded instance of a glTF scene you might want to remo
 [IMaterialGenerator]: xref:GLTFast.Materials.IMaterialGenerator
 [ImportSettings]: xref:GLTFast.ImportSettings
 [InstantiationSettings]: xref:GLTFast.InstantiationSettings
+[Khronos]: https://www.khronos.org
 [LogMessages]: xref:GLTFast.Logging.LogMessages
 [GameObjectSceneInstance]: xref:GLTFast.GameObjectSceneInstance
 [SceneObjectCreation]: xref:GLTFast.SceneObjectCreation
+[Unity]: https://unity.com

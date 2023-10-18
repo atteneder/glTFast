@@ -94,7 +94,11 @@ namespace GLTFast.Export
                 exportTexture = new Texture2D(
                     texture.width,
                     texture.height,
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2023_2_OR_NEWER
+                    // ~20 times faster texture construction
+                    !hasAlpha && SystemInfo.IsFormatSupported(GraphicsFormat.R8G8B8_UNorm, GraphicsFormatUsage.Sample) ?  GraphicsFormat.R8G8B8_UNorm : GraphicsFormat.R8G8B8A8_UNorm,
+                    TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate
+#elif UNITY_2022_1_OR_NEWER
                     // ~20 times faster texture construction
                     !hasAlpha && SystemInfo.IsFormatSupported(GraphicsFormat.R8G8B8_UNorm, FormatUsage.Sample) ?  GraphicsFormat.R8G8B8_UNorm : GraphicsFormat.R8G8B8A8_UNorm,
                     TextureCreationFlags.DontInitializePixels | TextureCreationFlags.DontUploadUponCreate
