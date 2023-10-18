@@ -25,16 +25,16 @@ namespace GLTFast
         /// </summary>
         Unknown,
         /// <summary>
-        /// <see href="https://docs.unity3d.com/Manual/built-in-render-pipeline.html">Built-in Render Pipeline</see>
+        /// <a href="https://docs.unity3d.com/Manual/built-in-render-pipeline.html">Built-in Render Pipeline</a>
         /// Unity's built-in render pipeline
         /// </summary>
         BuiltIn,
         /// <summary>
-        /// <see href="https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@latest">Universal Render Pipeline</see>
+        /// <a href="https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@latest">Universal Render Pipeline</a>
         /// </summary>
         Universal,
         /// <summary>
-        /// <see href="https://docs.unity3d.com/Packages/com.unity.render-pipelines.high-definition@latest">High Definition Render Pipeline</see>
+        /// <a href="https://docs.unity3d.com/Packages/com.unity.render-pipelines.high-definition@latest">High Definition Render Pipeline</a>
         /// </summary>
         HighDefinition
     }

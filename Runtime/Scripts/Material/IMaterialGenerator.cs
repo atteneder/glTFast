@@ -17,30 +17,30 @@ namespace GLTFast.Materials
         /// <summary>
         /// Get fallback material that is assigned to nodes without a material.
         /// </summary>
-        /// <param name="pointsSupport">If true, material has to support meshes with points topology <seealso cref="MeshTopology.Points"/></param>
+        /// <param name="pointsSupport">If true, material has to support meshes with <see cref="MeshTopology.Points">points</see> topology.</param>
         /// <returns>fallback material</returns>
         UnityEngine.Material GetDefaultMaterial(bool pointsSupport = false);
 
         /// <summary>
         /// Converts a glTF material into a Unity <see cref="Material"/>.
-        /// <cref>gltfMaterial</cref> might reference textures, which can be queried from <cref>gltf</cref>
+        /// <see cref="gltfMaterial"/> might reference textures, which can be queried from <see cref="gltf"/>.
         /// </summary>
         /// <param name="gltfMaterial">Source glTF material</param>
         /// <param name="gltf">Interface to a loaded glTF's resources (e.g. textures)</param>
-        /// <param name="pointsSupport">If true, material has to support meshes with points topology <seealso cref="MeshTopology.Points"/></param>
+        /// <param name="pointsSupport">If true, material has to support meshes with <see cref="MeshTopology.Points">points</see> topology.</param>
         /// <returns>Generated Unity Material</returns>
         UnityEngine.Material GenerateMaterial(
-            Material gltfMaterial,
+            MaterialBase gltfMaterial,
             IGltfReadable gltf,
             bool pointsSupport = false
             );
 
         /// <summary>
-        /// Is called prior to <seealso cref="GenerateMaterial"/>. The logger should be used
+        /// Has to be called prior to <see cref="GenerateMaterial"/>. The logger can be used
         /// to inform users about incidents of arbitrary severity (error,warning or info)
         /// during material generation.
         /// </summary>
-        /// <param name="logger"></param>
+        /// <param name="logger">Logger to be used.</param>
         void SetLogger(ICodeLogger logger);
     }
 }

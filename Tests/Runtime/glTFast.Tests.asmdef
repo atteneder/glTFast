@@ -3,20 +3,40 @@
     "rootNamespace": "GLTFast.Tests",
     "references": [
         "UnityEngine.TestRunner",
+        "Unity.Mathematics",
+        "Unity.PerformanceTesting",
         "glTFast",
-        "Unity.Mathematics"
+        "glTFast.Newtonsoft",
+        "Unity.Meshopt.Decompress"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [
         "UNITY_INCLUDE_TESTS"
     ],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.meshopt.decompress",
+            "expression": "",
+            "define": "MESHOPT"
+        },
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "",
+            "define": "NEWTONSOFT_JSON"
+        },
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "",
+            "define": "UNITY_ANIMATION"
+        }
+    ],
     "noEngineReferences": false
 }

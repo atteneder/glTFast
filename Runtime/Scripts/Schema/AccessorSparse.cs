@@ -3,16 +3,38 @@
 
 namespace GLTFast.Schema
 {
+    /// <inheritdoc/>
+    [System.Serializable]
+    public class AccessorSparse : AccessorSparseBase<AccessorSparseIndices, AccessorSparseValues> { }
+
+    /// <inheritdoc/>
+    [System.Serializable]
+    public abstract class AccessorSparseBase<TIndices, TValues> : AccessorSparseBase
+    where TIndices : AccessorSparseIndices
+    where TValues : AccessorSparseValues
+    {
+        /// <inheritdoc cref="Indices"/>
+        public TIndices indices;
+
+        /// <inheritdoc cref="Values"/>
+        public TValues values;
+
+        /// <inheritdoc cref="AccessorSparseBase.Indices"/>
+        public override AccessorSparseIndices Indices => indices;
+
+        /// <inheritdoc cref="AccessorSparseBase.Values"/>
+        public override AccessorSparseValues Values => values;
+    }
 
     /// <summary>
-    /// Sparse property of a glTF <seealso cref="Accessor"/>
+    /// Sparse property of a glTF
     /// </summary>
+    /// <seealso cref="Accessor"/>
     [System.Serializable]
-    public class AccessorSparse
+    public abstract class AccessorSparseBase
     {
         /// <summary>
         /// Number of entries stored in the sparse array.
-        /// <minimum>1</minimum>
         /// </summary>
         public int count;
 
@@ -20,28 +42,28 @@ namespace GLTFast.Schema
         /// Index array of size `count` that points to those accessor attributes that
         /// deviate from their initialization value. Indices must strictly increase.
         /// </summary>
-        public AccessorSparseIndices indices;
+        public abstract AccessorSparseIndices Indices { get; }
 
         /// <summary>
         /// "Array of size `count` times number of components, storing the displaced
         /// accessor attributes pointed by `indices`. Substituted values must have
         /// the same `componentType` and number of components as the base accessor.
         /// </summary>
-        public AccessorSparseValues values;
+        public abstract AccessorSparseValues Values { get; }
 
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
             writer.AddProperty("count", count);
-            if (indices != null)
+            if (Indices != null)
             {
                 writer.AddProperty("indices");
-                indices.GltfSerialize(writer);
+                Indices.GltfSerialize(writer);
             }
-            if (values != null)
+            if (Values != null)
             {
                 writer.AddProperty("values");
-                values.GltfSerialize(writer);
+                Values.GltfSerialize(writer);
             }
             writer.Close();
         }

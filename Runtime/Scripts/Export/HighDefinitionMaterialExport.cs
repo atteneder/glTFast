@@ -29,6 +29,8 @@ namespace GLTFast.Export {
         static readonly int k_SmoothnessRemapMax = Shader.PropertyToID("_SmoothnessRemapMax");
         static readonly int k_SmoothnessRemapMin = Shader.PropertyToID("_SmoothnessRemapMin");
         static readonly int k_UnlitColor = Shader.PropertyToID("_UnlitColor");
+        static readonly int k_CoatMask = Shader.PropertyToID("_CoatMask");
+        static readonly int k_CoatMaskMap = Shader.PropertyToID("_CoatMaskMap");
 
         /// <summary>
         /// Converts a Unity material to a glTF material.
@@ -104,6 +106,34 @@ namespace GLTFast.Export {
                 }
             }
 
+            //
+            // Clearcoat
+            //
+            if (uMaterial.HasProperty(k_CoatMask) && uMaterial.GetFloat(k_CoatMask) > 0)
+            {
+                gltf.RegisterExtensionUsage(Extension.MaterialsClearcoat);
+                material.extensions = material.extensions ?? new MaterialExtensions();
+                material.extensions.KHR_materials_clearcoat = new ClearCoat();
+                material.extensions.KHR_materials_clearcoat.clearcoatFactor = uMaterial.GetFloat(k_CoatMask);
+
+                if (uMaterial.HasProperty(k_CoatMaskMap))
+                {
+                    var coatMaskTex = uMaterial.GetTexture(k_CoatMaskMap);
+                    if (coatMaskTex != null)
+                    {
+                        if (coatMaskTex is Texture2D)
+                        {
+                            material.extensions.KHR_materials_clearcoat.clearcoatTexture = ExportTextureInfo(coatMaskTex, gltf);
+                            ExportTextureTransform(material.extensions.KHR_materials_clearcoat.clearcoatTexture, uMaterial, k_CoatMaskMap, gltf);
+                        }
+                        else
+                        {
+                            logger?.Error(LogCode.TextureInvalidType, "clearcoat", material.name);
+                            success = false;
+                        }
+                    }
+                }
+            }
 
             var mainTexProperty = uMaterial.HasProperty(k_BaseColorMap) ? k_BaseColorMap : MainTexProperty;
 

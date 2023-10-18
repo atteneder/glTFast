@@ -4,13 +4,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.0] - 2023-10-04
+
+### Added
+- Custom Extension API (`GLTFast.Extensions` namespace)
+- Support for alternative JSON parsing via Newtonsoft JSON
+- `Accessor.ElementByteSize`: Byte size of one element of that accessor
+- `Accessor.ByteSize`: Overall byte size
+- `IGltfReadable.GetAccessor`: Generic byte-array view into an accessor
+- `GameObjectInstantiator` events that allow further instantiation customizations
+  - `NodeCreated`
+  - `MeshAdded`
+  - `EndSceneCompleted`
+- Value array JSON parsing tests
+- String/enum conversions tests
+- (Import) Clearcoat material support in HDRP and URP (via [KHR_materials_clearcoat](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_clearcoat/) extension)
+- (Export) Clearcoat material export support for HDRP Lit shader
+
+### Changed
+- Renamed `GltfAnimation` to `Animation` for consistent naming.
+- Bumped Burst dependency version to 1.8.4
+- Bumped Mathematics dependency version to 1.3.1
+
+### Fixed
+- Added Obsolete attribute to public schema class fields that are for serialization only and should not get modified directly.
+- More robust parsing of (invalid) enum values
+
 ## [5.2.0] - 2023-09-14
 
 ### Added
 - Runtime tests
 - (Export) Setting for deterministic export (limits concurrency to ensure consistent output)
 - (DOTS) Support for [Entities 1.0][Entities1.0]
-
 ### Changed
 - Optimized `Accessor.GetAccessorAttributeType`
 - Optimized `GltfEntityAsset.ClearScenes` via Burst

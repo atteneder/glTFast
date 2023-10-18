@@ -234,10 +234,10 @@ namespace GLTFast.Export
             {
                 if (AddImageExport(gltf, ormImageExport, out var ormTextureId))
                 {
-                    if (material.pbrMetallicRoughness.metallicRoughnessTexture != null)
+                    if (material.pbrMetallicRoughness.MetallicRoughnessTexture != null)
                     {
-                        material.pbrMetallicRoughness.metallicRoughnessTexture.index = ormTextureId;
-                        ExportTextureTransform(material.pbrMetallicRoughness.metallicRoughnessTexture, uMaterial, k_MetallicGlossMap, gltf);
+                        material.PbrMetallicRoughness.MetallicRoughnessTexture.index = ormTextureId;
+                        ExportTextureTransform(material.PbrMetallicRoughness.MetallicRoughnessTexture, uMaterial, k_MetallicGlossMap, gltf);
                     }
 
                     if (ormImageExport.HasOcclusion)
@@ -329,9 +329,9 @@ namespace GLTFast.Export
                                 ? ImageFormat.Jpg
                                 : ImageFormat.Unknown
                         );
-                        if (pbr.baseColorTexture != null)
+                        if (pbr.BaseColorTexture != null)
                         {
-                            ExportTextureTransform(pbr.baseColorTexture, uMaterial, mainTexProperty, gltf);
+                            ExportTextureTransform(pbr.BaseColorTexture, uMaterial, mainTexProperty, gltf);
                         }
                     }
                     else

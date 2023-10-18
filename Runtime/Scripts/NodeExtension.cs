@@ -10,7 +10,7 @@ namespace GLTFast
     using Schema;
 
     /// <summary>
-    /// Extension methods for <seealso cref="Node"/>
+    /// Extension methods for <see cref="NodeBase"/>
     /// </summary>
     public static class NodeExtension
     {
@@ -23,7 +23,7 @@ namespace GLTFast
         /// <param name="position">Node's translation</param>
         /// <param name="rotation">Node's rotation</param>
         /// <param name="scale">Node's scale</param>
-        public static void GetTransform(this Node node, out Vector3 position, out Quaternion rotation, out Vector3 scale)
+        public static void GetTransform(this NodeBase node, out Vector3 position, out Quaternion rotation, out Vector3 scale)
         {
 
             position = Vector3.zero;

@@ -29,10 +29,9 @@ namespace GLTFast.Export
         /// <param name="exportSettings">Export settings</param>
         /// <param name="gameObjectExportSettings">GameObject export settings</param>
         /// <param name="materialExport">Provides material conversion</param>
-        /// <param name="deferAgent">Defer agent; decides when/if to preempt
-        /// export to preserve a stable frame rate <seealso cref="IDeferAgent"/></param>
-        /// <param name="logger">Interface for logging (error) messages
-        /// <seealso cref="ConsoleLogger"/></param>
+        /// <param name="deferAgent">Defer agent (&lt;see cref="IDeferAgent"/&gt;); decides when/if to preempt
+        /// export to preserve a stable frame rate.</param>
+        /// <param name="logger">Interface for logging (error) messages.</param>
         public GameObjectExport(
             ExportSettings exportSettings = null,
             GameObjectExportSettings gameObjectExportSettings = null,
@@ -50,7 +49,7 @@ namespace GLTFast.Export
         /// Adds a scene to the glTF.
         /// If the conversion to glTF was not flawless (i.e. parts of the scene
         /// were not converted 100% correctly) you still might be able to
-        /// export a glTF. You may use the <seealso cref="CollectingLogger"/>
+        /// export a glTF. You may use the <see cref="CollectingLogger"/>
         /// to analyze what exactly went wrong.
         /// </summary>
         /// <param name="gameObjects">Root level GameObjects (will get added recursively)</param>

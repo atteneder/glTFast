@@ -5,8 +5,9 @@ namespace GLTFast.Schema
 {
 
     /// <summary>
-    /// Sparse indices property of a glTF <seealso cref="AccessorSparse"/>
+    /// Sparse indices property of a glTF
     /// </summary>
+    /// <seealso cref="AccessorSparse"/>
     [System.Serializable]
     public class AccessorSparseIndices
     {
@@ -18,7 +19,6 @@ namespace GLTFast.Schema
 
         /// <summary>
         /// The offset relative to the start of the bufferView in bytes. Must be aligned.
-        /// <minimum>0</minimum>
         /// </summary>
         public int byteOffset;
 

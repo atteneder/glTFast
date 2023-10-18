@@ -7,9 +7,10 @@ namespace GLTFast
 {
 
     /// <summary>
-    /// <seealso cref="IDeferAgent"/> that always decides to continue
+    /// Defer agent that always decides to continue
     /// processing
     /// </summary>
+    /// <seealso cref="IDeferAgent"/>
     public class UninterruptedDeferAgent : IDeferAgent
     {
         /// <inheritdoc />

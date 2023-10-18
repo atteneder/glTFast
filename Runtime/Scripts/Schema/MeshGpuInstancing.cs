@@ -9,8 +9,8 @@ namespace GLTFast.Schema
     /// <summary>
     /// Extension for enabling GPU instancing, rendering many copies of a
     /// single mesh at once using a small number of draw calls.
-    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_mesh_gpu_instancing"/>
     /// </summary>
+    /// <seealso href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_mesh_gpu_instancing"/>
     [System.Serializable]
     public class MeshGpuInstancing
     {

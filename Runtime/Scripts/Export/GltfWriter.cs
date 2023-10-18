@@ -117,10 +117,9 @@ namespace GLTFast.Export
         /// Provides glTF export independent of workflow (GameObjects/Entities)
         /// </summary>
         /// <param name="exportSettings">Export settings</param>
-        /// <param name="deferAgent">Defer agent; decides when/if to preempt
-        /// export to preserve a stable frame rate <seealso cref="IDeferAgent"/></param>
-        /// <param name="logger">Interface for logging (error) messages
-        /// <seealso cref="ConsoleLogger"/></param>
+        /// <param name="deferAgent">Defer agent (<see cref="IDeferAgent"/>); decides when/if to preempt
+        /// export to preserve a stable frame rate.</param>
+        /// <param name="logger">Interface for logging (error) messages.</param>
         public GltfWriter(
             ExportSettings exportSettings = null,
             IDeferAgent deferAgent = null,
@@ -390,7 +389,7 @@ namespace GLTFast.Export
                 node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name: $"{node.name}_Orientation");
             }
             node.extensions = node.extensions ?? new NodeExtensions();
-            node.extensions.KHR_lights_punctual = new NodeLightsPunctual
+            node.Extensions.KHR_lights_punctual = new NodeLightsPunctual
             {
                 light = lightId
             };
@@ -741,10 +740,10 @@ namespace GLTFast.Export
             var sb = new StringBuilder("glTF summary: ");
             sb.AppendFormat("{0} bytes JSON + {1} bytes buffer", jsonLength, bufferLength);
             if (m_Gltf != null) {
-                sb.AppendFormat(", {0} nodes", m_Gltf.nodes?.Length ?? 0);
+                sb.AppendFormat(", {0} nodes", m_Gltf.Nodes?.Count ?? 0);
                 sb.AppendFormat(" ,{0} meshes", m_Gltf.meshes?.Length ?? 0);
-                sb.AppendFormat(" ,{0} materials", m_Gltf.materials?.Length ?? 0);
-                sb.AppendFormat(" ,{0} images", m_Gltf.images?.Length ?? 0);
+                sb.AppendFormat(" ,{0} materials", m_Gltf.Materials?.Count ?? 0);
+                sb.AppendFormat(" ,{0} images", m_Gltf.Images?.Count ?? 0);
             }
             m_Logger?.Info(sb.ToString());
 #endif
@@ -794,7 +793,7 @@ namespace GLTFast.Export
             if (m_Lights != null && m_Lights.Count > 0)
             {
                 RegisterExtensionUsage(Extension.LightsPunctual);
-                m_Gltf.extensions = m_Gltf.extensions ?? new Schema.RootExtension();
+                m_Gltf.extensions = m_Gltf.extensions ?? new Schema.RootExtensions();
                 m_Gltf.extensions.KHR_lights_punctual = m_Gltf.extensions.KHR_lights_punctual ?? new LightsPunctual();
                 m_Gltf.extensions.KHR_lights_punctual.lights = m_Lights.ToArray();
             }

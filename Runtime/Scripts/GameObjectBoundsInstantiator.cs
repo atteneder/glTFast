@@ -17,7 +17,7 @@ namespace GLTFast
 
         Dictionary<uint, Bounds> m_NodeBounds;
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="GameObjectInstantiator(IGltfReadable,Transform,ICodeLogger,InstantiationSettings)"/>
         public GameObjectBoundsInstantiator(
             IGltfReadable gltf,
             Transform parent,
@@ -42,8 +42,7 @@ namespace GLTFast
         public override void AddPrimitive(
             uint nodeIndex,
             string meshName,
-            Mesh mesh,
-            int[] materialIndices,
+            MeshResult meshResult,
             uint[] joints = null,
             uint? rootJoint = null,
             float[] morphTargetWeights = null,
@@ -53,8 +52,7 @@ namespace GLTFast
             base.AddPrimitive(
                 nodeIndex,
                 meshName,
-                mesh,
-                materialIndices,
+                meshResult,
                 joints,
                 rootJoint,
                 morphTargetWeights,
@@ -63,7 +61,7 @@ namespace GLTFast
 
             if (m_NodeBounds != null)
             {
-                var meshBounds = GetTransformedBounds(mesh.bounds, m_Parent.worldToLocalMatrix * m_Nodes[nodeIndex].transform.localToWorldMatrix);
+                var meshBounds = GetTransformedBounds(meshResult.mesh.bounds, m_Parent.worldToLocalMatrix * m_Nodes[nodeIndex].transform.localToWorldMatrix);
                 if (m_NodeBounds.TryGetValue(nodeIndex, out var prevBounds))
                 {
                     meshBounds.Encapsulate(prevBounds);

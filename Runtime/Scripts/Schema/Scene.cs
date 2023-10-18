@@ -19,7 +19,7 @@ namespace GLTFast.Schema
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
-            GltfSerializeRoot(writer);
+            GltfSerializeName(writer);
             writer.AddArrayProperty("nodes", nodes);
             writer.Close();
         }

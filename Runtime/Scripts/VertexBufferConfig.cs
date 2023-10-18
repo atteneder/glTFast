@@ -167,13 +167,13 @@ namespace GLTFast
                 }
                 if (posAcc.IsSparse)
                 {
-                    buffers.GetAccessorSparseIndices(posAcc.sparse.indices, out var posIndexData);
-                    buffers.GetAccessorSparseValues(posAcc.sparse.values, out var posValueData);
+                    buffers.GetAccessorSparseIndices(posAcc.Sparse.Indices, out var posIndexData);
+                    buffers.GetAccessorSparseValues(posAcc.Sparse.Values, out var posValueData);
                     var sparseJobHandle = GetVector3SparseJob(
                         posIndexData,
                         posValueData,
-                        posAcc.sparse.count,
-                        posAcc.sparse.indices.componentType,
+                        posAcc.Sparse.count,
+                        posAcc.Sparse.Indices.componentType,
                         posAcc.componentType,
                         (float3*)vDataPtr,
                         outputByteStride,

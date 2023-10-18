@@ -14,7 +14,7 @@ namespace GLTFast
     using Schema;
 
     /// <summary>
-    /// Extension methods for <seealso cref="LightPunctual"/>
+    /// Extension methods for <see cref="LightPunctual"/>
     /// </summary>
     public static class LightPunctualExtension
     {
