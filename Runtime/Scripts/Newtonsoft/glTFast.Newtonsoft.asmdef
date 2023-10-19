@@ -13,6 +13,11 @@
     "defineConstraints": [],
     "versionDefines": [
         {
+            "name": "com.unity.modules.animation",
+            "expression": "1.0.0",
+            "define": "UNITY_ANIMATION"
+        },
+        {
             "name": "com.unity.nuget.newtonsoft-json",
             "expression": "",
             "define": "NEWTONSOFT_JSON"

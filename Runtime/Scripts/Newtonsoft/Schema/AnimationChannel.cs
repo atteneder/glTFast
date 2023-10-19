@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NEWTONSOFT_JSON
+#if UNITY_ANIMATION && NEWTONSOFT_JSON
 
 using System.Collections.Generic;
 
