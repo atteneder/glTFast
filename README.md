@@ -1,10 +1,14 @@
-# Unity glTFast
+# glTFast
 
 <p align="center">
 <img src="./Documentation~/Images/unity-gltf-logos.png" alt="Unity and glTF logos side by side" />
 </p>
 
-*Unity glTFast* enables use of [glTF&trade; (GL Transmission Format)][gltf] asset files in [Unity][unity].
+[![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
+
+> **NOTE:** It's recommended to switch to [Unity glTFast][UnityGltfast], a fork of this package that is developed and supported by [Unity][unity]. Consult the [upgrade guide](https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@6.0/manual/UpgradeGuides.html#unity-fork) for details.
+
+*glTFast* enables use of [glTF&trade; (GL Transmission Format)][gltf] asset files in [Unity][unity].
 
 It focuses on speed, memory efficiency and a small build footprint while also providing:
 
@@ -15,7 +19,7 @@ It focuses on speed, memory efficiency and a small build footprint while also pr
 
 ## Features
 
-*Unity glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
+*glTFast* supports the full [glTF 2.0 specification][gltf-spec] and many extensions. It works with Universal, High Definition and the Built-In Render Pipelines on all platforms.
 
 See the [comprehensive list of supported features and extensions](./Documentation~/features.md).
 
@@ -36,16 +40,9 @@ Read more about the workflows in the [documentation][workflows].
 
 ## Installing
 
-To install the *Unity glTFast* package, follow these steps:
+> **NOTE:** Consider switching to [Unity glTFast][UnityGltfast], a fork of this package that is developed and supported by [Unity][unity]. Consult the [upgrade guide](./Documentation~/UpgradeGuides.md#unity-fork) for details.
 
-In your Unity project, go to Windows > Package Manager.
-On the status bar, select the Add (+) button.
-From the Add menu, select Add + package by name. Name and Version fields appear.
-In the Name field, enter `com.unity.cloud.gltfast`.
-Select Add.
-The Editor installs the latest available version of the package and any dependent packages.
-
-> **NOTE:** This package originally had the identifier `com.atteneder.gltfast`. Consult the [upgrade guide](./Documentation~/UpgradeGuides.md#unity-fork) to learn how to switch to the Unity version (`com.unity.cloud.gltfast`) or [install the original package](./Documentation~/Original.md).
+[Installation instruction for the original glTFast](./Documentation~/Original.md).
 
 ### Optional Packages
 
@@ -144,4 +141,5 @@ limitations under the License.
 [KtxUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest
 [Meshopt]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [unity]: https://unity.com
+[UnityGltfast]: https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@latest/
 [workflows]: ./Documentation~/index.md#workflows
