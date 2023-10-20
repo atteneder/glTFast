@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [6.0.0] - 2023-10-04
 
 ### Added
-- Custom Extension API (`GLTFast.Extensions` namespace)
+- Custom Add-On API (`GLTFast.Addons` namespace)
 - Support for alternative JSON parsing via Newtonsoft JSON
 - `Accessor.ElementByteSize`: Byte size of one element of that accessor
 - `Accessor.ByteSize`: Overall byte size
@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Clearcoat material export support for HDRP Lit shader
 
 ### Changed
+- Bumped minimum Unity version to 2020.3.48f1
 - Renamed `GltfAnimation` to `Animation` for consistent naming.
 - Bumped Burst dependency version to 1.8.4
 - Bumped Mathematics dependency version to 1.3.1
@@ -43,10 +44,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runtime tests
 - (Export) Setting for deterministic export (limits concurrency to ensure consistent output)
 - (DOTS) Support for [Entities 1.0][Entities1.0]
+
 ### Changed
 - Optimized `Accessor.GetAccessorAttributeType`
 - Optimized `GltfEntityAsset.ClearScenes` via Burst
-- Bump minimum unity version from 2019.4.7f1 to 2019.4.40f1
+- Bump minimum Unity version from 2019.4.7f1 to 2019.4.40f1
 
 ### Fixed
 - Compiler errors and warnings on Unity 2023.2 (and newer) due to using obsolete types.

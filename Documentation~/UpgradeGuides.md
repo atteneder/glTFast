@@ -20,7 +20,7 @@ For now, both the Unity variant and the original version will receive updates.
 The C# namespaces are identical between the variants, so all you need to do is:
 
 - Removed original *glTFast* (with package identifier `com.atteneder.gltfast`).
-- Add *Unity glTFast* (`com.unity.cloud.gltfast`).
+- [Install *Unity glTFast*](installation.html) (`com.unity.cloud.gltfast`).
 - Update assembly definition references (if your project had any).
 - Update any dependencies in your packages manifest (if your package had any)
 
