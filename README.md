@@ -86,7 +86,7 @@ Read the section *Materials and Shader Variants* in the [Documentation](./Docume
 
 ## Contribution
 
-Contributions in the form of ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *Unity glTFast*.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
