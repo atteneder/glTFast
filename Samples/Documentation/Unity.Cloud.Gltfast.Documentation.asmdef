@@ -1,0 +1,17 @@
+{
+    "name": "Unity.Cloud.Gltfast.Documentation",
+    "rootNamespace": "",
+    "references": [
+        "glTFast",
+        "glTFast.Newtonsoft"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
