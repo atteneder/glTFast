@@ -24,6 +24,6 @@
     <ui:VisualElement name="Report" class="report section">
         <Style src="GltfImporter-style.uss" />
         <ui:Label text="Report" name="Headline" class="h1" />
-        <ui:ListView focusable="true" binding-path="reportItems" virtualization-method="DynamicHeight" class="report-list" />
+        <ui:ListView focusable="true" binding-path="reportItems" virtualization-method="DynamicHeight" show-bound-collection-size="false" class="report-list" />
     </ui:VisualElement>
 </ui:UXML>
