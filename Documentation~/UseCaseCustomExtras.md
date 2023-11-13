@@ -1,14 +1,14 @@
 # Use case: Use glTFast Add-on API
 
-This use case describes the step to use glTFast Add-on API to import custom data in the `extras` property of a glTF&trade; JSON object. This example uses Newtonsoft JSON parser to deserialize data.
+This use case describes the steps to use glTFast Add-on API to import custom data from the `extras` property of a glTF&trade; JSON object. This example uses Newtonsoft JSON parser to deserialize data.
 
 To accomplish this use case, do the following:
 
-1. Add custom data in a gltf asset
-2. Create a custom gltf import behavior
+1. Add custom data in a glTF asset
+2. Create a custom glTF import behavior
 3. Add assembly definitions
 4. Set up a new scene
-5. Import the gltf asset in runtime
+5. Import the glTF asset in runtime
 
 ## Before you start
 
@@ -30,7 +30,7 @@ Before you start, you must add the following package dependencies to your projec
 
 ## How do I...?
 
-### Add custom data in a gltf asset
+### Add custom data in a glTF asset
 
 Add some custom data in the `extras` property of a glTF JSON object:
 
@@ -49,9 +49,9 @@ Add some custom data in the `extras` property of a glTF JSON object:
   ]
 ```
 
-### Create a custom gltf import behavior
+### Create a custom glTF import behavior
 
-To create a custom gltf import behavior, follow these steps:
+To create a custom glTF import behavior, follow these steps:
 
 1. Open your Unity&reg; Project.
 2. Go to the **Assets** folder in the Project window.
@@ -85,14 +85,14 @@ To set up a new scene, follow these steps:
 1. Create a new scene.
 2. Create a GameObject called **GltfImport**.
 3. Select **Add Component** in the Inspector window and add the **Custom Gltf Import** component.
-4. In the **Uri** field, set the path to point to where the gltf asset is stored.   
+4. In the **Uri** field, set the path to point to where the glTF asset is stored.
 
-### Import the gltf asset in runtime
+### Import the glTF asset in runtime
 
-Select **Play**, the gltf asset should be loaded and displayed at runtime.
+Select **Play**, the glTF asset should be loaded and displayed at runtime.
 
-You can verify that the custom data in the `extras` property of the glTF is imported correctly by inspecting the loaded gltf asset:
-![Screen capture that displays the extra data in the imported gltf asset](Images/gltf-extra-data.PNG)
+You can verify that the custom data in the `extras` property of the glTF is imported correctly by inspecting the loaded glTF asset:
+![Screen capture that displays the extra data in the imported glTF asset](Images/gltf-extra-data.PNG)
 
 ## Trademarks
 
