@@ -15,7 +15,7 @@ To install the *Unity glTFast* package, follow these steps:
 
 There are some related package that improve *Unity glTFast* by extending its feature set.
 
-- [Draco&trade; 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
+- [Draco&trade; for Unity][DracoForUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
 - [KTX&trade; for Unity][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
 - [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
 
@@ -29,7 +29,7 @@ There are some related package that improve *Unity glTFast* by extending its fea
 
 *Draco&trade;* is a trademark of [*Google LLC*][GoogleLLC].
 
-[DracoUnity]: https://github.com/atteneder/DracoUnity
+[DracoForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.draco@latest
 [ExtBasisU]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu
 [ExtDraco]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression
 [ExtMeshopt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
