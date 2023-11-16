@@ -1314,8 +1314,10 @@ namespace GLTFast.Export
                 var attributes = new Attributes();
                 var dracoAttributes = new Attributes();
 
-                foreach (var (vertexAttribute, attribute) in encodeResult.vertexAttributes)
+                foreach ( var vertexAttributeTuple in encodeResult.vertexAttributes)
                 {
+                    var vertexAttribute = vertexAttributeTuple.Key;
+                    var attribute = vertexAttributeTuple.Value;
                     var accessor = new Accessor {
                         componentType = GltfComponentType.Float,
                         count = (int)encodeResult.vertexCount

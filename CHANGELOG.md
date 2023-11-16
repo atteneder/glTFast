@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Compilation error when Animation module is disabled and Newtonsoft JSON package installed.
+- Compilation on Unity 2020 LTS
 
 ## [6.0.0] - 2023-10-04
 
