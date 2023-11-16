@@ -42,7 +42,7 @@ Shader "glTF/PbrSpecularGlossiness"
         emissiveTexture("Emissive Tex", 2D) = "white" {}
         emissiveTexture_Rotation ("Emissive Tex Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] emissiveTexture_texCoord ("Emissive Tex UV", Float) = 0
-        
+
         // _DetailMask("Detail Mask", 2D) = "white" {}
 
         // _DetailAlbedoMap("Detail Albedo x2", 2D) = "grey" {}

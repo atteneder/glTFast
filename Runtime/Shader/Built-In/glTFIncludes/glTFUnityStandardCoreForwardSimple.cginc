@@ -150,13 +150,13 @@ FragmentCommonData FragmentSetupSimple(VertexOutputBaseSimple i)
         clip (alpha - alphaCutoff);
     #endif
 
-    
+
 #if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.texORM.zw,i.color);
 #else
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.color);
 #endif
-    
+
     // NOTE: shader relies on pre-multiply alpha-blend (_SrcBlend = One, _DstBlend = OneMinusSrcAlpha)
     s.diffColor = PreMultiplyAlpha (s.diffColor, alpha, s.oneMinusReflectivity, /*out*/ s.alpha);
 
@@ -352,7 +352,7 @@ FragmentCommonData FragmentSetupSimpleAdd(VertexOutputForwardAddSimple i)
     #if defined(_ALPHATEST_ON)
         clip (alpha - alphaCutoff);
     #endif
-   
+
 #if defined(_METALLICGLOSSMAP) || defined(_SPECGLOSSMAP)
     FragmentCommonData s = UNITY_SETUP_BRDF_INPUT (i.tex,i.texORM.zw,i.color);
 #else

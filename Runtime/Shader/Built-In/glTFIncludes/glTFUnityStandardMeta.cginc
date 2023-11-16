@@ -43,7 +43,7 @@ v2f_meta vert_meta (VertexInput v)
 #else
     o.uv.zw = float2(0,0);
 #endif
-    
+
 #ifdef EDITOR_VISUALIZATION
     o.vizUV = 0;
     o.lightCoord = 0;
@@ -73,14 +73,14 @@ float4 frag_meta (v2f_meta i) : SV_Target
 {
     // we're interested in diffuse & specular colors,
     // and surface roughness to produce final albedo.
-    
+
 #ifdef _METALLICGLOSSMAP
     FragmentCommonData data = UNITY_SETUP_BRDF_INPUT (i.uv,i.uv,i.color);
 #else
     FragmentCommonData data = UNITY_SETUP_BRDF_INPUT (i.uv,i.color);
 #endif
 
-    
+
     UnityMetaInput o;
     UNITY_INITIALIZE_OUTPUT(UnityMetaInput, o);
 

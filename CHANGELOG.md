@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Documentation improvements
+- Auto-formatted all markdown, USS, UXML and shader code
 
 ## [6.0.1] - 2023-10-11
 
@@ -500,7 +501,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 ## [4.3.4] - 2021-10-26
 
 ### Added
-- Option to turn off Editor import by adding `GLTFAST_EDITOR_IMPORT_OFF` to the project's *Scripting Define Symbols* in the *Player Settings* (#256)  
+- Option to turn off Editor import by adding `GLTFAST_EDITOR_IMPORT_OFF` to the project's *Scripting Define Symbols* in the *Player Settings* (#256)
 
 ### Fixed
 - Import of glTFs with no meshes (#257)
@@ -686,7 +687,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - Support for unsigned byte joint indices
 
 ### Changed
-- Accelerated loading meshes by obtaining and setting bounds from accessors min/max values instead of recalculating them  
+- Accelerated loading meshes by obtaining and setting bounds from accessors min/max values instead of recalculating them
 - Improved log message when DracoUnity/KtxUnity packages are missing
 - Restored/simplified `GLTFast.LoadGltfBinary`, allowing users to load glTF binary files from byte arrays directly (also added documentation; fixes #148)
 

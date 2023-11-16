@@ -37,7 +37,7 @@ Add some custom data in the `extras` property of a glTF JSON object:
 ```json
   "nodes": [
     {
-      // Example of mesh data in a glTF 
+      // Example of mesh data in a glTF
       "mesh": 0,
       "name": "Cube",
 

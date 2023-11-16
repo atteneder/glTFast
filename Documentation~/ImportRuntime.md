@@ -27,7 +27,7 @@ async void LoadGltfBinaryFromMemory() {
     byte[] data = File.ReadAllBytes(filePath);
     var gltf = new GltfImport();
     bool success = await gltf.LoadGltfBinary(
-        data, 
+        data,
         // The URI of the original data is important for resolving relative URIs within the glTF
         new Uri(filePath)
         );
@@ -92,7 +92,7 @@ async void Start() {
 
     if (success) {
         // Here you can customize the post-loading behavior
-        
+
         // Get the first material
         var material = gltf.GetMaterial();
         Debug.LogFormat("The first material is called {0}", material.name);
@@ -186,7 +186,7 @@ async void Start()
     var instantiator = new GameObjectInstantiator(gltfImport,transform);
     var success = await gltfImport.InstantiateMainSceneAsync(instantiator);
     if (success) {
-    
+
         // Get the SceneInstance to access the instance's properties
         var sceneInstance = instantiator.SceneInstance;
 
@@ -194,14 +194,14 @@ async void Start()
         if (sceneInstance.Cameras is { Count: > 0 }) {
             sceneInstance.Cameras[0].enabled = true;
         }
-    
+
         // Decrease lights' ranges
         if (sceneInstance.Lights != null) {
             foreach (var glTFLight in sceneInstance.Lights) {
                 glTFLight.range *= 0.1f;
             }
         }
-    
+
         // Play the default (i.e. the first) animation clip
         var legacyAnimation = instantiator.SceneInstance.LegacyAnimation;
         if (legacyAnimation != null) {
@@ -219,7 +219,7 @@ When loading a glTF file, *Unity glTFast* logs messages of varying severity (err
 - Feed the information into an analytics framework
 - Display details to the users
 
-The provided component `GltfAsset` logs all of those messages to the console by default.  
+The provided component `GltfAsset` logs all of those messages to the console by default.
 
 You can customize logging by providing an implementation of [`ICodeLogger`][ICodeLogger] to methods like `GltfImport.Load` or `GltfImport.InstantiateMainScene`.
 
@@ -258,7 +258,7 @@ async Task CustomDeferAgentPerGltfImport() {
     deferAgent = new UninterruptedDeferAgent();
 
     var tasks = new List<Task>();
-    
+
     foreach( var url in manyUrls) {
         var gltf = new GLTFast.GltfImport(null,deferAgent);
         var task = gltf.Load(url).ContinueWith(

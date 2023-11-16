@@ -26,7 +26,7 @@ SubShader {
     LOD 100
 
     Pass {
-        
+
         Blend [_SrcBlend] [_DstBlend]
         ZWrite [_ZWrite]
         Cull [_CullMode]

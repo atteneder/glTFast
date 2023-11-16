@@ -153,7 +153,7 @@ async void Start() {
     var instantiator = new GameObjectInstantiator(gltfImport,transform);
     var success = gltfImport.InstantiateMainScene(instantiator);
     if (success) {
-        
+
         // Get the SceneInstance to access the instance's properties
         var sceneInstance = instantiator.SceneInstance;
 
