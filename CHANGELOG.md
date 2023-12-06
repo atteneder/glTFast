@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Documentation improvements
 - Auto-formatted all markdown, USS, UXML and shader code
+- CI maintenance
 
 ### Fixed
 - Updated references to *KTX for Unity*

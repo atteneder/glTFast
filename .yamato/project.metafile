@@ -18,8 +18,8 @@ upm_test_platforms:
   - name: win
     type: Unity::VM
     flavor: b1.large
-    image: package-ci/win10:stable
+    image: package-ci/win10:v4
   - name: mac
     type: Unity::VM::osx
-    image: package-ci/mac:stable
+    image: package-ci/macos-13:v4
     flavor: m1.mac
