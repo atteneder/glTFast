@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 #if DRACO_UNITY
-using Draco.Encode;
+using Draco.Encoder;
 #endif
 using GLTFast.Schema;
 using Unity.Collections;
