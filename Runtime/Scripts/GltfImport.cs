@@ -8,7 +8,7 @@
 #if KTX_UNITY_2_2_OR_NEWER || (!UNITY_2021_2_OR_NEWER && KTX_UNITY_1_3_OR_NEWER)
 #define KTX
 #elif KTX_UNITY
-#warning You have to update KtxUnity to enable support for KTX textures in glTFast
+#warning You have to update *KTX for Unity* to enable support for KTX textures in glTFast
 #endif
 
 // #define MEASURE_TIMINGS
@@ -1148,7 +1148,7 @@ namespace GLTFast
 #if !KTX_UNITY
                     if (ext == ExtensionName.TextureBasisUniversal)
                     {
-                        m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
+                        m_Logger?.Error(LogCode.PackageMissing, "KTX for Unity", ext);
                     }
                     else
 #endif
@@ -1554,7 +1554,7 @@ namespace GLTFast
                 }
                 m_KtxDownloadTasks.Add(imageIndex, downloadTask);
 #else
-                m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
+                m_Logger?.Error(LogCode.PackageMissing, "KTX for Unity", ExtensionName.TextureBasisUniversal);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
@@ -2707,7 +2707,7 @@ namespace GLTFast
                             Profiler.EndSample();
                             await m_DeferAgent.BreakPoint();
 #else
-                            m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
+                            m_Logger?.Error(LogCode.PackageMissing, "KTX for Unity", ExtensionName.TextureBasisUniversal);
 #endif // KTX_UNITY
                         }
                         else
