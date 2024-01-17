@@ -233,6 +233,9 @@ namespace GLTFast
         /// </summary>
         Texture2D[] m_Textures;
 
+#if KTX
+        HashSet<int> m_NonFlippedYTextureIndices;
+#endif
         ImageFormat[] m_ImageFormats;
         bool[] m_ImageReadable;
         bool[] m_ImageGamma;
@@ -823,6 +826,16 @@ namespace GLTFast
                 return m_Textures[index];
             }
             return null;
+        }
+
+        /// <inheritdoc cref="IGltfReadable.IsTextureYFlipped"/>
+        public bool IsTextureYFlipped(int index = 0)
+        {
+#if KTX
+            return m_NonFlippedYTextureIndices == null || !m_NonFlippedYTextureIndices.Contains(index);
+#else
+            return false;
+#endif
         }
 
 #if UNITY_ANIMATION
@@ -1469,6 +1482,11 @@ namespace GLTFast
                 var result = await ktxContext.LoadTexture2D(forceSampleLinear);
                 if (result.errorCode == ErrorCode.Success) {
                     m_Images[imageIndex] = result.texture;
+                    if (!result.orientation.IsYFlipped())
+                    {
+                        m_NonFlippedYTextureIndices ??= new HashSet<int>();
+                        m_NonFlippedYTextureIndices.Add(imageIndex);
+                    }
                     return true;
                 }
             } else {
@@ -3961,6 +3979,11 @@ namespace GLTFast
                 if (kTask.Result.result.errorCode == ErrorCode.Success) {
                     var ktx = m_KtxLoadContextsBuffer[i];
                     m_Images[ktx.imageIndex] = kTask.Result.result.texture;
+                    if (!kTask.Result.result.orientation.IsYFlipped())
+                    {
+                        m_NonFlippedYTextureIndices ??= new HashSet<int>();
+                        m_NonFlippedYTextureIndices.Add(ktx.imageIndex);
+                    }
                     await m_DeferAgent.BreakPoint();
                 }
                 ktxTasks.Remove(kTask);

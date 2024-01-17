@@ -301,7 +301,7 @@ namespace GLTFast.Materials
                         // this condition
                         if (scaleTransformPropertyId >= 0 && rotationPropertyId >= 0 && uvChannelPropertyId >= 0)
                         {
-                            var isKtx = srcTexture.IsKtx;
+                            var flipY = gltf.IsTextureYFlipped(textureIndex);
                             TrySetTextureTransform(
                                 textureInfo,
                                 material,
@@ -309,7 +309,7 @@ namespace GLTFast.Materials
                                 scaleTransformPropertyId,
                                 rotationPropertyId,
                                 uvChannelPropertyId,
-                                isKtx
+                                flipY
                                 );
                         }
                         return true;
