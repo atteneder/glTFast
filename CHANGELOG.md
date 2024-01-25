@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Compiler error when Newtonsoft JSON package was not installed.
 - All Draco vertex attributes are assigned by identifier instead of type. As a result, tangents are now decoded properly instead of recalculated.
 - Compilation error when scripting define `GLTFAST_BUILTIN_SHADER_GRAPH` is set.
+- `GltfImport.IsTextureYFlipped` returns correct result for non-KTX textures.
 
 ## [6.1.0] - 2024-01-17
 

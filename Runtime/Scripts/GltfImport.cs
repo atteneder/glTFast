@@ -831,7 +831,7 @@ namespace GLTFast
         public bool IsTextureYFlipped(int index = 0)
         {
 #if KTX
-            return m_NonFlippedYTextureIndices == null || !m_NonFlippedYTextureIndices.Contains(index);
+            return (m_NonFlippedYTextureIndices == null || !m_NonFlippedYTextureIndices.Contains(index)) && GetSourceTexture(index).IsKtx;
 #else
             return false;
 #endif
