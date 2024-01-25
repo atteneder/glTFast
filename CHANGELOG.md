@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Support for Draco 3D Data Compression is now provided by [*Draco for Unity* (com.unity.cloud.draco)][DracoForUnity], which is a fork of and replaces [*DracoUnity* (com.atteneder.draco)][DracoUnity].
+
 ### Fixed
 - Compiler error when Newtonsoft JSON package was not installed.
+- All Draco vertex attributes are assigned by identifier instead of type. As a result, tangents are now decoded properly instead of recalculated.
 
 ## [6.1.0] - 2024-01-17
 
@@ -1067,6 +1071,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 [Entities1.0]: https://docs.unity3d.com/Packages/com.unity.entities@1.0
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [DanDovi]: https://github.com/DanDovi
+[DracoForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.draco@latest
 [DracoUnity]: https://github.com/atteneder/DracoUnity
 [aurorahcx]: https://github.com/aurorahcx
 [Battlehub0x]: https://github.com/Battlehub0x

@@ -67,7 +67,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Texture coordinates / UV sets | ✅ | `?`
 | Three or more texture coordinates / UV sets | <sup>2</sup>☑️ | `?`
 | Vertex colors | ✅ | `?`
-| Draco&trade; mesh compression (via [DracoUnity]) | ✅ | ✅
+| Draco&trade; mesh compression (via [DracoForUnity]) | ✅ | ✅
 | Implicit (no) indices | ✅ |
 | Per primitive material | ✅ | ✅
 | Joints (up to 4 per vertex) | ✅ |
@@ -268,7 +268,7 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
 [AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166
 [ClearCoat]: https://github.com/atteneder/glTFast/issues/68
-[DracoUnity]: https://github.com/atteneder/DracoUnity
+[DracoForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.draco@latest
 [DOTS]: https://unity.com/dots
 [Entities]: https://docs.unity3d.com/Packages/com.unity.entities@latest
 [EntitiesGraphics]: https://docs.unity3d.com/Packages/com.unity.entities.graphics@latest

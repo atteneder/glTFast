@@ -122,7 +122,7 @@ public class TestExport : MonoBehaviour {
 
 ### Draco Compression
 
-*Unity glTFast* supports applying [Google Draco&trade; 3D Data compression][Draco] to meshes. This requires the [DracoUnity][DracoUnity] package to be installed.
+*Unity glTFast* supports applying [Google Draco&trade; 3D Data compression][Draco] to meshes. This requires the [Draco for Unity][DracoForUnity] package to be installed.
 
 ```csharp
 // ExportSettings provides generic export settings
@@ -147,7 +147,7 @@ var exportSettings = new ExportSettings {
 
 [asmdef]: https://docs.unity3d.com/Manual/ScriptCompilationAssemblyDefinitionFiles.html
 [Draco]: https://google.github.io/draco/
-[DracoUnity]: https://github.com/atteneder/DracoUnity
+[DracoForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.draco@latest
 [GoogleLLC]: https://about.google/
 [khronos]: https://www.khronos.org
 [unity]: https://unity.com

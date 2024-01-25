@@ -4,17 +4,19 @@
 #if DRACO_UNITY
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Collections;
 using Draco;
+using GLTFast.Schema;
 using UnityEngine.Rendering;
+using Mesh = UnityEngine.Mesh;
 
 namespace GLTFast {
 
     class PrimitiveDracoCreateContext : PrimitiveCreateContextBase {
 
-        DracoMeshLoader m_Draco;
         Task<Mesh> m_DracoTask;
         Bounds? m_Bounds;
 
@@ -39,16 +41,23 @@ namespace GLTFast {
             m_Bounds = bounds;
         }
 
-        public void StartDecode(NativeSlice<byte> data, int weightsAttributeId, int jointsAttributeId) {
-            m_Draco = new DracoMeshLoader();
-            m_DracoTask = m_Draco.ConvertDracoMeshToUnity(
-                data,
-                m_NeedsNormals,
-                m_NeedsTangents,
-                weightsAttributeId,
-                jointsAttributeId,
-                morphTargetsContext!=null
-                );
+        public void StartDecode(NativeSlice<byte> data, Attributes dracoAttributes)
+        {
+            var flags = DecodeSettings.ConvertSpace;
+            if (m_NeedsTangents)
+            {
+                flags |= DecodeSettings.RequireNormalsAndTangents;
+            } else
+            if (m_NeedsNormals)
+            {
+                flags |= DecodeSettings.RequireNormals;
+            }
+            if (morphTargetsContext != null)
+            {
+                flags |= DecodeSettings.ForceUnityVertexLayout;
+            }
+
+            m_DracoTask = DracoDecoder.DecodeMesh(data, flags, GenerateAttributeIdMap(dracoAttributes));
         }
 
         public override async Task<MeshResult?> CreatePrimitive() {
@@ -101,6 +110,40 @@ namespace GLTFast {
                 m_Materials,
                 mesh
                 );
+        }
+
+        static Dictionary<VertexAttribute, int> GenerateAttributeIdMap(Attributes attributes)
+        {
+            var result = new Dictionary<VertexAttribute, int>();
+            if (attributes.POSITION >= 0)
+                result[VertexAttribute.Position] = attributes.POSITION;
+            if (attributes.NORMAL >= 0)
+                result[VertexAttribute.Normal] = attributes.NORMAL;
+            if (attributes.TANGENT >= 0)
+                result[VertexAttribute.Normal] = attributes.TANGENT;
+            if (attributes.COLOR_0 >= 0)
+                result[VertexAttribute.Color] = attributes.COLOR_0;
+            if (attributes.TEXCOORD_0 >= 0)
+                result[VertexAttribute.TexCoord0] = attributes.TEXCOORD_0;
+            if (attributes.TEXCOORD_1 >= 0)
+                result[VertexAttribute.TexCoord1] = attributes.TEXCOORD_1;
+            if (attributes.TEXCOORD_2 >= 0)
+                result[VertexAttribute.TexCoord2] = attributes.TEXCOORD_2;
+            if (attributes.TEXCOORD_3 >= 0)
+                result[VertexAttribute.TexCoord3] = attributes.TEXCOORD_3;
+            if (attributes.TEXCOORD_4 >= 0)
+                result[VertexAttribute.TexCoord4] = attributes.TEXCOORD_4;
+            if (attributes.TEXCOORD_5 >= 0)
+                result[VertexAttribute.TexCoord5] = attributes.TEXCOORD_5;
+            if (attributes.TEXCOORD_6 >= 0)
+                result[VertexAttribute.TexCoord6] = attributes.TEXCOORD_6;
+            if (attributes.TEXCOORD_7 >= 0)
+                result[VertexAttribute.TexCoord7] = attributes.TEXCOORD_7;
+            if (attributes.WEIGHTS_0 >= 0)
+                result[VertexAttribute.BlendWeight] = attributes.WEIGHTS_0;
+            if (attributes.JOINTS_0 >= 0)
+                result[VertexAttribute.BlendIndices] = attributes.JOINTS_0;
+            return result;
         }
     }
 }
