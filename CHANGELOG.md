@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Deprecated soft-dependency packages are detected and a warning with upgrade instructions is shown in the console.
+
 ### Changed
 - Support for Draco 3D Data Compression is now provided by [*Draco for Unity* (com.unity.cloud.draco)][DracoForUnity], which is a fork of and replaces [*DracoUnity* (com.atteneder.draco)][DracoUnity].
 
