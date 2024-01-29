@@ -4,15 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0] - 2024-01-17
+
+### Added
+- (Documentation) Explanation and user case for the add-on API
+- `GltfImport.IsTextureYFlipped` to support non-default texture orientations
+
+### Changed
+- Documentation improvements
+- Auto-formatted all markdown, USS, UXML and shader code
+- CI maintenance
+
+### Fixed
+- Updated references to *KTX for Unity*
+
 ## [6.0.1] - 2023-10-11
 
 ### Fixed
 - Compilation error when Animation module is disabled and Newtonsoft JSON package installed.
+- Compilation on Unity 2020 LTS
 
 ## [6.0.0] - 2023-10-04
 
 ### Added
-- Custom Extension API (`GLTFast.Extensions` namespace)
+- Custom Add-On API (`GLTFast.Addons` namespace)
 - Support for alternative JSON parsing via Newtonsoft JSON
 - `Accessor.ElementByteSize`: Byte size of one element of that accessor
 - `Accessor.ByteSize`: Overall byte size
@@ -27,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Clearcoat material export support for HDRP Lit shader
 
 ### Changed
+- Bumped minimum Unity version to 2020.3.48f1
 - Renamed `GltfAnimation` to `Animation` for consistent naming.
 - Bumped Burst dependency version to 1.8.4
 - Bumped Mathematics dependency version to 1.3.1
@@ -41,10 +57,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runtime tests
 - (Export) Setting for deterministic export (limits concurrency to ensure consistent output)
 - (DOTS) Support for [Entities 1.0][Entities1.0]
+
 ### Changed
 - Optimized `Accessor.GetAccessorAttributeType`
 - Optimized `GltfEntityAsset.ClearScenes` via Burst
-- Bump minimum unity version from 2019.4.7f1 to 2019.4.40f1
+- Bump minimum Unity version from 2019.4.7f1 to 2019.4.40f1
 
 ### Fixed
 - Compiler errors and warnings on Unity 2023.2 (and newer) due to using obsolete types.
@@ -489,7 +506,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 ## [4.3.4] - 2021-10-26
 
 ### Added
-- Option to turn off Editor import by adding `GLTFAST_EDITOR_IMPORT_OFF` to the project's *Scripting Define Symbols* in the *Player Settings* (#256)  
+- Option to turn off Editor import by adding `GLTFAST_EDITOR_IMPORT_OFF` to the project's *Scripting Define Symbols* in the *Player Settings* (#256)
 
 ### Fixed
 - Import of glTFs with no meshes (#257)
@@ -675,7 +692,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - Support for unsigned byte joint indices
 
 ### Changed
-- Accelerated loading meshes by obtaining and setting bounds from accessors min/max values instead of recalculating them  
+- Accelerated loading meshes by obtaining and setting bounds from accessors min/max values instead of recalculating them
 - Improved log message when DracoUnity/KtxUnity packages are missing
 - Restored/simplified `GLTFast.LoadGltfBinary`, allowing users to load glTF binary files from byte arrays directly (also added documentation; fixes #148)
 

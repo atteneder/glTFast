@@ -216,7 +216,7 @@ inline FragmentCommonData SpecularSetup (
 #else
     half4 specGloss = SpecularGloss(i_tex);
 #endif
-    
+
     half3 specColor = specGloss.rgb;
     half smoothness = specGloss.a;
 
@@ -425,7 +425,7 @@ struct VertexOutputForwardBase
 #ifdef _EMISSION
     float2 texEmission                  : TEXCOORD10;
 #endif
-    
+
     half4 color                         : COLOR;
     UNITY_VERTEX_INPUT_INSTANCE_ID
     UNITY_VERTEX_OUTPUT_STEREO
@@ -461,7 +461,7 @@ VertexOutputForwardBase vertForwardBase (VertexInput v)
     #ifdef _METALLICGLOSSMAP
     o.texORM.zw = TexCoordsSingle((metallicRoughnessTexture_texCoord==0)?v.uv0:v.uv1,metallicRoughnessTexture);
     #elif defined(_SPECGLOSSMAP)
-    o.texORM.zw = TexCoordsSingle((specularGlossinessTexture_texCoord==0)?v.uv0:v.uv1,specularGlossinessTexture);    
+    o.texORM.zw = TexCoordsSingle((specularGlossinessTexture_texCoord==0)?v.uv0:v.uv1,specularGlossinessTexture);
     #endif
     #ifdef _EMISSION
     o.texEmission = TexCoordsSingle((emissiveTexture_texCoord==0)?v.uv0:v.uv1,emissiveTexture);
@@ -518,7 +518,7 @@ half4 fragForwardBaseInternal (VertexOutputForwardBase i)
     UnityLight mainLight = MainLight ();
     UNITY_LIGHT_ATTENUATION(atten, i, s.posWorld);
 
-    half occlusion = 
+    half occlusion =
 #ifdef _OCCLUSION
         Occlusion(i.texORM.xy);
 #else
@@ -566,7 +566,7 @@ struct VertexOutputForwardAdd
 #ifdef _EMISSION
     float2 texEmission                  : TEXCOORD10;
 #endif
-    
+
     half4 color                         : COLOR;
 
     UNITY_VERTEX_OUTPUT_STEREO
@@ -592,7 +592,7 @@ VertexOutputForwardAdd vertForwardAdd (VertexInput v)
     #ifdef _METALLICGLOSSMAP
     o.texORM.zw = TexCoordsSingle((metallicRoughnessTexture_texCoord==0)?v.uv0:v.uv1,metallicRoughnessTexture);
     #elif defined(_SPECGLOSSMAP)
-    o.texORM.zw = TexCoordsSingle((specularGlossinessTexture_texCoord==0)?v.uv0:v.uv1,specularGlossinessTexture);    
+    o.texORM.zw = TexCoordsSingle((specularGlossinessTexture_texCoord==0)?v.uv0:v.uv1,specularGlossinessTexture);
     #endif
     #ifdef _EMISSION
     o.texEmission = TexCoordsSingle((emissiveTexture_texCoord==0)?v.uv0:v.uv1,emissiveTexture);
@@ -713,7 +713,7 @@ VertexOutputDeferred vertDeferred (VertexInput v)
     #endif
     o.pos = UnityObjectToClipPos(v.vertex);
 
-    
+
     o.tex.xy = TexCoordsSingle((baseColorTexture_texCoord==0)?v.uv0:v.uv1,baseColorTexture);
     #ifdef _NORMALMAP
     o.tex.zw = TexCoordsSingle((normalTexture_texCoord==0)?v.uv0:v.uv1,normalTexture);

@@ -20,7 +20,7 @@ For now, both the Unity variant and the original version will receive updates.
 The C# namespaces are identical between the variants, so all you need to do is:
 
 - Removed original *glTFast* (with package identifier `com.atteneder.gltfast`).
-- Add *Unity glTFast* (`com.unity.cloud.gltfast`).
+- [Install *Unity glTFast*](installation.html) (`com.unity.cloud.gltfast`).
 - Update assembly definition references (if your project had any).
 - Update any dependencies in your packages manifest (if your package had any)
 
@@ -30,7 +30,7 @@ Unity forks have been created for *KtxUnity* and *DracoUnity* as well. If you've
 
 See their respective upgrade guides
 
-- Upgrade to [*KTX for Unity*](https://docs.unity3d.com/Packages/com.unity.cloud.ktx@3.0/manual/upgrade-guide.html)
+- Upgrade to [*KTX for Unity*](https://docs.unity3d.com/Packages/com.unity.cloud.ktx@3.2/manual/upgrade-guide.html)
 - Upgrade to *Draco for Unity* (coming soon)
 
 ### Keep using the original glTFast
@@ -153,7 +153,7 @@ async void Start() {
     var instantiator = new GameObjectInstantiator(gltfImport,transform);
     var success = gltfImport.InstantiateMainScene(instantiator);
     if (success) {
-        
+
         // Get the SceneInstance to access the instance's properties
         var sceneInstance = instantiator.SceneInstance;
 

@@ -8,7 +8,7 @@
 #if KTX_UNITY_2_2_OR_NEWER || (!UNITY_2021_2_OR_NEWER && KTX_UNITY_1_3_OR_NEWER)
 #define KTX
 #elif KTX_UNITY
-#warning You have to update KtxUnity to enable support for KTX textures in glTFast
+#warning You have to update *KTX for Unity* to enable support for KTX textures in glTFast
 #endif
 
 // #define MEASURE_TIMINGS
@@ -233,6 +233,9 @@ namespace GLTFast
         /// </summary>
         Texture2D[] m_Textures;
 
+#if KTX
+        HashSet<int> m_NonFlippedYTextureIndices;
+#endif
         ImageFormat[] m_ImageFormats;
         bool[] m_ImageReadable;
         bool[] m_ImageGamma;
@@ -825,6 +828,16 @@ namespace GLTFast
             return null;
         }
 
+        /// <inheritdoc cref="IGltfReadable.IsTextureYFlipped"/>
+        public bool IsTextureYFlipped(int index = 0)
+        {
+#if KTX
+            return m_NonFlippedYTextureIndices == null || !m_NonFlippedYTextureIndices.Contains(index);
+#else
+            return false;
+#endif
+        }
+
 #if UNITY_ANIMATION
         /// <summary>
         /// Returns all imported animation clips
@@ -1148,7 +1161,7 @@ namespace GLTFast
 #if !KTX_UNITY
                     if (ext == ExtensionName.TextureBasisUniversal)
                     {
-                        m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ext);
+                        m_Logger?.Error(LogCode.PackageMissing, "KTX for Unity", ext);
                     }
                     else
 #endif
@@ -1469,6 +1482,11 @@ namespace GLTFast
                 var result = await ktxContext.LoadTexture2D(forceSampleLinear);
                 if (result.errorCode == ErrorCode.Success) {
                     m_Images[imageIndex] = result.texture;
+                    if (!result.orientation.IsYFlipped())
+                    {
+                        m_NonFlippedYTextureIndices ??= new HashSet<int>();
+                        m_NonFlippedYTextureIndices.Add(imageIndex);
+                    }
                     return true;
                 }
             } else {
@@ -1554,7 +1572,7 @@ namespace GLTFast
                 }
                 m_KtxDownloadTasks.Add(imageIndex, downloadTask);
 #else
-                m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
+                m_Logger?.Error(LogCode.PackageMissing, "KTX for Unity", ExtensionName.TextureBasisUniversal);
                 Profiler.EndSample();
                 return;
 #endif // KTX_UNITY
@@ -2707,7 +2725,7 @@ namespace GLTFast
                             Profiler.EndSample();
                             await m_DeferAgent.BreakPoint();
 #else
-                            m_Logger?.Error(LogCode.PackageMissing, "KtxUnity", ExtensionName.TextureBasisUniversal);
+                            m_Logger?.Error(LogCode.PackageMissing, "KTX for Unity", ExtensionName.TextureBasisUniversal);
 #endif // KTX_UNITY
                         }
                         else
@@ -3961,6 +3979,11 @@ namespace GLTFast
                 if (kTask.Result.result.errorCode == ErrorCode.Success) {
                     var ktx = m_KtxLoadContextsBuffer[i];
                     m_Images[ktx.imageIndex] = kTask.Result.result.texture;
+                    if (!kTask.Result.result.orientation.IsYFlipped())
+                    {
+                        m_NonFlippedYTextureIndices ??= new HashSet<int>();
+                        m_NonFlippedYTextureIndices.Add(ktx.imageIndex);
+                    }
                     await m_DeferAgent.BreakPoint();
                 }
                 ktxTasks.Remove(kTask);

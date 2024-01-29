@@ -11,7 +11,7 @@ Shader "glTF/PbrMetallicRoughness"
         [MainTexture] baseColorTexture("Base Color Tex", 2D) = "white" {}
         baseColorTexture_Rotation ("Base Color Tex Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] baseColorTexture_texCoord ("Base Color Tex UV", Float) = 0
-        
+
         alphaCutoff("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
 
         roughnessFactor("Roughness", Range(0.0, 1.0)) = 1
@@ -38,12 +38,12 @@ Shader "glTF/PbrMetallicRoughness"
         occlusionTexture("Occlusion Tex", 2D) = "white" {}
         occlusionTexture_Rotation ("Occlusion Tex Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] occlusionTexture_texCoord ("Occlusion Tex UV", Float) = 0
-        
+
         [HDR] emissiveFactor("Emissive", Color) = (0,0,0)
         emissiveTexture("Emission Tex", 2D) = "white" {}
         emissiveTexture_Rotation ("Emission Tex Rotation", Vector) = (0,0,0,0)
         [Enum(UV0,0,UV1,1)] emissiveTexture_texCoord ("Emission Tex UV", Float) = 0
-        
+
         // _DetailMask("Detail Mask", 2D) = "white" {}
 
         // _DetailAlbedoMap("Detail Albedo x2", 2D) = "grey" {}

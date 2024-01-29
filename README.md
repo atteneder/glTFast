@@ -6,9 +6,9 @@
 
 [![openupm](https://img.shields.io/npm/v/com.atteneder.gltfast?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.atteneder.gltfast/)
 
-> **NOTE:** It's recommended to switch to [Unity glTFast][UnityGltfast], a fork of this package that is developed and supported by [Unity][unity]. Consult the [upgrade guide](https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@6.0/manual/UpgradeGuides.html#unity-fork) for details.
+> **NOTE:** It's recommended to switch to [Unity glTFast][UnityGltfast], a fork of this package that is developed and supported by [Unity][unity]. Consult the [upgrade guide](https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@6.1/manual/UpgradeGuides.html#unity-fork) for details.
 
-*glTFast* enables use of [glTF&trade; (GL Transmission Format)][gltf] asset files in [Unity][unity].
+*glTFast* enables use of [glTF&trade; (GL Transmission Format)][gltf] asset files in [Unity&reg;][unity].
 
 It focuses on speed, memory efficiency and a small build footprint while also providing:
 
@@ -43,16 +43,6 @@ Read more about the workflows in the [documentation][workflows].
 > **NOTE:** Consider switching to [Unity glTFast][UnityGltfast], a fork of this package that is developed and supported by [Unity][unity]. Consult the [upgrade guide](./Documentation~/UpgradeGuides.md#unity-fork) for details.
 
 [Installation instruction for the original glTFast](./Documentation~/Original.md).
-
-### Optional Packages
-
-There are some related package that improve *Unity glTFast* by extending its feature set.
-
-- [Draco&trade; 3D Data Compression Unity Package][DracoUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
-- [KTX&trade; for Unity][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
-- [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])
-
-*Unity glTFast* 5.x requires Unity 2020.1 or newer.
 
 ## Usage
 
@@ -100,7 +90,7 @@ Read the section *Materials and Shader Variants* in the [Documentation](./Docume
 
 ## Contribution
 
-Contributions in the form of ideas, comments, critique, bug reports, pull requests are highly appreciated. Feel free to get in contact if you consider using or improving *Unity glTFast*.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
@@ -124,22 +114,11 @@ limitations under the License.
 
 *Khronos&reg;* is a registered trademark and [glTF&trade;][gltf] is a trademark of [The Khronos Group Inc][khronos].
 
-*KTX&trade;* and the KTX logo are trademarks of the [The Khronos Group Inc][khronos].
-
-*Draco&trade;* is a trademark of [*Google LLC*][GoogleLLC].
-
-[DracoUnity]: https://github.com/atteneder/DracoUnity
-[ExtBasisU]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu
-[ExtDraco]: https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression
-[ExtMeshopt]: https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression
 [gltf-spec]: https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html
 [gltf]: https://www.khronos.org/gltf
 [gltfasset_component]: ./Documentation~/Images/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
-[GoogleLLC]: https://about.google/
 [import-gif]: ./Documentation~/Images/import.gif  "Video showing glTF files being copied into the Assets folder and imported"
 [khronos]: https://www.khronos.org
-[KtxUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest
-[Meshopt]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@0.1/manual/index.html
 [unity]: https://unity.com
 [UnityGltfast]: https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@latest/
 [workflows]: ./Documentation~/index.md#workflows

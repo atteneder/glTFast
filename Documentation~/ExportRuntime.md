@@ -35,7 +35,7 @@ public class TestExport : MonoBehaviour {
 
         // Example of gathering GameObjects to be exported (recursively)
         var rootLevelNodes = GameObject.FindGameObjectsWithTag("ExportMe");
-        
+
         // GameObjectExport lets you create glTFs from GameObject hierarchies
         var export = new GameObjectExport();
 
@@ -76,14 +76,14 @@ public class TestExport : MonoBehaviour {
 
         // ExportSettings and GameObjectExportSettings allow you to configure the export
         // Check their respective source for details
-        
+
         // ExportSettings provides generic export settings
         var exportSettings = new ExportSettings {
             Format = GltfFormat.Binary,
             FileConflictResolution = FileConflictResolution.Overwrite,
             // Export everything except cameras or animation
             ComponentMask = ~(ComponentType.Camera | ComponentType.Animation),
-            // Boost light intensities 
+            // Boost light intensities
             LightIntensityFactor = 100f,
         };
 

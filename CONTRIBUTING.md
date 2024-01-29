@@ -7,36 +7,55 @@ of guidelines to ensure that your extensions can be easily integrated.
 
 ## Communication
 
-First, please read through our [code of conduct](CODE_OF_CONDUCT.md), as we
+Please read through our [code of conduct][COC], as we
 expect all our contributors to follow it.
 
-Second, before starting on a project that you intend to contribute in any form, we
-**strongly** recommend posting on our
-[Issues page](https://github.com/atteneder/glTFast/issues) and
-briefly outline the changes you plan to make. This will enable us to provide
-some context that may be helpful for you. This could range from advice and
-feedback on how to optimally perform your changes or reasons for not doing it.
+For inquiries of all sorts, feel free to raise an issue by going to the
+[issues page][issues] and click the *New issue* button.
 
-Lastly, if you're looking for input on what to contribute browse the GitHub
-issues, especially ones with the `help wanted` or `good first issue` label.
+If you're looking for ideas on ways to contribute browse the [issues][issues],
+especially ones with the `help wanted` or `good first issue` label.
 
-## Git Branches
+## Preparation
 
-The main branch corresponds to the most recent version of the project. Note
-that this branch may be unstable and may be newer that the latest release.
+Before starting to work on a contribution we recommend searching within the
+existing [issues][issues] and [pull requests][pulls] for similar topics to
+avoid redundant efforts and make sure you got all contextual information.
 
-When contributing to the project, please make sure that your Pull Request (PR)
-contains the following:
+Feel free to propose ideas upfront via an [issue][issues] that briefly outlines
+your intended changes. We'll then try to give you advice and feedback on how to
+optimally implement those changes or, if justifiable, reasons to abandon an
+idea. This pre-evaluation can raise the chances of getting a contribution
+accepted.
+
+## Version Control
+
+*glTFast* uses [Git][Git] and [GitHub][repo] for version control.
+
+## Submission via Pull Request
+
+Changes can be proposed via [pull requests (PR)][GithubDocPR] on the [pull requests][pulls] page.
+
+Please make sure that your PR contains the following:
 
 - Detailed description of the changes performed
 - Corresponding changes to documentation, changelog and unit tests
 - Summary of the tests performed to validate your changes
 - Issue numbers that the PR resolves (if any)
 
+PRs will be transferred to an internal, mirrored repository to undergo review and (automated) tests that use Unity's internal tools and infrastructure. If those tests and reviews are not successful, we'll help you resolve remaining issues and merge your work, once it passes all tests. The merge will happen on the mirrored repository and the original pull requests will get closed with a proper notification about expected release version and date.
+
 ## Contributor License Agreements
 
 When you open a pull request, you will be asked to acknowledge our Contributor
 License Agreement. You will have to confirm that your Contributions are your
 original creation and that you have complete right and authority to make your
-Contributions. We allow both individual contributions and contributions made on
+contributions. We allow both individual contributions and contributions made on
 behalf of companies.
+
+[COC]: (CODE_OF_CONDUCT.md)
+[Git]: https://git-scm.com/
+[repo]: https://github.com/Unity-Technologies/com.unity.cloud.gltfast
+[issues]: https://github.com/Unity-Technologies/com.unity.cloud.gltfast/issues
+[pulls]: https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pulls
+[GithubDocPR]: https://docs.github.com/pull-requests

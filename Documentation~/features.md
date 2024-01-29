@@ -138,6 +138,12 @@ Not investigated yet:
 - FB_geometry_metadata (prefer KTX_xmp)
 - MSFT_texture_dds (prefer KTX/basisu)
 
+### Custom extras and extensions
+
+Optional `extras` and `extensions` object properties are supported. glTFast uses Newtonsoft JSON parser to access these additional properties.
+
+See [glTFast Add-on API](UseCaseCustomExtras.md) for an example to import the `extras` property in a gltf asset.
+
 ## Materials Details
 
 ### Material Import
