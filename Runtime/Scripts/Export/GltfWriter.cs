@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 #if DRACO_UNITY
-using Draco.Encoder;
+using Draco.Encode;
 #endif
 using GLTFast.Schema;
 using Unity.Collections;
@@ -926,7 +926,7 @@ namespace GLTFast.Export
                     m_Logger.Warning(LogCode.UncompressedFallbackNotSupported);
                 }
 #else
-                m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ExtensionName.DracoMeshCompression);
+                m_Logger?.Error(LogCode.PackageMissing, "Draco For Unity", ExtensionName.DracoMeshCompression);
                 return false;
 #endif
             }
@@ -1296,12 +1296,8 @@ namespace GLTFast.Export
             var results = await DracoEncoder.EncodeMesh(
                 unityMesh,
                 meshData,
-                m_Settings.DracoSettings.encodingSpeed,
-                m_Settings.DracoSettings.decodingSpeed,
-                m_Settings.DracoSettings.positionQuantization,
-                m_Settings.DracoSettings.normalQuantization,
-                m_Settings.DracoSettings.texCoordQuantization,
-                m_Settings.DracoSettings.colorQuantization
+                (QuantizationSettings) m_Settings.DracoSettings,
+                (SpeedSettings) m_Settings.DracoSettings
             );
 
             if (results == null) return;

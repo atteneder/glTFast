@@ -44,7 +44,6 @@ using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 using UnityEngine;
-
 using Debug = UnityEngine.Debug;
 
 [assembly: InternalsVisibleTo("glTFast.Editor")]
@@ -832,7 +831,7 @@ namespace GLTFast
         public bool IsTextureYFlipped(int index = 0)
         {
 #if KTX
-            return m_NonFlippedYTextureIndices == null || !m_NonFlippedYTextureIndices.Contains(index);
+            return (m_NonFlippedYTextureIndices == null || !m_NonFlippedYTextureIndices.Contains(index)) && GetSourceTexture(index).IsKtx;
 #else
             return false;
 #endif
@@ -1154,7 +1153,7 @@ namespace GLTFast
 #if !DRACO_UNITY
                     if (ext == ExtensionName.DracoMeshCompression)
                     {
-                        m_Logger?.Error(LogCode.PackageMissing, "DracoUnity", ext);
+                        m_Logger?.Error(LogCode.PackageMissing, "Draco for Unity", ext);
 
                     }
 #endif
@@ -3473,7 +3472,7 @@ namespace GLTFast
             var bufferView = gltf.BufferViews[dracoExt.bufferView];
             var buffer = GetBufferViewSlice(bufferView);
 
-            c.StartDecode(buffer, dracoExt.attributes.WEIGHTS_0, dracoExt.attributes.JOINTS_0);
+            c.StartDecode(buffer, dracoExt.attributes);
         }
 #endif
 

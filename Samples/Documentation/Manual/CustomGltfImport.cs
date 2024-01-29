@@ -1,7 +1,7 @@
+#if NEWTONSOFT_JSON
 namespace Samples.Documentation.Manual
 {
-
-    #region CustomGltfImport
+#region CustomGltfImport
     using GLTFast;
     using GLTFast.Addons;
     using System;
@@ -96,6 +96,7 @@ namespace Samples.Documentation.Manual
             }
         }
     }
-    #endregion
+#endregion
 
 }
+#endif

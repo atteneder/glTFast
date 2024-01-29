@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if DRACO_UNITY
+using Draco.Encode;
+#endif
+
 namespace GLTFast.Export
 {
     /// <summary>
@@ -28,5 +32,19 @@ namespace GLTFast.Export
 
         /// <summary>Color quantization.</summary>
         public int colorQuantization = 8;
+
+#if DRACO_UNITY
+        public static implicit operator QuantizationSettings(DracoExportSettings s) => new QuantizationSettings(
+            s.positionQuantization,
+            s.normalQuantization,
+            s.texCoordQuantization,
+            s.colorQuantization
+        );
+
+        public static implicit operator SpeedSettings(DracoExportSettings s) => new SpeedSettings(
+            s.encodingSpeed,
+            s.decodingSpeed
+        );
+#endif
     }
 }
