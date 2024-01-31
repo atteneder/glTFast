@@ -1,0 +1,124 @@
+test_editors:
+  - version: 2020
+  - version: 2021
+  - version: 2022
+  - version: 2023.2
+  - version: trunk
+
+test_platforms:
+  - name: win
+    type: Unity::VM
+    image: package-ci/win10:v4
+    flavor: b1.large
+  - name: mac
+    type: Unity::VM::osx
+    image: package-ci/macos-13:v4
+    flavor: m1.mac
+  - name: ubuntu
+    type: Unity::VM
+    image: package-ci/ubuntu-22.04:v4
+    flavor: b1.large
+
+player_test_editors:
+  - version: 2020.3
+  - version: trunk
+
+player_test_platforms:
+  - name: win
+    id: standalone
+    build:
+      type: Unity::VM
+      image: package-ci/win10:v4
+      flavor: b1.large
+    run:
+      type: Unity::VM
+      image: package-ci/win10:v4
+      flavor: b1.large
+  - name: mac
+    id: standalone
+    build:
+      type: Unity::VM::osx
+      image: package-ci/macos-13:v4
+      flavor: m1.mac
+    run:
+      type: Unity::VM::osx
+      image: package-ci/macos-13:v4
+      flavor: m1.mac
+  - name: android
+    id: android
+    build:
+      type: Unity::VM
+      image: package-ci/win10:v4
+      flavor: b1.large
+    run:
+      type: Unity::mobile::shield
+      image: package-ci/win10:v4
+      flavor: b1.large
+  - name: ios
+    id: ios
+    build:
+      type: Unity::VM::osx
+      image: package-ci/macos-13:v4
+      flavor: b1.large
+    run:
+      type: Unity::mobile::iPhone
+      image: package-ci/macos-13:v4
+      flavor: b1.large
+  - name: ps4
+    id: ps4
+    build_and_run:
+      type: Unity::console::ps4
+      image: package-ci/win10-ps4:v4
+      flavor: b1.large
+  - name: ps5
+    id: ps5
+    build:
+      type: Unity::VM
+      image: package-ci/win10-ps5:v4
+      flavor: b1.large
+    run:
+      type: Unity::console::ps5
+      image: package-ci/win10-ps5:v4
+      flavor: b1.large
+  - name: switch
+    id: switch
+    build_and_run:
+      type: Unity::console::switch
+      image: package-ci/win10-switch:v4
+      flavor: b1.large
+  - name: gamecorexboxone
+    id: GameCoreXboxOne
+    build:
+      type: Unity::VM
+      image: package-ci/win10-xbox:v4
+      flavor: b1.large
+    run:
+      type: Unity::console::xbox
+      image: package-ci/win10-xbox:v4
+      flavor: b1.large
+  - name: gamecorexboxseries
+    id: GameCoreScarlett
+    build:
+      type: Unity::VM
+      image: package-ci/win10-xbox:v4
+      flavor: b1.large
+    run:
+      type: Unity::console::scarlett
+      image: package-ci/win10-xbox:v4
+      flavor: b1.large
+
+registry:
+  npm: https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-npm
+
+
+# Some player platforms require jobs to explicitly pick an SDK version
+# (this example assumes the same version is used for all Unity versions).
+
+ps4_sdk: |
+    SCE_ORBIS_SDK_DIR: C:\Users\bokken\SCE\ps4_sdk_10_00
+
+switch_sdk_1: |
+    UNITY_NINTENDOSDK_CLI_TOOLS: 'C:\Nintendo\nx_sdk-15_3_0\NintendoSDK\Tools\CommandLineTools'
+
+switch_sdk_2: |
+    NINTENDO_SDK_ROOT: 'C:\Nintendo\nx_sdk-15_3_0\NintendoSDK'

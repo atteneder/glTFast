@@ -1,0 +1,79 @@
+{% metadata_file .yamato/package.metafile -%}
+---
+
+publish_dry_run:
+  name: Dry Run Publish to Internal Registry
+  agent:
+    type: Unity::VM
+    image: package-ci/ubuntu-22.04:v4
+    flavor: b1.small
+  source:
+    skip_checkout: true
+  commands:
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {% if platform.name == "win" %}"%GIT_REPOSITORY_URL%"{% else %}"$GIT_REPOSITORY_URL"{% endif %} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      git checkout -f --detach {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      popd
+    - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
+    - upm-ci package publish --package-path Packages/gltfast --dry-run
+  triggers:
+    tags:
+      only:
+        - /^[Rr][Cc]-(0\.\d+\.\d+|[1-9]\d*\.\d+\.\d+(-preview(\.\d+)?|-exp(\.\d+|-\w+\.\d+)|-pre\.\d+)?)$/
+  artifacts:
+    artifacts:
+      paths:
+        - "upm-ci~/packages/*.tgz"
+    logs:
+      paths:
+        - "upm-ci~/upm-ci.log"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% for editor in test_editors -%}
+{% for platform in test_platforms -%}
+    - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
+{% endfor -%}
+{% endfor -%}
+
+
+publish:
+  name: Publish to Internal Registry
+  agent:
+    type: Unity::VM
+    image: package-ci/ubuntu-22.04:v4
+    flavor: b1.small
+  source:
+    skip_checkout: true
+  commands:
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {% if platform.name == "win" %}"%GIT_REPOSITORY_URL%"{% else %}"$GIT_REPOSITORY_URL"{% endif %} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      git checkout -f --detach {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      popd
+    - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
+    - upm-ci package publish --package-path Packages/gltfast
+  triggers:
+    tags:
+      only:
+        - /^[Rr][Cc]-(0\.\d+\.\d+|[1-9]\d*\.\d+\.\d+(-preview(\.\d+)?|-exp(\.\d+|-\w+\.\d+)|-pre\.\d+)?)$/
+  artifacts:
+    artifacts:
+      paths:
+        - "upm-ci~/packages/*.tgz"
+    logs:
+      paths:
+        - "upm-ci~/upm-ci.log"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% for editor in test_editors -%}
+{% for platform in test_platforms -%}
+    - .yamato/package-test.yml#test_{{ platform.name }}_{{ editor.version }}
+{% endfor -%}
+{% endfor -%}
