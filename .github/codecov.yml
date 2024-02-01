@@ -1,0 +1,36 @@
+codecov:
+  require_ci_to_pass: false
+  notify:
+    wait_for_ci: true
+
+coverage:
+  precision: 2
+  round: down
+  range: "50...70"
+  status:
+    patch: true
+    default_rules:
+      flag_coverage_not_uploaded_behavior: exclude
+    project:
+      default:
+        target: auto
+        # Threshold used for the PR Check
+        threshold: 0.5%
+        base: auto 
+        if_ci_failed: success
+        informational: false
+        only_pulls: true
+
+# PR Comment configuration
+comment:
+  layout: "reach,diff,flags,files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: false
+  # Set this to the number of coverage jobs run in the PR
+  after_n_builds: 2
+
+flag_management:
+  default_rules:
+    carryforward: true

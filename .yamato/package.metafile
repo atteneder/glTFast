@@ -2,6 +2,7 @@ test_editors:
   - version: 2020
   - version: 2021
   - version: 2022
+    coverage: !!bool true
   - version: 2023.2
   - version: trunk
 
