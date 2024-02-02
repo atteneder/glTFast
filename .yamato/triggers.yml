@@ -1,0 +1,37 @@
+{% metadata_file .yamato/package.metafile -%}
+---
+
+pr_trigger:
+  name: PR Trigger
+  triggers:
+    expression: |
+      (pull_request.target eq "main" OR pull_request.target eq "develop") AND
+      NOT pull_request.push.changes.all match "**/*.md"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% for editor in test_editors limit: 1 -%}
+{% for platform in test_platforms limit: 1 -%}
+    # First(oldest) editor, first(most important) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
+{% endfor -%}
+{% endfor -%}
+{% for platform in test_platforms limit: 1 offset: continue -%}
+    # Newest editor, next(second) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{test_editors[-1].version}}
+{% endfor -%}
+{% for editor in test_editors limit: 1 offset: continue -%}
+{% for platform in test_platforms limit: 1 offset: continue -%}
+    # Next(second) editor, next(third) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
+{% endfor -%}
+{% endfor -%}
+{% for platform in test_platforms -%}
+{%- if platform.coverage -%}
+{% for editor in test_editors -%}
+{%- if editor.coverage -%}
+    # Code coverage on first(most important) platform and editors, where coverage is enabled in metafile
+    - .yamato/package-coverage.yml#test_coverage_{{ platform.name }}_{{ editor.version }}
+{%- endif -%}
+{% endfor -%}
+{%- endif -%}
+{% endfor -%}

@@ -11,14 +11,21 @@ test_platforms:
     type: Unity::VM
     image: package-ci/win10:v4
     flavor: b1.large
+    yamato_source_dir: "%YAMATO_SOURCE_DIR%"
+    git_revision: "%GIT_REVISION%"
+    coverage: !!bool true
   - name: mac
     type: Unity::VM::osx
     image: package-ci/macos-13:v4
     flavor: m1.mac
+    yamato_source_dir: ${YAMATO_SOURCE_DIR}
+    git_revision: ${GIT_REVISION}
   - name: ubuntu
     type: Unity::VM
     image: package-ci/ubuntu-22.04:v4
     flavor: b1.large
+    yamato_source_dir: ${YAMATO_SOURCE_DIR}
+    git_revision: ${GIT_REVISION}
 
 player_test_editors:
   - version: 2020.3

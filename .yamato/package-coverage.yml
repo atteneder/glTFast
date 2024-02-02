@@ -3,7 +3,7 @@
 {% for editor in test_editors -%}
 {% for platform in test_platforms -%}
 test_coverage_{{ platform.name }}_{{ editor.version }}:
-  name : Test Coverage on {{ platform.name }} ({{ editor.version }})
+  name : Coverage {{ editor.version }} on {{ platform.name }}
   agent:
     type: {{ platform.type }}
     image: {{ platform.image }}
@@ -20,7 +20,7 @@ test_coverage_{{ platform.name }}_{{ editor.version }}:
       git checkout -f --detach {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
       popd
     - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
-    - upm-ci package test -u {{ editor.version }} --package-path Packages/gltfast --type package-tests --extra-create-project-arg=-upmNoDefaultPackages --enable-code-coverage --code-coverage-options 'generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,+Unity.Cloud.Gltfast*' --extra-utr-arg="--coverage-upload-options=\"hostUrl:https://codecov.unity3d.com;reports:upm-ci~/test-results/**/*.xml;name:{{platform.name}}_{{editor.version}};flags:{{platform.name}}_{{editor.version}}\""
+    - upm-ci package test -u {{ editor.version }} --package-path Packages/gltfast --type package-tests --extra-create-project-arg=-upmNoDefaultPackages --enable-code-coverage --code-coverage-options 'generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,+Unity.Cloud.Gltfast*;pathReplacePatterns:**/PackageCache/com.unity.cloud.gltfast@*/,;sourcePaths:{{ platform.yamato_source_dir }}/Packages/gltfast' --extra-utr-arg="--coverage-results-path={{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults --coverage-upload-options=\"hostUrl:https://codecov.unity3d.com;reportsDir:{{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults;reports:*.xml;sourceDir:Packages/gltfast;repo:unity/com.unity.cloud.gltfast.src;changeset:{{platform.git_revision}};name:{{platform.name}}_{{editor.version}};flags:{{platform.name}}_{{editor.version}};verbose\""
   artifacts:
     logs:
       paths:
@@ -42,19 +42,3 @@ tests_coverage_all_{{ platform.name }}:
 {% endfor -%}
 {% endfor -%}
 
-# Run coverage on PRs, but only on trunk and one platform
-tests_coverage_trigger:
-  name: _Run Coverage Tests
-  triggers:
-    expression: |
-      (pull_request.target eq "main" OR pull_request.target eq "develop") AND
-      NOT pull_request.push.changes.all match "**/*.md"
-  dependencies:
-    - .yamato/package-pack.yml#pack
-{% for platform in test_platforms limit: 1 -%}
-{% for editor in test_editors -%}
-{%- if editor.coverage -%}
-    - .yamato/package-coverage.yml#test_coverage_{{ platform.name }}_{{ editor.version }}
-{%- endif -%}
-{% endfor -%}
-{% endfor -%}
