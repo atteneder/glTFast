@@ -197,7 +197,10 @@ namespace GLTFast.Materials {
                 Logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
             }
             var defaultMaterial = GetMetallicMaterial(MetallicShaderFeatures.Default);
-            defaultMaterial.name = DefaultMaterialName;
+            if (defaultMaterial != null)
+            {
+                defaultMaterial.name = DefaultMaterialName;
+            }
             return defaultMaterial;
         }
 

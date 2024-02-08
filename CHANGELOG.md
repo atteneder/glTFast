@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## Fixed
+- Exception when required glTF shader is not included.
+
 ## [6.2.0] - 2024-01-29
 
 ### Added
