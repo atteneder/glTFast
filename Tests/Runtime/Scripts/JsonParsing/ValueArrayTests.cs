@@ -14,7 +14,7 @@ namespace GLTFast.Tests.JsonParsing
 {
     [TestFixture]
     [Category("JsonParsing")]
-    class ValueArrays
+    class ValueArrayTests
     {
         Root m_Gltf;
 #if NEWTONSOFT_JSON

@@ -18,7 +18,7 @@ namespace GLTFast.Tests.JsonParsing
 {
     [TestFixture]
     [Category("JsonParsing")]
-    class EnumTypes
+    class EnumTypeTests
     {
         Root m_Gltf;
 #if NEWTONSOFT_JSON

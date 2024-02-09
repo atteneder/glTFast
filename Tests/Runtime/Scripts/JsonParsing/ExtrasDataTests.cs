@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 namespace GLTFast.Tests.JsonParsing
 {
     [Category("JsonParsing")]
-    class ExtrasData
+    class ExtrasDataTests
     {
         const string k_ExtrasDataJson = @"
 {

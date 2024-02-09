@@ -71,7 +71,7 @@ namespace GLTFast
         /// <param name="index">glTF texture index</param>
         /// <returns>Loaded Unity texture</returns>
         Texture2D GetTexture(int index = 0);
-        
+
         /// <summary>
         /// Evaluates if the texture's vertical orientation conforms to Unity's default.
         /// If it's not aligned (=true; =flipped), the texture has to be applied mirrored vertically.

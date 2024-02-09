@@ -13,7 +13,7 @@ using UnityEngine;
 namespace GLTFast.Tests.JsonParsing
 {
     [Category("JsonParsing")]
-    class Extensions
+    class ExtensionTests
     {
         const string k_CustomContent = @"
 {
