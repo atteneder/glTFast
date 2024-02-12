@@ -115,6 +115,11 @@ player_test_platforms:
       image: package-ci/win10-xbox:v4
       flavor: b1.large
 
+asset_sets:
+  - name: glTF-test-models
+    git_uri: https://github.com/atteneder/glTF-test-models.git
+    git_revision: fee92e61a93546e48a34773cc8d2f20db7e22873
+
 registry:
   npm: https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-npm
 

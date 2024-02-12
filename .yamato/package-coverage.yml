@@ -19,8 +19,26 @@ test_coverage_{{ platform.name }}_{{ editor.version }}:
       git fetch origin {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
       git checkout -f --detach {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
       popd
+
+    - mkdir Assets
+{% for asset_set in asset_sets -%}
+    - |
+      pushd Assets
+      git clone {{ asset_set.git_uri }} --no-checkout {{ asset_set.name }}
+      cd {{ asset_set.name }}
+      git fetch origin {{ asset_set.git_revision }}
+      git checkout -f --detach {{ asset_set.git_revision }}
+      popd
+{% endfor -%}
+
     - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
-    - upm-ci package test -u {{ editor.version }} --package-path Packages/gltfast --type package-tests --extra-create-project-arg=-upmNoDefaultPackages --enable-code-coverage --code-coverage-options 'generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,+Unity.Cloud.Gltfast*;pathReplacePatterns:**/PackageCache/com.unity.cloud.gltfast@*/,;sourcePaths:{{ platform.yamato_source_dir }}/Packages/gltfast' --extra-utr-arg="--coverage-results-path={{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults --coverage-upload-options=\"hostUrl:https://codecov.unity3d.com;reportsDir:{{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults;reports:*.xml;sourceDir:Packages/gltfast;repo:unity/com.unity.cloud.gltfast.src;changeset:{{platform.git_revision}};name:{{platform.name}}_{{editor.version}};flags:{{platform.name}}_{{editor.version}};verbose\""
+    - |
+{% if platform.name == "win" -%}
+      set GLTF_TEST_ASSET_DIR={{ platform.yamato_source_dir }}\Assets
+{% else -%}
+      export GLTF_TEST_ASSET_DIR="{{ platform.yamato_source_dir }}/Assets"
+{% endif -%}
+      upm-ci package test -u {{ editor.version }} --package-path Packages/gltfast --type package-tests --extra-create-project-arg=-upmNoDefaultPackages --enable-code-coverage --code-coverage-options 'generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,+Unity.Cloud.Gltfast*;pathReplacePatterns:**/PackageCache/com.unity.cloud.gltfast@*/,;sourcePaths:{{ platform.yamato_source_dir }}/Packages/gltfast' --extra-utr-arg="--coverage-results-path={{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults --coverage-upload-options=\"hostUrl:https://codecov.unity3d.com;reportsDir:{{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults;reports:*.xml;sourceDir:Packages/gltfast;repo:unity/com.unity.cloud.gltfast.src;changeset:{{platform.git_revision}};name:{{platform.name}}_{{editor.version}};flags:{{platform.name}}_{{editor.version}};verbose\""
   artifacts:
     logs:
       paths:

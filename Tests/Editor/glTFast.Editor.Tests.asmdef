@@ -5,7 +5,8 @@
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "glTFast",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "glTFast.Tests"
     ],
     "includePlatforms": [
         "Editor"
