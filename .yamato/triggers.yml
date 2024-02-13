@@ -35,3 +35,15 @@ pr_trigger:
 {% endfor -%}
 {%- endif -%}
 {% endfor -%}
+
+tests_trigger_all:
+  name: _Trigger All Tests [Weekly]
+  triggers:
+    recurring:
+      - branch: develop
+        frequency: weekly
+        rerun: always
+  dependencies:
+    - .yamato/package-pack.yml#pack
+    - .yamato/package-test.yml#tests_all
+    - .yamato/package-coverage.yml#tests_coverage_all

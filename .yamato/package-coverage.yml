@@ -38,7 +38,7 @@ test_coverage_{{ platform.name }}_{{ editor.version }}:
 {% else -%}
       export GLTF_TEST_ASSET_DIR="{{ platform.yamato_source_dir }}/Assets"
 {% endif -%}
-      upm-ci package test -u {{ editor.version }} --package-path Packages/gltfast --type package-tests --extra-create-project-arg=-upmNoDefaultPackages --enable-code-coverage --code-coverage-options 'generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,+Unity.Cloud.Gltfast*;pathReplacePatterns:**/PackageCache/com.unity.cloud.gltfast@*/,;sourcePaths:{{ platform.yamato_source_dir }}/Packages/gltfast' --extra-utr-arg="--coverage-results-path={{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults --coverage-upload-options=\"hostUrl:https://codecov.unity3d.com;reportsDir:{{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults;reports:*.xml;sourceDir:Packages/gltfast;repo:unity/com.unity.cloud.gltfast.src;changeset:{{platform.git_revision}};name:{{platform.name}}_{{editor.version}};flags:{{platform.name}}_{{editor.version}};verbose\""
+      upm-ci package test -u {{ editor.version }} --package-path Packages/gltfast --type package-tests --extra-create-project-arg=-upmNoDefaultPackages --enable-code-coverage --code-coverage-options 'generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,+Unity.Cloud.Gltfast*;pathReplacePatterns:**/PackageCache/com.unity.cloud.gltfast@*/,;sourcePaths:'"{{ platform.yamato_source_dir }}/Packages/gltfast" --extra-utr-arg="--coverage-results-path={{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults --coverage-upload-options=\"hostUrl:https://codecov.unity3d.com;reportsDir:{{ platform.yamato_source_dir }}/upm-ci~/test-results/CoverageResults;reports:*.xml;sourceDir:Packages/gltfast;repo:unity/com.unity.cloud.gltfast.src;changeset:{{platform.git_revision}};name:{{platform.name}}_{{editor.version}};flags:{{platform.name}}_{{editor.version}};verbose\""
   artifacts:
     logs:
       paths:
@@ -52,7 +52,7 @@ test_coverage_{{ platform.name }}_{{ editor.version }}:
 
 {% for platform in test_platforms -%}
 tests_coverage_all_{{ platform.name }}:
-  name: _Run All Coverage Tests ({{ platform.name }})
+  name: _Coverage All on ({{ platform.name }})
   dependencies:
     - .yamato/package-pack.yml#pack
 {% for editor in test_editors -%}
@@ -60,3 +60,13 @@ tests_coverage_all_{{ platform.name }}:
 {% endfor -%}
 {% endfor -%}
 
+
+tests_coverage_all:
+  name: _Coverage All
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% for platform in test_platforms -%}
+{% for editor in test_editors -%}
+    - .yamato/package-coverage.yml#test_coverage_{{ platform.name }}_{{ editor.version }}
+{% endfor -%}
+{% endfor -%}
