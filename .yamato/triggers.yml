@@ -9,41 +9,28 @@ pr_trigger:
       NOT pull_request.push.changes.all match "**/*.md"
   dependencies:
     - .yamato/package-pack.yml#pack
-{% for editor in test_editors limit: 1 -%}
-{% for platform in test_platforms limit: 1 -%}
-    # First(oldest) editor, first(most important) platform
-    - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
-{% endfor -%}
-{% endfor -%}
-{% for platform in test_platforms limit: 1 offset: continue -%}
-    # Newest editor, next(second) platform
-    - .yamato/package-test.yml#test_{{platform.name}}_{{test_editors[-1].version}}
-{% endfor -%}
-{% for editor in test_editors limit: 1 offset: continue -%}
-{% for platform in test_platforms limit: 1 offset: continue -%}
-    # Next(second) editor, next(third) platform
-    - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
-{% endfor -%}
-{% endfor -%}
-{% for platform in test_platforms -%}
-{%- if platform.coverage -%}
-{% for editor in test_editors -%}
-{%- if editor.coverage -%}
-    # Code coverage on first(most important) platform and editors, where coverage is enabled in metafile
-    - .yamato/package-coverage.yml#test_coverage_{{ platform.name }}_{{ editor.version }}
-{%- endif -%}
-{% endfor -%}
-{%- endif -%}
-{% endfor -%}
+    - .yamato/package-test.yml#tests_pr
+    - .yamato/package-player-test.yml#player_test_pr
+    - .yamato/package-coverage.yml#tests_coverage_pr
 
-tests_trigger_all:
-  name: _Trigger All Tests [Weekly]
+tests_all_trigger:
+  name: _Tests All
+  triggers:
+    expression: |
+      push.branch eq "main" OR
+      pull_request.comment eq "all" 
+  dependencies:
+    - .yamato/package-pack.yml#pack
+    - .yamato/package-test.yml#tests_all
+    - .yamato/package-player-test.yml#player_test_all
+    - .yamato/package-coverage.yml#tests_coverage_all
+
+tests_all_weekly:
+  name: _Tests All [Weekly]
   triggers:
     recurring:
       - branch: develop
         frequency: weekly
         rerun: always
   dependencies:
-    - .yamato/package-pack.yml#pack
-    - .yamato/package-test.yml#tests_all
-    - .yamato/package-coverage.yml#tests_coverage_all
+    - .yamato/triggers.yml#tests_all_trigger

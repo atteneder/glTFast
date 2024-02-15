@@ -17,10 +17,10 @@ test_{{ platform.name }}_{{ editor.version }}:
     - |
       mkdir Packages
       pushd Packages
-      git clone {% if platform.name == "win" %}"%GIT_REPOSITORY_URL%"{% else %}"$GIT_REPOSITORY_URL"{% endif %} --no-checkout gltfast
+      git clone {{ platform.git_url }} --no-checkout gltfast
       cd gltfast
-      git fetch origin {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
-      git checkout -f --detach {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      git fetch origin {{ platform.git_revision }}
+      git checkout -f --detach {{ platform.git_revision }}
       popd
 
     - mkdir Assets
@@ -70,10 +70,10 @@ validate_{{ platform.name }}_{{ editor.version }}:
     - |
       mkdir Packages
       pushd Packages
-      git clone {% if platform.name == "win" %}"%GIT_REPOSITORY_URL%"{% else %}"$GIT_REPOSITORY_URL"{% endif %} --no-checkout gltfast
+      git clone {{ platform.git_url }} --no-checkout gltfast
       cd gltfast
-      git fetch origin {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
-      git checkout -f --detach {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      git fetch origin {{ platform.git_revision }}
+      git checkout -f --detach {{ platform.git_revision }}
       popd
 
     - mkdir Assets
@@ -114,5 +114,26 @@ tests_all:
 {% for platform in test_platforms -%}
     - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
     - .yamato/package-test.yml#validate_{{platform.name}}_{{editor.version}}
+{% endfor -%}
+{% endfor -%}
+
+tests_pr:
+  name: _Test subset for PRs
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% for editor in test_editors limit: 1 -%}
+{% for platform in test_platforms limit: 1 -%}
+    # First(oldest) editor, first(most important) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
+{% endfor -%}
+{% endfor -%}
+{% for platform in test_platforms limit: 1 offset: continue -%}
+    # Newest editor, next(second) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{test_editors[-1].version}}
+{% endfor -%}
+{% for editor in test_editors limit: 1 offset: continue -%}
+{% for platform in test_platforms limit: 1 offset: continue -%}
+    # Next(second) editor, next(third) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
 {% endfor -%}
 {% endfor -%}

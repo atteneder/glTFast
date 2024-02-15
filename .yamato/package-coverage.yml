@@ -14,10 +14,10 @@ test_coverage_{{ platform.name }}_{{ editor.version }}:
     - |
       mkdir Packages
       pushd Packages
-      git clone {% if platform.name == "win" %}"%GIT_REPOSITORY_URL%"{% else %}"$GIT_REPOSITORY_URL"{% endif %} --no-checkout gltfast
+      git clone {{ platform.git_url }} --no-checkout gltfast
       cd gltfast
-      git fetch origin {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
-      git checkout -f --detach {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      git fetch origin {{ platform.git_revision }}
+      git checkout -f --detach {{ platform.git_revision }}
       popd
 
     - mkdir Assets
@@ -69,4 +69,19 @@ tests_coverage_all:
 {% for editor in test_editors -%}
     - .yamato/package-coverage.yml#test_coverage_{{ platform.name }}_{{ editor.version }}
 {% endfor -%}
+{% endfor -%}
+
+tests_coverage_pr:
+  name: _Coverage subset for PRs
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% for platform in test_platforms -%}
+{%- if platform.coverage -%}
+{% for editor in test_editors -%}
+{%- if editor.coverage -%}
+    # Code coverage on first(most important) platform and editors, where coverage is enabled in metafile
+    - .yamato/package-coverage.yml#test_coverage_{{ platform.name }}_{{ editor.version }}
+{%- endif -%}
+{% endfor -%}
+{%- endif -%}
 {% endfor -%}

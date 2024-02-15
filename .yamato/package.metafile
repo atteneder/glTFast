@@ -12,6 +12,7 @@ test_platforms:
     image: package-ci/win10:v4
     flavor: b1.large
     yamato_source_dir: "%YAMATO_SOURCE_DIR%"
+    git_url: "%GIT_REPOSITORY_URL%"
     git_revision: "%GIT_REVISION%"
     coverage: !!bool true
   - name: mac
@@ -19,12 +20,14 @@ test_platforms:
     image: package-ci/macos-13:v4
     flavor: m1.mac
     yamato_source_dir: ${YAMATO_SOURCE_DIR}
+    git_url: ${GIT_REPOSITORY_URL}
     git_revision: ${GIT_REVISION}
   - name: ubuntu
     type: Unity::VM
     image: package-ci/ubuntu-22.04:v4
     flavor: b1.large
     yamato_source_dir: ${YAMATO_SOURCE_DIR}
+    git_url: ${GIT_REPOSITORY_URL}
     git_revision: ${GIT_REVISION}
 
 player_test_editors:
@@ -34,26 +37,27 @@ player_test_editors:
 player_test_platforms:
   - name: win
     id: standalone
-    build:
+    windows_host: !!bool true
+    build_and_run:
       type: Unity::VM
       image: package-ci/win10:v4
       flavor: b1.large
-    run:
-      type: Unity::VM
-      image: package-ci/win10:v4
-      flavor: b1.large
+    yamato_source_dir: "%YAMATO_SOURCE_DIR%"
+    git_url: "%GIT_REPOSITORY_URL%"
+    git_revision: "%GIT_REVISION%"
   - name: mac
     id: standalone
-    build:
+    build_and_run:
       type: Unity::VM::osx
       image: package-ci/macos-13:v4
       flavor: m1.mac
-    run:
-      type: Unity::VM::osx
-      image: package-ci/macos-13:v4
-      flavor: m1.mac
+    yamato_source_dir: ${YAMATO_SOURCE_DIR}
+    git_url: ${GIT_REPOSITORY_URL}
+    git_revision: ${GIT_REVISION}
   - name: android
     id: android
+    windows_host: !!bool true
+    upm_ci_params: --backend=Il2Cpp
     build:
       type: Unity::VM
       image: package-ci/win10:v4
@@ -62,58 +66,69 @@ player_test_platforms:
       type: Unity::mobile::shield
       image: package-ci/win10:v4
       flavor: b1.large
-  - name: ios
-    id: ios
-    build:
-      type: Unity::VM::osx
-      image: package-ci/macos-13:v4
-      flavor: b1.large
-    run:
-      type: Unity::mobile::iPhone
-      image: package-ci/macos-13:v4
-      flavor: b1.large
-  - name: ps4
-    id: ps4
-    build_and_run:
-      type: Unity::console::ps4
-      image: package-ci/win10-ps4:v4
-      flavor: b1.large
-  - name: ps5
-    id: ps5
-    build:
-      type: Unity::VM
-      image: package-ci/win10-ps5:v4
-      flavor: b1.large
-    run:
-      type: Unity::console::ps5
-      image: package-ci/win10-ps5:v4
-      flavor: b1.large
-  - name: switch
-    id: switch
-    build_and_run:
-      type: Unity::console::switch
-      image: package-ci/win10-switch:v4
-      flavor: b1.large
-  - name: gamecorexboxone
-    id: GameCoreXboxOne
-    build:
-      type: Unity::VM
-      image: package-ci/win10-xbox:v4
-      flavor: b1.large
-    run:
-      type: Unity::console::xbox
-      image: package-ci/win10-xbox:v4
-      flavor: b1.large
-  - name: gamecorexboxseries
-    id: GameCoreScarlett
-    build:
-      type: Unity::VM
-      image: package-ci/win10-xbox:v4
-      flavor: b1.large
-    run:
-      type: Unity::console::scarlett
-      image: package-ci/win10-xbox:v4
-      flavor: b1.large
+    yamato_source_dir: "%YAMATO_SOURCE_DIR%"
+    git_url: "%GIT_REPOSITORY_URL%"
+    git_revision: "%GIT_REVISION%"
+#  - name: ios
+#    id: ios
+#    build:
+#      type: Unity::VM::osx
+#      image: package-ci/macos-13:v4
+#      flavor: b1.large
+#    run:
+#      type: Unity::mobile::iPhone
+#      image: package-ci/macos-13:v4
+#      flavor: b1.large
+#    yamato_source_dir: ${YAMATO_SOURCE_DIR}
+#    git_url: ${GIT_REPOSITORY_URL}
+#    git_revision: ${GIT_REVISION}
+#  - name: ps4
+#    id: ps4
+#    windows_host: !!bool true
+#    build_and_run:
+#      type: Unity::console::ps4
+#      image: package-ci/win10-ps4:v4
+#      flavor: b1.large
+#  - name: ps5
+#    id: ps5
+#    windows_host: !!bool true
+#    build:
+#      type: Unity::VM
+#      image: package-ci/win10-ps5:v4
+#      flavor: b1.large
+#    run:
+#      type: Unity::console::ps5
+#      image: package-ci/win10-ps5:v4
+#      flavor: b1.large
+#  - name: switch
+#    id: switch
+#    windows_host: !!bool true
+#    build_and_run:
+#      type: Unity::console::switch
+#      image: package-ci/win10-switch:v4
+#      flavor: b1.large
+#  - name: gamecorexboxone
+#    id: GameCoreXboxOne
+#    windows_host: !!bool true
+#    build:
+#      type: Unity::VM
+#      image: package-ci/win10-xbox:v4
+#      flavor: b1.large
+#    run:
+#      type: Unity::console::xbox
+#      image: package-ci/win10-xbox:v4
+#      flavor: b1.large
+#  - name: gamecorexboxseries
+#    id: GameCoreScarlett
+#    windows_host: !!bool true
+#    build:
+#      type: Unity::VM
+#      image: package-ci/win10-xbox:v4
+#      flavor: b1.large
+#    run:
+#      type: Unity::console::scarlett
+#      image: package-ci/win10-xbox:v4
+#      flavor: b1.large
 
 asset_sets:
   - name: glTF-test-models

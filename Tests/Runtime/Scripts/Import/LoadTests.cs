@@ -20,12 +20,11 @@ namespace GLTFast.Tests.Import
         [GltfTestCase("glTF-test-models", 22)]
         public IEnumerator GltfTestModels(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
         {
-            Debug.Log($"Loading {testCase}");
             var go = new GameObject();
             var deferAgent = new UninterruptedDeferAgent();
             var loadLogger = new CollectingLogger();
-            var rootDir = testCaseSet.GetSourcePath();
-            var path = Path.Combine(rootDir, testCase.relativeUri);
+            var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
+            Debug.Log($"Loading {testCase} from {path}");
 
             using (var gltf = new GltfImport(deferAgent: deferAgent, logger: loadLogger))
             {
