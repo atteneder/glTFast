@@ -5,7 +5,7 @@ using GLTFast.Schema;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace GLTFast.Tests
+namespace GLTFast.Tests.JsonParsing
 {
     [Category("JsonParsing")]
     class JsonParsingTests

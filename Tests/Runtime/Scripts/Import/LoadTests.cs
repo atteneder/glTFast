@@ -64,40 +64,54 @@ namespace GLTFast.Tests.Import
 
         static void AssertLoggers(IEnumerable<CollectingLogger> loggers, GltfTestCase testCase)
         {
+            AssertLogItems(IterateLoggerItems(), testCase);
+            return;
+
+            IEnumerable<LogItem> IterateLoggerItems()
+            {
+                foreach (var logger in loggers)
+                {
+                    if (logger.Count < 1) continue;
+                    foreach (var item in logger.Items)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
+
+        internal static void AssertLogItems(IEnumerable<LogItem> logItems, GltfTestCase testCase)
+        {
             var expectedLogCodeFound = new Dictionary<LogCode, bool>();
             foreach (var logCode in testCase.expectedLogCodes)
             {
                 expectedLogCodeFound[logCode] = false;
             }
 
-            foreach (var logger in loggers)
+            foreach (var item in logItems)
             {
-                if (logger.Count < 1) continue;
-                foreach (var item in logger.Items)
+                switch (item.Type)
                 {
-                    switch (item.Type)
-                    {
-                        case LogType.Assert:
-                        case LogType.Error:
-                        case LogType.Exception:
-                            if (expectedLogCodeFound.Keys.Contains(item.Code))
-                            {
-                                expectedLogCodeFound[item.Code] = true;
-                                // Informal log
-                                Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, item.ToString());
-                            }
-                            else
-                            {
-                                item.Log();
-                                throw new AssertionException($"Unhandled {item.Type} message {item} ({item.Code}).");
-                            }
-                            break;
-                        case LogType.Warning:
-                        case LogType.Log:
-                        default:
+                    case LogType.Assert:
+                    case LogType.Error:
+                    case LogType.Exception:
+                        if (expectedLogCodeFound.Keys.Contains(item.Code))
+                        {
+                            expectedLogCodeFound[item.Code] = true;
+                            // Informal log
+                            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, item.ToString());
+                        }
+                        else
+                        {
                             item.Log();
-                            break;
-                    }
+                            throw new AssertionException($"Unhandled {item.Type} message {item} ({item.Code}).");
+                        }
+                        break;
+                    case LogType.Warning:
+                    case LogType.Log:
+                    default:
+                        item.Log();
+                        break;
                 }
             }
 

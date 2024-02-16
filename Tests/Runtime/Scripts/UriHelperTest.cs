@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using NUnit.Framework;
+using UnityEngine;
 using UnityEngine.Profiling;
 
 namespace GLTFast.Tests
@@ -57,10 +58,7 @@ namespace GLTFast.Tests
 
             // file paths
             Assert.AreEqual(new Uri("file:///dir/sub/"), UriHelper.GetBaseUri(new Uri("file:///dir/sub/file.gltf")));
-            Assert.AreEqual(new Uri("file://c:\\dir\\sub\\"), UriHelper.GetBaseUri(new Uri("c:\\dir\\sub\\file.gltf")));
-#if !UNITY_EDITOR_WIN
-            Assert.AreEqual(new Uri("file:///dir/sub/"), UriHelper.GetBaseUri(new Uri("/dir/sub/file.gltf")));
-#endif
+            Assert.AreEqual(new Uri(@"file://c:\dir\sub\"), UriHelper.GetBaseUri(new Uri(@"c:\dir\sub\file.gltf")));
 
             // special char `+`
             Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"), UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file+test.gltf")));
@@ -71,6 +69,20 @@ namespace GLTFast.Tests
             var uri = new Uri("Assets/Some/Path/asset.glb", UriKind.Relative);
             var sep = Path.DirectorySeparatorChar;
             Assert.AreEqual(new Uri($"Assets{sep}Some{sep}Path", UriKind.Relative), UriHelper.GetBaseUri(uri));
+        }
+
+        [Test]
+        public void GetBaseUriNonWindowsTest()
+        {
+            switch (Application.platform)
+            {
+                case RuntimePlatform.WindowsPlayer:
+                case RuntimePlatform.WindowsEditor:
+                    Assert.Ignore("Absolute POSIX paths result in System.UriFormatException on Microsoft platforms.");
+                    return;
+            }
+            // file paths
+            Assert.AreEqual(new Uri("file:///dir/sub/"), UriHelper.GetBaseUri(new Uri("/dir/sub/file.gltf")));
         }
 
         [Test]

@@ -351,5 +351,12 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             }
 #endif
         }
+
+#if UNITY_EDITOR
+        internal static string GetRawMessage(LogCode code)
+        {
+            return k_FullMessages[code];
+        }
+#endif
     }
 }
