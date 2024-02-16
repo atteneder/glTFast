@@ -6,6 +6,7 @@
 #endif
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using GLTFast.Tests.Import;
@@ -13,6 +14,14 @@ using UnityEngine;
 
 namespace GLTFast.Tests
 {
+    /// <summary>
+    /// Helper component that loads all glTFs of a GltfTestCaseSet.
+    /// Typical use-cases during development:
+    /// - Extract all shader variants
+    /// - Performance testing
+    /// </summary>
+    // Not actually used by any test at the moment, so exclude from coverage.
+    [ExcludeFromCodeCoverage]
     class LoadGltfTestCaseSet : MonoBehaviour
     {
         enum Strategy

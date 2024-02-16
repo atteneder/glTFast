@@ -12,6 +12,7 @@ pr_trigger:
     - .yamato/package-test.yml#tests_pr
     - .yamato/package-player-test.yml#player_test_pr
     - .yamato/package-coverage.yml#tests_coverage_pr
+    - .yamato/code-format-check.yml#code_format_check
 
 tests_all_trigger:
   name: _Tests All
@@ -34,3 +35,14 @@ tests_all_weekly:
         rerun: always
   dependencies:
     - .yamato/triggers.yml#tests_all_trigger
+
+
+# Runs code coverage on any change on the develop branch
+# in order to create a reference for pull requests.
+post_merge_trigger:
+  name: Post Merge Trigger
+  triggers:
+    expression: push.branch eq "develop"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+    - .yamato/package-coverage.yml#tests_coverage_pr

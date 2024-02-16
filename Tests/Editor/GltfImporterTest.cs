@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections;
-using System.IO;
-using System.Text.RegularExpressions;
-using GLTFast.Logging;
 using GLTFast.Tests.Import;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+
+#if !GLTFAST_EDITOR_IMPORT_OFF
+using System.IO;
 using UnityEngine.TestTools;
+#endif
 
 namespace GLTFast.Editor.Tests
 {
@@ -38,6 +39,9 @@ namespace GLTFast.Editor.Tests
         [GltfTestCase("glTF-test-models", 22)]
         public IEnumerator GltfTestModels(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
         {
+#if GLTFAST_EDITOR_IMPORT_OFF
+            Assert.Ignore("glTF Editor import is disabled via GLTFAST_EDITOR_IMPORT_OFF scripting define.");
+#else
             var directories = testCase.relativeUri.Split('/');
             Assert.NotNull(directories);
             Assert.GreaterOrEqual(directories.Length, 2);
@@ -61,7 +65,7 @@ namespace GLTFast.Editor.Tests
             Assert.NotNull(importer, $"No glTF importer at {assetPath}");
 
             LoadTests.AssertLogItems(importer.reportItems, testCase);
-
+#endif
             yield return null;
         }
     }
