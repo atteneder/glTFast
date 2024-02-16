@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 - Exception when required glTF shader is not included.
+- Compiler errors when safe mode (`GLTFAST_SAFE` scripting define) is enabled.
 
 ## [6.2.0] - 2024-01-29
 

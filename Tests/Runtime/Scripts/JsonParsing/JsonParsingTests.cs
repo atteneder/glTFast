@@ -225,9 +225,9 @@ namespace GLTFast.Tests.JsonParsing
             Assert.AreEqual(0, sparse.Sparse.Values.byteOffset);
 
 #if GLTFAST_SAFE
-            var invalid = gltf.accessors[2];
+            var invalid = gltf.Accessors[2];
             Assert.NotNull(invalid);
-            Assert.IsNull(invalid.sparse);
+            Assert.IsNull(invalid.Sparse);
 #else
             Debug.LogWarning("Invalid Sparse Accessors will break glTFast");
 #endif
