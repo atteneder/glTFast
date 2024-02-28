@@ -109,7 +109,6 @@ validate_{{ platform.name }}_{{ editor.version }}:
 tests_all:
   name: _Test All
   dependencies:
-    - .yamato/package-pack.yml#pack
 {% for editor in test_editors -%}
 {% for platform in test_platforms -%}
     - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
@@ -120,20 +119,22 @@ tests_all:
 tests_pr:
   name: _Test subset for PRs
   dependencies:
-    - .yamato/package-pack.yml#pack
 {% for editor in test_editors limit: 1 -%}
 {% for platform in test_platforms limit: 1 -%}
     # First(oldest) editor, first(most important) platform
     - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/package-test.yml#validate_{{platform.name}}_{{editor.version}}
 {% endfor -%}
 {% endfor -%}
 {% for platform in test_platforms limit: 1 offset: continue -%}
     # Newest editor, next(second) platform
     - .yamato/package-test.yml#test_{{platform.name}}_{{test_editors[-1].version}}
+    - .yamato/package-test.yml#validate_{{platform.name}}_{{editor.version}}
 {% endfor -%}
 {% for editor in test_editors limit: 1 offset: continue -%}
 {% for platform in test_platforms limit: 1 offset: continue -%}
     # Next(second) editor, next(third) platform
     - .yamato/package-test.yml#test_{{platform.name}}_{{editor.version}}
+    - .yamato/package-test.yml#validate_{{platform.name}}_{{editor.version}}
 {% endfor -%}
 {% endfor -%}

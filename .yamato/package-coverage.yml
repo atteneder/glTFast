@@ -54,7 +54,6 @@ test_coverage_{{ platform.name }}_{{ editor.version }}:
 tests_coverage_all_{{ platform.name }}:
   name: _Coverage All on ({{ platform.name }})
   dependencies:
-    - .yamato/package-pack.yml#pack
 {% for editor in test_editors -%}
     - .yamato/package-coverage.yml#test_coverage_{{ platform.name }}_{{ editor.version }}
 {% endfor -%}
@@ -74,7 +73,6 @@ tests_coverage_all:
 tests_coverage_pr:
   name: _Coverage subset for PRs
   dependencies:
-    - .yamato/package-pack.yml#pack
 {% for platform in test_platforms -%}
 {%- if platform.coverage -%}
 {% for editor in test_editors -%}
