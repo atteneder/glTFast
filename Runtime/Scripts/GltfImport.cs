@@ -46,11 +46,6 @@ using UnityEngine.Profiling;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-[assembly: InternalsVisibleTo("glTFast.Editor")]
-[assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
-[assembly: InternalsVisibleTo("glTFast.Export")]
-[assembly: InternalsVisibleTo("glTFast.Tests")]
-
 namespace GLTFast
 {
 

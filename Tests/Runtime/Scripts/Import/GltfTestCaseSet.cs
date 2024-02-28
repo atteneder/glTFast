@@ -22,8 +22,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 #endif
 
-[assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
-
 namespace GLTFast.Tests.Import
 {
     [CreateAssetMenu(fileName = "glTF-TestCaseCollection", menuName = "ScriptableObjects/glTFast Test Case Collection")]

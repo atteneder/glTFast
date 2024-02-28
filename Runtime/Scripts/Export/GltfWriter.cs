@@ -46,9 +46,6 @@ using System.Text;
 using UnityEditor;
 #endif
 
-[assembly: InternalsVisibleTo("glTFast.Editor")]
-[assembly: InternalsVisibleTo("glTF-test-framework.Tests")]
-
 namespace GLTFast.Export
 {
 

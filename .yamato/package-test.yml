@@ -129,7 +129,7 @@ tests_pr:
 {% for platform in test_platforms limit: 1 offset: continue -%}
     # Newest editor, next(second) platform
     - .yamato/package-test.yml#test_{{platform.name}}_{{test_editors[-1].version}}
-    - .yamato/package-test.yml#validate_{{platform.name}}_{{editor.version}}
+    - .yamato/package-test.yml#validate_{{platform.name}}_{{test_editors[-1].version}}
 {% endfor -%}
 {% for editor in test_editors limit: 1 offset: continue -%}
 {% for platform in test_platforms limit: 1 offset: continue -%}
