@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 - Exception when required glTF shader is not included.
 - Compiler errors when safe mode (`GLTFAST_SAFE` scripting define) is enabled.
+- Compiler error with High Definition Render Pipeline version 17 (2023.3)
+- Removed usage of obsolete APIs in High Definition Render Pipeline version 17 (2023.3)
 
 ## [6.2.0] - 2024-01-29
 
