@@ -234,19 +234,16 @@ namespace GLTFast.Export
                 name = uLight.name
             };
 
+            var renderPipeline = RenderPipelineUtils.RenderPipeline;
+
             var lightType = uLight.type;
 
-            var renderPipeline = RenderPipelineUtils.RenderPipeline;
 #if USING_HDRP
             HDAdditionalLightData lightHd = null;
+
             if (renderPipeline == RenderPipeline.HighDefinition) {
                 lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
-#if !UNITY_2023_2_OR_NEWER
-                // For newer HDRP versions, the generic `uLight.type` works just fine
-                if (lightHd!=null && lightHd.type == HDLightType.Area) {
-                    lightType = LightType.Rectangle;
-                }
-#endif
+                lightType = lightHd?.TryGetLightType() ?? lightType;
             }
 #endif
 
@@ -279,7 +276,7 @@ namespace GLTFast.Export
             }
 
             light.LightColor = uLight.color.linear;
-            light.range = uLight.range;
+            light.range = GetLightRange(uLight, lightType);
 
             switch (renderPipeline)
             {
@@ -354,6 +351,48 @@ namespace GLTFast.Export
             lightId = m_Lights.Count;
             m_Lights.Add(light);
             return true;
+        }
+
+        /// <summary>
+        /// Retrieves the light's range.
+        /// In Unity 2023.1 and older `Light.range` would return what now is <see cref="Light.dilatedRange"/>, which is
+        /// the range extended by a certain area light size factor. This method removes that addition in that case to
+        /// get the original value that's shown in the inspector.
+        /// </summary>
+        /// <param name="light">Unity Light</param>
+        /// <param name="lightType">Actual light type (might differ from light.type in HDRP).</param>
+        /// <returns>The light's range.</returns>
+        static float GetLightRange(Light light, LightType lightType)
+        {
+#if UNITY_2023_2_OR_NEWER
+            return light.range;
+#else
+            var range = light.range;
+            switch (lightType)
+            {
+#if !USING_HDRP // And, of course, it behaves correctly in the particular case HDRP+Rectangle.
+                case LightType.Rectangle:
+#if UNITY_EDITOR
+                    var longestSide = light.areaSize.magnitude;
+#else
+                    // At runtime, assume default magnitude(vec2(1,1))
+                    var longestSide = 1.4142135624f;
+#endif
+                    range -= longestSide * .5f;
+                    break;
+#endif // !USING_HDRP
+                case LightType.Disc:
+#if UNITY_EDITOR
+                    var radius = light.areaSize.x;
+#else
+                    // At runtime, assume default
+                    const float radius = 1f;
+#endif
+                    range -= radius * .5f;
+                    break;
+            }
+            return range;
+#endif
         }
 
         /// <inheritdoc />
