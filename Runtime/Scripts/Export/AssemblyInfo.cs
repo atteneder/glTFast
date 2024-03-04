@@ -4,6 +4,7 @@
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("glTFast.Editor")]
+[assembly: InternalsVisibleTo("glTFast.Tests")]
 
 // TODO: Remove once tests are transferred into package
 [assembly: InternalsVisibleTo("glTF-test-framework.Tests")]

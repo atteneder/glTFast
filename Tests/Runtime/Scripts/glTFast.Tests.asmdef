@@ -6,8 +6,10 @@
         "Unity.Mathematics",
         "Unity.PerformanceTesting",
         "glTFast",
+        "glTFast.Export",
         "glTFast.Newtonsoft",
-        "Unity.Meshopt.Decompress"
+        "Unity.Meshopt.Decompress",
+        "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -36,6 +38,11 @@
             "name": "com.unity.modules.animation",
             "expression": "",
             "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "",
+            "define": "USING_HDRP"
         }
     ],
     "noEngineReferences": false
