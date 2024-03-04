@@ -22,6 +22,15 @@ namespace GLTFast.Export
         public NormalImageExport(Texture2D texture)
             : base(texture) { }
 
+        protected override ImageFormat ImageFormat
+        {
+            get
+            {
+                if (m_ImageFormat != ImageFormat.Unknown) return m_ImageFormat;
+                return ImageFormat.Png;
+            }
+        }
+
         static Material GetNormalBlitMaterial()
         {
             if (s_NormalBlitMaterial == null)

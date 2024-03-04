@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 - Refactored test scripts folder layout.
+- (Export) Normal maps are exported in PNG format by default.
 
 ## Fixed
 - Exception when required glTF shader is not included.
