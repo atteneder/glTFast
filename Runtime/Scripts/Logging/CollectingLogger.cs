@@ -163,5 +163,36 @@ namespace GLTFast.Logging
         {
             return LogMessages.GetFullMessage(Code, Messages);
         }
+
+        public override bool Equals(object obj)
+        {
+            //Check for null and compare run-time types.
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals((LogItem)obj);
+        }
+
+        bool Equals(LogItem other)
+        {
+            if (Type != other.Type || Code != other.Code) return false;
+            if (Messages == null ^ other.Messages == null) return false;
+            return Messages == null || AreEqual(Messages, other.Messages);
+        }
+
+        static bool AreEqual(IReadOnlyList<string> a, IReadOnlyList<string> b)
+        {
+            if (a.Count == b.Count)
+            {
+                for (var i = 0; i < a.Count; i++)
+                {
+                    if (!a[i].Equals(b[i])) return false;
+                }
+
+                return true;
+            }
+            return false;
+        }
     }
 }

@@ -208,7 +208,7 @@ namespace GLTFast
                 buffers.GetAccessor(normalAccessorIndex, out var nrmAcc, out var input, out var inputByteStride);
                 if (nrmAcc.IsSparse)
                 {
-                    m_Logger.Error(LogCode.SparseAccessor, "normals");
+                    m_Logger?.Error(LogCode.SparseAccessor, "normals");
                 }
                 var h = GetVector3Job(
                     input,
@@ -237,7 +237,7 @@ namespace GLTFast
                 buffers.GetAccessor(tangentAccessorIndex, out var tanAcc, out var input, out var inputByteStride);
                 if (tanAcc.IsSparse)
                 {
-                    m_Logger.Error(LogCode.SparseAccessor, "tangents");
+                    m_Logger?.Error(LogCode.SparseAccessor, "tangents");
                 }
                 var h = GetTangentsJob(
                     input,

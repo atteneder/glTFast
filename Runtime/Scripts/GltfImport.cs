@@ -3247,7 +3247,7 @@ namespace GLTFast
                             }
 
                             if (!bounds.HasValue) {
-                                m_Logger.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
+                                m_Logger?.Error(LogCode.MeshBoundsMissing, meshIndex.ToString());
                             }
                             var dracoContext = new PrimitiveDracoCreateContext(
                                 meshIndex,
@@ -3320,7 +3320,7 @@ namespace GLTFast
                 );
                 if (!success)
                 {
-                    m_Logger.Error(LogCode.MorphTargetContextFail);
+                    m_Logger?.Error(LogCode.MorphTargetContextFail);
                     break;
                 }
             }
@@ -3530,7 +3530,7 @@ namespace GLTFast
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             if (accessor.IsSparse)
             {
-                m_Logger.Error(LogCode.SparseAccessor, "indices");
+                m_Logger?.Error(LogCode.SparseAccessor, "indices");
             }
 
             Profiler.BeginSample("CreateJob");
@@ -3626,7 +3626,7 @@ namespace GLTFast
             //Assert.AreEqual(accessor.count * GetLength(accessor.typeEnum) * 4 , (int) chunk.length);
             if (accessor.IsSparse)
             {
-                m_Logger.Error(LogCode.SparseAccessor, "Matrix");
+                m_Logger?.Error(LogCode.SparseAccessor, "Matrix");
             }
 
             Profiler.BeginSample("CreateJob");
@@ -3662,7 +3662,7 @@ namespace GLTFast
             Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.VEC3);
             if (accessor.IsSparse)
             {
-                m_Logger.Error(LogCode.SparseAccessor, "Vector3");
+                m_Logger?.Error(LogCode.SparseAccessor, "Vector3");
             }
 
             Profiler.BeginSample("CreateJob");
@@ -3714,7 +3714,7 @@ namespace GLTFast
             Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.VEC4);
             if (accessor.IsSparse)
             {
-                m_Logger.Error(LogCode.SparseAccessor, "Vector4");
+                m_Logger?.Error(LogCode.SparseAccessor, "Vector4");
             }
 
             Profiler.BeginSample("CreateJob");
@@ -3769,7 +3769,7 @@ namespace GLTFast
 
             Assert.AreEqual(accessor.GetAttributeType(), GltfAccessorAttributeType.SCALAR);
             if (accessor.IsSparse) {
-                m_Logger.Error(LogCode.SparseAccessor,"scalars");
+                m_Logger?.Error(LogCode.SparseAccessor,"scalars");
             }
 
             if (accessor.componentType == GltfComponentType.Float) {

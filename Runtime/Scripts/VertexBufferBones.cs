@@ -56,7 +56,7 @@ namespace GLTFast
             buffers.GetAccessor(weightsAccessorIndex, out var weightsAcc, out var weightsData, out var weightsByteStride);
             if (weightsAcc.IsSparse)
             {
-                m_Logger.Error(LogCode.SparseAccessor, "bone weights");
+                m_Logger?.Error(LogCode.SparseAccessor, "bone weights");
             }
             m_Data = new NativeArray<VBones>(weightsAcc.count, VertexBufferConfigBase.defaultAllocator);
             var vDataPtr = (byte*)NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(m_Data);
@@ -89,7 +89,7 @@ namespace GLTFast
                 buffers.GetAccessor(jointsAccessorIndex, out var jointsAcc, out var jointsData, out var jointsByteStride);
                 if (jointsAcc.IsSparse)
                 {
-                    m_Logger.Error(LogCode.SparseAccessor, "bone joints");
+                    m_Logger?.Error(LogCode.SparseAccessor, "bone joints");
                 }
                 var h = GetJointsJob(
                     jointsData,

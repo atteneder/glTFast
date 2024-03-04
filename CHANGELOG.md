@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Compiler error with High Definition Render Pipeline version 17 (2023.3)
 - Removed usage of obsolete APIs in High Definition Render Pipeline version 17 (2023.3)
 - (Export) Area light's range value is exported accurately (as shown in the inspector).
+- Various occasions of `NullReferenceException` when no logger is used/provided.
+- Proper error handling when trying to load unsupported sparse texture coordinates
 
 ## [6.2.0] - 2024-01-29
 

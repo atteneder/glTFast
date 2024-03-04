@@ -81,43 +81,7 @@ namespace GLTFast.Tests.Import
 
         internal static void AssertLogItems(IEnumerable<LogItem> logItems, GltfTestCase testCase)
         {
-            var expectedLogCodeFound = new Dictionary<LogCode, bool>();
-            foreach (var logCode in testCase.expectedLogCodes)
-            {
-                expectedLogCodeFound[logCode] = false;
-            }
-
-            foreach (var item in logItems)
-            {
-                switch (item.Type)
-                {
-                    case LogType.Assert:
-                    case LogType.Error:
-                    case LogType.Exception:
-                        if (expectedLogCodeFound.Keys.Contains(item.Code))
-                        {
-                            expectedLogCodeFound[item.Code] = true;
-                            // Informal log
-                            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, item.ToString());
-                        }
-                        else
-                        {
-                            item.Log();
-                            throw new AssertionException($"Unhandled {item.Type} message {item} ({item.Code}).");
-                        }
-                        break;
-                    case LogType.Warning:
-                    case LogType.Log:
-                    default:
-                        item.Log();
-                        break;
-                }
-            }
-
-            foreach (var b in expectedLogCodeFound.Where(b => !b.Value))
-            {
-                throw new AssertionException($"Missing expected log message {b.Key}.");
-            }
+            LoggerTest.AssertLogCodes(logItems, testCase.expectedLogCodes);
         }
     }
 }

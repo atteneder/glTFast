@@ -959,7 +959,7 @@ namespace GLTFast.Export
                 }
                 if ((m_Settings.Compression & Compression.Uncompressed) != 0)
                 {
-                    m_Logger.Warning(LogCode.UncompressedFallbackNotSupported);
+                    m_Logger?.Warning(LogCode.UncompressedFallbackNotSupported);
                 }
 #else
                 m_Logger?.Error(LogCode.PackageMissing, "Draco For Unity", ExtensionName.DracoMeshCompression);
