@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace GLTFast.Schema
 {
@@ -30,6 +32,7 @@ namespace GLTFast.Schema
 
         public void AddProperty(string name)
         {
+            CertifyValidJsonString(name);
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
@@ -46,6 +49,7 @@ namespace GLTFast.Schema
 
         public void AddArray(string name)
         {
+            CertifyValidJsonString(name);
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
@@ -86,6 +90,7 @@ namespace GLTFast.Schema
             AddArray(name);
             foreach (var value in values)
             {
+                CertifyValidJsonString(value);
                 Separate();
                 m_Stream.Write('"');
                 m_Stream.Write(value);
@@ -94,8 +99,22 @@ namespace GLTFast.Schema
             CloseArray();
         }
 
+        public void AddArrayPropertySafe(string name, IEnumerable<string> values)
+        {
+            AddArray(name);
+            foreach (var value in values)
+            {
+                Separate();
+                m_Stream.Write('"');
+                WriteStringValueSafe(value);
+                m_Stream.Write('"');
+            }
+            CloseArray();
+        }
+
         public void AddProperty<T>(string name, T value)
         {
+            CertifyValidJsonString(name);
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
@@ -105,6 +124,7 @@ namespace GLTFast.Schema
 
         public void AddProperty(string name, float value)
         {
+            CertifyValidJsonString(name);
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
@@ -114,6 +134,8 @@ namespace GLTFast.Schema
 
         public void AddProperty(string name, string value)
         {
+            CertifyValidJsonString(name);
+            CertifyValidJsonString(value);
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
@@ -122,8 +144,20 @@ namespace GLTFast.Schema
             m_Stream.Write('"');
         }
 
+        public void AddPropertySafe(string name, string value)
+        {
+            CertifyValidJsonString(name);
+            Separate();
+            m_Stream.Write('"');
+            m_Stream.Write(name);
+            m_Stream.Write("\":\"");
+            WriteStringValueSafe(value);
+            m_Stream.Write('"');
+        }
+
         public void AddProperty(string name, bool value)
         {
+            CertifyValidJsonString(name);
             Separate();
             m_Stream.Write('"');
             m_Stream.Write(name);
@@ -144,6 +178,55 @@ namespace GLTFast.Schema
         {
             m_Stream.Write('}');
             m_Separation = true;
+        }
+
+        void WriteStringValueSafe(string value)
+        {
+            foreach (var c in value)
+            {
+                switch (c)
+                {
+                    case '\\':
+                        m_Stream.Write(@"\\");
+                        break;
+                    case '\f':
+                        m_Stream.Write("\\f");
+                        break;
+                    case '\n':
+                        m_Stream.Write("\\n");
+                        break;
+                    case '\r':
+                        m_Stream.Write("\\r");
+                        break;
+                    case '\t':
+                        m_Stream.Write("\\t");
+                        break;
+                    case '"':
+                        m_Stream.Write("\\\"");
+                        break;
+                    default:
+                        m_Stream.Write(c);
+                        break;
+                }
+            }
+        }
+
+        [Conditional("DEBUG")]
+        static void CertifyValidJsonString(string value)
+        {
+#if DEBUG
+            var invalidChars = new[]
+            {
+                '\\',
+                '\f',
+                '\n',
+                '\r',
+                '\t',
+                '"'
+            };
+
+            Assert.IsTrue(value.IndexOfAny(invalidChars) < 0, "JSON string literal contains invalid characters");
+#endif
         }
     }
 }

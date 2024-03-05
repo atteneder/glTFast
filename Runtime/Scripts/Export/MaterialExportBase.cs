@@ -107,7 +107,7 @@ namespace GLTFast.Export
         /// <returns>True if material uses unlit shader, false otherwise</returns>
         protected static bool IsUnlit(UnityEngine.Material material)
         {
-            return material.shader.name.ToLower().Contains("unlit");
+            return material.shader.name.ToLowerInvariant().Contains("unlit");
         }
 
         /// <summary>

@@ -34,7 +34,7 @@ namespace GLTFast.Schema
             GltfSerializeName(writer);
             if (!string.IsNullOrEmpty(uri))
             {
-                writer.AddProperty("uri", uri);
+                writer.AddPropertySafe("uri", uri);
             }
             if (!string.IsNullOrEmpty(mimeType))
             {

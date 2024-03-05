@@ -7,8 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ## Added
-- Runtime import tests
-- Runtime export tests
+- Runtime import tests.
+- Runtime export tests.
+- (Export) Added development-time checks for valid JSON string literals.
 
 ## Changed
 - Refactored test scripts folder layout.
@@ -21,7 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed usage of obsolete APIs in High Definition Render Pipeline version 17 (2023.3)
 - (Export) Area light's range value is exported accurately (as shown in the inspector).
 - Various occasions of `NullReferenceException` when no logger is used/provided.
-- Proper error handling when trying to load unsupported sparse texture coordinates
+- Proper error handling when trying to load unsupported sparse texture coordinates.
+- Ensure that special chars in string values don't lead to invalid JSON.
+- Using invariant culture `ToLower`/`ToUpper` variants on all non-language-specific data.
 
 ## [6.2.0] - 2024-01-29
 

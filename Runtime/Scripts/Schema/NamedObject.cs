@@ -20,7 +20,7 @@ namespace GLTFast.Schema
         {
             if (!string.IsNullOrEmpty(name))
             {
-                writer.AddProperty("name", name);
+                writer.AddPropertySafe("name", name);
             }
         }
     }

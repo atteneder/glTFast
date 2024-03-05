@@ -108,7 +108,7 @@ namespace GLTFast.Schema
         {
             writer.AddObject();
             GltfSerializeName(writer);
-            writer.AddProperty("type", m_TypeEnum.ToString().ToLower());
+            writer.AddProperty("type", m_TypeEnum.ToString().ToLowerInvariant());
             if (Perspective != null)
             {
                 writer.AddProperty("perspective");
