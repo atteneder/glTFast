@@ -18,18 +18,11 @@ namespace GLTFast.Tests.Export
         public IEnumerator ToStreamNotSelfContained()
         {
             var logger = new CollectingLogger();
-            var writer = new GltfWriter(
-                new ExportSettings
-                {
-                    Format = GltfFormat.Binary,
-                    ImageDestination = ImageDestination.SeparateFile
-                },
-                logger: logger
-            );
 
             yield return AsyncWrapper.WaitForTask(
-                writer.SaveToStreamAndDispose(new MemoryStream())
+                ToStreamNotSelfContained(logger)
             );
+
             LoggerTest.AssertLogger(
                 logger,
                 new[]
@@ -40,6 +33,34 @@ namespace GLTFast.Tests.Export
                         "Save to Stream currently only works for self-contained glTF-Binary"
                         )
                 });
+        }
+
+        /// <summary>
+        /// Write a non-self-contained glTF to stream is not supported. Previously this resulted in a
+        /// NullReferenceException when no logger was provided.
+        /// </summary>
+        /// <seealso href="https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/9"/>
+        /// <returns>Coroutine iterator</returns>
+        [UnityTest]
+        public IEnumerator ToStreamNotSelfContainedNoLogger()
+        {
+            yield return AsyncWrapper.WaitForTask(
+                ToStreamNotSelfContained(null)
+            );
+        }
+
+        static async Task ToStreamNotSelfContained(ICodeLogger logger)
+        {
+            var writer = new GltfWriter(
+                new ExportSettings
+                {
+                    Format = GltfFormat.Binary,
+                    ImageDestination = ImageDestination.SeparateFile
+                },
+                logger: logger
+            );
+
+            await writer.SaveToStreamAndDispose(new MemoryStream());
         }
 
         [UnityTest]
