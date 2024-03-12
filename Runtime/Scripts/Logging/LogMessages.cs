@@ -319,6 +319,7 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
             if (code == LogCode.None)
             {
                 var sb = new StringBuilder();
+                if (messages == null) return "";
                 foreach (var message in messages)
                 {
                     if (sb.Length > 0)

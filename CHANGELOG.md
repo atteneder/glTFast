@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Proper error handling when trying to load unsupported sparse texture coordinates.
 - Ensure that special chars in string values don't lead to invalid JSON.
 - Using invariant culture `ToLower`/`ToUpper` variants on all non-language-specific data.
+- Added missing `GetHashCode` implementation (removes compiler warning).
 
 ## [6.2.0] - 2024-01-29
 

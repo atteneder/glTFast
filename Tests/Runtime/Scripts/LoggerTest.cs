@@ -36,50 +36,50 @@ namespace GLTFast.Tests
         [Test]
         public static void TestLogItemEquals()
         {
-            Assert.AreEqual(
-                new LogItem(LogType.Error, LogCode.None),
-                new LogItem(LogType.Error, LogCode.None)
-                );
+            var a = new LogItem(LogType.Error, LogCode.None);
+            var b = new LogItem(LogType.Error, LogCode.None);
+            Assert.AreEqual(a, b);
+            Assert.AreEqual(a.GetHashCode(), b.GetHashCode());
 
-            Assert.AreEqual(
-                new LogItem(LogType.Log, LogCode.None, "MyMessage"),
-                new LogItem(LogType.Log, LogCode.None, "MyMessage")
-            );
+            a = new LogItem(LogType.Log, LogCode.None, "MyMessage");
+            b = new LogItem(LogType.Log, LogCode.None, "MyMessage");
+            Assert.AreEqual(a, b);
+            Assert.AreEqual(a.GetHashCode(), b.GetHashCode());
 
-            Assert.AreEqual(
-                new LogItem(LogType.Log, LogCode.None, "FirstMessage", "SecondMessage"),
-                new LogItem(LogType.Log, LogCode.None, "FirstMessage", "SecondMessage")
-            );
+            a = new LogItem(LogType.Log, LogCode.None, "FirstMessage", "SecondMessage");
+            b = new LogItem(LogType.Log, LogCode.None, "FirstMessage", "SecondMessage");
+            Assert.AreEqual(a, b);
+            Assert.AreEqual(a.GetHashCode(), b.GetHashCode());
 
-            Assert.AreNotEqual(
-                new LogItem(LogType.Error, LogCode.None),
-                new LogItem(LogType.Assert, LogCode.None)
-            );
+            a = new LogItem(LogType.Error, LogCode.None);
+            b = new LogItem(LogType.Assert, LogCode.None);
+            Assert.AreNotEqual(a, b);
+            Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
 
-            Assert.AreNotEqual(
-                new LogItem(LogType.Error, LogCode.None),
-                new LogItem(LogType.Error, LogCode.EmbedSlow)
-            );
+            a = new LogItem(LogType.Error, LogCode.None);
+            b = new LogItem(LogType.Error, LogCode.EmbedSlow);
+            Assert.AreNotEqual(a, b);
+            Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
 
-            Assert.AreNotEqual(
-                new LogItem(LogType.Log, LogCode.None, "MyMessage"),
-                new LogItem(LogType.Log, LogCode.None)
-            );
+            a = new LogItem(LogType.Log, LogCode.None, "MyMessage");
+            b = new LogItem(LogType.Log, LogCode.None);
+            Assert.AreNotEqual(a, b);
+            Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
 
-            Assert.AreNotEqual(
-                new LogItem(LogType.Log, LogCode.None, "MyMessage"),
-                new LogItem(LogType.Log, LogCode.None, "DifferentMessage")
-            );
+            a = new LogItem(LogType.Log, LogCode.None, "MyMessage");
+            b = new LogItem(LogType.Log, LogCode.None, "DifferentMessage");
+            Assert.AreNotEqual(a, b);
+            Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
 
-            Assert.AreNotEqual(
-                new LogItem(LogType.Log, LogCode.None, "FirstMessage", "SecondMessage"),
-                new LogItem(LogType.Log, LogCode.None, "FirstMessage", "DifferentSecondMessage")
-            );
+            a = new LogItem(LogType.Log, LogCode.None, "FirstMessage", "SecondMessage");
+            b = new LogItem(LogType.Log, LogCode.None, "FirstMessage", "DifferentSecondMessage");
+            Assert.AreNotEqual(a, b);
+            Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
 
-            Assert.AreNotEqual(
-                new LogItem(LogType.Log, LogCode.None, "FirstMessage", "SecondMessage"),
-                new LogItem(LogType.Log, LogCode.None, "FirstMessage")
-            );
+            a = new LogItem(LogType.Log, LogCode.None, "FirstMessage", "SecondMessage");
+            b = new LogItem(LogType.Log, LogCode.None, "FirstMessage");
+            Assert.AreNotEqual(a, b);
+            Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
         }
 
         internal static void AssertLogger(CollectingLogger logger, IEnumerable<LogCode> expectedLogCodes)
