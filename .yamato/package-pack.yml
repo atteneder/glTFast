@@ -3,9 +3,10 @@
 pack:
   name: Pack
   agent:
-    type: Unity::VM
-    image: package-ci/ubuntu-22.04:v4
-    flavor: b1.large
+{% assign agent = agents.ubuntu -%}
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
   source:
     skip_checkout: true
   commands:

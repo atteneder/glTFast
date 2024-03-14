@@ -1,22 +1,24 @@
 {% metadata_file .yamato/package.metafile -%}
 ---
+{% assign os = os_variables.unix -%}
+{% assign agent = agents.ubuntu-small -%}
 
 publish_dry_run:
   name: Dry Run Publish to Internal Registry
   agent:
-    type: Unity::VM
-    image: package-ci/ubuntu-22.04:v4
-    flavor: b1.small
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
   source:
     skip_checkout: true
   commands:
     - |
       mkdir Packages
       pushd Packages
-      git clone {{ platform.git_url }} --no-checkout gltfast
+      git clone {{ os.git_url }} --no-checkout gltfast
       cd gltfast
-      git fetch origin {{ platform.git_revision }}
-      git checkout -f --detach {{ platform.git_revision }}
+      git fetch origin {{ os.git_revision }}
+      git checkout -f --detach {{ os.git_revision }}
       popd
     - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
     - upm-ci package publish --package-path Packages/gltfast --dry-run
@@ -39,19 +41,20 @@ publish_dry_run:
 publish:
   name: Publish to Internal Registry
   agent:
-    type: Unity::VM
-    image: package-ci/ubuntu-22.04:v4
-    flavor: b1.small
+{% assign agent = agents.ubuntu-small -%}
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
   source:
     skip_checkout: true
   commands:
     - |
       mkdir Packages
       pushd Packages
-      git clone {{ platform.git_url }} --no-checkout gltfast
+      git clone {{ os.git_url }} --no-checkout gltfast
       cd gltfast
-      git fetch origin {{ platform.git_revision }}
-      git checkout -f --detach {{ platform.git_revision }}
+      git fetch origin {{ os.git_revision }}
+      git checkout -f --detach {{ os.git_revision }}
       popd
     - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
     - upm-ci package publish --package-path Packages/gltfast
