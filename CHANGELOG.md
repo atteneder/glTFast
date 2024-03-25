@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored test scripts folder layout.
 - (Export) Normal maps are exported in PNG format by default.
 - (Export) HDRP area lights are still exported as spot-lights, but their intensity is taken from `Light.intensity` (still incorrect, but more consistent).
+- Switched from asset-path-based to GUID-based shader loading (in the Editor 2021 and newer) in order to allow for a flexible folder layout without risking breaks/regressions should the layout change in the future.
+- Avoid expensive UnityEngine.Object null check when accessing cached default shaders.
 
 ## Fixed
 - Exception when required glTF shader is not included.
@@ -28,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Using invariant culture `ToLower`/`ToUpper` variants on all non-language-specific data.
 - Added missing `GetHashCode` implementation (removes compiler warning).
 - Compiler errors and warnings on newer HDRP versions (16.x/17.x)
+- URP clearcoat shader loading at runtime.
+- HDRP stack-lit shader loading at runtime.
 
 ## [6.2.0] - 2024-01-29
 

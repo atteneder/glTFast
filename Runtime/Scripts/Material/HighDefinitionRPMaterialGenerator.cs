@@ -4,6 +4,9 @@
 #if USING_HDRP
 
 using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Rendering;
 #if USING_HDRP_10_OR_NEWER
@@ -36,8 +39,12 @@ namespace GLTFast.Materials {
         static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
         static readonly int k_DoubleSidedConstantsPropId = Shader.PropertyToID("_DoubleSidedConstants");
 
+#if UNITY_EDITOR
+        /// <summary>GUID of the stack lit shader graph used for advanced PBR materials</summary>
+        public const string MetallicStackLitShaderGuid = "429ab83ee9ef05b4f8a76e58ea5d5ad4";
+#endif
         /// <summary>Name of the stack lit shader graph used for advanced PBR materials</summary>
-        public const string MetallicStackLitShader = "HDRP/glTF-pbrMetallicRoughnessStackLit";
+        public const string MetallicStackLitShader = "glTF-pbrMetallicRoughnessStackLit";
 
         static bool s_MetallicStackLitShaderQueried;
         static Shader s_MetallicStackLitShader;
@@ -133,7 +140,11 @@ namespace GLTFast.Materials {
             {
                 if (!s_MetallicStackLitShaderQueried)
                 {
+#if UNITY_EDITOR
+                    s_MetallicStackLitShader = LoadShaderByGuid(new GUID(MetallicStackLitShaderGuid));
+#else
                     s_MetallicStackLitShader = LoadShaderByName(MetallicStackLitShader);
+#endif
                     if (s_MetallicStackLitShader == null)
                     {
                         // Fallback to regular shader graph

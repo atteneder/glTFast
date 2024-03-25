@@ -6,6 +6,9 @@
 using System;
 
 using GLTFast.Schema;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -25,8 +28,12 @@ namespace GLTFast.Materials {
         static readonly int k_AlphaClipPropId = Shader.PropertyToID("_AlphaClip");
         static readonly int k_SurfacePropId = Shader.PropertyToID("_Surface");
 
+#if UNITY_EDITOR
+        /// <summary>Guid of the shader graph with clearcoat support</summary>
+        const string k_MetallicClearcoatShaderGuid = "c18c97ae1ce021b4980c5d19a54f0d3c";
+#endif
         /// <summary>Name of the shader graph with clearcoat support</summary>
-        public const string MetallicClearcoatShader = "URP/glTF-pbrMetallicRoughness-Clearcoat";
+        public const string MetallicClearcoatShader = "glTF-pbrMetallicRoughness-Clearcoat";
 
         static bool s_MetallicClearcoatShaderQueried;
         static Shader s_MetallicClearcoatShader;
@@ -37,7 +44,7 @@ namespace GLTFast.Materials {
         }
 
 #if USING_URP_12_OR_NEWER
-        protected override void SetDoubleSided(Schema.MaterialBase gltfMaterial, Material material) {
+        protected override void SetDoubleSided(MaterialBase gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
             material.SetFloat(CullProperty, (int)CullMode.Off);
         }
@@ -76,7 +83,11 @@ namespace GLTFast.Materials {
             {
                 if (!s_MetallicClearcoatShaderQueried)
                 {
+#if UNITY_EDITOR
+                    s_MetallicClearcoatShader = LoadShaderByGuid(new GUID(k_MetallicClearcoatShaderGuid));
+#else
                     s_MetallicClearcoatShader = LoadShaderByName(MetallicClearcoatShader);
+#endif
                     if (s_MetallicClearcoatShader == null)
                     {
                         // Fallback to regular shader graph
@@ -91,7 +102,7 @@ namespace GLTFast.Materials {
         }
 #endif
 
-        protected override ShaderMode? ApplyTransmissionShaderFeatures(Schema.MaterialBase gltfMaterial) {
+        protected override ShaderMode? ApplyTransmissionShaderFeatures(MaterialBase gltfMaterial) {
             if (!s_SupportsCameraOpaqueTexture) {
                 // Fall back to makeshift approximation via premultiply or blend
                 return base.ApplyTransmissionShaderFeatures(gltfMaterial);
