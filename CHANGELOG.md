@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 - Refactored test scripts folder layout.
 - (Export) Normal maps are exported in PNG format by default.
+- (Export) HDRP area lights are still exported as spot-lights, but their intensity is taken from `Light.intensity` (still incorrect, but more consistent).
 
 ## Fixed
 - Exception when required glTF shader is not included.
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ensure that special chars in string values don't lead to invalid JSON.
 - Using invariant culture `ToLower`/`ToUpper` variants on all non-language-specific data.
 - Added missing `GetHashCode` implementation (removes compiler warning).
+- Compiler errors and warnings on newer HDRP versions (16.x/17.x)
 
 ## [6.2.0] - 2024-01-29
 
