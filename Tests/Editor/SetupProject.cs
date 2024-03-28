@@ -1,18 +1,28 @@
 // SPDX-FileCopyrightText: 2024 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if USING_URP
+#define USING_SRP
+#endif
+
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
+#if USING_SRP
+using UnityEngine.Rendering;
+#endif
 
 namespace GLTFast.Editor.Tests
 {
     static class SetupProject
     {
+        const string k_RenderPipelineAssetsPath = "Packages/com.unity.cloud.gltfast/Tests/Runtime/RenderPipelineAssets/";
+
         static readonly Dictionary<string, ProjectSetup> k_ProjectSetups = new Dictionary<string, ProjectSetup>
         {
             ["default"] = new ProjectSetup(
@@ -79,6 +89,35 @@ namespace GLTFast.Editor.Tests
                     break;
                 }
             }
+        }
+
+        public static void SetRenderPipeline()
+        {
+            var args = Environment.GetCommandLineArgs();
+            foreach (var arg in args)
+            {
+                const string prefix = "SRP:";
+                if (arg.StartsWith(prefix))
+                {
+                    var subPath = arg.Substring(prefix.Length);
+                    var assetPath = $"{k_RenderPipelineAssetsPath}{subPath}.asset";
+#if USING_SRP
+                    var asset = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(assetPath);
+                    if (asset == null)
+                    {
+                        throw new InvalidDataException($"Could not find render pipeline asset at {subPath}.");
+                    }
+                    Debug.Log($"Set default render pipeline to {subPath}");
+                    GraphicsSettings.defaultRenderPipeline = asset;
+                    break;
+#else
+                    throw new InvalidOperationException(
+                        $"Could not set render pipeline asset ({subPath}): No SRP package installed");
+#endif
+                }
+            }
+
+
         }
     }
 

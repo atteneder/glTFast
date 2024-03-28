@@ -1,4 +1,6 @@
 test_setups:
+  # Project profile name
+  # see GLTFast.Editor.Tests.SetupProject.ApplySetup (Tests/Editor/SetupProject.cs) for details
   - project_setup: default
     # # Use to limit versions
     # editor_versions: [2020,2021,2022,2023.2,trunk]
@@ -11,20 +13,39 @@ test_setups:
         editor: trunk
       - platform: ubuntu
         editor: 2022
-    coverage: !!bool true
+    coverage_sets:
+      # default for coverage: windows + current LTS
+      - platform: win
+        editor: 2022
   - project_setup: minimalistic
     editor_versions: [2020,trunk]
     platforms: [win]
     pr_sets:
       - platform: win
         editor: trunk
+    coverage_sets:
+      # default for coverage: windows + current LTS
+      - platform: win
+        editor: 2022
   - project_setup: all_defines
+    render_pipeline: URP-Forward
     editor_versions: [2020,trunk]
     platforms: [win]
     pr_sets:
       - platform: win
         editor: trunk
-    coverage: !!bool true
+    coverage_sets:
+      # default for coverage: windows + current LTS
+      - platform: win
+        editor: 2022
+      # TODO: Move those to `urp` and `hdrp` test setup at some point
+      # For URP/shader graph test all versions
+      - platform: win
+        editor: 2021
+      - platform: win
+        editor: 2023
+      - platform: win
+        editor: trunk
 
 editor_versions:
   - 2020
@@ -35,16 +56,27 @@ editor_versions:
 
 platforms:
   win:
-    agent: win
+    test: win
+    build_and_run: win
+    platform: StandaloneWindows64
+    component: il2cpp
   mac:
-    agent: mac
+    test: mac
+    build_and_run: mac
+    platform: StandaloneOSX
+    component: il2cpp
   ubuntu:
-    agent: ubuntu
+    test: ubuntu
+    platform: StandaloneLinux64
+    component: il2cpp
+  android:
+    build: win
+    run: samsung
+    component: Android
 
 test_platforms:
   - name: win
     agent: win
-    coverage: !!bool true
   - name: mac
     agent: mac
   - name: ubuntu
@@ -94,6 +126,11 @@ agents:
     type: Unity::VM
     image: package-ci/ubuntu-22.04:v4
     flavor: b1.large
+  samsung:
+    os: win
+    type: Unity::mobile::samsung
+    image: package-ci/win10:v4
+    flavor: b1.large
   shield:
     os: win
     type: Unity::mobile::shield
@@ -140,14 +177,16 @@ os_variables:
     git_url: ${GIT_REPOSITORY_URL}
     git_revision: ${GIT_REVISION}
     tool_utr: "./utr"
+    bokken_host_ip: ${BOKKEN_HOST_IP}
   # Windows specific
   win:
     yamato_source_dir: "%YAMATO_SOURCE_DIR%"
     git_url: "%GIT_REPOSITORY_URL%"
     git_revision: "%GIT_REVISION%"
     tool_utr: "utr.bat"
+    bokken_host_ip: "%BOKKEN_HOST_IP%"
 
 editor_location:
-  win: "Unity.exe"
-  mac: "Unity.app/Contents/MacOS/Unity"
-  ubuntu: "Unity"
+  win: "\\.Editor\\Unity.exe"
+  mac: "/.Editor/Unity.app/Contents/MacOS/Unity"
+  ubuntu: "/.Editor/Unity"

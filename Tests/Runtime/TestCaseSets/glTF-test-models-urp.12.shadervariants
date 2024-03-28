@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: glTF-test-models-urp.12
+  m_Shaders:
+  - first: {fileID: -6465566751694194690, guid: c87047c884d9843f5b0f4cce282aa760,
+      type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: _ALPHATEST_ON
+        passType: 0
+      - keywords: _SURFACE_TYPE_TRANSPARENT
+        passType: 0
+      - keywords: 
+        passType: 8
+      - keywords: _ALPHATEST_ON
+        passType: 8
+      - keywords: 
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: b9d29dfa1474148e792ac720cbd45122,
+      type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _ADDITIONAL_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _ADDITIONAL_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+          _SHADOWS_SOFT
+        passType: 13

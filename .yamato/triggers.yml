@@ -10,8 +10,8 @@ pr_trigger:
   dependencies:
     - .yamato/code-format-check.yml#code_format_check
     - .yamato/package-test.yml#tests_pr
-    - .yamato/package-player-test.yml#player_test_pr
     - .yamato/project-test.yml#tests_pr
+    - .yamato/project-test.yml#build_and_run_pr
 
 tests_all_trigger:
   name: _Tests All
@@ -21,8 +21,8 @@ tests_all_trigger:
       pull_request.comment eq "all" 
   dependencies:
     - .yamato/package-test.yml#tests_all
-    - .yamato/package-player-test.yml#player_test_all
     - .yamato/project-test.yml#tests_all
+    - .yamato/project-test.yml#build_and_run_all
 
 tests_all_weekly:
   name: _Tests All [Weekly]
@@ -42,4 +42,4 @@ post_merge_trigger:
   triggers:
     expression: push.branch eq "develop"
   dependencies:
-    - .yamato/project-test.yml#tests_pr
+    - .yamato/project-test.yml#coverage_all
