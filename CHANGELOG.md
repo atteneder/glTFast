@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Runtime import tests.
 - Runtime export tests.
 - (Export) Added development-time checks for valid JSON string literals.
+- Added Apple Privacy Manifest file to `/Plugins` directory.
 
 ## Changed
 - Refactored test scripts folder layout.
