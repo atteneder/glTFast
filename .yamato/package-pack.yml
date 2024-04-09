@@ -1,0 +1,26 @@
+{% metadata_file .yamato/package.metafile -%}
+---
+pack:
+  name: Pack
+  agent:
+{% assign agent = agents.ubuntu -%}
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
+  source:
+    skip_checkout: true
+  commands:
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {% if platform.name == "win" %}"%GIT_REPOSITORY_URL%"{% else %}"$GIT_REPOSITORY_URL"{% endif %} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      git checkout -f --detach {% if platform.name == "win" %}"%GIT_REVISION%"{% else %}"$GIT_REVISION"{% endif %}
+      popd
+    - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
+    - upm-ci package pack --package-path Packages/gltfast
+  artifacts:
+    packages:
+      paths:
+        - "upm-ci~/packages/**/*"

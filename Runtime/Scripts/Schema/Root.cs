@@ -571,11 +571,11 @@ namespace GLTFast.Schema
             }
 
 #if GLTFAST_SAFE
-            if (accessors != null) {
-                for (var i = 0; i < accessors.Length; i++) {
+            if (Accessors != null) {
+                for (var i = 0; i < Accessors.Count; i++) {
                     var sparse = fakeRoot.accessors[i].sparse;
                     if (sparse?.indices == null || sparse.values == null) {
-                        accessors[i].sparse = null;
+                        Accessors[i].UnsetSparse();
                     }
                 }
             }

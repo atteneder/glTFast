@@ -1,0 +1,192 @@
+{% metadata_file .yamato/package.metafile -%}
+---
+{% assign job_project_path = generic_project_path -%}
+
+{% for test_setup in test_setups -%}
+{% if test_setup.editor_versions -%}
+  {% assign editor_versions = test_setup.editor_versions -%}
+{% endif -%}
+
+{% if test_setup.platforms -%}
+  {% assign platform_ids = test_setup.platforms -%}
+{% else -%}
+  {% assign platform_ids = '' -%}
+  {% for p in platforms -%}
+    {% assign platform_ids = platform_ids | append: p[0] | append: ','  -%}
+  {% endfor -%}
+  {% assign platform_ids = platform_ids | split: ','  -%}
+{% endif -%}
+
+{% for editor in editor_versions -%}
+{% for platform_id in platform_ids -%}
+{% assign platform = platforms[platform_id] -%}
+{% if platform_id == "win" -%}
+  {% assign os = os_variables.win -%}
+  {% assign is_windows = true -%}
+  {% assign editor_exe = os.yamato_source_dir | append: "\.Editor\" | append: editor_location.win -%}
+{% else -%}
+  {% assign os = os_variables.unix -%}
+  {% assign is_windows = false -%}
+  {% if platform_id == "mac" -%}
+    {% assign editor_exe = os.yamato_source_dir | append: "/.Editor/" | append: editor_location.mac -%}
+  {% else -%}
+    {% assign editor_exe = os.yamato_source_dir | append: "/.Editor/" | append: editor_location.ubuntu -%}
+  {% endif -%}    
+{% endif -%}
+
+{% assign is_pr_set = false -%}
+{% for pr_set in test_setup.pr_sets -%}
+  {% if pr_set.platform == platform_id and pr_set.editor == editor -%}
+    {% assign is_pr_set = true -%}
+    {% break -%}
+  {% endif -%}
+{% endfor -%}
+
+test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
+  name : Test {{ test_setup.project_setup }} with {{ editor }} on {{ platform_id }}
+  agent:
+{% assign agent = agents[platform.agent] -%}
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
+  source:
+    skip_checkout: true
+  commands:
+    # Clone package into sub-folder `Packages/gltf`
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {{ os.git_url }} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {{ os.git_revision }}
+      git checkout -f --detach {{ os.git_revision }}
+      popd
+
+    # Clone all test asset repositories into `Assets`
+    - mkdir Assets
+{% for asset_set in asset_sets -%}
+    - |
+      pushd Assets
+      git clone {{ asset_set.git_uri }} --no-checkout {{ asset_set.name }}
+      cd {{ asset_set.name }}
+      git fetch origin {{ asset_set.git_revision }}
+      git checkout -f --detach {{ asset_set.git_revision }}
+      popd
+{% endfor -%}
+
+    # Install unity-downloader-cli and unity-config
+{% if is_windows -%}
+    - |
+      where /q gsudo.exe && set CMD_ADMIN=gsudo.exe
+      %CMD_ADMIN% choco source add --priority 1 -n Unity -s {{ registry.artifactory }}/api/nuget/unity-choco-local
+      %CMD_ADMIN% choco install unity-config -y
+      %CMD_ADMIN% choco install unity-downloader-cli -y
+{% elsif platform.name == "mac" -%}
+    - brew tap --force-auto-update unity/unity git@github.cds.internal.unity3d.com:unity/homebrew-unity.git
+    - brew install unity-config
+{% endif -%}
+
+    # Install UnifiedTestRunner
+{% if is_windows -%}
+    - curl -s --show-error --retry 15 {{ registry.artifactory }}/unity-tools-local/utr-standalone/utr.bat --output {{ os.tool_utr }}
+{% else -%}
+    - curl -s --show-error --retry 15 {{ registry.artifactory }}/unity-tools-local/utr-standalone/utr --output {{ os.tool_utr }}
+    - chmod +x {{ os.tool_utr }}
+{% endif -%}
+
+    # Install Unity Editor with IL2CPP
+    - unity-downloader-cli -u {{ editor }} -c Editor -c il2cpp -w --fast
+
+    # Create test project
+    - |
+      unity-config project create {{ job_project_path }}
+      unity-config project add testable com.unity.cloud.gltfast
+      unity-config project add dependency com.unity.cloud.gltfast@file:./../../../Packages/gltfast
+      unity-config project add dependency {{ test_framework }} -p {{ job_project_path }}
+{% for dep in test_dependencies -%}
+      unity-config project add dependency {{ dep.id }}@{{ dep.version }} -p {{ job_project_path }}
+{% endfor -%}
+
+{% capture results_path -%}{{ os.yamato_source_dir }}/test-results~/com.unity.cloud.gltfast/{{ platform_id }}/{{ editor }}/{{ test_setup.project_setup }}{% endcapture -%}
+
+    # Apply project setup
+    - >
+      {{ editor_exe }}
+      -projectPath {{ job_project_path }}
+      -executeMethod GLTFast.Editor.Tests.SetupProject.ApplySetup glTFastSetup:{{ test_setup.project_setup }}
+      -upmNoDefaultPackages
+      -enablePackageManagerTraces
+      -batchmode
+      -quit
+      -logFile {{ results_path }}/UnityProjectSetup.log
+
+    # Run Tests
+    # TODO: upm-ci rocks UPM and other cache directories. Maybe we can speed things up this way as well.
+    - >
+{% if is_windows -%}
+      set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
+{% else -%}
+      export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
+{% endif -%}
+
+      {{ os.tool_utr }} 
+      --testproject={{ job_project_path }}
+      --editor-location=.Editor
+      --artifacts_path={{ results_path }}
+      --stdout-filter=minimal
+      --reruncount=2
+      --verbose
+      --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
+      --suite=editor
+      --suite=playmode
+{% if test_setup.coverage and is_pr_set -%}
+      --enable-code-coverage
+      --coverage-results-path={{ results_path }}
+      --coverage-options='generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,+Unity.Cloud.Gltfast*,-glTFast*Tests*;pathReplacePatterns:**/PackageCache/com.unity.cloud.gltfast@*/,;sourcePaths:{{ os.yamato_source_dir }}/Packages/gltfast'
+      --coverage-results-path={{ os.yamato_source_dir }}/test-results~/CoverageResults
+      --coverage-upload-options="hostUrl:https://codecov.unity3d.com;reportsDir:{{ os.yamato_source_dir }}/test-results~/CoverageResults;reports:*.xml;sourceDir:Packages/gltfast;repo:unity/com.unity.cloud.gltfast.src;changeset:{{ os.git_revision }};name:{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }};flags:{{ test_setup.project_setup }};verbose"
+{% endif -%}
+  artifacts:
+    logs:
+      paths:
+        - "test-results~/**/*"
+    Project:
+      paths:
+        - "{{ job_project_path }}/Packages/*.json"
+        - "{{ job_project_path }}/ProjectSettings/*.asset"
+
+{% endfor -%}
+{% endfor -%}
+
+tests_{{ test_setup.project_setup }}_all:
+  name: Test all {{ test_setup.project_setup }}
+  dependencies:
+{% for editor in editor_versions -%}
+{% for platform_id in platform_ids -%}
+    - .yamato/project-test.yml#test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}
+{% endfor -%}
+{% endfor -%}
+
+tests_{{ test_setup.project_setup }}_pr:
+  name: Test PR subset {{ test_setup.project_setup }}
+  dependencies:
+{% for pr_set in test_setup.pr_sets -%}
+    - .yamato/project-test.yml#test_{{ test_setup.project_setup }}_{{ pr_set.platform }}_{{ pr_set.editor }}
+{% endfor -%}
+
+{% endfor -%}
+
+
+tests_all:
+  name: Test all
+  dependencies:
+{% for test_setup in test_setups -%}
+    - .yamato/project-test.yml#tests_{{ test_setup.project_setup }}_all
+{% endfor -%}
+
+tests_pr:
+  name: Test PR subsets
+  dependencies:
+{% for test_setup in test_setups -%}
+    - .yamato/project-test.yml#tests_{{ test_setup.project_setup }}_pr
+{% endfor -%}

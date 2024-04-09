@@ -27,9 +27,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
-#if USING_HDRP
-using UnityEngine.Rendering.HighDefinition;
-#endif
 
 using Buffer = GLTFast.Schema.Buffer;
 using Camera = GLTFast.Schema.Camera;
@@ -45,9 +42,6 @@ using System.Text;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
-[assembly: InternalsVisibleTo("glTFast.Editor")]
-[assembly: InternalsVisibleTo("glTF-test-framework.Tests")]
 
 namespace GLTFast.Export
 {
@@ -232,122 +226,7 @@ namespace GLTFast.Export
                 return false;
             }
             CertifyNotDisposed();
-            var light = new LightPunctual
-            {
-                name = uLight.name
-            };
-
-            var lightType = uLight.type;
-
-            var renderPipeline = RenderPipelineUtils.RenderPipeline;
-#if USING_HDRP
-            HDAdditionalLightData lightHd = null;
-            if (renderPipeline == RenderPipeline.HighDefinition) {
-                lightHd = uLight.gameObject.GetComponent<HDAdditionalLightData>();
-#if !UNITY_2023_2_OR_NEWER
-                // For newer HDRP versions, the generic `uLight.type` works just fine
-                if (lightHd!=null && lightHd.type == HDLightType.Area) {
-                    lightType = LightType.Rectangle;
-                }
-#endif
-            }
-#endif
-
-            switch (lightType)
-            {
-                case LightType.Spot:
-                    light.SetLightType(LightPunctual.Type.Spot);
-                    light.spot = new SpotLight
-                    {
-                        outerConeAngle = uLight.spotAngle * Mathf.Deg2Rad * .5f,
-                        innerConeAngle = uLight.innerSpotAngle * Mathf.Deg2Rad * .5f
-                    };
-                    break;
-                case LightType.Directional:
-                    light.SetLightType(LightPunctual.Type.Directional);
-                    break;
-                case LightType.Point:
-                    light.SetLightType(LightPunctual.Type.Point);
-                    break;
-                case LightType.Rectangle:
-                case LightType.Disc:
-                default:
-                    light.SetLightType(LightPunctual.Type.Spot);
-                    light.spot = new SpotLight
-                    {
-                        outerConeAngle = 45 * Mathf.Deg2Rad * .5f,
-                        innerConeAngle = 35 * Mathf.Deg2Rad * .5f
-                    };
-                    break;
-            }
-
-            light.LightColor = uLight.color.linear;
-            light.range = uLight.range;
-
-            switch (renderPipeline)
-            {
-                case RenderPipeline.BuiltIn:
-                    light.intensity = uLight.intensity * Mathf.PI;
-                    break;
-                case RenderPipeline.Universal:
-                    light.intensity = uLight.intensity;
-                    break;
-#if USING_HDRP
-                case RenderPipeline.HighDefinition:
-
-                    float GetIntensity(LightUnit unit) {
-                        if (lightHd.lightUnit == unit) {
-                            return lightHd.intensity;
-                        }
-                        // Workaround to get intensity in candela
-                        var oldUnit = lightHd.lightUnit;
-                        lightHd.lightUnit = unit;
-                        var result = lightHd.intensity;
-                        lightHd.lightUnit = oldUnit;
-                        return result;
-                    }
-
-                    if (lightHd == null) {
-                        light.intensity = uLight.intensity;
-                    }
-                    else {
-#if !UNITY_2023_2_OR_NEWER
-                        switch (lightHd.type) {
-                            case HDLightType.Spot:
-                            case HDLightType.Point:
-                                light.intensity = GetIntensity(LightUnit.Candela);
-                                break;
-                            case HDLightType.Directional:
-                                light.intensity = GetIntensity(LightUnit.Lux);
-                                break;
-                            case HDLightType.Area:
-                            default:
-                                light.intensity = lightHd.intensity;
-                                break;
-                        }
-#else
-                        switch (lightType) {
-                            case LightType.Spot:
-                            case LightType.Point:
-                                light.intensity = GetIntensity(LightUnit.Candela);
-                                break;
-                            case LightType.Directional:
-                                light.intensity = GetIntensity(LightUnit.Lux);
-                                break;
-                            case LightType.Rectangle:
-                            default:
-                                light.intensity = lightHd.intensity;
-                                break;
-                        }
-#endif
-                    }
-                    break;
-#endif
-                default:
-                    light.intensity = uLight.intensity;
-                    break;
-            }
-
+            var light = KhrLightsPunctual.ConvertToLight(uLight);
             light.intensity *= m_Settings.LightIntensityFactor;
 
             if (m_Lights == null)
@@ -578,7 +457,7 @@ namespace GLTFast.Export
 
             if (m_Settings.Format != GltfFormat.Binary || GetFinalImageDestination() == ImageDestination.SeparateFile)
             {
-                m_Logger.Error(LogCode.None, "Save to Stream currently only works for self-contained glTF-Binary");
+                m_Logger?.Error(LogCode.None, "Save to Stream currently only works for self-contained glTF-Binary");
                 return false;
             }
 
@@ -923,7 +802,7 @@ namespace GLTFast.Export
                 }
                 if ((m_Settings.Compression & Compression.Uncompressed) != 0)
                 {
-                    m_Logger.Warning(LogCode.UncompressedFallbackNotSupported);
+                    m_Logger?.Warning(LogCode.UncompressedFallbackNotSupported);
                 }
 #else
                 m_Logger?.Error(LogCode.PackageMissing, "Draco For Unity", ExtensionName.DracoMeshCompression);

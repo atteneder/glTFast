@@ -163,5 +163,65 @@ namespace GLTFast.Logging
         {
             return LogMessages.GetFullMessage(Code, Messages);
         }
+
+        public override int GetHashCode()
+        {
+#if NET_STANDARD
+            var hash = new HashCode();
+            hash.Add(Type);
+            hash.Add(Code);
+            if (Messages != null) {
+                foreach (var id in Messages) {
+                    hash.Add(id);
+                }
+            }
+            return hash.ToHashCode();
+#else
+            var hash = 17;
+            hash = hash * 31 + Type.GetHashCode();
+            hash = hash * 31 + Code.GetHashCode();
+
+            if (Messages != null)
+            {
+                hash = hash * 31 + Messages.Length;
+                foreach (var message in Messages)
+                {
+                    hash = hash * 31 + message.GetHashCode();
+                }
+            }
+            return hash;
+#endif
+        }
+
+        public override bool Equals(object obj)
+        {
+            //Check for null and compare run-time types.
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+            return Equals((LogItem)obj);
+        }
+
+        bool Equals(LogItem other)
+        {
+            if (Type != other.Type || Code != other.Code) return false;
+            if (Messages == null ^ other.Messages == null) return false;
+            return Messages == null || AreEqual(Messages, other.Messages);
+        }
+
+        static bool AreEqual(IReadOnlyList<string> a, IReadOnlyList<string> b)
+        {
+            if (a.Count == b.Count)
+            {
+                for (var i = 0; i < a.Count; i++)
+                {
+                    if (!a[i].Equals(b[i])) return false;
+                }
+
+                return true;
+            }
+            return false;
+        }
     }
 }

@@ -1,0 +1,187 @@
+{% metadata_file .yamato/package.metafile -%}
+---
+{% for editor in player_test_editors -%}
+{% for platform in player_test_platforms -%}
+{% if platform.build -%}
+{% assign agent = agents[platform.build] -%}
+{% if agent.os == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
+build_{{ platform.name }}_{{ editor.version }}:
+  name : Build {{ editor.version }} {{ platform.name }} Player
+  agent:
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
+  source:
+    skip_checkout: true
+  commands:
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {{ os.git_url }} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {{ os.git_revision }}
+      git checkout -f --detach {{ os.git_revision }}
+      popd
+
+    - mkdir Assets
+{% for asset_set in asset_sets -%}
+    - |
+      pushd Assets
+      git clone {{ asset_set.git_uri }} --no-checkout {{ asset_set.name }}
+      cd {{ asset_set.name }}
+      git fetch origin {{ asset_set.git_revision }}
+      git checkout -f --detach {{ asset_set.git_revision }}
+      popd
+{% endfor -%}
+
+    - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
+    - |
+{% if platform.windows_host -%}
+      set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
+{% else -%}
+      export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
+{% endif -%}
+      upm-ci package test -u {{ editor.version }} --platform {{ platform.id }} {% if platform.upm_ci_params %}{{ platform.upm_ci_params }}{% endif %} --package-path Packages/gltfast --extra-create-project-arg=-upmNoDefaultPackages --player-build-path upm-ci~/player/{{ platform.id }} --build-only
+  artifacts:
+    logs:
+      paths:
+        - "**/*.log"
+    player:
+      paths:
+        - "upm-ci~/player/{{ platform.id }}/**"
+    test-results:
+      paths:
+        - "**/test-results/**"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% endif -%}
+
+{% if platform.run -%}
+{% assign agent = agents[platform.run] -%}
+{% if agent.os == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
+run_{{ platform.name }}_{{ editor.version }}:
+  name : Run {{ editor.version }} {{ platform.name }} Player Tests
+  agent:
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
+  source:
+    skip_checkout: true
+  commands:
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {{ os.git_url }} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {{ os.git_revision }}
+      git checkout -f --detach {{ os.git_revision }}
+      popd
+
+    - mkdir Assets
+{% for asset_set in asset_sets -%}
+    - |
+      pushd Assets
+      git clone {{ asset_set.git_uri }} --no-checkout {{ asset_set.name }}
+      cd {{ asset_set.name }}
+      git fetch origin {{ asset_set.git_revision }}
+      git checkout -f --detach {{ asset_set.git_revision }}
+      popd
+{% endfor -%}
+    - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
+    - |
+{% if platform.name == "win" -%}
+      set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
+{% else -%}
+      export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
+{% endif -%}
+      upm-ci package test -u {{ editor.version }} --platform {{ platform.id }} --player-build-path upm-ci~/player/{{ platform.id }} --package-path Packages/gltfast --extra-create-project-arg=-upmNoDefaultPackages
+  artifacts:
+    logs:
+      paths:
+        - "**/*.log"
+    test-results:
+      paths:
+        - "**/test-results/**"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+    - .yamato/package-player-test.yml#build_{{ platform.name }}_{{ editor.version }}
+{% endif -%}
+
+{% if platform.build_and_run -%}
+{% assign agent = agents[platform.build_and_run] -%}
+{% if agent.os == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
+build_and_run_{{ platform.name }}_{{ editor.version }}:
+  name : Build and run {{ editor.version }} {{ platform.name }} Player Tests
+  agent:
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
+  source:
+    skip_checkout: true
+  commands:
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {{ os.git_url }} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {{ os.git_revision }}
+      git checkout -f --detach {{ os.git_revision }}
+      popd
+
+    - mkdir Assets
+{% for asset_set in asset_sets -%}
+    - |
+      pushd Assets
+      git clone {{ asset_set.git_uri }} --no-checkout {{ asset_set.name }}
+      cd {{ asset_set.name }}
+      git fetch origin {{ asset_set.git_revision }}
+      git checkout -f --detach {{ asset_set.git_revision }}
+      popd
+{% endfor -%}
+
+    - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
+    - |
+{% if platform.name == "win" -%}
+      set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
+{% else -%}
+      export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
+{% endif -%}
+      upm-ci package test -u {{ editor.version }} --platform {{ platform.id }} --package-path Packages/gltfast --extra-create-project-arg=-upmNoDefaultPackages
+  artifacts:
+    logs:
+      paths:
+        - "**/*.log"
+    test-results:
+      paths:
+        - "**/test-results/**"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% endif -%}
+{% endfor -%}
+{% endfor -%}
+
+player_test_all:
+  name: _Player Tests All
+  dependencies:
+{% for editor in player_test_editors -%}
+{% for platform in player_test_platforms -%}
+{% if platform.run -%}
+    - .yamato/package-player-test.yml#run_{{ platform.name }}_{{ editor.version }}
+{% elsif platform.build_and_run -%}
+    - .yamato/package-player-test.yml#build_and_run_{{ platform.name }}_{{ editor.version }}
+{% endif -%}
+{% endfor -%}
+{% endfor -%}
+
+player_test_pr:
+  name: _Player Test subset for PRs
+  dependencies:
+{% for platform in player_test_platforms -%}
+{% assign editor_index = forloop.index0 | modulo: player_test_editors.size -%}
+{% assign editor = player_test_editors[editor_index] -%}
+{% if platform.run -%}
+    - .yamato/package-player-test.yml#run_{{ platform.name }}_{{ editor.version }}
+{% elsif platform.build_and_run -%}
+    - .yamato/package-player-test.yml#build_and_run_{{ platform.name }}_{{ editor.version }}
+{% endif -%}
+{% endfor -%}

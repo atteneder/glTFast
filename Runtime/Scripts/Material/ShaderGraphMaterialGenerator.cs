@@ -70,6 +70,15 @@ namespace GLTFast.Materials {
         // ReSharper disable MemberCanBePrivate.Global
         // ReSharper disable MemberCanBeProtected.Global
 
+#if UNITY_EDITOR
+        /// <summary>GUID of the shader graph used for PBR metallic/roughness materials</summary>
+        const string k_MetallicShaderGuid = "b9d29dfa1474148e792ac720cbd45122";
+        /// <summary>GUID of the shader graph used for unlit materials</summary>
+        const string k_UnlitShaderGuid = "c87047c884d9843f5b0f4cce282aa760";
+        /// <summary>GUID of the shader graph used for PBR specular/glossiness materials</summary>
+        const string k_SpecularShaderGuid = "9a07dad0f3c4e43ff8312e3b5fa42300";
+#endif
+
         /// <summary>Name of the shader graph used for PBR metallic/roughness materials</summary>
         public const string MetallicShader = "glTF-pbrMetallicRoughness";
         /// <summary>Name of the shader graph used for unlit materials</summary>
@@ -94,9 +103,9 @@ namespace GLTFast.Materials {
 #else
         const string k_ShaderPathPrefix = "Packages/" + GltfGlobals.GltfPackageName + "/Runtime/Shader/Legacy/";
 #endif
-#else
-        const string k_ShaderGraphsPrefix = "Shader Graphs/";
 #endif
+
+        const string k_ShaderGraphsPrefix = "Shader Graphs/";
 
         const string k_OcclusionKeyword = "_OCCLUSION";
         const string k_EmissiveKeyword = "_EMISSIVE";
@@ -189,6 +198,10 @@ namespace GLTFast.Materials {
         static Shader s_MetallicShader;
         static Shader s_SpecularShader;
         static Shader s_UnlitShader;
+
+        static bool s_MetallicShaderQueried;
+        static bool s_SpecularShaderQueried;
+        static bool s_UnlitShaderQueried;
 #endif
 
         /// <inheritdoc />
@@ -197,7 +210,10 @@ namespace GLTFast.Materials {
                 Logger?.Warning(LogCode.TopologyPointsMaterialUnsupported);
             }
             var defaultMaterial = GetMetallicMaterial(MetallicShaderFeatures.Default);
-            defaultMaterial.name = DefaultMaterialName;
+            if (defaultMaterial != null)
+            {
+                defaultMaterial.name = DefaultMaterialName;
+            }
             return defaultMaterial;
         }
 
@@ -497,8 +513,13 @@ namespace GLTFast.Materials {
         protected virtual Shader GetMetallicShader(MetallicShaderFeatures features)
         {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
-            if (s_MetallicShader == null) {
+            if (!s_MetallicShaderQueried) {
+#if UNITY_EDITOR
+                s_MetallicShader = LoadShaderByGuid(new GUID(k_MetallicShaderGuid));
+#else
                 s_MetallicShader = LoadShaderByName(MetallicShader);
+#endif
+                s_MetallicShaderQueried = true;
             }
             return s_MetallicShader;
 #else
@@ -513,8 +534,13 @@ namespace GLTFast.Materials {
         // ReSharper disable once UnusedParameter.Local
         Shader GetUnlitShader(MaterialBase gltfMaterial) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
-            if (s_UnlitShader == null) {
+            if (!s_UnlitShaderQueried) {
+#if UNITY_EDITOR
+                s_UnlitShader = LoadShaderByGuid(new GUID(k_UnlitShaderGuid));
+#else
                 s_UnlitShader = LoadShaderByName(UnlitShader);
+#endif
+                s_UnlitShaderQueried = true;
             }
             return s_UnlitShader;
 #else
@@ -531,8 +557,13 @@ namespace GLTFast.Materials {
         // ReSharper disable once UnusedParameter.Local
         Shader GetSpecularShader(SpecularShaderFeatures features) {
 #if UNITY_SHADER_GRAPH_12_OR_NEWER
-            if (s_SpecularShader == null) {
+            if (!s_SpecularShaderQueried) {
+#if UNITY_EDITOR
+                s_SpecularShader = LoadShaderByGuid(new GUID(k_SpecularShaderGuid));
+#else
                 s_SpecularShader = LoadShaderByName(SpecularShader);
+#endif
+                s_SpecularShaderQueried = true;
             }
             return s_SpecularShader;
 #else
@@ -543,6 +574,13 @@ namespace GLTFast.Materials {
             return shader;
 #endif
         }
+
+#if UNITY_EDITOR
+        protected static Shader LoadShaderByGuid(GUID guid)
+        {
+            return AssetDatabase.LoadAssetAtPath<Shader>(AssetDatabase.GUIDToAssetPath(guid));
+        }
+#endif
 
         protected Shader LoadShaderByName(string shaderName) {
 #if UNITY_EDITOR

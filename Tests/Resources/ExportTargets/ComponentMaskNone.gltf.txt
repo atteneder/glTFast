@@ -1,0 +1,1 @@
+{"asset":{"version":"2.0","generator":"Unity 2021.3.13f1 glTFast 5.0.0-exp.1"},"nodes":[{"name":"Mesh"},{"name":"Light","translation":[-1,0,0]},{"name":"Camera","translation":[-0.5,0,-3]},{"name":"Root","children":[0,1,2]}],"materials":[{"name":"Default-Material","pbrMetallicRoughness":{"metallicFactor":0,"roughnessFactor":0.5}}],"scene":0,"scenes":[{"nodes":[3]}]}

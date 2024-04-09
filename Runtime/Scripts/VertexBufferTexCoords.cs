@@ -54,7 +54,9 @@ namespace GLTFast
                 buffers.GetAccessor(accIndex, out var uvAcc, out var data, out var byteStride);
                 if (uvAcc.IsSparse)
                 {
-                    m_Logger.Error(LogCode.SparseAccessor, "UVs");
+                    m_Logger?.Error(LogCode.SparseAccessor, "UVs");
+                    Profiler.EndSample();
+                    return false;
                 }
                 var h = GetUvsJob(
                     data,

@@ -5,6 +5,7 @@ using System;
 using UnityEngine;
 
 #if USING_HDRP
+using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 #endif
 
@@ -44,6 +45,7 @@ namespace GLTFast
                     throw new ArgumentOutOfRangeException();
             }
 
+            lightDestination.useColorTemperature = false;
             lightDestination.color = lightSource.LightColor.gamma;
 
             LightAssignIntensity(lightDestination, lightSource, lightIntensityFactor);
@@ -114,14 +116,19 @@ namespace GLTFast
                     break;
 #if USING_HDRP
                 case RenderPipeline.HighDefinition:
+                    var lightUnit = lightSource.GetLightType() == LightPunctual.Type.Directional
+                        ? LightUnit.Lux
+                        : LightUnit.Candela;
+
+#if USING_HDRP_17_OR_NEWER
+                    lightDestination.gameObject.AddComponent<HDAdditionalLightData>();
+                    lightDestination.lightUnit = lightUnit;
+                    lightDestination.intensity = lightSource.intensity;
+#else
                     var lightHd = lightDestination.gameObject.AddComponent<HDAdditionalLightData>();
-                    if (lightSource.GetLightType() == LightPunctual.Type.Directional) {
-                        lightHd.lightUnit = LightUnit.Lux;
-                    }
-                    else {
-                        lightHd.lightUnit = LightUnit.Candela;
-                    }
+                    lightHd.lightUnit = lightUnit;
                     lightHd.intensity = lightSource.intensity;
+#endif
                     break;
 #endif
                 default:
@@ -144,10 +151,14 @@ namespace GLTFast
                     break;
 #if USING_HDRP
                 case RenderPipeline.HighDefinition:
+#if USING_HDRP_17_OR_NEWER
+                    lightDestination.intensity = lightSource.intensity;
+#else
                     if (lightSource.gameObject.TryGetComponent(out HDAdditionalLightData lightHd))
                         lightDestination.intensity = lightHd.intensity;
                     else
                         lightDestination.intensity = 1;
+#endif
                     break;
 #endif
                 default:

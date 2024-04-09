@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59748363cc8e485aa56e62947048bff8, type: 3}
+  m_Name: glTF-test-models
+  m_EditorClassIdentifier: 
+  assetsRelativePath: glTF-test-models
+  assetsAbsolutePath: 
+  m_TestCases:
+  - relativeUri: ColorSpace/ColorSpace.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: EightTexcoords/8-texcoords.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 34000000
+  - relativeUri: EmbedBufferInvalid/EmbedBufferInvalid.gltf
+    expectLoadFail: 1
+    expectInstantiationFail: 0
+    expectedLogCodes: 0f000000
+  - relativeUri: Empty/Empty.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: ExtrasData/ExtrasData.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Lights/LightsDirectional.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Lights/LightsPoint.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Lights/LightsSpot.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: NoScene/NoScene.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: OnlyAccessors/OnlyAccessors.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: OnlyTextures/OnlyTextures.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: PrimitiveModes/PrimitiveModes.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: RelativeUri/SubFolder/RelativeUri.glb
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: RelativeUri/SubFolder/RelativeUri.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: RootNodeCount/AllScenes.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: RootNodeCount/AllScenesAnimated.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: RootNodeCount/SingleNode.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: RootNodeCount/SingleNodeAnimated.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: RootNodeCount/TwoNodes.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: RootNodeCount/TwoNodesAnimated.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: UnknownExtensions/UnknownExtensions.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: UnlitAlphaModes/UnlitAlphaModes.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 

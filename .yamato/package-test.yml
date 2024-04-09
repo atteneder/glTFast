@@ -1,0 +1,145 @@
+{% metadata_file .yamato/package.metafile -%}
+---
+
+{% for editor in editor_versions -%}
+{% for platform in test_platforms -%}
+{% if platform.name == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
+test_{{ platform.name }}_{{ editor }}:
+  name : Test {{ editor }} on {{ platform.name }}
+  agent:
+{% assign agent = agents[platform.agent] -%}
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
+  source:
+    skip_checkout: true
+  variables:
+    UPMCI_PKG: "upm-ci-utils@stable"
+  commands:
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {{ os.git_url }} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {{ os.git_revision }}
+      git checkout -f --detach {{ os.git_revision }}
+      popd
+
+    - mkdir Assets
+{% for asset_set in asset_sets -%}
+    - |
+      pushd Assets
+      git clone {{ asset_set.git_uri }} --no-checkout {{ asset_set.name }}
+      cd {{ asset_set.name }}
+      git fetch origin {{ asset_set.git_revision }}
+      git checkout -f --detach {{ asset_set.git_revision }}
+      popd
+{% endfor -%}
+
+    - npm install {% if platform.name == "win" %}"%UPMCI_PKG%"{% else %}"$UPMCI_PKG"{% endif %} -g --registry {{ registry.npm }}
+    - |
+{% if platform.name == "win" -%}
+      set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
+{% else -%}
+      export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
+{% endif -%}
+      upm-ci package test -u {{ editor }} --package-path Packages/gltfast --type package-tests --extra-create-project-arg=-upmNoDefaultPackages
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+        - "upm-ci~/upm-ci.log"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+
+{% endfor -%}
+{% endfor -%}
+
+# Validate the package on each editor version and each platform
+# Validation only occurs in editmode.
+{% for editor in editor_versions -%}
+{% for platform in test_platforms -%}
+{% if platform.name == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
+validate_{{ platform.name }}_{{ editor }}:
+  name : Validate {{ editor }} on {{ platform.name }}
+  agent:
+{% assign agent = agents[platform.agent] -%}
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
+  source:
+    skip_checkout: true
+  variables:
+    UPMCI_PKG: "upm-ci-utils@stable"
+  commands:
+    - |
+      mkdir Packages
+      pushd Packages
+      git clone {{ os.git_url }} --no-checkout gltfast
+      cd gltfast
+      git fetch origin {{ os.git_revision }}
+      git checkout -f --detach {{ os.git_revision }}
+      popd
+
+    - mkdir Assets
+{% for asset_set in asset_sets -%}
+    - |
+      pushd Assets
+      git clone {{ asset_set.git_uri }} --no-checkout {{ asset_set.name }}
+      cd {{ asset_set.name }}
+      git fetch origin {{ asset_set.git_revision }}
+      git checkout -f --detach {{ asset_set.git_revision }}
+      popd
+{% endfor -%}
+
+    - npm install {% if platform.name == "win" %}"%UPMCI_PKG%"{% else %}"$UPMCI_PKG"{% endif %} -g --registry {{ registry.npm }}
+    - |
+{% if platform.name == "win" -%}
+      set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
+{% else -%}
+      export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
+{% endif -%}
+      upm-ci package test -u {{ editor }} --package-path Packages/gltfast --type vetting-tests --platform editmode --extra-create-project-arg=-upmNoDefaultPackages
+  artifacts:
+    logs:
+      paths:
+        - "upm-ci~/test-results/**/*"
+        - "upm-ci~/upm-ci.log"
+  dependencies:
+    - .yamato/package-pack.yml#pack
+{% endfor -%}
+{% endfor -%}
+
+
+tests_all:
+  name: _Test All
+  dependencies:
+{% for editor in editor_versions -%}
+{% for platform in test_platforms -%}
+    - .yamato/package-test.yml#test_{{platform.name}}_{{editor}}
+    - .yamato/package-test.yml#validate_{{platform.name}}_{{editor}}
+{% endfor -%}
+{% endfor -%}
+
+tests_pr:
+  name: _Test subset for PRs
+  dependencies:
+{% for editor in editor_versions limit: 1 -%}
+{% for platform in test_platforms limit: 1 -%}
+    # First(oldest) editor, first(most important) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{editor}}
+    - .yamato/package-test.yml#validate_{{platform.name}}_{{editor}}
+{% endfor -%}
+{% endfor -%}
+{% for platform in test_platforms limit: 1 offset: continue -%}
+    # Newest editor, next(second) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{editor_versions[-1]}}
+    - .yamato/package-test.yml#validate_{{platform.name}}_{{editor_versions[-1]}}
+{% endfor -%}
+{% for editor in editor_versions limit: 1 offset: continue -%}
+{% for platform in test_platforms limit: 1 offset: continue -%}
+    # Next(second) editor, next(third) platform
+    - .yamato/package-test.yml#test_{{platform.name}}_{{editor}}
+    - .yamato/package-test.yml#validate_{{platform.name}}_{{editor}}
+{% endfor -%}
+{% endfor -%}

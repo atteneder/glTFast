@@ -285,7 +285,7 @@ namespace GLTFast.Schema
 #pragma warning restore CS0618 // Type or member is obsolete
             if (m_AlphaModeEnum.HasValue && m_AlphaModeEnum.Value != AlphaMode.Opaque)
             {
-                writer.AddProperty("alphaMode", m_AlphaModeEnum.Value.ToString().ToUpper());
+                writer.AddProperty("alphaMode", m_AlphaModeEnum.Value.ToString().ToUpperInvariant());
             }
             if (math.abs(alphaCutoff - .5f) > Constants.epsilon)
             {

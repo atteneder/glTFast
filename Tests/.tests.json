@@ -1,0 +1,8 @@
+{
+    "createSeparatePackage": true,
+    "displayName": "Unity glTFast Tests",
+    "dependencies": {
+        "com.unity.modules.unitywebrequesttexture": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.1"
+    }
+}

@@ -115,7 +115,7 @@ namespace GLTFast.Schema
         {
             if (targetNames != null)
             {
-                writer.AddArrayProperty("targetNames", targetNames);
+                writer.AddArrayPropertySafe("targetNames", targetNames);
             }
         }
     }

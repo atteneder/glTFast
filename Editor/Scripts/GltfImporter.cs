@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using GLTFast.Logging;
 using GLTFast.Utils;
 using UnityEditor;
@@ -32,6 +33,8 @@ using UnityEditor.Experimental.AssetImporters;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
+
+[assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
 
 namespace GLTFast.Editor
 {
@@ -59,7 +62,7 @@ namespace GLTFast.Editor
         GltfAssetDependency[] assetDependencies;
 
         [SerializeField]
-        LogItem[] reportItems;
+        internal LogItem[] reportItems;
         // ReSharper restore NotAccessedField.Local
 
         GltfImport m_Gltf;

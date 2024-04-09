@@ -1,0 +1,13 @@
+{% metadata_file .yamato/package.metafile -%}
+---
+code_format_check:
+  name : Code Format check
+  agent:
+{% assign agent = agents.ubuntu-small -%}
+    type: {{ agent.type }}
+    image: {{ agent.image }}
+    flavor: {{ agent.flavor}}
+  commands:
+    - git clone --depth 1 --branch stable https://github.cds.internal.unity3d.com/unity/unity-meta.git
+    - mv unity-meta ~
+    - perl ~/unity-meta/Tools/Format/format.pl --showfiles --dry-run .

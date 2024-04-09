@@ -5,6 +5,7 @@
         "glTFast",
         "Unity.Mathematics",
         "Unity.Burst",
+        "Unity.RenderPipelines.Core.Runtime",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime",
         "Draco.Encode"
@@ -17,6 +18,11 @@
     "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.core",
+            "expression": "17",
+            "define": "RENDER_PIPELINES_CORE_17_OR_NEWER"
+        },
         {
             "name": "com.unity.render-pipelines.universal",
             "expression": "7.3.1",

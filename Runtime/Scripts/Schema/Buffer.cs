@@ -26,7 +26,7 @@ namespace GLTFast.Schema
             writer.AddObject();
             if (!string.IsNullOrEmpty(uri))
             {
-                writer.AddProperty("uri", uri);
+                writer.AddPropertySafe("uri", uri);
             }
             writer.AddProperty("byteLength", byteLength);
             writer.Close();

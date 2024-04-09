@@ -39,11 +39,11 @@ namespace GLTFast.Schema
             }
             if (!string.IsNullOrEmpty(generator))
             {
-                writer.AddProperty("generator", generator);
+                writer.AddPropertySafe("generator", generator);
             }
             if (!string.IsNullOrEmpty(copyright))
             {
-                writer.AddProperty("copyright", copyright);
+                writer.AddPropertySafe("copyright", copyright);
             }
             if (!string.IsNullOrEmpty(minVersion))
             {

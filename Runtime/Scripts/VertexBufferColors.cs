@@ -47,7 +47,7 @@ namespace GLTFast
             buffers.GetAccessor(colorAccessorIndex, out var colorAcc, out var data, out var byteStride);
             if (colorAcc.IsSparse)
             {
-                m_Logger.Error(LogCode.SparseAccessor, "color");
+                m_Logger?.Error(LogCode.SparseAccessor, "color");
             }
             m_Data = new NativeArray<float4>(colorAcc.count, VertexBufferConfigBase.defaultAllocator);
             Profiler.EndSample();

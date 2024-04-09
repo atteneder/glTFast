@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.3.0] - 2024-03-27
+
+## Added
+- Runtime import tests.
+- Runtime export tests.
+- (Export) Added development-time checks for valid JSON string literals.
+
+## Changed
+- Refactored test scripts folder layout.
+- (Export) Normal maps are exported in PNG format by default.
+- (Export) HDRP area lights are still exported as spot-lights, but their intensity is taken from `Light.intensity` (still incorrect, but more consistent).
+- Switched from asset-path-based to GUID-based shader loading (in the Editor 2021 and newer) in order to allow for a flexible folder layout without risking breaks/regressions should the layout change in the future.
+- Avoid expensive UnityEngine.Object null check when accessing cached default shaders.
+
+## Fixed
+- Exception when required glTF shader is not included.
+- Compiler errors when safe mode (`GLTFAST_SAFE` scripting define) is enabled.
+- Compiler error with High Definition Render Pipeline version 17 (2023.3)
+- Removed usage of obsolete APIs in High Definition Render Pipeline version 17 (2023.3)
+- (Export) Area light's range value is exported accurately (as shown in the inspector).
+- Various occasions of `NullReferenceException` when no logger is used/provided.
+- Proper error handling when trying to load unsupported sparse texture coordinates.
+- Ensure that special chars in string values don't lead to invalid JSON.
+- Using invariant culture `ToLower`/`ToUpper` variants on all non-language-specific data.
+- Added missing `GetHashCode` implementation (removes compiler warning).
+- Compiler errors and warnings on newer HDRP versions (16.x/17.x)
+- URP clearcoat shader loading at runtime.
+- HDRP stack-lit shader loading at runtime.
+
 ## [6.2.0] - 2024-01-29
 
 ### Added

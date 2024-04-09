@@ -1,0 +1,153 @@
+test_setups:
+  - project_setup: default
+    # # Use to limit versions
+    # editor_versions: [2020,2021,2022,2023.2,trunk]
+    # # Use to limit to platforms
+    # platforms: [win,mac,ubuntu]
+    pr_sets:
+      - platform: win
+        editor: 2020
+      - platform: mac
+        editor: trunk
+      - platform: ubuntu
+        editor: 2022
+    coverage: !!bool true
+  - project_setup: minimalistic
+    editor_versions: [2020,trunk]
+    platforms: [win]
+    pr_sets:
+      - platform: win
+        editor: trunk
+  - project_setup: all_defines
+    editor_versions: [2020,trunk]
+    platforms: [win]
+    pr_sets:
+      - platform: win
+        editor: trunk
+    coverage: !!bool true
+
+editor_versions:
+  - 2020
+  - 2021
+  - 2022
+  - 2023.2
+  - trunk
+
+platforms:
+  win:
+    agent: win
+  mac:
+    agent: mac
+  ubuntu:
+    agent: ubuntu
+
+test_platforms:
+  - name: win
+    agent: win
+    coverage: !!bool true
+  - name: mac
+    agent: mac
+  - name: ubuntu
+    agent: ubuntu
+
+player_test_editors:
+  - version: 2020.3
+  - version: trunk
+
+player_test_platforms:
+  - name: win
+    id: standalone
+    windows_host: !!bool true
+    build_and_run: win
+  - name: mac
+    id: standalone
+    build_and_run: mac
+  - name: android
+    id: android
+    windows_host: !!bool true
+    upm_ci_params: --backend=Il2Cpp
+    build: win
+    run: shield
+  # - name: ios
+  #   id: ios
+  #   build: mac-intel
+  #   run: mac-iphone
+
+asset_sets:
+  - name: glTF-test-models
+    git_uri: https://github.com/atteneder/glTF-test-models.git
+    git_revision: fee92e61a93546e48a34773cc8d2f20db7e22873
+
+agents:
+  win:
+    os: win
+    type: Unity::VM
+    image: package-ci/win10:v4
+    flavor: b1.large
+  mac:
+    os: mac
+    type: Unity::VM::osx
+    image: package-ci/macos-13:v4
+    flavor: m1.mac
+  ubuntu:
+    os: linux
+    type: Unity::VM
+    image: package-ci/ubuntu-22.04:v4
+    flavor: b1.large
+  shield:
+    os: win
+    type: Unity::mobile::shield
+    image: package-ci/win10:v4
+    flavor: b1.large
+  mac-intel:
+    os: mac
+    type: Unity::VM::osx
+    image: package-ci/macos-13:v4
+    flavor: b1.large
+  mac-iphone:
+    os: mac
+    type: Unity::mobile::iPhone
+    image: package-ci/macos-13:v4
+    flavor: b1.large
+  ubuntu-small:
+    os: linux
+    type: Unity::VM
+    image: package-ci/ubuntu-22.04:v4
+    flavor: b1.small
+
+test_framework: com.unity.test-framework@1.4.3
+
+# Note: Newtonsoft JSON and UnityWebRequestTexture are dependencies of the package tests (not the package itself)
+# TODO: Auto-add test dependencies (Tests/.tests.json) in project setups for tests
+test_dependencies:
+  - id: com.unity.nuget.newtonsoft-json
+    version: 3.2.1
+  - id: com.unity.modules.unitywebrequesttexture
+    version: 1.0.0
+
+registry:
+  npm: https://artifactory.prd.it.unity3d.com/artifactory/api/npm/upm-npm
+  homebrew: "git@github.cds.internal.unity3d.com:unity/homebrew-unity.git"
+  artifactory: https://artifactory.prd.cds.internal.unity3d.com/artifactory
+
+generic_project_path: Projects/TestProject
+
+# Operating system specific variables
+os_variables:
+  # Unix (macOS and Ubuntu)
+  unix:
+    yamato_source_dir: ${YAMATO_SOURCE_DIR}
+    git_url: ${GIT_REPOSITORY_URL}
+    git_revision: ${GIT_REVISION}
+    tool_utr: "./utr"
+  # Windows specific
+  win:
+    yamato_source_dir: "%YAMATO_SOURCE_DIR%"
+    git_url: "%GIT_REPOSITORY_URL%"
+    git_revision: "%GIT_REVISION%"
+    tool_utr: "utr.bat"
+
+editor_location:
+  win: "Unity.exe"
+  mac: "Unity.app/Contents/MacOS/Unity"
+  ubuntu: "Unity"

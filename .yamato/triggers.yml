@@ -1,0 +1,45 @@
+{% metadata_file .yamato/package.metafile -%}
+---
+
+pr_trigger:
+  name: PR Trigger
+  triggers:
+    expression: |
+      (pull_request.target eq "main" OR pull_request.target eq "develop") AND
+      NOT pull_request.push.changes.all match "**/*.md"
+  dependencies:
+    - .yamato/code-format-check.yml#code_format_check
+    - .yamato/package-test.yml#tests_pr
+    - .yamato/package-player-test.yml#player_test_pr
+    - .yamato/project-test.yml#tests_pr
+
+tests_all_trigger:
+  name: _Tests All
+  triggers:
+    expression: |
+      push.branch eq "main" OR
+      pull_request.comment eq "all" 
+  dependencies:
+    - .yamato/package-test.yml#tests_all
+    - .yamato/package-player-test.yml#player_test_all
+    - .yamato/project-test.yml#tests_all
+
+tests_all_weekly:
+  name: _Tests All [Weekly]
+  triggers:
+    recurring:
+      - branch: develop
+        frequency: weekly
+        rerun: always
+  dependencies:
+    - .yamato/triggers.yml#tests_all_trigger
+
+
+# Runs code coverage on any change on the develop branch
+# in order to create a reference for pull requests.
+post_merge_trigger:
+  name: Post Merge Trigger
+  triggers:
+    expression: push.branch eq "develop"
+  dependencies:
+    - .yamato/project-test.yml#tests_pr
