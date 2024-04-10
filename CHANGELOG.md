@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- *Emission* sub graph uses shader define [`UNITY_HEADER_HD_INCLUDED`](https://forum.unity.com/threads/deploying-for-multiple-rp.1342277/) for HDRP usage detection (replacing a custom function node).
+- *BaseColor* sub graph uses built-in shader define [`UNITY_COLORSPACE_GAMMA`](https://docs.unity3d.com/ScriptReference/Rendering.BuiltinShaderDefine.UNITY_COLORSPACE_GAMMA.html) for project color space detection (replacing a custom function node).
+
+### Fixed
+- Shader sub graphs *BaseColor* and *Emission* are now compatible with [PolySpatial visionOS][PolySpatialVisionOS].
+
 ## [6.3.0] - 2024-03-27
 
 ## Added
@@ -1110,6 +1117,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 [DanDovi]: https://github.com/DanDovi
 [DracoForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.draco@latest
 [DracoUnity]: https://github.com/atteneder/DracoUnity
+[PolySpatialVisionOS]: https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/
 [aurorahcx]: https://github.com/aurorahcx
 [Battlehub0x]: https://github.com/Battlehub0x
 [Bersaelor]: https://github.com/Bersaelor
