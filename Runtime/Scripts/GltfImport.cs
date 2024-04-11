@@ -231,7 +231,9 @@ namespace GLTFast
         HashSet<int> m_NonFlippedYTextureIndices;
 #endif
         ImageFormat[] m_ImageFormats;
+#if !UNITY_VISIONOS
         bool[] m_ImageReadable;
+#endif
         bool[] m_ImageGamma;
 
         /// optional glTF-binary buffer
@@ -1255,11 +1257,13 @@ namespace GLTFast
                     imageVariants[imageIndex].Add(txt.sampler);
                 }
 
+#if !UNITY_VISIONOS
                 m_ImageReadable = new bool[m_Images.Length];
                 for (int i = 0; i < m_Images.Length; i++)
                 {
                     m_ImageReadable[i] = imageVariants[i] != null && imageVariants[i].Count > 1;
                 }
+#endif
 
                 Profiler.EndSample();
                 List<Task> imageTasks = null;
@@ -1303,7 +1307,16 @@ namespace GLTFast
                                 // Not Inside buffer
                                 if (!string.IsNullOrEmpty(img.uri))
                                 {
-                                    LoadImage(imageIndex, UriHelper.GetUriString(img.uri, baseUri), !m_ImageReadable[imageIndex], imgFormat == ImageFormat.Ktx);
+                                    LoadImage(
+                                        imageIndex,
+                                        UriHelper.GetUriString(img.uri, baseUri),
+#if UNITY_VISIONOS
+                                        false,
+#else
+                                        !m_ImageReadable[imageIndex],
+#endif
+                                        imgFormat == ImageFormat.Ktx
+                                        );
                                 }
                                 else
                                 {
@@ -1351,7 +1364,14 @@ namespace GLTFast
             // TODO: Investigate alternative: native texture creation in worker thread
             bool forceSampleLinear = m_ImageGamma != null && !m_ImageGamma[imageIndex];
             var txt = CreateEmptyTexture(img, imageIndex, forceSampleLinear);
-            txt.LoadImage(data,!m_ImageReadable[imageIndex]);
+            txt.LoadImage(
+                data,
+#if UNITY_VISIONOS
+                false
+#else
+                !m_ImageReadable[imageIndex]
+#endif
+                );
             m_Images[imageIndex] = txt;
             Profiler.EndSample();
         }
@@ -1425,7 +1445,14 @@ namespace GLTFast
                         var forceSampleLinear = m_ImageGamma!=null && !m_ImageGamma[imageIndex];
                         txt = CreateEmptyTexture(Root.Images[imageIndex], imageIndex, forceSampleLinear);
                         // TODO: Investigate for NativeArray variant to avoid `www.data`
-                        txt.LoadImage(www.Data,!m_ImageReadable[imageIndex]);
+                        txt.LoadImage(
+                            www.Data,
+#if UNITY_VISIONOS
+                            false
+#else
+                            !m_ImageReadable[imageIndex]
+#endif
+                            );
 #else
                         m_Logger?.Warning(LogCode.ImageConversionNotEnabled);
                         txt = null;
@@ -1905,7 +1932,14 @@ namespace GLTFast
                         {
                             jh.jobHandle.Complete();
 #if UNITY_IMAGECONVERSION
-                            m_Images[jh.imageIndex].LoadImage(jh.buffer,!m_ImageReadable[jh.imageIndex]);
+                            m_Images[jh.imageIndex].LoadImage(
+                                jh.buffer,
+#if UNITY_VISIONOS
+                                false
+#else
+                                !m_ImageReadable[jh.imageIndex]
+#endif
+                                );
 #endif
                             jh.gcHandle.Free();
                             m_ImageCreateContexts.RemoveAt(i);
@@ -2347,7 +2381,9 @@ namespace GLTFast
             m_ImageCreateContexts = null;
             m_Images = null;
             m_ImageFormats = null;
+#if !UNITY_VISIONOS
             m_ImageReadable = null;
+#endif
             m_ImageGamma = null;
             m_GlbBinChunk = null;
             m_MaterialPointsSupport = null;
