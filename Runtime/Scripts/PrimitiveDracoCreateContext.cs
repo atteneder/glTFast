@@ -120,7 +120,7 @@ namespace GLTFast {
             if (attributes.NORMAL >= 0)
                 result[VertexAttribute.Normal] = attributes.NORMAL;
             if (attributes.TANGENT >= 0)
-                result[VertexAttribute.Normal] = attributes.TANGENT;
+                result[VertexAttribute.Tangent] = attributes.TANGENT;
             if (attributes.COLOR_0 >= 0)
                 result[VertexAttribute.Color] = attributes.COLOR_0;
             if (attributes.TEXCOORD_0 >= 0)
