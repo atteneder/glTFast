@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- *Emission* sub graph uses shader define [`UNITY_HEADER_HD_INCLUDED`](https://forum.unity.com/threads/deploying-for-multiple-rp.1342277/) for HDRP usage detection (replacing a custom function node).
+- *Emission* sub graph uses shader define `SHADEROPTIONS_PRE_EXPOSITION` for HDRP usage detection (replacing a custom function node that checked for `UNITY_HEADER_HD_INCLUDED`).
 - *BaseColor* sub graph uses built-in shader define [`UNITY_COLORSPACE_GAMMA`](https://docs.unity3d.com/ScriptReference/Rendering.BuiltinShaderDefine.UNITY_COLORSPACE_GAMMA.html) for project color space detection (replacing a custom function node).
 
 ### Fixed
