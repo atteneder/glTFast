@@ -3,6 +3,7 @@
     "rootNamespace": "GLTFast.Tests",
     "references": [
         "UnityEngine.TestRunner",
+        "Unity.Burst",
         "Unity.Mathematics",
         "Unity.PerformanceTesting",
         "glTFast",
