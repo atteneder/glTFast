@@ -102,17 +102,20 @@ namespace GLTFast
             }
             Profiler.EndSample();
 
-            if (vertexData.calculateNormals)
+            if (topology == MeshTopology.Triangles || topology == MeshTopology.Quads)
             {
-                Profiler.BeginSample("RecalculateNormals");
-                msh.RecalculateNormals();
-                Profiler.EndSample();
-            }
-            if (vertexData.calculateTangents)
-            {
-                Profiler.BeginSample("RecalculateTangents");
-                msh.RecalculateTangents();
-                Profiler.EndSample();
+                if (vertexData.calculateNormals)
+                {
+                    Profiler.BeginSample("RecalculateNormals");
+                    msh.RecalculateNormals();
+                    Profiler.EndSample();
+                }
+                if (vertexData.calculateTangents)
+                {
+                    Profiler.BeginSample("RecalculateTangents");
+                    msh.RecalculateTangents();
+                    Profiler.EndSample();
+                }
             }
 
             if (allBounds.HasValue)

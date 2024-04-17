@@ -1,0 +1,513 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59748363cc8e485aa56e62947048bff8, type: 3}
+  m_Name: glTF-Sample-Assets
+  m_EditorClassIdentifier: 
+  assetsRelativePath: glTF-Sample-Assets
+  assetsAbsolutePath: 
+  m_TestCases:
+  - relativeUri: Models/AlphaBlendModeTest/glTF/AlphaBlendModeTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnimatedCube/glTF/AnimatedCube.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnimatedMorphCube/glTF/AnimatedMorphCube.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnimatedMorphCube/glTF-Quantized/AnimatedMorphCube.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnimatedTriangle/glTF/AnimatedTriangle.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnimatedTriangle/glTF-Embedded/AnimatedTriangle.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnisotropyBarnLamp/glTF-KTX-BasisU/AnisotropyBarnLamp.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnisotropyDiscTest/glTF/AnisotropyDiscTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnisotropyRotationTest/glTF/AnisotropyRotationTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AnisotropyStrengthTest/glTF/AnisotropyStrengthTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/AttenuationTest/glTF/AttenuationTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Avocado/glTF/Avocado.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoomBox/glTF/BoomBox.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Box/glTF/Box.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Box/glTF-Binary/Box.glb
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Box/glTF-Draco/Box.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Box/glTF-Embedded/Box.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Box With Spaces/glTF/Box With Spaces.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxAnimated/glTF/BoxAnimated.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxAnimated/glTF-Binary/BoxAnimated.glb
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxAnimated/glTF-Embedded/BoxAnimated.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxInterleaved/glTF/BoxInterleaved.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxInterleaved/glTF-Binary/BoxInterleaved.glb
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxInterleaved/glTF-Embedded/BoxInterleaved.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxTextured/glTF/BoxTextured.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxTextured/glTF-Binary/BoxTextured.glb
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxTextured/glTF-Embedded/BoxTextured.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxTexturedNonPowerOfTwo/glTF/BoxTexturedNonPowerOfTwo.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BoxVertexColors/glTF/BoxVertexColors.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BrainStem/glTF/BrainStem.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/BrainStem/glTF-Draco/BrainStem.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Cameras/glTF/Cameras.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/CarbonFibre/glTF/CarbonFibre.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/CesiumMan/glTF/CesiumMan.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/CesiumMan/glTF-Draco/CesiumMan.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/ChairDamaskPurplegold/glTF/ChairDamaskPurplegold.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/ClearCoatCarPaint/glTF/ClearCoatCarPaint.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/ClearCoatTest/glTF/ClearCoatTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/ClearcoatWicker/glTF/ClearcoatWicker.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Cube/glTF/Cube.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/DamagedHelmet/glTF/DamagedHelmet.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/DiffuseTransmissionPlant/glTF/DiffuseTransmissionPlant.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/DiffuseTransmissionTeacup/glTF/DiffuseTransmissionTeacup.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/DirectionalLight/glTF/DirectionalLight.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/DispersionTest/glTF/DispersionTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/DragonAttenuation/glTF/DragonAttenuation.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/DragonDispersion/glTF/DragonDispersion.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Duck/glTF/Duck.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/EmissiveStrengthTest/glTF/EmissiveStrengthTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/EnvironmentTest/glTF/EnvironmentTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/EnvironmentTest/glTF-IBL/EnvironmentTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Fox/glTF/Fox.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/GlamVelvetSofa/glTF/GlamVelvetSofa.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/GlassBrokenWindow/glTF/GlassBrokenWindow.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/GlassHurricaneCandleHolder/glTF/GlassHurricaneCandleHolder.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/GlassVaseFlowers/glTF/GlassVaseFlowers.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/IORTestGrid/glTF/IORTestGrid.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/InterpolationTest/glTF/InterpolationTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/IridescenceAbalone/glTF/IridescenceAbalone.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/IridescenceDielectricSpheres/glTF/IridescenceDielectricSpheres.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/IridescenceLamp/glTF/IridescenceLamp.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/IridescenceMetallicSpheres/glTF/IridescenceMetallicSpheres.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/IridescenceSuzanne/glTF/IridescenceSuzanne.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/IridescentDishWithOlives/glTF/IridescentDishWithOlives.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/LightsPunctualLamp/glTF/LightsPunctualLamp.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/MaterialsVariantsShoe/glTF/MaterialsVariantsShoe.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/MeshPrimitiveModes/glTF/MeshPrimitiveModes.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 26000000
+  - relativeUri: Models/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/MetalRoughSpheresNoTextures/glTF/MetalRoughSpheresNoTextures.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/MorphPrimitivesTest/glTF/MorphPrimitivesTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/MorphPrimitivesTest/glTF-Draco/MorphPrimitivesTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/MorphStressTest/glTF/MorphStressTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/MultiUVTest/glTF/MultiUVTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/MultipleScenes/glTF/MultipleScenes.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/NegativeScaleTest/glTF/NegativeScaleTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/NormalTangentMirrorTest/glTF/NormalTangentMirrorTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/NormalTangentTest/glTF/NormalTangentTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/OrientationTest/glTF/OrientationTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/PrimitiveModeNormalsTest/glTF/PrimitiveModeNormalsTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/RecursiveSkeletons/glTF/RecursiveSkeletons.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/RiggedFigure/glTF/RiggedFigure.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/RiggedSimple/glTF/RiggedSimple.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SheenChair/glTF/SheenChair.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SheenCloth/glTF/SheenCloth.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SheenTestGrid/glTF/SheenTestGrid.gltf
+    expectLoadFail: 1
+    expectInstantiationFail: 0
+    expectedLogCodes: 14000000
+  - relativeUri: Models/SimpleInstancing/glTF/SimpleInstancing.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleMaterial/glTF/SimpleMaterial.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleMeshes/glTF/SimpleMeshes.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleMeshes/glTF-Embedded/SimpleMeshes.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleMorph/glTF/SimpleMorph.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleSkin/glTF/SimpleSkin.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleSparseAccessor/glTF/SimpleSparseAccessor.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleSparseAccessor/glTF-Embedded/SimpleSparseAccessor.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleTexture/glTF/SimpleTexture.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SimpleTexture/glTF-Embedded/SimpleTexture.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SpecGlossVsMetalRough/glTF/SpecGlossVsMetalRough.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/SpecularSilkPouf/glTF/SpecularSilkPouf.gltf
+    expectLoadFail: 1
+    expectInstantiationFail: 0
+    expectedLogCodes: 14000000
+  - relativeUri: Models/SpecularTest/glTF/SpecularTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Sponza/glTF/Sponza.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/StainedGlassLamp/glTF/StainedGlassLamp.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/StainedGlassLamp/glTF-JPG-PNG/StainedGlassLamp.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/StainedGlassLamp/glTF-KTX-BasisU/StainedGlassLamp.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Suzanne/glTF/Suzanne.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TextureCoordinateTest/glTF/TextureCoordinateTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TextureEncodingTest/glTF/TextureEncodingTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TextureLinearInterpolationTest/glTF/TextureLinearInterpolationTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TextureSettingsTest/glTF/TextureSettingsTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TextureTransformMultiTest/glTF/TextureTransformMultiTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TextureTransformTest/glTF/TextureTransformTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/ToyCar/glTF/ToyCar.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TransmissionRoughnessTest/glTF/TransmissionRoughnessTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TransmissionTest/glTF/TransmissionTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TransmissionThinwallTestGrid/glTF/TransmissionThinwallTestGrid.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/Triangle/glTF/Triangle.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TriangleWithoutIndices/glTF/TriangleWithoutIndices.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/TwoSidedPlane/glTF/TwoSidedPlane.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: "Models/Unicode\u2764\u267BTest/glTF/Unicode\u2764\u267BTest.gltf"
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: "Models/Unicode\u2764\u267BTest/glTF-Binary/Unicode\u2764\u267BTest.glb"
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/UnlitTest/glTF/UnlitTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/VertexColorTest/glTF/VertexColorTest.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/VertexColorTest/glTF-Binary/VertexColorTest.glb
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/VirtualCity/glTF/VirtualCity.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 
+  - relativeUri: Models/XmpMetadataRoundedCube/glTF/XmpMetadataRoundedCube.gltf
+    expectLoadFail: 0
+    expectInstantiationFail: 0
+    expectedLogCodes: 

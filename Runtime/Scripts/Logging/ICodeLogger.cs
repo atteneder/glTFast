@@ -35,6 +35,14 @@ namespace GLTFast.Logging
         void Info(LogCode code, params string[] messages);
 
         /// <summary>
+        /// Dispatches an informational message.
+        /// </summary>
+        /// <param name="logType">Type of message e.g. warn or error etc.</param>
+        /// <param name="code">Message's log code</param>
+        /// <param name="messages">Additional, optional message parts</param>
+        void Log(LogType logType, LogCode code, params string[] messages);
+
+        /// <summary>
         /// Dispatches a critical error message.
         /// </summary>
         /// <param name="message">Message to send</param>

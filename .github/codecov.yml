@@ -29,7 +29,7 @@ comment:
   require_base: false
   require_head: false
   # Set this to the number of coverage jobs run in the PR
-  after_n_builds: 1
+  after_n_builds: 3
 
 flag_management:
   default_rules:

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Tests for all `GltfImport.Load` overloads.
 - Tests for all import Burst jobs.
+- `ICodeLogger.Log` for dynamic LogType usage.
 
 ### Changed
 - *Emission* sub graph uses shader define `SHADEROPTIONS_PRE_EXPOSITION` for HDRP usage detection (replacing a custom function node that checked for `UNITY_HEADER_HD_INCLUDED`).
@@ -18,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shader sub graphs *BaseColor* and *Emission* are now compatible with [PolySpatial visionOS][PolySpatialVisionOS].
 - On Apple visionOS, textures are always created readable, so that [PolySpatial visionOS][PolySpatialVisionOS] is able to convert them.
 - Draco compressed tangents import tangents correctly now.
+- Removed invalid attempt to calculate normals or tangents on point or line meshes.
+- Consistent log message when a glTF extension cannot be supported due to a missing Unity package depenency (e.g. [KTX for Unity][KtxForUnity]).
+  - All missing extensions are logged (not just the first one).
+  - There's now a single message per missing package.
+  - Depending on whether that extension is required the message's type is warning or error.
+  - Added explicit message when [*meshoptimizer decompression for Unity*][meshoptUnity] is missing.
 
 ## [6.3.0] - 2024-03-27
 
@@ -75,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI maintenance
 
 ### Fixed
-- Updated references to *KTX for Unity*
+- Updated references to [KTX for Unity][KtxForUnity]
 
 ## [6.0.1] - 2023-10-11
 
@@ -1120,10 +1127,12 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 
 [Entities1.0]: https://docs.unity3d.com/Packages/com.unity.entities@1.0
 [KtxUnity]: https://github.com/atteneder/KtxUnity
+[KtxForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest/
 [DanDovi]: https://github.com/DanDovi
 [DracoForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.draco@latest
 [DracoUnity]: https://github.com/atteneder/DracoUnity
 [PolySpatialVisionOS]: https://docs.unity3d.com/Packages/com.unity.polyspatial.visionos@latest/
+[meshoptUnity]: https://docs.unity3d.com/Packages/com.unity.meshopt.decompress@latest/
 [aurorahcx]: https://github.com/aurorahcx
 [Battlehub0x]: https://github.com/Battlehub0x
 [Bersaelor]: https://github.com/Bersaelor

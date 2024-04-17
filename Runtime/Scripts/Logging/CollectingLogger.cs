@@ -49,6 +49,16 @@ namespace GLTFast.Logging
         }
 
         /// <inheritdoc />
+        public void Log(LogType logType, LogCode code, params string[] messages)
+        {
+            if (m_Items == null)
+            {
+                m_Items = new List<LogItem>();
+            }
+            m_Items.Add(new LogItem(logType, code, messages));
+        }
+
+        /// <inheritdoc />
         public void Error(string message)
         {
             if (m_Items == null)

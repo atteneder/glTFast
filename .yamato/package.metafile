@@ -11,41 +11,41 @@ test_setups:
         editor: 2020
       - platform: mac
         editor: trunk
-      - platform: ubuntu
+      - platform: win
         editor: 2022
     coverage_sets:
       # default for coverage: windows + current LTS
       - platform: win
         editor: 2022
   - project_setup: minimalistic
-    editor_versions: [2020,trunk]
+    editor_versions: [2020,2022,trunk]
     platforms: [win]
     pr_sets:
       - platform: win
-        editor: trunk
+        editor: 2022
     coverage_sets:
       # default for coverage: windows + current LTS
       - platform: win
         editor: 2022
   - project_setup: all_defines
     render_pipeline: URP-Forward
-    editor_versions: [2020,trunk]
+    editor_versions: [2020,2021,2022,trunk]
     platforms: [win]
     pr_sets:
+      - platform: win
+        editor: 2022
+      # TODO: Move those to `urp` and `hdrp` test setup at some point
+      # For URP/shader graph test all versions
+      - platform: win
+        editor: 2020
+      - platform: win
+        editor: 2021
       - platform: win
         editor: trunk
     coverage_sets:
       # default for coverage: windows + current LTS
       - platform: win
         editor: 2022
-      # TODO: Move those to `urp` and `hdrp` test setup at some point
-      # For URP/shader graph test all versions
-      - platform: win
-        editor: 2021
-      - platform: win
-        editor: 2023
-      - platform: win
-        editor: trunk
 
 editor_versions:
   - 2020
@@ -109,6 +109,9 @@ asset_sets:
   - name: glTF-test-models
     git_uri: https://github.com/atteneder/glTF-test-models.git
     git_revision: fee92e61a93546e48a34773cc8d2f20db7e22873
+  - name: glTF-Sample-Assets
+    git_uri: https://github.com/KhronosGroup/glTF-Sample-Assets.git
+    git_revision: cfbe2f9ac259490855940ff85feb5b4b02386046
 
 agents:
   win:

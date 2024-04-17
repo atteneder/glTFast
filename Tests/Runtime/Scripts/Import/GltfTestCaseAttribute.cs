@@ -78,7 +78,7 @@ namespace GLTFast.Tests.Import
                         nameCounts[origName] = 1;
                     }
 
-                    data.SetName(name);
+                    data.SetName(testCase.relativeUri);
                     data.ExpectedResult = new UnityEngine.Object();
                     data.HasExpectedResult = true;
 

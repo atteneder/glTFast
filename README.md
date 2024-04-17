@@ -1,5 +1,7 @@
 # Unity glTFast
 
+[![codecov](https://codecov.unity3d.com/ghe/unity/com.unity.cloud.gltfast.src/graph/badge.svg?token=QZYEFH0SDC)](https://codecov.unity3d.com/ghe/unity/com.unity.cloud.gltfast.src)
+
 <p align="center">
 <img src="./Documentation~/Images/unity-gltf-logos.png" alt="Unity and glTF logos side by side" />
 </p>

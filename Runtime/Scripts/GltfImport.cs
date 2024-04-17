@@ -1131,6 +1131,7 @@ namespace GLTFast
         {
             if (extensions == null)
                 return true;
+            var allExtensionsSupported = true;
             foreach (var ext in extensions)
             {
                 var supported = k_SupportedExtensions.Contains(ext);
@@ -1150,31 +1151,52 @@ namespace GLTFast
 #if !DRACO_UNITY
                     if (ext == ExtensionName.DracoMeshCompression)
                     {
-                        m_Logger?.Error(LogCode.PackageMissing, "Draco for Unity", ext);
-
+                        m_Logger?.Log(
+                            required ? LogType.Error : LogType.Warning,
+                            LogCode.PackageMissing,
+                            "Draco for Unity",
+                            ext
+                            );
                     }
+                    else
+#endif
+#if !MESHOPT
+                    if (ext == ExtensionName.MeshoptCompression)
+                    {
+                        m_Logger?.Log(
+                            required ? LogType.Error : LogType.Warning,
+                            LogCode.PackageMissing,
+                            "meshoptimizer decompression for Unity",
+                            ext
+                        );
+                    }
+                    else
 #endif
 #if !KTX_UNITY
                     if (ext == ExtensionName.TextureBasisUniversal)
                     {
-                        m_Logger?.Error(LogCode.PackageMissing, "KTX for Unity", ext);
+                        m_Logger?.Log(
+                            required ? LogType.Error : LogType.Warning,
+                            LogCode.PackageMissing,
+                            "KTX for Unity",
+                            ext
+                            );
                     }
                     else
 #endif
+                    if (required)
                     {
-                        if (required)
-                        {
-                            m_Logger?.Error(LogCode.ExtensionUnsupported, ext);
-                        }
-                        else
-                        {
-                            m_Logger?.Warning(LogCode.ExtensionUnsupported, ext);
-                        }
+                        m_Logger?.Error(LogCode.ExtensionUnsupported, ext);
                     }
-                    return false;
+                    else
+                    {
+                        m_Logger?.Warning(LogCode.ExtensionUnsupported, ext);
+                    }
+
+                    allExtensionsSupported = false;
                 }
             }
-            return true;
+            return allExtensionsSupported;
         }
 
         async Task<bool> LoadGltf(string json, Uri url)
