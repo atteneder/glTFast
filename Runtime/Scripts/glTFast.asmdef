@@ -5,7 +5,6 @@
         "Unity.Mathematics",
         "Unity.Burst",
         "Unity.Collections",
-        "Unity.Jobs",
         "Draco",
         "Ktx",
         "Unity.Meshopt.Decompress",
@@ -79,11 +78,6 @@
             "name": "com.unity.modules.unitywebrequesttexture",
             "expression": "",
             "define": "UNITY_WEBREQUEST_TEXTURE"
-        },
-        {
-            "name": "com.unity.jobs",
-            "expression": "0.2.0",
-            "define": "UNITY_JOBS"
         },
         {
             "name": "com.unity.meshopt.decompress",

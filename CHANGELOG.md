@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] -
 
+### Added
+- Dependency on [Unity Collections package][Collections].
+
+### Changed
+- Faster buffer conversion jobs due to batching via [`IJobParallelForBatch`](https://docs.unity3d.com/Packages/com.unity.collections@2.4/api/Unity.Jobs.IJobParallelForBatch.html).
+
+### Removed
+- Soft dependency on deprecated [Unity Jobs package][JobsPkg].
+
 ## [6.4.0] - 2024-04-17
 
 ### Added
@@ -1128,6 +1137,8 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - initial version
 
 [Entities1.0]: https://docs.unity3d.com/Packages/com.unity.entities@1.0
+[Collections]: https://docs.unity3d.com/Packages/com.unity.collections@latest/
+[JobsPkg]: https://docs.unity3d.com/Packages/com.unity.jobs@latest/
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [KtxForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest/
 [DanDovi]: https://github.com/DanDovi

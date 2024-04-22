@@ -117,7 +117,7 @@ namespace GLTFast
         /// <summary>
         /// Default value for a C# Job's innerloopBatchCount parameter.
         /// </summary>
-        /// <seealso cref="IJobParallelForExtensions.Schedule(x,int,int,JobHandle)"/>
+        /// <seealso cref="IJobParallelForExtensions.Schedule&lt;T&gt;(T,int,int,JobHandle)"/>
         internal const int DefaultBatchCount = 512;
 
         /// <summary>

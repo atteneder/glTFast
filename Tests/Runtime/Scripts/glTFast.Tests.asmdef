@@ -4,6 +4,7 @@
     "references": [
         "UnityEngine.TestRunner",
         "Unity.Burst",
+        "Unity.Collections",
         "Unity.Mathematics",
         "Unity.PerformanceTesting",
         "glTFast",
