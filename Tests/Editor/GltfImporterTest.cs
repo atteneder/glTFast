@@ -64,7 +64,7 @@ namespace GLTFast.Editor.Tests
             var importer = (GltfImporter)AssetImporter.GetAtPath(assetPath);
             Assert.NotNull(importer, $"No glTF importer at {assetPath}");
 
-            LoadTests.AssertLogItems(importer.reportItems, testCase);
+            AssetsTests.AssertLogItems(importer.reportItems, testCase);
 #endif
             yield return null;
         }

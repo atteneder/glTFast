@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -18,14 +19,14 @@ namespace GLTFast.Tests.Import
     class GltfTestCaseAttribute : UnityEngine.TestTools.UnityTestAttribute, ITestBuilder
     {
         readonly GltfTestCaseSet m_TestCases;
+        readonly GltfTestCaseFilter m_Filter;
 
         readonly NUnitTestCaseBuilder m_Builder = new NUnitTestCaseBuilder();
 
-        public GltfTestCaseAttribute(string testSetName, int testCaseCount)
+        public GltfTestCaseAttribute(string testSetName, int testCaseCount, string includeFilter = null)
         {
-            string path = null;
 #if UNITY_EDITOR
-            path = $"Packages/{GltfGlobals.GltfPackageName}/Tests/Runtime/TestCaseSets/{testSetName}.asset";
+            var path = $"Packages/{GltfGlobals.GltfPackageName}/Tests/Runtime/TestCaseSets/{testSetName}.asset";
             m_TestCases = AssetDatabase.LoadAssetAtPath<GltfTestCaseSet>(path);
             if (m_TestCases == null)
             {
@@ -33,16 +34,23 @@ namespace GLTFast.Tests.Import
                 m_TestCases = AssetDatabase.LoadAssetAtPath<GltfTestCaseSet>(path);
             }
 #else
-            path = $"{testSetName}.json";
+            var path = $"{testSetName}.json";
             m_TestCases = GltfTestCaseSet.DeserializeFromStreamingAssets(path);
 #endif
             if (m_TestCases == null)
             {
                 throw new InvalidDataException($"Test case collection not found at {path}");
             }
-            if (testCaseCount != m_TestCases.TestCaseCount)
+
+            m_Filter = includeFilter == null ? null : new GltfTestCaseFilter(new Regex(includeFilter));
+            var actualTestCaseCount = m_TestCases.GetTestCaseCount(m_Filter);
+            if (testCaseCount != actualTestCaseCount)
             {
-                throw new InvalidDataException($"Incorrect number of test cases in {testSetName}. Expected {testCaseCount}, but found {m_TestCases.TestCaseCount}");
+                throw new InvalidDataException(
+                    $"Incorrect number of test cases in {testSetName}. " +
+                    $"Expected {testCaseCount}, but found {actualTestCaseCount} " +
+                    (includeFilter == null ? "" : $"(includeFilter: \"{includeFilter}\")")
+                    );
             }
         }
 
@@ -53,7 +61,7 @@ namespace GLTFast.Tests.Import
 
             try
             {
-                foreach (var testCase in m_TestCases.IterateTestCases())
+                foreach (var testCase in m_TestCases.IterateTestCases(m_Filter))
                 {
                     var data = new TestCaseData(new object[] { m_TestCases, testCase });
 
@@ -70,7 +78,7 @@ namespace GLTFast.Tests.Import
                         nameCounts[origName] = 1;
                     }
 
-                    data.SetName(name);
+                    data.SetName(testCase.relativeUri);
                     data.ExpectedResult = new UnityEngine.Object();
                     data.HasExpectedResult = true;
 

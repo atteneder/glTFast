@@ -1,0 +1,246 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: glTF-Sample-Assets-urp.10
+  m_Shaders:
+  - first: {fileID: -6465566751694194690, guid: f06cd296b834444abb6dbc0acccf9414, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: _TRANSMISSION
+        passType: 8
+      - keywords: _OCCLUSION _TRANSMISSION
+        passType: 8
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+          _DEPTH_NO_MSAA
+        passType: 13
+      - keywords: _TRANSMISSION
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _TRANSMISSION
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _OCCLUSION _TRANSMISSION
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: c9ba521fe23b44d6db1017a2d9d47a17, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: _TRANSMISSION
+        passType: 8
+      - keywords: _EMISSIVE _TRANSMISSION
+        passType: 8
+      - keywords: _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _TRANSMISSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS _TRANSMISSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _TRANSMISSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+          _TRANSMISSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+          _TRANSMISSION
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _EMISSIVE _TRANSMISSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS _EMISSIVE
+          _TRANSMISSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+          _EMISSIVE _TRANSMISSION
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 81efe6bcd8aa64c21b80376f539ee767, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS
+        passType: 0
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 0
+      - keywords: _TEXTURE_TRANSFORM
+        passType: 0
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS _TEXTURE_TRANSFORM
+        passType: 0
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS _TEXTURE_TRANSFORM
+          _UV_CHANNEL_SELECT
+        passType: 0
+      - keywords: 
+        passType: 8
+      - keywords: _TEXTURE_TRANSFORM
+        passType: 8
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+        passType: 13
+      - keywords: _TEXTURE_TRANSFORM
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _TEXTURE_TRANSFORM
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+          _TEXTURE_TRANSFORM _UV_CHANNEL_SELECT
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 41356b46cd8884ec5b404223e1338fa0, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: _EMISSIVE _OCCLUSION
+        passType: 8
+      - keywords: _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _EMISSIVE _OCCLUSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS _EMISSIVE
+          _OCCLUSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _EMISSIVE
+          _OCCLUSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+          _EMISSIVE _OCCLUSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+          _EMISSIVE _OCCLUSION
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 90c26dfde11bf4ff69ef936c6e6b1ed1, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: INSTANCING_ON
+        passType: 8
+      - keywords: _EMISSIVE
+        passType: 8
+      - keywords: _EMISSIVE _UV_CHANNEL_SELECT
+        passType: 8
+      - keywords: _OCCLUSION
+        passType: 8
+      - keywords: _EMISSIVE _OCCLUSION
+        passType: 8
+      - keywords: _TEXTURE_TRANSFORM
+        passType: 8
+      - keywords: _EMISSIVE _TEXTURE_TRANSFORM
+        passType: 8
+      - keywords: _OCCLUSION _TEXTURE_TRANSFORM
+        passType: 8
+      - keywords: 
+        passType: 13
+      - keywords: INSTANCING_ON
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: INSTANCING_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: _EMISSIVE
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _EMISSIVE
+        passType: 13
+      - keywords: _OCCLUSION
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _OCCLUSION
+        passType: 13
+      - keywords: _EMISSIVE _OCCLUSION
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _EMISSIVE _OCCLUSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+          _EMISSIVE _OCCLUSION
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+          _DEPTH_NO_MSAA _EMISSIVE _OCCLUSION
+        passType: 13
+      - keywords: _TEXTURE_TRANSFORM
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _TEXTURE_TRANSFORM
+        passType: 13
+      - keywords: _EMISSIVE _TEXTURE_TRANSFORM
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _EMISSIVE _TEXTURE_TRANSFORM
+        passType: 13
+      - keywords: _OCCLUSION _TEXTURE_TRANSFORM
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _OCCLUSION _TEXTURE_TRANSFORM
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: ba6d401c74b2c4f96af7edf0fe32241e, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: _EMISSIVE
+        passType: 8
+      - keywords: _OCCLUSION
+        passType: 8
+      - keywords: _OCCLUSION _UV_CHANNEL_SELECT
+        passType: 8
+      - keywords: _CLEARCOAT _EMISSIVE _OCCLUSION
+        passType: 8
+      - keywords: _OCCLUSION _TEXTURE_TRANSFORM
+        passType: 8
+      - keywords: 
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS _EMISSIVE
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _EMISSIVE
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+          _EMISSIVE
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+          _EMISSIVE
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH UNITY_HDR_ON _ADDITIONAL_LIGHTS
+          _DEPTH_NO_MSAA _EMISSIVE
+        passType: 13
+      - keywords: _OCCLUSION
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _OCCLUSION
+        passType: 13
+      - keywords: _EMISSIVE _OCCLUSION
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _EMISSIVE _OCCLUSION
+        passType: 13
+      - keywords: _OCCLUSION _TEXTURE_TRANSFORM
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS _OCCLUSION _TEXTURE_TRANSFORM
+        passType: 13

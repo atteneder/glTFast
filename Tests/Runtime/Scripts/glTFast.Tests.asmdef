@@ -3,6 +3,7 @@
     "rootNamespace": "GLTFast.Tests",
     "references": [
         "UnityEngine.TestRunner",
+        "Unity.Burst",
         "Unity.Mathematics",
         "Unity.PerformanceTesting",
         "glTFast",
@@ -48,6 +49,11 @@
             "name": "com.unity.cloud.draco",
             "expression": "5",
             "define": "DRACO_UNITY"
+        },
+        {
+            "name": "com.unity.cloud.ktx",
+            "expression": "3",
+            "define": "KTX_UNITY"
         }
     ],
     "noEngineReferences": false

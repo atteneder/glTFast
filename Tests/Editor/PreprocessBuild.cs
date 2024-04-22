@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the Draco for Unity authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using GLTFast.Tests.Export;
@@ -11,6 +12,7 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
+using Object = UnityEngine.Object;
 
 namespace GLTFast.Editor.Tests
 {
@@ -52,9 +54,9 @@ namespace GLTFast.Editor.Tests
             AssetDatabase.Refresh();
         }
 
-        static IEnumerable<T> IterateAssets<T>(string inPackageLocation) where T : Object
+        static IEnumerable<T> IterateAssets<T>(string inPackageLocation, string name = null) where T : Object
         {
-            var guids = FindAssets($"t:{typeof(T).Name}", inPackageLocation);
+            var guids = FindAssets($"t:{typeof(T).Name} {name ?? ""}", inPackageLocation);
             if (guids == null || guids.Length < 1)
             {
                 throw new InvalidDataException($"No {typeof(T).Name} asset set was found in {inPackageLocation}!");
@@ -67,7 +69,27 @@ namespace GLTFast.Editor.Tests
 
         static IEnumerable<ShaderVariantCollection> IterateAllShaderVariantCollections()
         {
-            foreach (var collection in IterateAssets<ShaderVariantCollection>("Tests/Runtime/TestCaseSets"))
+            string name;
+            switch (RenderPipelineUtils.RenderPipeline)
+            {
+                case RenderPipeline.BuiltIn:
+                    name = "birp";
+                    break;
+                case RenderPipeline.HighDefinition:
+                    name = "hdrp";
+                    break;
+                case RenderPipeline.Unknown:
+                case RenderPipeline.Universal:
+                default:
+#if UNITY_2021_2_OR_NEWER
+                    name = "urp.12";
+#else
+                    name = "urp.10";
+#endif
+                    break;
+            }
+
+            foreach (var collection in IterateAssets<ShaderVariantCollection>("Tests/Runtime/TestCaseSets", name))
             {
                 yield return collection;
             }

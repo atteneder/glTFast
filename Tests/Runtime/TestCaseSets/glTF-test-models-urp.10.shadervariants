@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: glTF-test-models-urp.10
+  m_Shaders:
+  - first: {fileID: 4800000, guid: 4340a3cf1cde6416d957808a6ac79eed, type: 3}
+    second:
+      variants:
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS
+        passType: 0
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+        passType: 0
+  - first: {fileID: -6465566751694194690, guid: 81efe6bcd8aa64c21b80376f539ee767, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 90c26dfde11bf4ff69ef936c6e6b1ed1, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS _DEPTH_NO_MSAA
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS LIGHTPROBE_SH _DEPTH_NO_MSAA
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: ba6d401c74b2c4f96af7edf0fe32241e, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+      - keywords: _ADDITIONAL_LIGHTS
+        passType: 13
+      - keywords: BILLBOARD_FACE_CAMERA_POS UNITY_HDR_ON _ADDITIONAL_LIGHTS _DEPTH_NO_MSAA
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: f94bbd13412a4419bbfac24d9a53b058, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 42aa4553160a34cf08f29a15eea9eb3b, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: 28efc76bda49d4bae9db32ea2079d3c0, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: 
+        passType: 8
+      - keywords: 
+        passType: 13

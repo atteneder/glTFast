@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: glTF-test-models-hdrp
+  m_Shaders:
+  - first: {fileID: 4800000, guid: 4340a3cf1cde6416d957808a6ac79eed, type: 3}
+    second:
+      variants:
+      - keywords: BILLBOARD_FACE_CAMERA_POS DECALS_3RT LIGHTPROBE_SH MATERIAL_QUALITY_HIGH
+          SCREEN_SPACE_SHADOWS_OFF SHADOW_MEDIUM USE_FPTL_LIGHTLIST
+        passType: 0
+  - first: {fileID: -6465566751694194690, guid: c87047c884d9843f5b0f4cce282aa760, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: BILLBOARD_FACE_CAMERA_POS DECALS_3RT MATERIAL_QUALITY_HIGH SCREEN_SPACE_SHADOWS_OFF
+          SHADOW_MEDIUM USE_CLUSTERED_LIGHTLIST
+        passType: 8
+      - keywords: _BLENDMODE_OFF
+        passType: 8
+      - keywords: _BLENDMODE_OFF _ENABLE_FOG_ON_TRANSPARENT _SURFACE_TYPE_TRANSPARENT
+        passType: 8
+      - keywords: BILLBOARD_FACE_CAMERA_POS DECALS_3RT MATERIAL_QUALITY_HIGH SCREEN_SPACE_SHADOWS_OFF
+          SHADOW_MEDIUM USE_FPTL_LIGHTLIST
+        passType: 13
+      - keywords: _BLENDMODE_OFF
+        passType: 13
+      - keywords: _BLENDMODE_OFF _ENABLE_FOG_ON_TRANSPARENT _SURFACE_TYPE_TRANSPARENT
+        passType: 13
+  - first: {fileID: -6465566751694194690, guid: b9d29dfa1474148e792ac720cbd45122, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 8
+      - keywords: BILLBOARD_FACE_CAMERA_POS DECALS_3RT MATERIAL_QUALITY_HIGH SCREEN_SPACE_SHADOWS_OFF
+          SHADOW_MEDIUM USE_CLUSTERED_LIGHTLIST
+        passType: 8
+      - keywords: _BLENDMODE_OFF _DOUBLESIDED_ON _REFRACTION_OFF
+        passType: 8
+      - keywords: _BLENDMODE_OFF _REFRACTION_OFF
+        passType: 12
+      - keywords: _BLENDMODE_OFF _DOUBLESIDED_ON _REFRACTION_OFF
+        passType: 12
+      - keywords: _BLENDMODE_OFF _REFRACTION_OFF
+        passType: 13
+      - keywords: DECALS_3RT _BLENDMODE_OFF _REFRACTION_OFF
+        passType: 13
+      - keywords: DECALS_3RT _BLENDMODE_OFF _DOUBLESIDED_ON _REFRACTION_OFF
+        passType: 13

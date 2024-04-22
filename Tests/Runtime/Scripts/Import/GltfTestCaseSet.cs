@@ -48,12 +48,28 @@ namespace GLTFast.Tests.Import
 
         public string streamingAssetsPath => $"gltfast/{assetsRelativePath}";
 
-        public IEnumerable<GltfTestCase> IterateTestCases()
+        public IEnumerable<GltfTestCase> IterateTestCases(GltfTestCaseFilter filter = null)
         {
             foreach (var testCase in m_TestCases)
             {
-                yield return testCase;
+                if (filter == null || filter.Matches(testCase))
+                {
+                    yield return testCase;
+                }
             }
+        }
+
+        public uint GetTestCaseCount(GltfTestCaseFilter filter = null)
+        {
+            var count = 0u;
+            foreach (var testCase in m_TestCases)
+            {
+                if (filter == null || filter.Matches(testCase))
+                {
+                    count++;
+                }
+            }
+            return count;
         }
 
         public static GltfTestCaseSet DeserializeFromStreamingAssets(string path)

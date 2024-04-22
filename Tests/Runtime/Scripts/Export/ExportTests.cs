@@ -5,6 +5,10 @@
 #define LOCAL_LOADING
 #endif
 
+#if UNITY_EDITOR
+#define LOAD_REFERENCE_SYNC
+#endif
+
 using System;
 using System.Collections;
 using System.IO;
@@ -677,11 +681,10 @@ namespace GLTFast.Tests.Export
 
             if (!binary)
             {
-#if UNITY_EDITOR
-                AssertGltfJson(fileName, path);
-#else
-                await AssertGltfJson(fileName, path);
+#if !LOAD_REFERENCE_SYNC
+                await
 #endif
+                AssertGltfJson(fileName, path);
             }
 
 #if GLTF_VALIDATOR && UNITY_EDITOR
@@ -694,11 +697,12 @@ namespace GLTFast.Tests.Export
 #endif
         }
 
-#if UNITY_EDITOR
-        static void AssertGltfJson(string testName, string resultPath)
+#if LOAD_REFERENCE_SYNC
+        static void
 #else
-        static async Task AssertGltfJson(string testName, string resultPath)
+        static async Task
 #endif
+        AssertGltfJson(string testName, string resultPath)
         {
 
             var renderPipeline = RenderPipelineUtils.RenderPipeline;
@@ -716,7 +720,7 @@ namespace GLTFast.Tests.Export
                     break;
             }
 
-#if UNITY_EDITOR
+#if LOAD_REFERENCE_SYNC
             var pathPrefix = $"Packages/{GltfGlobals.GltfPackageName}/Tests/Resources/ExportTargets";
             TryFixPackageAssetPath(ref pathPrefix);
 
@@ -730,21 +734,7 @@ namespace GLTFast.Tests.Export
             }
             var targetJson = targetJsonAsset.text;
 #else
-            var path = Path.Combine(Application.streamingAssetsPath, $"{exportTargetFolder}{rpSubfolder}/{testName}.txt");
-#if LOCAL_LOADING
-            path = $"file://{path}";
-#endif
-            var request = UnityWebRequest.Get(path);
-
-            var x = request.SendWebRequest();
-            while (!x.isDone)
-            {
-                await Task.Yield();
-            }
-
-            Assert.IsNull(request.error, $"Target glTF JSON for {testName} was not found at {path}: {request.error}");
-
-            var targetJson = request.downloadHandler.text;
+            var targetJson = await LoadGltfJsonReference(testName, rpSubfolder);
 #endif
 
             CompareGltfJsonTokenRecursively(
@@ -752,6 +742,38 @@ namespace GLTFast.Tests.Export
                 JToken.Parse(File.ReadAllText(resultPath))
                 );
         }
+
+#if !LOAD_REFERENCE_SYNC
+        static async Task<string> LoadGltfJsonReference(string testName, string rpSubfolder)
+        {
+            while (true)
+            {
+                var path = Path.Combine(Application.streamingAssetsPath, $"{exportTargetFolder}{rpSubfolder}/{testName}.txt");
+#if LOCAL_LOADING
+                path = $"file://{path}";
+#endif
+                var request = UnityWebRequest.Get(path);
+
+                var x = request.SendWebRequest();
+                while (!x.isDone)
+                {
+                    await Task.Yield();
+                }
+
+                if (request.error != null && !string.IsNullOrEmpty(rpSubfolder))
+                {
+                    // Fallback to BuiltIn reference
+                    rpSubfolder = "";
+                    continue;
+                }
+
+                Assert.IsNull(request.error, $"Target glTF JSON for {testName} was not found at {path}: {request.error}");
+
+                var targetJson = request.downloadHandler.text;
+                return targetJson;
+            }
+        }
+#endif
 
         static void CompareGltfJsonTokenRecursively(JToken tokenA, JToken tokenB)
         {

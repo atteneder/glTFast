@@ -1,87 +1,187 @@
-// SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
+// SPDX-FileCopyrightText: 2024 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using GLTFast.Logging;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using GLTFast.Logging;
 
 namespace GLTFast.Tests.Import
 {
-    [TestFixture]
+    /// <summary>
+    /// Tests all of <see cref="GltfImport"/>'s load methods.
+    /// </summary>
+    [Category("Import")]
     class LoadTests
     {
-        [GltfTestCase("glTF-test-models", 22)]
-        public IEnumerator GltfTestModels(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
+        const string k_RelativeUriFilter = @"\/RelativeUri\.gl(b|tf)$";
+
+        [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
+        public IEnumerator LoadString(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
         {
             var go = new GameObject();
             var deferAgent = new UninterruptedDeferAgent();
-            var loadLogger = new CollectingLogger();
+            var logger = new ConsoleLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
             var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
-            Debug.Log($"Loading {testCase} from {path}");
-
-            using (var gltf = new GltfImport(deferAgent: deferAgent, logger: loadLogger))
-            {
-                var task = gltf.Load(path);
-                yield return AsyncWrapper.WaitForTask(task);
-                var success = task.Result;
-                if (success ^ !testCase.expectLoadFail)
-                {
-                    AssertLoggers(new[] { loadLogger }, testCase);
-                    if (success)
-                    {
-                        throw new AssertionException("glTF import unexpectedly succeeded!");
-                    }
-
-                    throw new AssertionException("glTF import failed!");
-                }
-
-                if (!success)
-                {
-                    AssertLoggers(new[] { loadLogger }, testCase);
-                    yield break;
-                }
-                var instantiateLogger = new CollectingLogger();
-                var instantiator = new GameObjectInstantiator(gltf, go.transform, instantiateLogger);
-                task = gltf.InstantiateMainSceneAsync(instantiator);
-                yield return AsyncWrapper.WaitForTask(task);
-                success = task.Result;
-                if (!success)
-                {
-                    instantiateLogger.LogAll();
-                    throw new AssertionException("glTF instantiation failed");
-                }
-                Object.Destroy(go);
-                AssertLoggers(new[] { loadLogger, instantiateLogger }, testCase);
-            }
+            var task = gltf.Load(path);
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
+            Assert.IsTrue(success);
+            var instantiator = new GameObjectInstantiator(gltf, go.transform, logger);
+            task = gltf.InstantiateMainSceneAsync(instantiator);
+            yield return Utils.WaitForTask(task);
+            success = task.Result;
+            Assert.IsTrue(success);
+            Object.Destroy(go);
         }
 
-        static void AssertLoggers(IEnumerable<CollectingLogger> loggers, GltfTestCase testCase)
+        [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
+        public IEnumerator LoadUri(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
         {
-            AssertLogItems(IterateLoggerItems(), testCase);
-            return;
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var logger = new ConsoleLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
+            var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
+            var uri = new Uri(path, UriKind.RelativeOrAbsolute);
+            var task = gltf.Load(uri);
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
+            Assert.IsTrue(success);
 
-            IEnumerable<LogItem> IterateLoggerItems()
-            {
-                foreach (var logger in loggers)
-                {
-                    if (logger.Count < 1) continue;
-                    foreach (var item in logger.Items)
-                    {
-                        yield return item;
-                    }
-                }
-            }
+            task = gltf.InstantiateMainSceneAsync(go.transform);
+            yield return Utils.WaitForTask(task);
+            success = task.Result;
+            Assert.IsTrue(success);
+
+            var firstSceneGameObject = new GameObject("firstScene");
+            task = gltf.InstantiateSceneAsync(firstSceneGameObject.transform);
+            yield return Utils.WaitForTask(task);
+            success = task.Result;
+            Assert.IsTrue(success);
+
+            Object.Destroy(go);
         }
 
-        internal static void AssertLogItems(IEnumerable<LogItem> logItems, GltfTestCase testCase)
+        [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
+        public IEnumerator Load(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
         {
-            LoggerTest.AssertLogCodes(logItems, testCase.expectedLogCodes);
+            var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
+            Debug.Log($"Testing {path}");
+            var data = File.ReadAllBytes(path);
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var logger = new ConsoleLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
+            var task = gltf.Load(data, new Uri(path));
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
+            Assert.IsTrue(success);
+            var instantiator = new GameObjectInstantiator(gltf, go.transform, logger);
+            task = gltf.InstantiateMainSceneAsync(instantiator);
+            yield return Utils.WaitForTask(task);
+            success = task.Result;
+            Assert.IsTrue(success);
+            Object.Destroy(go);
+        }
+
+        [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
+        public IEnumerator LoadSyncInstantiation(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
+        {
+            var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
+            Debug.Log($"Testing {path}");
+            var data = File.ReadAllBytes(path);
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var logger = new ConsoleLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
+            var task = gltf.Load(data, new Uri(path));
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
+            Assert.IsTrue(success);
+            var instantiator = new GameObjectInstantiator(gltf, go.transform, logger);
+#pragma warning disable CS0618
+            success = gltf.InstantiateMainScene(instantiator);
+#pragma warning restore CS0618
+            Assert.IsTrue(success);
+            Object.Destroy(go);
+        }
+
+        [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
+        public IEnumerator LoadFile(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
+        {
+            var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
+            Debug.Log($"Testing {path}");
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var logger = new ConsoleLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
+            var task = gltf.LoadFile(path, new Uri(path));
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
+            Assert.IsTrue(success);
+            var instantiator = new GameObjectInstantiator(gltf, go.transform, logger);
+            task = gltf.InstantiateMainSceneAsync(instantiator);
+            yield return Utils.WaitForTask(task);
+            success = task.Result;
+            Assert.IsTrue(success);
+            Object.Destroy(go);
+        }
+
+        [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
+        public IEnumerator LoadBinary(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
+        {
+            var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
+            if (!path.EndsWith(".glb"))
+            {
+                Assert.Ignore("Wrong glTF type. Skipping");
+            }
+            Debug.Log($"Testing {path}");
+            var data = File.ReadAllBytes(path);
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var logger = new ConsoleLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
+            var task = gltf.LoadGltfBinary(data, new Uri(path));
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
+            Assert.IsTrue(success);
+            var instantiator = new GameObjectInstantiator(gltf, go.transform, logger);
+            task = gltf.InstantiateMainSceneAsync(instantiator);
+            yield return Utils.WaitForTask(task);
+            success = task.Result;
+            Assert.IsTrue(success);
+            Object.Destroy(go);
+        }
+
+        [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
+        public IEnumerator LoadJson(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
+        {
+            var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
+            if (!path.EndsWith(".gltf"))
+            {
+                Assert.Ignore("Wrong glTF type. Skipping");
+            }
+            Debug.Log($"Testing {path}");
+            var json = File.ReadAllText(path);
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var logger = new ConsoleLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
+            var task = gltf.LoadGltfJson(json, new Uri(path));
+            yield return Utils.WaitForTask(task);
+            var success = task.Result;
+            Assert.IsTrue(success);
+            var instantiator = new GameObjectInstantiator(gltf, go.transform, logger);
+            task = gltf.InstantiateMainSceneAsync(instantiator);
+            yield return Utils.WaitForTask(task);
+            success = task.Result;
+            Assert.IsTrue(success);
+            Object.Destroy(go);
         }
     }
 }
