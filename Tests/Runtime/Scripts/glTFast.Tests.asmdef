@@ -55,6 +55,11 @@
             "name": "com.unity.cloud.ktx",
             "expression": "3",
             "define": "KTX_UNITY"
+        },
+        {
+            "name": "com.unity.test-framework.performance",
+            "expression": "3",
+            "define": "UNITY_PERFORMANCE_TESTS"
         }
     ],
     "noEngineReferences": false
