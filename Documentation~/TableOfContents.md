@@ -15,3 +15,4 @@
   * [Known Issues](KnownIssues.md)
   * [Physical Light Units in glTF](LightUnits.md)
   * [Implementation Details](ImplementationDetails.md)
+  * [Apple Privacy Manifest](apple-privacy-manifest.md)
