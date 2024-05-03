@@ -9,11 +9,7 @@ using System.IO;
 using GLTFast.Editor;
 using UnityEditor;
 
-#if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
-#else
-using UnityEditor.Experimental.AssetImporters;
-#endif
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;

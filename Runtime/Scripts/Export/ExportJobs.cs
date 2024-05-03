@@ -1,11 +1,6 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if UNITY_2020_2_OR_NEWER
-#define GLTFAST_MESH_DATA
-#endif
-
-
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -20,10 +15,9 @@ namespace GLTFast.Export
     static class ExportJobs
     {
 
-#if GLTFAST_MESH_DATA
-
         [BurstCompile]
-        public struct ConvertIndicesFlippedJob<T> : IJobParallelFor where T : struct {
+        public struct ConvertIndicesFlippedJob<T> : IJobParallelFor where T : struct
+        {
 
             [ReadOnly]
             public NativeArray<T> input;
@@ -32,15 +26,17 @@ namespace GLTFast.Export
             [NativeDisableParallelForRestriction]
             public NativeArray<T> result;
 
-            public void Execute(int i) {
-                result[i*3+0] = input[i*3+0];
-                result[i*3+1] = input[i*3+2];
-                result[i*3+2] = input[i*3+1];
+            public void Execute(int i)
+            {
+                result[i * 3 + 0] = input[i * 3 + 0];
+                result[i * 3 + 1] = input[i * 3 + 2];
+                result[i * 3 + 2] = input[i * 3 + 1];
             }
         }
 
         [BurstCompile]
-        public struct ConvertIndicesQuadFlippedJob<T> : IJobParallelFor where T : struct {
+        public struct ConvertIndicesQuadFlippedJob<T> : IJobParallelFor where T : struct
+        {
 
             [ReadOnly]
             public NativeArray<T> input;
@@ -49,17 +45,16 @@ namespace GLTFast.Export
             [NativeDisableParallelForRestriction]
             public NativeArray<T> result;
 
-            public void Execute(int i) {
-                result[i*6+0] = input[i*4+0];
-                result[i*6+1] = input[i*4+2];
-                result[i*6+2] = input[i*4+1];
-                result[i*6+3] = input[i*4+2];
-                result[i*6+4] = input[i*4+0];
-                result[i*6+5] = input[i*4+3];
+            public void Execute(int i)
+            {
+                result[i * 6 + 0] = input[i * 4 + 0];
+                result[i * 6 + 1] = input[i * 4 + 2];
+                result[i * 6 + 2] = input[i * 4 + 1];
+                result[i * 6 + 3] = input[i * 4 + 2];
+                result[i * 6 + 4] = input[i * 4 + 0];
+                result[i * 6 + 5] = input[i * 4 + 3];
             }
         }
-
-#endif // GLTFAST_MESH_DATA
 
         [BurstCompile]
         public unsafe struct ConvertPositionFloatJob : IJobParallelFor

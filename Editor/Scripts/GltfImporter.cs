@@ -25,11 +25,7 @@ using System.Runtime.CompilerServices;
 using GLTFast.Logging;
 using GLTFast.Utils;
 using UnityEditor;
-#if UNITY_2020_2_OR_NEWER
 using UnityEditor.AssetImporters;
-#else
-using UnityEditor.Experimental.AssetImporters;
-#endif
 using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Soft dependency on deprecated [Unity Jobs package][JobsPkg].
+- Legacy code for Unity versions older than the minimum required 2020 LTS.
 
 ## [6.4.0] - 2024-04-17
 
