@@ -60,6 +60,26 @@
             "name": "com.unity.test-framework.performance",
             "expression": "3",
             "define": "UNITY_PERFORMANCE_TESTS"
+        },
+        {
+            "name": "com.unity.modules.imageconversion",
+            "expression": "",
+            "define": "UNITY_IMAGECONVERSION"
+        },
+        {
+            "name": "com.unity.shadergraph",
+            "expression": "",
+            "define": "UNITY_SHADER_GRAPH"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "USING_URP"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "12",
+            "define": "USING_URP_12_OR_NEWER"
         }
     ],
     "noEngineReferences": false

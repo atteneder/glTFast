@@ -25,9 +25,6 @@ namespace GLTFast.Materials {
         static bool s_SupportsCameraOpaqueTexture;
 
 #if USING_URP_12_OR_NEWER
-        static readonly int k_AlphaClipPropId = Shader.PropertyToID("_AlphaClip");
-        static readonly int k_SurfacePropId = Shader.PropertyToID("_Surface");
-
 #if UNITY_EDITOR
         /// <summary>Guid of the shader graph with clearcoat support</summary>
         const string k_MetallicClearcoatShaderGuid = "c18c97ae1ce021b4980c5d19a54f0d3c";
@@ -46,12 +43,12 @@ namespace GLTFast.Materials {
 #if USING_URP_12_OR_NEWER
         protected override void SetDoubleSided(MaterialBase gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
-            material.SetFloat(CullProperty, (int)CullMode.Off);
+            material.SetFloat(MaterialProperty.Cull, (int)CullMode.Off);
         }
 
         protected override void SetAlphaModeMask(MaterialBase gltfMaterial, Material material) {
             base.SetAlphaModeMask(gltfMaterial, material);
-            material.SetFloat(k_AlphaClipPropId, 1);
+            material.SetFloat(MaterialProperty.AlphaClip, 1);
         }
 
         protected override void SetShaderModeBlend(MaterialBase gltfMaterial, Material material) {
@@ -64,12 +61,12 @@ namespace GLTFast.Materials {
             material.SetShaderPassEnabled(ShaderPassTransparentBackface, false);
             material.SetShaderPassEnabled(ShaderPassRayTracingPrepass, false);
             material.SetShaderPassEnabled(ShaderPassDepthOnlyPass, false);
-            material.SetFloat(SrcBlendProperty, (int) BlendMode.SrcAlpha);//5
-            material.SetFloat(DstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
+            material.SetFloat(MaterialProperty.SrcBlend, (int) BlendMode.SrcAlpha);//5
+            material.SetFloat(MaterialProperty.DstBlend, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(ZTestGBufferProperty, (int)CompareFunction.Equal); //3
             material.SetFloat(AlphaDstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
-            material.SetFloat(k_SurfacePropId, 1);
-            material.SetFloat(ZWriteProperty, 0);
+            material.SetFloat(MaterialProperty.Surface, 1);
+            material.SetFloat(MaterialProperty.ZWrite, 0);
         }
 
         /// <summary>

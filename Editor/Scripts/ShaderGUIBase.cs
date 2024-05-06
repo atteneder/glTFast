@@ -13,12 +13,6 @@ namespace GLTFast.Editor
     {
         const float k_Tolerance = 0.001f;
 
-        protected struct UvTransform
-        {
-            public float rotation;
-            public float2 scale;
-        }
-
         protected UvTransform? TextureRotationSlider(
             Material material,
             UvTransform? uvTransform,
@@ -38,7 +32,7 @@ namespace GLTFast.Editor
             }
             else
             {
-                GetUvTransform(material, scaleTransformPropertyId, rotationPropertyId, out oldUvTransform);
+                oldUvTransform = UvTransform.FromMaterial(material, scaleTransformPropertyId, rotationPropertyId);
                 newUvTransform = new UvTransform();
             }
 
@@ -95,26 +89,6 @@ namespace GLTFast.Editor
             }
 
             return uvTransform;
-        }
-
-        /// <summary>
-        /// Extracts a material's texture rotation (degrees) from the 2 by 2 matrix
-        /// </summary>
-        /// <param name="material"></param>
-        /// <param name="scaleTransformPropertyId">ID of the scale-transform (_ST) property</param>
-        /// <param name="rotationPropertyId">ID of the rotation property</param>
-        /// <param name="uvTransform">Resulting UV transform</param>
-        static void GetUvTransform(Material material, int scaleTransformPropertyId, int rotationPropertyId, out UvTransform uvTransform)
-        {
-            float4 st = material.GetVector(scaleTransformPropertyId);
-            float2 r = (Vector2)material.GetVector(rotationPropertyId);
-
-            uvTransform.scale.x = Mathematics.Normalize(new float2(st.x, r.y), out var r1);
-            uvTransform.scale.y = Mathematics.Normalize(new float2(st.y, r.x), out var r2);
-
-            var acos = Mathf.Acos(r1.x);
-            if (r2.x < 0) acos = Mathf.PI * 2 - acos;
-            uvTransform.rotation = acos * Mathf.Rad2Deg;
         }
     }
 }

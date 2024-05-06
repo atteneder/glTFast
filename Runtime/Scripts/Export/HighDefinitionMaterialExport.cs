@@ -51,7 +51,7 @@ namespace GLTFast.Export {
             };
 
             SetAlphaModeAndCutoff(uMaterial, material);
-            material.doubleSided = IsDoubleSided(uMaterial, MaterialGenerator.CullModeProperty);
+            material.doubleSided = IsDoubleSided(uMaterial, MaterialProperty.CullMode);
 
             //
             // Emission
@@ -176,7 +176,7 @@ namespace GLTFast.Export {
                 if (mainTex) {
                     if(mainTex is Texture2D) {
                         pbr.baseColorTexture = ExportTextureInfo(mainTex, gltf,
-                            material.GetAlphaMode() == Material.AlphaMode.Opaque
+                            material.GetAlphaMode() == MaterialBase.AlphaMode.Opaque
                                 ? ImageFormat.Jpg
                                 : ImageFormat.Unknown
                             );
@@ -226,7 +226,7 @@ namespace GLTFast.Export {
 
                     if ( metallicUsed || occUsed || smoothnessUsed ) {
                         ormImageExport = new MaskMapImageExport(maskMap);
-                        if (AddImageExport(gltf, ormImageExport, out var ormTextureId)) {
+                        if (MaterialExport.AddImageExport(gltf, ormImageExport, out var ormTextureId)) {
 
                             if (metallicUsed || smoothnessUsed) {
                                 pbr.metallicRoughnessTexture = new TextureInfo {

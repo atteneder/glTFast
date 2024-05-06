@@ -123,6 +123,11 @@ namespace GLTFast.Tests
             Assert.AreNotEqual(a.GetHashCode(), b.GetHashCode());
         }
 
+        internal static void AssertLogger(CollectingLogger logger)
+        {
+            AssertLogCodes(logger.Items, null);
+        }
+
         internal static void AssertLogger(CollectingLogger logger, IEnumerable<LogCode> expectedLogCodes)
         {
             AssertLogCodes(logger.Items, expectedLogCodes);
@@ -130,42 +135,52 @@ namespace GLTFast.Tests
 
         internal static void AssertLogCodes(IEnumerable<LogItem> logItems, IEnumerable<LogCode> expectedLogCodes)
         {
-            var expectedLogCodeFound = new Dictionary<LogCode, bool>();
-            foreach (var logCode in expectedLogCodes)
+            Dictionary<LogCode, bool> expectedLogCodeFound = null;
+            if (expectedLogCodes != null)
             {
-                expectedLogCodeFound[logCode] = false;
-            }
-
-            foreach (var item in logItems)
-            {
-                switch (item.Type)
+                expectedLogCodeFound = new Dictionary<LogCode, bool>();
+                foreach (var logCode in expectedLogCodes)
                 {
-                    case LogType.Assert:
-                    case LogType.Error:
-                    case LogType.Exception:
-                        if (expectedLogCodeFound.Keys.Contains(item.Code))
-                        {
-                            expectedLogCodeFound[item.Code] = true;
-                            // Informal log
-                            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, item.ToString());
-                        }
-                        else
-                        {
-                            item.Log();
-                            throw new AssertionException($"Unhandled {item.Type} message {item} ({item.Code}).");
-                        }
-                        break;
-                    case LogType.Warning:
-                    case LogType.Log:
-                    default:
-                        item.Log();
-                        break;
+                    expectedLogCodeFound[logCode] = false;
                 }
             }
 
-            foreach (var b in expectedLogCodeFound.Where(b => !b.Value))
+            if (logItems != null)
             {
-                throw new AssertionException($"Missing expected log message {b.Key}.");
+                foreach (var item in logItems)
+                {
+                    switch (item.Type)
+                    {
+                        case LogType.Assert:
+                        case LogType.Error:
+                        case LogType.Exception:
+                            if (expectedLogCodeFound?.Keys.Contains(item.Code) == true)
+                            {
+                                expectedLogCodeFound[item.Code] = true;
+                                // Informal log
+                                Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, item.ToString());
+                            }
+                            else
+                            {
+                                item.Log();
+                                throw new AssertionException($"Unhandled {item.Type} message {item} ({item.Code}).");
+                            }
+                            break;
+                        case LogType.Warning:
+                        case LogType.Log:
+                        default:
+                            item.Log();
+                            break;
+                    }
+                }
+            }
+
+            if (expectedLogCodeFound != null)
+            {
+                foreach (var b in expectedLogCodeFound.Where(b => !b.Value))
+                {
+                    throw new AssertionException($"Missing expected log message {b.Key}.");
+                }
             }
         }
 

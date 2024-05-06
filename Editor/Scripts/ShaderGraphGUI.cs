@@ -8,7 +8,6 @@
 #if GLTFAST_SHADER_GRAPH || UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
-using static GLTFast.Materials.MaterialGenerator;
 
 namespace GLTFast.Editor
 {
@@ -23,8 +22,8 @@ namespace GLTFast.Editor
                 m_UVTransform = TextureRotationSlider(
                     material,
                     m_UVTransform,
-                    BaseColorTextureScaleTransformProperty,
-                    BaseColorTextureRotationProperty,
+                    Materials.MaterialProperty.BaseColorTextureScaleTransform,
+                    Materials.MaterialProperty.BaseColorTextureRotation,
                     label:"Base Color Tex Rotation"
                     );
 

@@ -24,25 +24,57 @@ namespace GLTFast.Export
         {
             if (s_MaterialExport == null)
             {
-
                 var renderPipeline = RenderPipelineUtils.RenderPipeline;
 
                 switch (renderPipeline)
                 {
                     case RenderPipeline.BuiltIn:
                     case RenderPipeline.Universal:
+#if UNITY_SHADER_GRAPH
+                        s_MaterialExport = new MetaMaterialExport<
+                            StandardMaterialExport,
+                            GltfShaderGraphMaterialExporter
+                        >();
+#else
                         s_MaterialExport = new StandardMaterialExport();
+#endif
                         break;
 #if USING_HDRP
                     case RenderPipeline.HighDefinition:
-                        s_MaterialExport = new HighDefinitionMaterialExport();
+                        s_MaterialExport = new MetaMaterialExport<
+                            HighDefinitionMaterialExport,
+                            GltfHdrpMaterialExporter
+                        >();
                         break;
 #endif
                     default:
                         throw new InvalidOperationException($"Could not determine default MaterialExport (render pipeline {renderPipeline})");
                 }
+
             }
             return s_MaterialExport;
+        }
+
+        /// <summary>
+        /// Adds an ImageExport to the glTF.
+        /// No conversions or channel swizzling
+        /// </summary>
+        /// <param name="gltf">glTF to add the image to.</param>
+        /// <param name="imageExport">Texture generator to be added</param>
+        /// <param name="textureId">Resulting texture index.</param>
+        /// <returns>True if the texture was added, false otherwise.</returns>
+        internal static bool AddImageExport(IGltfWritable gltf, ImageExportBase imageExport, out int textureId)
+        {
+            var imageId = gltf.AddImage(imageExport);
+            if (imageId < 0)
+            {
+                textureId = -1;
+                return false;
+            }
+
+            var samplerId = gltf.AddSampler(imageExport.FilterMode, imageExport.WrapModeU, imageExport.WrapModeV);
+            textureId = gltf.AddTexture(imageId, samplerId);
+            return true;
         }
     }
 }

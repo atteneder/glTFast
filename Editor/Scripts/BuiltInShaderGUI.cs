@@ -26,7 +26,7 @@ namespace GLTFast.Editor
 
         UvTransform? m_UVTransform;
 
-        public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
+        public override void OnGUI(MaterialEditor materialEditor, UnityEditor.MaterialProperty[] properties)
         {
             if (materialEditor.target is Material material)
             {
@@ -64,8 +64,8 @@ namespace GLTFast.Editor
                 m_UVTransform = TextureRotationSlider(
                     material,
                     m_UVTransform,
-                    BaseColorTextureScaleTransformProperty,
-                    BaseColorTextureRotationProperty,
+                    MaterialProperty.BaseColorTextureScaleTransform,
+                    MaterialProperty.BaseColorTextureRotation,
                     true,
                     "Base Color Tex Rotation");
                 if (m_UVTransform.HasValue)
@@ -112,7 +112,7 @@ namespace GLTFast.Editor
                     SetOpaqueMode(material);
                     break;
                 case BlendModeOption.Cutout:
-                    SetAlphaModeMask(material, material.GetFloat(AlphaCutoffProperty));
+                    SetAlphaModeMask(material, material.GetFloat(MaterialProperty.AlphaCutoff));
                     break;
                 case BlendModeOption.Fade:
                     SetAlphaModeBlend(material);

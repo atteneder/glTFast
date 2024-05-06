@@ -91,6 +91,11 @@
         },
         {
             "name": "com.unity.shadergraph",
+            "expression": "",
+            "define": "UNITY_SHADER_GRAPH"
+        },
+        {
+            "name": "com.unity.shadergraph",
             "expression": "12",
             "define": "UNITY_SHADER_GRAPH_12_OR_NEWER"
         },

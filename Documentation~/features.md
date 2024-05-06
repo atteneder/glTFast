@@ -7,13 +7,13 @@
 | | |
 | **GameObject**
 | Import   | ✅️ | ✅
-| Export   | <sup>1</sup>☑️ | <sup>1</sup> ☑️
+| Export   | ¹☑️ | ¹ ☑️
 | | |
 | **Entities (see [DOTS](#data-oriented-technology-stack))**
 | Import   | [☑️](#data-oriented-technology-stack) | `n/a`
 | Export   |  | `n/a`
 
-<sup>1</sup>: Experimental. Core features missing
+¹: Experimental. Core features missing
 
 ## Core glTF&trade; features
 
@@ -55,7 +55,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | POINTS | ✅ | ✅
 | LINES | ✅ | ✅
 | LINE_STRIP | ✅ | ✅
-| <sup>1</sup>LINE_LOOP | ✅ | ✅
+| ¹LINE_LOOP | ✅ | ✅
 | TRIANGLE_STRIP |  |
 | TRIANGLE_FAN |  |
 | Quads | `n/a` | ✅ via triangulation
@@ -65,7 +65,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Normals | ✅ | ✅
 | Tangents | ✅ | ✅
 | Texture coordinates / UV sets | ✅ | `?`
-| Three or more texture coordinates / UV sets | <sup>2</sup>☑️ | `?`
+| Three or more texture coordinates / UV sets | ²☑️ | `?`
 | Vertex colors | ✅ | `?`
 | Draco&trade; mesh compression (via [DracoForUnity]) | ✅ | ✅
 | Implicit (no) indices | ✅ |
@@ -74,7 +74,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Weights (up to 4 per vertex) | ✅ |
 | | |
 | **Morph Targets / Blend Shapes**
-| Sparse accessors | <sup>3</sup> ✅ |
+| Sparse accessors | ³ ✅ |
 | [Skins][Skins] | ✅ |
 | | |
 | **Animation**
@@ -82,11 +82,11 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | via Playable API ([issue][AnimationPlayables]) |  |
 | via Mecanim ([issue][AnimationMecanim]) |  |
 
-<sup>1</sup>: Untested due to lack of demo files.
+¹: Untested due to lack of demo files.
 
-<sup>2</sup>: Up to eight UV sets can imported, but *Unity glTFast* shaders only support two (see [issue][UVsets]).
+²: Up to eight UV sets can imported, but *Unity glTFast* shaders only support two (see [issue][UVsets]).
 
-<sup>3</sup>: Not on all accessor types; morph targets and vertex positions only
+³: Not on all accessor types; morph targets and vertex positions only
 
 ## Extensions
 
@@ -113,11 +113,11 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | KHR_xmp_json_ld |️ |
 | | |
 | **Vendor**
-| <sup>1</sup>EXT_mesh_gpu_instancing | ✅ |
+| ¹EXT_mesh_gpu_instancing | ✅ |
 | EXT_meshopt_compression | ✅ |
 | EXT_lights_image_based | [ℹ️][IBL] |
 
-<sup>1</sup>: Without support for custom vertex attributes (e.g. `_ID`)
+¹: Without support for custom vertex attributes (e.g. `_ID`)
 
 Not investigated yet:
 
@@ -150,8 +150,8 @@ See [glTFast Add-on API](UseCaseCustomExtras.md) for an example to import the `e
 
 | Material Feature              | URP | HDRP | Built-In |
 |-------------------------------|-----|------|----------|
-| PBR<sup>1</sup> Metallic-Roughness        | ✅  | ✅   | ✅       |
-| PBR<sup>1</sup> Specular-Glossiness       | ✅  | ✅   | ✅       |
+| PBR¹ Metallic-Roughness        | ✅  | ✅   | ✅       |
+| PBR¹ Specular-Glossiness       | ✅  | ✅   | ✅       |
 | Unlit                         | ✅  | ✅   | ✅       |
 | Normal texture                | ✅  | ✅   | ✅       |
 | Occlusion texture             | ✅  | ✅   | ✅       |
@@ -159,30 +159,36 @@ See [glTFast Add-on API](UseCaseCustomExtras.md) for an example to import the `e
 | Alpha modes OPAQUE/MASK/BLEND | ✅  | ✅   | ✅       |
 | Double sided / Two sided      | ✅  | ✅   | ✅       |
 | Vertex colors                 | ✅  | ✅   | ✅       |
-| Multiple UV sets              | ✅<sup>2</sup>  | ✅<sup>2</sup>   | ✅<sup>2</sup>       |
+| Multiple UV sets              | ✅²  | ✅²   | ✅²       |
 | Texture Transform             | ✅  | ✅   | ✅       |
-| Clear coat                    | ☑️<sup>3</sup>  | ✅  | [⛔️][ClearCoat] |
+| Clear coat                    | ☑️³  | ✅  | [⛔️][ClearCoat] |
 | Sheen                         | [ℹ️][Sheen] | [ℹ️][Sheen] | [⛔️][Sheen] |
-| Transmission                  | [☑️][Transmission]<sup>4</sup> | [☑️][Transmission]<sup>5</sup> | [☑️][Transmission]<sup>5</sup> |
+| Transmission                  | [☑️][Transmission]⁴ | [☑️][Transmission]⁵ | [☑️][Transmission]⁵ |
 | Variants                      | [ℹ️][Variants] | [ℹ️][Variants] | [ℹ️][Variants] |
 | IOR                           | [ℹ️][IOR]      | [ℹ️][IOR]      | [⛔️][IOR]      |
 | Specular                      | [ℹ️][Specular] | [ℹ️][Specular] | [⛔️][Specular] |
 | Volume                        | [ℹ️][Volume]   | [ℹ️][Volume]   | [⛔️][Volume]   |
 | Point clouds                  |      |     | Unlit only |
 
-<sup>1</sup>: Physically-Based Rendering (PBR) material model
+¹: Physically-Based Rendering (PBR) material model
 
-<sup>2</sup>: Two sets of texture coordinates (as required by the glTF 2.0 specification) are supported, but not three or more ([issue][UVSets])
+²: Two sets of texture coordinates (as required by the glTF 2.0 specification) are supported, but not three or more ([issue][UVSets])
 
-<sup>3</sup>: Only supports Universal Render Pipeline versions >= 12.0; Only coat mask and smoothness are supported, other coat related properties, such as coat normal, are not supported
+³: Only supports Universal Render Pipeline versions >= 12.0; Only coat mask and smoothness are supported, other coat related properties, such as coat normal, are not supported
 
-<sup>4</sup>: There are two approximation implementations for transmission in Universal render pipeline. If the Opaque Texture is enabled (in the Universal RP Asset settings), it is sampled to provide proper transmissive filtering. The downside of this approach is transparent objects are not rendered on top of each other. If the opaque texture is not available, the common approximation (see <sup>4</sup> below) is used.
+⁴: There are two approximation implementations for transmission in Universal render pipeline. If the Opaque Texture is enabled (in the Universal RP Asset settings), it is sampled to provide proper transmissive filtering. The downside of this approach is transparent objects are not rendered on top of each other. If the opaque texture is not available, the common approximation (see ⁴ below) is used.
 
-<sup>5</sup>: Transmission in Built-In and HD render pipeline does not support transmission textures and is only 100% correct in certain cases like clear glass (100% transmission, white base color). Otherwise it's an approximation.
+⁵: Transmission in Built-In and HD render pipeline does not support transmission textures and is only 100% correct in certain cases like clear glass (100% transmission, white base color). Otherwise it's an approximation.
 
 ### Material Export
 
-Material export is currently only tested on the following shaders:
+Material export support depends largely on the shaders used. We differentiate between Unity shaders (default shaders of Unity render pipelines) and glTFast's own shaders.
+
+#### Unity Shaders
+
+Unity shaders are typically used on pre-existing assets.
+
+Supported Unity shaders:
 
 - Universal and High Definition render pipeline
   - `Lit`
@@ -193,32 +199,67 @@ Material export is currently only tested on the following shaders:
 
 Other shaders might (partially) work if they have similar properties (with identical names).
 
-| Material Feature              | URP<sup>1</sup> | HDRP<sup>2</sup> | Built-In<sup>3</sup> |
-|-------------------------------|-----|------|----------|
-| PBR Metallic-Roughness        | ✅ | ✅ | ✅ |
-| PBR Specular-Glossiness       |  |  |  |
-| Unlit                         | ✅ | ✅ | ✅ |
-| Normal texture                | ✅ | ✅ | ✅ |
-| Occlusion texture             | ✅ | ✅ | ✅ |
-| Emission texture              | ✅ | ✅ | ✅ |
-| Alpha modes OPAQUE/MASK/BLEND | ✅ | ✅ | ✅ |
-| Double sided / Two sided      | ✅ | ✅ | ✅ |
-| Vertex colors                 | `?` | `?` | `?` |
-| Multiple UV sets              | `?` | `?` | `?` |
-| Texture Transform             | ✅ | ✅ | ✅ |
-| Clear coat                    | `n/a` | ✅ | `n/a` |
-| Sheen                         | `?` | `?` | `n/a` |
-| Transmission                  |  |  | `n/a` |
-| Variants                      |  |  |  |
-| IOR                           |  |  | `n/a` |
-| Specular                      |  |  |  |
-| Volume                        |  |  | `n/a` |
+| Material Feature              | URP¹ | HDRP² | Built-In³
+|-------------------------------|-----|------|----------
+| PBR Metallic-Roughness        | ✅ | ✅ | ✅
+| PBR Specular-Glossiness       |  |  |&nbsp;
+| Unlit                         | ✅ | ✅ | ✅
+| Normal texture                | ✅ | ✅ | ✅
+| Occlusion texture             | ✅ | ✅ | ✅
+| Emission texture              | ✅ | ✅ | ✅
+| Alpha modes OPAQUE/MASK/BLEND | ✅ | ✅ | ✅
+| Double sided / Two sided      | ✅ | ✅ | ✅
+| Vertex colors                 | ✅⁴ | ✅⁴ | ✅⁴
+| Texture Transform             | ✅ | ✅ | ✅
+| Clear coat                    | `n/a` | ✅ | `n/a`
+| Sheen                         | `?` | `?` | `n/a`
+| Transmission                  |  |  | `n/a`
+| IOR                           |  |  | `n/a`
+| Specular                      |  |  |&nbsp;
+| Volume                        |  |  | `n/a`
 
-<sup>1</sup>: Universal Render Pipeline Lit Shader
+¹: Universal Render Pipeline Lit Shader
 
-<sup>2</sup>: High Definition Render Pipeline Lit Shader
+²: High Definition Render Pipeline Lit Shader
 
-<sup>3</sup>: Built-In Render Pipeline Standard and Unlit Shader
+³: Built-In Render Pipeline Standard and Unlit Shader
+
+⁴: Vertex colors are always exported, regardless whether the shader makes use of them.
+
+#### glTFast Shaders
+
+glTFast's own shaders are typically used when the assets were imported with glTFast. This enables round-trip import-export workflows. They are also the preferred way to author assets for glTF export specifically.
+
+Supported glTFast shaders/shader graphs:
+
+- Shader Graphs
+  - [x] `Shader Graphs/glTF-pbrMetallicRoughness`
+  - [x] `Shader Graphs/glTF-unlit`
+  - [ ] `Shader Graphs/glTF-pbrSpecularGlossiness`
+  - [ ] Legacy shader graphs (in folder `Runtime/Shader/Legacy`; used for Universal Render Pipeline 10.x and older)
+- Shaders
+  - [x] `glTF/PbrMetallicRoughness`
+  - [x] `glTF/Unlit`
+  - [ ] `glTF/PbrSpecularGlossiness`
+
+| Material Feature              | URP | HDRP | Built-In
+|-------------------------------|-----|------|----------
+| Normal texture                | ✅ | ✅ | ✅
+| Occlusion texture             | ✅ | ✅ | ✅
+| Emission texture              | ✅ | ✅ | ✅
+| Alpha modes OPAQUE/MASK/BLEND | ✅ | ✅ | ✅
+| Double sided / Two sided      | ✅ | ✅ | ✅
+| Vertex colors                 | ✅ | ✅ | ✅
+| Multiple UV sets              | ✅¹ | ✅¹ | ✅¹
+| Texture Transform             | ✅ | ✅ | ✅
+| Clear coat                    | `n/a` |  | `n/a`
+| Sheen                         | `?` | `?` | `n/a`
+| Transmission                  |  |  | `n/a`
+| IOR                           |  |  | `n/a`
+| Specular                      |  |  |&nbsp;
+| Volume                        |  |  | `n/a`
+
+¹: Only two UV sets are supported by the shaders.
 
 ## Data-Oriented Technology Stack
 

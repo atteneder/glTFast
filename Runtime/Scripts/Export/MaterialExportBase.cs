@@ -202,7 +202,7 @@ namespace GLTFast.Export
                 return null;
             }
             var imageExport = new ImageExport(texture2d, format);
-            if (AddImageExport(gltf, imageExport, out var textureId))
+            if (MaterialExport.AddImageExport(gltf, imageExport, out var textureId))
             {
                 return new TextureInfo
                 {
@@ -234,7 +234,7 @@ namespace GLTFast.Export
                 return null;
             }
             var imageExport = new NormalImageExport(texture2d);
-            if (AddImageExport(gltf, imageExport, out var textureId))
+            if (MaterialExport.AddImageExport(gltf, imageExport, out var textureId))
             {
                 var info = new NormalTextureInfo
                 {
@@ -251,26 +251,11 @@ namespace GLTFast.Export
             return null;
         }
 
-        /// <summary>
-        /// Adds an ImageExport to the glTF.
-        /// No conversions or channel swizzling
-        /// </summary>
-        /// <param name="gltf">glTF to add the image to.</param>
-        /// <param name="imageExport">Texture generator to be added</param>
-        /// <param name="textureId">Resulting texture index.</param>
-        /// <returns>True if the texture was added, false otherwise.</returns>
+        /// <inheritdoc cref="MaterialExport.AddImageExport"/>
+        [Obsolete("Use MaterialExport.AddImageExport instead.")]
         protected static bool AddImageExport(IGltfWritable gltf, ImageExportBase imageExport, out int textureId)
         {
-            var imageId = gltf.AddImage(imageExport);
-            if (imageId < 0)
-            {
-                textureId = -1;
-                return false;
-            }
-
-            var samplerId = gltf.AddSampler(imageExport.FilterMode, imageExport.WrapModeU, imageExport.WrapModeV);
-            textureId = gltf.AddTexture(imageId, samplerId);
-            return true;
+            return MaterialExport.AddImageExport(gltf, imageExport, out textureId);
         }
 
         /// <summary>

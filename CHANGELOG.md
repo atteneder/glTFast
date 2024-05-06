@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] -
 
 ### Added
+- (Export) Support for exporting glTFast shader based materials. This reduces data loss on import-export round trips considerably.
 - Dependency on [Unity Collections package][Collections].
 - Added Apple Privacy Manifest documentation.
 
@@ -16,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Soft dependency on deprecated [Unity Jobs package][JobsPkg].
 - Legacy code for Unity versions older than the minimum required 2020 LTS.
+
+### Changed
+- Material exporter implementation is chosen based on used shader by default.
 
 ## [6.4.0] - 2024-04-17
 

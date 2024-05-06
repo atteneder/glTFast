@@ -46,7 +46,6 @@ namespace GLTFast.Export
     /// </summary>
     public class GltfWriter : IGltfWritable
     {
-
         enum State
         {
             Initialized,
