@@ -58,6 +58,7 @@ namespace GLTFast.Export
             public int stream;
             public int offset;
             public int accessorId;
+            public int size;
         }
 
         const int k_MAXStreamCount = 4;
@@ -90,6 +91,7 @@ namespace GLTFast.Export
         List<SamplerKey> m_SamplerKeys;
         List<UnityEngine.Material> m_UnityMaterials;
         List<UnityEngine.Mesh> m_UnityMeshes;
+        List<VertexAttributeUsage> m_MeshVertexAttributeUsage;
         Dictionary<int, int[]> m_NodeMaterials;
 
         Stream m_BufferStream;
@@ -134,19 +136,58 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
+        [Obsolete("Use overload with skinning parameter.")]
         public void AddMeshToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds)
+        {
+            AddMeshToNode(nodeId, uMesh, materialIds, true);
+        }
+
+        /// <inheritdoc />
+        public void AddMeshToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds, bool skinning)
         {
             if ((m_Settings.ComponentMask & ComponentType.Mesh) == 0) return;
             CertifyNotDisposed();
             var node = m_Nodes[nodeId];
 
+            // Always export positions.
+            var attributeUsage = VertexAttributeUsage.Position;
+            var noMaterialAssigned = false;
+
             if (materialIds != null && materialIds.Length > 0)
             {
-                m_NodeMaterials = m_NodeMaterials ?? new Dictionary<int, int[]>();
+                m_NodeMaterials ??= new Dictionary<int, int[]>();
                 m_NodeMaterials[nodeId] = materialIds;
+
+                foreach (var materialId in materialIds)
+                {
+                    if (materialId < 0)
+                    {
+                        noMaterialAssigned = true;
+                    }
+                    else
+                    {
+                        var usage = GetVertexAttributeUsage(m_UnityMaterials[materialId].shader);
+                        if (!skinning)
+                        {
+                            usage &= ~VertexAttributeUsage.Skinning;
+                        }
+                        attributeUsage |= usage;
+                    }
+                }
+            }
+            else
+            {
+                noMaterialAssigned = true;
             }
 
-            node.mesh = AddMesh(uMesh);
+            if (noMaterialAssigned)
+            {
+                // No material.
+                // This means the default material will be assigned, which requires positions, normals and colors.
+                attributeUsage |= VertexAttributeUsage.Normal | VertexAttributeUsage.Color;
+            }
+
+            node.mesh = AddMesh(uMesh, attributeUsage);
         }
 
         /// <inheritdoc />
@@ -836,9 +877,11 @@ namespace GLTFast.Export
 
             var mesh = m_Meshes[meshId];
             var uMesh = m_UnityMeshes[meshId];
+            var vertexAttributeUsage = m_Settings.PreservedVertexAttributes | m_MeshVertexAttributeUsage[meshId];
 
             var vertexAttributes = uMesh.GetVertexAttributes();
-            var strides = new int[k_MAXStreamCount];
+            var inputStrides = new int[k_MAXStreamCount];
+            var outputStrides = new int[k_MAXStreamCount];
             var alignments = new int[k_MAXStreamCount];
 
             var attributes = new Attributes();
@@ -854,16 +897,28 @@ namespace GLTFast.Export
                     continue;
                 }
 
-                var attrData = new AttributeData
-                {
-                    offset = strides[attribute.stream],
-                    stream = attribute.stream
-                };
+                var excludeAttribute = (attribute.attribute.ToVertexAttributeUsage() & vertexAttributeUsage) == VertexAttributeUsage.None;
 
                 var attributeSize = GetAttributeSize(attribute.format);
-                var size = attribute.dimension * attributeSize;
-                strides[attribute.stream] += size;
+
+                var attrData = new AttributeData
+                {
+                    offset = inputStrides[attribute.stream],
+                    stream = attribute.stream,
+                    size = attribute.dimension * attributeSize
+                };
+
+                inputStrides[attribute.stream] += attrData.size;
                 alignments[attribute.stream] = math.max(alignments[attribute.stream], attributeSize);
+
+                if (excludeAttribute)
+                {
+                    continue;
+                }
+                else
+                {
+                    outputStrides[attribute.stream] += attrData.size;
+                }
 
                 // Adhere data alignment rules
                 Assert.IsTrue(attrData.offset % 4 == 0);
@@ -942,9 +997,9 @@ namespace GLTFast.Export
             }
 
             var streamCount = 1;
-            for (var stream = 0; stream < strides.Length; stream++)
+            for (var stream = 0; stream < outputStrides.Length; stream++)
             {
-                var stride = strides[stream];
+                var stride = outputStrides[stream];
                 if (stride <= 0) continue;
                 streamCount = stream + 1;
             }
@@ -1120,7 +1175,7 @@ namespace GLTFast.Export
             for (var stream = 0; stream < streamCount; stream++)
             {
                 inputStreams[stream] = meshData.GetVertexData<byte>(stream);
-                outputStreams[stream] = new NativeArray<byte>(inputStreams[stream], Allocator.TempJob);
+                outputStreams[stream] = new NativeArray<byte>(outputStrides[stream] * vertexCount, Allocator.TempJob);
             }
 
             foreach (var pair in attrDataDict)
@@ -1133,7 +1188,8 @@ namespace GLTFast.Export
                     case VertexAttribute.Normal:
                         await ConvertPositionAttribute(
                             attrData,
-                            (uint)strides[attrData.stream],
+                            (uint)inputStrides[attrData.stream],
+                            (uint)outputStrides[attrData.stream],
                             vertexCount,
                             inputStreams[attrData.stream],
                             outputStreams[attrData.stream]
@@ -1142,7 +1198,8 @@ namespace GLTFast.Export
                     case VertexAttribute.Tangent:
                         await ConvertTangentAttribute(
                             attrData,
-                            (uint)strides[attrData.stream],
+                            (uint)inputStrides[attrData.stream],
+                            (uint)outputStrides[attrData.stream],
                             vertexCount,
                             inputStreams[attrData.stream],
                             outputStreams[attrData.stream]
@@ -1158,11 +1215,25 @@ namespace GLTFast.Export
                     case VertexAttribute.TexCoord7:
                         await ConvertTexCoordAttribute(
                             attrData,
-                            (uint)strides[attrData.stream],
+                            (uint)inputStrides[attrData.stream],
+                            (uint)outputStrides[attrData.stream],
                             vertexCount,
                             inputStreams[attrData.stream],
                             outputStreams[attrData.stream]
                             );
+                        break;
+                    case VertexAttribute.Color:
+                    case VertexAttribute.BlendWeight:
+                    case VertexAttribute.BlendIndices:
+                    default:
+                        await ConvertGenericAttribute(
+                            attrData,
+                            (uint)inputStrides[attrData.stream],
+                            (uint)outputStrides[attrData.stream],
+                            vertexCount,
+                            inputStreams[attrData.stream],
+                            outputStreams[attrData.stream]
+                        );
                         break;
                 }
             }
@@ -1172,7 +1243,7 @@ namespace GLTFast.Export
             {
                 bufferViewIds[stream] = WriteBufferViewToBuffer(
                     outputStreams[stream],
-                    strides[stream],
+                    outputStrides[stream],
                     alignments[stream]
                     );
                 inputStreams[stream].Dispose();
@@ -1450,13 +1521,21 @@ namespace GLTFast.Export
 
         static async Task ConvertPositionAttribute(
             AttributeData attrData,
-            uint byteStride,
+            uint inputByteStride,
+            uint outputByteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
             )
         {
-            var job = CreateConvertPositionAttributeJob(attrData, byteStride, vertexCount, inputStream, outputStream);
+            var job = CreateConvertPositionAttributeJob(
+                attrData,
+                inputByteStride,
+                outputByteStride,
+                vertexCount,
+                inputStream,
+                outputStream
+                );
             while (!job.IsCompleted)
             {
                 await Task.Yield();
@@ -1466,7 +1545,8 @@ namespace GLTFast.Export
 
         static unsafe JobHandle CreateConvertPositionAttributeJob(
             AttributeData attrData,
-            uint byteStride,
+            uint inputByteStride,
+            uint outputByteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
@@ -1475,7 +1555,8 @@ namespace GLTFast.Export
             var job = new ExportJobs.ConvertPositionFloatJob
             {
                 input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
-                byteStride = byteStride,
+                inputByteStride = inputByteStride,
+                outputByteStride = outputByteStride,
                 output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
@@ -1483,13 +1564,21 @@ namespace GLTFast.Export
 
         static async Task ConvertTangentAttribute(
             AttributeData attrData,
-            uint byteStride,
+            uint inputByteStride,
+            uint outputByteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
             )
         {
-            var job = CreateConvertTangentAttributeJob(attrData, byteStride, vertexCount, inputStream, outputStream);
+            var job = CreateConvertTangentAttributeJob(
+                attrData,
+                inputByteStride,
+                outputByteStride,
+                vertexCount,
+                inputStream,
+                outputStream
+                );
             while (!job.IsCompleted)
             {
                 await Task.Yield();
@@ -1499,7 +1588,8 @@ namespace GLTFast.Export
 
         static unsafe JobHandle CreateConvertTangentAttributeJob(
             AttributeData attrData,
-            uint byteStride,
+            uint inputByteStride,
+            uint outputByteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
@@ -1508,7 +1598,8 @@ namespace GLTFast.Export
             var job = new ExportJobs.ConvertTangentFloatJob
             {
                 input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
-                byteStride = byteStride,
+                inputByteStride = inputByteStride,
+                outputByteStride = outputByteStride,
                 output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
@@ -1516,13 +1607,43 @@ namespace GLTFast.Export
 
         static async Task ConvertTexCoordAttribute(
             AttributeData attrData,
-            uint byteStride,
+            uint inputByteStride,
+            uint outputByteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
         )
         {
-            var job = CreateConvertTexCoordAttributeJob(attrData, byteStride, vertexCount, inputStream, outputStream);
+            var job = CreateConvertTexCoordAttributeJob(
+                attrData,
+                inputByteStride,
+                outputByteStride,
+                vertexCount,
+                inputStream,
+                outputStream);
+            while (!job.IsCompleted)
+            {
+                await Task.Yield();
+            }
+            job.Complete();
+        }
+
+        static async Task ConvertGenericAttribute(
+            AttributeData attrData,
+            uint inputByteStride,
+            uint outputByteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+        )
+        {
+            var job = CreateConvertGenericAttributeJob(
+                attrData,
+                inputByteStride,
+                outputByteStride,
+                vertexCount,
+                inputStream,
+                outputStream);
             while (!job.IsCompleted)
             {
                 await Task.Yield();
@@ -1532,7 +1653,8 @@ namespace GLTFast.Export
 
         static unsafe JobHandle CreateConvertTexCoordAttributeJob(
             AttributeData attrData,
-            uint byteStride,
+            uint inputByteStride,
+            uint outputByteStride,
             int vertexCount,
             NativeArray<byte> inputStream,
             NativeArray<byte> outputStream
@@ -1541,7 +1663,28 @@ namespace GLTFast.Export
             var job = new ExportJobs.ConvertTexCoordFloatJob
             {
                 input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
-                byteStride = byteStride,
+                inputByteStride = inputByteStride,
+                outputByteStride = outputByteStride,
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+            }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
+            return job;
+        }
+
+        static unsafe JobHandle CreateConvertGenericAttributeJob(
+            AttributeData attrData,
+            uint inputByteStride,
+            uint outputByteStride,
+            int vertexCount,
+            NativeArray<byte> inputStream,
+            NativeArray<byte> outputStream
+        )
+        {
+            var job = new ExportJobs.ConvertGenericJob
+            {
+                inputByteStride = inputByteStride,
+                outputByteStride = outputByteStride,
+                byteLength = (uint)attrData.size,
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
                 output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
@@ -1619,7 +1762,7 @@ namespace GLTFast.Export
             return node;
         }
 
-        int AddMesh(UnityEngine.Mesh uMesh)
+        int AddMesh(UnityEngine.Mesh uMesh, VertexAttributeUsage attributeUsage)
         {
             int meshId;
 
@@ -1636,6 +1779,7 @@ namespace GLTFast.Export
                 meshId = m_UnityMeshes.IndexOf(uMesh);
                 if (meshId >= 0)
                 {
+                    SetVertexAttributeUsage(meshId, attributeUsage);
                     return meshId;
                 }
             }
@@ -1646,8 +1790,10 @@ namespace GLTFast.Export
             };
             m_Meshes = m_Meshes ?? new List<Mesh>();
             m_UnityMeshes = m_UnityMeshes ?? new List<UnityEngine.Mesh>();
+            m_MeshVertexAttributeUsage ??= new List<VertexAttributeUsage>();
             m_Meshes.Add(mesh);
             m_UnityMeshes.Add(uMesh);
+            m_MeshVertexAttributeUsage.Add(attributeUsage);
             meshId = m_Meshes.Count - 1;
             return meshId;
         }
@@ -1739,6 +1885,16 @@ namespace GLTFast.Export
             return bufferViewId;
         }
 
+        void SetVertexAttributeUsage(int meshId, VertexAttributeUsage attributeUsage)
+        {
+            var existingUsage = m_MeshVertexAttributeUsage[meshId];
+            if (((existingUsage ^ attributeUsage) & VertexAttributeUsage.Color) == VertexAttributeUsage.Color)
+            {
+                m_Logger.Warning(LogCode.InconsistentVertexColorUsage, meshId.ToString());
+            }
+            m_MeshVertexAttributeUsage[meshId] = attributeUsage | existingUsage;
+        }
+
         void Dispose()
         {
             m_Settings = null;
@@ -1751,6 +1907,7 @@ namespace GLTFast.Export
             m_SamplerKeys = null;
             m_UnityMaterials = null;
             m_UnityMeshes = null;
+            m_MeshVertexAttributeUsage = null;
             m_NodeMaterials = null;
             m_BufferStream?.Close();
             m_BufferStream = null;
@@ -1800,6 +1957,38 @@ namespace GLTFast.Export
                 default:
                     throw new ArgumentOutOfRangeException(nameof(format), format, null);
             }
+        }
+
+        static VertexAttributeUsage GetVertexAttributeUsage(Shader shader)
+        {
+            var shaderName = shader.name;
+            if (shaderName.EndsWith("unlit", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return VertexAttributeUsage.Position
+                    // Only two UV channels
+                    | VertexAttributeUsage.TwoTexCoords
+                    | VertexAttributeUsage.Color
+                    | VertexAttributeUsage.Skinning;
+            }
+            if (shaderName.StartsWith("Shader Graphs/glTF-", StringComparison.InvariantCulture)
+                || shaderName.StartsWith("glTF/", StringComparison.InvariantCulture)
+                || shaderName.StartsWith("Particles/Standard", StringComparison.InvariantCulture)
+                )
+            {
+                return VertexAttributeUsage.Position
+                    | VertexAttributeUsage.Normal
+                    | VertexAttributeUsage.Tangent
+                    // Only two UV channels
+                    | VertexAttributeUsage.TwoTexCoords
+                    | VertexAttributeUsage.Color
+                    | VertexAttributeUsage.Skinning;
+            }
+            // Note: No vertex colors. Most shaders don't make use of them, so discard them by default.
+            return VertexAttributeUsage.Position
+                | VertexAttributeUsage.Normal
+                | VertexAttributeUsage.Tangent
+                | VertexAttributeUsage.AllTexCoords
+                | VertexAttributeUsage.Skinning;
         }
     }
 }

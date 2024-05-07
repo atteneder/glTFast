@@ -15,7 +15,7 @@ namespace GLTFast.Tests.Jobs
 {
 
     [TestFixture]
-    public class Vector3Jobs
+    class Vector3Jobs
     {
 
         const int k_Length = 10;
@@ -274,7 +274,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class PositionSparseJobs
+    class PositionSparseJobs
     {
 
         const int k_Length = 10;
@@ -337,7 +337,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class UVJobs
+    class UVJobs
     {
         const int k_UVLength = 10;
         float2 m_NormalizedReference = new float2(.5f, 0f);
@@ -590,7 +590,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class Vector4Jobs
+    class Vector4Jobs
     {
         const int k_RotationLength = 10;
         float4 m_NormalizedReference = new float4(0.844623f, -0.191342f, -0.46194f, 0.191342f);
@@ -811,7 +811,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class ColorJobs
+    class ColorJobs
     {
         const int k_ColorLength = 10;
         Color m_ReferenceRGB = new Color(.13f, .42f, .95f, 1f);
@@ -950,7 +950,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class BoneIndexJobs
+    class BoneIndexJobs
     {
         const int k_BoneIndexLength = 10;
         uint4 m_Reference = new uint4(2, 3, 4, 5);
@@ -1020,7 +1020,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class SortJointsJobs
+    class SortJointsJobs
     {
 
         const int k_BoneIndexLength = 24;
@@ -1112,7 +1112,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class MatrixJobs
+    class MatrixJobs
     {
         const int k_MatrixLength = 10;
         static readonly Matrix4x4 k_Reference = new Matrix4x4(
@@ -1159,7 +1159,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class IndexJobs
+    class IndexJobs
     {
         const int k_IndexLength = 12; // multiple of 3!
         NativeArray<byte> m_InputUInt8;
@@ -1319,7 +1319,7 @@ namespace GLTFast.Tests.Jobs
     }
 
     [TestFixture]
-    public class ScalarJobs
+    class ScalarJobs
     {
         const int k_ScalarLength = 10;
         NativeArray<sbyte> m_InputInt8;

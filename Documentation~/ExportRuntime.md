@@ -32,6 +32,20 @@ Further, the export can be customized by passing [ExportSettings](xref:GLTFast.E
 
 > **NOTE:** Exporting to a [Stream][Stream] currently only works for self-contained glTF-Binary files (where the binary buffer and all textures are included in the `.glb` file). Trying other export settings will fail.
 
+### Vertex Attribute Discarding
+
+In certain cases glTFast discards mesh vertex attributes that are not used or required. This not only reduces the resulting glTF's file size, but in case of vertex colors, is necessary to preserve visual consistency.
+
+This behavior might be undesirable, for example in authoring workflows where the resulting glTF will be further edited. In that case vertex attribute discarding can be disabled on a per-attribute basis by setting [ExportSettings' PreservedVertexAttributes](xref:GLTFast.Export.ExportSettings.PreservedVertexAttributes) mask.
+
+Examples of vertex attribute discarding:
+
+- Vertex colors, when the assigned material(s) do not use them.
+- Normals and tangents, when the assigned material is unlit and does not require them for shading.
+- When no material was assigned, a default fallback material will be assumed. This does not require tangents nor texture coordinates, hence those are discarded.
+
+> **NOTE:** Not all cases of potential discarding are covered at the moment (e.g. unused texture coordinates when no textures are assigned).
+
 ### Draco Compression
 
 *Unity glTFast* supports applying [Google Draco&trade; 3D Data compression][Draco] to meshes. This requires the [Draco for Unity][DracoForUnity] package to be installed.

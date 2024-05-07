@@ -3,3 +3,9 @@ apiRules:
       hasAttribute:
         uid: System.ObsoleteAttribute
       type: Type
+  - exclude:
+      uidRegex: ^GLTFast\.Tests\..*$
+      type: Namespace
+  - exclude:
+      uidRegex: ^Samples\..*$
+      type: Namespace

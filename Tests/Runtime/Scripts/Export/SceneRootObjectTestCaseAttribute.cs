@@ -13,7 +13,7 @@ using UnityEngine;
 namespace GLTFast.Tests.Export
 {
 
-    public class SceneRootObjectTestCaseAttribute : UnityEngine.TestTools.UnityTestAttribute, ITestBuilder
+    class SceneRootObjectTestCaseAttribute : UnityEngine.TestTools.UnityTestAttribute, ITestBuilder
     {
 
         string m_Suffix;

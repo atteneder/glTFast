@@ -10,7 +10,7 @@ namespace Samples.Documentation.Manual
     using GLTFast.Export;
     using GLTFast.Logging;
 
-    public class ExportSamples : MonoBehaviour
+    class ExportSamples : MonoBehaviour
     {
 
         [FormerlySerializedAs("path")]
@@ -39,6 +39,10 @@ namespace Samples.Documentation.Manual
 
                 // Boost light intensities
                 LightIntensityFactor = 100f,
+
+                // Ensure mesh vertex attributes colors and texture coordinate (channels 1 through 8) are always
+                // exported, even if they are not used/referenced.
+                PreservedVertexAttributes = VertexAttributeUsage.AllTexCoords | VertexAttributeUsage.Color,
             };
 
             // GameObjectExportSettings provides settings specific to a GameObject/Component based hierarchy

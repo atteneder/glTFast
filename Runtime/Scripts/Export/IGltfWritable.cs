@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Unity.Mathematics;
@@ -40,7 +41,18 @@ namespace GLTFast.Export
         /// <param name="uMesh">Unity mesh to be assigned and exported</param>
         /// <param name="materialIds">glTF materials IDs to be assigned
         /// (multiple in case of sub-meshes)</param>
+        [Obsolete("Use overload with skinning parameter.")]
         void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds);
+
+        /// <summary>
+        /// Assigns a mesh to a previously added node
+        /// </summary>
+        /// <param name="nodeId">Index of the node to add the mesh to</param>
+        /// <param name="uMesh">Unity mesh to be assigned and exported</param>
+        /// <param name="materialIds">glTF materials IDs to be assigned
+        /// (multiple in case of sub-meshes)</param>
+        /// <param name="skinning">Skinning has been applied (e.g. <see cref="SkinnedMeshRenderer"/>).</param>
+        void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds, bool skinning);
 
         /// <summary>
         /// Assigns a camera to a previously added node

@@ -7,7 +7,7 @@ namespace Samples.Documentation.Manual
     using UnityEngine;
     using GLTFast.Export;
 
-    public class SimpleExport : MonoBehaviour
+    class SimpleExport : MonoBehaviour
     {
 
         [SerializeField]

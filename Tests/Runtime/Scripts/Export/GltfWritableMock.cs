@@ -40,6 +40,11 @@ namespace GLTFast.Tests.Export
 
         public void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds)
         {
+            AddMeshToNode(nodeId, uMesh, materialIds, true);
+        }
+
+        public void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds, bool skinning)
+        {
             throw new NotImplementedException();
         }
 

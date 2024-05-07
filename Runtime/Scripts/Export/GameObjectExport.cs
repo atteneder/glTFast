@@ -184,6 +184,7 @@ namespace GLTFast.Export
         {
             tempMaterials.Clear();
             Mesh mesh = null;
+            var skinning = false;
             if (gameObject.TryGetComponent(out MeshFilter meshFilter))
             {
                 if (gameObject.TryGetComponent(out Renderer renderer))
@@ -203,6 +204,7 @@ namespace GLTFast.Export
                     mesh = smr.sharedMesh;
                     smr.GetSharedMaterials(tempMaterials);
                 }
+                skinning = true;
             }
 
             var materialIds = new int[tempMaterials.Count];
@@ -221,7 +223,7 @@ namespace GLTFast.Export
 
             if (mesh != null)
             {
-                m_Writer.AddMeshToNode(nodeId, mesh, materialIds);
+                m_Writer.AddMeshToNode(nodeId, mesh, materialIds, skinning);
             }
 
             if (gameObject.TryGetComponent(out Camera camera))
