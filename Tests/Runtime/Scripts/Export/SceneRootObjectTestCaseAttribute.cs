@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2024 Unity Technologies and the Draco for Unity authors
+// SPDX-FileCopyrightText: 2024 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
 using System;

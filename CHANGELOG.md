@@ -14,17 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Faster buffer conversion jobs due to batching via [`IJobParallelForBatch`](https://docs.unity3d.com/Packages/com.unity.collections@2.4/api/Unity.Jobs.IJobParallelForBatch.html).
+- (Export) Material exporter implementation is chosen based on used shader by default.
 - (Export) Vertex attributes are discarded if they are not used/referenced.
 
 ### Fixed
 - (Export) Discrepancy in color due to export of unused vertex colors.
 
+### Fixed
+- Incorrect copyright text in some SPDX headers.
+
 ### Removed
 - Soft dependency on deprecated [Unity Jobs package][JobsPkg].
 - Legacy code for Unity versions older than the minimum required 2020 LTS.
-
-### Changed
-- Material exporter implementation is chosen based on used shader by default.
 
 ## [6.4.0] - 2024-04-17
 
