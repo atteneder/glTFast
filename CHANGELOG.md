@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Export) Support for exporting glTFast shader based materials. This reduces data loss on import-export round trips considerably.
 - Dependency on [Unity Collections package][Collections].
 - Added Apple Privacy Manifest documentation.
+- Export sample code.
 
 ### Changed
 - Faster buffer conversion jobs due to batching via [`IJobParallelForBatch`](https://docs.unity3d.com/Packages/com.unity.collections@2.4/api/Unity.Jobs.IJobParallelForBatch.html).

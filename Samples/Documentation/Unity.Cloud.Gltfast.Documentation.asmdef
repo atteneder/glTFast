@@ -3,6 +3,7 @@
     "rootNamespace": "",
     "references": [
         "glTFast",
+        "glTFast.Export",
         "glTFast.Newtonsoft"
     ],
     "includePlatforms": [],
