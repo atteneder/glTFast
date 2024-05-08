@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Apple Privacy Manifest documentation.
 - Export sample code.
 - XML documentation comments.
+- `float4x4.Decompose` overload that outputs rotation as type `quaternion`.
 
 ### Changed
 - Faster buffer conversion jobs due to batching via [`IJobParallelForBatch`](https://docs.unity3d.com/Packages/com.unity.collections@2.4/api/Unity.Jobs.IJobParallelForBatch.html).
@@ -20,9 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - (Export) Discrepancy in color due to export of unused vertex colors.
-
-### Fixed
 - Incorrect copyright text in some SPDX headers.
+
+### Deprecated
+- `float4x4.Decompose` overload that outputs rotation as type `float4` (quaternion values).
 
 ### Removed
 - Soft dependency on deprecated [Unity Jobs package][JobsPkg].
