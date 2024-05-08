@@ -10,8 +10,16 @@ using UnityEngine.Rendering.HighDefinition;
 
 namespace GLTFast.Export
 {
+    /// <summary>
+    /// Provides conversion from Unity light components to glTF lights.
+    /// </summary>
     public static class KhrLightsPunctual
     {
+        /// <summary>
+        /// Converts a Unity light component to a glTF light.
+        /// </summary>
+        /// <param name="uLight">Unity light component.</param>
+        /// <returns>glTF light.</returns>
         public static LightPunctual ConvertToLight(Light uLight)
         {
             var light = new LightPunctual

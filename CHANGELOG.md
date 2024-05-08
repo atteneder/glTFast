@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dependency on [Unity Collections package][Collections].
 - Added Apple Privacy Manifest documentation.
 - Export sample code.
+- XML documentation comments.
 
 ### Changed
 - Faster buffer conversion jobs due to batching via [`IJobParallelForBatch`](https://docs.unity3d.com/Packages/com.unity.collections@2.4/api/Unity.Jobs.IJobParallelForBatch.html).
