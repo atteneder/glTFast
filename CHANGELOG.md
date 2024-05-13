@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - (Export) Support for exporting glTFast shader based materials. This reduces data loss on import-export round trips considerably.
+- (Export) Support for setting a custom scene origin via transform matrix.
 - Dependency on [Unity Collections package][Collections].
 - Added Apple Privacy Manifest documentation.
 - Export sample code.
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Faster buffer conversion jobs due to batching via [`IJobParallelForBatch`](https://docs.unity3d.com/Packages/com.unity.collections@2.4/api/Unity.Jobs.IJobParallelForBatch.html).
 - (Export) Material exporter implementation is chosen based on used shader by default.
 - (Export) Vertex attributes are discarded if they are not used/referenced.
+- (Export) Root level nodes' positions are based on their GameObject's world positions (and not their local position anymore).
 
 ### Fixed
 - (Export) Discrepancy in color due to export of unused vertex colors.
