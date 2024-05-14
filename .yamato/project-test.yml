@@ -178,10 +178,9 @@ test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --suite=playmode
 {% if is_coverage_set -%}
       --enable-code-coverage
-      --coverage-results-path={{ results_path }}
-      --coverage-options='generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,+Unity.Cloud.Gltfast*,-glTFast*Tests*;pathReplacePatterns:**/PackageCache/com.unity.cloud.gltfast@*/,;sourcePaths:{{ os.yamato_source_dir }}/Packages/gltfast'
-      --coverage-results-path={{ os.yamato_source_dir }}/test-results~/CoverageResults
-      --coverage-upload-options="reportsDir:{{ os.yamato_source_dir }}/test-results~/CoverageResults;reports:*.xml;sourceDir:Packages/gltfast;repo:unity/com.unity.cloud.gltfast.src;changeset:{{ os.git_revision }};name:{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }};flags:{{ test_setup.project_setup }};verbose"
+      --coverage-results-path={{ results_path }}/CoverageResults
+      --coverage-options='generateAdditionalMetrics;generateHtmlReport;assemblyFilters:+glTFast*,-glTFast*Tests*;pathReplacePatterns:**/PackageCache/com.unity.cloud.gltfast@*/,;sourcePaths:{{ os.yamato_source_dir }}/Packages/gltfast'
+      --coverage-upload-options="reportsDir:{{ results_path }}/CoverageResults;reports:*.xml;sourceDir:Packages/gltfast;repo:unity/com.unity.cloud.gltfast.src;changeset:{{ os.git_revision }};name:{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }};flags:{{ test_setup.project_setup }};verbose"
 {% endif -%}
 {{ job_artifacts }}
 {% endif -%}
