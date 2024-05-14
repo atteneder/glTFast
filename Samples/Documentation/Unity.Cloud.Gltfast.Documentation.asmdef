@@ -2,6 +2,7 @@
     "name": "Unity.Cloud.Gltfast.Documentation",
     "rootNamespace": "",
     "references": [
+        "Unity.Mathematics",
         "glTFast",
         "glTFast.Export",
         "glTFast.Newtonsoft"

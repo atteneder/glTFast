@@ -32,6 +32,14 @@ Further, the export can be customized by passing [ExportSettings](xref:GLTFast.E
 
 > **NOTE:** Exporting to a [Stream][Stream] currently only works for self-contained glTF-Binary files (where the binary buffer and all textures are included in the `.glb` file). Trying other export settings will fail.
 
+### Scene Origin
+
+When adding GameObjects to a glTF scene, the resulting glTF root nodes' positions will be their original GameObjects' world position in the Unity scene. That might be undesirable (e.g. if the scene is far off the origin and thus not centered), so [AddScene](xref:GLTFast.Export.GameObjectExport.AddScene(ICollection{UnityEngine.GameObject},Unity.Mathematics.float4x4,System.String)) allows you to provide an inverse scene origin matrix that'll be applied to all root-level nodes.
+
+Here's an example how to export a GameObject, discarding its transform:
+
+[!code-cs [local-transform](../Samples/Documentation/Manual/ExportSamples.cs#LocalTransform)]
+
 ### Vertex Attribute Discarding
 
 In certain cases glTFast discards mesh vertex attributes that are not used or required. This not only reduces the resulting glTF's file size, but in case of vertex colors, is necessary to preserve visual consistency.

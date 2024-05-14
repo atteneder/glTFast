@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2024 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System.Threading.Tasks;
 using UnityEngine.Serialization;
 
 namespace Samples.Documentation.Manual
@@ -96,6 +97,36 @@ namespace Samples.Documentation.Manual
                 }
             };
             #endregion
+        }
+
+        async void Start()
+        {
+            await LocalTransform();
+        }
+
+        async Task LocalTransform()
+        {
+            #region LocalTransform
+            var export = new GameObjectExport();
+
+            // Add a scene
+            export.AddScene(
+                // Only the current gameObject as root node.
+                new[] { gameObject },
+                // The worldToLocalMatrix counter-acts any world-space transform, effectively moving the resulting
+                // root node to the origin.
+                gameObject.transform.worldToLocalMatrix,
+                "Node at origin glTF scene"
+                );
+            #endregion
+
+            // Async glTF export
+            var success = await export.SaveToFileAndDispose(destinationFilePath);
+
+            if (!success)
+            {
+                Debug.LogError("Something went wrong exporting a glTF");
+            }
         }
     }
 }
