@@ -171,6 +171,7 @@ registry:
   artifactory: https://artifactory.prd.cds.internal.unity3d.com/artifactory
 
 generic_project_path: Projects/TestProject
+test_categories: "!Performance"
 
 # Operating system specific variables
 os_variables:

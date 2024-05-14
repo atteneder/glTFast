@@ -37,13 +37,20 @@ test_{{ platform.name }}_{{ editor }}:
 {% endfor -%}
 
     - npm install {% if platform.name == "win" %}"%UPMCI_PKG%"{% else %}"$UPMCI_PKG"{% endif %} -g --registry {{ registry.npm }}
-    - |
+    - >
 {% if platform.name == "win" -%}
       set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
 {% else -%}
       export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
 {% endif -%}
-      upm-ci package test -u {{ editor }} --package-path Packages/gltfast --type package-tests --extra-create-project-arg=-upmNoDefaultPackages
+
+      upm-ci package test
+      -u {{ editor }}
+      --package-path Packages/gltfast
+      --type package-tests
+      --extra-create-project-arg=-upmNoDefaultPackages
+      --extra-utr-arg='--category="{{ test_categories }}"'
+
   artifacts:
     logs:
       paths:
@@ -93,13 +100,21 @@ validate_{{ platform.name }}_{{ editor }}:
 {% endfor -%}
 
     - npm install {% if platform.name == "win" %}"%UPMCI_PKG%"{% else %}"$UPMCI_PKG"{% endif %} -g --registry {{ registry.npm }}
-    - |
+    - >
 {% if platform.name == "win" -%}
       set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
 {% else -%}
       export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
 {% endif -%}
-      upm-ci package test -u {{ editor }} --package-path Packages/gltfast --type vetting-tests --platform editmode --extra-create-project-arg=-upmNoDefaultPackages
+
+      upm-ci package test
+      -u {{ editor }}
+      --package-path Packages/gltfast
+      --type vetting-tests
+      --platform editmode
+      --extra-create-project-arg=-upmNoDefaultPackages
+      --extra-utr-arg='--category="{{ test_categories }}"'
+
   artifacts:
     logs:
       paths:

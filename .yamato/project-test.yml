@@ -176,6 +176,7 @@ test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
       --suite=editor
       --suite=playmode
+      --category="{{ test_categories }}"
 {% if is_coverage_set -%}
       --enable-code-coverage
       --coverage-results-path={{ results_path }}/CoverageResults
@@ -314,6 +315,7 @@ build_and_run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --verbose
       --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
       --suite=playmode
+      --category="{{ test_categories }}"
       --scripting-backend=Il2Cpp
       --platform={% if platform.platform -%}{{ platform.platform }}{% else -%}{{ platform_id }}{% endif %}
 {{ job_artifacts }}
@@ -448,6 +450,7 @@ build_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --verbose
       --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
       --suite=playmode
+      --category="{{ test_categories }}"
       --scripting-backend=Il2Cpp
       --platform={% if platform.platform -%}{{ platform.platform }}{% else -%}{{ platform_id }}{% endif %}
       --build-only
@@ -585,6 +588,7 @@ run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --verbose
       --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
       --suite=playmode
+      --category="{{ test_categories }}"
       --scripting-backend=Il2Cpp
       --platform={% if platform.platform -%}{{ platform.platform }}{% else -%}{{ platform_id }}{% endif %}
       --player-load-path={{ results_path }}/player
