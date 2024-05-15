@@ -46,6 +46,17 @@ test_setups:
       # default for coverage: windows + current LTS
       - platform: win
         editor: 2022
+  - project_setup: hdrp
+    render_pipeline: HDRP-Deferred
+    editor_versions: [2022,trunk]
+    platforms: [win]
+    pr_sets:
+      - platform: win
+        editor: 2022
+    coverage_sets:
+      # default for coverage: windows + current LTS
+      - platform: win
+        editor: 2022
 
 editor_versions:
   - 2020

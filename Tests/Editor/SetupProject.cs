@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2024 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if USING_URP
+#if USING_URP || USING_HDRP
 #define USING_SRP
 #endif
 
@@ -102,6 +102,7 @@ namespace GLTFast.Editor.Tests
                     var subPath = arg.Substring(prefix.Length);
                     var assetPath = $"{k_RenderPipelineAssetsPath}{subPath}.asset";
 #if USING_SRP
+                    PlayerSettings.colorSpace = ColorSpace.Linear;
                     var asset = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(assetPath);
                     if (asset == null)
                     {
