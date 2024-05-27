@@ -11,12 +11,20 @@ namespace GLTFast.Tests
 {
     class MatrixExtensionTest
     {
+        static Vector3EqualityComparer s_Vector3Comparer;
+        static QuaternionEqualityComparer s_QuaternionComparer;
 
-        [Test]
-        public void MatrixDecomposeTest()
+        static Matrix4x4 s_UnityMatrix;
+        static float4x4 s_Matrix;
+
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
         {
+            s_Vector3Comparer = new Vector3EqualityComparer(10e-6f);
+            s_QuaternionComparer = new QuaternionEqualityComparer(10e-6f);
+
             // Corner case matrix (90°/0°/45° rotation with -1/-1/-1 scale)
-            var m = new Matrix4x4(
+            s_UnityMatrix = new Matrix4x4(
                 new Vector4(
                     -0.7071067811865474f,
                     0f,
@@ -43,43 +51,77 @@ namespace GLTFast.Tests
                 )
             );
 
-            var m2 = new float4x4(
-                m.m00, m.m01, m.m02, m.m03,
-                m.m10, m.m11, m.m12, m.m13,
-                m.m20, m.m21, m.m22, m.m23,
-                m.m30, m.m31, m.m32, m.m33
+            s_Matrix = new float4x4(
+                s_UnityMatrix.m00, s_UnityMatrix.m01, s_UnityMatrix.m02, s_UnityMatrix.m03,
+                s_UnityMatrix.m10, s_UnityMatrix.m11, s_UnityMatrix.m12, s_UnityMatrix.m13,
+                s_UnityMatrix.m20, s_UnityMatrix.m21, s_UnityMatrix.m22, s_UnityMatrix.m23,
+                s_UnityMatrix.m30, s_UnityMatrix.m31, s_UnityMatrix.m32, s_UnityMatrix.m33
             );
+        }
 
+        [Test]
+        public void MatrixDecomposeTest()
+        {
             Profiler.BeginSample("Matrix4x4.DecomposeUnity");
-            if (m.ValidTRS())
+            if (s_UnityMatrix.ValidTRS())
             {
                 // ReSharper disable UnusedVariable
-                var t1 = new Vector3(m.m03, m.m13, m.m23);
-                var r1 = m.rotation;
-                var s1 = m.lossyScale;
+                var t1 = new Vector3(s_UnityMatrix.m03, s_UnityMatrix.m13, s_UnityMatrix.m23);
+                var r1 = s_UnityMatrix.rotation;
+                var s1 = s_UnityMatrix.lossyScale;
                 // ReSharper restore UnusedVariable
             }
 
             Profiler.EndSample();
 
             Profiler.BeginSample("Matrix4x4.DecomposeCustom");
-            m.Decompose(out var t, out var r, out var s);
+            s_UnityMatrix.Decompose(out var t, out var r, out var s);
             Profiler.EndSample();
 
-            var comparer3 = new Vector3EqualityComparer(10e-6f);
-            var comparer4 = new QuaternionEqualityComparer(10e-6f);
-
-            Assert.That(t, Is.EqualTo(new Vector3(0, 0, 0)).Using(comparer3));
-            Assert.That(r, Is.EqualTo(new Quaternion(0.65328151f, -0.270598054f, 0.270598054f, 0.65328151f)).Using(comparer4));
-            Assert.That(s, Is.EqualTo(new Vector3(-.99999994f, -.99999994f, -1)).Using(comparer3));
+            Assert.That(t, Is.EqualTo(new Vector3(0, 0, 0)).Using(s_Vector3Comparer));
+            Assert.That(r, Is.EqualTo(
+                new Quaternion(0.65328151f, -0.270598054f, 0.270598054f, 0.65328151f))
+                .Using(s_QuaternionComparer)
+            );
+            Assert.That(s, Is.EqualTo(new Vector3(-.99999994f, -.99999994f, -1)).Using(s_Vector3Comparer));
 
             Profiler.BeginSample("float4x4.Decompose");
-            m2.Decompose(out var t3, out var r3, out var s3);
+            s_Matrix.Decompose(out var t3, out quaternion r3, out var s3);
             Profiler.EndSample();
 
-            Assert.That((Vector3)t3, Is.EqualTo(new Vector3(0, 0, 0)).Using(comparer3));
-            Assert.That((Quaternion)new quaternion(r3), Is.EqualTo(new Quaternion(0.65328151f, -0.270598054f, 0.270598054f, 0.65328151f)).Using(comparer4));
-            Assert.That((Vector3)s3, Is.EqualTo(new Vector3(-.99999994f, -.99999994f, -1)).Using(comparer3));
+            Assert.That((Vector3)t3, Is.EqualTo(new Vector3(0, 0, 0)).Using(s_Vector3Comparer));
+            Assert.That(
+                (Quaternion)r3,
+                Is.EqualTo(new Quaternion(0.65328151f, -0.270598054f, 0.270598054f, 0.65328151f))
+                    .Using(s_QuaternionComparer)
+                );
+            Assert.That(
+                (Vector3)s3,
+                Is.EqualTo(new Vector3(-.99999994f, -.99999994f, -1))
+                    .Using(s_Vector3Comparer)
+                );
+        }
+
+        [Test]
+        public void MatrixDecomposeObsoleteTest()
+        {
+            Profiler.BeginSample("float4x4.Decompose");
+#pragma warning disable CS0618 // Type or member is obsolete
+            s_Matrix.Decompose(out var translation, out float4 rotationValues, out var scale);
+#pragma warning restore CS0618 // Type or member is obsolete
+            Profiler.EndSample();
+
+            Assert.That((Vector3)translation, Is.EqualTo(new Vector3(0, 0, 0)).Using(s_Vector3Comparer));
+            Assert.That(
+                (Quaternion)new quaternion(rotationValues),
+                Is.EqualTo(new Quaternion(0.65328151f, -0.270598054f, 0.270598054f, 0.65328151f))
+                    .Using(s_QuaternionComparer)
+                );
+            Assert.That(
+                (Vector3)scale,
+                Is.EqualTo(new Vector3(-.99999994f, -.99999994f, -1))
+                    .Using(s_Vector3Comparer)
+                );
         }
 
         // [Test]

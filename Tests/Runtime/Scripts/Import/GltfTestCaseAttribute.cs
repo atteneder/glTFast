@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Unity Technologies and the Draco for Unity authors
+// SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
@@ -78,7 +78,7 @@ namespace GLTFast.Tests.Import
                         nameCounts[origName] = 1;
                     }
 
-                    data.SetName(testCase.relativeUri);
+                    data.SetName($"{method.Name}.{name}");
                     data.ExpectedResult = new UnityEngine.Object();
                     data.HasExpectedResult = true;
 

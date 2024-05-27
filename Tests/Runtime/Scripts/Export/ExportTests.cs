@@ -856,7 +856,7 @@ namespace GLTFast.Tests.Export
                 success = await export.SaveToFileAndDispose(path);
             }
             Assert.IsTrue(success);
-            AssertLogger(logger);
+            LoggerTest.AssertLogger(logger, new LogCode[] { });
 #if GLTF_VALIDATOR && UNITY_EDITOR
             ValidateGltf(path, new [] {
                 MessageCode.ACCESSOR_ELEMENT_OUT_OF_MAX_BOUND,

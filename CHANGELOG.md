@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.5.0] - 2024-05-15
+
+### Added
+- (Export) Support for exporting glTFast shader based materials. This reduces data loss on import-export round trips considerably.
+- (Export) Support for setting a custom scene origin via transform matrix.
+- Dependency on [Unity Collections package][Collections].
+- Added Apple Privacy Manifest documentation.
+- Export sample code.
+- XML documentation comments.
+- `float4x4.Decompose` overload that outputs rotation as type `quaternion`.
+
+### Changed
+- Faster buffer conversion jobs due to batching via [`IJobParallelForBatch`](https://docs.unity3d.com/Packages/com.unity.collections@2.4/api/Unity.Jobs.IJobParallelForBatch.html).
+- (Export) Material exporter implementation is chosen based on used shader by default.
+- (Export) Vertex attributes are discarded if they are not used/referenced.
+- (Export) Root level nodes' positions are based on their GameObject's world positions (and not their local position anymore).
+
+### Fixed
+- (Export) Discrepancy in color due to export of unused vertex colors.
+- Incorrect copyright text in some SPDX headers.
+
+### Deprecated
+- `float4x4.Decompose` overload that outputs rotation as type `float4` (quaternion values).
+
+### Removed
+- Soft dependency on deprecated [Unity Jobs package][JobsPkg].
+- Legacy code for Unity versions older than the minimum required 2020 LTS.
+
 ## [6.4.0] - 2024-04-17
 
 ### Added
@@ -1126,6 +1154,8 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - initial version
 
 [Entities1.0]: https://docs.unity3d.com/Packages/com.unity.entities@1.0
+[Collections]: https://docs.unity3d.com/Packages/com.unity.collections@latest/
+[JobsPkg]: https://docs.unity3d.com/Packages/com.unity.jobs@latest/
 [KtxUnity]: https://github.com/atteneder/KtxUnity
 [KtxForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.ktx@latest/
 [DanDovi]: https://github.com/DanDovi

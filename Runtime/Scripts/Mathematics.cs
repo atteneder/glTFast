@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+using System;
 using UnityEngine;
 using static Unity.Mathematics.math;
 
@@ -35,8 +36,8 @@ namespace GLTFast
                 m.m10, m.m11, m.m12,
                 m.m20, m.m21, m.m22
                 );
-            mRotScale.Decompose(out float4 mRotation, out float3 mScale);
-            rotation = new Quaternion(mRotation.x, mRotation.y, mRotation.z, mRotation.w);
+            mRotScale.Decompose(out var mRotation, out var mScale);
+            rotation = mRotation;
             scale = new Vector3(mScale.x, mScale.y, mScale.z);
         }
 
@@ -51,7 +52,7 @@ namespace GLTFast
         public static void Decompose(
             this float4x4 m,
             out float3 translation,
-            out float4 rotation,
+            out quaternion rotation,
             out float3 scale
             )
         {
@@ -70,7 +71,7 @@ namespace GLTFast
         /// <param name="m">Input matrix</param>
         /// <param name="rotation">Rotation quaternion values</param>
         /// <param name="scale">Scale</param>
-        static void Decompose(this float3x3 m, out float4 rotation, out float3 scale)
+        static void Decompose(this float3x3 m, out quaternion rotation, out float3 scale)
         {
             var lenC0 = length(m.c0);
             var lenC1 = length(m.c1);
@@ -96,7 +97,7 @@ namespace GLTFast
             rotationMatrix.c1 = math.normalize(rotationMatrix.c1);
             rotationMatrix.c2 = math.normalize(rotationMatrix.c2);
 
-            rotation = new quaternion(rotationMatrix).value;
+            rotation = new quaternion(rotationMatrix);
         }
 
         static bool IsNegative(this float3x3 m)
@@ -113,9 +114,22 @@ namespace GLTFast
         /// <returns>Length/magnitude of input vector</returns>
         public static float Normalize(float2 input, out float2 output)
         {
-            float len = math.length(input);
+            var len = math.length(input);
             output = input / len;
             return len;
+        }
+
+        /// <inheritdoc cref="Decompose(float4x4,out float3,out quaternion,out float3)"/>
+        [Obsolete("Use Decompose overload with rotation parameter of type quaternion.")]
+        public static void Decompose(
+            this float4x4 m,
+            out float3 translation,
+            out float4 rotation,
+            out float3 scale
+        )
+        {
+            m.Decompose(out translation, out quaternion rotationQuaternion, out scale);
+            rotation = rotationQuaternion.value;
         }
     }
 }

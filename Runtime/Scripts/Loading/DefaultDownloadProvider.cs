@@ -101,11 +101,7 @@ namespace GLTFast.Loading
         /// <summary>
         /// True if the download finished and was successful
         /// </summary>
-#if UNITY_2020_1_OR_NEWER
-        public bool Success => m_Request!=null && m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
-#else
-        public bool Success => m_Request != null && m_Request.isDone && !m_Request.isNetworkError && !m_Request.isHttpError;
-#endif
+        public bool Success => m_Request != null && m_Request.isDone && m_Request.result == UnityWebRequest.Result.Success;
 
         /// <summary>
         /// If the download failed, error description

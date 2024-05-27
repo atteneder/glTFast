@@ -174,6 +174,7 @@ namespace GLTFast.Logging
             return LogMessages.GetFullMessage(Code, Messages);
         }
 
+        /// <inheritdoc cref="System.Object.GetHashCode"/>
         public override int GetHashCode()
         {
 #if NET_STANDARD
@@ -203,6 +204,7 @@ namespace GLTFast.Logging
 #endif
         }
 
+        /// <inheritdoc cref="System.Object.Equals(object)"/>
         public override bool Equals(object obj)
         {
             //Check for null and compare run-time types.

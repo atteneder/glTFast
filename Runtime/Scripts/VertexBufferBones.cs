@@ -130,7 +130,7 @@ namespace GLTFast
                     bones = m_Data,
                     skinWeights = math.max(1, skinWeights)
                 };
-                jobHandle = job.Schedule(m_Data.Length, GltfImport.DefaultBatchCount, jobHandle);
+                jobHandle = job.Schedule(m_Data.Length, GltfImportBase.DefaultBatchCount, jobHandle);
             }
 #if GLTFAST_SAFE
             else {
@@ -138,7 +138,7 @@ namespace GLTFast
                 var job = new RenormalizeBoneWeightsJob {
                     bones = m_Data,
                 };
-                jobHandle = job.Schedule(m_Data.Length, GltfImport.DefaultBatchCount, jobHandle);
+                jobHandle = job.Schedule(m_Data.Length, GltfImportBase.DefaultBatchCount, jobHandle);
             }
 #endif
 
@@ -186,11 +186,7 @@ namespace GLTFast
                     jobTangentI.input = (byte*)input;
                     jobTangentI.outputByteStride = outputByteStride;
                     jobTangentI.result = output;
-#if UNITY_JOBS
-                    jobHandle = jobTangentI.ScheduleBatch(count,GltfImport.DefaultBatchCount);
-#else
-                    jobHandle = jobTangentI.Schedule(count, GltfImport.DefaultBatchCount);
-#endif
+                    jobHandle = jobTangentI.ScheduleBatch(count, GltfImportBase.DefaultBatchCount);
                     break;
                 case GltfComponentType.UnsignedShort:
                     {
@@ -201,11 +197,7 @@ namespace GLTFast
                             outputByteStride = outputByteStride,
                             result = output
                         };
-#if UNITY_JOBS
-                    jobHandle = job.ScheduleBatch(count,GltfImport.DefaultBatchCount);
-#else
-                        jobHandle = job.Schedule(count, GltfImport.DefaultBatchCount);
-#endif
+                        jobHandle = job.ScheduleBatch(count, GltfImportBase.DefaultBatchCount);
                         break;
                     }
                 case GltfComponentType.UnsignedByte:
@@ -217,11 +209,7 @@ namespace GLTFast
                             outputByteStride = outputByteStride,
                             result = output
                         };
-#if UNITY_JOBS
-                    jobHandle = job.ScheduleBatch(count,GltfImport.DefaultBatchCount);
-#else
-                        jobHandle = job.Schedule(count, GltfImport.DefaultBatchCount);
-#endif
+                        jobHandle = job.ScheduleBatch(count, GltfImportBase.DefaultBatchCount);
                         break;
                     }
                 default:
@@ -254,7 +242,7 @@ namespace GLTFast
                     jointsUInt8Job.input = (byte*)input;
                     jointsUInt8Job.outputByteStride = outputByteStride;
                     jointsUInt8Job.result = output;
-                    jobHandle = jointsUInt8Job.Schedule(count, GltfImport.DefaultBatchCount);
+                    jobHandle = jointsUInt8Job.Schedule(count, GltfImportBase.DefaultBatchCount);
                     break;
                 case GltfComponentType.UnsignedShort:
                     var jointsUInt16Job = new ConvertBoneJointsUInt16ToUInt32Job();
@@ -262,7 +250,7 @@ namespace GLTFast
                     jointsUInt16Job.input = (byte*)input;
                     jointsUInt16Job.outputByteStride = outputByteStride;
                     jointsUInt16Job.result = output;
-                    jobHandle = jointsUInt16Job.Schedule(count, GltfImport.DefaultBatchCount);
+                    jobHandle = jointsUInt16Job.Schedule(count, GltfImportBase.DefaultBatchCount);
                     break;
                 default:
                     logger?.Error(LogCode.TypeUnsupported, "Joints", inputType.ToString());

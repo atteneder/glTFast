@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-
+using GLTFast.Materials;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -26,7 +26,6 @@ namespace GLTFast.Export
 #endif
         const string k_KeywordSmoothnessTextureAlbedoChannelA = "_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A";
 
-        static readonly int k_Cull = Shader.PropertyToID("_Cull");
         static readonly int k_EmissionColor = Shader.PropertyToID("_EmissionColor");
         static readonly int k_EmissionMap = Shader.PropertyToID("_EmissionMap");
         static readonly int k_BumpMap = Shader.PropertyToID("_BumpMap");
@@ -62,7 +61,7 @@ namespace GLTFast.Export
             };
 
             SetAlphaModeAndCutoff(uMaterial, material);
-            material.doubleSided = IsDoubleSided(uMaterial, k_Cull);
+            material.doubleSided = IsDoubleSided(uMaterial, MaterialProperty.Cull);
 
             if (uMaterial.IsKeywordEnabled(k_KeywordEmission))
             {
@@ -232,7 +231,7 @@ namespace GLTFast.Export
 
             if (ormImageExport != null && material.pbrMetallicRoughness != null)
             {
-                if (AddImageExport(gltf, ormImageExport, out var ormTextureId))
+                if (MaterialExport.AddImageExport(gltf, ormImageExport, out var ormTextureId))
                 {
                     if (material.pbrMetallicRoughness.MetallicRoughnessTexture != null)
                     {
@@ -413,7 +412,7 @@ namespace GLTFast.Export
                 return null;
             }
             var imageExport = new ImageExport(texture2d);
-            if (AddImageExport(gltf, imageExport, out var textureId))
+            if (MaterialExport.AddImageExport(gltf, imageExport, out var textureId))
             {
                 return new OcclusionTextureInfo
                 {

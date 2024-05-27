@@ -31,8 +31,23 @@ namespace GLTFast.Schema
         {
             writer.AddObject();
             GltfSerializeName(writer);
+
+            if (inverseBindMatrices != -1)
+            {
+                writer.AddProperty("inverseBindMatrices", inverseBindMatrices);
+            }
+
+            if (skeleton != -1)
+            {
+                writer.AddProperty("skeleton", skeleton);
+            }
+
+            if (joints != null)
+            {
+                writer.AddArrayProperty("joints", joints);
+            }
+
             writer.Close();
-            throw new System.NotImplementedException($"GltfSerialize missing on {GetType()}");
         }
     }
 }

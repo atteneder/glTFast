@@ -27,15 +27,12 @@ namespace GLTFast.Materials {
 
         // ReSharper restore MemberCanBePrivate.Global
 
-        static readonly int k_AlphaCutoffEnable = Shader.PropertyToID("_AlphaCutoffEnable");
         static readonly int k_ZTestDepthEqualForOpaque = Shader.PropertyToID("_ZTestDepthEqualForOpaque");
 
 #if USING_HDRP_10_OR_NEWER
         static readonly int k_RenderQueueType = Shader.PropertyToID("_RenderQueueType");
-        static readonly int k_SurfaceType = Shader.PropertyToID("_SurfaceType");
         const string k_DoubleSidedOnKeyword = "_DOUBLESIDED_ON";
 
-        static readonly int k_DoubleSidedEnablePropId = Shader.PropertyToID("_DoubleSidedEnable");
         static readonly int k_DoubleSidedNormalModePropId = Shader.PropertyToID("_DoubleSidedNormalMode");
         static readonly int k_DoubleSidedConstantsPropId = Shader.PropertyToID("_DoubleSidedConstants");
 
@@ -84,13 +81,13 @@ namespace GLTFast.Materials {
             base.SetDoubleSided(gltfMaterial,material);
 
             material.EnableKeyword(k_DoubleSidedOnKeyword);
-            material.SetFloat(k_DoubleSidedEnablePropId, 1);
+            material.SetFloat(MaterialProperty.DoubleSidedEnable, 1);
 
             // UnityEditor.Rendering.HighDefinition.DoubleSidedNormalMode.Flip
             material.SetFloat(k_DoubleSidedNormalModePropId, 0);
             material.SetVector(k_DoubleSidedConstantsPropId, new Vector4(-1,-1,-1,0));
 
-            material.SetFloat(CullModeProperty, (int)CullMode.Off);
+            material.SetFloat(MaterialProperty.CullMode, (int)CullMode.Off);
             material.SetFloat(CullModeForwardProperty, (int)CullMode.Off);
         }
 #endif // USING_HDRP_10_OR_NEWER
@@ -98,7 +95,7 @@ namespace GLTFast.Materials {
         protected override void SetAlphaModeMask(Schema.MaterialBase gltfMaterial, Material material) {
             base.SetAlphaModeMask(gltfMaterial,material);
 
-            material.SetFloat(k_AlphaCutoffEnable, 1);
+            material.SetFloat(MaterialProperty.AlphaCutoffEnable, 1);
             material.SetOverrideTag(MotionVectorTag, MotionVectorUser);
             material.SetShaderPassEnabled(MotionVectorsPass, false);
 
@@ -119,12 +116,12 @@ namespace GLTFast.Materials {
 #endif // USING_HDRP_10_OR_NEWER
                 material.SetOverrideTag(RenderTypeTag,TransparentRenderType);
                 material.SetShaderPassEnabled(DistortionVectorsPass,false);
-                material.SetFloat(DstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
-                material.SetFloat(SrcBlendProperty, (int) BlendMode.One);
+                material.SetFloat(MaterialProperty.DstBlend, (int)BlendMode.OneMinusSrcAlpha);//10
+                material.SetFloat(MaterialProperty.SrcBlend, (int) BlendMode.One);
                 // material.SetFloat(k_RenderQueueType, 4);
                 // material.SetFloat(k_SurfaceType, 1);
                 material.SetFloat(k_ZTestDepthEqualForOpaque, (int)CompareFunction.LessEqual);
-                material.SetFloat(ZWriteProperty, 0);
+                material.SetFloat(MaterialProperty.ZWrite, 0);
             }
         }
 
@@ -174,15 +171,15 @@ namespace GLTFast.Materials {
             material.SetShaderPassEnabled(ShaderPassRayTracingPrepass, false);
             material.SetShaderPassEnabled(ShaderPassDepthOnlyPass, false);
 
-            material.SetFloat(k_AlphaCutoffEnable, 0);
+            material.SetFloat(MaterialProperty.AlphaCutoffEnable, 0);
             material.SetFloat(k_RenderQueueType, (int)CustomPass.RenderQueueType.PreRefraction );// 4
-            material.SetFloat(k_SurfaceType, 1 );
-            material.SetFloat(ZWriteProperty, 0);
+            material.SetFloat(MaterialProperty.SurfaceType, 1 );
+            material.SetFloat(MaterialProperty.ZWrite, 0);
             material.SetFloat(ZTestGBufferProperty, (int)CompareFunction.LessEqual); //4
             material.SetFloat(k_ZTestDepthEqualForOpaque, (int)CompareFunction.LessEqual); //4
             material.SetFloat(AlphaDstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
-            material.SetFloat(DstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
-            material.SetFloat(SrcBlendProperty, (int) BlendMode.SrcAlpha);//5
+            material.SetFloat(MaterialProperty.DstBlend, (int)BlendMode.OneMinusSrcAlpha);//10
+            material.SetFloat(MaterialProperty.SrcBlend, (int) BlendMode.SrcAlpha);//5
         }
 #endif // USING_HDRP_10_OR_NEWER
     }

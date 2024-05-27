@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace GLTFast.Export
@@ -46,25 +47,39 @@ namespace GLTFast.Export
         }
 
         /// <summary>
-        /// Adds a scene to the glTF.
-        /// If the conversion to glTF was not flawless (i.e. parts of the scene
-        /// were not converted 100% correctly) you still might be able to
-        /// export a glTF. You may use the <see cref="CollectingLogger"/>
-        /// to analyze what exactly went wrong.
+        /// Adds a scene to the glTF which consists of a collection of GameObjects.
         /// </summary>
-        /// <param name="gameObjects">Root level GameObjects (will get added recursively)</param>
+        /// <param name="gameObjects">GameObjects to be added (recursively) as root level nodes.</param>
         /// <param name="name">Name of the scene</param>
-        /// <returns>True if the scene was added flawlessly, false otherwise</returns>
+        /// <returns>True, if the scene was added flawlessly. False, otherwise</returns>
         public bool AddScene(GameObject[] gameObjects, string name = null)
         {
+            return AddScene(gameObjects, float4x4.identity, name);
+        }
+
+        /// <summary>
+        /// Creates a glTF scene from a collection of GameObjects. The GameObjects will be converted into glTF nodes.
+        /// The nodes' positions within the glTF scene will be their GameObjects' world position transformed by the
+        /// <see cref="origin"/> matrix, essentially allowing you to set an arbitrary scene center.
+        /// </summary>
+        /// <param name="gameObjects">Root level GameObjects (will get added recursively)</param>
+        /// <param name="origin">Inverse scene origin matrix. This transform will be applied to all nodes.</param>
+        /// <param name="name">Name of the scene</param>
+        /// <returns>True if the scene was added successfully, false otherwise</returns>
+        public bool AddScene(ICollection<GameObject> gameObjects, float4x4 origin, string name)
+        {
             CertifyNotDisposed();
-            var rootNodes = new List<uint>(gameObjects.Length);
+            var rootNodes = new List<uint>(gameObjects.Count);
             var tempMaterials = new List<Material>();
             var success = true;
-            for (var index = 0; index < gameObjects.Length; index++)
+            foreach (var gameObject in gameObjects)
             {
-                var gameObject = gameObjects[index];
-                success &= AddGameObject(gameObject, tempMaterials, out var nodeId);
+                success &= AddGameObject(
+                    gameObject,
+                    origin,
+                    tempMaterials,
+                    out var nodeId
+                );
                 if (nodeId >= 0)
                 {
                     rootNodes.Add((uint)nodeId);
@@ -123,7 +138,11 @@ namespace GLTFast.Export
                 throw new InvalidOperationException("GameObjectExport was already disposed");
             }
         }
-        bool AddGameObject(GameObject gameObject, List<Material> tempMaterials, out int nodeId)
+        bool AddGameObject(
+            GameObject gameObject,
+            float4x4? sceneOrigin,
+            List<Material> tempMaterials,
+            out int nodeId)
         {
             if (m_Settings.OnlyActiveInHierarchy && !gameObject.activeInHierarchy
                 || gameObject.CompareTag("EditorOnly"))
@@ -141,7 +160,12 @@ namespace GLTFast.Export
                 for (var i = 0; i < childCount; i++)
                 {
                     var child = gameObject.transform.GetChild(i);
-                    success &= AddGameObject(child.gameObject, tempMaterials, out var childNodeId);
+                    success &= AddGameObject(
+                        child.gameObject,
+                        null,
+                        tempMaterials,
+                        out var childNodeId
+                        );
                     if (childNodeId >= 0)
                     {
                         childList.Add((uint)childNodeId);
@@ -159,10 +183,27 @@ namespace GLTFast.Export
 
             if (onIncludedLayer || children != null)
             {
+                float3 translation;
+                quaternion rotation;
+                float3 scale;
+
+                if (sceneOrigin.HasValue)
+                {
+                    // root level node - calculate transform based on scene origin
+                    var trans = math.mul(sceneOrigin.Value, transform.localToWorldMatrix);
+                    trans.Decompose(out translation, out rotation, out scale);
+                }
+                else
+                {
+                    // nested node - use local transform
+                    translation = transform.localPosition;
+                    rotation = transform.localRotation;
+                    scale = transform.localScale;
+                }
                 nodeId = (int)m_Writer.AddNode(
-                    transform.localPosition,
-                    transform.localRotation,
-                    transform.localScale,
+                    translation,
+                    rotation,
+                    scale,
                     children,
                     gameObject.name
                     );
@@ -184,6 +225,7 @@ namespace GLTFast.Export
         {
             tempMaterials.Clear();
             Mesh mesh = null;
+            var skinning = false;
             if (gameObject.TryGetComponent(out MeshFilter meshFilter))
             {
                 if (gameObject.TryGetComponent(out Renderer renderer))
@@ -203,6 +245,7 @@ namespace GLTFast.Export
                     mesh = smr.sharedMesh;
                     smr.GetSharedMaterials(tempMaterials);
                 }
+                skinning = true;
             }
 
             var materialIds = new int[tempMaterials.Count];
@@ -221,7 +264,7 @@ namespace GLTFast.Export
 
             if (mesh != null)
             {
-                m_Writer.AddMeshToNode(nodeId, mesh, materialIds);
+                m_Writer.AddMeshToNode(nodeId, mesh, materialIds, skinning);
             }
 
             if (gameObject.TryGetComponent(out Camera camera))

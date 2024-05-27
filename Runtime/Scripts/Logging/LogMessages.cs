@@ -238,6 +238,10 @@ namespace GLTFast.Logging
         /// Fallback to uncompressed meshes/bufferViews is not supported.
         /// </summary>
         UncompressedFallbackNotSupported,
+        /// <summary>
+        /// Inconsistent use of vertex color attribute.
+        /// </summary>
+        InconsistentVertexColorUsage,
     }
 
     /// <summary>
@@ -278,6 +282,7 @@ See details in corresponding issue at https://github.com/atteneder/glTFast/issue
             { LogCode.ImageConversionNotEnabled, $"Jpeg/PNG textures failed because required built-in packages \"Image Conversion\"/\"Unity Web Request Texture\" are not enabled. {k_LinkProjectSetupTextureSupport}" },
             { LogCode.ImageFormatUnknown, "Unknown image format (image {0};uri:{1})" },
             { LogCode.ImageMultipleSamplers, "Have to create copy of image {0} due to different samplers. This is harmless, but requires more memory." },
+            { LogCode.InconsistentVertexColorUsage, "Potential visual discrepancy due to inconsistent vertex colors usage on mesh {0}" },
             { LogCode.IndexFormatInvalid, "Invalid index format {0}" },
             { LogCode.JsonParsingFailed, "Parsing JSON failed" },
             { LogCode.MaterialTransmissionApprox, "Chance of incorrect materials! glTF transmission is approximated when using built-in render pipeline!" },

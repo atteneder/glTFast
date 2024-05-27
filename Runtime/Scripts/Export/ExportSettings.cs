@@ -114,5 +114,11 @@ namespace GLTFast.Export
         /// This can be a requirement for certain asset pipelines or automated tests.
         /// </summary>
         public bool Deterministic { get; set; }
+
+        /// <summary>
+        /// Controls which vertex attributes are preserved during export, regardless whether they are used/referenced
+        /// or not. By default, unused attributes are discarded.
+        /// </summary>
+        public VertexAttributeUsage PreservedVertexAttributes { get; set; } = VertexAttributeUsage.None;
     }
 }
