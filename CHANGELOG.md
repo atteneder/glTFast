@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] -
 
+### Added
+- Serialization/de-serialization (only) support for the KHR_materials_variants extension.
+
 ## [6.5.0] - 2024-05-15
 
 ### Added
