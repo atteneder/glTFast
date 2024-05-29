@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Serialization/de-serialization (only) support for the KHR_materials_variants extension.
 
+### Fixed
+- Compatible with [Entities 1.2.0][Entities1.2].
+
 ## [6.5.0] - 2024-05-15
 
 ### Added
@@ -1159,6 +1162,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - initial version
 
 [Entities1.0]: https://docs.unity3d.com/Packages/com.unity.entities@1.0
+[Entities1.2]: https://docs.unity3d.com/Packages/com.unity.entities@1.2
 [Collections]: https://docs.unity3d.com/Packages/com.unity.collections@latest/
 [JobsPkg]: https://docs.unity3d.com/Packages/com.unity.jobs@latest/
 [KtxUnity]: https://github.com/atteneder/KtxUnity

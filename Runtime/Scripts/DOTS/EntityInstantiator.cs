@@ -263,7 +263,7 @@ namespace GLTFast {
 
             var renderMeshArray = new RenderMeshArray(materials, new[] { meshResult.mesh });
 
-            for (var index = 0; index < meshResult.materialIndices.Length; index++)
+            for (ushort index = 0; index < meshResult.materialIndices.Length; index++)
             {
                 RenderMeshUtility.AddComponents(
                     node,
@@ -273,7 +273,11 @@ namespace GLTFast {
                     MaterialMeshInfo.FromRenderMeshArrayIndices(
                         index,
                         0,
+#if UNITY_ENTITIES_1_2_OR_NEWER
+                        index
+#else
                         (sbyte)index
+#endif
                         )
                     );
 
@@ -344,7 +348,7 @@ namespace GLTFast {
             };
 
             var renderMeshArray = new RenderMeshArray(materials, new[] { meshResult.mesh });
-            for (var index = 0; index < meshResult.materialIndices.Length; index++)
+            for (ushort index = 0; index < meshResult.materialIndices.Length; index++)
             {
                 var prototype = m_EntityManager.CreateEntity(m_NodeArchetype);
                 m_EntityManager.SetEnabled(prototype, true);
@@ -381,7 +385,15 @@ namespace GLTFast {
                         m_EntityManager,
                         renderMeshDescription,
                         renderMeshArray,
-                        MaterialMeshInfo.FromRenderMeshArrayIndices(index, 0, (sbyte) index)
+                        MaterialMeshInfo.FromRenderMeshArrayIndices(
+                            index,
+                            0,
+#if UNITY_ENTITIES_1_2_OR_NEWER
+                            index
+#else
+                            (sbyte)index
+#endif
+                        )
                     );
                 }
 
