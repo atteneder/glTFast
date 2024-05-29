@@ -3,35 +3,42 @@ test_setups:
   # see GLTFast.Editor.Tests.SetupProject.ApplySetup (Tests/Editor/SetupProject.cs) for details
   - project_setup: default
     # # Use to limit versions
-    # editor_versions: [2020,2021,2022,2023.2,trunk]
+    # editor_versions: [2020,2021,2022,6000]
     # # Use to limit to platforms
     # platforms: [win,mac,ubuntu]
-    pr_sets:
+    pr_test_subset:
       - platform: win
         editor: 2020
       - platform: mac
-        editor: trunk
+        editor: 6000
       - platform: win
         editor: 2022
-    coverage_sets:
+    pr_build_subset:
+      - platform: mac
+        editor: 2022
+    coverage_subset:
       # default for coverage: windows + current LTS
       - platform: win
         editor: 2022
   - project_setup: minimalistic
-    editor_versions: [2020,2022,trunk]
+    editor_versions: [2020,2022,6000]
     platforms: [win]
-    pr_sets:
+    pr_test_subset:
       - platform: win
         editor: 2022
-    coverage_sets:
+    pr_build_subset:
+      - platform: win
+        editor: 2022
+    coverage_subset:
       # default for coverage: windows + current LTS
       - platform: win
         editor: 2022
   - project_setup: all_defines
     render_pipeline: URP-Forward
-    editor_versions: [2020,2021,2022,trunk]
+    utr_timeout: 1200
+    editor_versions: [2020,2021,2022,6000]
     platforms: [win]
-    pr_sets:
+    pr_test_subset:
       - platform: win
         editor: 2022
       # TODO: Move those to `urp` and `hdrp` test setup at some point
@@ -41,19 +48,24 @@ test_setups:
       - platform: win
         editor: 2021
       - platform: win
-        editor: trunk
-    coverage_sets:
+        editor: 6000
+    pr_build_subset:
+      - platform: win
+        editor: 6000
+    coverage_subset:
       # default for coverage: windows + current LTS
       - platform: win
         editor: 2022
   - project_setup: hdrp
     render_pipeline: HDRP-Deferred
-    editor_versions: [2022,trunk]
+    utr_timeout: 3600
+    agent_xlarge_required: !!bool true
+    editor_versions: [2022,6000]
     platforms: [win]
-    pr_sets:
+    pr_test_subset:
       - platform: win
         editor: 2022
-    coverage_sets:
+    coverage_subset:
       # default for coverage: windows + current LTS
       - platform: win
         editor: 2022
@@ -62,8 +74,8 @@ editor_versions:
   - 2020
   - 2021
   - 2022
-  - 2023.2
-  - trunk
+  - 6000
+  # - trunk
 
 platforms:
   win:
@@ -95,19 +107,17 @@ test_platforms:
 
 player_test_editors:
   - version: 2020.3
-  - version: trunk
+  - version: 6000
 
 player_test_platforms:
   - name: win
     id: standalone
-    windows_host: !!bool true
     build_and_run: win
   - name: mac
     id: standalone
     build_and_run: mac
   - name: android
     id: android
-    windows_host: !!bool true
     upm_ci_params: --backend=Il2Cpp
     build: win
     run: shield
@@ -130,41 +140,49 @@ agents:
     type: Unity::VM
     image: package-ci/win10:v4
     flavor: b1.large
+    flavor_xlarge: b1.xlarge
   mac:
     os: mac
     type: Unity::VM::osx
     image: package-ci/macos-13:v4
     flavor: m1.mac
+    flavor_xlarge: m1.mac
   ubuntu:
     os: linux
     type: Unity::VM
     image: package-ci/ubuntu-22.04:v4
     flavor: b1.large
+    flavor_xlarge: b1.xlarge
   samsung:
     os: win
     type: Unity::mobile::samsung
     image: package-ci/win10:v4
     flavor: b1.large
+    flavor_xlarge: b1.xlarge
   shield:
     os: win
     type: Unity::mobile::shield
     image: package-ci/win10:v4
     flavor: b1.large
+    flavor_xlarge: b1.xlarge
   mac-intel:
     os: mac
     type: Unity::VM::osx
     image: package-ci/macos-13:v4
     flavor: b1.large
+    flavor_xlarge: b1.xlarge
   mac-iphone:
     os: mac
     type: Unity::mobile::iPhone
     image: package-ci/macos-13:v4
     flavor: b1.large
+    flavor_xlarge: b1.xlarge
   ubuntu-small:
     os: linux
     type: Unity::VM
     image: package-ci/ubuntu-22.04:v4
     flavor: b1.small
+    flavor_xlarge: b1.xlarge
 
 test_framework: com.unity.test-framework@1.4.3
 

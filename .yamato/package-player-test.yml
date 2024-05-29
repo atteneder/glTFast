@@ -36,7 +36,7 @@ build_{{ platform.name }}_{{ editor.version }}:
 
     - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
     - |
-{% if platform.windows_host -%}
+{% if agent.os == "win" -%}
       set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
 {% else -%}
       export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
@@ -89,7 +89,7 @@ run_{{ platform.name }}_{{ editor.version }}:
 {% endfor -%}
     - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
     - |
-{% if platform.name == "win" -%}
+{% if agent.os == "win" -%}
       set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
 {% else -%}
       export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
@@ -141,7 +141,7 @@ build_and_run_{{ platform.name }}_{{ editor.version }}:
 
     - npm install upm-ci-utils@stable -g --registry {{ registry.npm }}
     - |
-{% if platform.name == "win" -%}
+{% if agent.os == "win" -%}
       set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
 {% else -%}
       export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"

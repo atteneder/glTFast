@@ -21,15 +21,8 @@
 {% for platform_id in platform_ids -%}
 {% assign platform = platforms[platform_id] -%}
 
-{% assign is_pr_set = false -%}
-{% for pr_set in test_setup.pr_sets -%}
-  {% if pr_set.platform == platform_id and pr_set.editor == editor -%}
-    {% assign is_pr_set = true -%}
-    {% break -%}
-  {% endif -%}
-{% endfor -%}
 {% assign is_coverage_set = false -%}
-{% for coverage_set in test_setup.coverage_sets -%}
+{% for coverage_set in test_setup.coverage_subset -%}
   {% if coverage_set.platform == platform_id and coverage_set.editor == editor -%}
     {% assign is_coverage_set = true -%}
     {% break -%}
@@ -60,7 +53,7 @@
     {% assign os = os_variables.unix -%}
     {% assign editor_exe = os.yamato_source_dir | append: editor_location.ubuntu -%}
   {% else -%}
-     Platform {{ platform.test }} has unknown OS!
+    Platform {{ platform.test }} has unknown OS!
 {% endcase -%}
 
 test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
@@ -68,7 +61,7 @@ test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
   agent:
     type: {{ agent.type }}
     image: {{ agent.image }}
-    flavor: {{ agent.flavor}}
+    flavor: {% if test_setup.agent_xlarge_required %}{{ agent.flavor_xlarge}}{% else %}{{ agent.flavor}}{% endif %}
   source:
     skip_checkout: true
   commands:
@@ -172,6 +165,9 @@ test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --editor-location=.Editor
       --artifacts_path={{ results_path }}
       --reruncount=2
+{% if test_setup.utr_timeout -%}
+      --timeout={{ test_setup.utr_timeout }}
+{% endif -%}
       --verbose
       --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
       --suite=editor
@@ -199,7 +195,7 @@ test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
     {% assign os = os_variables.unix -%}
     {% assign editor_exe = os.yamato_source_dir | append: editor_location.ubuntu -%}
   {% else -%}
-     Platform {{ platform.build_and_run }} has unknown OS!
+    Platform {{ platform.test }} has unknown OS!
 {% endcase -%}
 
 build_and_run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
@@ -208,7 +204,7 @@ build_and_run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
 {% assign agent = agents[platform.build_and_run] -%}
     type: {{ agent.type }}
     image: {{ agent.image }}
-    flavor: {{ agent.flavor}}
+    flavor: {% if test_setup.agent_xlarge_required %}{{ agent.flavor_xlarge}}{% else %}{{ agent.flavor}}{% endif %}
   source:
     skip_checkout: true
   commands:
@@ -312,6 +308,9 @@ build_and_run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --editor-location=.Editor
       --artifacts_path={{ results_path }}
       --reruncount=2
+{% if test_setup.utr_timeout -%}
+      --timeout={{ test_setup.utr_timeout }}
+{% endif -%}
       --verbose
       --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
       --suite=playmode
@@ -334,7 +333,7 @@ build_and_run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
     {% assign os = os_variables.unix -%}
     {% assign editor_exe = os.yamato_source_dir | append: editor_location.ubuntu -%}
   {% else -%}
-     Platform {{ platform.build }} has unknown OS!
+    Platform {{ platform.test }} has unknown OS!
 {% endcase -%}
 
 build_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
@@ -343,7 +342,7 @@ build_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
 {% assign agent = agents[platform.build] -%}
     type: {{ agent.type }}
     image: {{ agent.image }}
-    flavor: {{ agent.flavor}}
+    flavor: {% if test_setup.agent_xlarge_required %}{{ agent.flavor_xlarge}}{% else %}{{ agent.flavor}}{% endif %}
   source:
     skip_checkout: true
   commands:
@@ -447,6 +446,9 @@ build_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --editor-location=.Editor
       --artifacts_path={{ results_path }}
       --reruncount=2
+{% if test_setup.utr_timeout -%}
+      --timeout={{ test_setup.utr_timeout }}
+{% endif -%}
       --verbose
       --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
       --suite=playmode
@@ -474,7 +476,7 @@ build_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
     {% assign os = os_variables.unix -%}
     {% assign editor_exe = os.yamato_source_dir | append: editor_location.ubuntu -%}
   {% else -%}
-     Platform {{ platform.run }} has unknown OS!
+    Platform {{ platform.test }} has unknown OS!
 {% endcase -%}
 
 run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
@@ -483,7 +485,7 @@ run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
 {% assign agent = agents[platform.run] -%}
     type: {{ agent.type }}
     image: {{ agent.image }}
-    flavor: {{ agent.flavor}}
+    flavor: {% if test_setup.agent_xlarge_required %}{{ agent.flavor_xlarge}}{% else %}{{ agent.flavor}}{% endif %}
   source:
     skip_checkout: true
   commands:
@@ -585,6 +587,9 @@ run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
       --editor-location=.Editor
       --artifacts_path={{ results_path }}
       --reruncount=2
+{% if test_setup.utr_timeout -%}
+      --timeout={{ test_setup.utr_timeout }}
+{% endif -%}
       --verbose
       --extra-editor-arg="-enablePackageManagerTraces -upmNoDefaultPackages"
       --suite=playmode
@@ -620,7 +625,7 @@ tests_{{ test_setup.project_setup }}_all:
 tests_{{ test_setup.project_setup }}_pr:
   name: Test PR subset {{ test_setup.project_setup }}
   dependencies:
-{% for pr_set in test_setup.pr_sets -%}
+{% for pr_set in test_setup.pr_test_subset -%}
     - .yamato/project-test.yml#test_{{ test_setup.project_setup }}_{{ pr_set.platform }}_{{ pr_set.editor }}
 {% endfor -%}
 
@@ -637,18 +642,20 @@ build_and_run_{{ test_setup.project_setup }}_all:
 {% endfor -%}
 {% endfor -%}
 
+{% if test_setup.pr_build_subset -%}
 build_and_run_{{ test_setup.project_setup }}_pr:
   name: Build and run PR subset {{ test_setup.project_setup }}
   dependencies:
-{% for pr_set in test_setup.pr_sets -%}
+{% for pr_set in test_setup.pr_build_subset -%}
 {% if platforms[pr_set.platform].build_and_run -%}
     - .yamato/project-test.yml#build_and_run_{{ test_setup.project_setup }}_{{ pr_set.platform }}_{{ pr_set.editor }}
 {% elsif platforms[pr_set.platform].run -%}
     - .yamato/project-test.yml#run_{{ test_setup.project_setup }}_{{ pr_set.platform }}_{{ pr_set.editor }}
 {% endif -%}
 {% endfor -%}
+{% endif -%}
 
-{% endfor -%}
+{% endfor -%} # for test_setup in test_setups
 
 tests_all:
   name: Test all
@@ -675,14 +682,16 @@ build_and_run_pr:
   name: Build and run PR subsets
   dependencies:
 {% for test_setup in test_setups -%}
+{% if test_setup.pr_build_subset -%}
     - .yamato/project-test.yml#build_and_run_{{ test_setup.project_setup }}_pr
+{% endif -%}
 {% endfor -%}
 
 coverage_all:
   name: Coverage All
   dependencies:
 {% for test_setup in test_setups -%}
-{% for coverage_set in test_setup.coverage_sets -%}
+{% for coverage_set in test_setup.coverage_subset -%}
     - .yamato/project-test.yml#test_{{ test_setup.project_setup }}_{{ coverage_set.platform }}_{{ coverage_set.editor }}
 {% endfor -%}
 {% endfor -%}
