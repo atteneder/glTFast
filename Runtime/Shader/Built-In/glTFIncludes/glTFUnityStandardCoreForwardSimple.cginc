@@ -98,14 +98,15 @@ VertexOutputBaseSimple vertForwardBaseSimple (VertexInput v)
 {
     UNITY_SETUP_INSTANCE_ID(v);
     VertexOutputBaseSimple o;
+    UNITY_INITIALIZE_OUTPUT(VertexOutputBaseSimple, o);
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
 #ifdef UNITY_COLORSPACE_GAMMA
     o.color.rgb = LinearToGammaSpace(v.color.rgb);
     o.color.a = v.color.a;
 #else
     o.color = v.color;
 #endif
-    UNITY_INITIALIZE_OUTPUT(VertexOutputBaseSimple, o);
-    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
     float4 posWorld = mul(unity_ObjectToWorld, v.vertex);
     o.pos = UnityObjectToClipPos(v.vertex);

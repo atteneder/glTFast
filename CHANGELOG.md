@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Compatible with [Entities 1.2.0][Entities1.2].
+- Black materials when using low standard shader quality with the built-in render pipeline (thanks [Victor Beaupuy][Kushulain] for [#595](https://github.com/atteneder/glTFast/pull/595)).
 
 ## [6.5.0] - 2024-05-15
 
@@ -1178,6 +1179,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 [EricBeetsOfficial-Opuscope]: https://github.com/EricBeetsOfficial-Opuscope
 [Holo-Krzysztof]: https://github.com/Holo-Krzysztof
 [hybridherbst]: https://github.com/hybridherbst
+[Kushulain]: https://github.com/Kushulain
 [mikejurka]: https://github.com/mikejurka
 [ReadyPlayerMe]: https://readyplayer.me
 [rt-nikowiss]: https://github.com/rt-nikowiss
