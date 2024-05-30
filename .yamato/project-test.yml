@@ -59,7 +59,7 @@
 test_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
   name : Test {{ test_setup.project_setup }} with {{ editor }} on {{ platform_id }}
   agent:
-    type: {{ agent.type }}
+    type: {% if test_setup.gpu_required %}{{ agent.gpu_type}}{% else %}{{ agent.type}}{% endif %}
     image: {{ agent.image }}
     flavor: {% if test_setup.agent_xlarge_required %}{{ agent.flavor_xlarge}}{% else %}{{ agent.flavor}}{% endif %}
   source:
@@ -202,7 +202,7 @@ build_and_run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
   name : Build and run {{ test_setup.project_setup }} with {{ editor }} on {{ platform_id }}
   agent:
 {% assign agent = agents[platform.build_and_run] -%}
-    type: {{ agent.type }}
+    type: {% if test_setup.gpu_required %}{{ agent.gpu_type}}{% else %}{{ agent.type}}{% endif %}
     image: {{ agent.image }}
     flavor: {% if test_setup.agent_xlarge_required %}{{ agent.flavor_xlarge}}{% else %}{{ agent.flavor}}{% endif %}
   source:
@@ -340,7 +340,7 @@ build_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
   name : Build {{ test_setup.project_setup }} with {{ editor }} on {{ platform_id }}
   agent:
 {% assign agent = agents[platform.build] -%}
-    type: {{ agent.type }}
+    type: {% if test_setup.gpu_required %}{{ agent.gpu_type}}{% else %}{{ agent.type}}{% endif %}
     image: {{ agent.image }}
     flavor: {% if test_setup.agent_xlarge_required %}{{ agent.flavor_xlarge}}{% else %}{{ agent.flavor}}{% endif %}
   source:
@@ -483,7 +483,7 @@ run_{{ test_setup.project_setup }}_{{ platform_id }}_{{ editor }}:
   name : Run {{ test_setup.project_setup }} with {{ editor }} on {{ platform_id }}
   agent:
 {% assign agent = agents[platform.run] -%}
-    type: {{ agent.type }}
+    type: {% if test_setup.gpu_required %}{{ agent.gpu_type}}{% else %}{{ agent.type}}{% endif %}
     image: {{ agent.image }}
     flavor: {% if test_setup.agent_xlarge_required %}{{ agent.flavor_xlarge}}{% else %}{{ agent.flavor}}{% endif %}
   source:
