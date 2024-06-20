@@ -53,6 +53,22 @@ namespace GLTFast
         /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_variants">KHR_materials_variants</see> glTF extension
         /// </summary>
         MaterialsVariants,
+        /// <summary>
+        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_meshopt_compression">EXT_meshopt_compression</a> glTF extension
+        /// </summary>
+        MeshoptCompression,
+        /// <summary>
+        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_ior">KHR_materials_ior</a> glTF extension
+        /// </summary>
+        MaterialsIor,
+        /// <summary>
+        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_sheen">KHR_materials_sheen</a> glTF extension
+        /// </summary>
+        MaterialsSheen,
+        /// <summary>
+        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_specular">KHR_materials_specular</a> glTF extension
+        /// </summary>
+        MaterialsSpecular,
     }
 
     /// <summary>
@@ -60,53 +76,35 @@ namespace GLTFast
     /// </summary>
     public static class ExtensionName
     {
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md">KHR_draco_mesh_compression</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.DracoMeshCompression"/>
         public const string DracoMeshCompression = "KHR_draco_mesh_compression";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Archived/KHR_materials_pbrSpecularGlossiness">KHR_materials_pbrSpecularGlossiness</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.MaterialsPbrSpecularGlossiness"/>
         public const string MaterialsPbrSpecularGlossiness = "KHR_materials_pbrSpecularGlossiness";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_transmission/README.md">KHR_materials_transmission</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.MaterialsTransmission"/>
         public const string MaterialsTransmission = "KHR_materials_transmission";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_materials_unlit/README.md">KHR_materials_unlit</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.MaterialsUnlit"/>
         public const string MaterialsUnlit = "KHR_materials_unlit";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_mesh_gpu_instancing/README.md">EXT_mesh_gpu_instancing</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.MeshGPUInstancing"/>
         public const string MeshGPUInstancing = "EXT_mesh_gpu_instancing";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/EXT_meshopt_compression/README.md">EXT_meshopt_compression</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.MeshoptCompression"/>
         public const string MeshoptCompression = "EXT_meshopt_compression";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_mesh_quantization/README.md">KHR_mesh_quantization</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.MeshQuantization"/>
         public const string MeshQuantization = "KHR_mesh_quantization";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_basisu/README.md">KHR_texture_basisu</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.TextureBasisUniversal"/>
         public const string TextureBasisUniversal = "KHR_texture_basisu";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_texture_transform/README.md">KHR_texture_transform</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.TextureTransform"/>
         public const string TextureTransform = "KHR_texture_transform";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.LightsPunctual"/>
         public const string LightsPunctual = "KHR_lights_punctual";
-        /// <summary>
-        /// <a href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_clearcoat">KHR_materials_clearcoat</a> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.MaterialsClearcoat"/>
         public const string MaterialsClearcoat = "KHR_materials_clearcoat";
-        /// <summary>
-        /// <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_variants">KHR_materials_variants</see> glTF extension
-        /// </summary>
+        /// <inheritdoc cref="Extension.MaterialsIor"/>
+        public const string MaterialsIor = "KHR_materials_ior";
+        /// <inheritdoc cref="Extension.MaterialsSheen"/>
+        public const string MaterialsSheen = "KHR_materials_sheen";
+        /// <inheritdoc cref="Extension.MaterialsSpecular"/>
+        public const string MaterialsSpecular = "KHR_materials_specular";
+        /// <inheritdoc cref="Extension.MaterialsVariants"/>
         public const string MaterialsVariants = "KHR_materials_variants";
 
         /// <summary>
@@ -140,6 +138,14 @@ namespace GLTFast
                     return MaterialsClearcoat;
                 case Extension.MaterialsVariants:
                     return MaterialsVariants;
+                case Extension.MeshoptCompression:
+                    return MeshoptCompression;
+                case Extension.MaterialsIor:
+                    return MaterialsIor;
+                case Extension.MaterialsSpecular:
+                    return MaterialsSpecular;
+                case Extension.MaterialsSheen:
+                    return MaterialsSheen;
                 default:
                     return null;
             }

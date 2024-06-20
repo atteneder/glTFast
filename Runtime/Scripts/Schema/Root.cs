@@ -567,6 +567,16 @@ namespace GLTFast.Schema
                     {
                         mat.Extensions.KHR_materials_sheen = null;
                     }
+
+                    if (fake.KHR_materials_ior == null)
+                    {
+                        mat.Extensions.KHR_materials_ior = null;
+                    }
+
+                    if (fake.KHR_materials_specular == null)
+                    {
+                        mat.Extensions.KHR_materials_specular = null;
+                    }
                 }
             }
 

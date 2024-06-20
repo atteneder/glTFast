@@ -7,6 +7,7 @@ using GLTFast.Schema;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools.Utils;
 
 namespace GLTFast.Tests.JsonParsing
 {
@@ -146,6 +147,125 @@ namespace GLTFast.Tests.JsonParsing
 
             Assert.AreEqual(
                 @"{""array"":[""this one is valid"",""this\fone\\is\not even\remotely\""\tight\""""]}",
+                json
+            );
+        }
+
+        [Test]
+        public void ExtMaterialSheen()
+        {
+            var sheenColor = new Color(.2f, .5f, .7f);
+            var ext = new Sheen
+            {
+                SheenColor = sheenColor,
+                sheenRoughnessFactor = .42f,
+                sheenColorTexture = new TextureInfo
+                {
+                    index = 42,
+                    texCoord = 1,
+                },
+                sheenRoughnessTexture = new TextureInfo
+                {
+                    index = 43,
+                    texCoord = 2,
+                }
+            };
+
+            Assert.That(ext.SheenColor, Is.EqualTo(sheenColor).Using(ColorEqualityComparer.Instance));
+
+            var json = CreateJsonTest(writer =>
+            {
+                writer.AddProperty("ext");
+                ext.GltfSerialize(writer);
+            });
+
+            Assert.AreEqual(
+                @"{""ext"":{""sheenColorFactor"":[0.2,0.5,0.7],""sheenColorTexture"":{""index"":42,""texCoord"":1},""sheenRoughnessFactor"":0.42,""sheenRoughnessTexture"":{""index"":43,""texCoord"":2}}}",
+                json
+            );
+        }
+
+        [Test]
+        public void ExtMaterialSpecular()
+        {
+            var specularColor = new Color(.2f, .5f, .7f);
+            var ext = new MaterialSpecular()
+            {
+                specularFactor = .42f,
+                specularTexture = new TextureInfo
+                {
+                    index = 42,
+                    texCoord = 1,
+                },
+                SpecularColor = specularColor,
+                specularColorTexture = new TextureInfo
+                {
+                    index = 43,
+                    texCoord = 2,
+                }
+            };
+
+            Assert.That(ext.SpecularColor, Is.EqualTo(specularColor).Using(ColorEqualityComparer.Instance));
+
+            var json = CreateJsonTest(writer =>
+            {
+                writer.AddProperty("ext");
+                ext.GltfSerialize(writer);
+            });
+
+            Assert.AreEqual(
+                @"{""ext"":{""specularFactor"":0.42,""specularTexture"":{""index"":42,""texCoord"":1},""specularColorFactor"":[0.2,0.5,0.7],""specularColorTexture"":{""index"":43,""texCoord"":2}}}",
+                json
+            );
+        }
+
+        [Test]
+        public void ExtMaterialIor()
+        {
+            var ext = new MaterialIor()
+            {
+                ior = 1.42f
+            };
+
+            var json = CreateJsonTest(writer =>
+            {
+                writer.AddProperty("ext");
+                ext.GltfSerialize(writer);
+            });
+
+            Assert.AreEqual(
+                @"{""ext"":{""ior"":1.42}}",
+                json
+            );
+        }
+
+        [Test]
+        public void ExtMaterialExtensions()
+        {
+            var ext = new MaterialExtensions
+            {
+                KHR_materials_sheen = new Sheen
+                {
+                    sheenRoughnessFactor = .42f
+                },
+                KHR_materials_specular = new MaterialSpecular
+                {
+                    specularFactor = .43f
+                },
+                KHR_materials_ior = new MaterialIor
+                {
+                    ior = 1.42f
+                },
+            };
+
+            var json = CreateJsonTest(writer =>
+            {
+                writer.AddProperty("ext");
+                ext.GltfSerialize(writer);
+            });
+
+            Assert.AreEqual(
+                @"{""ext"":{""KHR_materials_sheen"":{""sheenRoughnessFactor"":0.42},""KHR_materials_specular"":{""specularFactor"":0.43},""KHR_materials_ior"":{""ior"":1.42}}}",
                 json
             );
         }

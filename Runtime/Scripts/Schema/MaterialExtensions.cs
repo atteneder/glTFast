@@ -18,17 +18,23 @@ namespace GLTFast.Schema
         /// <inheritdoc cref="PbrSpecularGlossiness"/>
         public PbrSpecularGlossiness KHR_materials_pbrSpecularGlossiness;
 
-        /// <inheritdoc cref="PbrSpecularGlossiness"/>
+        /// <inheritdoc cref="MaterialUnlit"/>
         public MaterialUnlit KHR_materials_unlit;
 
-        /// <inheritdoc cref="PbrSpecularGlossiness"/>
+        /// <inheritdoc cref="Transmission"/>
         public Transmission KHR_materials_transmission;
 
-        /// <inheritdoc cref="PbrSpecularGlossiness"/>
+        /// <inheritdoc cref="ClearCoat"/>
         public ClearCoat KHR_materials_clearcoat;
 
-        /// <inheritdoc cref="PbrSpecularGlossiness"/>
+        /// <inheritdoc cref="Sheen"/>
         public Sheen KHR_materials_sheen;
+
+        /// <inheritdoc cref="MaterialSpecular"/>
+        public MaterialSpecular KHR_materials_specular;
+
+        /// <inheritdoc cref="MaterialIor"/>
+        public MaterialIor KHR_materials_ior;
 
         // ReSharper restore InconsistentNaming
 
@@ -59,6 +65,16 @@ namespace GLTFast.Schema
             {
                 writer.AddProperty("KHR_materials_sheen");
                 KHR_materials_sheen.GltfSerialize(writer);
+            }
+            if (KHR_materials_specular != null)
+            {
+                writer.AddProperty("KHR_materials_specular");
+                KHR_materials_specular.GltfSerialize(writer);
+            }
+            if (KHR_materials_ior != null)
+            {
+                writer.AddProperty("KHR_materials_ior");
+                KHR_materials_ior.GltfSerialize(writer);
             }
             writer.Close();
         }
