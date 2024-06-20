@@ -22,6 +22,11 @@ namespace GLTFast
         /// </summary>
         public IReadOnlyList<Light> Lights => m_Lights;
 
+        /// <summary>
+        /// Enables controlling and applying materials variants.
+        /// </summary>
+        public MaterialsVariantsControl MaterialsVariantsControl { get; private set; }
+
 #if UNITY_ANIMATION
         /// <summary>
         /// <see cref="Animation" /> component. Is null if scene has no
@@ -54,6 +59,11 @@ namespace GLTFast
                 m_Lights = new List<Light>();
             }
             m_Lights.Add(light);
+        }
+
+        internal void SetMaterialsVariantsControl(MaterialsVariantsControl control)
+        {
+            MaterialsVariantsControl = control;
         }
 
 #if UNITY_ANIMATION

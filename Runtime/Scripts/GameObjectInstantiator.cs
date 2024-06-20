@@ -57,6 +57,8 @@ namespace GLTFast
         /// </summary>
         protected Dictionary<uint, GameObject> m_Nodes;
 
+        List<IMaterialsVariantsSlotInstance> m_InstanceSlots;
+
         /// <summary>
         /// Transform representing the scene.
         /// Root nodes will get parented to it.
@@ -289,6 +291,14 @@ namespace GLTFast
 
             renderer.sharedMaterials = materials;
 
+            var slots = m_Gltf.GetMaterialsVariantsSlots(meshResult.meshIndex, primitiveNumeration);
+            if (slots != null && slots.Length > 0)
+            {
+                m_InstanceSlots ??= new List<IMaterialsVariantsSlotInstance>();
+                var instanceSlot = new MaterialsVariantsSlotInstances(renderer, slots);
+                m_InstanceSlots.Add(instanceSlot);
+            }
+
             MeshAdded?.Invoke(
                 meshGo,
                 nodeIndex,
@@ -326,6 +336,12 @@ namespace GLTFast
                 materials[index] = material;
             }
 
+            var slots = m_Gltf.GetMaterialsVariantsSlots(meshResult.meshIndex, primitiveNumeration);
+            var hasMaterialsVariants = slots != null && slots.Length > 0;
+            var renderers = hasMaterialsVariants
+                ? new Renderer[instanceCount]
+                : null;
+
             for (var i = 0; i < instanceCount; i++)
             {
                 var meshGo = new GameObject($"{meshName}_i{i}");
@@ -340,6 +356,18 @@ namespace GLTFast
                 mf.mesh = meshResult.mesh;
                 Renderer renderer = meshGo.AddComponent<MeshRenderer>();
                 renderer.sharedMaterials = materials;
+
+                if (hasMaterialsVariants)
+                {
+                    renderers[i] = renderer;
+                }
+            }
+
+            if (hasMaterialsVariants)
+            {
+                m_InstanceSlots ??= new List<IMaterialsVariantsSlotInstance>();
+                var instanceSlot = new MultiMaterialsVariantsSlotInstances(renderers, slots);
+                m_InstanceSlots.Add(instanceSlot);
             }
         }
 
@@ -522,6 +550,13 @@ namespace GLTFast
         public virtual void EndScene(uint[] rootNodeIndices)
         {
             Profiler.BeginSample("EndScene");
+
+            if (m_InstanceSlots != null)
+            {
+                var materialsVariantsControl = new MaterialsVariantsControl(m_Gltf, m_InstanceSlots);
+                SceneInstance.SetMaterialsVariantsControl(materialsVariantsControl);
+            }
+
             if (rootNodeIndices != null)
             {
                 foreach (var nodeIndex in rootNodeIndices)

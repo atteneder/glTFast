@@ -137,48 +137,29 @@ namespace GLTFast.Editor
                 instantiationLogger = new CollectingLogger();
                 for (var sceneIndex = 0; sceneIndex < m_Gltf.SceneCount; sceneIndex++)
                 {
-                    var scene = m_Gltf.GetSourceScene(sceneIndex);
-                    var sceneName = m_Gltf.GetSceneName(sceneIndex);
-                    var go = new GameObject(sceneName);
-                    var instantiator = new GameObjectInstantiator(m_Gltf, go.transform, instantiationLogger, instantiationSettings);
-                    var index = sceneIndex;
-                    success = AsyncHelpers.RunSync(() => m_Gltf.InstantiateSceneAsync(instantiator, index));
-                    if (!success) break;
-                    var useFirstChild = true;
-                    var multipleNodes = scene.nodes.Length > 1;
-                    var hasAnimation = false;
-#if UNITY_ANIMATION
-                    if (importSettings.AnimationMethod != AnimationMethod.None
-                        && (instantiationSettings.Mask & ComponentType.Animation) != 0) {
-                        var animationClips = m_Gltf.GetAnimationClips();
-                        if (animationClips != null && animationClips.Length > 0) {
-                            hasAnimation = true;
+                    try
+                    {
+                        ImportScene(ctx, sceneIndex, instantiationLogger);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        instantiationLogger.Error($"Failed creating scene {sceneIndex} instance.");
+                    }
+
+                    if (m_Gltf.MaterialsVariantsCount > 0)
+                    {
+                        for (var variantIndex = 0; variantIndex < m_Gltf.MaterialsVariantsCount; variantIndex++)
+                        {
+                            try
+                            {
+                                ImportScene(ctx, sceneIndex, instantiationLogger, variantIndex);
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                instantiationLogger.Error($"Failed creating scene {sceneIndex} materials variant " +
+                                    $"{variantIndex} instance.");
+                            }
                         }
-                    }
-#endif
-
-                    if (instantiationSettings.SceneObjectCreation == SceneObjectCreation.Never
-                        || instantiationSettings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes && !multipleNodes)
-                    {
-                        // No scene GameObject was created, so the first
-                        // child is the first (and in this case only) node.
-
-                        // If there's animation, its clips' paths are relative
-                        // to the root GameObject (which will also carry the
-                        // `Animation` component. If not, we can import the the
-                        // first and only node as root directly.
-
-                        useFirstChild = !hasAnimation;
-                    }
-
-                    var sceneTransform = useFirstChild
-                        ? go.transform.GetChild(0)
-                        : go.transform;
-                    var sceneGo = sceneTransform.gameObject;
-                    AddObjectToAsset(ctx, $"scenes/{sceneName}", sceneGo, gltfIcon);
-                    if (sceneIndex == m_Gltf.DefaultSceneIndex)
-                    {
-                        ctx.SetMainObject(sceneGo);
                     }
                 }
 
@@ -311,6 +292,85 @@ namespace GLTFast.Editor
                 Debug.LogError($"Failed to import {assetPath} (see inspector for details)", this);
             }
             reportItems = reportItemList.ToArray();
+        }
+
+        void ImportScene(
+            AssetImportContext ctx,
+            int sceneIndex,
+            CollectingLogger instantiationLogger,
+            int? materialsVariantIndex = null
+            )
+        {
+            var scene = m_Gltf.GetSourceScene(sceneIndex);
+            var sceneName = m_Gltf.GetSceneName(sceneIndex);
+            string sceneObjectName = null;
+            string variantNameSuffix = null;
+            if (materialsVariantIndex.HasValue)
+            {
+                variantNameSuffix = m_Gltf.GetMaterialsVariantName(materialsVariantIndex.Value);
+                if (string.IsNullOrEmpty(variantNameSuffix))
+                {
+                    variantNameSuffix = $"variant_{materialsVariantIndex.Value}";
+                }
+                sceneObjectName = $"{sceneName}_{variantNameSuffix}";
+            }
+            else
+            {
+                sceneObjectName = sceneName;
+            }
+
+            var go = new GameObject(sceneObjectName);
+            var instantiator = new GameObjectInstantiator(m_Gltf, go.transform, instantiationLogger, instantiationSettings);
+            var index = sceneIndex;
+            var success = AsyncHelpers.RunSync(() => m_Gltf.InstantiateSceneAsync(instantiator, index));
+            if (!success)
+            {
+                throw new InvalidOperationException("Instantiating scene failed");
+            }
+            var useFirstChild = true;
+            var multipleNodes = scene.nodes.Length > 1;
+            var hasAnimation = false;
+#if UNITY_ANIMATION
+            if (importSettings.AnimationMethod != AnimationMethod.None
+                && (instantiationSettings.Mask & ComponentType.Animation) != 0) {
+                var animationClips = m_Gltf.GetAnimationClips();
+                if (animationClips != null && animationClips.Length > 0) {
+                    hasAnimation = true;
+                }
+            }
+#endif
+
+            if (instantiationSettings.SceneObjectCreation == SceneObjectCreation.Never
+                || instantiationSettings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes && !multipleNodes)
+            {
+                // No scene GameObject was created, so the first
+                // child is the first (and in this case only) node.
+
+                // If there's animation, its clips' paths are relative
+                // to the root GameObject (which will also carry the
+                // `Animation` component. If not, we can import the the
+                // first and only node as root directly.
+
+                useFirstChild = !hasAnimation;
+            }
+
+            var sceneTransform = useFirstChild
+                ? go.transform.GetChild(0)
+                : go.transform;
+            var sceneGo = sceneTransform.gameObject;
+
+            if (materialsVariantIndex.HasValue)
+            {
+                sceneGo.name = $"{sceneGo.name}_{variantNameSuffix}";
+
+                var variantsControl = instantiator.SceneInstance.MaterialsVariantsControl;
+                AsyncHelpers.RunSync(() => variantsControl.ApplyMaterialsVariantAsync(materialsVariantIndex.Value));
+            }
+            AddObjectToAsset(ctx, $"scenes/{sceneObjectName}", sceneGo);
+            if (sceneIndex == m_Gltf.DefaultSceneIndex && !materialsVariantIndex.HasValue)
+            {
+                ctx.SetMainObject(sceneGo);
+            }
         }
 
         void AddObjectToAsset(AssetImportContext ctx, string originalName, Object obj, Texture2D thumbnail = null)

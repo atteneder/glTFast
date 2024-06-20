@@ -106,7 +106,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | KHR_materials_clearcoat | ✅ | ✅
 | KHR_materials_sheen | [ℹ️][Sheen] |
 | KHR_materials_transmission | [ℹ️][Transmission] |
-| KHR_materials_variants | [ℹ️][Variants] |
+| KHR_materials_variants | ✅ |
 | KHR_materials_ior | [ℹ️][IOR] |
 | KHR_materials_specular | [ℹ️][Specular] |
 | KHR_materials_volume | [ℹ️][Volume] |
@@ -164,7 +164,7 @@ See [glTFast Add-on API](UseCaseCustomExtras.md) for an example to import the `e
 | Clear coat                    | ☑️³  | ✅  | [⛔️][ClearCoat] |
 | Sheen                         | [ℹ️][Sheen] | [ℹ️][Sheen] | [⛔️][Sheen] |
 | Transmission                  | [☑️][Transmission]⁴ | [☑️][Transmission]⁵ | [☑️][Transmission]⁵ |
-| Variants                      | [ℹ️][Variants] | [ℹ️][Variants] | [ℹ️][Variants] |
+| Variants                      | ✅ | ✅ | ✅ |
 | IOR                           | [ℹ️][IOR]      | [ℹ️][IOR]      | [⛔️][IOR]      |
 | Specular                      | [ℹ️][Specular] | [ℹ️][Specular] | [⛔️][Specular] |
 | Volume                        | [ℹ️][Volume]   | [ℹ️][Volume]   | [⛔️][Volume]   |
@@ -328,5 +328,4 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 [Unity]: https://unity.com
 [URP]: https://unity.com/srp/universal-render-pipeline
 [UVsets]: https://github.com/atteneder/glTFast/issues/206
-[Variants]: https://github.com/atteneder/glTFast/issues/112
 [Volume]: https://github.com/atteneder/glTFast/issues/209

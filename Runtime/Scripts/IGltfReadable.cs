@@ -26,7 +26,7 @@ namespace GLTFast
     /// <summary>
     /// Provides read-only access to a glTF (schema and imported Unity resources)
     /// </summary>
-    public interface IGltfReadable
+    public interface IGltfReadable : IMaterialProvider
     {
 
         /// <summary>
@@ -93,6 +93,14 @@ namespace GLTFast
         /// <param name="index">glTF material index</param>
         /// <returns>De-serialized glTF material</returns>
         MaterialBase GetSourceMaterial(int index = 0);
+
+        /// <summary>
+        /// Get source (de-serialized glTF) mesh primitive
+        /// </summary>
+        /// <param name="meshIndex">glTF mesh index.</param>
+        /// <param name="primitiveIndex">glTF primitive index within mesh.</param>
+        /// <returns>De-serialized glTF mesh primitive</returns>
+        MeshPrimitiveBase GetSourceMeshPrimitive(int meshIndex, int primitiveIndex);
 
         /// <summary>
         /// Get source (de-serialized glTF) node

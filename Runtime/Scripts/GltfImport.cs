@@ -157,6 +157,7 @@ namespace GLTFast
 #endif
             ExtensionName.MaterialsPbrSpecularGlossiness,
             ExtensionName.MaterialsUnlit,
+            ExtensionName.MaterialsVariants,
             ExtensionName.TextureTransform,
             ExtensionName.MeshQuantization,
             ExtensionName.MaterialsTransmission,
@@ -779,6 +780,18 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
+        public async Task<UnityEngine.Material> GetMaterialAsync(int index)
+        {
+            return await GetMaterialAsync(index, new CancellationToken());
+        }
+
+        /// <inheritdoc />
+        public Task<UnityEngine.Material> GetMaterialAsync(int index, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(GetMaterial(index));
+        }
+
+        /// <inheritdoc />
         public UnityEngine.Material GetDefaultMaterial()
         {
 #if UNITY_EDITOR
@@ -794,6 +807,18 @@ namespace GLTFast
             m_MaterialGenerator.SetLogger(null);
             return material;
 #endif
+        }
+
+        /// <inheritdoc />
+        public async Task<UnityEngine.Material> GetDefaultMaterialAsync()
+        {
+            return await GetDefaultMaterialAsync(new CancellationToken());
+        }
+
+        /// <inheritdoc />
+        public Task<UnityEngine.Material> GetDefaultMaterialAsync(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(GetDefaultMaterial());
         }
 
         /// <summary>
@@ -901,6 +926,41 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
+        public MeshPrimitiveBase GetSourceMeshPrimitive(int meshIndex, int primitiveIndex)
+        {
+            if (Root?.Meshes != null && meshIndex >= 0 && meshIndex < Root.Meshes.Count)
+            {
+                var mesh = Root.Meshes[meshIndex];
+                if (mesh?.Primitives != null && primitiveIndex >= 0 && primitiveIndex < mesh.Primitives.Count)
+                {
+                    return mesh.Primitives[primitiveIndex];
+                }
+            }
+            return null;
+        }
+
+        /// <inheritdoc />
+        public IMaterialsVariantsSlot[] GetMaterialsVariantsSlots(int meshIndex, int meshResultOffset)
+        {
+            var meshResultIndex = m_MeshPrimitiveIndex[meshIndex] + meshResultOffset;
+            Assert.IsTrue(meshResultIndex < m_MeshPrimitiveIndex[meshIndex + 1]);
+
+            List<IMaterialsVariantsSlot> materialSlots = null;
+            var meshResult = m_Primitives[meshResultIndex];
+            foreach (var primitiveIndex in meshResult.primitiveIndices)
+            {
+                var primitive = GetSourceMeshPrimitive(meshIndex, primitiveIndex);
+                if (primitive.Extensions?.KHR_materials_variants?.mappings != null)
+                {
+                    materialSlots ??= new List<IMaterialsVariantsSlot>();
+                    materialSlots.Add(primitive);
+                }
+            }
+
+            return materialSlots?.ToArray();
+        }
+
+        /// <inheritdoc />
         public NodeBase GetSourceNode(int index = 0)
         {
             if (Root?.Nodes != null && index >= 0 && index < Root.Nodes.Count)
@@ -958,6 +1018,15 @@ namespace GLTFast
             }
             var accessor = Root.Accessors[accessorIndex];
             return GetBufferView(accessor.bufferView, accessor.byteOffset, accessor.ByteSize);
+        }
+
+        /// <inheritdoc />
+        public int MaterialsVariantsCount => Root.MaterialsVariantsCount;
+
+        /// <inheritdoc />
+        public string GetMaterialsVariantName(int index)
+        {
+            return Root.GetMaterialsVariantName(index);
         }
 
         async Task<bool> LoadFromUri(Uri url, CancellationToken cancellationToken)
