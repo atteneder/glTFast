@@ -180,6 +180,9 @@ namespace GLTFast.Materials {
             material.SetFloat(AlphaDstBlendProperty, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(MaterialProperty.DstBlend, (int)BlendMode.OneMinusSrcAlpha);//10
             material.SetFloat(MaterialProperty.SrcBlend, (int) BlendMode.SrcAlpha);//5
+#if UNITY_2021_1_OR_NEWER
+            material.SetFloat(MaterialProperty.EnableBlendModePreserveSpecularLighting, 0);
+#endif
         }
 #endif // USING_HDRP_10_OR_NEWER
     }

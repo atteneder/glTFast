@@ -3,6 +3,9 @@
 
 using System;
 using UnityEngine;
+#if USING_HDRP
+using UnityEngine.Rendering.HighDefinition;
+#endif
 
 namespace GLTFast.Materials
 {
@@ -112,6 +115,10 @@ namespace GLTFast.Materials
         public static readonly int AlphaCutoffEnable = Shader.PropertyToID("_AlphaCutoffEnable");
         /// <summary>Shader property ID for property _DoubleSidedEnable</summary>
         public static readonly int DoubleSidedEnable = Shader.PropertyToID("_DoubleSidedEnable");
+#if UNITY_2021_1_OR_NEWER
+        /// <summary>Shader property ID for property _EnableBlendModePreserveSpecularLighting</summary>
+        public static readonly int EnableBlendModePreserveSpecularLighting = Shader.PropertyToID(HDMaterialProperties.kEnableBlendModePreserveSpecularLighting);
+#endif
         /// <summary>Shader property ID for property _SurfaceType</summary>
         public static readonly int SurfaceType = Shader.PropertyToID("_SurfaceType");
 #endif
