@@ -105,13 +105,7 @@ namespace GLTFast.Export
 
             if (TryGetValue(unityMaterial, MaterialProperty.BaseColor, out Color baseColor))
             {
-                material.pbrMetallicRoughness.baseColorFactor = new[]
-                {
-                    baseColor.r,
-                    baseColor.g,
-                    baseColor.b,
-                    baseColor.a
-                };
+                material.pbrMetallicRoughness.BaseColor = baseColor.linear;
             }
 
             material = HandleMetallicRoughness(gltf, material, unityMaterial);

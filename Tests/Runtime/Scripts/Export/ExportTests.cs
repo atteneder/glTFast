@@ -13,6 +13,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using GLTFast.Export;
@@ -52,6 +53,11 @@ namespace GLTFast.Tests.Export
         const string k_SceneNameUniversal = "ExportSceneUniversal";
 
         const string k_ScenesPath = "/Tests/Runtime/Export/Scenes/";
+
+        const string k_ColorPropertyPattern = @"\.(?<property>\w*[cC]olor\w*)(\[\d+\])?$";
+        static readonly Regex k_ColorPropertyRegex = new Regex(k_ColorPropertyPattern, RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1));
+
+
 #if UNITY_EDITOR
         static void UpdateObjectLists()
         {
@@ -797,10 +803,15 @@ namespace GLTFast.Tests.Export
                     switch (a.Type)
                     {
                         case JTokenType.Float:
-                        case JTokenType.Integer:
                             var expected = a.Value<double>();
                             var actual = b.Value<double>();
-                            Assert.That(actual, Is.EqualTo(expected).Within(6E-08f), $"Value mismatch at {a.Path}.");
+                            var isColor = k_ColorPropertyRegex.Match(a.Path).Success;
+                            // Colors usually undergo a gamma to linear conversion, hence a bit more tolerance.
+                            var tolerance = isColor ? 6E-06f : 6E-08f;
+                            Assert.That(actual, Is.EqualTo(expected).Within(tolerance), $"Value mismatch at {a.Path}.");
+                            break;
+                        case JTokenType.Integer:
+                            Assert.AreEqual(a.Value<int>(), b.Value<int>(), $"Value mismatch at {a.Path}.");
                             break;
                         case JTokenType.String:
                             Assert.AreEqual(a.Value<string>(), b.Value<string>(), $"Value mismatch at {a.Path}.");

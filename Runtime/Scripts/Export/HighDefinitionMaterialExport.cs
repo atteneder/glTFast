@@ -258,10 +258,10 @@ namespace GLTFast.Export {
 
             if (uMaterial.HasProperty(BaseColorProperty))
             {
-                pbr.BaseColor = uMaterial.GetColor(BaseColorProperty);
+                pbr.BaseColor = uMaterial.GetColor(BaseColorProperty).linear;
             } else
             if (uMaterial.HasProperty(ColorProperty)) {
-                pbr.BaseColor = uMaterial.GetColor(ColorProperty);
+                pbr.BaseColor = uMaterial.GetColor(ColorProperty).linear;
             }
 
             if(ormImageExport == null && uMaterial.HasProperty(SmoothnessProperty)) {

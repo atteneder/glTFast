@@ -135,7 +135,7 @@ namespace GLTFast.Export
 
             if (GetUnlitColor(uMaterial, out var baseColor))
             {
-                pbr.BaseColor = baseColor;
+                pbr.BaseColor = baseColor.linear;
             }
 
             if (uMaterial.HasProperty(mainTexProperty))

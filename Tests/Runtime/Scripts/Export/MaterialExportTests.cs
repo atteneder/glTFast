@@ -23,7 +23,7 @@ namespace GLTFast.Tests.Export
             var material = ConvertMaterial("BaseColor", out _, renderPipeline);
 
             Assert.IsNotNull(material.pbrMetallicRoughness);
-            Assert.AreEqual(new[] { .484529138f, .7353569f, .880825f, 1 }, material.pbrMetallicRoughness.baseColorFactor);
+            Assert.AreEqual(new[] { .199999973f, .5, .75f, 1 }, material.pbrMetallicRoughness.baseColorFactor);
         }
 
         protected void BaseColorTextureTest(RenderPipeline renderPipeline)
@@ -343,7 +343,7 @@ namespace GLTFast.Tests.Export
             Assert.IsInstanceOf<ImageExport>(gltfWriter.imageExports[0]);
 
             Assert.IsNotNull(material.pbrMetallicRoughness);
-            Assert.AreEqual(new[] { .9f, .8f, .7f, 1 }, material.pbrMetallicRoughness.baseColorFactor);
+            Assert.AreEqual(new[] { 0.787412345f, 0.603827417f, 0.447988421f, 1 }, material.pbrMetallicRoughness.baseColorFactor);
             var baseColorTexture = material.pbrMetallicRoughness.baseColorTexture;
             Assert.IsNotNull(baseColorTexture);
             Assert.AreEqual(0, baseColorTexture.index);
@@ -419,7 +419,7 @@ namespace GLTFast.Tests.Export
             Assert.IsInstanceOf<ImageExport>(gltfWriter.imageExports[0]);
 
             Assert.IsNotNull(material.pbrMetallicRoughness);
-            Assert.AreEqual(new[] { .9f, .8f, .7f, 1 }, material.pbrMetallicRoughness.baseColorFactor);
+            Assert.AreEqual(new[] { 0.787412345f, 0.603827417f, 0.447988421f, 1 }, material.pbrMetallicRoughness.baseColorFactor);
             var texture = material.pbrMetallicRoughness.baseColorTexture;
             Assert.IsNotNull(texture);
             Assert.AreEqual(0, texture.index);
