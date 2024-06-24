@@ -8,6 +8,7 @@ using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using GLTFast.Logging;
+using UnityEngine.TestTools;
 
 namespace GLTFast.Tests.Import
 {
@@ -159,6 +160,29 @@ namespace GLTFast.Tests.Import
         }
 
         [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
+        public IEnumerator LoadStream(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
+        {
+            var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
+            Debug.Log($"Testing {path}");
+            var stream = new FileStream(path, FileMode.Open);
+            var go = new GameObject();
+            var deferAgent = new UninterruptedDeferAgent();
+            var logger = new ConsoleLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
+            var task = gltf.LoadStream(stream, new Uri(path));
+            yield return Utils.WaitForTask(task);
+            stream.Dispose();
+            var success = task.Result;
+            Assert.IsTrue(success);
+            var instantiator = new GameObjectInstantiator(gltf, go.transform, logger);
+            task = gltf.InstantiateMainSceneAsync(instantiator);
+            yield return Utils.WaitForTask(task);
+            success = task.Result;
+            Assert.IsTrue(success);
+            Object.Destroy(go);
+        }
+
+        [GltfTestCase("glTF-test-models", 2, k_RelativeUriFilter)]
         public IEnumerator LoadJson(GltfTestCaseSet testCaseSet, GltfTestCase testCase)
         {
             var path = Path.Combine(testCaseSet.RootPath, testCase.relativeUri);
@@ -182,6 +206,39 @@ namespace GLTFast.Tests.Import
             success = task.Result;
             Assert.IsTrue(success);
             Object.Destroy(go);
+        }
+
+        [UnityTest]
+        public IEnumerator LoadStreamBigGltf()
+        {
+            // Create header-only glTF-binary that's too big (4GB).
+            var stream = new MemoryStream();
+            // glTF magic
+            stream.Write(BitConverter.GetBytes(GltfGlobals.GltfBinaryMagic), 0, 4);
+            // glTF version
+            stream.Write(BitConverter.GetBytes(2u), 0, 4);
+            // Total size
+            stream.Write(BitConverter.GetBytes(uint.MaxValue), 0, 4);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            var deferAgent = new UninterruptedDeferAgent();
+            var logger = new CollectingLogger();
+            using var gltf = new GltfImport(deferAgent: deferAgent, logger: logger);
+            var task = gltf.LoadStream(stream);
+            yield return Utils.WaitForTask(task);
+            stream.Dispose();
+            var success = task.Result;
+            Assert.IsFalse(success);
+            LoggerTest.AssertLogger(
+                logger,
+                new[]
+                {
+                    new LogItem(
+                        LogType.Error,
+                        LogCode.None,
+                        "glb exceeds 2GB limit."
+                    )
+                });
         }
     }
 }

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - (Import) Support for [materials variants extension](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_variants).
 - Serialization support for material extensions IOR, Sheen and Specular.
+- (Import) Ability to load a glTF from a generic `Stream` (`GltfImport.LoadStream`; thanks [sandr01d][sandr01d] for [#10](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/10)).
 
 ### Changed
 - (Import) Prefabs imported from glTF assets (at design-time) don't have the glTF logo icon assigned to them anymore. This makes it more consistent with other file types (like FBX; fixes [#557](https://github.com/atteneder/glTFast/issues/557)).
@@ -1202,6 +1203,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 [mikejurka]: https://github.com/mikejurka
 [ReadyPlayerMe]: https://readyplayer.me
 [rt-nikowiss]: https://github.com/rt-nikowiss
+[sandr01d]: https://github.com/sandr01d
 [NyxStudio]: https://github.com/NyxStudio
 [zharry]: https://github.com/zharry
 [weichx]: https://gist.github.com/weichx

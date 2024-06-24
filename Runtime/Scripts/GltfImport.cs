@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-
+using System.Text;
 using GLTFast.Addons;
 using GLTFast.Jobs;
 #if MEASURE_TIMINGS
@@ -471,17 +471,43 @@ namespace GLTFast
             CancellationToken cancellationToken = default
             )
         {
-            var firstBytes = new byte[4];
-
 #if UNITY_2021_3_OR_NEWER && NET_STANDARD_2_1
             await using
 #endif
             var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
-            var bytesRead = await fs.ReadAsync(firstBytes, 0, firstBytes.Length, cancellationToken);
+            var result = await LoadStream(fs, uri, importSettings, cancellationToken);
+            fs.Dispose();
+            return result;
+        }
 
-            if (bytesRead != firstBytes.Length)
+        /// <summary>
+        /// Load glTF from a stream.
+        /// </summary>
+        /// <param name="stream">Stream of the glTF or glTF-Binary</param>
+        /// <param name="uri">Base URI for relative paths of external buffers or images</param>
+        /// <param name="importSettings">Import Settings (<see cref="ImportSettings"/> for details)</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <returns>True if loading was successful, false otherwise</returns>
+        public async Task<bool> LoadStream(
+            Stream stream,
+            Uri uri = null,
+            ImportSettings importSettings = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (!stream.CanRead)
             {
-                m_Logger?.Error(LogCode.Download, "Failed reading first bytes", localPath);
+                m_Logger?.Error(LogCode.StreamError, "Not readable");
+                return false;
+            }
+
+            var initialStreamPosition = stream.CanSeek
+                ? stream.Position
+                : -1L;
+
+            var firstBytes = new byte[4];
+            if (!await stream.ReadToArrayAsync(firstBytes, 0, firstBytes.Length, cancellationToken))
+            {
+                m_Logger?.Error(LogCode.StreamError, "First bytes");
                 return false;
             }
 
@@ -489,32 +515,52 @@ namespace GLTFast
 
             if (GltfGlobals.IsGltfBinary(firstBytes))
             {
-                var data = new byte[fs.Length];
-                for (var i = 0; i < firstBytes.Length; i++)
+                // Read the rest of the header
+                var glbHeader = new byte[8];
+                if (!await stream.ReadToArrayAsync(glbHeader, 0, glbHeader.Length, cancellationToken))
                 {
-                    data[i] = firstBytes[i];
-                }
-                var length = (int)fs.Length - 4;
-                var read = await fs.ReadAsync(data, 4, length, cancellationToken);
-                fs.Close();
-                if (read != length)
-                {
-                    m_Logger?.Error(LogCode.Download, "Failed reading data", localPath);
+                    m_Logger?.Error(LogCode.StreamError, "glb header");
                     return false;
+                }
+                // Length of the entire glTF, including the header
+                var length = BitConverter.ToUInt32(glbHeader, 4);
+                if (length >= int.MaxValue)
+                {
+                    // glTF-binary supports up to 2^32 = 4GB, but C# arrays have a 2^31 (2GB) limit.
+                    m_Logger?.Error("glb exceeds 2GB limit.");
+                    return false;
+                }
+                var data = new byte[length];
+                Array.Copy(firstBytes, data, firstBytes.Length);
+                Array.Copy(glbHeader, 0, data, firstBytes.Length, glbHeader.Length);
+                // The amount of bytes we've already read
+                var offset = firstBytes.Length + glbHeader.Length;
+                var pendingBytes = (int)length - offset;
+
+                if (!await stream.ReadToArrayAsync(data, offset, pendingBytes, cancellationToken))
+                {
+                    m_Logger?.Error(LogCode.StreamError, "glb data");
                 }
 
                 return await LoadGltfBinary(data, uri, importSettings, cancellationToken);
             }
-            fs.Close();
+            var reader = new StreamReader(stream);
+            string json;
+            if (stream.CanSeek)
+            {
+                stream.Seek(initialStreamPosition, SeekOrigin.Begin);
+                json = await reader.ReadToEndAsync();
+            }
+            else
+            {
+                // TODO: String concat likely leads to another copy in memory and bad performance.
+                json = Encoding.UTF8.GetString(firstBytes) + await reader.ReadToEndAsync();
+            }
 
-            return await LoadGltfJson(
-#if UNITY_2021_3_OR_NEWER
-                await File.ReadAllTextAsync(localPath,cancellationToken),
-#else
-                File.ReadAllText(localPath),
-#endif
-                uri,
-                importSettings, cancellationToken);
+            reader.Dispose();
+
+            return !cancellationToken.IsCancellationRequested
+                && await LoadGltfJson(json, uri, importSettings, cancellationToken);
         }
 
         /// <summary>

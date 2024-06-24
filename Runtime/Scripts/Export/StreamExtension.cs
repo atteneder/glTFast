@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+#if !UNITY_2022_2_OR_NEWER
 using System;
 using System.IO;
 using UnityEngine;
@@ -34,3 +35,4 @@ namespace GLTFast.Export
 #endif
     }
 }
+#endif
