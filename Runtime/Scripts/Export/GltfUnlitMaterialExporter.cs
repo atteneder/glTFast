@@ -13,7 +13,7 @@ using Material = UnityEngine.Material;
 namespace GLTFast.Export
 {
     /// <summary>
-    /// Converts Unity Materials that use a glTFast shader to glTF materials
+    /// Converts Unity Materials that use the glTFast shader `glTF/Unlit` to glTF materials
     /// </summary>
     public class GltfUnlitMaterialExporter : IMaterialExport
     {
