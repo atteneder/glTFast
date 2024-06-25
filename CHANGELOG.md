@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added missing entries to the API documentation.
 - (Export) Base colors are now in correct, linear color space.
 - Alpha mode blend now works as expected in HDRP 11 and newer as well (fixes [#699](https://github.com/atteneder/glTFast/issues/699)).
+- (Export) Fixed mesh min/max when using Draco compression.
 
 ## [6.6.0] - 2024-05-29
 

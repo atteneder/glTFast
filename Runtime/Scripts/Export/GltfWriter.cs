@@ -1301,13 +1301,13 @@ namespace GLTFast.Export
                         var extents = bounds.extents;
                         accessor.min = new[]
                         {
-                            center.x-extents.x,
+                            -center.x-extents.x,
                             center.y-extents.y,
                             center.z-extents.z
                         };
                         accessor.max = new[]
                         {
-                            center.x+extents.x,
+                            -center.x+extents.x,
                             center.y+extents.y,
                             center.z+extents.z
                         };
