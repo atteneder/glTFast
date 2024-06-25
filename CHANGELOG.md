@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.6.0] - 2024-05-29
+
+### Added
+- Serialization/de-serialization (only) support for the KHR_materials_variants extension.
+
+### Fixed
+- Compatible with [Entities 1.2.0][Entities1.2].
+- Black materials when using low standard shader quality with the built-in render pipeline (thanks [Victor Beaupuy][Kushulain] for [#595](https://github.com/atteneder/glTFast/pull/595)).
+- (UI) Quantity of report items is not shown in importer inspector anymore. Report items cannot be removed anymore (thanks [krisrok][krisrok] for [#428](https://github.com/atteneder/glTFast/pull/630)).
+
 ## [6.5.0] - 2024-05-15
 
 ### Added
@@ -1154,6 +1164,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 - initial version
 
 [Entities1.0]: https://docs.unity3d.com/Packages/com.unity.entities@1.0
+[Entities1.2]: https://docs.unity3d.com/Packages/com.unity.entities@1.2
 [Collections]: https://docs.unity3d.com/Packages/com.unity.collections@latest/
 [JobsPkg]: https://docs.unity3d.com/Packages/com.unity.jobs@latest/
 [KtxUnity]: https://github.com/atteneder/KtxUnity
@@ -1169,6 +1180,8 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 [EricBeetsOfficial-Opuscope]: https://github.com/EricBeetsOfficial-Opuscope
 [Holo-Krzysztof]: https://github.com/Holo-Krzysztof
 [hybridherbst]: https://github.com/hybridherbst
+[krisrok]: https://github.com/krisrok
+[Kushulain]: https://github.com/Kushulain
 [mikejurka]: https://github.com/mikejurka
 [ReadyPlayerMe]: https://readyplayer.me
 [rt-nikowiss]: https://github.com/rt-nikowiss

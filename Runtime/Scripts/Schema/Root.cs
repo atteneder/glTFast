@@ -581,26 +581,29 @@ namespace GLTFast.Schema
             }
 #endif
 
-#if DRACO_UNITY
-            if (Meshes != null) {
-                for (var i = 0; i < Meshes.Count; i++) {
+            if (Meshes != null)
+            {
+                for (var i = 0; i < Meshes.Count; i++)
+                {
                     var mesh = Meshes[i];
                     Assert.AreEqual(mesh.name, fakeRoot.meshes[i].name);
-                    for (var j = 0; j < mesh.Primitives.Count; j++) {
+                    for (var j = 0; j < mesh.Primitives.Count; j++)
+                    {
                         var primitive = mesh.Primitives[j];
-                        if (primitive.Extensions == null ) continue;
+                        if (primitive.Extensions == null) continue;
                         var fake = fakeRoot.meshes[i].primitives[j];
+#if DRACO_UNITY
                         if (fake.extensions.KHR_draco_mesh_compression == null) {
-                            // TODO: Differentiate Primitive extensions here
-                            // since Draco is the only primitive extension, we
-                            // remove the whole extensions property.
-                            // primitive.extensions.KHR_draco_mesh_compression = null;
-                            primitive.UnsetExtensions();
+                            primitive.Extensions.KHR_draco_mesh_compression = null;
+                        }
+#endif
+                        if (fake.extensions.KHR_materials_variants == null)
+                        {
+                            primitive.Extensions.KHR_materials_variants = null;
                         }
                     }
                 }
             }
-#endif
             Profiler.EndSample();
         }
 

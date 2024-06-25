@@ -8,6 +8,8 @@ code_format_check:
     image: {{ agent.image }}
     flavor: {{ agent.flavor}}
   commands:
-    - git clone --depth 1 --branch stable https://github.cds.internal.unity3d.com/unity/unity-meta.git
+    - >
+      GIT_CLONE_PROTECTION_ACTIVE=false
+      git clone --depth 1 --branch stable https://github.cds.internal.unity3d.com/unity/unity-meta.git
     - mv unity-meta ~
     - perl ~/unity-meta/Tools/Format/format.pl --showfiles --dry-run .

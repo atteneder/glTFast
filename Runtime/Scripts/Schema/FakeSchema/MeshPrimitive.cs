@@ -1,20 +1,22 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if DRACO_UNITY
-
-namespace GLTFast.FakeSchema {
+namespace GLTFast.FakeSchema
+{
     // ReSharper disable InconsistentNaming
     [System.Serializable]
-    class MeshPrimitive {
+    class MeshPrimitive
+    {
         public MeshPrimitiveExtensions extensions;
     }
 
     [System.Serializable]
-    class MeshPrimitiveExtensions {
+    class MeshPrimitiveExtensions
+    {
+#if DRACO_UNITY
         public string KHR_draco_mesh_compression;
+#endif
+        public string KHR_materials_variants;
     }
     // ReSharper restore InconsistentNaming
 }
-
-#endif

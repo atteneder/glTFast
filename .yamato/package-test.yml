@@ -3,11 +3,11 @@
 
 {% for editor in editor_versions -%}
 {% for platform in test_platforms -%}
-{% if platform.name == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
+{% assign agent = agents[platform.agent] -%}
+{% if agent.os == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
 test_{{ platform.name }}_{{ editor }}:
   name : Test {{ editor }} on {{ platform.name }}
   agent:
-{% assign agent = agents[platform.agent] -%}
     type: {{ agent.type }}
     image: {{ agent.image }}
     flavor: {{ agent.flavor}}
@@ -36,9 +36,9 @@ test_{{ platform.name }}_{{ editor }}:
       popd
 {% endfor -%}
 
-    - npm install {% if platform.name == "win" %}"%UPMCI_PKG%"{% else %}"$UPMCI_PKG"{% endif %} -g --registry {{ registry.npm }}
+    - npm install {% if agent.os == "win" %}"%UPMCI_PKG%"{% else %}"$UPMCI_PKG"{% endif %} -g --registry {{ registry.npm }}
     - >
-{% if platform.name == "win" -%}
+{% if agent.os == "win" -%}
       set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
 {% else -%}
       export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"
@@ -66,11 +66,11 @@ test_{{ platform.name }}_{{ editor }}:
 # Validation only occurs in editmode.
 {% for editor in editor_versions -%}
 {% for platform in test_platforms -%}
-{% if platform.name == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
+{% assign agent = agents[platform.agent] -%}
+{% if agent.os == "win" -%}{% assign os = os_variables.win -%}{% else -%}{% assign os = os_variables.unix -%}{% endif -%}
 validate_{{ platform.name }}_{{ editor }}:
   name : Validate {{ editor }} on {{ platform.name }}
   agent:
-{% assign agent = agents[platform.agent] -%}
     type: {{ agent.type }}
     image: {{ agent.image }}
     flavor: {{ agent.flavor}}
@@ -99,9 +99,9 @@ validate_{{ platform.name }}_{{ editor }}:
       popd
 {% endfor -%}
 
-    - npm install {% if platform.name == "win" %}"%UPMCI_PKG%"{% else %}"$UPMCI_PKG"{% endif %} -g --registry {{ registry.npm }}
+    - npm install {% if agent.os == "win" %}"%UPMCI_PKG%"{% else %}"$UPMCI_PKG"{% endif %} -g --registry {{ registry.npm }}
     - >
-{% if platform.name == "win" -%}
+{% if agent.os == "win" -%}
       set GLTF_TEST_ASSET_DIR={{ os.yamato_source_dir }}\Assets
 {% else -%}
       export GLTF_TEST_ASSET_DIR="{{ os.yamato_source_dir }}/Assets"

@@ -36,6 +36,11 @@
             "name": "com.unity.entities.graphics",
             "expression": "1.0.10",
             "define": "UNITY_ENTITIES_GRAPHICS"
+        },
+        {
+            "name": "com.unity.entities",
+            "expression": "1.2",
+            "define": "UNITY_ENTITIES_1_2_OR_NEWER"
         }
     ],
     "noEngineReferences": false

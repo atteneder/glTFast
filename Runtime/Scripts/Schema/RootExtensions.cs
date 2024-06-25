@@ -15,6 +15,10 @@ namespace GLTFast.Schema
         // ReSharper disable once InconsistentNaming
         public LightsPunctual KHR_lights_punctual;
 
+        /// <inheritdoc cref="MaterialsVariantsRootExtension"/>
+        // ReSharper disable once InconsistentNaming
+        public MaterialsVariantsRootExtension KHR_materials_variants;
+
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
@@ -22,6 +26,11 @@ namespace GLTFast.Schema
             {
                 writer.AddProperty("KHR_lights_punctual");
                 KHR_lights_punctual.GltfSerialize(writer);
+            }
+            if (KHR_materials_variants != null)
+            {
+                writer.AddProperty("KHR_materials_variants");
+                KHR_materials_variants.GltfSerialize(writer);
             }
             writer.Close();
         }
@@ -37,7 +46,13 @@ namespace GLTFast.Schema
                 KHR_lights_punctual = null;
             }
 
-            return KHR_lights_punctual != null;
+            if (KHR_materials_variants != null && !KHR_materials_variants.JsonUtilityCleanup())
+            {
+                KHR_materials_variants = null;
+            }
+
+            return KHR_lights_punctual != null
+                || KHR_materials_variants != null;
         }
     }
 }

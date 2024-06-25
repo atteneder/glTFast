@@ -20,8 +20,6 @@ namespace GLTFast.FakeSchema
         public Accessor[] accessors;
 #endif
 
-#if DRACO_UNITY
         public Mesh[] meshes;
-#endif
     }
 }

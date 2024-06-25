@@ -325,6 +325,10 @@ namespace GLTFast.Schema
         public MeshPrimitiveDracoExtension KHR_draco_mesh_compression;
 #endif
 
+        /// <inheritdoc cref="MaterialsVariantsMeshPrimitiveExtension"/>
+        // ReSharper disable once InconsistentNaming
+        public MaterialsVariantsMeshPrimitiveExtension KHR_materials_variants;
+
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();
@@ -334,6 +338,11 @@ namespace GLTFast.Schema
                 KHR_draco_mesh_compression.GltfSerialize(writer);
             }
 #endif
+            if (KHR_materials_variants != null)
+            {
+                writer.AddProperty("KHR_materials_variants");
+                KHR_materials_variants.GltfSerialize(writer);
+            }
             writer.Close();
         }
     }
