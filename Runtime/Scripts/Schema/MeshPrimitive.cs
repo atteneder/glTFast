@@ -55,7 +55,7 @@ namespace GLTFast.Schema
     /// Geometry to be rendered with the given material.
     /// </summary>
     [Serializable]
-    public abstract class MeshPrimitiveBase : ICloneable
+    public abstract class MeshPrimitiveBase : ICloneable, IMaterialsVariantsSlot
     {
 
         /// <summary>
@@ -97,6 +97,17 @@ namespace GLTFast.Schema
 
         /// <inheritdoc cref="MeshPrimitiveExtensions"/>
         public abstract MeshPrimitiveExtensions Extensions { get; }
+
+        /// <inheritdoc />
+        public int GetMaterialIndex(int variantIndex)
+        {
+            var mapping = Extensions?.KHR_materials_variants;
+            if (mapping != null && mapping.TryGetMaterialIndex(variantIndex, out var materialIndex))
+            {
+                return materialIndex;
+            }
+            return material;
+        }
 
         /// <summary>`
         /// Sets <see cref="Extensions"/> to null.

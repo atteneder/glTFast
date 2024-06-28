@@ -62,6 +62,32 @@ namespace GLTFast.Schema
         /// </summary>
         public List<MaterialVariantsMapping> mappings;
 
+        /// <summary>
+        /// Retrieves the index of the material that corresponds to a material variant.
+        /// If there's no match for this variant index, it returns false. In this case the default material has to be
+        /// applied.
+        /// </summary>
+        /// <param name="variantIndex">glTF materials variant index.</param>
+        /// <param name="materialIndex">glTF material index.</param>
+        /// <returns>True if there's a matching mapping with the provided variant index. False otherwise.</returns>
+        public bool TryGetMaterialIndex(int variantIndex, out int materialIndex)
+        {
+            foreach (var mapping in mappings)
+            {
+                foreach (var i in mapping.variants)
+                {
+                    if (variantIndex == i)
+                    {
+                        materialIndex = mapping.material;
+                        return true;
+                    }
+                }
+            }
+
+            materialIndex = -1;
+            return false;
+        }
+
         internal void GltfSerialize(JsonWriter writer)
         {
             writer.AddObject();

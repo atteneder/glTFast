@@ -60,6 +60,7 @@ test_setups:
     render_pipeline: HDRP-Deferred
     utr_timeout: 3600
     agent_xlarge_required: !!bool true
+    gpu_required: !!bool true
     editor_versions: [2022,6000]
     platforms: [win]
     pr_test_subset:
@@ -138,6 +139,7 @@ agents:
   win:
     os: win
     type: Unity::VM
+    gpu_type: Unity::VM::GPU
     image: package-ci/win10:v4
     flavor: b1.large
     flavor_xlarge: b1.xlarge
@@ -150,6 +152,7 @@ agents:
   ubuntu:
     os: linux
     type: Unity::VM
+    gpu_type: Unity::VM::GPU
     image: package-ci/ubuntu-22.04:v4
     flavor: b1.large
     flavor_xlarge: b1.xlarge

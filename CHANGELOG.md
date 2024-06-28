@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.7.0] - 2024-06-25
+
+### Added
+- (Import) Support for [materials variants extension](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_materials_variants).
+- Serialization support for material extensions IOR, Sheen and Specular.
+- (Import) Ability to load a glTF from a generic `Stream` (`GltfImport.LoadStream`; thanks [sandr01d][sandr01d] for [#10](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/10)).
+
+### Changed
+- (Import) Prefabs imported from glTF assets (at design-time) don't have the glTF logo icon assigned to them anymore. This makes it more consistent with other file types (like FBX; fixes [#557](https://github.com/atteneder/glTFast/issues/557)).
+
+### Deprecated
+- `MetaMaterialExport`. Always use `MaterialExport.GetDefaultMaterialExport` to get the correct material export.
+
+### Fixed
+- (Export) glTFast shader based materials and textures are exported correctly when using the default render pipeline.
+- Added missing entries to the API documentation.
+- (Export) Base colors are now in correct, linear color space.
+- Alpha mode blend now works as expected in HDRP 11 and newer as well (fixes [#699](https://github.com/atteneder/glTFast/issues/699)).
+- (Export) Fixed mesh min/max when using Draco compression.
+
 ## [6.6.0] - 2024-05-29
 
 ### Added
@@ -1185,6 +1205,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 [mikejurka]: https://github.com/mikejurka
 [ReadyPlayerMe]: https://readyplayer.me
 [rt-nikowiss]: https://github.com/rt-nikowiss
+[sandr01d]: https://github.com/sandr01d
 [NyxStudio]: https://github.com/NyxStudio
 [zharry]: https://github.com/zharry
 [weichx]: https://gist.github.com/weichx

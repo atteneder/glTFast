@@ -177,7 +177,7 @@ namespace GLTFast.Export
                     metallicFactor = 0,
                     roughnessFactor = 1.0f,
                     BaseColor = uMaterial.HasProperty(BaseColorProperty)
-                        ? uMaterial.GetColor(BaseColorProperty)
+                        ? uMaterial.GetColor(BaseColorProperty).linear
                         : Color.white
                 };
                 if (mainTex != null)
@@ -191,7 +191,7 @@ namespace GLTFast.Export
                 if (uMaterial.HasProperty(k_TintColor))
                 {
                     //particles use _TintColor instead of _Color
-                    material.pbrMetallicRoughness.BaseColor = uMaterial.GetColor(k_TintColor);
+                    material.pbrMetallicRoughness.BaseColor = uMaterial.GetColor(k_TintColor).linear;
                 }
             }
 
@@ -288,12 +288,12 @@ namespace GLTFast.Export
 
             if (uMaterial.HasProperty(BaseColorProperty))
             {
-                pbr.BaseColor = uMaterial.GetColor(BaseColorProperty);
+                pbr.BaseColor = uMaterial.GetColor(BaseColorProperty).linear;
             }
             else
             if (uMaterial.HasProperty(ColorProperty))
             {
-                pbr.BaseColor = uMaterial.GetColor(ColorProperty);
+                pbr.BaseColor = uMaterial.GetColor(ColorProperty).linear;
             }
 
             if (uMaterial.HasProperty(k_TintColor))
@@ -306,7 +306,7 @@ namespace GLTFast.Export
                     white = (c.r + c.g + c.b) / 3.0f; //multiply alpha by overall whiteness of TintColor
                 }
 
-                pbr.BaseColor = uMaterial.GetColor(k_TintColor) * white;
+                pbr.BaseColor = (uMaterial.GetColor(k_TintColor) * white).linear;
             }
 
             if (uMaterial.HasProperty(mainTexProperty))

@@ -31,20 +31,20 @@ namespace GLTFast.Export
                     case RenderPipeline.BuiltIn:
                     case RenderPipeline.Universal:
 #if UNITY_SHADER_GRAPH
-                        s_MaterialExport = new MetaMaterialExport<
+                        s_MaterialExport = MetaMaterialExportShaderGraphs<
                             StandardMaterialExport,
                             GltfShaderGraphMaterialExporter
-                        >();
+                        >.Instance;
 #else
-                        s_MaterialExport = new StandardMaterialExport();
+                        s_MaterialExport = MetaMaterialExportBuiltIn.Instance;
 #endif
                         break;
 #if USING_HDRP
                     case RenderPipeline.HighDefinition:
-                        s_MaterialExport = new MetaMaterialExport<
+                        s_MaterialExport = MetaMaterialExportShaderGraphs<
                             HighDefinitionMaterialExport,
                             GltfHdrpMaterialExporter
-                        >();
+                        >.Instance;
                         break;
 #endif
                     default:

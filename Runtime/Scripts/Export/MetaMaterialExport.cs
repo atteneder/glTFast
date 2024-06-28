@@ -11,18 +11,52 @@ namespace GLTFast.Export
     using Logging;
     using Schema;
 
+    /// <inheritdoc cref="MetaMaterialExportShaderGraphs{TLitExport,TGltfShaderGraphExport}"/>
+    [Obsolete("Use MaterialExport.GetDefaultMaterialExport instead.")]
+    // TODO: Make private in next major release
     public class MetaMaterialExport<TLitExport, TGltfShaderGraphExport> :
         IMaterialExport
         where TLitExport : IMaterialExport, new()
         where TGltfShaderGraphExport : IMaterialExport, new()
     {
-        static IMaterialExport s_LitMaterialExport;
-        static IMaterialExport s_GltfBuiltInMaterialExport;
-        static IMaterialExport s_GltfShaderGraphMaterialExport;
-        static IMaterialExport s_GltfUnlitMaterialExport;
+        /// <inheritdoc />
+        public bool ConvertMaterial(
+            UnityEngine.Material uMaterial,
+            out Material material,
+            IGltfWritable gltf,
+            ICodeLogger logger
+            )
+        {
+            return MetaMaterialExportShaderGraphs<TLitExport, TGltfShaderGraphExport>
+                .Instance
+                .ConvertMaterial(uMaterial, out material, gltf, logger);
+        }
+    }
+
+    /// <summary>
+    /// Picks a fitting material exporter, based on the used shader.
+    /// </summary>
+    /// <typeparam name="TLitExport">Fallback material exporter for Unity Standard/Lit shaders.</typeparam>
+    /// <typeparam name="TGltfShaderGraphExport">Material exporter for glTFast shader graphs.</typeparam>
+    class MetaMaterialExportShaderGraphs<TLitExport, TGltfShaderGraphExport> :
+        IMaterialExport
+        where TLitExport : IMaterialExport, new()
+        where TGltfShaderGraphExport : IMaterialExport, new()
+    {
+        static TLitExport s_LitMaterialExport;
+        static TGltfShaderGraphExport s_GltfShaderGraphMaterialExport;
+
+        MetaMaterialExportShaderGraphs() { }
+        public static MetaMaterialExportShaderGraphs<TLitExport, TGltfShaderGraphExport> Instance { get; } =
+            new MetaMaterialExportShaderGraphs<TLitExport, TGltfShaderGraphExport>();
 
         /// <inheritdoc />
-        public bool ConvertMaterial(UnityEngine.Material uMaterial, out Material material, IGltfWritable gltf, ICodeLogger logger)
+        public bool ConvertMaterial(
+            UnityEngine.Material uMaterial,
+            out Material material,
+            IGltfWritable gltf,
+            ICodeLogger logger
+            )
         {
             IMaterialExport materialExport;
 
@@ -30,13 +64,7 @@ namespace GLTFast.Export
 #if UNITY_SHADER_GRAPH
             if (name.StartsWith("Shader Graphs/glTF-"))
             {
-                if (name.LastIndexOf("nlit") >= 0)
-                {
-                    // Unlit shader
-                    s_GltfUnlitMaterialExport ??= new GltfUnlitMaterialExporter();
-                    materialExport = s_GltfUnlitMaterialExport;
-                }
-                else
+                if (!MetaMaterialExportBuiltIn.TryFindMatchingGltfUnlitMaterialExport(name, out materialExport))
                 {
                     s_GltfShaderGraphMaterialExport ??= new TGltfShaderGraphExport();
                     materialExport = s_GltfShaderGraphMaterialExport;
@@ -44,21 +72,7 @@ namespace GLTFast.Export
             }
             else
 #endif
-            if (name.StartsWith("glTF/"))
-            {
-                if (name.LastIndexOf("nlit") >= 0)
-                {
-                    // Unlit shader
-                    s_GltfUnlitMaterialExport ??= new GltfUnlitMaterialExporter();
-                    materialExport = s_GltfUnlitMaterialExport;
-                }
-                else
-                {
-                    s_GltfBuiltInMaterialExport ??= new GltfBuiltInShaderMaterialExporter();
-                    materialExport = s_GltfBuiltInMaterialExport;
-                }
-            }
-            else
+            if (!MetaMaterialExportBuiltIn.TryFindMatchingGltfMaterialExport(name, out materialExport))
             {
                 s_LitMaterialExport ??= new TLitExport();
                 materialExport = s_LitMaterialExport;
