@@ -57,16 +57,18 @@ namespace GLTFast.Export
     }
 
     /// <summary>
-    /// Compression
+    /// glTF compression method.
     /// </summary>
     [Flags]
     public enum Compression
     {
         /// <summary>No compression</summary>
         Uncompressed = 1,
-        /// <summary>Replace existing files with newly created ones</summary>
+        /// <summary><a href="https://meshoptimizer.org/#vertexindex-buffer-compression">Meshopt compression</a>
+        /// via <see cref="Extension.MeshoptCompression"/></summary>
         MeshOpt = 1 << 1,
-        /// <summary>Replace existing files with newly created ones</summary>
+        /// <summary><a href="https://google.github.io/draco/">Draco 3D Data compression</a>
+        /// via <see cref="Extension.DracoMeshCompression"/></summary>
         Draco = 1 << 2,
     }
 
