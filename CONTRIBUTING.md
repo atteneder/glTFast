@@ -53,7 +53,7 @@ original creation and that you have complete right and authority to make your
 contributions. We allow both individual contributions and contributions made on
 behalf of companies.
 
-[COC]: (CODE_OF_CONDUCT.md)
+[COC]: CODE_OF_CONDUCT.md
 [Git]: https://git-scm.com/
 [repo]: https://github.com/Unity-Technologies/com.unity.cloud.gltfast
 [issues]: https://github.com/Unity-Technologies/com.unity.cloud.gltfast/issues
