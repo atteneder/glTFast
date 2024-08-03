@@ -3052,11 +3052,7 @@ namespace GLTFast
                     var att = primitive.attributes;
                     if (primitive.indices >= 0)
                     {
-                        var usage = (
-                            primitive.mode == DrawMode.Triangles
-                            || primitive.mode == DrawMode.TriangleStrip
-                            || primitive.mode == DrawMode.TriangleFan
-                            )
+                        var usage = ( primitive.mode == DrawMode.Triangles )
                         ? AccessorUsage.IndexFlipped
                         : AccessorUsage.Index;
                         SetAccessorUsage(primitive.indices, isDraco ? AccessorUsage.Ignore : usage);
@@ -3606,30 +3602,36 @@ namespace GLTFast
                     c.topology = MeshTopology.Lines;
                     break;
                 case DrawMode.LineLoop:
-                    m_Logger?.Error(LogCode.PrimitiveModeUnsupported, primitive.mode.ToString());
                     c.topology = MeshTopology.LineStrip;
                     break;
                 case DrawMode.LineStrip:
                     c.topology = MeshTopology.LineStrip;
                     break;
                 case DrawMode.TriangleStrip:
+                    c.topology = MeshTopology.Triangles;
+                    break;
                 case DrawMode.TriangleFan:
+                    c.topology = MeshTopology.Triangles;
+                    break;
                 default:
                     m_Logger?.Error(LogCode.PrimitiveModeUnsupported, primitive.mode.ToString());
                     c.topology = MeshTopology.Triangles;
                     break;
             }
 
+            int[] indices;
             if (primitive.indices >= 0)
             {
-                c.SetIndices(subMesh, ((AccessorData<int>)m_AccessorData[primitive.indices]).data);
+                indices = ((AccessorData<int>)m_AccessorData[primitive.indices]).data;
+                RecalculateIndicesJob(primitive, indices, out indices, out c.jobHandle, out c.calculatedIndicesHandle);
             }
             else
             {
                 int vertexCount = gltf.Accessors[primitive.attributes.POSITION].count;
-                CalculateIndicesJob(primitive, vertexCount, c.topology, out var indices, out c.jobHandle, out c.calculatedIndicesHandle);
-                c.SetIndices(subMesh, indices);
+                CalculateIndicesJob(primitive, vertexCount, c.topology, out indices, out c.jobHandle, out c.calculatedIndicesHandle);
             }
+
+            c.SetIndices(subMesh, indices);
             Profiler.EndSample();
         }
 
@@ -3643,6 +3645,61 @@ namespace GLTFast
             c.StartDecode(buffer, dracoExt.attributes);
         }
 #endif
+
+        static unsafe void RecalculateIndicesJob (
+            MeshPrimitiveBase primitive,
+            int[] oldIndices,
+            out int[] indices,
+            out JobHandle jobHandle,
+            out GCHandle resultHandle
+            )
+        {
+            switch (primitive.mode)
+            {
+                case DrawMode.LineLoop:
+                    indices = new int[oldIndices.Length + 1];
+                    Array.Copy(oldIndices, indices, oldIndices.Length);
+                    indices[oldIndices.Length] = oldIndices[0];
+                    jobHandle = default;
+                    resultHandle = default;
+                    break;
+                case DrawMode.TriangleStrip:
+                    indices = new int[(oldIndices.Length - 2) * 3];
+                    resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+                    //RecalculateIndicesTriangleStripJob
+                    var triangleStripJob = new RecalculateIndicesForTriangleStripJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        triangleStripJob.result = (int*)dst;
+                    }
+                    fixed (void* inp = &(oldIndices[0]))
+                    {
+                        triangleStripJob.input = (int*)inp;
+                    }
+                    jobHandle = triangleStripJob.Schedule(oldIndices.Length, DefaultBatchCount);
+                    break;
+                case DrawMode.TriangleFan:
+                    indices = new int[(oldIndices.Length - 2) * 3];
+                    resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+                    //RecalculateIndicesTriangleFanJob
+                    var triangleFanJob = new RecalculateIndicesForTriangleFanJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        triangleFanJob.result = (int*)dst;
+                    }
+                    fixed (void* inp = &(oldIndices[0]))
+                    {
+                        triangleFanJob.input = (int*)inp;
+                    }
+                    jobHandle = triangleFanJob.Schedule(oldIndices.Length, DefaultBatchCount);
+                    break;
+                default:
+                    indices = oldIndices;
+                    jobHandle = default;
+                    resultHandle = default;
+                    break;
+            }
+        }
 
         static unsafe void CalculateIndicesJob(
             MeshPrimitiveBase primitive,
@@ -3659,28 +3716,47 @@ namespace GLTFast
             // extra index (first vertex again) for closing line loop
             indices = new int[vertexCount + (lineLoop ? 1 : 0)];
             resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
-            if (topology == MeshTopology.Triangles)
+            switch (primitive.mode)
             {
-                var job8 = new CreateIndicesInt32FlippedJob();
-                fixed (void* dst = &(indices[0]))
-                {
-                    job8.result = (int*)dst;
-                }
-                jobHandle = job8.Schedule(indices.Length, DefaultBatchCount);
-            }
-            else
-            {
-                var job8 = new CreateIndicesInt32Job();
-                if (lineLoop)
-                {
-                    // Set the last index to the first vertex
-                    indices[vertexCount] = 0;
-                }
-                fixed (void* dst = &(indices[0]))
-                {
-                    job8.result = (int*)dst;
-                }
-                jobHandle = job8.Schedule(vertexCount, DefaultBatchCount);
+                case DrawMode.Triangles:
+                    var flippedJob8 = new CreateIndicesInt32FlippedJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        flippedJob8.result = (int*)dst;
+                    }
+                    jobHandle = flippedJob8.Schedule(indices.Length, DefaultBatchCount);
+                    break;
+                case DrawMode.TriangleStrip:
+                    indices = new int[(indices.Length - 2) * 3];
+                    var triangleStripJob = new CreateIndicesForTriangleStripJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        triangleStripJob.result = (int*)dst;
+                    }
+                    jobHandle = triangleStripJob.Schedule(indices.Length, DefaultBatchCount);
+                    break;
+                case DrawMode.TriangleFan:
+                    indices = new int[(indices.Length - 2) * 3];
+                    var triangleFanJob = new CreateIndicesForTriangleFanJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        triangleFanJob.result = (int*)dst;
+                    }
+                    jobHandle = triangleFanJob.Schedule(indices.Length, DefaultBatchCount);
+                    break;
+                default:
+                    var job8 = new CreateIndicesInt32Job();
+                    if (lineLoop)
+                    {
+                        // Set the last index to the first vertex
+                        indices[vertexCount] = 0;
+                    }
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        job8.result = (int*)dst;
+                    }
+                    jobHandle = job8.Schedule(vertexCount, DefaultBatchCount);
+                    break;
             }
             Profiler.EndSample();
         }
