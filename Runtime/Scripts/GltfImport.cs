@@ -3667,7 +3667,6 @@ namespace GLTFast
                     int triangleStripTriangleCount = oldIndices.Length - 2;
                     indices = new int[triangleStripTriangleCount * 3];
                     resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
-                    //RecalculateIndicesTriangleStripJob
                     var triangleStripJob = new RecalculateIndicesForTriangleStripJob();
                     fixed (void* dst = &(indices[0]))
                     {
@@ -3683,7 +3682,6 @@ namespace GLTFast
                     int triangleFanTriangleCount = oldIndices.Length - 2;
                     indices = new int[triangleFanTriangleCount * 3];
                     resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
-                    //RecalculateIndicesTriangleFanJob
                     var triangleFanJob = new RecalculateIndicesForTriangleFanJob();
                     fixed (void* dst = &(indices[0]))
                     {
