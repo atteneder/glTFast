@@ -3664,7 +3664,8 @@ namespace GLTFast
                     resultHandle = default;
                     break;
                 case DrawMode.TriangleStrip:
-                    indices = new int[(oldIndices.Length - 2) * 3];
+                    int triangleStripTriangleCount = oldIndices.Length - 2;
+                    indices = new int[triangleStripTriangleCount * 3];
                     resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
                     //RecalculateIndicesTriangleStripJob
                     var triangleStripJob = new RecalculateIndicesForTriangleStripJob();
@@ -3676,10 +3677,11 @@ namespace GLTFast
                     {
                         triangleStripJob.input = (int*)inp;
                     }
-                    jobHandle = triangleStripJob.Schedule(oldIndices.Length, DefaultBatchCount);
+                    jobHandle = triangleStripJob.Schedule(triangleStripTriangleCount, DefaultBatchCount);
                     break;
                 case DrawMode.TriangleFan:
-                    indices = new int[(oldIndices.Length - 2) * 3];
+                    int triangleFanTriangleCount = oldIndices.Length - 2;
+                    indices = new int[triangleFanTriangleCount * 3];
                     resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
                     //RecalculateIndicesTriangleFanJob
                     var triangleFanJob = new RecalculateIndicesForTriangleFanJob();
@@ -3691,7 +3693,7 @@ namespace GLTFast
                     {
                         triangleFanJob.input = (int*)inp;
                     }
-                    jobHandle = triangleFanJob.Schedule(oldIndices.Length, DefaultBatchCount);
+                    jobHandle = triangleFanJob.Schedule(triangleFanTriangleCount, DefaultBatchCount);
                     break;
                 default:
                     indices = oldIndices;
