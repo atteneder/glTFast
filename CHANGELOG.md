@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - (Export) Cases of corrupt glTFs when not all vertex attributes of a mesh were exported.
+- Alpha blending via baseColorTexture's alpha value is now in correct color space, less opaque and as a result consistent with other glTF viewers (affected URP and built-in render pipeline projects in linear color space; fixes [#700](https://github.com/atteneder/glTFast/issues/700)).
 
 ## [6.7.0] - 2024-06-25
 

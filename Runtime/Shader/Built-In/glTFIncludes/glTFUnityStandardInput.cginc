@@ -153,7 +153,11 @@ half Alpha(float2 uv)
 #if defined(_SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A)
     return baseColorFactor.a;
 #else
-    return tex2D(baseColorTexture, uv).a * baseColorFactor.a;
+    half alpha = tex2D(baseColorTexture, uv).a;
+#ifndef UNITY_COLORSPACE_GAMMA
+    alpha = GammaToLinearSpace(alpha);
+#endif
+    return alpha * baseColorFactor.a;
 #endif
 }
 

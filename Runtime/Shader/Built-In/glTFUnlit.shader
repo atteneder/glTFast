@@ -80,7 +80,11 @@ SubShader {
 
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(baseColorTexture, i.texcoord) * baseColorFactor;
+                fixed4 col = tex2D(baseColorTexture, i.texcoord);
+#ifndef UNITY_COLORSPACE_GAMMA
+                col.a = GammaToLinearSpace(col.a);
+#endif
+                col *= baseColorFactor;
                 col *= i.color;
 #ifdef _ALPHATEST_ON
                 clip(col.a - alphaCutoff);
