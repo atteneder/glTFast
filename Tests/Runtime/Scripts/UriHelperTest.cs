@@ -64,6 +64,8 @@ namespace GLTFast.Tests
             Assert.AreEqual(new Uri("https://www.server.com/dir/sub/"), UriHelper.GetBaseUri(new Uri("https://www.server.com/dir/sub/file+test.gltf")));
             Assert.AreEqual(new Uri("file:///dir/sub/"), UriHelper.GetBaseUri(new Uri("file:///dir/sub/file+test.gltf")));
 
+            // Android paths
+            Assert.AreEqual(new Uri("jar:file:///dir/sub/"), UriHelper.GetBaseUri(new Uri("jar:file:///dir/sub/file.gltf")));
 
             // relative paths
             var uri = new Uri("Assets/Some/Path/asset.glb", UriKind.Relative);
