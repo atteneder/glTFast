@@ -587,7 +587,12 @@ namespace GLTFast.Export
                     outStream.Write(BitConverter.GetBytes((uint)ChunkFormat.Binary));
                     var ms = (MemoryStream)m_BufferStream;
                     ms.WriteTo(outStream);
+#if UNITY_WEBGL && !UNITY_EDITOR
+                    // FlushAsync never finishes on the Web, so doing it in sync
+                    ms.Flush();
+#else
                     await ms.FlushAsync();
+#endif
                     for (var i = 0; i < binPad; i++)
                     {
                         outStream.WriteByte(0);
@@ -613,7 +618,12 @@ namespace GLTFast.Export
         {
             var writer = new StreamWriter(outStream);
             m_Gltf.GltfSerialize(writer);
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // FlushAsync never finishes on the Web, so doing it in sync
+            writer.Flush();
+#else
             await writer.FlushAsync();
+#endif
         }
 
         void CertifyNotDisposed()
