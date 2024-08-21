@@ -56,7 +56,8 @@ namespace GLTFast.Export
         struct AttributeData
         {
             public int stream;
-            public int offset;
+            public int inputOffset;
+            public int outputOffset;
             public int accessorId;
             public int size;
         }
@@ -903,7 +904,8 @@ namespace GLTFast.Export
 
                 var attrData = new AttributeData
                 {
-                    offset = inputStrides[attribute.stream],
+                    inputOffset = inputStrides[attribute.stream],
+                    outputOffset = outputStrides[attribute.stream],
                     stream = attribute.stream,
                     size = attribute.dimension * attributeSize
                 };
@@ -915,17 +917,14 @@ namespace GLTFast.Export
                 {
                     continue;
                 }
-                else
-                {
-                    outputStrides[attribute.stream] += attrData.size;
-                }
 
+                outputStrides[attribute.stream] += attrData.size;
                 // Adhere data alignment rules
-                Assert.IsTrue(attrData.offset % 4 == 0);
+                Assert.IsTrue(attrData.outputOffset % 4 == 0);
 
                 var accessor = new Accessor
                 {
-                    byteOffset = attrData.offset,
+                    byteOffset = attrData.outputOffset,
                     componentType = Accessor.GetComponentType(attribute.format),
                     count = vertexCount,
                 };
@@ -1554,10 +1553,10 @@ namespace GLTFast.Export
         {
             var job = new ExportJobs.ConvertPositionFloatJob
             {
-                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.inputOffset,
                 inputByteStride = inputByteStride,
                 outputByteStride = outputByteStride,
-                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.outputOffset
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
         }
@@ -1597,10 +1596,10 @@ namespace GLTFast.Export
         {
             var job = new ExportJobs.ConvertTangentFloatJob
             {
-                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.inputOffset,
                 inputByteStride = inputByteStride,
                 outputByteStride = outputByteStride,
-                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.outputOffset
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
         }
@@ -1662,10 +1661,10 @@ namespace GLTFast.Export
         {
             var job = new ExportJobs.ConvertTexCoordFloatJob
             {
-                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.inputOffset,
                 inputByteStride = inputByteStride,
                 outputByteStride = outputByteStride,
-                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.outputOffset
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
         }
@@ -1684,8 +1683,8 @@ namespace GLTFast.Export
                 inputByteStride = inputByteStride,
                 outputByteStride = outputByteStride,
                 byteLength = (uint)attrData.size,
-                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.offset,
-                output = (byte*)outputStream.GetUnsafePtr() + attrData.offset
+                input = (byte*)inputStream.GetUnsafeReadOnlyPtr() + attrData.inputOffset,
+                output = (byte*)outputStream.GetUnsafePtr() + attrData.outputOffset
             }.Schedule(vertexCount, k_DefaultInnerLoopBatchCount);
             return job;
         }
