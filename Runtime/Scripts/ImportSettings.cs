@@ -41,6 +41,15 @@ namespace GLTFast
         }
 
         /// <summary>
+        /// Create textures readable. Increases memory consumption.
+        /// </summary>
+        public bool TexturesReadable
+        {
+            get => texturesReadable;
+            set => texturesReadable = value;
+        }
+
+        /// <summary>
         /// Defines the default minification filter mode for textures that have no such specification in data
         /// </summary>
         public Sampler.MinFilterMode DefaultMinFilterMode
@@ -78,6 +87,10 @@ namespace GLTFast
         [SerializeField]
         [Tooltip("Controls if mipmaps are created for imported textures.")]
         bool generateMipMaps;
+
+        [SerializeField]
+        [Tooltip("Create textures readable. Increases memory consumption.")]
+        bool texturesReadable;
 
         [SerializeField]
         [Tooltip("Minification filter mode fallback if no mode was provided.")]

@@ -1395,10 +1395,13 @@ namespace GLTFast
                 }
 
 #if !UNITY_VISIONOS
-                m_ImageReadable = new bool[m_Images.Length];
-                for (int i = 0; i < m_Images.Length; i++)
+                if (!m_Settings.TexturesReadable)
                 {
-                    m_ImageReadable[i] = imageVariants[i] != null && imageVariants[i].Count > 1;
+                    m_ImageReadable = new bool[m_Images.Length];
+                    for (var i = 0; i < m_Images.Length; i++)
+                    {
+                        m_ImageReadable[i] = imageVariants[i] != null && imageVariants[i].Count > 1;
+                    }
                 }
 #endif
 
@@ -1450,7 +1453,7 @@ namespace GLTFast
 #if UNITY_VISIONOS
                                         false,
 #else
-                                        !m_ImageReadable[imageIndex],
+                                        !m_Settings.TexturesReadable && !m_ImageReadable[imageIndex],
 #endif
                                         imgFormat == ImageFormat.Ktx
                                         );
@@ -1506,7 +1509,7 @@ namespace GLTFast
 #if UNITY_VISIONOS
                 false
 #else
-                !m_ImageReadable[imageIndex]
+                !m_Settings.TexturesReadable && !m_ImageReadable[imageIndex]
 #endif
                 );
             m_Images[imageIndex] = txt;
@@ -1587,7 +1590,7 @@ namespace GLTFast
 #if UNITY_VISIONOS
                             false
 #else
-                            !m_ImageReadable[imageIndex]
+                            !m_Settings.TexturesReadable && !m_ImageReadable[imageIndex]
 #endif
                             );
 #else
@@ -2074,7 +2077,7 @@ namespace GLTFast
 #if UNITY_VISIONOS
                                 false
 #else
-                                !m_ImageReadable[jh.imageIndex]
+                                !m_Settings.TexturesReadable && !m_ImageReadable[jh.imageIndex]
 #endif
                                 );
 #endif

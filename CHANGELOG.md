@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] -
 
+### Added
+- (Import) Setting to create textures readable. This allows users to access resulting textures from their scripts.
+
 ### Fixed
 - (Export) Writing to files on the web via IndexedDB now works (fixes [#625](https://github.com/atteneder/glTFast/issues/625))
 - Export test results are validated again.
