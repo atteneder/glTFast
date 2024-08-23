@@ -84,6 +84,32 @@ namespace GLTFast.Export
         }
 
         [BurstCompile]
+        public unsafe struct ConvertPositionHalfJob : IJobParallelFor
+        {
+
+            public uint inputByteStride;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (half3*)(input + i * inputByteStride);
+                var outPtr = (float3*)(output + i * outputByteStride);
+
+                var tmp = (float3)(*inPtr);
+                tmp.x *= -1;
+                *outPtr = tmp;
+            }
+        }
+
+        [BurstCompile]
         public unsafe struct ConvertTangentFloatJob : IJobParallelFor
         {
 
@@ -110,6 +136,32 @@ namespace GLTFast.Export
         }
 
         [BurstCompile]
+        public unsafe struct ConvertTangentHalfJob : IJobParallelFor
+        {
+
+            public uint inputByteStride;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (half4*)(input + i * inputByteStride);
+                var outPtr = (float4*)(output + i * outputByteStride);
+
+                var tmp = (float4)(*inPtr);
+                tmp.z *= -1;
+                *outPtr = tmp;
+            }
+        }
+
+        [BurstCompile]
         public unsafe struct ConvertTexCoordFloatJob : IJobParallelFor
         {
             public uint inputByteStride;
@@ -129,6 +181,31 @@ namespace GLTFast.Export
                 var outPtr = (float2*)(output + i * outputByteStride);
 
                 var tmp = *inPtr;
+                tmp.y = 1 - tmp.y;
+                *outPtr = tmp;
+            }
+        }
+
+        [BurstCompile]
+        public unsafe struct ConvertTexCoordHalfJob : IJobParallelFor
+        {
+            public uint inputByteStride;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (half2*)(input + i * inputByteStride);
+                var outPtr = (float2*)(output + i * outputByteStride);
+
+                var tmp = (float2)(*inPtr);
                 tmp.y = 1 - tmp.y;
                 *outPtr = tmp;
             }

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - (Import) Setting to create textures readable. This allows users to access resulting textures from their scripts.
+- (Export) Non-readable meshes can be exported as well now.
+- (Export) Added support for exporting meshes with vertex compression enabled (effectively converting 16-bit float positions/normals/tangents/texture coordinates to 32-bit floats).
 
 ### Fixed
 - (Export) Writing to files on the web via IndexedDB now works (fixes [#625](https://github.com/atteneder/glTFast/issues/625))

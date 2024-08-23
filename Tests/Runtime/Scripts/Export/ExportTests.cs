@@ -879,7 +879,7 @@ namespace GLTFast.Tests.Export
 #endif
         }
 
-        static void AssertLogger(CollectingLogger logger)
+        internal static void AssertLogger(CollectingLogger logger)
         {
             logger.LogAll();
             if (logger.Count > 0)
@@ -930,7 +930,7 @@ namespace GLTFast.Tests.Export
 
 
 #if GLTF_VALIDATOR && UNITY_EDITOR
-        static void ValidateGltf(string path, params MessageCode[] expectedMessages) {
+        internal static void ValidateGltf(string path, params MessageCode[] expectedMessages) {
             var report = Validator.Validate(path);
             Assert.NotNull(report, $"Report null for {path}");
             // report.Log();
