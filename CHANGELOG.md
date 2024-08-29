@@ -10,10 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Import) Setting to create textures readable. This allows users to access resulting textures from their scripts.
 - (Export) Non-readable meshes can be exported as well now.
 - (Export) Added support for exporting meshes with vertex compression enabled (effectively converting 16-bit float positions/normals/tangents/texture coordinates to 32-bit floats).
+- (Import) Support for mesh primitive modes `TRIANGLE_STRIP` and `TRIANGLE_FAN` (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/22))
 
 ### Fixed
 - (Export) Writing to files on the web via IndexedDB now works (fixes [#625](https://github.com/atteneder/glTFast/issues/625))
 - Export test results are validated again.
+- Primitve mode LINE_LOOP works as expected (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/22)).
 
 ## [6.7.1] - 2024-08-07
 
@@ -1218,6 +1220,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 [Battlehub0x]: https://github.com/Battlehub0x
 [Bersaelor]: https://github.com/Bersaelor
 [EricBeetsOfficial-Opuscope]: https://github.com/EricBeetsOfficial-Opuscope
+[Hexer611]: https://github.com/Hexer611
 [Holo-Krzysztof]: https://github.com/Holo-Krzysztof
 [hybridherbst]: https://github.com/hybridherbst
 [krisrok]: https://github.com/krisrok

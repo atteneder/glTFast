@@ -56,8 +56,8 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | LINES | ✅ | ✅
 | LINE_STRIP | ✅ | ✅
 | ¹LINE_LOOP | ✅ | ✅
-| TRIANGLE_STRIP |  |
-| TRIANGLE_FAN |  |
+| TRIANGLE_STRIP | ✅ | `n/a`
+| TRIANGLE_FAN | ✅ | `n/a`
 | Quads | `n/a` | ✅ via triangulation
 | | |
 | **Meshes**

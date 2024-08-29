@@ -327,6 +327,110 @@ namespace GLTFast.Jobs
     }
 
     [BurstCompile]
+    unsafe struct CreateIndicesForTriangleStripJob : IJobParallelFor
+    {
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        public void Execute(int i)
+        {
+            // Source https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+            // Triangle Strips
+            // One triangle primitive is defined by each vertex and the two vertices that follow it, according to the equation:
+            // pi = { vi, vi + (1 + i % 2), vi + (2 - i % 2)}
+            // We change first and second indices for Unity
+
+            var triangleIndex = i / 3;
+            result[i] = (i % 3) switch
+            {
+                0 => triangleIndex + (1 + triangleIndex % 2),
+                1 => triangleIndex,
+                2 => triangleIndex + (2 - triangleIndex % 2),
+                _ => result[i]
+            };
+        }
+    }
+
+    [BurstCompile]
+    unsafe struct CreateIndicesForTriangleFanJob : IJobParallelFor
+    {
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        public void Execute(int i)
+        {
+            // Source https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+            // Triangle Fans
+            // Triangle primitives are defined around a shared common vertex, according to the equation:
+            // pi = {vi+1, vi+2, v0}
+            // We change first and second indices for Unity
+
+            var triangleIndex = i / 3;
+            result[i] = (i % 3) switch
+            {
+                0 => triangleIndex + 2,
+                1 => triangleIndex + 1,
+                _ => 0
+            };
+        }
+    }
+
+    [BurstCompile]
+    unsafe struct RecalculateIndicesForTriangleStripJob : IJobParallelFor
+    {
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        public void Execute(int i)
+        {
+            // Source https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+            // Triangle Strips
+            // One triangle primitive is defined by each vertex and the two vertices that follow it, according to the equation:
+            // pi = { vi, vi + (1 + i % 2), vi + (2 - i % 2)}
+            // We change first and second indices for Unity
+
+            var triangleIndex = i * 3;
+            result[triangleIndex + 1] = input[i];
+            result[triangleIndex] = input[i + (1 + i % 2)];
+            result[triangleIndex + 2] = input[i + (2 - i % 2)];
+        }
+    }
+
+    [BurstCompile]
+    unsafe struct RecalculateIndicesForTriangleFanJob : IJobParallelFor
+    {
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* input;
+
+        [ReadOnly]
+        [NativeDisableUnsafePtrRestriction]
+        public int* result;
+
+        public void Execute(int i)
+        {
+            // Source https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+            // Triangle Fans
+            // Triangle primitives are defined around a shared common vertex, according to the equation:
+            // pi = {vi+1, vi+2, v0}
+            // We change first and second indices for Unity
+
+            var triangleIndex = i * 3;
+            result[triangleIndex + 1] = input[i + 1];
+            result[triangleIndex] = input[i + 2];
+            result[triangleIndex + 2] = 0;
+        }
+    }
+    [BurstCompile]
     unsafe struct ConvertIndicesUInt8ToInt32Job : IJobParallelFor
     {
 
