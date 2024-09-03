@@ -830,6 +830,33 @@ namespace GLTFast.Tests.Export
 
                 CompareGltfJsonTokenRecursively(a, b);
             }
+
+            if (tokenA is JObject objA && tokenB is JObject objB)
+            {
+                if (objA.Count > objB.Count)
+                {
+                    AssertMissingProperties(objA, objB, true);
+                }
+                else if (objA.Count < objB.Count)
+                {
+                    AssertMissingProperties(objB, objA, false);
+                }
+            }
+
+            void AssertMissingProperties(JObject largerObject, JObject smallerObject, bool expected)
+            {
+                var i = 0;
+                foreach (var pair in largerObject)
+                {
+                    if (i < smallerObject.Count)
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    throw new AssertionException($"{expected ? "Missing" : "Unexpected"} property \"{pair.Key}\" at {largerObject.Path}.");
+                }
+            }
         }
 
         static async Task ExportSceneAll(bool binary, bool toStream = false)
