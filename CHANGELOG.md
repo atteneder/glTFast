@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - (Export) Writing to files on the web via IndexedDB now works (fixes [#625](https://github.com/atteneder/glTFast/issues/625))
-- Export test results are validated again.
+- (Export) test results are validated again.
+- (Export) Removed expendable JSON content when exporting unlit materials without color or texture applied.
 - Primitve mode LINE_LOOP works as expected (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/22)).
 
 ## [6.7.1] - 2024-08-07

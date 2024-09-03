@@ -29,7 +29,6 @@ namespace GLTFast.Export
             material = new GLTFast.Schema.Material
             {
                 name = unityMaterial.name,
-                pbrMetallicRoughness = new PbrMetallicRoughness(),
                 extensions = new MaterialExtensions
                 {
                     KHR_materials_unlit = new MaterialUnlit()
@@ -61,6 +60,7 @@ namespace GLTFast.Export
                         texCoord = GltfMaterialExporter.GetValue(unityMaterial, MaterialProperty.BaseColorTextureTexCoord)
                     };
 
+                    material.pbrMetallicRoughness ??= new PbrMetallicRoughness();
                     material.pbrMetallicRoughness.baseColorTexture = textureInfo;
 
                     if (GltfMaterialExporter.TryCreateTextureTransform(
@@ -79,8 +79,10 @@ namespace GLTFast.Export
                 }
             }
 
-            if (GltfMaterialExporter.TryGetValue(unityMaterial, MaterialProperty.BaseColor, out Color baseColor))
+            if (GltfMaterialExporter.TryGetValue(unityMaterial, MaterialProperty.BaseColor, out Color baseColor)
+                && baseColor != Color.white)
             {
+                material.pbrMetallicRoughness ??= new PbrMetallicRoughness();
                 material.pbrMetallicRoughness.BaseColor = baseColor.linear;
             }
 
