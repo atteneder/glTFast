@@ -1387,6 +1387,7 @@ namespace GLTFast
                 foreach (var txt in Root.Textures)
                 {
                     var imageIndex = txt.GetImageIndex();
+                    if (imageIndex < 0 || imageIndex >= Root.Images.Count) continue;
                     if (imageVariants[imageIndex] == null)
                     {
                         imageVariants[imageIndex] = new HashSet<int>();
@@ -2117,6 +2118,7 @@ namespace GLTFast
                     }
 
                     var imageIndex = txt.GetImageIndex();
+                    if (imageIndex < 0 || imageIndex >= Root.Images.Count) continue;
                     var img = m_Images[imageIndex];
                     if (imageVariants[imageIndex] == null)
                     {

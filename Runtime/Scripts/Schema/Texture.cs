@@ -20,6 +20,12 @@ namespace GLTFast.Schema
 
         /// <inheritdoc />
         public override TextureExtensions Extensions => extensions;
+
+        /// <inheritdoc />
+        internal override void UnsetExtensions()
+        {
+            extensions = null;
+        }
     }
 
     /// <summary>
@@ -123,6 +129,28 @@ namespace GLTFast.Schema
             hash = hash * 31 + Extensions.GetHashCode();
             return hash;
 #endif
+        }
+
+        /// <summary>
+        /// Sets <see cref="Extensions"/> to null.
+        /// </summary>
+        internal abstract void UnsetExtensions();
+
+        /// <summary>
+        /// Cleans up invalid parsing artifacts created by <see cref="GltfJsonUtilityParser"/>.
+        /// </summary>
+        internal void JsonUtilityCleanup()
+        {
+            var e = Extensions;
+            if (e != null)
+            {
+                // Check if Basis Universal extension is valid
+                if ((e.KHR_texture_basisu?.source ?? -1) < 0)
+                {
+                    e.KHR_texture_basisu = null;
+                    UnsetExtensions();
+                }
+            }
         }
     }
 }

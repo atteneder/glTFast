@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Test) Fail export test if glTF JSON contains unexpected or misses expected properties.
 - Increased resilience against invalid animation data.
 - Broken link in `CONTRIBUTING.md` (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/23)).
+- Loading glTFs with unknown texture extensions (e.g. WebP, `EXT_texture_webp`) now works (fixes [#705](https://github.com/atteneder/glTFast/issues/705)).
 
 ## [6.7.1] - 2024-08-07
 
