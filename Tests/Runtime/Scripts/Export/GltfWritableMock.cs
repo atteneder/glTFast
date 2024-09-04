@@ -48,6 +48,11 @@ namespace GLTFast.Tests.Export
             throw new NotImplementedException();
         }
 
+        public void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds, uint[] joints)
+        {
+            throw new NotImplementedException();
+        }
+
         public void AddCameraToNode(int nodeId, int cameraId)
         {
             throw new NotImplementedException();

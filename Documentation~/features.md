@@ -70,12 +70,12 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | Draco&trade; mesh compression (via [DracoForUnity]) | ✅ | ✅
 | Implicit (no) indices | ✅ |
 | Per primitive material | ✅ | ✅
-| Joints (up to 4 per vertex) | ✅ |
-| Weights (up to 4 per vertex) | ✅ |
+| Joints (up to 4 per vertex) | ✅ | ✅
+| Weights (up to 4 per vertex) | ✅ | ✅
 | | |
 | **Morph Targets / Blend Shapes**
 | Sparse accessors | ³ ✅ |
-| [Skins][Skins] | ✅ |
+| [Skins][Skins] | ✅ | ✅
 | | |
 | **Animation**
 | via legacy Animation System | ✅ |

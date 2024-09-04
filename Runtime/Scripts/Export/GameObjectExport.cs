@@ -72,18 +72,33 @@ namespace GLTFast.Export
             var rootNodes = new List<uint>(gameObjects.Count);
             var tempMaterials = new List<Material>();
             var success = true;
+
+            var nodesQueue = new Queue<Transform>();
+            var transformNodeId = new Dictionary<Transform, uint>();
+
             foreach (var gameObject in gameObjects)
             {
                 success &= AddGameObject(
                     gameObject,
                     origin,
-                    tempMaterials,
+                    nodesQueue,
+                    transformNodeId,
                     out var nodeId
                 );
                 if (nodeId >= 0)
                 {
                     rootNodes.Add((uint)nodeId);
                 }
+            }
+
+            while (nodesQueue.Count > 0)
+            {
+                var transform = nodesQueue.Dequeue();
+                AddNodeComponents(
+                    transform,
+                    transformNodeId,
+                    tempMaterials
+                    );
             }
             if (rootNodes.Count > 0)
             {
@@ -141,7 +156,8 @@ namespace GLTFast.Export
         bool AddGameObject(
             GameObject gameObject,
             float4x4? sceneOrigin,
-            List<Material> tempMaterials,
+            Queue<Transform> nodesQueue,
+            Dictionary<Transform, uint> transformNodeId,
             out int nodeId)
         {
             if (m_Settings.OnlyActiveInHierarchy && !gameObject.activeInHierarchy
@@ -163,7 +179,8 @@ namespace GLTFast.Export
                     success &= AddGameObject(
                         child.gameObject,
                         null,
-                        tempMaterials,
+                        nodesQueue,
+                        transformNodeId,
                         out var childNodeId
                         );
                     if (childNodeId >= 0)
@@ -200,7 +217,8 @@ namespace GLTFast.Export
                     rotation = transform.localRotation;
                     scale = transform.localScale;
                 }
-                nodeId = (int)m_Writer.AddNode(
+
+                var newNodeId = m_Writer.AddNode(
                     translation,
                     rotation,
                     scale,
@@ -210,8 +228,11 @@ namespace GLTFast.Export
 
                 if (onIncludedLayer)
                 {
-                    AddNodeComponents(gameObject, tempMaterials, nodeId);
+                    nodesQueue.Enqueue(transform);
                 }
+                transformNodeId[transform] = newNodeId;
+
+                nodeId = (int)newNodeId;
             }
             else
             {
@@ -221,11 +242,17 @@ namespace GLTFast.Export
             return success;
         }
 
-        void AddNodeComponents(GameObject gameObject, List<Material> tempMaterials, int nodeId)
+        void AddNodeComponents(
+            Transform transform,
+            Dictionary<Transform, uint> transformNodeId,
+            List<Material> tempMaterials
+            )
         {
+            var gameObject = transform.gameObject;
+            var nodeId = transformNodeId[transform];
             tempMaterials.Clear();
             Mesh mesh = null;
-            var skinning = false;
+            Transform[] bones = null;
             if (gameObject.TryGetComponent(out MeshFilter meshFilter))
             {
                 if (gameObject.TryGetComponent(out Renderer renderer))
@@ -243,9 +270,9 @@ namespace GLTFast.Export
                 if (smr.enabled || m_Settings.DisabledComponents)
                 {
                     mesh = smr.sharedMesh;
+                    bones = smr.bones;
                     smr.GetSharedMaterials(tempMaterials);
                 }
-                skinning = true;
             }
 
             var materialIds = new int[tempMaterials.Count];
@@ -264,7 +291,24 @@ namespace GLTFast.Export
 
             if (mesh != null)
             {
-                m_Writer.AddMeshToNode(nodeId, mesh, materialIds, skinning);
+                uint[] joints = null;
+                if (bones != null)
+                {
+                    joints = new uint[bones.Length];
+                    for (var i = 0; i < bones.Length; i++)
+                    {
+                        var bone = bones[i];
+                        if (!transformNodeId.TryGetValue(bone, out joints[i]))
+                        {
+#if DEBUG
+                            Debug.LogError($"Skip skin on {transform.name}: No node ID for bone transform {bone.name} found!");
+                            joints = null;
+                            break;
+#endif
+                        }
+                    }
+                }
+                m_Writer.AddMeshToNode((int)nodeId, mesh, materialIds, joints);
             }
 
             if (gameObject.TryGetComponent(out Camera camera))
@@ -273,7 +317,7 @@ namespace GLTFast.Export
                 {
                     if (m_Writer.AddCamera(camera, out var cameraId))
                     {
-                        m_Writer.AddCameraToNode(nodeId, cameraId);
+                        m_Writer.AddCameraToNode((int)nodeId, cameraId);
                     }
                 }
             }
@@ -284,7 +328,7 @@ namespace GLTFast.Export
                 {
                     if (m_Writer.AddLight(light, out var lightId))
                     {
-                        m_Writer.AddLightToNode(nodeId, lightId);
+                        m_Writer.AddLightToNode((int)nodeId, lightId);
                     }
                 }
             }

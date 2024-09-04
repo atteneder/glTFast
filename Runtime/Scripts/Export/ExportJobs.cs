@@ -211,6 +211,93 @@ namespace GLTFast.Export
             }
         }
 
+
+        [BurstCompile]
+        public unsafe struct ConvertSkinWeightsJob : IJobParallelFor
+        {
+
+            public uint inputByteStride;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (float4*)(input + i * inputByteStride);
+                var outPtr = (float4*)(output + i * outputByteStride);
+
+                *outPtr = *inPtr;
+            }
+        }
+
+        [BurstCompile]
+        public struct ConvertMatrixJob : IJobParallelFor
+        {
+            public NativeArray<float4x4> matrices;
+
+            public void Execute(int i)
+            {
+
+                var tmp = matrices[i];
+                tmp.c0.y *= -1;
+                tmp.c0.z *= -1;
+                tmp.c1.x *= -1;
+                tmp.c2.x *= -1;
+                tmp.c3.x *= -1;
+                matrices[i] = tmp;
+            }
+        }
+
+        [BurstCompile]
+        public unsafe struct ConvertSkinIndicesJob : IJobParallelFor
+        {
+
+            struct ushort4
+            {
+                public ushort4(uint x, uint y, uint z, uint w)
+                {
+                    m_X = (ushort)x;
+                    m_Y = (ushort)y;
+                    m_Z = (ushort)z;
+                    m_W = (ushort)w;
+                }
+
+                ushort m_X;
+                ushort m_Y;
+                ushort m_Z;
+                ushort m_W;
+            }
+
+            public uint inputByteStride;
+            public int indicesOffset;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inputIndexPtr = (uint4*)(indicesOffset + input + i * inputByteStride);
+                var outIndexPtr = (ushort4*)(indicesOffset + output + i * outputByteStride);
+
+                // Set the correct values for the indices
+                var tmpIndex = *inputIndexPtr;
+                var tmpOut = new ushort4(tmpIndex[0], tmpIndex[1], tmpIndex[2], tmpIndex[3]);
+                *outIndexPtr = tmpOut;
+            }
+        }
+
         [BurstCompile]
         public unsafe struct ConvertGenericJob : IJobParallelFor
         {
