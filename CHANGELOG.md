@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Primitve mode LINE_LOOP works as expected (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/22)).
 - (Test) Fail export test if glTF JSON contains unexpected or misses expected properties.
 - Increased resilience against invalid animation data.
+- Broken link in `CONTRIBUTING.md` (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/23)).
 
 ## [6.7.1] - 2024-08-07
 
