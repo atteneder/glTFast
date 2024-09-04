@@ -263,7 +263,7 @@ namespace GLTFast.Logging
 This may result in low performance and high memory usage. Try optimizing the glTF file.
 See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52" },
             { LogCode.AnimationChannelNodeInvalid, "Animation channel {0} has invalid node id" },
-            { LogCode.AnimationChannelSamplerInvalid, "Animation channel {0} has invalid sampler id" },
+            { LogCode.AnimationChannelSamplerInvalid, "Animation channel {0} has invalid sampler id or output" },
             { LogCode.AnimationFormatInvalid, "Invalid animation format {0}" },
             { LogCode.AnimationTargetPathUnsupported, "Unsupported animation target path {0}" },
             { LogCode.BufferLoadFailed, "Download buffer {1} failed: {0}" },

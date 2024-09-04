@@ -2268,6 +2268,11 @@ namespace GLTFast
                             continue;
                         }
                         var sampler = animation.Samplers[channel.sampler];
+                        if (sampler == null || sampler.output < 0 || sampler.output >= Root.Accessors.Count)
+                        {
+                            m_Logger?.Error(LogCode.AnimationChannelSamplerInvalid, j.ToString());
+                            continue;
+                        }
                         if (channel.Target.node < 0 || channel.Target.node >= Root.Nodes.Count) {
                             m_Logger?.Error(LogCode.AnimationChannelNodeInvalid, j.ToString());
                             continue;
@@ -2277,24 +2282,31 @@ namespace GLTFast
 
                         var times = ((AccessorNativeData<float>) m_AccessorData[sampler.input]).data;
 
+                        var outputData = m_AccessorData[sampler.output];
+                        Assert.IsNotNull(outputData);
+
                         switch (channel.Target.GetPath()) {
                             case AnimationChannel.Path.Translation: {
-                                var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
+                                Assert.IsTrue(outputData is AccessorNativeData<Vector3>);
+                                var values = ((AccessorNativeData<Vector3>) outputData).data;
                                 AnimationUtils.AddTranslationCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Rotation: {
-                                var values= ((AccessorNativeData<Quaternion>) m_AccessorData[sampler.output]).data;
+                                Assert.IsTrue(outputData is AccessorNativeData<Quaternion>);
+                                var values = ((AccessorNativeData<Quaternion>) outputData).data;
                                 AnimationUtils.AddRotationCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Scale: {
-                                var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
+                                Assert.IsTrue(outputData is AccessorNativeData<Vector3>);
+                                var values = ((AccessorNativeData<Vector3>) outputData).data;
                                 AnimationUtils.AddScaleCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Weights: {
-                                var values= ((AccessorNativeData<float>) m_AccessorData[sampler.output]).data;
+                                Assert.IsTrue(outputData is AccessorNativeData<float>);
+                                var values = ((AccessorNativeData<float>) outputData).data;
                                 var node = Root.Nodes[channel.Target.node];
                                 if (node.mesh < 0 || node.mesh >= Root.Meshes.Count) {
                                     break;
