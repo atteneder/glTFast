@@ -854,7 +854,7 @@ namespace GLTFast.Tests.Export
                         continue;
                     }
 
-                    throw new AssertionException($"{expected ? "Missing" : "Unexpected"} property \"{pair.Key}\" at {largerObject.Path}.");
+                    throw new AssertionException($"{(expected ? "Missing" : "Unexpected")} property \"{pair.Key}\" at {largerObject.Path}.");
                 }
             }
         }
