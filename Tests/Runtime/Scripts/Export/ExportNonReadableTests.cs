@@ -12,6 +12,7 @@ using NUnit.Framework;
 using Unity.glTF.Validator;
 #endif // GLTF_VALIDATOR
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.TestTools;
 
 namespace GLTFast.Tests.Export
@@ -129,6 +130,12 @@ namespace GLTFast.Tests.Export
 
         void Certify()
         {
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLCore
+                || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES2
+                || SystemInfo.graphicsDeviceType == GraphicsDeviceType.OpenGLES3)
+            {
+                Assert.Ignore("Exporting non-readable meshes is unreliable on OpenGL/OpenGLES.");
+            }
 #if !(UNITY_6000_0_OR_NEWER || (UNITY_EDITOR && UNITY_2022_3_OR_NEWER))
             Assert.Ignore("Exporting non-readable meshes is unreliable on Unity versions before 6.");
 #endif
