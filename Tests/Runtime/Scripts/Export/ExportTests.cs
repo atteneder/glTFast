@@ -117,9 +117,13 @@ namespace GLTFast.Tests.Export
             return guid;
         }
 
-        internal static void AddExportTestScene()
+        static void AddExportTestScene()
         {
-            var sceneName = GetExportSceneName();
+            AddExportTestScene(GetExportSceneName());
+        }
+
+        internal static void AddExportTestScene(string sceneName)
+        {
             var scenePath = $"Packages/{GltfGlobals.GltfPackageName}{k_ScenesPath}{sceneName}.unity";
             var sceneGuid = TryFixPackageAssetPath(ref scenePath);
 
@@ -135,7 +139,6 @@ namespace GLTFast.Tests.Export
             Array.Resize(ref scenes, scenes.Length+1);
             scenes[scenes.Length - 1] = new EditorBuildSettingsScene(sceneGuid, true);
             EditorBuildSettings.scenes = scenes;
-
         }
 
         static void CreateExportSceneObjectList(string sceneName)
@@ -548,7 +551,7 @@ namespace GLTFast.Tests.Export
                 "LayerMaskOne",
                 gameObjectExportSettings: new GameObjectExportSettings
                 {
-                    LayerMask = 1
+                    LayerMask = 2 // layer one: 1<<1
                 });
             yield return AsyncWrapper.WaitForTask(task);
 
@@ -558,7 +561,7 @@ namespace GLTFast.Tests.Export
                 "LayerMaskTwo",
                 gameObjectExportSettings: new GameObjectExportSettings
                 {
-                    LayerMask = 2
+                    LayerMask = 4 // layer two: 1<<2
                 });
             yield return AsyncWrapper.WaitForTask(task);
 
@@ -830,6 +833,33 @@ namespace GLTFast.Tests.Export
 
                 CompareGltfJsonTokenRecursively(a, b);
             }
+
+            if (tokenA is JObject objA && tokenB is JObject objB)
+            {
+                if (objA.Count > objB.Count)
+                {
+                    AssertMissingProperties(objA, objB, true);
+                }
+                else if (objA.Count < objB.Count)
+                {
+                    AssertMissingProperties(objB, objA, false);
+                }
+            }
+
+            void AssertMissingProperties(JObject largerObject, JObject smallerObject, bool expected)
+            {
+                var i = 0;
+                foreach (var pair in largerObject)
+                {
+                    if (i < smallerObject.Count)
+                    {
+                        i++;
+                        continue;
+                    }
+
+                    throw new AssertionException($"{(expected ? "Missing" : "Unexpected")} property \"{pair.Key}\" at {largerObject.Path}.");
+                }
+            }
         }
 
         static async Task ExportSceneAll(bool binary, bool toStream = false)
@@ -879,7 +909,7 @@ namespace GLTFast.Tests.Export
 #endif
         }
 
-        static void AssertLogger(CollectingLogger logger)
+        internal static void AssertLogger(CollectingLogger logger)
         {
             logger.LogAll();
             if (logger.Count > 0)
@@ -930,7 +960,7 @@ namespace GLTFast.Tests.Export
 
 
 #if GLTF_VALIDATOR && UNITY_EDITOR
-        static void ValidateGltf(string path, params MessageCode[] expectedMessages) {
+        internal static void ValidateGltf(string path, params MessageCode[] expectedMessages) {
             var report = Validator.Validate(path);
             Assert.NotNull(report, $"Report null for {path}");
             // report.Log();

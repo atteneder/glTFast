@@ -1387,6 +1387,7 @@ namespace GLTFast
                 foreach (var txt in Root.Textures)
                 {
                     var imageIndex = txt.GetImageIndex();
+                    if (imageIndex < 0 || imageIndex >= Root.Images.Count) continue;
                     if (imageVariants[imageIndex] == null)
                     {
                         imageVariants[imageIndex] = new HashSet<int>();
@@ -1395,10 +1396,13 @@ namespace GLTFast
                 }
 
 #if !UNITY_VISIONOS
-                m_ImageReadable = new bool[m_Images.Length];
-                for (int i = 0; i < m_Images.Length; i++)
+                if (!m_Settings.TexturesReadable)
                 {
-                    m_ImageReadable[i] = imageVariants[i] != null && imageVariants[i].Count > 1;
+                    m_ImageReadable = new bool[m_Images.Length];
+                    for (var i = 0; i < m_Images.Length; i++)
+                    {
+                        m_ImageReadable[i] = imageVariants[i] != null && imageVariants[i].Count > 1;
+                    }
                 }
 #endif
 
@@ -1450,7 +1454,7 @@ namespace GLTFast
 #if UNITY_VISIONOS
                                         false,
 #else
-                                        !m_ImageReadable[imageIndex],
+                                        !m_Settings.TexturesReadable && !m_ImageReadable[imageIndex],
 #endif
                                         imgFormat == ImageFormat.Ktx
                                         );
@@ -1506,7 +1510,7 @@ namespace GLTFast
 #if UNITY_VISIONOS
                 false
 #else
-                !m_ImageReadable[imageIndex]
+                !m_Settings.TexturesReadable && !m_ImageReadable[imageIndex]
 #endif
                 );
             m_Images[imageIndex] = txt;
@@ -1587,7 +1591,7 @@ namespace GLTFast
 #if UNITY_VISIONOS
                             false
 #else
-                            !m_ImageReadable[imageIndex]
+                            !m_Settings.TexturesReadable && !m_ImageReadable[imageIndex]
 #endif
                             );
 #else
@@ -2074,7 +2078,7 @@ namespace GLTFast
 #if UNITY_VISIONOS
                                 false
 #else
-                                !m_ImageReadable[jh.imageIndex]
+                                !m_Settings.TexturesReadable && !m_ImageReadable[jh.imageIndex]
 #endif
                                 );
 #endif
@@ -2114,6 +2118,7 @@ namespace GLTFast
                     }
 
                     var imageIndex = txt.GetImageIndex();
+                    if (imageIndex < 0 || imageIndex >= Root.Images.Count) continue;
                     var img = m_Images[imageIndex];
                     if (imageVariants[imageIndex] == null)
                     {
@@ -2265,6 +2270,11 @@ namespace GLTFast
                             continue;
                         }
                         var sampler = animation.Samplers[channel.sampler];
+                        if (sampler == null || sampler.output < 0 || sampler.output >= Root.Accessors.Count)
+                        {
+                            m_Logger?.Error(LogCode.AnimationChannelSamplerInvalid, j.ToString());
+                            continue;
+                        }
                         if (channel.Target.node < 0 || channel.Target.node >= Root.Nodes.Count) {
                             m_Logger?.Error(LogCode.AnimationChannelNodeInvalid, j.ToString());
                             continue;
@@ -2274,24 +2284,31 @@ namespace GLTFast
 
                         var times = ((AccessorNativeData<float>) m_AccessorData[sampler.input]).data;
 
+                        var outputData = m_AccessorData[sampler.output];
+                        Assert.IsNotNull(outputData);
+
                         switch (channel.Target.GetPath()) {
                             case AnimationChannel.Path.Translation: {
-                                var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
+                                Assert.IsTrue(outputData is AccessorNativeData<Vector3>);
+                                var values = ((AccessorNativeData<Vector3>) outputData).data;
                                 AnimationUtils.AddTranslationCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Rotation: {
-                                var values= ((AccessorNativeData<Quaternion>) m_AccessorData[sampler.output]).data;
+                                Assert.IsTrue(outputData is AccessorNativeData<Quaternion>);
+                                var values = ((AccessorNativeData<Quaternion>) outputData).data;
                                 AnimationUtils.AddRotationCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Scale: {
-                                var values= ((AccessorNativeData<Vector3>) m_AccessorData[sampler.output]).data;
+                                Assert.IsTrue(outputData is AccessorNativeData<Vector3>);
+                                var values = ((AccessorNativeData<Vector3>) outputData).data;
                                 AnimationUtils.AddScaleCurves(m_AnimationClips[i], path, times, values, sampler.GetInterpolationType());
                                 break;
                             }
                             case AnimationChannel.Path.Weights: {
-                                var values= ((AccessorNativeData<float>) m_AccessorData[sampler.output]).data;
+                                Assert.IsTrue(outputData is AccessorNativeData<float>);
+                                var values = ((AccessorNativeData<float>) outputData).data;
                                 var node = Root.Nodes[channel.Target.node];
                                 if (node.mesh < 0 || node.mesh >= Root.Meshes.Count) {
                                     break;
@@ -3052,13 +3069,9 @@ namespace GLTFast
                     var att = primitive.attributes;
                     if (primitive.indices >= 0)
                     {
-                        var usage = (
-                            primitive.mode == DrawMode.Triangles
-                            || primitive.mode == DrawMode.TriangleStrip
-                            || primitive.mode == DrawMode.TriangleFan
-                            )
-                        ? AccessorUsage.IndexFlipped
-                        : AccessorUsage.Index;
+                        var usage = primitive.mode == DrawMode.Triangles
+                            ? AccessorUsage.IndexFlipped
+                            : AccessorUsage.Index;
                         SetAccessorUsage(primitive.indices, isDraco ? AccessorUsage.Ignore : usage);
                     }
 
@@ -3597,6 +3610,8 @@ namespace GLTFast
             switch (primitive.mode)
             {
                 case DrawMode.Triangles:
+                case DrawMode.TriangleStrip:
+                case DrawMode.TriangleFan:
                     c.topology = MeshTopology.Triangles;
                     break;
                 case DrawMode.Points:
@@ -3606,30 +3621,30 @@ namespace GLTFast
                     c.topology = MeshTopology.Lines;
                     break;
                 case DrawMode.LineLoop:
-                    m_Logger?.Error(LogCode.PrimitiveModeUnsupported, primitive.mode.ToString());
                     c.topology = MeshTopology.LineStrip;
                     break;
                 case DrawMode.LineStrip:
                     c.topology = MeshTopology.LineStrip;
                     break;
-                case DrawMode.TriangleStrip:
-                case DrawMode.TriangleFan:
                 default:
                     m_Logger?.Error(LogCode.PrimitiveModeUnsupported, primitive.mode.ToString());
                     c.topology = MeshTopology.Triangles;
                     break;
             }
 
+            int[] indices;
             if (primitive.indices >= 0)
             {
-                c.SetIndices(subMesh, ((AccessorData<int>)m_AccessorData[primitive.indices]).data);
+                indices = ((AccessorData<int>)m_AccessorData[primitive.indices]).data;
+                RecalculateIndicesJob(primitive, indices, out indices, out c.jobHandle, out c.calculatedIndicesHandle);
             }
             else
             {
-                int vertexCount = gltf.Accessors[primitive.attributes.POSITION].count;
-                CalculateIndicesJob(primitive, vertexCount, c.topology, out var indices, out c.jobHandle, out c.calculatedIndicesHandle);
-                c.SetIndices(subMesh, indices);
+                var vertexCount = gltf.Accessors[primitive.attributes.POSITION].count;
+                CalculateIndicesJob(primitive, vertexCount, out indices, out c.jobHandle, out c.calculatedIndicesHandle);
             }
+
+            c.SetIndices(subMesh, indices);
             Profiler.EndSample();
         }
 
@@ -3644,10 +3659,64 @@ namespace GLTFast
         }
 #endif
 
+        static unsafe void RecalculateIndicesJob(
+            MeshPrimitiveBase primitive,
+            int[] oldIndices,
+            out int[] indices,
+            out JobHandle jobHandle,
+            out GCHandle resultHandle
+            )
+        {
+            switch (primitive.mode)
+            {
+                case DrawMode.LineLoop:
+                    indices = new int[oldIndices.Length + 1];
+                    Array.Copy(oldIndices, indices, oldIndices.Length);
+                    indices[oldIndices.Length] = oldIndices[0];
+                    jobHandle = default;
+                    resultHandle = default;
+                    break;
+                case DrawMode.TriangleStrip:
+                    var triangleStripTriangleCount = oldIndices.Length - 2;
+                    indices = new int[triangleStripTriangleCount * 3];
+                    resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+                    var triangleStripJob = new RecalculateIndicesForTriangleStripJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        triangleStripJob.result = (int*)dst;
+                    }
+                    fixed (void* inp = &(oldIndices[0]))
+                    {
+                        triangleStripJob.input = (int*)inp;
+                    }
+                    jobHandle = triangleStripJob.Schedule(triangleStripTriangleCount, DefaultBatchCount);
+                    break;
+                case DrawMode.TriangleFan:
+                    var triangleFanTriangleCount = oldIndices.Length - 2;
+                    indices = new int[triangleFanTriangleCount * 3];
+                    resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
+                    var triangleFanJob = new RecalculateIndicesForTriangleFanJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        triangleFanJob.result = (int*)dst;
+                    }
+                    fixed (void* inp = &(oldIndices[0]))
+                    {
+                        triangleFanJob.input = (int*)inp;
+                    }
+                    jobHandle = triangleFanJob.Schedule(triangleFanTriangleCount, DefaultBatchCount);
+                    break;
+                default:
+                    indices = oldIndices;
+                    jobHandle = default;
+                    resultHandle = default;
+                    break;
+            }
+        }
+
         static unsafe void CalculateIndicesJob(
             MeshPrimitiveBase primitive,
             int vertexCount,
-            MeshTopology topology,
             out int[] indices,
             out JobHandle jobHandle,
             out GCHandle resultHandle
@@ -3655,32 +3724,51 @@ namespace GLTFast
         {
             Profiler.BeginSample("CalculateIndicesJob");
             // No indices: calculate them
-            bool lineLoop = primitive.mode == DrawMode.LineLoop;
+            var lineLoop = primitive.mode == DrawMode.LineLoop;
             // extra index (first vertex again) for closing line loop
             indices = new int[vertexCount + (lineLoop ? 1 : 0)];
             resultHandle = GCHandle.Alloc(indices, GCHandleType.Pinned);
-            if (topology == MeshTopology.Triangles)
+            switch (primitive.mode)
             {
-                var job8 = new CreateIndicesInt32FlippedJob();
-                fixed (void* dst = &(indices[0]))
-                {
-                    job8.result = (int*)dst;
-                }
-                jobHandle = job8.Schedule(indices.Length, DefaultBatchCount);
-            }
-            else
-            {
-                var job8 = new CreateIndicesInt32Job();
-                if (lineLoop)
-                {
-                    // Set the last index to the first vertex
-                    indices[vertexCount] = 0;
-                }
-                fixed (void* dst = &(indices[0]))
-                {
-                    job8.result = (int*)dst;
-                }
-                jobHandle = job8.Schedule(vertexCount, DefaultBatchCount);
+                case DrawMode.Triangles:
+                    var flippedJob8 = new CreateIndicesInt32FlippedJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        flippedJob8.result = (int*)dst;
+                    }
+                    jobHandle = flippedJob8.Schedule(indices.Length, DefaultBatchCount);
+                    break;
+                case DrawMode.TriangleStrip:
+                    indices = new int[(indices.Length - 2) * 3];
+                    var triangleStripJob = new CreateIndicesForTriangleStripJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        triangleStripJob.result = (int*)dst;
+                    }
+                    jobHandle = triangleStripJob.Schedule(indices.Length, DefaultBatchCount);
+                    break;
+                case DrawMode.TriangleFan:
+                    indices = new int[(indices.Length - 2) * 3];
+                    var triangleFanJob = new CreateIndicesForTriangleFanJob();
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        triangleFanJob.result = (int*)dst;
+                    }
+                    jobHandle = triangleFanJob.Schedule(indices.Length, DefaultBatchCount);
+                    break;
+                default:
+                    var job8 = new CreateIndicesInt32Job();
+                    if (lineLoop)
+                    {
+                        // Set the last index to the first vertex
+                        indices[vertexCount] = 0;
+                    }
+                    fixed (void* dst = &(indices[0]))
+                    {
+                        job8.result = (int*)dst;
+                    }
+                    jobHandle = job8.Schedule(vertexCount, DefaultBatchCount);
+                    break;
             }
             Profiler.EndSample();
         }

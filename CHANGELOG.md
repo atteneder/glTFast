@@ -4,7 +4,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.8.0] - 2024-09-05
+
+### Added
+- (Import) Setting to create textures readable. This allows users to access resulting textures from their scripts.
+- (Export) Non-readable meshes can be exported as well now.
+- (Export) Added support for exporting meshes with vertex compression enabled (effectively converting 16-bit float positions/normals/tangents/texture coordinates to 32-bit floats).
+- (Export) [Buffer view targets](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_bufferview_target) are set properly now.
+- (Import) Support for mesh primitive modes `TRIANGLE_STRIP` and `TRIANGLE_FAN` (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/22))
+
+### Fixed
+- (Export) Writing to files on the web via IndexedDB now works (fixes [#625](https://github.com/atteneder/glTFast/issues/625))
+- (Export) test results are validated again.
+- (Export) Removed expendable JSON content when exporting unlit materials without color or texture applied.
+- Primitve mode LINE_LOOP works as expected (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/22)).
+- (Test) Fail export test if glTF JSON contains unexpected or misses expected properties.
+- Increased resilience against invalid animation data.
+- Broken link in `CONTRIBUTING.md` (thanks [Hexer611][Hexer611] for [#22](https://github.com/Unity-Technologies/com.unity.cloud.gltfast/pull/23)).
+- Loading glTFs with unknown texture extensions (e.g. WebP, `EXT_texture_webp`) now works (fixes [#705](https://github.com/atteneder/glTFast/issues/705)).
+
 ## [6.7.1] - 2024-08-07
+
+### Added
+- Test for correct handling of Android JAR URIs.
 
 ### Fixed
 - (Export) Cases of corrupt glTFs when not all vertex attributes of a mesh were exported.
@@ -1204,6 +1226,7 @@ This release contains multiple breaking changes. Please read the [upgrade guide]
 [Battlehub0x]: https://github.com/Battlehub0x
 [Bersaelor]: https://github.com/Bersaelor
 [EricBeetsOfficial-Opuscope]: https://github.com/EricBeetsOfficial-Opuscope
+[Hexer611]: https://github.com/Hexer611
 [Holo-Krzysztof]: https://github.com/Holo-Krzysztof
 [hybridherbst]: https://github.com/hybridherbst
 [krisrok]: https://github.com/krisrok

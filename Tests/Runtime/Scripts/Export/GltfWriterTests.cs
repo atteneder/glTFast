@@ -113,7 +113,7 @@ namespace GLTFast.Tests.Export
 
             var node = writer.AddNode();
             var tmpGameObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            writer.AddMeshToNode((int)node, tmpGameObject.GetComponent<MeshFilter>().sharedMesh, null, false);
+            writer.AddMeshToNode((int)node, tmpGameObject.GetComponent<MeshFilter>().sharedMesh, null, null);
 
             await writer.SaveToStreamAndDispose(new MemoryStream());
 

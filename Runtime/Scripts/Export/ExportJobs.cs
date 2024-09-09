@@ -84,6 +84,32 @@ namespace GLTFast.Export
         }
 
         [BurstCompile]
+        public unsafe struct ConvertPositionHalfJob : IJobParallelFor
+        {
+
+            public uint inputByteStride;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (half3*)(input + i * inputByteStride);
+                var outPtr = (float3*)(output + i * outputByteStride);
+
+                var tmp = (float3)(*inPtr);
+                tmp.x *= -1;
+                *outPtr = tmp;
+            }
+        }
+
+        [BurstCompile]
         public unsafe struct ConvertTangentFloatJob : IJobParallelFor
         {
 
@@ -104,6 +130,32 @@ namespace GLTFast.Export
                 var outPtr = (float4*)(output + i * outputByteStride);
 
                 var tmp = *inPtr;
+                tmp.z *= -1;
+                *outPtr = tmp;
+            }
+        }
+
+        [BurstCompile]
+        public unsafe struct ConvertTangentHalfJob : IJobParallelFor
+        {
+
+            public uint inputByteStride;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (half4*)(input + i * inputByteStride);
+                var outPtr = (float4*)(output + i * outputByteStride);
+
+                var tmp = (float4)(*inPtr);
                 tmp.z *= -1;
                 *outPtr = tmp;
             }
@@ -131,6 +183,118 @@ namespace GLTFast.Export
                 var tmp = *inPtr;
                 tmp.y = 1 - tmp.y;
                 *outPtr = tmp;
+            }
+        }
+
+        [BurstCompile]
+        public unsafe struct ConvertTexCoordHalfJob : IJobParallelFor
+        {
+            public uint inputByteStride;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (half2*)(input + i * inputByteStride);
+                var outPtr = (float2*)(output + i * outputByteStride);
+
+                var tmp = (float2)(*inPtr);
+                tmp.y = 1 - tmp.y;
+                *outPtr = tmp;
+            }
+        }
+
+
+        [BurstCompile]
+        public unsafe struct ConvertSkinWeightsJob : IJobParallelFor
+        {
+
+            public uint inputByteStride;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inPtr = (float4*)(input + i * inputByteStride);
+                var outPtr = (float4*)(output + i * outputByteStride);
+
+                *outPtr = *inPtr;
+            }
+        }
+
+        [BurstCompile]
+        public struct ConvertMatrixJob : IJobParallelFor
+        {
+            public NativeArray<float4x4> matrices;
+
+            public void Execute(int i)
+            {
+
+                var tmp = matrices[i];
+                tmp.c0.y *= -1;
+                tmp.c0.z *= -1;
+                tmp.c1.x *= -1;
+                tmp.c2.x *= -1;
+                tmp.c3.x *= -1;
+                matrices[i] = tmp;
+            }
+        }
+
+        [BurstCompile]
+        public unsafe struct ConvertSkinIndicesJob : IJobParallelFor
+        {
+
+            struct ushort4
+            {
+                public ushort4(uint x, uint y, uint z, uint w)
+                {
+                    m_X = (ushort)x;
+                    m_Y = (ushort)y;
+                    m_Z = (ushort)z;
+                    m_W = (ushort)w;
+                }
+
+                ushort m_X;
+                ushort m_Y;
+                ushort m_Z;
+                ushort m_W;
+            }
+
+            public uint inputByteStride;
+            public int indicesOffset;
+            public uint outputByteStride;
+
+            [ReadOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* input;
+
+            [WriteOnly]
+            [NativeDisableUnsafePtrRestriction]
+            public byte* output;
+
+            public void Execute(int i)
+            {
+                var inputIndexPtr = (uint4*)(indicesOffset + input + i * inputByteStride);
+                var outIndexPtr = (ushort4*)(indicesOffset + output + i * outputByteStride);
+
+                // Set the correct values for the indices
+                var tmpIndex = *inputIndexPtr;
+                var tmpOut = new ushort4(tmpIndex[0], tmpIndex[1], tmpIndex[2], tmpIndex[3]);
+                *outIndexPtr = tmpOut;
             }
         }
 

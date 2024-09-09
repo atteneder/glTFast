@@ -637,6 +637,14 @@ namespace GLTFast.Schema
             {
                 UnsetExtensions();
             }
+
+            if (Textures != null)
+            {
+                foreach (var texture in Textures)
+                {
+                    texture.JsonUtilityCleanup();
+                }
+            }
         }
 
         /// <summary>

@@ -55,38 +55,38 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | POINTS | ✅ | ✅
 | LINES | ✅ | ✅
 | LINE_STRIP | ✅ | ✅
-| ¹LINE_LOOP | ✅ | ✅
-| TRIANGLE_STRIP |  |
-| TRIANGLE_FAN |  |
+| LINE_LOOP | ✅ | ✅
+| TRIANGLE_STRIP | ✅ | `n/a`
+| TRIANGLE_FAN | ✅ | `n/a`
 | Quads | `n/a` | ✅ via triangulation
 | | |
 | **Meshes**
 | Positions | ✅ | ✅
 | Normals | ✅ | ✅
 | Tangents | ✅ | ✅
-| Texture coordinates / UV sets | ✅ | `?`
-| Three or more texture coordinates / UV sets | ²☑️ | `?`
-| Vertex colors | ✅ | `?`
+| Texture coordinates / UV sets | ✅ | ✅
+| Three or more texture coordinates / UV sets | ¹☑️ | ✅
+| Vertex colors | ✅ | ✅
 | Draco&trade; mesh compression (via [DracoForUnity]) | ✅ | ✅
 | Implicit (no) indices | ✅ |
 | Per primitive material | ✅ | ✅
-| Joints (up to 4 per vertex) | ✅ |
-| Weights (up to 4 per vertex) | ✅ |
+| Joints (up to 4 per vertex) | ✅ | ✅
+| Weights (up to 4 per vertex) | ✅ | ✅
 | | |
 | **Morph Targets / Blend Shapes**
-| Sparse accessors | ³ ✅ |
-| [Skins][Skins] | ✅ |
+| Sparse accessors | ² ✅ |
+| [Skins][Skins] | ✅ | ✅
 | | |
 | **Animation**
 | via legacy Animation System | ✅ |
 | via Playable API ([issue][AnimationPlayables]) |  |
-| via Mecanim ([issue][AnimationMecanim]) |  |
+| via Mecanim ([issue][AnimationMecanim]) | ³☑️ |
 
-¹: Untested due to lack of demo files.
+¹: Up to eight UV sets can imported, but *Unity glTFast* shaders only support two (see [issue][UVsets]).
 
-²: Up to eight UV sets can imported, but *Unity glTFast* shaders only support two (see [issue][UVsets]).
+²: Not on all accessor types; morph targets and vertex positions only
 
-³: Not on all accessor types; morph targets and vertex positions only
+³: Animation clips can be imported Mecanim compatible, but they won't be assigned and cannot be played back without further work.
 
 ## Extensions
 
@@ -96,37 +96,59 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 |------------| ------ | ------
 | | |
 | **Khronos**
+| KHR_animation_pointer | | |
 | KHR_draco_mesh_compression | ✅ | ✅
-| KHR_materials_pbrSpecularGlossiness | ✅ |
+| KHR_lights_punctual | ✅ | ✅
+| KHR_materials_anisotropy | | |
+| KHR_materials_clearcoat | ✅ | ✅
+| KHR_materials_dispersion | | |
+| KHR_materials_emissive_strength | | |
+| KHR_materials_ior | [ℹ️][IOR] |
+| KHR_materials_iridescence | | |
+| KHR_materials_sheen | [ℹ️][Sheen] |
+| KHR_materials_specular | [ℹ️][Specular] |
+| KHR_materials_transmission | [ℹ️][Transmission] |
 | KHR_materials_unlit | ✅ | ✅
-| KHR_texture_transform | ✅ | ✅
+| KHR_materials_variants | ✅ |
+| KHR_materials_volume | [ℹ️][Volume] |
 | KHR_mesh_quantization | ✅ |
 | KHR_texture_basisu | ✅ |
-| KHR_lights_punctual | ✅ | ✅
-| KHR_materials_clearcoat | ✅ | ✅
-| KHR_materials_sheen | [ℹ️][Sheen] |
-| KHR_materials_transmission | [ℹ️][Transmission] |
-| KHR_materials_variants | ✅ |
-| KHR_materials_ior | [ℹ️][IOR] |
-| KHR_materials_specular | [ℹ️][Specular] |
-| KHR_materials_volume | [ℹ️][Volume] |
+| KHR_texture_transform | ✅ | ✅
 | KHR_xmp_json_ld |️ |
+| ²KHR_materials_pbrSpecularGlossiness | ☑️ |
 | | |
 | **Vendor**
 | ¹EXT_mesh_gpu_instancing | ✅ |
 | EXT_meshopt_compression | ✅ |
 | EXT_lights_image_based | [ℹ️][IBL] |
+| EXT_texture_webp | | |
 
 ¹: Without support for custom vertex attributes (e.g. `_ID`)
 
+²: Archived/obsolete; Superseded by KHR_materials_specular
+
 Not investigated yet:
 
+- ADOBE_materials_clearcoat_tint
 - AGI_articulations
 - AGI_stk_metadata
 - CESIUM_primitive_outline
+- EXT_lights_ies
+- EXT_mesh_manifold
+- GRIFFEL_bim_data
+- MPEG_accessor_timed
+- MPEG_animation_timing
+- MPEG_audio_spatial
+- MPEG_buffer_circular
+- MPEG_media
+- MPEG_mesh_linking
+- MPEG_scene_dynamic
+- MPEG_texture_video
+- MPEG_viewport_recommended
 - MSFT_lod
 - MSFT_packing_normalRoughnessMetallic
 - MSFT_packing_occlusionRoughnessMetallic
+- NV_materials_mdl
 
  Will not become supported (reason in brackets):
 
@@ -134,7 +156,6 @@ Not investigated yet:
 - KHR_techniques_webgl (archived)
 - ADOBE_materials_clearcoat_specular (prefer KHR_materials_clearcoat)
 - ADOBE_materials_thin_transparency (prefer KHR_materials_transmission)
-- EXT_texture_webp (prefer KTX/basisu)
 - FB_geometry_metadata (prefer KTX_xmp)
 - MSFT_texture_dds (prefer KTX/basisu)
 
@@ -224,7 +245,7 @@ Other shaders might (partially) work if they have similar properties (with ident
 
 ³: Built-In Render Pipeline Standard and Unlit Shader
 
-⁴: Vertex colors are always exported, regardless whether the shader makes use of them.
+⁴: The vertex color attribute is only exported if the material/shader makes use of it (see [Vertex Attribute Discarding](ExportRuntime.md#vertex-attribute-discarding)).
 
 #### glTFast Shaders
 

@@ -7,7 +7,7 @@ namespace GLTFast.Export
 {
     static class Constants
     {
-        public const string version = "6.7.1";
+        public const string version = "6.8.0";
 
         internal const string mimeTypePNG = "image/png";
         internal const string mimeTypeJPG = "image/jpeg";

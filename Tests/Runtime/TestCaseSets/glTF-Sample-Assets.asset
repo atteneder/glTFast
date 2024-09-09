@@ -286,7 +286,7 @@ MonoBehaviour:
   - relativeUri: Models/MeshPrimitiveModes/glTF/MeshPrimitiveModes.gltf
     expectLoadFail: 0
     expectInstantiationFail: 0
-    expectedLogCodes: 26000000
+    expectedLogCodes: 
   - relativeUri: Models/MetalRoughSpheres/glTF/MetalRoughSpheres.gltf
     expectLoadFail: 0
     expectInstantiationFail: 0

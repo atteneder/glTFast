@@ -508,6 +508,81 @@ namespace GLTFast.Tests.JsonParsing
         }
 
         [Test]
+        public void UnknownTextureExtension()
+        {
+            var jsonParser = new GltfJsonUtilityParser();
+            var gltf = jsonParser.ParseJson(@"
+{
+    ""textures"": [
+        {
+            ""name"": ""Texture0""
+        },
+        {
+            ""extensions"": {},
+            ""name"": ""Texture1""
+        },
+        {
+            ""extensions"": {
+                ""EXT_texture_webp"": {
+                    ""source"": 42
+                }
+            },
+            ""name"": ""Texture2""
+        },
+        {
+            ""extensions"": {
+                ""KHR_texture_basisu"": {
+                    ""source"": 42
+                }
+            },
+            ""name"": ""Texture3""
+        },
+        {
+            ""extensions"": {
+                ""KHR_texture_basisu"": {
+                    ""source"": 42
+                },
+                ""EXT_texture_webp"": {
+                    ""source"": 43
+                }
+            },
+            ""name"": ""Texture4""
+        }
+    ]
+}
+"
+            );
+
+            Assert.NotNull(gltf);
+            Assert.NotNull(gltf.Textures, "No textures");
+            Assert.AreEqual(5, gltf.Textures.Count, "Invalid texture quantity");
+
+            var texture0 = gltf.Textures[0];
+            Assert.NotNull(texture0);
+            Assert.IsNull(texture0.Extensions);
+
+            var texture1 = gltf.Textures[1];
+            Assert.NotNull(texture1);
+            Assert.IsNull(texture1.Extensions);
+
+            var texture2 = gltf.Textures[2];
+            Assert.NotNull(texture2);
+            Assert.IsNull(texture2.Extensions);
+
+            var texture3 = gltf.Textures[3];
+            Assert.NotNull(texture3);
+            Assert.NotNull(texture3.Extensions);
+            Assert.NotNull(texture3.Extensions.KHR_texture_basisu);
+            Assert.AreEqual(42, texture3.Extensions.KHR_texture_basisu.source);
+
+            var texture4 = gltf.Textures[4];
+            Assert.NotNull(texture4);
+            Assert.NotNull(texture4.Extensions);
+            Assert.NotNull(texture4.Extensions.KHR_texture_basisu);
+            Assert.AreEqual(42, texture4.Extensions.KHR_texture_basisu.source);
+        }
+
+        [Test]
         public void ParseGarbage()
         {
             var jsonParser = new GltfJsonUtilityParser();
