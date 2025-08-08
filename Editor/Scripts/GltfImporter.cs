@@ -38,7 +38,7 @@ namespace GLTFast.Editor
 #else
     [ScriptedImporter(1, null, overrideExts: new[] { "gltf","glb" })]
 #endif
-    class GltfImporter : ScriptedImporter
+    public class GltfImporter : ScriptedImporter
     {
 
         [SerializeField]
@@ -64,16 +64,18 @@ namespace GLTFast.Editor
         HashSet<string> m_ImportedNames;
         HashSet<Object> m_ImportedObjects;
 
-        // static string[] GatherDependenciesFromSourceFile(string path) {
-        //     // Called before actual import for each changed asset that is imported by this importer type
-        //     // Extract the dependencies for the asset specified in path.
-        //     // For asset dependencies that are discovered, return them in the string array, where the string is the path to asset
-        //
-        //     // TODO: Texture files with relative URIs should be included here
-        //     return null;
-        // }
+		// static string[] GatherDependenciesFromSourceFile(string path) {
+		//     // Called before actual import for each changed asset that is imported by this importer type
+		//     // Extract the dependencies for the asset specified in path.
+		//     // For asset dependencies that are discovered, return them in the string array, where the string is the path to asset
+		//
+		//     // TODO: Texture files with relative URIs should be included here
+		//     return null;
+		// }
 
-        public override void OnImportAsset(AssetImportContext ctx)
+		protected virtual MaterialGenerator GetMaterialGenerator() => null;
+
+		public override void OnImportAsset(AssetImportContext ctx)
         {
 
             reportItems = null;
@@ -84,8 +86,8 @@ namespace GLTFast.Editor
             m_Gltf = new GltfImport(
                 downloadProvider,
                 new UninterruptedDeferAgent(),
-                null,
-                logger
+				GetMaterialGenerator(),
+				logger
                 );
 
             var gltfIcon = AssetDatabase.LoadAssetAtPath<Texture2D>($"Packages/{GltfGlobals.GltfPackageName}/Editor/UI/gltf-icon-bug.png");
