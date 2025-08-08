@@ -24,6 +24,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using GLTFast.Logging;
 using GLTFast.Utils;
+using GLTFast.Materials;
 using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEngine;
