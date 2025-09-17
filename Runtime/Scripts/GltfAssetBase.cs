@@ -29,7 +29,7 @@ namespace GLTFast
         /// Instance used for loading the glTF's content
         /// </summary>
         // ReSharper disable once MemberCanBeProtected.Global
-        public GltfImport Importer { get; protected set; }
+        public GltfImportBase Importer { get; protected set; }
 
         /// <summary>
         /// Indicates whether the glTF was loaded (no matter if successfully or not)
@@ -61,7 +61,7 @@ namespace GLTFast
             ICodeLogger logger = null
             )
         {
-            Importer = new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
+            Importer = GetDefaultImporter (downloadProvider, deferAgent, materialGenerator, logger);
             return await Importer.Load(gltfUrl, importSettings);
         }
 
@@ -148,6 +148,25 @@ namespace GLTFast
                 }
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Returns an instance of the default importer
+        /// </summary>
+        /// <param name="downloadProvider">Download Provider for custom loading (e.g. caching or HTTP authorization)</param>
+        /// <param name="deferAgent">Defer Agent takes care of interrupting the
+        /// loading procedure in order to keep the frame rate responsive.</param>
+        /// <param name="materialGenerator">Used to convert glTF materials to <see cref="Material"/> instances</param>
+        /// <param name="logger">Used for message reporting</param>
+        /// <returns>Default importer instance</returns>
+        protected virtual GltfImportBase GetDefaultImporter (
+            IDownloadProvider downloadProvider = null,
+            IDeferAgent deferAgent = null,
+            IMaterialGenerator materialGenerator = null,
+            ICodeLogger logger = null
+            )
+        {
+            return new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
         }
 
         /// <summary>
