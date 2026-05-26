@@ -33,6 +33,28 @@ namespace GLTFast
         );
 
         /// <summary>
+        /// Channel-aware variant of <see cref="LoadImage(NativeArray{byte}.ReadOnly,bool,bool,bool,CancellationToken)"/>.
+        /// <paramref name="channelMask"/> is a bitmask of the channels the referencing materials actually consume, so a
+        /// loader can pick the most efficient format. The default implementation ignores the mask and forwards to the
+        /// channel-unaware overload, so existing loaders keep working unchanged.
+        /// </summary>
+        /// <param name="data">Raw, compressed image data.</param>
+        /// <param name="linear">If true, the texture being created is in linear space. If false, it is in sRGB space.</param>
+        /// <param name="readable">If true, the resulting texture should remain readable (<see cref="UnityEngine.Texture2D.isReadable"/>).</param>
+        /// <param name="generateMipMaps">If true, mipmap levels should get generated.</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <param name="channelMask">Bitmask of channels consumed by referencing materials (bit0=R..bit3=A).</param>
+        /// <returns>An image texture result</returns>
+        Task<ImageResult> LoadImage(
+            NativeArray<byte>.ReadOnly data,
+            bool linear,
+            bool readable,
+            bool generateMipMaps,
+            CancellationToken cancellationToken,
+            int channelMask
+        ) => LoadImage(data, linear, readable, generateMipMaps, cancellationToken);
+
+        /// <summary>
         /// Determines if this loader can load the given texture, and if so, returns the corresponding image index.
         /// The typical use-case is a glTF texture extension that adds support for a new image format,
         /// e.g. EXT_texture_webp.
