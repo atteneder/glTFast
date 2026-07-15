@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- Main thread stall when loading glTF-binary files with large JSON chunks: the JSON string decode now runs on a background thread (gated by the defer agent, like the JSON parse), instead of always executing synchronously on the calling thread.
+
 ## [6.19.0] - 2026-05-19
 
 ### Added

@@ -2075,11 +2075,38 @@ namespace GLTFast
                 {
                     Assert.IsNull(Root);
 
-                    Profiler.BeginSample("GetJSON");
                     var bytesStream = bytes.ToUnmanagedMemoryStream((uint)index, chLength);
                     var reader = new StreamReader(bytesStream);
-                    var json = await reader.ReadToEndAsync();
-                    Profiler.EndSample();
+                    string json = null;
+                    var predictedTime = chLength / (float)k_JsonParseSpeed;
+#if GLTFAST_THREADS && !MEASURE_TIMINGS
+                    if (DeferAgent.ShouldDefer(predictedTime))
+                    {
+                        // ReadToEndAsync completes synchronously on a memory stream
+                        // => decode in a thread.
+                        try
+                        {
+                            json = await Task.Run(() =>
+                            {
+                                Profiler.BeginSample("GetJSON");
+                                var result = reader.ReadToEnd();
+                                Profiler.EndSample();
+                                return result;
+                            }, cancellationToken);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            cancellationToken.ThrowIfCancellationRequestedWithTracking();
+                        }
+                    }
+                    else
+#endif
+                    {
+                        // Chunk is small enough to decode within the frame budget.
+                        Profiler.BeginSample("GetJSON");
+                        json = await reader.ReadToEndAsync();
+                        Profiler.EndSample();
+                    }
 
                     var success = await ParseJsonAndLoadBuffers(json, cancellationToken);
 
