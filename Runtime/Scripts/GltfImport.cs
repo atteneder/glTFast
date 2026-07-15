@@ -3003,10 +3003,10 @@ namespace GLTFast
                 }
             }
 
-            async Task IterateNodes(uint nodeIndex, uint? parentIndex, Action<uint, uint?> callback)
+            async Task IterateNodes(uint nodeIndex, uint? parentIndex, Func<uint, uint?, Task> callback)
             {
                 var node = this.Root.Nodes[(int)nodeIndex];
-                callback(nodeIndex, parentIndex);
+                await callback(nodeIndex, parentIndex);
                 await DeferAgent.BreakPoint();
                 if (node.children != null)
                 {
@@ -3045,10 +3045,8 @@ namespace GLTFast
                 Profiler.EndSample();
             }
 
-            void PopulateHierarchy(uint nodeIndex, uint? parentIndex)
+            async Task PopulateHierarchy(uint nodeIndex, uint? parentIndex)
             {
-
-                Profiler.BeginSample("PopulateHierarchy");
                 var node = this.Root.Nodes[(int)nodeIndex];
 
                 if (node.mesh >= 0)
@@ -3057,6 +3055,11 @@ namespace GLTFast
                     foreach (var meshAssignment in m_MeshAssignments.Values(node.mesh))
                     {
                         cancellationToken.ThrowIfCancellationRequestedWithTracking();
+                        // A node can carry many mesh assignments (one per primitive cluster of a
+                        // multi-material mesh). Populating all of them in one un-yielding callback
+                        // can far exceed the defer agent's frame budget
+                        // => yield per assignment, like the node iteration above does per node.
+                        Profiler.BeginSample("PopulateHierarchy");
 
                         var mesh = meshAssignment.mesh;
                         var meshName = string.IsNullOrEmpty(mesh.name) ? null : mesh.name;
@@ -3151,9 +3154,12 @@ namespace GLTFast
                         }
 
                         meshNumeration++;
+                        Profiler.EndSample();
+                        await DeferAgent.BreakPoint();
                     }
                 }
 
+                Profiler.BeginSample("PopulateHierarchy");
                 if (node.camera >= 0
                     && Root.Cameras != null
                     && node.camera < Root.Cameras.Count
@@ -3185,7 +3191,11 @@ namespace GLTFast
                 foreach (var nodeId in scene.nodes)
                 {
                     cancellationToken.ThrowIfCancellationRequestedWithTracking();
-                    await IterateNodes(nodeId, null, CreateHierarchy);
+                    await IterateNodes(nodeId, null, (index, parent) =>
+                    {
+                        CreateHierarchy(index, parent);
+                        return Task.CompletedTask;
+                    });
                 }
                 foreach (var nodeId in scene.nodes)
                 {
