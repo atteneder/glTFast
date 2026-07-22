@@ -1,0 +1,25 @@
+name: Close pull request
+on:
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: superbrothers/close-pull-request@v3
+        with:
+          comment: |
+            👋 Thanks for opening a pull request!
+            
+            Unfortunately contributions are only accepted on Unity's fork.
+
+            Please resubmit your changes here instead:
+            👉 <https://github.com/Unity-Technologies/com.unity.cloud.gltfast>
+
+            > [!NOTE]  
+            > Unity's fork is structured as a monorepo, so you need to move your changes into the appropriate subfolder (`Packages/com.unity.cloud.gltfast`).
+            
+            Thank you! 🙏
