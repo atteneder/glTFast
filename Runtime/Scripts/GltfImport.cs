@@ -1708,6 +1708,70 @@ namespace GLTFast
                     }
                 }
 
+                // Compute per-texture channel mask based on material slot references.
+                var textureChannels = new byte[Root.Textures.Count];
+                if (Root.Materials != null)
+                {
+                    const byte R = 1, G = 2, B = 4, A = 8, RG = R | G, GB = G | B, RGB = R | G | B;
+                    void AddChannels(TextureInfoBase textureInfo, byte mask)
+                    {
+                        if (textureInfo is { index: >= 0 } && textureInfo.index < Root.Textures.Count)
+                            textureChannels[textureInfo.index] |= mask;
+                    }
+
+                    foreach (var material in Root.Materials)
+                    {
+                        if (material.PbrMetallicRoughness != null)
+                        {
+                            // baseColor: RGB, plus A unless the material is fully opaque.
+                            var baseColorMask = RGB;
+                            if (material.GetAlphaMode() != MaterialBase.AlphaMode.Opaque)
+                                baseColorMask |= A;
+                            AddChannels(material.PbrMetallicRoughness.BaseColorTexture, baseColorMask);
+
+                            // metallic-roughness: roughness=G, metallic=B (occlusion adds R when packed/ORM).
+                            AddChannels(material.PbrMetallicRoughness.MetallicRoughnessTexture, GB);
+                        }
+                        AddChannels(material.OcclusionTexture, R);
+                        AddChannels(material.NormalTexture, RG);
+                        AddChannels(material.EmissiveTexture, RGB);
+
+                        var ext = material.Extensions;
+                        if (ext != null)
+                        {
+                            if (ext.KHR_materials_pbrSpecularGlossiness != null)
+                            {
+                                AddChannels(ext.KHR_materials_pbrSpecularGlossiness.diffuseTexture, RGB);
+                                AddChannels(ext.KHR_materials_pbrSpecularGlossiness.specularGlossinessTexture, RGB);
+                            }
+                            if (ext.KHR_materials_transmission != null)
+                            {
+                                // KHR_materials_transmission: transmission factor in R.
+                                AddChannels(ext.KHR_materials_transmission.transmissionTexture, R);
+                            }
+                            if (ext.KHR_materials_clearcoat != null)
+                            {
+                                // KHR_materials_clearcoat: clearcoat=R, clearcoat roughness=G, plus a normal map.
+                                AddChannels(ext.KHR_materials_clearcoat.clearcoatTexture, R);
+                                AddChannels(ext.KHR_materials_clearcoat.clearcoatRoughnessTexture, G);
+                                AddChannels(ext.KHR_materials_clearcoat.clearcoatNormalTexture, RG);
+                            }
+                            if (ext.KHR_materials_sheen != null)
+                            {
+                                // KHR_materials_sheen: sheen color=RGB, sheen roughness=A.
+                                AddChannels(ext.KHR_materials_sheen.sheenColorTexture, RGB);
+                                AddChannels(ext.KHR_materials_sheen.sheenRoughnessTexture, A);
+                            }
+                            if (ext.KHR_materials_specular != null)
+                            {
+                                // KHR_materials_specular: specular strength=A, specular color=RGB.
+                                AddChannels(ext.KHR_materials_specular.specularTexture, A);
+                                AddChannels(ext.KHR_materials_specular.specularColorTexture, RGB);
+                            }
+                        }
+                    }
+                }
+
 #if !UNITY_VISIONOS
                 HashSet<int> readableTextureIndices = null;
 #endif
@@ -1820,7 +1884,8 @@ namespace GLTFast
                                 m_Settings.GenerateMipMaps,
                                 cancellationToken,
                                 loader,
-                                DeferAgent
+                                DeferAgent,
+                                textureChannels[textureIndex]
                             );
                         continue;
                     }
@@ -1848,7 +1913,8 @@ namespace GLTFast
                                             m_Settings.GenerateMipMaps,
                                             cancellationToken,
                                             defaultLoader,
-                                            DeferAgent
+                                            DeferAgent,
+                                            textureChannels[textureIndex]
                                             );
                                         return true;
                                     }
@@ -1907,7 +1973,8 @@ namespace GLTFast
                         m_Settings.GenerateMipMaps,
                         GetImageDataAsync(img, cancellationToken),
                         m_Addons,
-                        cancellationToken
+                        cancellationToken,
+                        textureChannels[textureIndex]
                     );
                 }
             }

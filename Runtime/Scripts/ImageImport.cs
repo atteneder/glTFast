@@ -24,7 +24,8 @@ namespace GLTFast
             bool generateMipMaps,
             Task<IReadOnlyDisposableData> dataTask,
             ImportAddonInstanceCollection addons,
-            CancellationToken cancellationToken
+            CancellationToken cancellationToken,
+            int channelMask = 0xF
             )
         {
             using var data = await dataTask;
@@ -46,7 +47,8 @@ namespace GLTFast
                     linear,
                     readable,
                     generateMipMaps,
-                    cancellationToken);
+                    cancellationToken,
+                    channelMask);
             if (task != null)
             {
                 return await task;
@@ -99,7 +101,8 @@ namespace GLTFast
             bool generateMipMaps,
             CancellationToken cancellationToken,
             ITextureImageLoader loader,
-            IDeferAgent deferAgent
+            IDeferAgent deferAgent,
+            int channelMask = 0xF
         )
         {
             using var data = await dataTask;
@@ -112,7 +115,7 @@ namespace GLTFast
                 cancellationToken.ThrowIfCancellationRequestedWithTracking();
                 await Task.Yield();
             }
-            return await loader.LoadImage(data.Data, linear, readable, generateMipMaps, cancellationToken);
+            return await loader.LoadImage(data.Data, linear, readable, generateMipMaps, cancellationToken, channelMask);
         }
 
         internal static async Task<IReadOnlyDisposableData> LoadDataAsync(
