@@ -2162,7 +2162,8 @@ namespace GLTFast
                 Assert.IsTrue(offset >= 0);
                 Assert.IsTrue(count > 0);
                 Assert.IsTrue(offset + count * UnsafeUtility.SizeOf(typeof(T)) <= fullSlice.Length);
-                return new ReadOnlyNativeArray<byte>(fullSlice).GetSubArray(offset, count).Reinterpret<T>();
+                // GetSubArray length is in bytes; count is an element count.
+                return new ReadOnlyNativeArray<byte>(fullSlice).GetSubArray(offset, count * UnsafeUtility.SizeOf(typeof(T))).Reinterpret<T>();
             }
 #endif
             return GetAccessorData<T>(bufferView, count, offset);
@@ -2181,6 +2182,11 @@ namespace GLTFast
                 unsafe
                 {
                     var fullSlice = m_MeshoptBufferViews[bufferViewIndex];
+                    // Decoded meshopt data is packed at the extension's byteStride, not the
+                    // bufferView's outer byteStride (undefined for non-vertex bufferViews).
+                    var meshoptByteStride = bufferView.Extensions.EXT_meshopt_compression.byteStride;
+                    if (meshoptByteStride <= 0)
+                        meshoptByteStride = UnsafeUtility.SizeOf(typeof(T));
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                     var safety = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(fullSlice);
 #endif
@@ -2189,7 +2195,7 @@ namespace GLTFast
                         fullSlice.Length,
                         offset,
                         count,
-                        bufferView.byteStride
+                        meshoptByteStride
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
                         , ref safety
 #endif
