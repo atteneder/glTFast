@@ -238,6 +238,9 @@ half3 NormalInTangentSpace(float2 texcoords)
     // This is a replacement for UnityStandardUtils UnpackScaleNormalRGorAG to use XYZ normals even with DXT5nm enabled
     half4 packedNormal = tex2D(normalTexture, texcoords);
     half3 normal = packedNormal.xyz * 2 - 1;
+    // Reconstruct Z from X,Y.
+    // This makes two-channel normalmaps (BC5 / EAC_RG) work and matches the behavior of Unity's own shaders.
+    normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
 #if (SHADER_TARGET >= 30)
     // SM2.0: instruction count limitation
     // SM2.0: normal scaler is not supported
