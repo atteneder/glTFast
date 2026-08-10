@@ -78,12 +78,17 @@ namespace GLTFast
 
             if (ImageFormatDetection.IsWebP(data.Data.AsReadOnlySpan()))
             {
+#if WEBP_IS_INSTALLED
+                return await WebpImageLoader.LoadAsync(
+                    context, settings, data.Data, linear, readable, generateMipMaps, cancellationToken);
+#else
                 context.Logger?.Error(
-                    LogCode.ImageFormatUnsupported,
-                    imageIndex.ToString(),
-                    nameof(ImageFormat.WebP)
+                    LogCode.PackageMissing,
+                    "unity.webp (com.netpyoung.webp)",
+                    ExtensionName.TextureWebP
                     );
                 return ImageResult.Null;
+#endif
             }
 
             context.Logger?.Error(

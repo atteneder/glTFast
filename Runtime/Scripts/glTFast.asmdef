@@ -7,6 +7,7 @@
         "Unity.Collections",
         "Draco",
         "Ktx",
+        "unity.webp",
         "Unity.Meshopt.Decompress",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.RenderPipelines.HighDefinition.Runtime"
@@ -88,7 +89,13 @@
             "name": "com.unity.nuget.newtonsoft-json",
             "expression": "",
             "define": "NEWTONSOFT_JSON"
+        },
+        {
+            "name": "com.netpyoung.webp",
+            "expression": "",
+            "define": "WEBP_IS_INSTALLED"
         }
     ],
-    "noEngineReferences": false
+    "noEngineReferences": false,
+    "ignoreMissingReferences": true
 }

@@ -45,8 +45,9 @@ namespace GLTFast.Addons
             {
                 s_Addons = new List<ImportAddon>();
 
-                // TODO: Register all default import add-ons
-                // TODO: Investigate if add-ons can be auto-registered via reflection
+#if WEBP_IS_INSTALLED
+                s_Addons.Add(new WebpTextureImportAddon());
+#endif
             }
         }
 

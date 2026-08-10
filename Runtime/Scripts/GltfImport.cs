@@ -1833,7 +1833,7 @@ namespace GLTFast
                             ? UriHelper.GetImageFormatFromUri(img.uri)
                             : ImageFormatExtensions.FromMimeType(img.mimeType);
 
-                        if (imgFormat is ImageFormat.Jpeg or ImageFormat.Png)
+                        if (imgFormat is ImageFormat.Jpeg or ImageFormat.Png or ImageFormat.WebP)
                         {
                             if (m_Addons?.TryGet(
                                 imgFormat,
@@ -1861,31 +1861,47 @@ namespace GLTFast
                                 continue;
                             }
 
-                            // Jpeg and PNG are a special case. If feasible, they're loaded via UnityWebRequestTexture,
-                            // which decodes them in a worker thread.
-#if UNITY_IMAGECONVERSION
-                            var loadFromBytes = ImageConversionImageLoader.LoadImageFromBytes(
-                                forceSampleLinear,
-                                m_Settings.GenerateMipMaps
-                                );
-                            if (!loadFromBytes)
+                            if (imgFormat == ImageFormat.WebP)
                             {
-                                var uri = UriHelper.GetUriString(img.uri, BaseUri);
-                                m_TextureLoadTasks[textureIndex] = ImageConversionImageLoader.LoadAsync(
-                                    m_Context, uri, readable, cancellationToken);
-                                continue;
+                                if (!(m_Addons?.Any<ITextureImageLoader>(_ => true) ?? false))
+                                {
+                                    Logger?.Error(
+                                        LogCode.ImageFormatUnsupported,
+                                        imageIndex.ToString(),
+                                        imgFormat.ToString()
+                                        );
+                                    continue;
+                                }
                             }
+                            else
+                            {
+                                // Jpeg and PNG are a special case. If feasible, they're loaded via UnityWebRequestTexture,
+                                // which decodes them in a worker thread.
+#if UNITY_IMAGECONVERSION
+                                var loadFromBytes = ImageConversionImageLoader.LoadImageFromBytes(
+                                    forceSampleLinear,
+                                    m_Settings.GenerateMipMaps
+                                    );
+                                if (!loadFromBytes)
+                                {
+                                    var uri = UriHelper.GetUriString(img.uri, BaseUri);
+                                    m_TextureLoadTasks[textureIndex] = ImageConversionImageLoader.LoadAsync(
+                                        m_Context, uri, readable, cancellationToken);
+                                    continue;
+                                }
 #else
-                            Logger?.Error(LogCode.ImageConversionNotEnabled);
-                            continue;
+                                Logger?.Error(LogCode.ImageConversionNotEnabled);
+                                continue;
 #endif
+                            }
                         }
 
                         // Abort for formats known to be not supported to avoid pointless downloads.
                         if (
-                            imgFormat == ImageFormat.WebP
 #if !KTX_IS_ENABLED
-                            || imgFormat == ImageFormat.Ktx
+                            imgFormat == ImageFormat.Ktx
+#else
+                            false
 #endif
                             )
                         {

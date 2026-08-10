@@ -76,7 +76,7 @@ namespace GLTFast.Documentation.Examples
 
     }
 
-    abstract class ImageLoaderAddonInstance : ImportAddonInstance
+    public abstract class ImageLoaderAddonInstance : ImportAddonInstance
     {
         public override void Dispose() { }
 

@@ -17,14 +17,7 @@ namespace GLTFast.Documentation.Examples
     {
         public override void Inject(GltfImportBase gltfImport)
         {
-#if NEWTONSOFT_JSON
-            if (gltfImport is not Newtonsoft.GltfImport)
-                return;
-
             gltfImport.AddImportAddonInstance(this);
-#else
-            Debug.LogError("WebpTextureAddon requires the Newtonsoft.Json package to be installed.");
-#endif
         }
 
         public override bool SupportsGltfExtension(string extensionName)
@@ -34,15 +27,11 @@ namespace GLTFast.Documentation.Examples
 
         public bool IsAbleToLoad(TextureBase texture, out int imageIndex)
         {
-#if NEWTONSOFT_JSON
-            if (texture is GLTFast.Newtonsoft.Schema.Texture { extensions: not null } t
-                && t.extensions.TryGetValue<TextureWebpExtension>(
-                    "EXT_texture_webp", out var ext))
+            if (texture.Extensions?.EXT_texture_webp is { source: >= 0 } webp)
             {
-                imageIndex = ext.source;
+                imageIndex = webp.source;
                 return true;
             }
-#endif
             imageIndex = -1;
             return false;
         }
@@ -64,10 +53,5 @@ namespace GLTFast.Documentation.Examples
             return new ImageResult(texture, true);
         }
     }
-
-    [Serializable]
-    struct TextureWebpExtension
-    {
-        public int source;
-    }
 }
+

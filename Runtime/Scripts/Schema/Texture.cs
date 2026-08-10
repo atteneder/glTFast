@@ -129,6 +129,17 @@ namespace GLTFast.Schema
                 if ((e.KHR_texture_basisu?.source ?? -1) < 0)
                 {
                     e.KHR_texture_basisu = null;
+                }
+
+                // Check if WebP extension is valid
+                if ((e.EXT_texture_webp?.source ?? -1) < 0)
+                {
+                    e.EXT_texture_webp = null;
+                }
+
+                // Unset extensions container if all extensions are null
+                if (e.KHR_texture_basisu == null && e.EXT_texture_webp == null)
+                {
                     UnsetExtensions();
                 }
             }
