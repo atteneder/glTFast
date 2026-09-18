@@ -5,7 +5,6 @@
         "Unity.Mathematics",
         "glTFast",
         "glTFast.Export",
-        "UnityEngine.TestTools.Graphics",
         "Unity.RenderPipelines.HighDefinition.Runtime",
         "UnityEditor.Formats.Gltf.Validation"
     ],
@@ -28,11 +27,6 @@
             "name": "com.unity.render-pipelines.high-definition",
             "expression": "7.3.1",
             "define": "USING_HDRP"
-        },
-        {
-            "name": "com.unity.testframework.graphics",
-            "expression": "7.7.0",
-            "define": "GLTFAST_RENDER_TEST"
         },
         {
             "name": "com.unity.modules.animation",

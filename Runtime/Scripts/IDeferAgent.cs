@@ -19,7 +19,9 @@ namespace GLTFast
         /// </summary>
         /// <returns>True if the remaining work of the loading procedure should
         /// be deferred to the next frame/Update loop invocation. False if
-        /// work can continue.</returns>
+        /// work can continue. Must eventually return false, otherwise the
+        /// procedure may stall indefinitely (imports never complete, tasks never
+        /// finish, no error is raised).</returns>
         bool ShouldDefer();
 
         /// <summary>
@@ -28,7 +30,9 @@ namespace GLTFast
         /// <param name="duration">Predicted duration of upcoming processing in seconds</param>
         /// <returns>True if the remaining work of the loading procedure should
         /// be deferred to the next frame/Update loop invocation. False if
-        /// work can continue.</returns>
+        /// work can continue. Must eventually return false, otherwise the
+        /// procedure may stall indefinitely (imports never complete, tasks never
+        /// finish, no error is raised).</returns>
         bool ShouldDefer(float duration);
 
         /// <summary>

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Unity.Collections;
 using UnityEditor;
@@ -47,21 +46,21 @@ namespace GLTFast.Editor
 
     class SyncFileLoader : IDownload, INativeDownload
     {
-        ReadOnlyNativeArrayFromManagedArray<byte> m_ManagedNativeArray;
+        NativeArray<byte> m_FileBytes;
+        bool m_Success;
+
+        protected SyncFileLoader() { }
 
         public SyncFileLoader(Uri url)
         {
-            var path = url.OriginalString;
-            if (File.Exists(path))
+            if (NativeFileReader.TryReadAllBytes(url.OriginalString, out m_FileBytes, out var error))
             {
-                Data = File.ReadAllBytes(path);
-                // TODO: Is there a better way to load a file into a NativeArray, like AsyncReadManager?
-                m_ManagedNativeArray = new ReadOnlyNativeArrayFromManagedArray<byte>(Data);
-                NativeData = m_ManagedNativeArray.Array.AsNativeArrayReadOnly();
+                NativeData = m_FileBytes.AsReadOnly();
+                m_Success = true;
             }
             else
             {
-                Error = $"Cannot find resource at path {path}";
+                Error = error;
             }
         }
 
@@ -69,14 +68,22 @@ namespace GLTFast.Editor
         public bool MoveNext() { return false; }
         public void Reset() { }
 
-        public virtual bool Success => Data != null;
+        public virtual bool Success => m_Success;
 
         public string Error { get; protected set; }
-        public byte[] Data { get; private set; }
+        public byte[] Data
+        {
+            get
+            {
+                Debug.LogError("Managed byte array `Data` is not used anymore by glTFast and should not be used " +
+                    "as it creates a copy. It is maintained to satisfy the IDownload contract.");
+                return m_FileBytes.ToArray();
+            }
+        }
 
         public NativeArray<byte>.ReadOnly NativeData { get; private set; }
 
-        public string Text => Data != null ? System.Text.Encoding.UTF8.GetString(Data) : null;
+        public string Text => m_Success ? System.Text.Encoding.UTF8.GetString(m_FileBytes.AsReadOnlySpan()) : null;
 
         public bool? IsBinary
         {
@@ -100,9 +107,10 @@ namespace GLTFast.Editor
         {
             if (disposing)
             {
-                m_ManagedNativeArray?.Dispose();
-                m_ManagedNativeArray = null;
-                Data = null;
+                if (m_FileBytes.IsCreated)
+                    m_FileBytes.Dispose();
+                m_FileBytes = default;
+                m_Success = false;
                 NativeData = default;
             }
         }
@@ -116,7 +124,6 @@ namespace GLTFast.Editor
         public override bool Success => Texture != null;
 
         public SyncTextureLoader(Uri url)
-            : base(url)
         {
             Texture = AssetDatabase.LoadAssetAtPath<Texture2D>(url.OriginalString);
             if (Texture == null)

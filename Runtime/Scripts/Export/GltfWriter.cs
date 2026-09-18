@@ -501,10 +501,7 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
-        public async Task<bool> SaveToFileAndDispose(string path)
-        {
-            return await SaveToFileAndDisposeInternal(path, false);
-        }
+        public Task<bool> SaveToFileAndDispose(string path) => SaveToFileAndDisposeInternal(path, false);
 
         internal async Task<bool> SaveToFileAndDisposeInternal(string path, bool sync)
         {
@@ -532,9 +529,10 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
-        public async Task<bool> SaveToStreamAndDispose(Stream stream)
-        {
+        public Task<bool> SaveToStreamAndDispose(Stream stream) => SaveToStreamAndDispose(stream, false);
 
+        internal async Task<bool> SaveToStreamAndDispose(Stream stream, bool sync)
+        {
             CertifyNotDisposed();
 
             if (m_Settings.Format != GltfFormat.Binary || GetFinalImageDestination() == ImageDestination.SeparateFile)
@@ -543,7 +541,7 @@ namespace GLTFast.Export
                 return false;
             }
 
-            return await SaveAndDispose(stream, false);
+            return await SaveAndDispose(stream, sync);
         }
 
         async Task<bool> SaveAndDispose(
@@ -952,7 +950,8 @@ namespace GLTFast.Export
                 return false;
             }
 
-            var tasks = m_Settings.Deterministic && !sync ? null : new List<Task>(m_Meshes.Count);
+            var sequential = m_Settings.Deterministic || sync;
+            var tasks = !sequential ? new List<Task>(m_Meshes.Count) : null;
 
             var meshData = CollectMeshData(out var meshDataArray);
 
@@ -970,21 +969,22 @@ namespace GLTFast.Export
                     task = BakeMesh(meshId, meshData[meshId], sync);
                 }
 
+                if (sequential)
+                {
+                    await task;
+                }
+                else
+                {
+                    tasks!.Add(task);
+                }
+
                 if (!sync)
                 {
-                    if (m_Settings.Deterministic || tasks == null)
-                    {
-                        await task;
-                    }
-                    else
-                    {
-                        tasks.Add(task);
-                    }
                     await m_DeferAgent.BreakPoint();
                 }
             }
 
-            if (!sync && !m_Settings.Deterministic)
+            if (!sequential)
             {
                 await Task.WhenAll(tasks);
             }
@@ -1378,7 +1378,7 @@ namespace GLTFast.Export
             }
         }
 
-        async Task<int> BakeMeshIndices(IMeshData meshData, UnityEngine.Mesh uMesh, MeshTopology? topology, bool sync)
+        async ValueTask<int> BakeMeshIndices(IMeshData meshData, UnityEngine.Mesh uMesh, MeshTopology? topology, bool sync)
         {
             NativeArray<byte> indices;
             if (uMesh.indexFormat == IndexFormat.UInt16)
@@ -1553,7 +1553,7 @@ namespace GLTFast.Export
             }
         }
 
-        async Task<int> WriteBindPosesToBuffer(Matrix4x4[] bindposes, bool sync)
+        async ValueTask<int> WriteBindPosesToBuffer(Matrix4x4[] bindposes, bool sync)
         {
             var bufferViewId = -1;
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -1776,11 +1776,7 @@ namespace GLTFast.Export
                 if (!overwrite && imageDest == ImageDestination.SeparateFile)
                 {
                     var fileExists = false;
-                    var fileNames = new HashSet<string>(
-#if NET_STANDARD
-                        m_ImageExports.Count
-#endif
-                        );
+                    var fileNames = new HashSet<string>(m_ImageExports.Count);
 
                     bool GetUniqueFileName(ref string filename)
                     {

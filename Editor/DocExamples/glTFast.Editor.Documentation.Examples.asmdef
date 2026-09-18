@@ -1,0 +1,20 @@
+{
+    "name": "glTFast.Editor.Documentation.Examples",
+    "rootNamespace": "GLTFast.Editor.Documentation.Examples",
+    "references": [
+        "glTFast",
+        "glTFast.Editor",
+        "glTFast.Export"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

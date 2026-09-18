@@ -15,13 +15,13 @@ Add a [GltfAsset] component to a GameObject. It offers a lot of settings for imp
 
 Conveniently you can re-use the [GltfAsset] component to load from script:
 
-[!code-cs [load-via-component](../DocExamples/LoadGltfFromMemory.cs#LoadViaComponent)]
+[!code-cs [load-via-component](../Runtime/DocExamples/LoadGltfFromMemory.cs#LoadViaComponent)]
 
 To load from sources other than a URI or for advanced [customization](#customize-loading-behavior), loading is performed with these generalized steps:
 
 1. Create a [GltfImport] instance.
 2. Call one of the instance's loading methods, depending on your source.
-   - From URI, [Load(Uri,…)](xref:GLTFast.GltfImportBase.Load(System.Uri,GLTFast.ImportSettings,System.Threading.CancellationToken)) or [Load(string,…)](xref:GLTFast.GltfImportBase.Load(System.String,GLTFast.ImportSettings,System.Threading.CancellationToken)) 
+   - From URI, [Load(Uri,…)](xref:GLTFast.GltfImportBase.Load(System.Uri,GLTFast.ImportSettings,System.Threading.CancellationToken)) or [Load(string,…)](xref:GLTFast.GltfImportBase.Load(System.String,GLTFast.ImportSettings,System.Threading.CancellationToken))
    - From a buffer [Load(NativeArray&lt;byte&gt;.ReadOnly,…)](xref:GLTFast.GltfImportBase.Load(Unity.Collections.NativeArray{System.Byte}.ReadOnly,System.Uri,GLTFast.ImportSettings,System.Threading.CancellationToken))
    - From a managed buffer [Load(byte[],…)](xref:GLTFast.GltfImportBase.Load(System.Byte[],System.Uri,GLTFast.ImportSettings,System.Threading.CancellationToken))
    - From a file path [LoadFile(string,…)](xref:GLTFast.GltfImportBase.LoadFile*)
@@ -40,7 +40,7 @@ Both the loading and instantiation methods return a boolean value indicating if 
 
 ### Example: Load from byte array
 
-[!code-cs [load-gltf-from-memory](../DocExamples/LoadGltfFromMemory.cs#LoadGltfFromMemory)]
+[!code-cs [load-gltf-from-memory](../Runtime/DocExamples/LoadGltfFromMemory.cs#LoadGltfFromMemory)]
 
 > [!TIP]
 > Provide the original URI of glTF-binary file as `uri` parameter to [LoadGltfBinary][GltfImportLoadGltfBinary], so that it is able to resolve relative URIs in non-self-contained glTFs.
@@ -60,15 +60,15 @@ Loading via script allows you to:
 
 ### Import Settings
 
-`GltfImport.Load` accepts an optional instance of [`ImportSettings`][ImportSettings] as parameter. Have a look at this class to see all options available. Here's an example usage:
+All [`GltfImport.Load`][GltfImportLoad] overloads accept an optional instance of [`ImportSettings`][ImportSettings] as parameter. Have a look at this class to see all options available. Here's an example usage:
 
-[!code-cs [import-settings](../DocExamples/LoadGltfFromMemory.cs#ImportSettings)]
+[!code-cs [import-settings](../Runtime/DocExamples/LoadGltfFromMemory.cs#ImportSettings)]
 
 ### Custom Post-Loading Behavior
 
 The async `Load` method can be awaited and followed up by custom behavior.
 
-[!code-cs [instantiation](../DocExamples/LoadGltfFromMemory.cs#Instantiation)]
+[!code-cs [instantiation](../Runtime/DocExamples/LoadGltfFromMemory.cs#Instantiation)]
 
 ### Instantiation
 
@@ -135,7 +135,7 @@ After a glTF scene was instanced, you can access selected components for further
 
 [`GameObjectInstantiator`][GameObjectInstantiator] provides a [`SceneInstance`][GameObjectSceneInstance] for that purpose. Here's some code that demonstrates how to access it
 
-[!code-cs [SceneInstanceAccess](../DocExamples/LoadGltfFromMemory.cs#SceneInstanceAccess)]
+[!code-cs [SceneInstanceAccess](../Runtime/DocExamples/LoadGltfFromMemory.cs#SceneInstanceAccess)]
 
 ### Logging
 
@@ -179,7 +179,7 @@ You can accomplish the same from script by calling `GltfImport.SetDefaultDeferAg
 
 For most granular control, you can pass a custom defer agent to each individual `GltfImport` instance:
 
-[!code-cs [CustomDeferAgent](../DocExamples/LoadGltfFromMemory.cs#CustomDeferAgent)]
+[!code-cs [CustomDeferAgent](../Runtime/DocExamples/LoadGltfFromMemory.cs#CustomDeferAgent)]
 
 > [!NOTE]
 > Depending on your glTF scene, using the `UninterruptedDeferAgent` may block the main thread for up to multiple seconds. Be sure to not do this during critical game play action.
@@ -215,7 +215,6 @@ When you no longer need a loaded instance of a glTF scene you might want to remo
 [InstantiationSettings]: xref:GLTFast.InstantiationSettings
 [Khronos]: https://www.khronos.org
 [LogMessages]: xref:GLTFast.Logging.LogMessages
-[NativeArrayByteReadOnly]: xref:Unity.Collections.NativeArray`1.ReadOnly
 [GameObjectSceneInstance]: xref:GLTFast.GameObjectSceneInstance
 [SceneObjectCreation]: xref:GLTFast.SceneObjectCreation
 [Stream]: xref:System.IO.Stream

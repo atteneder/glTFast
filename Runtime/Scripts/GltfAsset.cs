@@ -98,7 +98,7 @@ namespace GLTFast
         public GameObjectSceneInstance SceneInstance { get; protected set; }
 
         /// <summary>
-        /// Final URL, considering all options (like <see cref="streamingAsset"/>)
+        /// Final URL, considering all options (like <see cref="StreamingAsset"/>)
         /// </summary>
         // ReSharper disable once MemberCanBePrivate.Global
         public string FullUrl => streamingAsset

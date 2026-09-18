@@ -11,7 +11,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Converts URP/HDRP Lit and Built-In Standard shader based materials to glTF materials
     /// </summary>
-	/// <seealso cref="BuiltInStandardMaterialExport"/>
+    /// <seealso cref="BuiltInStandardMaterialExport"/>
     /// <seealso cref="LitMaterialExport"/>
     [Obsolete("Use BuiltInStandardMaterialExport or LitMaterialExport instead.")]
     public class StandardMaterialExport : MaterialExportBase

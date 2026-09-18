@@ -14,7 +14,6 @@ namespace GLTFast
         /// <summary>
         /// Materials variants control instance.
         /// </summary>
-        [field: SerializeField]
         public MaterialsVariantsControl Control { get; set; }
     }
 }

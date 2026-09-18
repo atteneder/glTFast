@@ -22,11 +22,13 @@ namespace GLTFast.Export
         /// </summary>
         public static readonly int GlossinessProperty = Shader.PropertyToID("_Glossiness");
 
+        /// <inheritdoc/>
         protected override bool HasMetallicGlossMap(UnityEngine.Material uMaterial)
         {
             return uMaterial.IsKeywordEnabled(k_KeywordMetallicGlossMap);
         }
 
+        /// <inheritdoc/>
         protected override bool IsPbrMetallicRoughness(UnityEngine.Material material)
         {
             return material.HasProperty(MetallicProperty)
@@ -36,6 +38,7 @@ namespace GLTFast.Export
                 );
         }
 
+        /// <inheritdoc/>
         protected override int GetSmoothnessProperty(bool sourceAlbedoAlpha, bool hasMetallicGlossinessMap)
         {
             return sourceAlbedoAlpha || hasMetallicGlossinessMap ? k_GlossMapScaleProperty : GlossinessProperty;

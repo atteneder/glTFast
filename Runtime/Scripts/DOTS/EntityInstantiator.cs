@@ -21,6 +21,13 @@ using UnityEngine.Rendering;
 
 namespace GLTFast
 {
+    /// <summary>
+    /// Generates an Entity hierarchy from a glTF scene.
+    /// </summary>
+    /// <remarks>
+    /// A derived class must re-declare the interface (<c>class MyInstantiator : EntityInstantiator, IInstantiator</c>)
+    /// for its own <see cref="IInstantiator.AddMesh"/> or <see cref="IInstantiator.AddMeshInstanced"/> to be reached.
+    /// </remarks>
     public class EntityInstantiator : IInstantiator
     {
 
@@ -161,6 +168,20 @@ namespace GLTFast
             return node;
         }
 
+        /// <inheritdoc />
+        public virtual void CreateNode(
+            uint nodeIndex,
+            uint? parentIndex,
+            Vector3 position,
+            Quaternion rotation,
+            Vector3 scale,
+            string name
+        )
+        {
+            CreateNode(nodeIndex, parentIndex, position, rotation, scale);
+            SetNodeName(nodeIndex, name);
+        }
+
         public void SetNodeName(uint nodeIndex, string name)
         {
 #if UNITY_EDITOR
@@ -169,6 +190,7 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
+        [Obsolete("Use IInstantiator.AddMesh instead.")]
         public virtual void AddPrimitive(
             uint nodeIndex,
             string meshName,
@@ -183,7 +205,7 @@ namespace GLTFast
             {
                 return;
             }
-            Profiler.BeginSample("AddPrimitive");
+            Profiler.BeginSample("AddMesh");
 
             var materials = new Material[meshResult.materialIndices.Length];
             for (var index = 0; index < meshResult.materialIndices.Length; index++)
@@ -247,6 +269,7 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
+        [Obsolete("Use IInstantiator.AddMeshInstanced instead.")]
         public void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,
@@ -262,7 +285,7 @@ namespace GLTFast
             {
                 return;
             }
-            Profiler.BeginSample("AddPrimitiveInstanced");
+            Profiler.BeginSample("AddMeshInstanced");
             var materials = new Material[meshResult.materialIndices.Length];
             for (var index = 0; index < meshResult.materialIndices.Length; index++)
             {

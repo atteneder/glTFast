@@ -177,7 +177,6 @@ namespace GLTFast.Logging
         /// <inheritdoc cref="System.Object.GetHashCode"/>
         public override int GetHashCode()
         {
-#if NET_STANDARD
             var hash = new HashCode();
             hash.Add(Type);
             hash.Add(Code);
@@ -189,21 +188,6 @@ namespace GLTFast.Logging
                 }
             }
             return hash.ToHashCode();
-#else
-            var hash = 17;
-            hash = hash * 31 + Type.GetHashCode();
-            hash = hash * 31 + Code.GetHashCode();
-
-            if (Messages != null)
-            {
-                hash = hash * 31 + Messages.Length;
-                foreach (var message in Messages)
-                {
-                    hash = hash * 31 + message.GetHashCode();
-                }
-            }
-            return hash;
-#endif
         }
 
         /// <inheritdoc cref="System.Object.Equals(object)"/>

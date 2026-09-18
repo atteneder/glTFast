@@ -11,6 +11,7 @@
 * [Project Setup](ProjectSetup.md)
 * Use Cases
   * [Use glTFast Add-on API to import custom data](UseCaseCustomExtras.md)
+  * [Batch export scene roots to glTF files](UseCaseBatchExport.md)
 * [Development](development.md)
   * [Sources](sources.md)
   * [Test Project](test-project-setup.md)

@@ -22,17 +22,10 @@ namespace GLTFast
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CalculateHashCode(MeshPrimitiveBase primitive)
         {
-#if NET_STANDARD
             return HashCode.Combine(
                 GetHashCode(primitive.attributes),
                 GetHashCode(primitive.targets)
                 );
-#else
-            var hash = 17;
-            hash = hash * 31 + GetHashCode(primitive.attributes);
-            hash = hash * 31 + GetHashCode(primitive.targets);
-            return hash;
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,7 +77,6 @@ namespace GLTFast
         static int GetHashCode(Attributes x)
         {
             if (x == null) return 0;
-#if NET_STANDARD
             var hash = new HashCode();
             hash.Add(x.POSITION);
             hash.Add(x.NORMAL);
@@ -101,32 +93,12 @@ namespace GLTFast
             hash.Add(x.JOINTS_0);
             hash.Add(x.WEIGHTS_0);
             return hash.ToHashCode();
-#else
-            if (x == null) return 0;
-            var hash = 17;
-            hash = hash * 31 + x.POSITION;
-            hash = hash * 31 + x.NORMAL;
-            hash = hash * 31 + x.TANGENT;
-            hash = hash * 31 + x.TEXCOORD_0;
-            hash = hash * 31 + x.TEXCOORD_1;
-            hash = hash * 31 + x.TEXCOORD_2;
-            hash = hash * 31 + x.TEXCOORD_3;
-            hash = hash * 31 + x.TEXCOORD_4;
-            hash = hash * 31 + x.TEXCOORD_5;
-            hash = hash * 31 + x.TEXCOORD_6;
-            hash = hash * 31 + x.TEXCOORD_7;
-            hash = hash * 31 + x.COLOR_0;
-            hash = hash * 31 + x.JOINTS_0;
-            hash = hash * 31 + x.WEIGHTS_0;
-            return hash;
-#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int GetHashCode(MorphTarget[] x)
         {
             if (x == null) return 0;
-#if NET_STANDARD
             HashCode hash = new();
             hash.Add(x.Length);
             foreach (var target in x)
@@ -141,19 +113,6 @@ namespace GLTFast
                 hash.Add(target.TANGENT);
             }
             return hash.ToHashCode();
-#else
-            var hash = 17;
-            hash = hash * 31 + x.Length;
-            foreach (var target in x)
-            {
-                if (target == null)
-                    continue;
-                hash = hash * 31 + target.POSITION;
-                hash = hash * 31 + target.NORMAL;
-                hash = hash * 31 + target.TANGENT;
-            }
-            return hash;
-#endif
         }
     }
 }

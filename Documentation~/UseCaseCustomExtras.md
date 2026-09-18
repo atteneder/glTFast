@@ -59,11 +59,11 @@ To create a custom glTF import behavior, follow these steps:
 4. Select **C# Script**.
 5. Rename the new script as `CustomGltfImport`.
 6. Open the `CustomGltfImport` script and replace the content with the following:
-   [!code-cs [custom-gltf-import](../DocExamples/CustomGltfImport.cs#CustomGltfImport)]
+   [!code-cs [custom-gltf-import](../Runtime/DocExamples/CustomGltfImport.cs#CustomGltfImport)]
 7. Repeat step 2-4 to create another new script
 8. Rename the new script as `ExtraData`.
 9. Open the `ExtraData` script and replace the content with the following:
-   [!code-cs [extra-data](../DocExamples/ExtraData.cs#ExtraData)]
+   [!code-cs [extra-data](../Runtime/DocExamples/ExtraData.cs#ExtraData)]
 
 ### Add assembly definitions
 

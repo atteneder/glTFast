@@ -78,14 +78,17 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | | |
 | **Animation**
 | via legacy Animation System | ✅ |
-| via Playable API ([issue][AnimationPlayables]) |  |
+| via custom animation system (via [Add-on API](xref:GLTFast.Animations.IAnimationProcessor)) | ✅ |
 | via Mecanim ([issue][AnimationMecanim]) | ³☑️ |
+| via Playable API | [⁴⛔️](UseCaseCustomPlayablesAnimation.md) |
 
 ¹: Up to eight UV sets can imported, but *Unity glTFast* shaders only support two (see [issue][UVsets]).
 
 ²: Not on all accessor types; morph targets and vertex positions only
 
 ³: Animation clips can be imported Mecanim compatible, but they won't be assigned and cannot be played back without further work.
+
+⁴: Playables support was removed because it was not usable in builds (`AnimationClip.SetCurve` only works at runtime for legacy clips). Use the legacy Animation System or a custom animation system instead.
 
 ## Extensions
 
@@ -330,7 +333,6 @@ Possibly incomplete list of things that are known to not work with Entities yet:
 *Draco&trade;* is a trademark of [*Google LLC*][GoogleLLC].
 
 [AnimationMecanim]: https://github.com/atteneder/glTFast/issues/167
-[AnimationPlayables]: https://github.com/atteneder/glTFast/issues/166
 [ClearCoat]: https://github.com/atteneder/glTFast/issues/68
 [DracoForUnity]: https://docs.unity3d.com/Packages/com.unity.cloud.draco@latest
 [DOTS]: https://unity.com/dots
