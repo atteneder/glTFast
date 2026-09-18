@@ -1,0 +1,84 @@
+name: Sync upstream release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Released Unity glTFast version (empty = latest of this branch''s channel)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Each branch tracks its own release channel and syncs independently.
+concurrency:
+  group: sync-upstream-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          lfs: true
+
+      - name: Sync package sources
+        id: sync
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          python3 .github/sync/sync_upstream.py \
+            --watch-report "$RUNNER_TEMP/upstream-report.md" \
+            ${VERSION:+--version "$VERSION"}
+
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.sync.outputs.version }}
+          CHANNEL: ${{ steps.sync.outputs.channel }}
+          BASE: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --all
+
+          if git diff --cached --quiet; then
+            echo "::notice::Already in sync with $VERSION, nothing to do."
+            exit 0
+          fi
+
+          branch="sync/$VERSION"
+          git switch --create "$branch"
+          git commit --message "com.atteneder.gltfast Release $VERSION"
+          git push --force origin "$branch"
+
+          body="$RUNNER_TEMP/pull-request.md"
+          {
+            printf 'Synced from the `release/%s` tag of [Unity glTFast][upstream]. ' "$VERSION"
+            printf 'Branch `%s` tracks the %s channel.\n\n' "$BASE" "$CHANNEL"
+            printf 'The OpenUPM specific modifications were re-applied by '
+            printf '`.github/sync/sync_upstream.py`, which fails the workflow rather than '
+            printf 'guessing whenever upstream changes one of the patched sections.\n\n'
+            cat "$RUNNER_TEMP/upstream-report.md"
+            printf '\n### After merging\n\n'
+            printf -- '- [ ] Tag the merge commit `com.atteneder.gltfast/%s` and push the tag.\n' "$VERSION"
+            printf -- '- [ ] Draft a GitHub release for that tag with the changelog entry of %s.\n\n' "$VERSION"
+            printf '[upstream]: https://github.com/Unity-Technologies/com.unity.cloud.gltfast\n'
+          } > "$body"
+
+          if [ -n "$(gh pr list --head "$branch" --state open --json number --jq '.[].number')" ]; then
+            gh pr edit "$branch" --body-file "$body"
+            echo "::notice::Updated the existing pull request for $branch."
+            exit 0
+          fi
+
+          gh pr create \
+            --base "$BASE" \
+            --head "$branch" \
+            --title "com.atteneder.gltfast Release $VERSION" \
+            --body-file "$body"
