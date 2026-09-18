@@ -21,10 +21,10 @@ Exporting via script works exactly the same as [Runtime Export](ExportRuntime.md
 
 ### Editor Scripting: Enforce Synchronous I/O
 
-When triggering an export from Editor scripting &mdash; for example a menu item, a custom inspector, or an asset post-processor &mdash; pass `forceSync: true` to [SaveToFileAndDispose](xref:GLTFast.Export.GameObjectExport.SaveToFileAndDispose*):
+When triggering an export from Editor scripting &mdash; for example a menu item, a custom inspector, or an asset post-processor &mdash; pass `forceSync: true` to [SaveToFileAndDisposeAsync](xref:Unity.Cloud.Gltfast.Export.GameObjectExport.SaveToFileAndDisposeAsync*):
 
 ```csharp
-await export.SaveToFileAndDispose(path, forceSync: true);
+await export.SaveToFileAndDisposeAsync(path, forceSync: true);
 ```
 
 Unity does not pump the main-thread `SynchronizationContext` outside Play Mode, so awaited asynchronous I/O continuations (e.g. `Stream.WriteAsync`) may never resume and the export can hang silently. The `forceSync` overload routes writes through the synchronous I/O path instead, which completes deterministically in Edit Mode. At runtime (Play Mode or in a built player), keep the default asynchronous path to avoid blocking the main thread.

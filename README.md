@@ -50,7 +50,7 @@ Add a `GltfAsset` component to a GameObject.
 ### Runtime Loading via Script
 
 ```C#
-var gltf = gameObject.AddComponent<GLTFast.GltfAsset>();
+var gltf = gameObject.AddComponent<Unity.Cloud.Gltfast.GltfAsset>();
 gltf.url = "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Duck/glTF/Duck.gltf";
 ```
 

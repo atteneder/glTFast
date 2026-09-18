@@ -1,0 +1,48 @@
+{
+    "name": "Unity.Cloud.Gltfast.Export",
+    "rootNamespace": "Unity.Cloud.Gltfast.Export",
+    "references": [
+        "Unity.Cloud.Gltfast",
+        "Unity.Mathematics",
+        "Unity.Burst",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Draco.Encode"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "USING_URP"
+        },
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "",
+            "define": "USING_HDRP"
+        },
+        {
+            "name": "com.unity.modules.imageconversion",
+            "expression": "",
+            "define": "UNITY_IMAGECONVERSION"
+        },
+        {
+            "name": "com.unity.cloud.draco",
+            "expression": "5.0.0-pre.1",
+            "define": "DRACO_IS_INSTALLED"
+        },
+        {
+            "name": "com.unity.shadergraph",
+            "expression": "",
+            "define": "UNITY_SHADER_GRAPH"
+        }
+    ],
+    "noEngineReferences": false
+}

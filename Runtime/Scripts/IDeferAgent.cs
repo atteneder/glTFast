@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Threading.Tasks;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     /// <summary>
@@ -12,6 +13,7 @@ namespace GLTFast
     /// This decision manages the trade-off between minimum procedure duration
     /// and a responsive frame rate.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public interface IDeferAgent
     {
         /// <summary>
@@ -39,13 +41,13 @@ namespace GLTFast
         /// Conditional yield. May continue right away or yield once, based on time.
         /// </summary>
         /// <returns>If <see cref="ShouldDefer()"/> returns true, returns Task.Yield(). Otherwise returns sync</returns>
-        Task BreakPoint();
+        Task BreakPointAsync();
 
         /// <summary>
         /// Conditional yield. May continue right away or yield once, based on time and duration.
         /// </summary>
         /// <param name="duration">Predicted duration of upcoming processing in seconds</param>
         /// <returns>If <see cref="ShouldDefer(float)"/> returns true, returns Task.Yield(). Otherwise returns sync</returns>
-        Task BreakPoint(float duration);
+        Task BreakPointAsync(float duration);
     }
 }

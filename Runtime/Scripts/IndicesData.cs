@@ -6,7 +6,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.Rendering;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     struct IndicesData : IDisposable
     {

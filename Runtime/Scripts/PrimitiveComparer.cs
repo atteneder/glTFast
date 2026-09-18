@@ -2,60 +2,94 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
+using Unity.Cloud.Gltfast.Text.Json;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     static class PrimitiveComparer
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool HaveEqualVertexBuffers(MeshPrimitiveBase x, MeshPrimitiveBase y)
+        public static bool HaveEqualVertexBuffers(MeshPrimitive x, MeshPrimitive y)
         {
             if (ReferenceEquals(x, y)) return true;
             if (x is null) return false;
             if (y is null) return false;
-            return Equals(x.attributes, y.attributes)
-                && Equals(x.targets, y.targets);
+            return Equals(x.Attributes, y.Attributes)
+                && Equals(x.Targets, y.Targets);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int CalculateHashCode(MeshPrimitiveBase primitive)
+        public static int CalculateHashCode(MeshPrimitive primitive)
         {
             return HashCode.Combine(
-                GetHashCode(primitive.attributes),
-                GetHashCode(primitive.targets)
+                GetHashCode(primitive.Attributes),
+                GetHashCode(primitive.Targets)
                 );
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool Equals(Attributes x, Attributes y)
+        internal static bool Equals(Attributes x, Attributes y)
         {
             if (ReferenceEquals(x, y)) return true;
             if (x == null || y == null) return false;
-            return x.POSITION == y.POSITION
-                && x.NORMAL == y.NORMAL
-                && x.TANGENT == y.TANGENT
-                && x.TEXCOORD_0 == y.TEXCOORD_0
-                && x.TEXCOORD_1 == y.TEXCOORD_1
-                && x.TEXCOORD_2 == y.TEXCOORD_2
-                && x.TEXCOORD_3 == y.TEXCOORD_3
-                && x.TEXCOORD_4 == y.TEXCOORD_4
-                && x.TEXCOORD_5 == y.TEXCOORD_5
-                && x.TEXCOORD_6 == y.TEXCOORD_6
-                && x.TEXCOORD_7 == y.TEXCOORD_7
-                && x.COLOR_0 == y.COLOR_0
-                && x.JOINTS_0 == y.JOINTS_0
-                && x.WEIGHTS_0 == y.WEIGHTS_0;
+            return x.Position == y.Position
+                && x.Normal == y.Normal
+                && x.Tangent == y.Tangent
+                && ChannelEquals(x.TexCoords, y.TexCoords)
+                && ChannelEquals(x.Colors, y.Colors)
+                && ChannelEquals(x.Joints, y.Joints)
+                && ChannelEquals(x.Weights, y.Weights)
+                && ExtensionDataEquals(x.ExtensionData, y.ExtensionData);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool Equals(MorphTarget[] x, MorphTarget[] y)
+        static bool ChannelEquals(List<int?> x, List<int?> y)
+        {
+            if (ReferenceEquals(x, y)) return true;
+            var xCount = x?.Count ?? 0;
+            var yCount = y?.Count ?? 0;
+            if (xCount != yCount) return false;
+            for (var i = 0; i < xCount; i++)
+            {
+                if (x[i] != y[i]) return false;
+            }
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool ExtensionDataEquals(Dictionary<string, JsonElement> x, Dictionary<string, JsonElement> y)
+        {
+            if (ReferenceEquals(x, y)) return true;
+            var xCount = x?.Count ?? 0;
+            var yCount = y?.Count ?? 0;
+            if (xCount != yCount) return false;
+            if (xCount == 0) return true;
+            foreach (var pair in x)
+            {
+                if (!y.TryGetValue(pair.Key, out var v)) return false;
+                if (pair.Value.ValueKind == JsonValueKind.Number && v.ValueKind == JsonValueKind.Number)
+                {
+                    if (pair.Value.TryGetDouble(out var xVal) && v.TryGetDouble(out var yVal))
+                    {
+                        if (xVal.Equals(yVal)) continue;
+                        return false;
+                    }
+                }
+                if (pair.Value.GetRawText() != v.GetRawText()) return false;
+            }
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static bool Equals(IReadOnlyList<MorphTarget> x, IReadOnlyList<MorphTarget> y)
         {
             if (ReferenceEquals(x, y)) return true;
             if (x == null || y == null) return false;
-            if (x.Length != y.Length) return false;
-            for (var i = 0; i < x.Length; i++)
+            if (x.Count != y.Count) return false;
+            for (var i = 0; i < x.Count; i++)
             {
                 if (!Equals(x[i], y[i]))
                     return false;
@@ -68,50 +102,75 @@ namespace GLTFast
         {
             if (ReferenceEquals(x, y)) return true;
             if (x == null || y == null) return false;
-            return x.POSITION == y.POSITION
-                && x.NORMAL == y.NORMAL
-                && x.TANGENT == y.TANGENT;
+            return x.Position == y.Position
+                && x.Normal == y.Normal
+                && x.Tangent == y.Tangent;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int GetHashCode(Attributes x)
+        internal static int GetHashCode(Attributes x)
         {
             if (x == null) return 0;
             var hash = new HashCode();
-            hash.Add(x.POSITION);
-            hash.Add(x.NORMAL);
-            hash.Add(x.TANGENT);
-            hash.Add(x.TEXCOORD_0);
-            hash.Add(x.TEXCOORD_1);
-            hash.Add(x.TEXCOORD_2);
-            hash.Add(x.TEXCOORD_3);
-            hash.Add(x.TEXCOORD_4);
-            hash.Add(x.TEXCOORD_5);
-            hash.Add(x.TEXCOORD_6);
-            hash.Add(x.TEXCOORD_7);
-            hash.Add(x.COLOR_0);
-            hash.Add(x.JOINTS_0);
-            hash.Add(x.WEIGHTS_0);
+            hash.Add(x.Position);
+            hash.Add(x.Normal);
+            hash.Add(x.Tangent);
+            AddChannel(ref hash, x.TexCoords);
+            AddChannel(ref hash, x.Colors);
+            AddChannel(ref hash, x.Joints);
+            AddChannel(ref hash, x.Weights);
+            if (x.ExtensionData != null)
+            {
+                // XOR to keep the contribution order-independent — Dictionary
+                // iteration order isn't part of the glTF object's identity.
+                var extHash = 0;
+                foreach (var pair in x.ExtensionData)
+                {
+                    var valHash = pair.Value.ValueKind == JsonValueKind.Number && pair.Value.TryGetDouble(out var d)
+                        ? d.GetHashCode()
+                        : (pair.Value.GetRawText()?.GetHashCode() ?? 0);
+                    extHash ^= HashCode.Combine(pair.Key, valHash);
+                }
+                hash.Add(extHash);
+            }
             return hash.ToHashCode();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int GetHashCode(MorphTarget[] x)
+        static void AddChannel(ref HashCode hash, List<int?> channel)
+        {
+            if (channel == null)
+            {
+                hash.Add(0);
+                return;
+            }
+            hash.Add(channel.Count);
+            for (var i = 0; i < channel.Count; i++)
+            {
+                hash.Add(channel[i]);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int GetHashCode(IReadOnlyList<MorphTarget> x)
         {
             if (x == null) return 0;
             HashCode hash = new();
-            hash.Add(x.Length);
-            foreach (var target in x)
+            hash.Add(x.Count);
+            for (var index = 0; index < x.Count; index++)
             {
+                var target = x[index];
                 if (target == null)
                 {
                     hash.Add(0);
                     continue;
                 }
-                hash.Add(target.POSITION);
-                hash.Add(target.NORMAL);
-                hash.Add(target.TANGENT);
+
+                hash.Add(target.Position);
+                hash.Add(target.Normal);
+                hash.Add(target.Tangent);
             }
+
             return hash.ToHashCode();
         }
     }

@@ -15,7 +15,7 @@ using System.Diagnostics;
 using System.Reflection;
 #endif
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     static class CancellationTokenExtension
     {

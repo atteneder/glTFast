@@ -5,7 +5,7 @@ using System;
 using System.Runtime.InteropServices;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Wraps a managed array and provides a <see cref="ReadOnlyNativeArray{T}"/> for accessing it.
@@ -16,7 +16,11 @@ namespace GLTFast
         public ReadOnlyNativeArray<T> Array { get; }
 
         GCHandle m_BufferHandle;
-        readonly bool m_Pinned;
+        bool m_Pinned;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+        AtomicSafetyHandle m_Safety;
+#endif
 
         public unsafe ReadOnlyNativeArrayFromManagedArray(T[] original)
         {
@@ -27,8 +31,8 @@ namespace GLTFast
             fixed (void* bufferAddress = &original[0])
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                var safety = AtomicSafetyHandle.Create();
-                Array = new ReadOnlyNativeArray<T>(bufferAddress, original.Length, ref safety);
+                m_Safety = AtomicSafetyHandle.Create();
+                Array = new ReadOnlyNativeArray<T>(bufferAddress, original.Length, ref m_Safety);
 #else
                 Array = new ReadOnlyNativeArray<T>(bufferAddress, original.Length);
 #endif
@@ -38,16 +42,21 @@ namespace GLTFast
         }
 
         /// <summary>
-        /// Disposes the managed <see cref="ReadOnlyNativeArray{T}" />.
+        /// Releases the pin on the managed array and invalidates every
+        /// <see cref="ReadOnlyNativeArray{T}" /> derived from it. Repeated calls are a no-op.
         /// </summary>
         public void Dispose()
         {
-            if (m_Pinned)
+            if (!m_Pinned)
             {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-#endif
-                m_BufferHandle.Free();
+                return;
             }
+            m_Pinned = false;
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            AtomicSafetyHandle.CheckDeallocateAndThrow(m_Safety);
+            AtomicSafetyHandle.Release(m_Safety);
+#endif
+            m_BufferHandle.Free();
         }
     }
 }

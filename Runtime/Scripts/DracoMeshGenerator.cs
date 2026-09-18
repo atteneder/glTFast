@@ -7,8 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Draco;
-using GLTFast.Logging;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Logging;
+using Unity.Cloud.Gltfast.Objects;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -16,7 +16,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 using Mesh = UnityEngine.Mesh;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     class DracoMeshGenerator : MeshGeneratorBase
@@ -30,18 +30,18 @@ namespace GLTFast
         public override bool IsCompleted => base.IsCompleted && (!m_HasMorphTargets || m_MorphTargetsJobHandle.IsCompleted);
 
         public DracoMeshGenerator(
-            IReadOnlyList<MeshPrimitiveBase> primitives,
-            string[] morphTargetNames,
+            IReadOnlyList<MeshPrimitive> primitives,
+            IReadOnlyList<string> morphTargetNames,
             string meshName,
             IGltfReadable gltf,
-            IGltfBuffers buffers,
+            BufferStore buffers,
             IDeferAgent deferAgent,
             ICodeLogger logger
             )
             : base(meshName)
         {
-            var morphTargets = primitives[0].targets;
-            m_HasMorphTargets = morphTargets is { Length: > 0 };
+            var morphTargets = primitives[0].Targets;
+            m_HasMorphTargets = morphTargets is { Count: > 0 };
 
             var vertexCount = 0;
             var primitivesCount = primitives.Count;
@@ -56,13 +56,13 @@ namespace GLTFast
                 var primitive = primitives[index];
                 Assert.IsTrue(primitive.IsDracoCompressed);
 
-                var posAccessor = buffers.GetAccessor(primitive.attributes.POSITION);
+                var posAccessor = buffers.GetAccessor(primitive.Attributes.Position.Value);
 
                 if (m_HasMorphTargets)
                 {
                     vertexIntervals[index] = vertexCount;
                 }
-                vertexCount += posAccessor.count;
+                vertexCount += posAccessor.Count;
 
                 if (bounds != null)
                 {
@@ -74,18 +74,18 @@ namespace GLTFast
                     }
                     else
                     {
-                        logger?.Error(LogCode.MeshBoundsMissing, primitive.attributes.POSITION.ToString());
+                        logger?.Error(LogCode.MeshBoundsMissing, primitive.Attributes.Position.ToString());
                         bounds = null;
                     }
                 }
 
-                if (primitive.material < 0)
+                if (!primitive.Material.HasValue)
                 {
                     m_NeedsNormals = true;
                 }
                 else
                 {
-                    var material = gltf.GetSourceMaterial(primitive.material);
+                    var material = gltf.GetSourceMaterial(primitive.Material.Value);
                     m_NeedsNormals |= material.RequiresNormals;
                     m_NeedsTangents |= material.RequiresTangents;
                 }
@@ -101,7 +101,8 @@ namespace GLTFast
                     vertexCount,
                     morphTargets,
                     buffers,
-                    deferAgent
+                    deferAgent,
+                    logger
                     );
             }
 
@@ -109,40 +110,44 @@ namespace GLTFast
         }
 
         void InitializeMorphTargets(
-            IReadOnlyList<MeshPrimitiveBase> primitives,
-            string[] morphTargetNames,
+            IReadOnlyList<MeshPrimitive> primitives,
+            IReadOnlyList<string> morphTargetNames,
             int[] vertexIntervals,
             int vertexCount,
-            MorphTarget[] morphTargets,
-            IGltfBuffers buffers,
-            IDeferAgent deferAgent
+            List<MorphTarget> morphTargets,
+            BufferStore buffers,
+            IDeferAgent deferAgent,
+            ICodeLogger logger
             )
         {
             m_MorphTargetsGenerator = new MorphTargetsGenerator(
                 vertexCount,
                 primitives.Count,
-                morphTargets.Length,
+                morphTargets.Count,
                 morphTargetNames,
-                morphTargets[0].NORMAL >= 0,
-                morphTargets[0].TANGENT >= 0,
+                morphTargets[0].Normal.HasValue,
+                morphTargets[0].Tangent.HasValue,
                 buffers,
-                deferAgent
+                deferAgent,
+                logger
+
             );
             for (var subMesh = 0; subMesh < primitives.Count; subMesh++)
             {
                 var primitive = primitives[subMesh];
-                for (var morphTargetIndex = 0; morphTargetIndex < primitive.targets.Length; morphTargetIndex++)
+                for (var morphTargetIndex = 0; morphTargetIndex < primitive.Targets.Count; morphTargetIndex++)
                 {
-                    var target = primitive.targets[morphTargetIndex];
-                    m_MorphTargetsGenerator.AddMorphTarget(vertexIntervals[subMesh], subMesh, morphTargetIndex, target);
+                    var target = primitive.Targets[morphTargetIndex];
+                    m_MorphTargetsGenerator.AddMorphTarget(
+                        vertexIntervals[subMesh], subMesh, morphTargetIndex, target, logger);
                 }
             }
             m_MorphTargetsJobHandle = m_MorphTargetsGenerator.GetJobHandle();
         }
 
         async Task<Mesh> Decode(
-            IReadOnlyList<MeshPrimitiveBase> primitives,
-            IGltfBuffers buffers,
+            IReadOnlyList<MeshPrimitive> primitives,
+            BufferStore buffers,
             Bounds[] bounds
             )
         {
@@ -151,9 +156,15 @@ namespace GLTFast
 
             for (var index = 0; index < primitives.Count; index++)
             {
-                var dracoExt = primitives[index].Extensions.KHR_draco_mesh_compression;
-                bufferViews[index] = buffers.GetBufferView(dracoExt.bufferView, out _).AsNativeArrayReadOnly();
-                attributesArray[index] = dracoExt.attributes;
+                var dracoExt = primitives[index].Extensions.DracoMeshCompression;
+                if (dracoExt.BufferView is not { } bufferViewIndex
+                    || buffers.TryGetBufferView(bufferViewIndex, out var bufferView, out _) != BufferAccessStatus.Success)
+                {
+                    return null;
+                }
+
+                bufferViews[index] = bufferView.AsNativeArrayReadOnly();
+                attributesArray[index] = dracoExt.Attributes;
             }
 
             var mesh = await StartDecode(bufferViews, attributesArray, bounds == null);
@@ -180,7 +191,7 @@ namespace GLTFast
                 while (!m_MorphTargetsJobHandle.IsCompleted)
                     await Task.Yield();
                 m_MorphTargetsJobHandle.Complete();
-                await m_MorphTargetsGenerator.ApplyOnMeshAndDispose(mesh);
+                await m_MorphTargetsGenerator.ApplyOnMeshAndDisposeAsync(mesh);
             }
 
             mesh.name = m_MeshName;
@@ -241,34 +252,24 @@ namespace GLTFast
                 var attributes = attributesArray[i];
                 var result = new Dictionary<VertexAttribute, int>();
                 results[i] = result;
-                if (attributes.POSITION >= 0)
-                    result[VertexAttribute.Position] = attributes.POSITION;
-                if (attributes.NORMAL >= 0)
-                    result[VertexAttribute.Normal] = attributes.NORMAL;
-                if (attributes.TANGENT >= 0)
-                    result[VertexAttribute.Tangent] = attributes.TANGENT;
-                if (attributes.COLOR_0 >= 0)
-                    result[VertexAttribute.Color] = attributes.COLOR_0;
-                if (attributes.TEXCOORD_0 >= 0)
-                    result[VertexAttribute.TexCoord0] = attributes.TEXCOORD_0;
-                if (attributes.TEXCOORD_1 >= 0)
-                    result[VertexAttribute.TexCoord1] = attributes.TEXCOORD_1;
-                if (attributes.TEXCOORD_2 >= 0)
-                    result[VertexAttribute.TexCoord2] = attributes.TEXCOORD_2;
-                if (attributes.TEXCOORD_3 >= 0)
-                    result[VertexAttribute.TexCoord3] = attributes.TEXCOORD_3;
-                if (attributes.TEXCOORD_4 >= 0)
-                    result[VertexAttribute.TexCoord4] = attributes.TEXCOORD_4;
-                if (attributes.TEXCOORD_5 >= 0)
-                    result[VertexAttribute.TexCoord5] = attributes.TEXCOORD_5;
-                if (attributes.TEXCOORD_6 >= 0)
-                    result[VertexAttribute.TexCoord6] = attributes.TEXCOORD_6;
-                if (attributes.TEXCOORD_7 >= 0)
-                    result[VertexAttribute.TexCoord7] = attributes.TEXCOORD_7;
-                if (attributes.WEIGHTS_0 >= 0)
-                    result[VertexAttribute.BlendWeight] = attributes.WEIGHTS_0;
-                if (attributes.JOINTS_0 >= 0)
-                    result[VertexAttribute.BlendIndices] = attributes.JOINTS_0;
+                if (attributes.Position.HasValue)
+                    result[VertexAttribute.Position] = attributes.Position.Value;
+                if (attributes.Normal.HasValue)
+                    result[VertexAttribute.Normal] = attributes.Normal.Value;
+                if (attributes.Tangent.HasValue)
+                    result[VertexAttribute.Tangent] = attributes.Tangent.Value;
+                if (attributes.GetColor(0) is { } color)
+                    result[VertexAttribute.Color] = color;
+                var uvCount = Math.Min(attributes.GetTexCoordsCount(), VertexBufferGeneratorBase.maxUvSetCount);
+                for (var uv = 0; uv < uvCount; uv++)
+                {
+                    if (attributes.GetTexCoord(uv) is { } accessor)
+                        result[(VertexAttribute)((int)VertexAttribute.TexCoord0 + uv)] = accessor;
+                }
+                if (attributes.GetWeight(0) is { } weights)
+                    result[VertexAttribute.BlendWeight] = weights;
+                if (attributes.GetJoint(0) is { } joints)
+                    result[VertexAttribute.BlendIndices] = joints;
             }
 
             return results;

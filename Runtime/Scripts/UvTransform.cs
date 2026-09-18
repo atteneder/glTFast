@@ -4,7 +4,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     struct UvTransform
     {

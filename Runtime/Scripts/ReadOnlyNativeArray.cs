@@ -9,7 +9,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// This is a stripped-down version of <see cref="NativeArray{T}.ReadOnly"/> that supports <see cref="GetSubArray(int,int)"/>.
@@ -91,7 +91,12 @@ namespace GLTFast
             return array.AsReadOnly();
         }
 
-        public ReadOnlyNativeStridedArray<TTarget> ToStrided<TTarget>(int offset, int count, int byteStride) where TTarget : unmanaged
+        public ReadOnlyNativeStridedArray<TTarget> ToStrided<TTarget>(
+            int offset,
+            int count,
+            int byteStride
+            )
+            where TTarget : unmanaged
         {
             return new ReadOnlyNativeStridedArray<TTarget>(
                 m_Buffer,

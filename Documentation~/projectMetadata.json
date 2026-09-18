@@ -7,7 +7,6 @@
         "com.unity.entities.graphics": "1.4.18",
         "com.unity.mathematics": "1.3.0",
         "com.unity.meshopt.decompress": "0.2.0-exp.1",
-        "com.unity.nuget.newtonsoft-json": "3.2.2",
         "com.unity.render-pipelines.high-definition": "14.0.12",
         "com.unity.render-pipelines.universal": "14.0.12"
     }

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GLTFast.Addons
+namespace Unity.Cloud.Gltfast.Addons
 {
     /// <summary>
     /// Base class for <see cref="IDataInstanceApplierFactory"/> implementations that own a piece of

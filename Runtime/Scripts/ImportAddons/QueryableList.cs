@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GLTFast.Addons
+namespace Unity.Cloud.Gltfast.Addons
 {
     class QueryableList<TMember> : List<TMember>
     {

@@ -4,8 +4,9 @@
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     /// <summary>
@@ -13,6 +14,7 @@ namespace GLTFast
     /// whether this time frame was surpassed.
     /// </summary>
     [DefaultExecutionOrder(-10)]
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class TimeBudgetPerFrameDeferAgent : MonoBehaviour, IDeferAgent
     {
 
@@ -75,8 +77,14 @@ namespace GLTFast
             return duration <= m_TimeBudget - (Time.realtimeSinceStartup - m_LastTime);
         }
 
+        [Obsolete("BreakPoint has been renamed to BreakPointAsync. (UnityUpgradable) -> BreakPointAsync(*)", true)]
+        public Task BreakPoint() => BreakPointAsync();
+
+        [Obsolete("BreakPoint has been renamed to BreakPointAsync. (UnityUpgradable) -> BreakPointAsync(*)", true)]
+        public Task BreakPoint(float duration) => BreakPointAsync(duration);
+
         /// <inheritdoc />
-        public async Task BreakPoint()
+        public async Task BreakPointAsync()
         {
             if (ShouldDefer())
             {
@@ -85,7 +93,7 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
-        public async Task BreakPoint(float duration)
+        public async Task BreakPointAsync(float duration)
         {
             if (ShouldDefer(duration))
             {

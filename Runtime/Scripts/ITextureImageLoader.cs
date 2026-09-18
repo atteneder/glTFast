@@ -4,15 +4,17 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using GLTFast.Schema;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
+using Texture = Unity.Cloud.Gltfast.Objects.Texture;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Creates a <see cref="UnityEngine.Texture2D"/> from raw, usually compressed image data.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public interface ITextureImageLoader
     {
         /// <summary>
@@ -24,7 +26,7 @@ namespace GLTFast
         /// <param name="generateMipMaps">If true, mipmap levels should get generated.</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>An image texture result</returns>
-        Task<ImageResult> LoadImage(
+        Task<ImageResult> LoadImageAsync(
             NativeArray<byte>.ReadOnly data,
             bool linear,
             bool readable,
@@ -42,7 +44,7 @@ namespace GLTFast
         /// <param name="texture">glTF texture.</param>
         /// <param name="imageIndex">Corresponding, potentially updated glTF image index.</param>
         /// <returns>True if the texture image loader supports loading that texture, false otherwise.</returns>
-        bool IsAbleToLoad(TextureBase texture, out int imageIndex);
+        bool IsAbleToLoad(Texture texture, out int imageIndex);
 
         /// <summary>
         /// Implement this to support content-based image format detection.

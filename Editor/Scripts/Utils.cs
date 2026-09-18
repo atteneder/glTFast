@@ -7,7 +7,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
     static class Utils
     {

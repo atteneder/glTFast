@@ -3,11 +3,11 @@
 
 using UnityEngine;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     static class Constants
     {
-        public const string version = "6.20.0";
+        public const string version = "7.0.0-exp.1";
 
         internal const string mimeTypePNG = "image/png";
         internal const string mimeTypeJPG = "image/jpeg";

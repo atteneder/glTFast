@@ -4,18 +4,19 @@
 #if UNITY_SHADER_GRAPH
 
 using System;
-using GLTFast.Materials;
-using GLTFast.Schema;
-using Unity.Mathematics;
+using Unity.Cloud.Gltfast.Materials;
+using Unity.Cloud.Gltfast.Objects;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting.APIUpdating;
 using Material = UnityEngine.Material;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     /// <summary>
     /// Converts Unity Materials that use a glTFast Built-In shader to glTF materials
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public class GltfShaderGraphMaterialExporter : GltfMaterialExporter
     {
         protected override bool IsDoubleSided(Material material)
@@ -27,20 +28,20 @@ namespace GLTFast.Export
             return false;
         }
 
-        protected override MaterialBase.AlphaMode GetAlphaMode(Material material)
+        protected override AlphaMode GetAlphaMode(Material material)
         {
             if (TryGetValue(material, MaterialProperty.AlphaClip, out int alphaClip)
                 && alphaClip == 1)
             {
-                return MaterialBase.AlphaMode.Mask;
+                return AlphaMode.Mask;
             }
             if (TryGetValue(material, MaterialProperty.Surface, out int surface))
             {
                 return surface == 0
-                    ? MaterialBase.AlphaMode.Opaque
-                    : MaterialBase.AlphaMode.Blend;
+                    ? AlphaMode.Opaque
+                    : AlphaMode.Blend;
             }
-            return MaterialBase.AlphaMode.Opaque;
+            return AlphaMode.Opaque;
         }
 
         protected override float GetAlphaCutoff(Material material)

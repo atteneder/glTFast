@@ -23,7 +23,7 @@ There are some related package that improve *Unity glTFast* by extending its fea
   - [Image Conversion](https://docs.unity3d.com/6000.3/Documentation/ScriptReference/UnityEngine.ImageConversionModule.html) for import/export of Jpeg and PNG textures.
   - [Unity Web Request Texture](https://docs.unity3d.com/6000.3/Documentation/ScriptReference/UnityEngine.UnityWebRequestTextureModule.html) for import of Jpeg/PNG images from URI.
   - [Animation](https://docs.unity3d.com/6000.3/Documentation/ScriptReference/UnityEngine.AnimationModule.html) for animation playback.
-  - [Physics](https://docs.unity3d.com/6000.3/Documentation/ScriptReference/UnityEngine.PhysicsModule.html) to create a glTF scene's [bounding box collider](xref:UnityEngine.BoxCollider) via [GltfBoundsAsset](xref:GLTFast.GltfBoundsAsset).
+  - [Physics](https://docs.unity3d.com/6000.3/Documentation/ScriptReference/UnityEngine.PhysicsModule.html) to create a glTF scene's [bounding box collider](xref:UnityEngine.BoxCollider) via [GltfBoundsAsset](xref:Unity.Cloud.Gltfast.GltfBoundsAsset).
 - [Draco&trade; for Unity][DracoForUnity] (provides support for [KHR_draco_mesh_compression][ExtDraco])
 - [KTX&trade; for Unity][KtxUnity] (provides support for [KHR_texture_basisu][ExtBasisU])
 - [*meshoptimizer decompression for Unity*][Meshopt] (provides support for [EXT_meshopt_compression][ExtMeshopt])

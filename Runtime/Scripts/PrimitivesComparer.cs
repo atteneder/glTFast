@@ -5,18 +5,18 @@
 
 using System;
 using System.Collections.Generic;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// This is similar to <see cref="MeshComparer"/>, except it does not take the indices into account.
     /// That's useful to detect meshes that share large vertex buffers, but have different indices, which is
     /// inefficient (in Unity) and discouraged.
     /// </summary>
-    class PrimitivesComparer : IEqualityComparer<IReadOnlyList<MeshPrimitiveBase>>
+    class PrimitivesComparer : IEqualityComparer<IReadOnlyList<MeshPrimitive>>
     {
-        public bool Equals(IReadOnlyList<MeshPrimitiveBase> x, IReadOnlyList<MeshPrimitiveBase> y)
+        public bool Equals(IReadOnlyList<MeshPrimitive> x, IReadOnlyList<MeshPrimitive> y)
         {
             if (ReferenceEquals(x, y)) return true;
             if (x is null) return false;
@@ -30,7 +30,7 @@ namespace GLTFast
             return true;
         }
 
-        public int GetHashCode(IReadOnlyList<MeshPrimitiveBase> obj)
+        public int GetHashCode(IReadOnlyList<MeshPrimitive> obj)
         {
             var hashCode = new HashCode();
             foreach (var primitive in obj)

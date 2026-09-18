@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Addons
+namespace Unity.Cloud.Gltfast.Addons
 {
     /// <summary>
     /// Creates <see cref="IInstanceApplier"/> instances bound to a specific
@@ -14,6 +15,7 @@ namespace GLTFast.Addons
     /// instance. Implementations should return <see langword="null"/> when the supplied
     /// <see cref="IInstantiator"/> is not supported.
     /// </remarks>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Addons", sourceAssembly: "glTFast")]
     public interface IInstanceApplierFactory
     {
         /// <summary>

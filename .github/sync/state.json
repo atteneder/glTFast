@@ -1,5 +1,5 @@
 {
   "comment": "Release channel of this branch and the release it was last synced from. Maintained by sync_upstream.py.",
   "channel": "prerelease",
-  "upstream_version": "6.20.0"
+  "upstream_version": "7.0.0-exp.1"
 }

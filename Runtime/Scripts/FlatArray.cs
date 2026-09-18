@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     class FlatArray<T>
     {

@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-namespace GLTFast
+using UnityEngine.Scripting.APIUpdating;
+
+namespace Unity.Cloud.Gltfast
 {
 
     /// <summary>
@@ -10,6 +12,7 @@ namespace GLTFast
     /// glTF meshes and Unity Meshes do not necessarily relate one-to-one. One glTF mesh (with multiple primitives)
     /// might be converted to multiple Unity Meshes (e.g. because of incompatible vertex buffer structure).
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public readonly struct MeshResult
     {
         /// <summary>Original glTF mesh index</summary>
@@ -19,7 +22,7 @@ namespace GLTFast
         public readonly int[] primitiveIndices;
 
         /// <summary>glTF material index per sub-mesh</summary>
-        public readonly int[] materialIndices;
+        public readonly int?[] materialIndices;
 
         /// <summary>Converted Unity Mesh</summary>
         public readonly UnityEngine.Mesh mesh;
@@ -36,7 +39,7 @@ namespace GLTFast
         public MeshResult(
             int meshIndex,
             int[] primitiveIndices,
-            int[] materialIndices,
+            int?[] materialIndices,
             UnityEngine.Mesh mesh
             )
         {

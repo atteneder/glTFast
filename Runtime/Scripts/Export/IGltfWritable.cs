@@ -2,17 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     /// <summary>
     /// Is able to receive asset resources and export them to glTF
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public interface IGltfWritable
     {
 
@@ -22,15 +25,26 @@ namespace GLTFast.Export
         /// <param name="translation">Local translation of the node (in Unity-space)</param>
         /// <param name="rotation">Local rotation of the node (in Unity-space)</param>
         /// <param name="scale">Local scale of the node (in Unity-space)</param>
-        /// <param name="children">Array of node indices that are parented to
-        /// this newly created node</param>
+        /// <param name="children">Node indices that are parented to
+        /// this newly created node. Ownership of the list is transferred to
+        /// the writer; the caller must not modify it after the call.</param>
         /// <param name="name">Name of the node</param>
         /// <returns>glTF node index</returns>
         uint AddNode(
-            float3? translation = null,
-            quaternion? rotation = null,
-            float3? scale = null,
-            uint[] children = null,
+            double3? translation = null,
+            double4? rotation = null,
+            double3? scale = null,
+            List<uint> children = null,
+            string name = null
+        );
+
+        /// <inheritdoc cref="AddNode(double3?,double4?,double3?,List{uint},string)"/>
+        [Obsolete("Use overload with double precision and List<uint> children parameter.")]
+        uint AddNode(
+            float3? translation,
+            quaternion? rotation,
+            float3? scale,
+            uint[] children,
             string name = null
         );
 
@@ -41,43 +55,24 @@ namespace GLTFast.Export
         /// <param name="uMesh">Unity mesh to be assigned and exported</param>
         /// <param name="materialIds">glTF materials IDs to be assigned
         /// (multiple in case of sub-meshes)</param>
-        [Obsolete("Use overload with skinning parameter.")]
-        void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds);
-
-        /// <summary>
-        /// Assigns a mesh to a previously added node
-        /// </summary>
-        /// <param name="nodeId">Index of the node to add the mesh to</param>
-        /// <param name="uMesh">Unity mesh to be assigned and exported</param>
-        /// <param name="materialIds">glTF materials IDs to be assigned
-        /// (multiple in case of sub-meshes)</param>
-        /// <param name="skinning">Skinning has been applied (e.g. <see cref="SkinnedMeshRenderer"/>).</param>
-        [Obsolete("Use overload with joints parameter.")]
-        void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds, bool skinning);
-
-        /// <summary>
-        /// Assigns a mesh to a previously added node
-        /// </summary>
-        /// <param name="nodeId">Index of the node to add the mesh to</param>
-        /// <param name="uMesh">Unity mesh to be assigned and exported</param>
-        /// <param name="materialIds">glTF materials IDs to be assigned
-        /// (multiple in case of sub-meshes)</param>
-        /// <param name="joints">Node indices representing the joints of a skin.</param>
-        void AddMeshToNode(int nodeId, Mesh uMesh, int[] materialIds, uint[] joints);
+        /// <param name="joints">Node indices representing the joints of a skin.
+        /// Ownership of the list is transferred to the writer; the caller must
+        /// not modify it after the call.</param>
+        void AddMeshToNode(uint nodeId, Mesh uMesh, int[] materialIds, List<uint> joints);
 
         /// <summary>
         /// Assigns a camera to a previously added node
         /// </summary>
-        /// <param name="nodeId">Index of the node to add the mesh to</param>
+        /// <param name="nodeId">Index of the node to add the camera to</param>
         /// <param name="cameraId">glTF camera ID to be assigned</param>
-        void AddCameraToNode(int nodeId, int cameraId);
+        void AddCameraToNode(uint nodeId, int cameraId);
 
         /// <summary>
         /// Assigns a light to a previously added node
         /// </summary>
-        /// <param name="nodeId">Index of the node to add the mesh to</param>
+        /// <param name="nodeId">Index of the node to add the light to</param>
         /// <param name="lightId">glTF light ID to be assigned</param>
-        void AddLightToNode(int nodeId, int lightId);
+        void AddLightToNode(uint nodeId, int lightId);
 
         /// <summary>
         /// Adds a Unity material
@@ -101,7 +96,7 @@ namespace GLTFast.Export
         /// <param name="imageId">glTF image index returned by <see cref="AddImage"/></param>
         /// <param name="samplerId">glTF sampler index returned by <see cref="AddSampler"/></param>
         /// <returns>glTF texture index</returns>
-        int AddTexture(int imageId, int samplerId);
+        int AddTexture(int? imageId, int? samplerId);
 
         /// <summary>
         /// Creates a glTF sampler based on Unity filter and wrap settings
@@ -110,7 +105,7 @@ namespace GLTFast.Export
         /// <param name="wrapModeU">Texture wrap mode in U direction</param>
         /// <param name="wrapModeV">Texture wrap mode in V direction</param>
         /// <returns>glTF sampler index or -1 if no sampler is required</returns>
-        int AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV);
+        int? AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV);
 
         /// <summary>
         /// Creates a glTF camera based on a Unity camera
@@ -132,9 +127,15 @@ namespace GLTFast.Export
         /// <summary>
         /// Adds a scene to the glTF
         /// </summary>
-        /// <param name="nodes">Root level nodes</param>
+        /// <param name="nodes">Root level nodes. Ownership of the list is
+        /// transferred to the writer; the caller must not modify it after the
+        /// call.</param>
         /// <param name="name">Name of the scene</param>
         /// <returns>glTF scene index</returns>
+        uint AddScene(List<uint> nodes, string name = null);
+
+        /// <inheritdoc cref="AddScene(List{uint},string)"/>
+        [Obsolete("Use overload with List<uint> nodes parameter.")]
         uint AddScene(uint[] nodes, string name = null);
 
         /// <summary>
@@ -151,7 +152,7 @@ namespace GLTFast.Export
         /// </summary>
         /// <param name="path">glTF destination file path</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
-        Task<bool> SaveToFileAndDispose(string path);
+        Task<bool> SaveToFileAndDisposeAsync(string path);
 
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a Stream
@@ -160,6 +161,6 @@ namespace GLTFast.Export
         /// </summary>
         /// <param name="stream">glTF destination stream</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
-        Task<bool> SaveToStreamAndDispose(Stream stream);
+        Task<bool> SaveToStreamAndDisposeAsync(Stream stream);
     }
 }

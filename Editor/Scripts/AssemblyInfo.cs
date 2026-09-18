@@ -3,4 +3,4 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
+[assembly: InternalsVisibleTo("Unity.Cloud.Gltfast.Editor.Tests")]

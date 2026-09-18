@@ -5,7 +5,7 @@ using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Wraps a <see cref="NativeArray{T}.ReadOnly"/> and provides a <see cref="ReadOnlyNativeArray{T}"/> for accessing it.

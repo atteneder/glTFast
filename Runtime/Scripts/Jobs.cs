@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using GLTFast.Vertex;
 using Unity.Burst;
+using Unity.Cloud.Gltfast.Vertex;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -11,7 +11,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using static Unity.Mathematics.math;
 
-namespace GLTFast.Jobs
+namespace Unity.Cloud.Gltfast.Jobs
 {
     [BurstCompile]
     struct CreateIndicesUInt16Job : IJobParallelFor

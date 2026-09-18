@@ -11,7 +11,7 @@ using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-namespace GLTFast.Documentation.Examples
+namespace Unity.Cloud.Gltfast.Documentation.Examples
 {
     static class WebP
     {

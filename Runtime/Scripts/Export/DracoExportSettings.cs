@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
+using UnityEngine.Scripting.APIUpdating;
 #if DRACO_IS_INSTALLED
 using Draco.Encode;
 #endif
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     /// <summary>
     /// Settings for Draco mesh compression
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public class DracoExportSettings
     {
         // TODO: Look into world-space size and precision based quantization

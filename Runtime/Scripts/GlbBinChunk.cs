@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     readonly struct GlbBinChunk
     {

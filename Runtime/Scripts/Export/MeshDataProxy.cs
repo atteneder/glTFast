@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Unity.Collections;
 using UnityEngine;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     class MeshDataProxy<TIndex> : IMeshData<TIndex> where TIndex : unmanaged
     {
@@ -29,12 +29,12 @@ namespace GLTFast.Export
             return m_MeshData.GetSubMesh(subMesh).indexCount;
         }
 
-        public ValueTask<NativeArray<TIndex>> GetIndexData(bool sync)
+        public ValueTask<NativeArray<TIndex>> GetIndexDataAsync(bool sync)
         {
             return new ValueTask<NativeArray<TIndex>>(m_MeshData.GetIndexData<TIndex>());
         }
 
-        public ValueTask<NativeArray<byte>> GetVertexData(int stream, bool sync)
+        public ValueTask<NativeArray<byte>> GetVertexDataAsync(int stream, bool sync)
         {
             return new ValueTask<NativeArray<byte>>(m_MeshData.GetVertexData<byte>(stream));
         }

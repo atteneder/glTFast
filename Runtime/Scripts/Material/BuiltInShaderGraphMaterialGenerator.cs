@@ -3,12 +3,14 @@
 
 #if GLTFAST_BUILTIN_SHADER_GRAPH
 
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting.APIUpdating;
 using Material = UnityEngine.Material;
 
-namespace GLTFast.Materials {
+namespace Unity.Cloud.Gltfast.Materials {
+    [MovedFrom(true, sourceNamespace: "GLTFast.Materials", sourceAssembly: "glTFast")]
     public class BuiltInShaderGraphMaterialGenerator : ShaderGraphMaterialGenerator {
 
         const string k_SurfaceTypeTransparent = "_BUILTIN_SURFACE_TYPE_TRANSPARENT";
@@ -19,12 +21,12 @@ namespace GLTFast.Materials {
         static readonly int k_SurfacePropId = Shader.PropertyToID("_BUILTIN_Surface");
         static readonly int k_ZWritePropId = Shader.PropertyToID("_BUILTIN_ZWrite");
 
-        protected override void SetDoubleSided(MaterialBase gltfMaterial, Material material) {
+        protected override void SetDoubleSided(Material gltfMaterial, Material material) {
             base.SetDoubleSided(gltfMaterial,material);
             material.SetFloat(k_CullModePropId, (int)CullMode.Off);
         }
 
-        protected override void SetShaderModeBlend(MaterialBase gltfMaterial, Material material) {
+        protected override void SetShaderModeBlend(Material gltfMaterial, Material material) {
             material.EnableKeyword(AlphaTestOnKeyword);
             material.EnableKeyword(k_SurfaceTypeTransparent);
             material.renderQueue = (int)RenderQueue.Transparent;

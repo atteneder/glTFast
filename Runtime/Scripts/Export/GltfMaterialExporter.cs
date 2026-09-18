@@ -2,40 +2,41 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using GLTFast.Logging;
-using GLTFast.Materials;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Logging;
+using Unity.Cloud.Gltfast.Materials;
+using Unity.Cloud.Gltfast.Objects;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering;
+using UnityEngine.Scripting.APIUpdating;
+using Color = UnityEngine.Color;
 using Material = UnityEngine.Material;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     /// <summary>
     /// Converts Unity Materials that use a glTFast shader to glTF materials
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public abstract class GltfMaterialExporter : MaterialExportBase
     {
         /// <inheritdoc />
         public override bool ConvertMaterial(
             Material unityMaterial,
-            out GLTFast.Schema.Material material,
+            out Unity.Cloud.Gltfast.Objects.Material material,
             IGltfWritable gltf,
             ICodeLogger logger)
         {
-            material = new GLTFast.Schema.Material
+            material = new Unity.Cloud.Gltfast.Objects.Material
             {
-                name = unityMaterial.name,
-                pbrMetallicRoughness = new PbrMetallicRoughness(),
-                doubleSided = IsDoubleSided(unityMaterial)
+                Name = unityMaterial.name,
+                PbrMetallicRoughness = new PbrMetallicRoughness(),
+                DoubleSided = IsDoubleSided(unityMaterial)
             };
 
-            var alphaMode = GetAlphaMode(unityMaterial);
-            material.SetAlphaMode(alphaMode);
-            if (alphaMode == MaterialBase.AlphaMode.Mask)
+            material.AlphaMode = GetAlphaMode(unityMaterial);
+            if (material.AlphaMode == AlphaMode.Mask)
             {
-                material.alphaCutoff = GetAlphaCutoff(unityMaterial);
+                material.AlphaCutoff = GetAlphaCutoff(unityMaterial);
             }
 
             material = HandlePbrMetallicRoughness(gltf, material, unityMaterial);
@@ -52,7 +53,7 @@ namespace GLTFast.Export
         /// <seealso href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_material_alphamode"/>
         /// <param name="material">Unity material.</param>
         /// <returns>glTF alpha mode.</returns>
-        protected abstract MaterialBase.AlphaMode GetAlphaMode(Material material);
+        protected abstract AlphaMode GetAlphaMode(Material material);
 
         /// <summary>
         /// Returns that material's alpha cutoff threshold.
@@ -70,22 +71,22 @@ namespace GLTFast.Export
         /// <returns>True if material does not do back-face culling. False otherwise.</returns>
         protected abstract bool IsDoubleSided(Material material);
 
-        static GLTFast.Schema.Material HandlePbrMetallicRoughness(
+        static Unity.Cloud.Gltfast.Objects.Material HandlePbrMetallicRoughness(
             IGltfWritable gltf,
-            GLTFast.Schema.Material material,
+            Unity.Cloud.Gltfast.Objects.Material material,
             Material unityMaterial)
         {
             if (TryGetValue(unityMaterial, MaterialProperty.BaseColorTexture, out Texture2D texture2D))
             {
-                if (MaterialExport.AddImageExport(gltf, new ImageExport(texture2D), out var textureId))
+                if (MaterialExport.TryAddImageExport(gltf, new ImageExport(texture2D), out var textureId))
                 {
                     var textureInfo = new TextureInfo
                     {
-                        index = textureId,
-                        texCoord = GetValue(unityMaterial, MaterialProperty.BaseColorTextureTexCoord)
+                        Index = textureId,
+                        TexCoord = GetValue(unityMaterial, MaterialProperty.BaseColorTextureTexCoord)
                     };
 
-                    material.pbrMetallicRoughness.baseColorTexture = textureInfo;
+                    material.PbrMetallicRoughness.BaseColorTexture = textureInfo;
 
                     if (TryCreateTextureTransform(
                             gltf,
@@ -95,9 +96,9 @@ namespace GLTFast.Export
                             out var textureTransform
                         ))
                     {
-                        material.pbrMetallicRoughness.baseColorTexture.extensions = new TextureInfoExtensions
+                        material.PbrMetallicRoughness.BaseColorTexture.Extensions = new TextureInfoExtensions
                         {
-                            KHR_texture_transform = textureTransform
+                            TextureTransform = textureTransform
                         };
                     }
                 }
@@ -105,7 +106,7 @@ namespace GLTFast.Export
 
             if (TryGetValue(unityMaterial, MaterialProperty.BaseColor, out Color baseColor))
             {
-                material.pbrMetallicRoughness.BaseColor = baseColor.linear;
+                material.PbrMetallicRoughness.BaseColorFactor = baseColor.linear;
             }
 
             material = HandleMetallicRoughness(gltf, material, unityMaterial);
@@ -113,18 +114,18 @@ namespace GLTFast.Export
             return material;
         }
 
-        static GLTFast.Schema.Material HandleMetallicRoughness(
+        static Unity.Cloud.Gltfast.Objects.Material HandleMetallicRoughness(
             IGltfWritable gltf,
-            GLTFast.Schema.Material material,
+            Unity.Cloud.Gltfast.Objects.Material material,
             Material unityMaterial)
         {
             if (TryGetValue(unityMaterial, MaterialProperty.MetallicRoughnessMap, out Texture2D texture2D)
-                && MaterialExport.AddImageExport(gltf, new ImageExport(texture2D), out var textureId))
+                && MaterialExport.TryAddImageExport(gltf, new ImageExport(texture2D), out var textureId))
             {
                 var textureInfo = new TextureInfo
                 {
-                    index = textureId,
-                    texCoord = GetValue(unityMaterial, MaterialProperty.MetallicRoughnessMapTexCoord)
+                    Index = textureId,
+                    TexCoord = GetValue(unityMaterial, MaterialProperty.MetallicRoughnessMapTexCoord)
                 };
 
                 if (TryCreateTextureTransform(
@@ -135,31 +136,31 @@ namespace GLTFast.Export
                         out var textureTransform)
                     )
                 {
-                    textureInfo.extensions = new TextureInfoExtensions
+                    textureInfo.Extensions = new TextureInfoExtensions
                     {
-                        KHR_texture_transform = textureTransform
+                        TextureTransform = textureTransform
                     };
                 }
 
-                material.pbrMetallicRoughness.metallicRoughnessTexture = textureInfo;
+                material.PbrMetallicRoughness.MetallicRoughnessTexture = textureInfo;
             }
 
             if (TryGetValue(unityMaterial, MaterialProperty.Metallic, out float metallicFactor))
             {
-                material.pbrMetallicRoughness.metallicFactor = metallicFactor;
+                material.PbrMetallicRoughness.MetallicFactor = metallicFactor;
             }
 
             if (TryGetValue(unityMaterial, MaterialProperty.RoughnessFactor, out float roughnessFactor))
             {
-                material.pbrMetallicRoughness.roughnessFactor = roughnessFactor;
+                material.PbrMetallicRoughness.RoughnessFactor = roughnessFactor;
             }
 
             return material;
         }
 
-        static GLTFast.Schema.Material HandleNormal(
+        static Unity.Cloud.Gltfast.Objects.Material HandleNormal(
             IGltfWritable gltf,
-            GLTFast.Schema.Material material,
+            Unity.Cloud.Gltfast.Objects.Material material,
             Material unityMaterial)
         {
             if (!TryGetValue(unityMaterial, MaterialProperty.NormalTexture, out Texture2D texture2D))
@@ -167,7 +168,7 @@ namespace GLTFast.Export
                 return material;
             }
 
-            if (!MaterialExport.AddImageExport(gltf, new NormalImageExport(texture2D), out var textureId))
+            if (!MaterialExport.TryAddImageExport(gltf, new NormalImageExport(texture2D), out var textureId))
             {
                 return material;
             }
@@ -175,12 +176,12 @@ namespace GLTFast.Export
             TryGetValue(unityMaterial, MaterialProperty.NormalTextureScale, out float normalScale);
             var textureInfo = new NormalTextureInfo
             {
-                index = textureId,
-                texCoord = GetValue(unityMaterial, MaterialProperty.NormalTextureTexCoord),
-                scale = normalScale
+                Index = textureId,
+                TexCoord = GetValue(unityMaterial, MaterialProperty.NormalTextureTexCoord),
+                Scale = normalScale
             };
 
-            material.normalTexture = textureInfo;
+            material.NormalTexture = textureInfo;
 
             if (TryCreateTextureTransform(
                     gltf,
@@ -190,18 +191,18 @@ namespace GLTFast.Export
                     out var textureTransform
                 ))
             {
-                material.normalTexture.extensions = new TextureInfoExtensions
+                material.NormalTexture.Extensions = new TextureInfoExtensions
                 {
-                    KHR_texture_transform = textureTransform
+                    TextureTransform = textureTransform
                 };
             }
 
             return material;
         }
 
-        static GLTFast.Schema.Material HandleOcclusion(
+        static Unity.Cloud.Gltfast.Objects.Material HandleOcclusion(
             IGltfWritable gltf,
-            GLTFast.Schema.Material material,
+            Unity.Cloud.Gltfast.Objects.Material material,
             Material unityMaterial)
         {
             if (!TryGetValue(unityMaterial, MaterialProperty.OcclusionTexture, out Texture2D texture2D))
@@ -209,7 +210,7 @@ namespace GLTFast.Export
                 return material;
             }
 
-            if (!MaterialExport.AddImageExport(gltf, new ImageExport(texture2D), out var textureId))
+            if (!MaterialExport.TryAddImageExport(gltf, new ImageExport(texture2D), out var textureId))
             {
                 return material;
             }
@@ -217,12 +218,12 @@ namespace GLTFast.Export
             TryGetValue(unityMaterial, MaterialProperty.OcclusionTextureStrength, out float occlusionStrength);
             var info = new OcclusionTextureInfo
             {
-                index = textureId,
-                texCoord = GetValue(unityMaterial, MaterialProperty.OcclusionTextureTexCoord),
-                strength = occlusionStrength
+                Index = textureId,
+                TexCoord = GetValue(unityMaterial, MaterialProperty.OcclusionTextureTexCoord),
+                Strength = occlusionStrength
             };
 
-            material.occlusionTexture = info;
+            material.OcclusionTexture = info;
 
             if (TryCreateTextureTransform(
                     gltf,
@@ -232,31 +233,31 @@ namespace GLTFast.Export
                     out var textureTransform
                 ))
             {
-                material.occlusionTexture.extensions = new TextureInfoExtensions
+                material.OcclusionTexture.Extensions = new TextureInfoExtensions
                 {
-                    KHR_texture_transform = textureTransform
+                    TextureTransform = textureTransform
                 };
             }
 
             return material;
         }
 
-        static GLTFast.Schema.Material HandleEmission(
+        static Unity.Cloud.Gltfast.Objects.Material HandleEmission(
             IGltfWritable gltf,
-            GLTFast.Schema.Material material,
+            Unity.Cloud.Gltfast.Objects.Material material,
             Material unityMaterial)
         {
             if (TryGetValue(unityMaterial, MaterialProperty.EmissiveTexture, out Texture2D texture2D))
             {
-                if (MaterialExport.AddImageExport(gltf, new ImageExport(texture2D), out var textureId))
+                if (MaterialExport.TryAddImageExport(gltf, new ImageExport(texture2D), out var textureId))
                 {
                     var info = new TextureInfo
                     {
-                        index = textureId,
-                        texCoord = GetValue(unityMaterial, MaterialProperty.EmissiveTextureTexCoord)
+                        Index = textureId,
+                        TexCoord = GetValue(unityMaterial, MaterialProperty.EmissiveTextureTexCoord)
                     };
 
-                    material.emissiveTexture = info;
+                    material.EmissiveTexture = info;
 
                     if (TryCreateTextureTransform(
                             gltf,
@@ -266,9 +267,9 @@ namespace GLTFast.Export
                             out var textureTransform
                         ))
                     {
-                        material.emissiveTexture.extensions = new TextureInfoExtensions
+                        material.EmissiveTexture.Extensions = new TextureInfoExtensions
                         {
-                            KHR_texture_transform = textureTransform
+                            TextureTransform = textureTransform
                         };
                     }
                 }
@@ -276,7 +277,7 @@ namespace GLTFast.Export
 
             if (TryGetValue(unityMaterial, MaterialProperty.EmissiveFactor, out Color emissiveFactor))
             {
-                material.Emissive = emissiveFactor;
+                material.EmissiveFactor = emissiveFactor;
             }
 
             return material;
@@ -302,7 +303,7 @@ namespace GLTFast.Export
             if (math.abs(st.z) >= float.Epsilon || math.abs(st.w) >= float.Epsilon)
             {
                 result ??= new TextureTransform();
-                result.offset = new[] { st.z, st.w };
+                result.Offset = new float2(st.z, st.w);
             }
 
             var uvTransform = UvTransform.FromMatrix(new float2x2(st.x, st.y, r.x, r.y));
@@ -310,14 +311,14 @@ namespace GLTFast.Export
             if (math.abs(uvTransform.rotation) > float.Epsilon)
             {
                 result ??= new TextureTransform();
-                result.rotation = uvTransform.rotation;
+                result.Rotation = uvTransform.rotation;
             }
 
             if (math.abs(uvTransform.scale.x - 1) > math.EPSILON
                 || math.abs(uvTransform.scale.y - 1) > math.EPSILON)
             {
                 result ??= new TextureTransform();
-                result.scale = new[] { uvTransform.scale[0], uvTransform.scale[1] };
+                result.Scale = uvTransform.scale;
             }
 
             if (result != null)

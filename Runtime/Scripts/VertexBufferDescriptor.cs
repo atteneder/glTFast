@@ -3,9 +3,9 @@
 
 #nullable enable
 using System;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     readonly struct VertexBufferDescriptor : IEquatable<VertexBufferDescriptor>
     {
@@ -35,15 +35,15 @@ namespace GLTFast
             m_MorphTargetCount = morphTargetCount;
         }
 
-        public static VertexBufferDescriptor FromPrimitive(MeshPrimitiveBase primitive)
+        public static VertexBufferDescriptor FromPrimitive(MeshPrimitive primitive)
         {
             return new VertexBufferDescriptor(
-                primitive.attributes.NORMAL >= 0,
-                primitive.attributes.TANGENT >= 0,
-                primitive.attributes.GetTexCoordsCount(),
-                primitive.attributes.COLOR_0 >= 0,
-                primitive.attributes.WEIGHTS_0 >= 0 && primitive.attributes.JOINTS_0 >= 0,
-                primitive.targets?.Length ?? 0
+                primitive.Attributes.Normal.HasValue,
+                primitive.Attributes.Tangent.HasValue,
+                primitive.Attributes.GetTexCoordsCount(),
+                primitive.Attributes.GetColor(0).HasValue,
+                primitive.Attributes.GetWeight(0).HasValue && primitive.Attributes.GetJoint(0).HasValue,
+                primitive.Targets?.Count ?? 0
             );
         }
 

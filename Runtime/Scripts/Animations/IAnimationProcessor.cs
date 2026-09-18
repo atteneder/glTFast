@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using GLTFast.Addons;
-using GLTFast.Schema;
+using System.Collections.Generic;
+using Unity.Cloud.Gltfast.Addons;
+using Unity.Cloud.Gltfast.Objects;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Animations
+namespace Unity.Cloud.Gltfast.Animations
 {
     /// <summary>
     /// Interface for processing animation clips.
@@ -20,6 +22,7 @@ namespace GLTFast.Animations
     /// <see cref="IDisposable.Dispose"/> is invoked. <see cref="IDisposable.Dispose"/> is the
     /// place to release scratch buffers and other temporary resources.
     /// </remarks>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Animations", sourceAssembly: "glTFast")]
     public interface IAnimationProcessor : IDisposable
     {
         /// <summary>
@@ -39,14 +42,14 @@ namespace GLTFast.Animations
         /// build an animation path string.</param>
         /// <param name="times">Time values.</param>
         /// <param name="values">Output translation values.</param>
-        /// <param name="interpolationType">Interpolation type.</param>
+        /// <param name="interpolation">Interpolation type.</param>
         void AddTranslationCurves(
             int clipIndex,
             int targetNode,
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<float3>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
         );
 
         /// <summary>
@@ -58,14 +61,14 @@ namespace GLTFast.Animations
         /// build an animation path string.</param>
         /// <param name="times">Time values.</param>
         /// <param name="values">Output rotation values.</param>
-        /// <param name="interpolationType">Interpolation type.</param>
+        /// <param name="interpolation">Interpolation type.</param>
         void AddRotationCurves(
             int clipIndex,
             int targetNode,
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<quaternion>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
         );
 
         /// <summary>
@@ -77,14 +80,14 @@ namespace GLTFast.Animations
         /// build an animation path string.</param>
         /// <param name="times">Time values.</param>
         /// <param name="values">Output scale values.</param>
-        /// <param name="interpolationType">Interpolation type.</param>
+        /// <param name="interpolation">Interpolation type.</param>
         void AddScaleCurves(
             int clipIndex,
             int targetNode,
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<float3>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
         );
 
         /// <summary>
@@ -101,7 +104,7 @@ namespace GLTFast.Animations
         /// build an animation path string.</param>
         /// <param name="times">Time values.</param>
         /// <param name="values">Output morph target weight values.</param>
-        /// <param name="interpolationType">Interpolation type.</param>
+        /// <param name="interpolation">Interpolation type.</param>
         /// <param name="morphTargetNames">Morph targets' names.</param>
         void AddMorphTargetWeightCurves(
             int clipIndex,
@@ -111,8 +114,8 @@ namespace GLTFast.Animations
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<float>.ReadOnly values,
-            InterpolationType interpolationType,
-            string[] morphTargetNames = null
+            Interpolation interpolation,
+            IReadOnlyList<string> morphTargetNames = null
         );
 
         /// <summary>

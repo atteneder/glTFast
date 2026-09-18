@@ -1,0 +1,22 @@
+{
+    "name": "Unity.Cloud.Gltfast.Newtonsoft",
+    "rootNamespace": "Unity.Cloud.Gltfast.Newtonsoft",
+    "references": [
+        "GUID:a42927d1d4a3b4cda9b076a7adecb9cc"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "",
+            "define": "UNITY_ANIMATION"
+        }
+    ],
+    "noEngineReferences": false
+}

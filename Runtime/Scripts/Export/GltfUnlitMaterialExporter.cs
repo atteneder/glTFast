@@ -2,42 +2,44 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using GLTFast.Logging;
-using GLTFast.Materials;
-using GLTFast.Schema;
-using Unity.Mathematics;
+using Unity.Cloud.Gltfast.Logging;
+using Unity.Cloud.Gltfast.Materials;
+using Unity.Cloud.Gltfast.Objects;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting.APIUpdating;
+using Color = UnityEngine.Color;
 using Material = UnityEngine.Material;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     /// <summary>
     /// Converts Unity Materials that use the glTFast shader `glTF/Unlit` to glTF materials
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public class GltfUnlitMaterialExporter : IMaterialExport
     {
         /// <inheritdoc />
         public bool ConvertMaterial(
             Material unityMaterial,
-            out GLTFast.Schema.Material material,
+            out Unity.Cloud.Gltfast.Objects.Material material,
             IGltfWritable gltf,
             ICodeLogger logger)
         {
             gltf.RegisterExtensionUsage(Extension.MaterialsUnlit);
 
-            material = new GLTFast.Schema.Material
+            material = new Unity.Cloud.Gltfast.Objects.Material
             {
-                name = unityMaterial.name,
-                extensions = new MaterialExtensions
+                Name = unityMaterial.name,
+                Extensions = new MaterialExtensions
                 {
-                    KHR_materials_unlit = new MaterialUnlit()
+                    Unlit = new MaterialUnlit()
                 }
             };
 
             if (GltfMaterialExporter.TryGetValue(unityMaterial, MaterialProperty.Cull, out int cull))
             {
-                material.doubleSided = cull.Equals((int)CullMode.Off);
+                material.DoubleSided = cull.Equals((int)CullMode.Off);
             }
 
             material = HandlePbrMetallicRoughness(gltf, material, unityMaterial);
@@ -45,23 +47,23 @@ namespace GLTFast.Export
             return true;
         }
 
-        static GLTFast.Schema.Material HandlePbrMetallicRoughness(
+        static Unity.Cloud.Gltfast.Objects.Material HandlePbrMetallicRoughness(
             IGltfWritable gltf,
-            GLTFast.Schema.Material material,
+            Unity.Cloud.Gltfast.Objects.Material material,
             Material unityMaterial)
         {
             if (GltfMaterialExporter.TryGetValue(unityMaterial, MaterialProperty.BaseColorTexture, out Texture2D texture2D))
             {
-                if (MaterialExport.AddImageExport(gltf, new ImageExport(texture2D), out var textureId))
+                if (MaterialExport.TryAddImageExport(gltf, new ImageExport(texture2D), out var textureId))
                 {
                     var textureInfo = new TextureInfo
                     {
-                        index = textureId,
-                        texCoord = GltfMaterialExporter.GetValue(unityMaterial, MaterialProperty.BaseColorTextureTexCoord)
+                        Index = textureId,
+                        TexCoord = GltfMaterialExporter.GetValue(unityMaterial, MaterialProperty.BaseColorTextureTexCoord)
                     };
 
-                    material.pbrMetallicRoughness ??= new PbrMetallicRoughness();
-                    material.pbrMetallicRoughness.baseColorTexture = textureInfo;
+                    material.PbrMetallicRoughness ??= new PbrMetallicRoughness();
+                    material.PbrMetallicRoughness.BaseColorTexture = textureInfo;
 
                     if (GltfMaterialExporter.TryCreateTextureTransform(
                             gltf,
@@ -71,9 +73,9 @@ namespace GLTFast.Export
                             out var textureTransform
                         ))
                     {
-                        material.pbrMetallicRoughness.baseColorTexture.extensions = new TextureInfoExtensions
+                        material.PbrMetallicRoughness.BaseColorTexture.Extensions = new TextureInfoExtensions
                         {
-                            KHR_texture_transform = textureTransform
+                            TextureTransform = textureTransform
                         };
                     }
                 }
@@ -82,8 +84,8 @@ namespace GLTFast.Export
             if (GltfMaterialExporter.TryGetValue(unityMaterial, MaterialProperty.BaseColor, out Color baseColor)
                 && baseColor != Color.white)
             {
-                material.pbrMetallicRoughness ??= new PbrMetallicRoughness();
-                material.pbrMetallicRoughness.BaseColor = baseColor.linear;
+                material.PbrMetallicRoughness ??= new PbrMetallicRoughness();
+                material.PbrMetallicRoughness.BaseColorFactor = baseColor.linear;
             }
 
             return material;

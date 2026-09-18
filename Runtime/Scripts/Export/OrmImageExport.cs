@@ -9,7 +9,7 @@ using UnityEngine.Assertions;
 using UnityEngine.Experimental.Rendering;
 using Object = UnityEngine.Object;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     /// <summary>
@@ -68,7 +68,7 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
-        protected override ImageFormat ImageFormat => m_ImageFormat != ImageFormat.Unknown ? m_ImageFormat : ImageFormat.Jpg;
+        protected override ImageFormat ImageFormat => m_ImageFormat != ImageFormat.Unknown ? m_ImageFormat : ImageFormat.Jpeg;
 
         /// <inheritdoc />
         public override FilterMode FilterMode

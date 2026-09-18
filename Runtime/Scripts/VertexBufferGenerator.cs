@@ -4,9 +4,9 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using GLTFast.Logging;
-using GLTFast.Schema;
-using GLTFast.Vertex;
+using Unity.Cloud.Gltfast.Logging;
+using Unity.Cloud.Gltfast.Objects;
+using Unity.Cloud.Gltfast.Vertex;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -17,7 +17,7 @@ using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Mesh = UnityEngine.Mesh;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     class VertexBufferGenerator<TMainBuffer> :
         VertexBufferGeneratorBase
@@ -34,7 +34,7 @@ namespace GLTFast
         VertexBufferColors m_Colors;
         VertexBufferBones m_Bones;
 
-        AccessorBase[] m_PositionAccessors;
+        Accessor[] m_PositionAccessors;
 
         public override int VertexCount => VertexIntervals != null ? VertexIntervals[VertexIntervals.Length - 1] : 0;
 
@@ -59,12 +59,12 @@ namespace GLTFast
                 bounds = boundsOpt.Value;
                 return true;
             }
-            logger?.Error(LogCode.MeshBoundsMissing, m_Attributes[subMesh].POSITION.ToString());
+            logger?.Error(LogCode.MeshBoundsMissing, m_Attributes[subMesh].Position.ToString());
             bounds = default;
             return false;
         }
 
-        public VertexBufferGenerator(int primitiveCount, IGltfBuffers buffers, ICodeLogger logger)
+        public VertexBufferGenerator(int primitiveCount, BufferStore buffers, ICodeLogger logger)
             : base(primitiveCount, buffers, logger)
         { }
 
@@ -77,18 +77,18 @@ namespace GLTFast
         {
             Assert.AreEqual(m_Attributes.Length, m_AttributeCount);
             var vertexCount = 0;
-            m_PositionAccessors = new AccessorBase[m_Attributes.Length];
+            m_PositionAccessors = new Accessor[m_Attributes.Length];
             VertexIntervals = new int[m_Attributes.Length + 1];
             for (var i = 0; i < m_Attributes.Length; i++)
             {
                 VertexIntervals[i] = vertexCount;
-                m_PositionAccessors[i] = m_Buffers.GetAccessor(m_Attributes[i].POSITION);
-                vertexCount += m_PositionAccessors[i].count;
+                m_PositionAccessors[i] = m_Buffers.GetAccessor(m_Attributes[i].Position.Value);
+                vertexCount += m_PositionAccessors[i].Count;
             }
             VertexIntervals[m_Attributes.Length] = vertexCount;
         }
 
-        public override async Task<bool> CreateVertexBuffer()
+        public override async Task<bool> CreateVertexBufferAsync()
         {
             var jh = CreateVertexBufferHandle();
             if (!jh.HasValue)
@@ -137,14 +137,14 @@ namespace GLTFast
                 };
             }
 
-            m_HasColors = firstAttributes.COLOR_0 >= 0;
+            m_HasColors = firstAttributes.GetColor(0).HasValue;
             if (m_HasColors)
             {
                 jobCount += m_Attributes.Length;
                 m_Colors = new VertexBufferColors(VertexCount, m_Logger);
             }
 
-            m_HasBones = firstAttributes.WEIGHTS_0 >= 0 && firstAttributes.JOINTS_0 >= 0;
+            m_HasBones = firstAttributes.GetWeight(0).HasValue && firstAttributes.GetJoint(0).HasValue;
             if (m_HasBones)
             {
                 jobCount++;
@@ -157,10 +157,10 @@ namespace GLTFast
 
                 var att = m_Attributes[i];
 
-                if (m_PositionAccessors[i].IsSparse && m_PositionAccessors[i].bufferView >= 0)
+                if (m_PositionAccessors[i].IsSparse && m_PositionAccessors[i].BufferView is >= 0)
                     jobCount++;
 
-                if (att.NORMAL >= 0)
+                if (att.Normal >= 0)
                 {
                     jobCount++;
                     m_HasNormals = true;
@@ -168,7 +168,7 @@ namespace GLTFast
 
                 m_HasNormals |= calculateNormals;
 
-                if (att.TANGENT >= 0)
+                if (att.Tangent >= 0)
                 {
                     jobCount++;
                     m_HasTangents = true;
@@ -187,12 +187,12 @@ namespace GLTFast
                 if (!SchedulePositionsJobs(i, vDataPtr, outputByteStride, handles, ref handleIndex))
                     return null;
 
-                if (att.NORMAL >= 0
-                    && !ScheduleNormalsJobs(att, vDataPtr, outputByteStride, i, handles, ref handleIndex)
+                if (att.Normal >= 0
+                    && !ScheduleNormalsJobs(att, vDataPtr, outputByteStride, i, handles, ref handleIndex, m_Logger)
                     )
                     return null;
 
-                if (att.TANGENT >= 0
+                if (att.Tangent >= 0
                     && !ScheduleTangentsJobs(att, vDataPtr, outputByteStride, i, handles, ref handleIndex)
                    )
                     return null;
@@ -217,14 +217,16 @@ namespace GLTFast
         {
             JobHandle? h = null;
 
-            if (m_PositionAccessors[i].bufferView >= 0)
+            if (m_PositionAccessors[i].BufferView is >= 0)
             {
                 h = GetVector3Job(
                     m_Buffers,
+                    m_Attributes[i].Position.Value,
                     m_PositionAccessors[i],
                     (float3*)(vDataPtr + outputByteStride * VertexIntervals[i]),
                     outputByteStride,
-                    m_PositionAccessors[i].normalized,
+                    m_Logger,
+                    m_PositionAccessors[i].Normalized,
                     false // positional data never needs to be normalized
                 );
             }
@@ -236,13 +238,13 @@ namespace GLTFast
                 var sparseJobHandle = GetVector3SparseJob(
                     posIndexData,
                     posValueData,
-                    m_PositionAccessors[i].Sparse.count,
-                    m_PositionAccessors[i].Sparse.Indices.componentType,
-                    m_PositionAccessors[i].componentType,
+                    m_PositionAccessors[i].Sparse.Count,
+                    m_PositionAccessors[i].Sparse.Indices.ComponentType,
+                    m_PositionAccessors[i].ComponentType,
                     (float3*)(vDataPtr + outputByteStride * VertexIntervals[i]),
                     outputByteStride,
                     dependsOn: ref h,
-                    m_PositionAccessors[i].normalized
+                    m_PositionAccessors[i].Normalized
                 );
                 if (sparseJobHandle.HasValue)
                 {
@@ -270,10 +272,18 @@ namespace GLTFast
             return true;
         }
 
-        unsafe bool ScheduleNormalsJobs(Attributes att, byte* vDataPtr, int outputByteStride, int i, NativeArray<JobHandle> handles, ref int handleIndex)
+        unsafe bool ScheduleNormalsJobs(
+            Attributes att,
+            byte* vDataPtr,
+            int outputByteStride,
+            int i,
+            NativeArray<JobHandle> handles,
+            ref int handleIndex,
+            ICodeLogger logger
+            )
         {
             m_Buffers.GetAccessorAndData(
-                att.NORMAL,
+                att.Normal.Value,
                 out var nrmAcc,
                 out var input,
                 out var inputByteStride
@@ -285,10 +295,12 @@ namespace GLTFast
 
             var h = GetVector3Job(
                 m_Buffers,
+                att.Normal.Value,
                 nrmAcc,
                 (float3*)(vDataPtr + outputByteStride * VertexIntervals[i] + 12),
                 outputByteStride,
-                nrmAcc.normalized
+                logger,
+                nrmAcc.Normalized
 
             //, normals need to be unit length
             );
@@ -309,7 +321,7 @@ namespace GLTFast
         unsafe bool ScheduleTangentsJobs(Attributes att, byte* vDataPtr, int outputByteStride, int i, NativeArray<JobHandle> handles, ref int handleIndex)
         {
             m_Buffers.GetAccessorAndData(
-                att.TANGENT,
+                att.Tangent.Value,
                 out var tanAcc,
                 out var input,
                 out var inputByteStride
@@ -321,12 +333,12 @@ namespace GLTFast
 
             var h = GetTangentsJob(
                 input,
-                tanAcc.count,
-                tanAcc.componentType,
+                tanAcc.Count,
+                tanAcc.ComponentType,
                 inputByteStride,
                 (float4*)(vDataPtr + outputByteStride * VertexIntervals[i] + 24),
                 outputByteStride,
-                tanAcc.normalized
+                tanAcc.Normalized
             );
             if (h.HasValue)
             {
@@ -344,9 +356,11 @@ namespace GLTFast
 
         int ScheduleTexCoordJobs(Attributes att, int uvSetCount, int i, NativeArray<JobHandle> handles, int handleIndex)
         {
-            var uvSuccess = att.TryGetAllUVAccessors(out var uvAccessors, out _);
-            Assert.IsTrue(uvSuccess);
-            Assert.AreEqual(uvSetCount, uvAccessors.Length);
+            var uvAccessors = new int[uvSetCount];
+            for (var uv = 0; uv < uvSetCount; uv++)
+            {
+                uvAccessors[uv] = att.GetTexCoord(uv) ?? -1;
+            }
 
             m_TexCoords.ScheduleVertexUVJobs(
                 VertexIntervals[i],
@@ -361,7 +375,7 @@ namespace GLTFast
         bool ScheduleColorsJobs(Attributes att, int i, NativeArray<JobHandle> handles, ref int handleIndex)
         {
             var success = m_Colors.ScheduleVertexColorJob(
-                att.COLOR_0,
+                att.GetColor(0).Value,
                 VertexIntervals[i],
                 handles.GetSubArray(handleIndex, 1),
                 m_Buffers
@@ -403,8 +417,8 @@ namespace GLTFast
                 var att = attributes[i];
 
                 var h = m_Bones.ScheduleVertexBonesJob(
-                    att.WEIGHTS_0,
-                    att.JOINTS_0,
+                    att.GetWeight(0).Value,
+                    att.GetJoint(0).Value,
                     VertexIntervals[i],
                     m_Buffers
                 );

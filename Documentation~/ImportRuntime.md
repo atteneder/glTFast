@@ -21,17 +21,17 @@ To load from sources other than a URI or for advanced [customization](#customize
 
 1. Create a [GltfImport] instance.
 2. Call one of the instance's loading methods, depending on your source.
-   - From URI, [Load(Uri,…)](xref:GLTFast.GltfImportBase.Load(System.Uri,GLTFast.ImportSettings,System.Threading.CancellationToken)) or [Load(string,…)](xref:GLTFast.GltfImportBase.Load(System.String,GLTFast.ImportSettings,System.Threading.CancellationToken))
-   - From a buffer [Load(NativeArray&lt;byte&gt;.ReadOnly,…)](xref:GLTFast.GltfImportBase.Load(Unity.Collections.NativeArray{System.Byte}.ReadOnly,System.Uri,GLTFast.ImportSettings,System.Threading.CancellationToken))
-   - From a managed buffer [Load(byte[],…)](xref:GLTFast.GltfImportBase.Load(System.Byte[],System.Uri,GLTFast.ImportSettings,System.Threading.CancellationToken))
-   - From a file path [LoadFile(string,…)](xref:GLTFast.GltfImportBase.LoadFile*)
-   - From a glTF JSON string [LoadGltfJson(string,…)][GltfImportLoadGltfJson]
-   - From a [Stream] [LoadStream(Stream,…)][GltfImportLoadStream]
+   - From URI, [LoadAsync(Uri,…)](xref:Unity.Cloud.Gltfast.GltfImportBase.LoadAsync(System.Uri,Unity.Cloud.Gltfast.ImportSettings,System.Threading.CancellationToken)) or [LoadAsync(string,…)](xref:Unity.Cloud.Gltfast.GltfImportBase.LoadAsync(System.String,Unity.Cloud.Gltfast.ImportSettings,System.Threading.CancellationToken))
+   - From a buffer [LoadAsync(NativeArray&lt;byte&gt;.ReadOnly,…)](xref:Unity.Cloud.Gltfast.GltfImportBase.LoadAsync(Unity.Collections.NativeArray{System.Byte}.ReadOnly,System.Uri,Unity.Cloud.Gltfast.ImportSettings,System.Threading.CancellationToken))
+   - From a managed buffer [LoadAsync(byte[],…)](xref:Unity.Cloud.Gltfast.GltfImportBase.LoadAsync(System.Byte[],System.Uri,Unity.Cloud.Gltfast.ImportSettings,System.Threading.CancellationToken))
+   - From a file path [LoadFileAsync(string,…)](xref:Unity.Cloud.Gltfast.GltfImportBase.LoadFileAsync*)
+   - From a glTF JSON string [LoadGltfJsonAsync(string,…)][GltfImportLoadGltfJson]
+   - From a [Stream] [LoadStreamAsync(Stream,…)][GltfImportLoadStream]
 3. Instantiate one ore more scenes however often you need.
-   - The main scene [InstantiateMainSceneAsync](xref:GLTFast.GltfImportBase.InstantiateMainSceneAsync*)
-   - Or select one by index [InstantiateSceneAsync](xref:GLTFast.GltfImportBase.InstantiateSceneAsync*)
+   - The main scene [InstantiateMainSceneAsync](xref:Unity.Cloud.Gltfast.GltfImportBase.InstantiateMainSceneAsync*)
+   - Or select one by index [InstantiateSceneAsync](xref:Unity.Cloud.Gltfast.GltfImportBase.InstantiateSceneAsync*)
 4. Destroy your scene instances after they're no longer needed.
-5. Call [Dispose](xref:GLTFast.GltfImportBase.Dispose) on your [GltfImport] instance.
+5. Call [Dispose](xref:Unity.Cloud.Gltfast.GltfImportBase.Dispose) on your [GltfImport] instance.
 
 Both the loading and instantiation methods return a boolean value indicating if the procedure was successful.
 
@@ -43,7 +43,18 @@ Both the loading and instantiation methods return a boolean value indicating if 
 [!code-cs [load-gltf-from-memory](../Runtime/DocExamples/LoadGltfFromMemory.cs#LoadGltfFromMemory)]
 
 > [!TIP]
-> Provide the original URI of glTF-binary file as `uri` parameter to [LoadGltfBinary][GltfImportLoadGltfBinary], so that it is able to resolve relative URIs in non-self-contained glTFs.
+> Provide the original URI of glTF-binary file as `uri` parameter to [LoadAsync][GltfImportLoad], so that it is able to resolve relative URIs in non-self-contained glTFs.
+
+### Example: Load from NativeArray
+
+> [!IMPORTANT]
+> The buffer you pass to [LoadAsync][GltfImportLoad] is not copied. It has to stay allocated and unmodified until the returned `Task` completed, because glTFast reads from it throughout loading, potentially from worker threads. When loading from a [NativeArray&lt;byte&gt;.ReadOnly][NativeArrayReadOnly], you keep ownership of the underlying [NativeArray&lt;byte&gt;][NativeArray] and thus have to dispose of it *after* awaiting.
+
+[!code-cs [load-gltf-from-native-array](../Runtime/DocExamples/LoadGltfFromMemory.cs#LoadGltfFromNativeArray)]
+
+Disposing of the data earlier results in undefined behavior (a safety check exception in the Unity Editor, invalid reads otherwise). Do **not** do this:
+
+[!code-cs [load-gltf-from-native-array-invalid](../Runtime/DocExamples/LoadGltfFromMemory.cs#LoadGltfFromNativeArrayInvalid)]
 
 ## Customize loading behavior
 
@@ -60,15 +71,43 @@ Loading via script allows you to:
 
 ### Import Settings
 
-All [`GltfImport.Load`][GltfImportLoad] overloads accept an optional instance of [`ImportSettings`][ImportSettings] as parameter. Have a look at this class to see all options available. Here's an example usage:
+All [`GltfImport.LoadAsync`][GltfImportLoad] overloads accept an optional instance of [`ImportSettings`][ImportSettings] as parameter. Have a look at this class to see all options available. Here's an example usage:
 
 [!code-cs [import-settings](../Runtime/DocExamples/LoadGltfFromMemory.cs#ImportSettings)]
 
 ### Custom Post-Loading Behavior
 
-The async `Load` method can be awaited and followed up by custom behavior.
+The async `LoadAsync` method can be awaited and followed up by custom behavior.
 
 [!code-cs [instantiation](../Runtime/DocExamples/LoadGltfFromMemory.cs#Instantiation)]
+
+### Reading Buffer Data
+
+[`IGltfBufferData`][IGltfBufferData] provides read access to a glTF asset's buffer view and accessor data, for example to run your own analysis or feed a Burst job.
+
+Buffer data comes with a lease: the import keeps its buffers alive until every lease is disposed. Buffer data only exists while an import is running, so the entry point is the [`IBufferDataConsumer`][IBufferDataConsumer] add-on hook, which is called once every buffer is loaded and before the import converts that data into Unity resources.
+
+[!code-cs [buffer-data-addon](../Runtime/DocExamples/BufferDataAccess.cs#PositionSumAddon)]
+
+Inject the add-on before loading:
+
+[!code-cs [read-buffer-data](../Runtime/DocExamples/BufferDataAccess.cs#ReadBufferDataDuringImport)]
+
+The lease handed to the hook is disposed as soon as the hook returns. To keep reading after the import finished, lease your own via [`GltfImport.LeaseBufferData`][LeaseBufferData] and dispose it when done:
+
+[!code-cs [retain-buffer-data](../Runtime/DocExamples/BufferDataAccess.cs#RetainBufferDataBeyondImport)]
+
+Data is provided in glTF's own coordinate system and value range. No conversion, normalization or coordinate flip is applied — use `ComponentType`, `Type` and `Normalized` on the [`Accessor`][Accessor] to interpret it. Sparse accessors are not provided.
+
+Use it from the main thread. The containers it provides may be read from C# jobs and from threads of your own, for as long as the lease has not been disposed. The hook is called on the main thread and has to return on it, so schedule jobs or start threads in between when the work is heavy.
+
+Add-ons implementing the hook are invoked in unspecified order and potentially concurrently, so do not assume yours is the only one running, or that it runs before or after another. The glTF asset is read-only there: allocate and create resources of your own freely, but do not modify the [`Root`][Root], any glTF object or any buffer data.
+
+[IGltfBufferData]: xref:Unity.Cloud.Gltfast.IGltfBufferData
+[IBufferDataConsumer]: xref:Unity.Cloud.Gltfast.Addons.IBufferDataConsumer
+[LeaseBufferData]: xref:Unity.Cloud.Gltfast.GltfImport.LeaseBufferData*
+[Root]: xref:Unity.Cloud.Gltfast.Objects.Root
+[Accessor]: xref:Unity.Cloud.Gltfast.Objects.Accessor
 
 ### Instantiation
 
@@ -79,7 +118,7 @@ You can customize it by providing an implementation of [`IInstantiator`][IInstan
 Inject your custom instantiation like so
 
 ```csharp
-public class YourCustomInstantiator : GLTFast.IInstantiator {
+public class YourCustomInstantiator : Unity.Cloud.Gltfast.IInstantiator {
   // Your code here
 }
 …
@@ -196,26 +235,27 @@ When you no longer need a loaded instance of a glTF scene you might want to remo
 
 *Khronos&reg;* is a registered trademark and *glTF&trade;* is a trademark of [The Khronos Group Inc][Khronos].
 
-[CollectingLogger]: xref:GLTFast.Logging.CollectingLogger
-[ConsoleLogger]: xref:GLTFast.Logging.ConsoleLogger
-[GltfAsset]: xref:GLTFast.GltfAsset
-[GltfImport]: xref:GLTFast.GltfImport
-[GltfImportDispose]: xref:GLTFast.GltfImportBase.Dispose
-[GltfImportLoad]: xref:GLTFast.GltfImportBase.Load*
-[GltfImportLoadGltfBinary]: xref:GLTFast.GltfImportBase.LoadGltfBinary*
-[GltfImportLoadGltfJson]: xref:GLTFast.GltfImportBase.LoadGltfJson*
-[GltfImportLoadStream]: xref:GLTFast.GltfImportBase.LoadStream*
-[GameObjectInstantiator]: xref:GLTFast.GameObjectInstantiator
+[CollectingLogger]: xref:Unity.Cloud.Gltfast.Logging.CollectingLogger
+[ConsoleLogger]: xref:Unity.Cloud.Gltfast.Logging.ConsoleLogger
+[GltfAsset]: xref:Unity.Cloud.Gltfast.GltfAsset
+[GltfImport]: xref:Unity.Cloud.Gltfast.GltfImport
+[GltfImportDispose]: xref:Unity.Cloud.Gltfast.GltfImportBase.Dispose
+[GltfImportLoad]: xref:Unity.Cloud.Gltfast.GltfImportBase.LoadAsync*
+[GltfImportLoadGltfJson]: xref:Unity.Cloud.Gltfast.GltfImportBase.LoadGltfJsonAsync*
+[GltfImportLoadStream]: xref:Unity.Cloud.Gltfast.GltfImportBase.LoadStreamAsync*
+[GameObjectInstantiator]: xref:Unity.Cloud.Gltfast.GameObjectInstantiator
 [gltfasset_component]: Images/gltfasset_component.png  "Inspector showing a GltfAsset component added to a GameObject"
-[ICodeLogger]: xref:GLTFast.Logging.ICodeLogger
-[IDownload]: xref:GLTFast.Loading.IDownload
-[IInstantiator]: xref:GLTFast.IInstantiator
-[IMaterialGenerator]: xref:GLTFast.Materials.IMaterialGenerator
-[ImportSettings]: xref:GLTFast.ImportSettings
-[InstantiationSettings]: xref:GLTFast.InstantiationSettings
+[ICodeLogger]: xref:Unity.Cloud.Gltfast.Logging.ICodeLogger
+[IDownload]: xref:Unity.Cloud.Gltfast.Loading.IDownload
+[IInstantiator]: xref:Unity.Cloud.Gltfast.IInstantiator
+[IMaterialGenerator]: xref:Unity.Cloud.Gltfast.Materials.IMaterialGenerator
+[ImportSettings]: xref:Unity.Cloud.Gltfast.ImportSettings
+[InstantiationSettings]: xref:Unity.Cloud.Gltfast.InstantiationSettings
 [Khronos]: https://www.khronos.org
-[LogMessages]: xref:GLTFast.Logging.LogMessages
-[GameObjectSceneInstance]: xref:GLTFast.GameObjectSceneInstance
-[SceneObjectCreation]: xref:GLTFast.SceneObjectCreation
+[LogMessages]: xref:Unity.Cloud.Gltfast.Logging.LogMessages
+[NativeArray]: xref:Unity.Collections.NativeArray`1
+[NativeArrayReadOnly]: xref:Unity.Collections.NativeArray`1.ReadOnly
+[GameObjectSceneInstance]: xref:Unity.Cloud.Gltfast.GameObjectSceneInstance
+[SceneObjectCreation]: xref:Unity.Cloud.Gltfast.SceneObjectCreation
 [Stream]: xref:System.IO.Stream
 [Unity]: https://unity.com

@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using GLTFast.Export;
+using Unity.Cloud.Gltfast.Export;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -16,7 +16,7 @@ using UnityEngine.SceneManagement;
 using UnityEditor.Formats.Gltf.Validation;
 #endif
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
 
     using Logging;
@@ -158,12 +158,12 @@ namespace GLTFast.Editor
             SaveFolderPath = Directory.GetParent(destinationPath)?.FullName;
             var settings = GetDefaultSettings(binary);
             var goSettings = new GameObjectExportSettings { OnlyActiveInHierarchy = false };
-            var export = new GameObjectExport(settings, gameObjectExportSettings: goSettings, logger: new ConsoleLogger());
+            var export = new GameObjectExport(settings, gameObjectExportSettings: goSettings);
             export.AddScene(gameObjects, name);
 #if GLTF_VALIDATOR
             var success =
 #endif
-            await export.SaveToFileAndDispose(destinationPath);
+            await export.SaveToFileAndDisposeAsync(destinationPath);
 
 #if GLTF_VALIDATOR
             if (success)
@@ -225,9 +225,9 @@ namespace GLTFast.Editor
             {
                 SaveFolderPath = Directory.GetParent(path)?.FullName;
                 var settings = GetDefaultSettings(binary);
-                var export = new GameObjectExport(settings, logger: new ConsoleLogger());
+                var export = new GameObjectExport(settings);
                 export.AddScene(gameObjects, scene.name);
-                await export.SaveToFileAndDispose(path);
+                await export.SaveToFileAndDisposeAsync(path);
 #if GLTF_VALIDATOR
                 var report = Validator.Validate(path);
                 report.Log();

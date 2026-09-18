@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
 
     [CustomEditor(typeof(GltfAsset)), CanEditMultipleObjects]

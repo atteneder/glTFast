@@ -6,28 +6,35 @@ using System.Threading.Tasks;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Profiling;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Loading
+namespace Unity.Cloud.Gltfast.Loading
 {
 
     /// <summary>
     /// Default <see cref="IDownloadProvider"/> implementation
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Loading", sourceAssembly: "glTFast")]
     public class DefaultDownloadProvider : IDownloadProvider
     {
+
+        [Obsolete("Request has been renamed to RequestAsync. (UnityUpgradable) -> RequestAsync(*)", true)]
+        public Task<IDownload> Request(Uri url) => RequestAsync(url);
 
         /// <summary>
         /// Sends a URI request and waits for its completion.
         /// </summary>
         /// <param name="url">URI to request</param>
         /// <returns>Object representing the request</returns>
-        public async Task<IDownload> Request(Uri url)
+        public async Task<IDownload> RequestAsync(Uri url)
         {
             var req = new AwaitableDownload(url);
             await req.WaitAsync();
             return req;
         }
+
+        [Obsolete("RequestTexture has been renamed to RequestTextureAsync. (UnityUpgradable) -> RequestTextureAsync(*)", true)]
+        public Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable) => RequestTextureAsync(url, nonReadable);
 
         /// <summary>
         /// Sends a URI request to load a texture
@@ -36,7 +43,7 @@ namespace GLTFast.Loading
         /// <param name="nonReadable">If true, resulting texture is not CPU readable (uses less memory)</param>
         /// <returns>Object representing the request</returns>
 #pragma warning disable CS1998
-        public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable)
+        public async Task<ITextureDownload> RequestTextureAsync(Uri url, bool nonReadable)
         {
 #pragma warning restore CS1998
 #if UNITY_WEBREQUEST_TEXTURE
@@ -52,11 +59,9 @@ namespace GLTFast.Loading
     /// <summary>
     /// Default <see cref="IDownload"/> implementation that loads URIs via <see cref="UnityWebRequest"/>
     /// </summary>
-    public class AwaitableDownload : IDownload, INativeDownload
+    [MovedFrom(true, sourceNamespace: "GLTFast.Loading", sourceAssembly: "glTFast")]
+    public class AwaitableDownload : IDownload
     {
-        const string k_MimeTypeGltfBinary = "model/gltf-binary";
-        const string k_MimeTypeGltf = "model/gltf+json";
-
         /// <summary>
         /// <see cref="UnityWebRequest"/> that is used for the download
         /// </summary>
@@ -109,49 +114,8 @@ namespace GLTFast.Loading
         /// </summary>
         public string Error => m_Request == null ? "Request disposed" : m_Request.error;
 
-        /// <summary>
-        /// Downloaded data as byte array
-        /// </summary>
-        public byte[] Data
-        {
-            get
-            {
-                Profiler.BeginSample("AwaitableDownload.Data");
-                var result = m_Request?.downloadHandler.data;
-                Profiler.EndSample();
-                return result;
-            }
-        }
-
         /// <inheritdoc />
-        public NativeArray<byte>.ReadOnly NativeData => m_Request?.downloadHandler.nativeData ?? default;
-
-        /// <summary>
-        /// Downloaded data as string
-        /// </summary>
-        public string Text => m_Request?.downloadHandler.text;
-
-        /// <summary>
-        /// True if the requested download is a glTF-Binary file.
-        /// False if it is a regular JSON-based glTF file.
-        /// Null if the type could not be determined.
-        /// </summary>
-        public bool? IsBinary
-        {
-            get
-            {
-                if (Success)
-                {
-                    string contentType = m_Request.GetResponseHeader("Content-Type");
-                    if (contentType == k_MimeTypeGltfBinary)
-                        return true;
-                    if (contentType == k_MimeTypeGltf)
-                        return false;
-                }
-
-                return GltfGlobals.IsGltfBinary(NativeData);
-            }
-        }
+        public NativeArray<byte>.ReadOnly Data => m_Request?.downloadHandler.nativeData ?? default;
 
         /// <summary>
         /// Releases previously allocated resources.
@@ -182,6 +146,7 @@ namespace GLTFast.Loading
     /// Default <see cref="ITextureDownload"/> implementation that loads
     /// texture URIs via <seealso cref="UnityWebRequest"/>.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Loading", sourceAssembly: "glTFast")]
     public class AwaitableTextureDownload : AwaitableDownload, ITextureDownload
     {
 

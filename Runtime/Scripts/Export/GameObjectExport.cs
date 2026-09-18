@@ -8,8 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     using Logging;
@@ -17,6 +18,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Creates glTF files from GameObject hierarchies
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public class GameObjectExport
     {
 
@@ -36,7 +38,7 @@ namespace GLTFast.Export
         /// <param name="materialExport">Provides material conversion</param>
         /// <param name="deferAgent">Defer agent (&lt;see cref="IDeferAgent"/&gt;); decides when/if to preempt
         /// export to preserve a stable frame rate.</param>
-        /// <param name="logger">Interface for logging (error) messages.</param>
+        /// <param name="logger">Custom logger for reporting messages. Default behavior is inherited from the <see cref="Unity.Cloud.Gltfast.Export.GltfWriter(Unity.Cloud.Gltfast.Export.ExportSettings, Unity.Cloud.Gltfast.IDeferAgent, Unity.Cloud.Gltfast.Logging.ICodeLogger)"/> constructor that this method forwards to.</param>
         public GameObjectExport(
             ExportSettings exportSettings = null,
             GameObjectExportSettings gameObjectExportSettings = null,
@@ -58,7 +60,7 @@ namespace GLTFast.Export
         /// <returns>True, if the scene was added flawlessly. False, otherwise</returns>
         public bool AddScene(GameObject[] gameObjects, string name = null)
         {
-            return AddScene(gameObjects, float4x4.identity, name);
+            return AddScene(gameObjects, double4x4.identity, name);
         }
 
         /// <summary>
@@ -70,7 +72,21 @@ namespace GLTFast.Export
         /// <param name="origin">Inverse scene origin matrix. This transform will be applied to all nodes.</param>
         /// <param name="name">Name of the scene</param>
         /// <returns>True if the scene was added successfully, false otherwise</returns>
-        public bool AddScene(ICollection<GameObject> gameObjects, float4x4 origin, string name)
+        public bool AddScene(ICollection<GameObject> gameObjects, Matrix4x4 origin, string name)
+        {
+            return AddScene(gameObjects, origin.ToDouble(), name);
+        }
+
+        /// <summary>
+        /// Creates a glTF scene from a collection of GameObjects. The GameObjects will be converted into glTF nodes.
+        /// The nodes' positions within the glTF scene will be their GameObjects' world position transformed by the
+        /// <paramref name="origin"/> matrix, essentially allowing you to set an arbitrary scene center.
+        /// </summary>
+        /// <param name="gameObjects">Root level GameObjects (will get added recursively)</param>
+        /// <param name="origin">Inverse scene origin matrix. This transform will be applied to all nodes.</param>
+        /// <param name="name">Name of the scene</param>
+        /// <returns>True if the scene was added successfully, false otherwise</returns>
+        public bool AddScene(ICollection<GameObject> gameObjects, double4x4 origin, string name)
         {
             CertifyNotDisposed();
             var rootNodes = new List<uint>(gameObjects.Count);
@@ -106,11 +122,15 @@ namespace GLTFast.Export
             }
             if (rootNodes.Count > 0)
             {
-                m_Writer.AddScene(rootNodes.ToArray(), name);
+                m_Writer.AddScene(rootNodes, name);
             }
 
             return success;
         }
+
+        [Obsolete("SaveToFileAndDispose has been renamed to SaveToFileAndDisposeAsync. (UnityUpgradable) -> SaveToFileAndDisposeAsync(*)", true)]
+        public Task<bool> SaveToFileAndDispose(string path, CancellationToken cancellationToken = default)
+            => SaveToFileAndDisposeAsync(path, cancellationToken);
 
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a file
@@ -120,8 +140,16 @@ namespace GLTFast.Export
         /// <param name="path">glTF destination file path</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
-        public Task<bool> SaveToFileAndDispose(string path, CancellationToken cancellationToken = default)
-            => SaveToFileAndDispose(path, false, cancellationToken);
+        public Task<bool> SaveToFileAndDisposeAsync(string path, CancellationToken cancellationToken = default)
+            => SaveToFileAndDisposeAsync(path, false, cancellationToken);
+
+        [Obsolete("SaveToFileAndDispose has been renamed to SaveToFileAndDisposeAsync. (UnityUpgradable) -> SaveToFileAndDisposeAsync(*)", true)]
+        public Task<bool> SaveToFileAndDispose(
+            string path,
+            bool forceSync,
+            CancellationToken cancellationToken = default
+        )
+            => SaveToFileAndDisposeAsync(path, forceSync, cancellationToken);
 
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a file
@@ -133,7 +161,7 @@ namespace GLTFast.Export
         /// scripting.</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
-        public async Task<bool> SaveToFileAndDispose(
+        public async Task<bool> SaveToFileAndDisposeAsync(
             string path,
             bool forceSync,
             CancellationToken cancellationToken = default
@@ -141,12 +169,18 @@ namespace GLTFast.Export
         {
             CertifyNotDisposed();
 #if UNITY_EDITOR
-            CertifyEditorForceSync(forceSync, nameof(SaveToFileAndDispose));
+            CertifyEditorForceSync(forceSync, nameof(SaveToFileAndDisposeAsync));
 #endif
-            var success = await m_Writer.SaveToFileAndDisposeInternal(path, forceSync);
+            var success = await m_Writer.SaveToFileAndDisposeAsyncInternal(path, forceSync);
             m_Writer = null;
             return success;
         }
+
+        [Obsolete("SaveToStreamAndDispose has been renamed to SaveToStreamAndDisposeAsync. (UnityUpgradable) -> SaveToStreamAndDisposeAsync(*)", true)]
+        public Task<bool> SaveToStreamAndDispose(
+            Stream stream,
+            CancellationToken cancellationToken = default
+            ) => SaveToStreamAndDisposeAsync(stream, cancellationToken);
 
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a Stream
@@ -156,10 +190,18 @@ namespace GLTFast.Export
         /// <param name="stream">glTF destination stream</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the glTF file was written successfully, false otherwise</returns>
-        public Task<bool> SaveToStreamAndDispose(
+        public Task<bool> SaveToStreamAndDisposeAsync(
             Stream stream,
             CancellationToken cancellationToken = default
-            ) => SaveToStreamAndDispose(stream, false, cancellationToken);
+            ) => SaveToStreamAndDisposeAsync(stream, false, cancellationToken);
+
+        [Obsolete("SaveToStreamAndDispose has been renamed to SaveToStreamAndDisposeAsync. (UnityUpgradable) -> SaveToStreamAndDisposeAsync(*)", true)]
+        public Task<bool> SaveToStreamAndDispose(
+            Stream stream,
+            bool forceSync,
+            CancellationToken cancellationToken = default
+        )
+            => SaveToStreamAndDisposeAsync(stream, forceSync, cancellationToken);
 
         /// <summary>
         /// Exports the collected scenes/content as glTF, writes it to a Stream
@@ -171,7 +213,7 @@ namespace GLTFast.Export
         /// scripting.</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the glTF file was written successfully, false otherwise</returns>
-        public async Task<bool> SaveToStreamAndDispose(
+        public async Task<bool> SaveToStreamAndDisposeAsync(
             Stream stream,
             bool forceSync,
             CancellationToken cancellationToken = default
@@ -179,9 +221,9 @@ namespace GLTFast.Export
         {
             CertifyNotDisposed();
 #if UNITY_EDITOR
-            CertifyEditorForceSync(forceSync, nameof(SaveToStreamAndDispose));
+            CertifyEditorForceSync(forceSync, nameof(SaveToStreamAndDisposeAsync));
 #endif
-            var success = await m_Writer.SaveToStreamAndDispose(stream, forceSync);
+            var success = await m_Writer.SaveToStreamAndDisposeAsync(stream, forceSync);
             m_Writer = null;
             return success;
         }
@@ -212,7 +254,7 @@ namespace GLTFast.Export
 
         bool AddGameObject(
             GameObject gameObject,
-            float4x4? sceneOrigin,
+            double4x4? sceneOrigin,
             Queue<Transform> nodesQueue,
             Dictionary<Transform, uint> transformNodeId,
             out int nodeId)
@@ -226,10 +268,9 @@ namespace GLTFast.Export
 
             var success = true;
             var childCount = gameObject.transform.childCount;
-            uint[] children = null;
+            List<uint> children = null;
             if (childCount > 0)
             {
-                var childList = new List<uint>(gameObject.transform.childCount);
                 for (var i = 0; i < childCount; i++)
                 {
                     var child = gameObject.transform.GetChild(i);
@@ -242,12 +283,9 @@ namespace GLTFast.Export
                         );
                     if (childNodeId >= 0)
                     {
-                        childList.Add((uint)childNodeId);
+                        children ??= new List<uint>(childCount);
+                        children.Add((uint)childNodeId);
                     }
-                }
-                if (childList.Count > 0)
-                {
-                    children = childList.ToArray();
                 }
             }
 
@@ -257,22 +295,23 @@ namespace GLTFast.Export
 
             if (onIncludedLayer || children != null)
             {
-                float3 translation;
-                quaternion rotation;
-                float3 scale;
+                double3 translation;
+                double4 rotation;
+                double3 scale;
 
                 if (sceneOrigin.HasValue)
                 {
                     // root level node - calculate transform based on scene origin
-                    var trans = math.mul(sceneOrigin.Value, transform.localToWorldMatrix);
+                    var localToWorldMatrix = transform.localToWorldMatrix.ToDouble();
+                    var trans = math.mul(sceneOrigin.Value, localToWorldMatrix);
                     trans.Decompose(out translation, out rotation, out scale);
                 }
                 else
                 {
                     // nested node - use local transform
-                    translation = transform.localPosition;
-                    rotation = transform.localRotation;
-                    scale = transform.localScale;
+                    translation = transform.localPosition.ToDouble();
+                    rotation = transform.localRotation.ToDouble();
+                    scale = transform.localScale.ToDouble();
                 }
 
                 var newNodeId = m_Writer.AddNode(
@@ -345,14 +384,13 @@ namespace GLTFast.Export
 
             if (mesh != null)
             {
-                uint[] joints = null;
+                List<uint> joints = null;
                 if (bones != null)
                 {
-                    joints = new uint[bones.Length];
-                    for (var i = 0; i < bones.Length; i++)
+                    joints = new List<uint>(bones.Length);
+                    foreach (var bone in bones)
                     {
-                        var bone = bones[i];
-                        if (!transformNodeId.TryGetValue(bone, out joints[i]))
+                        if (!transformNodeId.TryGetValue(bone, out var boneNodeId))
                         {
 #if DEBUG
                             Debug.LogError($"Skip skin on {transform.name}: No node ID for bone transform {bone.name} found!");
@@ -360,9 +398,10 @@ namespace GLTFast.Export
                             break;
 #endif
                         }
+                        joints.Add(boneNodeId);
                     }
                 }
-                m_Writer.AddMeshToNode((int)nodeId, mesh, materialIds, joints);
+                m_Writer.AddMeshToNode(nodeId, mesh, materialIds, joints);
             }
 
             if (gameObject.TryGetComponent(out Camera camera))
@@ -371,7 +410,7 @@ namespace GLTFast.Export
                 {
                     if (m_Writer.AddCamera(camera, out var cameraId))
                     {
-                        m_Writer.AddCameraToNode((int)nodeId, cameraId);
+                        m_Writer.AddCameraToNode(nodeId, cameraId);
                     }
                 }
             }
@@ -382,7 +421,7 @@ namespace GLTFast.Export
                 {
                     if (m_Writer.AddLight(light, out var lightId))
                     {
-                        m_Writer.AddLightToNode((int)nodeId, lightId);
+                        m_Writer.AddLightToNode(nodeId, lightId);
                     }
                 }
             }

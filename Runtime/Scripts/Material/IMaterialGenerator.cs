@@ -2,15 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Materials
+namespace Unity.Cloud.Gltfast.Materials
 {
     using Logging;
-    using Schema;
+    using Objects;
 
     /// <summary>
     /// Provides a mechanism to convert glTF materials into Unity Materials
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Materials", sourceAssembly: "glTFast")]
     public interface IMaterialGenerator
     {
 
@@ -30,7 +32,7 @@ namespace GLTFast.Materials
         /// <param name="pointsSupport">If true, material has to support meshes with <see cref="MeshTopology.Points">points</see> topology.</param>
         /// <returns>Generated Unity Material</returns>
         UnityEngine.Material GenerateMaterial(
-            MaterialBase gltfMaterial,
+            Material gltfMaterial,
             IGltfReadable gltf,
             bool pointsSupport = false
             );

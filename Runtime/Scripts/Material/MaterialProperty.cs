@@ -3,15 +3,17 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 #if USING_HDRP
 using UnityEngine.Rendering.HighDefinition;
 #endif
 
-namespace GLTFast.Materials
+namespace Unity.Cloud.Gltfast.Materials
 {
     /// <summary>
     /// Holds static material property identifiers.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Materials", sourceAssembly: "glTFast")]
     public static class MaterialProperty
     {
         /// <summary>Shader property ID for property alphaCutoff</summary>

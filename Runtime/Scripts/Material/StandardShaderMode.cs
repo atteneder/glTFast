@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Materials
+namespace Unity.Cloud.Gltfast.Materials
 {
     /// <summary>
     /// Built-In render pipeline Standard shader modes
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Materials", sourceAssembly: "glTFast")]
     public enum StandardShaderMode
     {
         /// <summary>

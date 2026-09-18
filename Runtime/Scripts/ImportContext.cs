@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-using GLTFast.Loading;
-using GLTFast.Logging;
+using Unity.Cloud.Gltfast.Loading;
+using Unity.Cloud.Gltfast.Logging;
 using UnityEngine;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Contains cross-cutting settings and services of a glTF import instance.

@@ -1,6 +1,6 @@
 using System;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     [Serializable]

@@ -3,35 +3,12 @@
 
 #if UNITY_SHADER_GRAPH
 
-using System;
 using UnityEngine;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     using Logging;
-    using Schema;
-
-    /// <inheritdoc cref="MetaMaterialExportShaderGraphs{TLitExport,TGltfShaderGraphExport}"/>
-    [Obsolete("Use MaterialExport.GetDefaultMaterialExport instead.")]
-    // TODO: Make private in next major release
-    public class MetaMaterialExport<TLitExport, TGltfShaderGraphExport> :
-        IMaterialExport
-        where TLitExport : IMaterialExport, new()
-        where TGltfShaderGraphExport : IMaterialExport, new()
-    {
-        /// <inheritdoc />
-        public bool ConvertMaterial(
-            UnityEngine.Material uMaterial,
-            out Material material,
-            IGltfWritable gltf,
-            ICodeLogger logger
-            )
-        {
-            return MetaMaterialExportShaderGraphs<TLitExport, TGltfShaderGraphExport>
-                .Instance
-                .ConvertMaterial(uMaterial, out material, gltf, logger);
-        }
-    }
+    using Objects;
 
     /// <summary>
     /// Picks a fitting material exporter, based on the used shader.

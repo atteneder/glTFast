@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 
-using GLTFast.Logging;
+using Unity.Cloud.Gltfast.Logging;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -14,25 +14,28 @@ using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEngine.Scripting.APIUpdating;
 #if UNITY_ENTITIES_GRAPHICS
 using Unity.Entities.Graphics;
 using UnityEngine.Rendering;
 #endif
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Generates an Entity hierarchy from a glTF scene.
     /// </summary>
-    /// <remarks>
-    /// A derived class must re-declare the interface (<c>class MyInstantiator : EntityInstantiator, IInstantiator</c>)
-    /// for its own <see cref="IInstantiator.AddMesh"/> or <see cref="IInstantiator.AddMeshInstanced"/> to be reached.
-    /// </remarks>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast.dots")]
     public class EntityInstantiator : IInstantiator
     {
 
         const float k_Epsilon = .00001f;
 
+        /// <summary>
+        /// Logger used by this instantiator. May be <c>null</c> when the caller passed
+        /// <see cref="Unity.Cloud.Gltfast.Logging.NullLogger.Instance"/>; subclasses MUST use
+        /// null-conditional access (<c>m_Logger?.Error(...)</c>).
+        /// </summary>
         protected ICodeLogger m_Logger;
 
         protected IGltfReadable m_Gltf;
@@ -46,9 +49,17 @@ namespace GLTFast
         EntityManager m_EntityManager;
         EntityArchetype m_NodeArchetype;
         EntityArchetype m_SceneArchetype;
+        NodeNameFallback m_NameFallback;
 
         List<Entity> m_Entities;
 
+        /// <summary>
+        /// Constructs an <see cref="EntityInstantiator"/>.
+        /// </summary>
+        /// <param name="gltf">glTF to instantiate from.</param>
+        /// <param name="parent">Generated entities will be children of this entity.</param>
+        /// <param name="logger">Custom logger for reporting messages. Defaults to the shared <see cref="Unity.Cloud.Gltfast.Logging.ConsoleLogger.Instance"/> (writes to Unity's Console) when <c>null</c> is passed. Pass <see cref="Unity.Cloud.Gltfast.Logging.NullLogger.Instance"/> (or <c>new NullLogger()</c>) to suppress all output.</param>
+        /// <param name="settings">Instantiation settings.</param>
         public EntityInstantiator(
             IGltfReadable gltf,
             Entity parent,
@@ -58,19 +69,20 @@ namespace GLTFast
         {
             m_Gltf = gltf;
             m_Parent = parent;
-            m_Logger = logger;
+            m_Logger = logger is NullLogger ? null : (logger ?? ConsoleLogger.Instance);
             m_Settings = settings ?? new InstantiationSettings();
         }
 
         /// <inheritdoc />
         public void BeginScene(
             string name,
-            uint[] nodeIndices
+            IReadOnlyList<uint> nodeIndices
         )
         {
             Profiler.BeginSample("BeginScene");
             m_Entities = new List<Entity>();
             m_Nodes = new Dictionary<uint, Entity>();
+            m_NameFallback = new NodeNameFallback();
             m_EntityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
             m_NodeArchetype = m_EntityManager.CreateArchetype(
                 typeof(Disabled),
@@ -86,7 +98,7 @@ namespace GLTFast
 
             var dedicatedSceneEntity = m_Settings.SceneObjectCreation == SceneObjectCreation.Always
                 || (m_Settings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes
-                    && nodeIndices is { Length: > 1 });
+                    && nodeIndices is { Count: > 1 });
 
             if (dedicatedSceneEntity)
             {
@@ -116,25 +128,11 @@ namespace GLTFast
         }
 #endif // UNITY_ANIMATION
 
-        /// <inheritdoc />
-        public void CreateNode(
-            uint nodeIndex,
-            uint? parentIndex,
-            Vector3 position,
-            Quaternion rotation,
-            Vector3 scale
-        )
-        {
-            var parent = new Parent { Value = parentIndex.HasValue ? m_Nodes[parentIndex.Value] : m_Parent };
-            var node = CreateNodeInternal(parent, position, rotation, scale);
-            m_Nodes[nodeIndex] = node;
-        }
-
         Entity CreateNodeInternal(
             Parent parent,
-            float3 position,
-            quaternion rotation,
-            float3 scale
+            double3 position,
+            double4 rotation,
+            double3 scale
         )
         {
             Profiler.BeginSample("CreateNode");
@@ -146,9 +144,9 @@ namespace GLTFast
                 node,
                 new LocalTransform
                 {
-                    Position = position,
-                    Rotation = rotation,
-                    Scale = isUniformScale ? scale.x : 1f
+                    Position = (float3)position,
+                    Rotation = rotation.ToQuaternion(),
+                    Scale = isUniformScale ? (float)scale.x : 1f
                 });
             if (!isUniformScale)
             {
@@ -156,7 +154,7 @@ namespace GLTFast
                 m_EntityManager.AddComponent<PostTransformMatrix>(node);
                 m_EntityManager.SetComponentData(
                     node,
-                    new PostTransformMatrix { Value = float4x4.Scale(scale) }
+                    new PostTransformMatrix { Value = float4x4.Scale((float3)scale) }
                     );
             }
 
@@ -172,35 +170,72 @@ namespace GLTFast
         public virtual void CreateNode(
             uint nodeIndex,
             uint? parentIndex,
-            Vector3 position,
-            Quaternion rotation,
-            Vector3 scale,
+            double3 position,
+            double4 rotation,
+            double3 scale,
             string name
         )
         {
-            CreateNode(nodeIndex, parentIndex, position, rotation, scale);
-            SetNodeName(nodeIndex, name);
-        }
-
-        public void SetNodeName(uint nodeIndex, string name)
-        {
+            var parent = new Parent { Value = parentIndex.HasValue ? m_Nodes[parentIndex.Value] : m_Parent };
+            var node = CreateNodeInternal(parent, position, rotation, scale);
+            m_Nodes[nodeIndex] = node;
+            if (name == null)
+            {
+                m_NameFallback.MarkUnnamed(nodeIndex);
+            }
 #if UNITY_EDITOR
-            m_EntityManager.SetName(m_Nodes[nodeIndex], name ?? $"Node-{nodeIndex}");
+            m_EntityManager.SetName(node, name ?? NodeNameFallback.DefaultName(nodeIndex));
 #endif
         }
 
-        /// <inheritdoc />
-        [Obsolete("Use IInstantiator.AddMesh instead.")]
-        public virtual void AddPrimitive(
+        /// <summary>Applies the mesh-name fallback to a node, if it is still unnamed and the mesh carries a name.</summary>
+        /// <param name="nodeIndex">Index of the node.</param>
+        /// <param name="meshResult">The mesh being assigned to it.</param>
+        protected void ApplyMeshNameFallback(uint nodeIndex, MeshResult meshResult)
+        {
+            if (m_NameFallback.TryTake(nodeIndex, meshResult, out var meshName))
+            {
+                SetFallbackNodeName(nodeIndex, meshName);
+            }
+        }
+
+        /// <summary>Names a node the glTF left unnamed, once, with the first non-empty name among its meshes.</summary>
+        /// <remarks>Not called when no mesh supplies a name; the <c>Node-{index}</c> placeholder stands instead.</remarks>
+        /// <remarks>Entity names exist in the Editor only, so this implementation does nothing in a player build.
+        /// An override that stores the name elsewhere still runs.</remarks>
+        /// <param name="nodeIndex">Index of the node to name.</param>
+        /// <param name="meshName">The resolved fallback name.</param>
+        protected virtual void SetFallbackNodeName(uint nodeIndex, string meshName)
+        {
+#if UNITY_EDITOR
+            m_EntityManager.SetName(m_Nodes[nodeIndex], meshName);
+#endif
+        }
+
+        [Obsolete("AddPrimitive has been renamed to AddMesh. (UnityUpgradable) -> AddMesh(*)", true)]
+        public void AddPrimitive(
             uint nodeIndex,
             string meshName,
             MeshResult meshResult,
-            uint[] joints = null,
+            IReadOnlyList<uint> joints = null,
             uint? rootJoint = null,
-            float[] morphTargetWeights = null,
+            IReadOnlyList<float> morphTargetWeights = null,
+            int meshNumeration = 0
+        ) => AddMesh(nodeIndex, meshName, meshResult, joints, rootJoint, morphTargetWeights, meshNumeration);
+
+        /// <inheritdoc />
+        public virtual void AddMesh(
+            uint nodeIndex,
+            string meshName,
+            MeshResult meshResult,
+            IReadOnlyList<uint> joints = null,
+            uint? rootJoint = null,
+            IReadOnlyList<float> morphTargetWeights = null,
             int meshNumeration = 0
         )
         {
+            ApplyMeshNameFallback(nodeIndex, meshResult);
+
             if ((m_Settings.Mask & ComponentType.Mesh) == 0)
             {
                 return;
@@ -210,7 +245,10 @@ namespace GLTFast
             var materials = new Material[meshResult.materialIndices.Length];
             for (var index = 0; index < meshResult.materialIndices.Length; index++)
             {
-                materials[index] = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                var materialIndex = meshResult.materialIndices[index];
+                var material = (materialIndex.HasValue ? m_Gltf.GetMaterial(materialIndex.Value) : null)
+                    ?? m_Gltf.GetDefaultMaterial();
+                materials[index] = material;
             }
 
             var filterSettings = RenderFilterSettings.Default;
@@ -239,7 +277,7 @@ namespace GLTFast
                     node = CreateNodeInternal(
                         new Parent { Value = m_Nodes[nodeIndex] },
                         float3.zero,
-                        quaternion.identity,
+                        Mathematics.k_QuaternionIdentity,
                         new float3(1f)
                         );
 #if UNITY_EDITOR
@@ -268,9 +306,20 @@ namespace GLTFast
             Profiler.EndSample();
         }
 
-        /// <inheritdoc />
-        [Obsolete("Use IInstantiator.AddMeshInstanced instead.")]
+        [Obsolete("AddPrimitiveInstanced has been renamed to AddMeshInstanced. (UnityUpgradable) -> AddMeshInstanced(*)", true)]
         public void AddPrimitiveInstanced(
+            uint nodeIndex,
+            string meshName,
+            MeshResult meshResult,
+            uint instanceCount,
+            NativeArray<Vector3>? positions,
+            NativeArray<Quaternion>? rotations,
+            NativeArray<Vector3>? scales,
+            int meshNumeration = 0
+        ) => AddMeshInstanced(nodeIndex, meshName, meshResult, instanceCount, positions, rotations, scales, meshNumeration);
+
+        /// <inheritdoc />
+        public virtual void AddMeshInstanced(
             uint nodeIndex,
             string meshName,
             MeshResult meshResult,
@@ -281,6 +330,8 @@ namespace GLTFast
             int meshNumeration = 0
         )
         {
+            ApplyMeshNameFallback(nodeIndex, meshResult);
+
             if ((m_Settings.Mask & ComponentType.Mesh) == 0)
             {
                 return;
@@ -289,7 +340,10 @@ namespace GLTFast
             var materials = new Material[meshResult.materialIndices.Length];
             for (var index = 0; index < meshResult.materialIndices.Length; index++)
             {
-                materials[index] = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                var materialIndex = meshResult.materialIndices[index];
+                var material = (materialIndex.HasValue ? m_Gltf.GetMaterial(materialIndex.Value) : null)
+                    ?? m_Gltf.GetDefaultMaterial();
+                materials[index] = material;
                 materials[index].enableInstancing = true;
             }
 
@@ -393,9 +447,11 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
-        public virtual void EndScene(uint[] rootNodeIndices)
+        public virtual void EndScene(IReadOnlyList<uint> rootNodeIndices)
         {
             Profiler.BeginSample("EndScene");
+
+            m_NameFallback?.Release();
 
             if (m_Entities.Count > 0)
             {
@@ -412,7 +468,7 @@ namespace GLTFast
             Profiler.EndSample();
         }
 
-        static bool IsUniform(Vector3 scale)
+        static bool IsUniform(double3 scale)
         {
             return Math.Abs(scale.x - scale.y) < k_Epsilon && Math.Abs(scale.x - scale.z) < k_Epsilon;
         }

@@ -10,12 +10,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using GLTFast.Logging;
 using KtxUnity;
+using Unity.Cloud.Gltfast.Logging;
 using Unity.Collections;
 using UnityEngine;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     static class KtxImageLoader
     {

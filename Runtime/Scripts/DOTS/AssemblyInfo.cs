@@ -4,5 +4,5 @@
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("glTFast.Tests")]
-[assembly: InternalsVisibleTo("glTFast.Tests.OpenDialog")]
+[assembly: InternalsVisibleTo("Unity.Cloud.Gltfast.Tests")]
+[assembly: InternalsVisibleTo("Unity.Cloud.Gltfast.Tests.OpenDialog")]

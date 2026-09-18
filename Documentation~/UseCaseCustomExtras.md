@@ -1,6 +1,6 @@
 # Use case: Use glTFast Add-on API
 
-This use case describes the steps to use glTFast Add-on API to import custom data from the `extras` property of a glTF&trade; JSON object. This example uses Newtonsoft JSON parser to deserialize data.
+This use case describes the steps to use glTFast Add-on API to import custom data from the `extras` property of a glTF&trade; JSON object.
 
 To accomplish this use case, do the following:
 
@@ -22,7 +22,6 @@ Before you start, you must add the following package dependencies to your projec
       // Add these lines:
       // Replace "<x.y.z>" with the version you wish to install
       "com.unity.cloud.gltfast": "<x.y.z>",
-      "com.unity.nuget.newtonsoft-json": "<x.y.z>"
       // Other dependencies...
     }
   }
@@ -73,7 +72,6 @@ In your [assembly definition](https://docs.unity3d.com/Manual/ScriptCompilationA
   "references": [
     // Add these lines:
     "glTFast",
-    "glTFast.Newtonsoft"
     // Other references...
   ]
 ```

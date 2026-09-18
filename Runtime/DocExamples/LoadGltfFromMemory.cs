@@ -4,13 +4,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using GLTFast.Logging;
+using Unity.Cloud.Gltfast.Logging;
 
-namespace GLTFast.Documentation.Examples
+namespace Unity.Cloud.Gltfast.Documentation.Examples
 {
 
     using System;
-    using GLTFast;
+    using Unity.Cloud.Gltfast;
+    using Unity.Collections;
     using UnityEngine;
 
     class LoadGltfFromMemory : MonoBehaviour
@@ -19,8 +20,8 @@ namespace GLTFast.Documentation.Examples
         public async Task LoadGltfFile(string filePath)
         {
             var gltfDataAsByteArray = await File.ReadAllBytesAsync(filePath);
-            var gltf = new GltfImport(logger: new ConsoleLogger());
-            var success = await gltf.Load(
+            var gltf = new GltfImport();
+            var success = await gltf.LoadAsync(
                 gltfDataAsByteArray,
                 // The URI of the original data is important for resolving relative URIs within the glTF
                 new Uri(filePath)
@@ -31,6 +32,37 @@ namespace GLTFast.Documentation.Examples
             }
         }
         #endregion
+
+        public async Task LoadGltfFromNativeArray(string filePath)
+        {
+            #region LoadGltfFromNativeArray
+            var data = new NativeArray<byte>(await File.ReadAllBytesAsync(filePath), Allocator.Persistent);
+            var gltf = new GltfImport();
+            var success = await gltf.LoadAsync(data.AsReadOnly(), new Uri(filePath));
+
+            // Loading completed, so the data is not accessed anymore and can be disposed of.
+            data.Dispose();
+
+            if (success)
+            {
+                await gltf.InstantiateMainSceneAsync(transform);
+            }
+            #endregion
+        }
+
+        public async Task LoadGltfFromNativeArrayInvalid(string filePath)
+        {
+            #region LoadGltfFromNativeArrayInvalid
+            var data = new NativeArray<byte>(await File.ReadAllBytesAsync(filePath), Allocator.Persistent);
+            var gltf = new GltfImport();
+            var loadTask = gltf.LoadAsync(data.AsReadOnly(), new Uri(filePath));
+
+            // Invalid: Loading is still in progress and reads from the data.
+            data.Dispose();
+
+            await loadTask;
+            #endregion
+        }
 
         public void LoadViaComponent()
         {
@@ -54,7 +86,7 @@ namespace GLTFast.Documentation.Examples
                 NodeNameMethod = NameImportMethod.OriginalUnique
             };
             // Load the glTF and pass along the settings
-            var success = await gltf.Load(filePath, settings);
+            var success = await gltf.LoadAsync(filePath, settings);
 
             if (success)
             {
@@ -72,8 +104,8 @@ namespace GLTFast.Documentation.Examples
         {
             #region Instantiation
             // First step: load glTF
-            var gltf = new GLTFast.GltfImport();
-            var success = await gltf.Load(filePath);
+            var gltf = new Unity.Cloud.Gltfast.GltfImport();
+            var success = await gltf.LoadAsync(filePath);
 
             if (success)
             {
@@ -105,10 +137,9 @@ namespace GLTFast.Documentation.Examples
         public async Task SceneInstanceAccess(string filePath)
         {
             #region SceneInstanceAccess
-            var logger = new ConsoleLogger();
-            var gltfImport = new GltfImport(logger: logger);
-            await gltfImport.Load(filePath);
-            var instantiator = new GameObjectInstantiator(gltfImport, transform, logger: logger);
+            var gltfImport = new GltfImport();
+            await gltfImport.LoadAsync(filePath);
+            var instantiator = new GameObjectInstantiator(gltfImport, transform);
             var success = await gltfImport.InstantiateMainSceneAsync(instantiator);
             if (success)
             {
@@ -159,7 +190,7 @@ namespace GLTFast.Documentation.Examples
             foreach (var url in manyUrls)
             {
                 var gltf = new GltfImport(null, deferAgent);
-                var task = gltf.Load(url).ContinueWith(
+                var task = gltf.LoadAsync(url).ContinueWith(
                     async t =>
                     {
                         if (t.Result)

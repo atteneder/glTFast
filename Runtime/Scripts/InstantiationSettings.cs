@@ -3,14 +3,16 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     /// <summary>
     /// Instantiation settings
     /// </summary>
     [Serializable]
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class InstantiationSettings
     {
         /// <summary>
@@ -51,7 +53,7 @@ namespace GLTFast
             set => lightIntensityFactor = value;
         }
 
-        /// <inheritdoc cref="GLTFast.SceneObjectCreation"/>
+        /// <inheritdoc cref="Unity.Cloud.Gltfast.SceneObjectCreation"/>
         public SceneObjectCreation SceneObjectCreation
         {
             get => sceneObjectCreation;

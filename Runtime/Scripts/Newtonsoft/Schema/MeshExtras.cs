@@ -1,38 +1,12 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NEWTONSOFT_JSON
+using System;
+using UnityEngine.Scripting.APIUpdating;
 
-using System.Collections.Generic;
-
-using GLTFast.Schema;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using UnityEngine.Scripting;
-
-namespace GLTFast.Newtonsoft.Schema
+namespace Unity.Cloud.Gltfast.Newtonsoft.Schema
 {
-    public class MeshExtras : GLTFast.Schema.MeshExtras, IJsonObject
-    {
-        [JsonExtensionData]
-        IDictionary<string, JToken> m_JsonExtensionData;
-
-        [Preserve]
-        public MeshExtras() { }
-
-        public bool TryGetValue<T>(string key, out T value)
-        {
-            if (m_JsonExtensionData != null
-                && m_JsonExtensionData.TryGetValue(key, out var token))
-            {
-                value = token.ToObject<T>();
-                return true;
-            }
-
-            value = default;
-            return false;
-        }
-    }
+    [Obsolete("Use Unity.Cloud.Gltfast.Objects.MeshExtras instead.")]
+    [MovedFrom(true, sourceNamespace: "GLTFast.Newtonsoft.Schema", sourceAssembly: "glTFast.Newtonsoft")]
+    public class MeshExtras : Unity.Cloud.Gltfast.Objects.MeshExtras, IJsonObject { }
 }
-
-#endif

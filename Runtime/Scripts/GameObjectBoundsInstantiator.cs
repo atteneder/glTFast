@@ -4,8 +4,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     using Logging;
@@ -13,6 +14,7 @@ namespace GLTFast
     /// <summary>
     /// Generates a GameObject hierarchy from a glTF scene and provides its bounding box
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class GameObjectBoundsInstantiator : GameObjectInstantiator
     {
 
@@ -29,7 +31,7 @@ namespace GLTFast
         /// <inheritdoc />
         public override void BeginScene(
             string name,
-            uint[] rootNodeIndices
+            IReadOnlyList<uint> rootNodeIndices
             )
         {
             base.BeginScene(
@@ -40,18 +42,17 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
-        [Obsolete("Use IInstantiator.AddMesh instead.")]
-        public override void AddPrimitive(
+        public override void AddMesh(
             uint nodeIndex,
             string meshName,
             MeshResult meshResult,
-            uint[] joints = null,
+            IReadOnlyList<uint> joints = null,
             uint? rootJoint = null,
-            float[] morphTargetWeights = null,
+            IReadOnlyList<float> morphTargetWeights = null,
             int meshNumeration = 0
         )
         {
-            base.AddPrimitive(
+            base.AddMesh(
                 nodeIndex,
                 meshName,
                 meshResult,

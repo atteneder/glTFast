@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     using Logging;
@@ -11,6 +12,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Converts a Unity Material into a glTF material
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public interface IMaterialExport
     {
 
@@ -24,7 +26,7 @@ namespace GLTFast.Export
         /// <returns>True if no errors occured, false otherwise</returns>
         bool ConvertMaterial(
             Material uMaterial,
-            out Schema.Material material,
+            out Objects.Material material,
             IGltfWritable gltf,
             ICodeLogger logger
             );

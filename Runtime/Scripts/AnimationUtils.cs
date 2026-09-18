@@ -7,12 +7,14 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Animation related utility methods.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public static class AnimationUtils
     {
         /// <summary>

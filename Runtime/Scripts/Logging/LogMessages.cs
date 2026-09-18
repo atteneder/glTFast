@@ -9,13 +9,15 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Logging
+namespace Unity.Cloud.Gltfast.Logging
 {
 
     /// <summary>
     /// Predefined message code
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Logging", sourceAssembly: "glTFast")]
     public enum LogCode : uint
     {
         /// <summary>
@@ -23,7 +25,7 @@ namespace GLTFast.Logging
         /// </summary>
         None,
         /// <summary>
-        /// Unknown GLTFAccessorAttributeType
+        /// Unknown accessor type
         /// </summary>
         AccessorAttributeTypeUnknown,
         /// <summary>
@@ -87,6 +89,9 @@ namespace GLTFast.Logging
         /// <summary>
         /// Inconsistent embed image type between data URI mediatype and image.mimeType.
         /// </summary>
+        // Retained despite being obsolete: LogCode ordinals are serialized as raw ints
+        // (e.g. GltfTestCase.expectedLogCodes), so removing this member renumbers every
+        // later code and silently invalidates that serialized data. Do not delete.
         [Obsolete("The glTF 2.0 specification requires data URIs to have a valid mediatype. Therefore it's not checked against image.mimeType anymore.")]
         EmbedImageInconsistentType,
         /// <summary>
@@ -269,11 +274,20 @@ namespace GLTFast.Logging
         AccessorAccessFailed,
         /// <summary>Could not create <see cref="Animation"/> component.</summary>
         AnimationComponentFail,
+        /// <summary>A property the glTF specification requires is absent.</summary>
+        RequiredPropertyMissing,
+        /// <summary>An index does not address an existing element.</summary>
+        IndexOutOfRange,
+        /// <summary>Buffer data leases were still open when the glTF import was disposed.</summary>
+        BufferDataForceDisposed,
+        /// <summary>Could not provide data of a bufferView.</summary>
+        BufferViewAccessFailed,
     }
 
     /// <summary>
     /// Converts <see cref="LogCode"/> to human readable and understandable message string.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Logging", sourceAssembly: "glTFast")]
     public static class LogMessages
     {
 #if GLTFAST_REPORT
@@ -281,7 +295,11 @@ namespace GLTFast.Logging
 
         static readonly Dictionary<LogCode, string> k_FullMessages = new Dictionary<LogCode, string>() {
             { LogCode.AccessorAccessFailed, "Could not provide data for accessor {0}" },
-            { LogCode.AccessorAttributeTypeUnknown, "Unknown GLTFAccessorAttributeType" },
+            { LogCode.BufferDataForceDisposed, "{0} buffer data lease(s) were still open when the glTF import was disposed. Their data is released now; further reads throw." },
+            { LogCode.BufferViewAccessFailed, "Could not provide data for bufferView {0}" },
+            { LogCode.RequiredPropertyMissing, "Required property {0} is missing" },
+            { LogCode.IndexOutOfRange, "Index {1} in property {0} does not address an existing element" },
+            { LogCode.AccessorAttributeTypeUnknown, "Unknown accessor type" },
             { LogCode.AccessorInconsistentUsage, "Inconsistent accessor usage {0} != {1}" },
             { LogCode.AccessorsShared, @"glTF file uses certain vertex attributes/accessors across multiple meshes!
 This may result in low performance and high memory usage. Try optimizing the glTF file.
@@ -373,10 +391,29 @@ is approximated. Enable Opaque Texture access in Universal Render Pipeline!" },
                 return sb.ToString();
             }
 #if GLTFAST_REPORT
-            return messages != null
+            if (k_FullMessages.TryGetValue(code, out var template))
+            {
+                if (messages == null)
+                {
+                    return template;
+                }
                 // ReSharper disable once CoVariantArrayConversion
-                ? string.Format(k_FullMessages[code], messages)
-                : k_FullMessages[code];
+                return string.Format(template, messages);
+            }
+            if (messages == null)
+            {
+                return code.ToString();
+            }
+            else
+            {
+                var sb = new StringBuilder(code.ToString());
+                foreach (var message in messages)
+                {
+                    sb.Append(";");
+                    sb.Append(message);
+                }
+                return sb.ToString();
+            }
 #else
             if (messages == null)
             {

@@ -4,7 +4,7 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     readonly struct MeshMaterialCombination
     {

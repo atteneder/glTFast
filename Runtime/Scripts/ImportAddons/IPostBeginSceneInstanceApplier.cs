@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GLTFast.Addons
+namespace Unity.Cloud.Gltfast.Addons
 {
     interface IPostBeginSceneInstanceApplier : IInstanceApplier
     {

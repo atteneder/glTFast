@@ -22,15 +22,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using GLTFast.Logging;
-using GLTFast.Utils;
+using Unity.Cloud.Gltfast.Logging;
+using Unity.Cloud.Gltfast.Utils;
 using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
 
 #if ENABLE_DEFAULT_GLB_IMPORTER
@@ -113,7 +113,7 @@ namespace GLTFast.Editor
                 instantiationSettings = new InstantiationSettings();
             }
 
-            var success = AsyncHelpers.RunSync(() => m_Gltf.Load(ctx.assetPath, importSettings));
+            var success = AsyncHelpers.RunSync(() => m_Gltf.LoadAsync(ctx.assetPath, importSettings));
 
             CollectingLogger instantiationLogger = null;
             if (success)
@@ -331,8 +331,8 @@ namespace GLTFast.Editor
             {
                 throw new InvalidOperationException("Instantiating scene failed");
             }
-            var useFirstChild = scene.nodes is { Length: > 0 };
-            var singleNode = scene.nodes is { Length: 1 };
+            var useFirstChild = scene.Nodes is { Count: > 0 };
+            var singleNode = scene.Nodes is { Count: 1 };
             var hasAnimation = false;
 #if UNITY_ANIMATION
             if (importSettings.AnimationMethod != AnimationMethod.None

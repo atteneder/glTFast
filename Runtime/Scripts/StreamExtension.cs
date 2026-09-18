@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     static class StreamExtension
     {

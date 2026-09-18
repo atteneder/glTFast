@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 #if USING_URP || USING_HDRP
 using UnityEngine.Rendering;
 #endif
@@ -12,12 +13,13 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering.HighDefinition;
 #endif
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     /// <summary>
     /// Render Pipeline
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public enum RenderPipeline
     {
         /// <summary>
@@ -42,6 +44,7 @@ namespace GLTFast
     /// <summary>
     /// Render Pipeline Utilities
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public static class RenderPipelineUtils
     {
 

@@ -1,0 +1,30 @@
+{
+    "name": "Unity.Cloud.Gltfast.Documentation.Examples",
+    "rootNamespace": "Unity.Cloud.Gltfast.Documentation.Examples",
+    "references": [
+        "Unity.Burst",
+        "Unity.Mathematics",
+        "Unity.Cloud.Gltfast",
+        "Unity.Cloud.Gltfast.Export"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "",
+            "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.unity.modules.imageconversion",
+            "expression": "",
+            "define": "UNITY_IMAGECONVERSION"
+        }
+    ],
+    "noEngineReferences": false
+}

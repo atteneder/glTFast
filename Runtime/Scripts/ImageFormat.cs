@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Image format.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public enum ImageFormat
     {
         /// <summary>Unknown image format</summary>
@@ -20,6 +22,10 @@ namespace GLTFast
         Ktx,
         /// <summary>WebP</summary>
         /// <seealso href="https://developers.google.com/speed/webp"/>
-        WebP
+        WebP,
+
+        /// <summary>JPEG File Interchange Format</summary>
+        [Obsolete("Use Jpeg instead.")]
+        Jpg = Jpeg,
     }
 }

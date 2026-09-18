@@ -8,7 +8,7 @@ using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
 
     using Loading;
@@ -19,7 +19,7 @@ namespace GLTFast.Editor
         public List<GltfAssetDependency> assetDependencies = new List<GltfAssetDependency>();
 
 #pragma warning disable 1998
-        public async Task<IDownload> Request(Uri url)
+        public async Task<IDownload> RequestAsync(Uri url)
         {
             var dependency = new GltfAssetDependency
             {
@@ -30,7 +30,7 @@ namespace GLTFast.Editor
             return req;
         }
 
-        public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable)
+        public async Task<ITextureDownload> RequestTextureAsync(Uri url, bool nonReadable)
         {
             var dependency = new GltfAssetDependency
             {
@@ -44,7 +44,7 @@ namespace GLTFast.Editor
 #pragma warning restore 1998
     }
 
-    class SyncFileLoader : IDownload, INativeDownload
+    class SyncFileLoader : IDownload
     {
         NativeArray<byte> m_FileBytes;
         bool m_Success;
@@ -55,7 +55,7 @@ namespace GLTFast.Editor
         {
             if (NativeFileReader.TryReadAllBytes(url.OriginalString, out m_FileBytes, out var error))
             {
-                NativeData = m_FileBytes.AsReadOnly();
+                Data = m_FileBytes.AsReadOnly();
                 m_Success = true;
             }
             else
@@ -71,17 +71,8 @@ namespace GLTFast.Editor
         public virtual bool Success => m_Success;
 
         public string Error { get; protected set; }
-        public byte[] Data
-        {
-            get
-            {
-                Debug.LogError("Managed byte array `Data` is not used anymore by glTFast and should not be used " +
-                    "as it creates a copy. It is maintained to satisfy the IDownload contract.");
-                return m_FileBytes.ToArray();
-            }
-        }
 
-        public NativeArray<byte>.ReadOnly NativeData { get; private set; }
+        public NativeArray<byte>.ReadOnly Data { get; private set; }
 
         public string Text => m_Success ? System.Text.Encoding.UTF8.GetString(m_FileBytes.AsReadOnlySpan()) : null;
 
@@ -91,7 +82,7 @@ namespace GLTFast.Editor
             {
                 if (Success)
                 {
-                    return GltfGlobals.IsGltfBinary(NativeData);
+                    return GltfGlobals.IsGltfBinary(Data);
                 }
                 return null;
             }
@@ -111,7 +102,7 @@ namespace GLTFast.Editor
                     m_FileBytes.Dispose();
                 m_FileBytes = default;
                 m_Success = false;
-                NativeData = default;
+                Data = default;
             }
         }
     }

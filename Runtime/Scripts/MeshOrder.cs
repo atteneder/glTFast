@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     readonly struct MeshOrder : IDisposable
     {

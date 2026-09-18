@@ -6,7 +6,7 @@ using System.Buffers;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     sealed unsafe class NativeMemoryManager<T> : MemoryManager<T> where T : unmanaged
     {

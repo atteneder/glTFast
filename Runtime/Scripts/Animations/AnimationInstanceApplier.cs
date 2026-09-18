@@ -4,10 +4,10 @@
 #if UNITY_ANIMATION
 
 using System;
-using GLTFast.Addons;
+using Unity.Cloud.Gltfast.Addons;
 using UnityEngine;
 
-namespace GLTFast.Animations
+namespace Unity.Cloud.Gltfast.Animations
 {
     sealed class AnimationInstanceApplier : IPostBeginSceneInstanceApplier
     {

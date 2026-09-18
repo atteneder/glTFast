@@ -3,12 +3,14 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Wraps a <see cref="MaterialsVariantsControl"/> and provides access to it.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class MaterialsVariantsComponent : MonoBehaviour
     {
         /// <summary>

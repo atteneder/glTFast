@@ -5,14 +5,16 @@ using System;
 using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Logging
+namespace Unity.Cloud.Gltfast.Logging
 {
 
     /// <summary>
     /// Logger that stores/collects all messages.
     /// </summary>
     [Serializable]
+    [MovedFrom(true, sourceNamespace: "GLTFast.Logging", sourceAssembly: "glTFast")]
     public class CollectingLogger : ICodeLogger
     {
 
@@ -117,6 +119,7 @@ namespace GLTFast.Logging
     /// Encapsulates a single log message.
     /// </summary>
     [Serializable]
+    [MovedFrom(true, sourceNamespace: "GLTFast.Logging", sourceAssembly: "glTFast")]
     public class LogItem
     {
 

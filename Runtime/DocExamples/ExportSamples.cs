@@ -3,11 +3,11 @@
 
 using System.Threading.Tasks;
 
-namespace GLTFast.Documentation.Examples
+namespace Unity.Cloud.Gltfast.Documentation.Examples
 {
     using Export;
-    using GLTFast;
     using Logging;
+    using Unity.Cloud.Gltfast;
     using UnityEngine;
 
     class ExportSamples : MonoBehaviour
@@ -65,7 +65,7 @@ namespace GLTFast.Documentation.Examples
             export.AddScene(rootLevelNodes, "My new glTF scene");
 
             // Async glTF export
-            var success = await export.SaveToFileAndDispose(destinationFilePath);
+            var success = await export.SaveToFileAndDisposeAsync(destinationFilePath);
 
             if (!success)
             {
@@ -118,7 +118,7 @@ namespace GLTFast.Documentation.Examples
             #endregion
 
             // Async glTF export
-            var success = await export.SaveToFileAndDispose(destinationFilePath);
+            var success = await export.SaveToFileAndDisposeAsync(destinationFilePath);
 
             if (!success)
             {

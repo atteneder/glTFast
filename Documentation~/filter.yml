@@ -3,3 +3,7 @@ apiRules:
       hasAttribute:
         uid: System.ObsoleteAttribute
       type: Type
+  - exclude:
+      hasAttribute:
+        uid: System.ObsoleteAttribute
+      type: Member

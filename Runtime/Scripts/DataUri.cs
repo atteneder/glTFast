@@ -1,146 +1,76 @@
 // SPDX-FileCopyrightText: 2025 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if !UNITY_WEBGL || UNITY_EDITOR
-#define GLTFAST_THREADS
-#endif
-
 using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Unity.Collections;
-using UnityEngine;
-using UnityEngine.Profiling;
+using System.Text;
+using Unity.Mathematics;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     static class DataUri
     {
+        static ReadOnlySpan<byte> DataPrefix => new[]
+        {
+            (byte)'d', (byte)'a', (byte)'t', (byte)'a', (byte)':'
+        };
+
+        static ReadOnlySpan<byte> Base64Marker => new[]
+        {
+            (byte)'b', (byte)'a', (byte)'s', (byte)'e', (byte)'6', (byte)'4', (byte)','
+        };
+
+        public static bool IsDataUri(ReadOnlySpan<byte> utf8)
+        {
+            return utf8.StartsWith(DataPrefix);
+        }
+
         /// <summary>
-        /// Base 64 string to byte array decode speed in bytes per second
-        /// Measurements based on a MacBook Pro Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz
-        /// and reduced by ~ 20%
+        /// Parses a <c>data:&lt;mime&gt;;base64,&lt;payload&gt;</c> URI's descriptor portion.
         /// </summary>
-        const int k_Base64DecodeSpeed =
-#if UNITY_EDITOR
-            60_000_000;
-#else
-            150_000_000;
-#endif
-
-        public static bool IsDataUri(ReadOnlySpan<char> dataUri)
-        {
-            return dataUri.StartsWith("data:", StringComparison.Ordinal);
-        }
-
-        public static async ValueTask<IReadOnlyDisposableData> DecodeDataUriAsync(
-            string dataUri,
-            IDeferAgent deferAgent,
-            CancellationToken cancellationToken
-        )
-        {
-            if (!TryGetDataUriDescriptor(
-                    dataUri, out _, out var startIndex, out var byteLength))
-            {
-                return null;
-            }
-
-            var data = await DecodeDataUriAsync(
-                dataUri, startIndex, byteLength, deferAgent, cancellationToken);
-            if (!data.IsCreated)
-            {
-                return null;
-            }
-
-            return new ReadOnlyDisposableData(data);
-        }
-
-        public static async ValueTask<NativeArray<byte>> DecodeDataUriAsync(
-            string dataUri,
-            int startIndex,
-            int byteLength,
-            IDeferAgent deferAgent,
-            CancellationToken cancellationToken,
-            bool timeCritical = false
-            )
-        {
-            var predictedTime = dataUri.Length / (float)k_Base64DecodeSpeed;
-#if MEASURE_TIMINGS
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-#elif GLTFAST_THREADS
-            if (!timeCritical || deferAgent.ShouldDefer(predictedTime))
-            {
-                try
-                {
-                    return await Task.Run(() => DecodeDataUri(dataUri, startIndex, byteLength), cancellationToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    cancellationToken.ThrowIfCancellationRequestedWithTracking();
-                }
-            }
-#endif
-            await deferAgent.BreakPoint(predictedTime);
-            var result = DecodeDataUri(dataUri, startIndex, byteLength);
-#if MEASURE_TIMINGS
-            stopWatch.Stop();
-            var elapsedSeconds = stopWatch.ElapsedMilliseconds / 1000f;
-            var relativeDiff = (elapsedSeconds-predictedTime) / predictedTime;
-            if (Mathf.Abs(relativeDiff) > .2f) {
-                Debug.LogWarning($"Base 64 unexpected duration! diff: {relativeDiff:0.00}% predicted: {predictedTime} sec actual: {elapsedSeconds} sec");
-            }
-            var throughput = dataUri.Length / elapsedSeconds;
-            Debug.Log($"Base 64 throughput: {throughput} bytes/sec ({dataUri.Length} bytes in {elapsedSeconds} seconds)");
-#endif
-            return result;
-        }
-
+        /// <param name="utf8">UTF-8 bytes of the full data URI.</param>
+        /// <param name="mimeType">MIME type substring (decoded as ASCII).</param>
+        /// <param name="payloadStartIndex">Byte index of the start of the base-64 payload.</param>
+        /// <param name="decodedByteLength">Predicted decoded byte length of the payload.</param>
+        /// <returns>True if the descriptor is well-formed and the encoding is <c>base64</c>.</returns>
         public static bool TryGetDataUriDescriptor(
-            string dataUri,
-            out ReadOnlySpan<char> mimeType,
-            out int startIndex,
-            out int byteLength
-            )
+            ReadOnlySpan<byte> utf8,
+            out string mimeType,
+            out int payloadStartIndex,
+            out int decodedByteLength)
         {
-            var mediaTypeEnd = dataUri.IndexOf(';', 5, Math.Min(dataUri.Length - 5, 1000));
+            const int prefixLength = 5; // "data:"
+            // Cap the MIME type segment search to a reasonable size to avoid scanning huge payloads.
+            var searchLength = math.min(utf8.Length - prefixLength, 1000);
+            var mediaTypeEnd = utf8.Slice(prefixLength, searchLength).IndexOf((byte)';');
             if (mediaTypeEnd < 0)
             {
                 mimeType = null;
-                startIndex = 0;
-                byteLength = -1;
+                payloadStartIndex = 0;
+                decodedByteLength = -1;
                 return false;
             }
-            mimeType = dataUri.AsSpan(5, mediaTypeEnd - 5);
-            if (!dataUri.AsSpan(mediaTypeEnd + 1, 7).SequenceEqual("base64,"))
+            mediaTypeEnd += prefixLength;
+            var mimeBytes = utf8.Slice(prefixLength, mediaTypeEnd - prefixLength);
+            var encodingStart = mediaTypeEnd + 1;
+            if (utf8.Length < encodingStart + Base64Marker.Length
+                || !utf8.Slice(encodingStart, Base64Marker.Length).SequenceEqual(Base64Marker))
             {
-                startIndex = 0;
-                byteLength = -1;
+                mimeType = null;
+                payloadStartIndex = 0;
+                decodedByteLength = -1;
                 return false;
             }
+
+            mimeType = Encoding.ASCII.GetString(mimeBytes);
+            payloadStartIndex = encodingStart + Base64Marker.Length;
+
             var padding = 0;
-            if (dataUri.Length > 0 && dataUri[^1] == '=')
+            if (utf8.Length > 0 && utf8[utf8.Length - 1] == (byte)'=')
             {
-                padding = dataUri.Length > 1 && dataUri[^2] == '=' ? 2 : 1;
+                padding = utf8.Length > 1 && utf8[utf8.Length - 2] == (byte)'=' ? 2 : 1;
             }
-
-            startIndex = mediaTypeEnd + 8;
-            byteLength = ((dataUri.Length - startIndex) * 3 + 3) / 4 - padding;
+            decodedByteLength = (int)(((long)(utf8.Length - payloadStartIndex) * 3 + 3) / 4 - padding);
             return true;
-        }
-
-        static NativeArray<byte> DecodeDataUri(string dataUri, int startIndex, int dataLength)
-        {
-            Profiler.BeginSample("DecodeDataUri");
-            var data = new NativeArray<byte>(dataLength, Allocator.Persistent);
-            if (!Convert.TryFromBase64Chars(dataUri.AsSpan(startIndex), data.AsSpan(), out var bytesWritten)
-                || bytesWritten != dataLength)
-            {
-                // Invalidate buffer to signal decoding failed.
-                data.Dispose();
-            }
-            Profiler.EndSample();
-            return data;
         }
     }
 }

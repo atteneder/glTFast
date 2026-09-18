@@ -1,17 +1,16 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NEWTONSOFT_JSON
-namespace GLTFast.Documentation.Examples
+
+namespace Unity.Cloud.Gltfast.Documentation.Examples
 {
     #region CustomGltfImport
     using System;
     using System.Threading.Tasks;
-    using Addons;
-    using GLTFast;
-    using GLTFast.Logging;
+    using Unity.Cloud.Gltfast;
+    using Unity.Cloud.Gltfast.Addons;
+    using Unity.Cloud.Gltfast.Objects;
     using UnityEngine;
-    using GltfImport = GLTFast.Newtonsoft.GltfImport;
 
     class CustomGltfImport : MonoBehaviour
     {
@@ -28,8 +27,8 @@ namespace GLTFast.Documentation.Examples
             try
             {
                 ImportAddonRegistry.RegisterImportAddon(new MyAddon());
-                var gltfImport = new GltfImport(logger: new ConsoleLogger());
-                await gltfImport.Load(uri);
+                var gltfImport = new GltfImport();
+                await gltfImport.LoadAsync(uri);
                 await gltfImport.InstantiateMainSceneAsync(transform);
             }
             catch (Exception e)
@@ -46,14 +45,14 @@ namespace GLTFast.Documentation.Examples
 
             public override void Dispose() { }
 
-            public override void Inject(GltfImportBase gltfImport)
+            public override void Inject(GltfImport gltfImport)
             {
-                var newtonsoftGltfImport = gltfImport as GltfImport;
-                if (newtonsoftGltfImport == null)
+                var import = gltfImport as GltfImport;
+                if (import == null)
                     return;
 
-                m_GltfImport = newtonsoftGltfImport;
-                newtonsoftGltfImport.AddImportAddonInstance(this);
+                m_GltfImport = import;
+                import.AddImportAddonInstance(this);
             }
 
             public override void Inject(IInstantiator instantiator)
@@ -90,16 +89,13 @@ namespace GLTFast.Documentation.Examples
         void OnNodeCreated(uint nodeIndex, GameObject gameObject)
         {
             // De-serialize glTF JSON
-            var gltf = m_GltfImport.GetSourceRoot();
+            var gltf = m_GltfImport.Root;
 
-            var node = gltf.Nodes[(int)nodeIndex] as GLTFast.Newtonsoft.Schema.Node;
-            var extras = node?.extras;
+            var node = gltf.Nodes[(int)nodeIndex];
+            var extras = node?.Extras;
 
-            if (extras == null)
-                return;
-
-            // Access values in the extras property
-            if (extras.TryGetValue("some-extra-key", out string extraValue))
+            if (extras is { Kind: ValueKind.Object }
+                && extras.TryGetValue("some-extra-key", out string extraValue))
             {
                 var component = gameObject.AddComponent<ExtraData>();
                 component.someExtraKey = extraValue;
@@ -107,6 +103,4 @@ namespace GLTFast.Documentation.Examples
         }
     }
     #endregion
-
 }
-#endif
