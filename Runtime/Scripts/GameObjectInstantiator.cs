@@ -3,14 +3,18 @@
 
 using System;
 using System.Collections.Generic;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEngine.Scripting.APIUpdating;
 #if UNITY_ANIMATION
 using Animation = UnityEngine.Animation;
 #endif
 using Camera = UnityEngine.Camera;
+using CameraType = Unity.Cloud.Gltfast.Objects.CameraType;
+using LightType = Unity.Cloud.Gltfast.Objects.LightType;
 using Material = UnityEngine.Material;
 using Mesh = UnityEngine.Mesh;
 
@@ -18,7 +22,7 @@ using Mesh = UnityEngine.Mesh;
 // using UnityEditor.Animations;
 // #endif
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     using Logging;
@@ -26,10 +30,7 @@ namespace GLTFast
     /// <summary>
     /// Generates a GameObject hierarchy from a glTF scene
     /// </summary>
-    /// <remarks>
-    /// A derived class must re-declare the interface (<c>class MyInstantiator : GameObjectInstantiator, IInstantiator</c>)
-    /// for its own <see cref="IInstantiator.AddMesh"/> or <see cref="IInstantiator.AddMeshInstanced"/> to be reached.
-    /// </remarks>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class GameObjectInstantiator : IInstantiator
     {
         // Developers might want to customize this class by deriving from it.
@@ -42,7 +43,9 @@ namespace GLTFast
         protected InstantiationSettings m_Settings;
 
         /// <summary>
-        /// Instantiation logger
+        /// Logger used by this instantiator. May be <c>null</c> when the caller passed
+        /// <see cref="Unity.Cloud.Gltfast.Logging.NullLogger.Instance"/>; subclasses MUST use
+        /// null-conditional access (<c>m_Logger?.Error(...)</c>).
         /// </summary>
         protected ICodeLogger m_Logger;
 
@@ -60,6 +63,8 @@ namespace GLTFast
         /// glTF node index to instantiated GameObject dictionary
         /// </summary>
         protected Dictionary<uint, GameObject> m_Nodes;
+
+        NodeNameFallback m_NameFallback;
 
         List<IMaterialsVariantsSlotInstance> m_InstanceSlots;
 
@@ -81,7 +86,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="gltf">glTF to instantiate from</param>
         /// <param name="parent">Generated GameObjects will get parented to this Transform</param>
-        /// <param name="logger">Custom logger</param>
+        /// <param name="logger">Custom logger for reporting messages. Defaults to the shared <see cref="Unity.Cloud.Gltfast.Logging.ConsoleLogger.Instance"/> (writes to Unity's Console) when <c>null</c> is passed. Pass <see cref="Unity.Cloud.Gltfast.Logging.NullLogger.Instance"/> (or <c>new NullLogger()</c>) to suppress all output.</param>
         /// <param name="settings">Instantiation settings</param>
         public GameObjectInstantiator(
             IGltfReadable gltf,
@@ -90,27 +95,28 @@ namespace GLTFast
             InstantiationSettings settings = null
             )
         {
-            this.m_Gltf = gltf;
-            this.m_Parent = parent;
-            m_Logger = logger;
+            m_Gltf = gltf;
+            m_Parent = parent;
+            m_Logger = logger is NullLogger ? null : (logger ?? ConsoleLogger.Instance);
             m_Settings = settings ?? new InstantiationSettings();
         }
 
         /// <inheritdoc />
         public virtual void BeginScene(
             string name,
-            uint[] rootNodeIndices
+            IReadOnlyList<uint> rootNodeIndices
             )
         {
             Profiler.BeginSample("BeginScene");
 
             m_Nodes = new Dictionary<uint, GameObject>();
+            m_NameFallback = new NodeNameFallback();
             SceneInstance = new GameObjectSceneInstance();
 
             GameObject sceneGameObject;
             if (m_Settings.SceneObjectCreation == SceneObjectCreation.Never
                 || (m_Settings.SceneObjectCreation == SceneObjectCreation.WhenMultipleRootNodes
-                    && (rootNodeIndices == null || rootNodeIndices.Length == 1))
+                    && (rootNodeIndices == null || rootNodeIndices.Count == 1))
                 )
             {
                 sceneGameObject = m_Parent.gameObject;
@@ -165,22 +171,28 @@ namespace GLTFast
 #endif // UNITY_ANIMATION
 
         /// <inheritdoc />
-        public void CreateNode(
+        public virtual void CreateNode(
             uint nodeIndex,
             uint? parentIndex,
-            Vector3 position,
-            Quaternion rotation,
-            Vector3 scale
+            double3 position,
+            double4 rotation,
+            double3 scale,
+            string name
         )
         {
-            var go = new GameObject();
+            var go = new GameObject(name ?? NodeNameFallback.DefaultName(nodeIndex));
             // Deactivate root-level nodes, so half-loaded scenes won't render.
             go.SetActive(parentIndex.HasValue);
-            go.transform.localScale = scale;
-            go.transform.localPosition = position;
-            go.transform.localRotation = rotation;
+            go.transform.localScale = scale.ToVector3();
+            go.transform.localPosition = position.ToVector3();
+            go.transform.localRotation = rotation.ToUnityEngineQuaternion();
             go.layer = m_Settings.Layer;
             m_Nodes[nodeIndex] = go;
+
+            if (name == null)
+            {
+                m_NameFallback.MarkUnnamed(nodeIndex);
+            }
 
             go.transform.SetParent(
                 parentIndex.HasValue ? m_Nodes[parentIndex.Value].transform : SceneTransform,
@@ -189,38 +201,50 @@ namespace GLTFast
             NodeCreated?.Invoke(nodeIndex, go);
         }
 
-        /// <inheritdoc />
-        public virtual void CreateNode(
-            uint nodeIndex,
-            uint? parentIndex,
-            Vector3 position,
-            Quaternion rotation,
-            Vector3 scale,
-            string name
-        )
+        /// <summary>Applies the mesh-name fallback to a node, if it is still unnamed and the mesh carries a name.</summary>
+        /// <param name="nodeIndex">Index of the node.</param>
+        /// <param name="meshResult">The mesh being assigned to it.</param>
+        protected void ApplyMeshNameFallback(uint nodeIndex, MeshResult meshResult)
         {
-            CreateNode(nodeIndex, parentIndex, position, rotation, scale);
-            SetNodeName(nodeIndex, name);
+            if (m_NameFallback.TryTake(nodeIndex, meshResult, out var meshName))
+            {
+                SetFallbackNodeName(nodeIndex, meshName);
+            }
         }
 
-        /// <inheritdoc />
-        public virtual void SetNodeName(uint nodeIndex, string name)
+        /// <summary>Names a node the glTF left unnamed, once, with the first non-empty name among its meshes.</summary>
+        /// <remarks>Not called when no mesh supplies a name; the <c>Node-{index}</c> placeholder stands instead.</remarks>
+        /// <param name="nodeIndex">Index of the node to name.</param>
+        /// <param name="meshName">The resolved fallback name.</param>
+        protected virtual void SetFallbackNodeName(uint nodeIndex, string meshName)
         {
-            m_Nodes[nodeIndex].name = name ?? $"Node-{nodeIndex}";
+            m_Nodes[nodeIndex].name = meshName;
         }
 
-        /// <inheritdoc />
-        [Obsolete("Use IInstantiator.AddMesh instead.")]
-        public virtual void AddPrimitive(
+        [Obsolete("AddPrimitive has been renamed to AddMesh. (UnityUpgradable) -> AddMesh(*)", true)]
+        public void AddPrimitive(
             uint nodeIndex,
             string meshName,
             MeshResult meshResult,
-            uint[] joints = null,
+            IReadOnlyList<uint> joints = null,
             uint? rootJoint = null,
-            float[] morphTargetWeights = null,
+            IReadOnlyList<float> morphTargetWeights = null,
+            int meshNumeration = 0
+        ) => AddMesh(nodeIndex, meshName, meshResult, joints, rootJoint, morphTargetWeights, meshNumeration);
+
+        /// <inheritdoc />
+        public virtual void AddMesh(
+            uint nodeIndex,
+            string meshName,
+            MeshResult meshResult,
+            IReadOnlyList<uint> joints = null,
+            uint? rootJoint = null,
+            IReadOnlyList<float> morphTargetWeights = null,
             int meshNumeration = 0
         )
         {
+            ApplyMeshNameFallback(nodeIndex, meshResult);
+
             if ((m_Settings.Mask & ComponentType.Mesh) == 0)
             {
                 return;
@@ -255,7 +279,7 @@ namespace GLTFast
                 smr.updateWhenOffscreen = m_Settings.SkinUpdateWhenOffscreen;
                 if (joints != null)
                 {
-                    var bones = new Transform[joints.Length];
+                    var bones = new Transform[joints.Count];
                     for (var j = 0; j < bones.Length; j++)
                     {
                         var jointIndex = joints[j];
@@ -270,7 +294,7 @@ namespace GLTFast
                 smr.sharedMesh = meshResult.mesh;
                 if (morphTargetWeights != null)
                 {
-                    for (var i = 0; i < morphTargetWeights.Length; i++)
+                    for (var i = 0; i < morphTargetWeights.Count; i++)
                     {
                         var weight = morphTargetWeights[i];
                         smr.SetBlendShapeWeight(i, weight);
@@ -282,7 +306,9 @@ namespace GLTFast
             var materials = new Material[meshResult.materialIndices.Length];
             for (var index = 0; index < materials.Length; index++)
             {
-                var material = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                var materialIndex = meshResult.materialIndices[index];
+                var material = (materialIndex.HasValue ? m_Gltf.GetMaterial(materialIndex.Value) : null)
+                    ?? m_Gltf.GetDefaultMaterial();
                 materials[index] = material;
             }
 
@@ -308,9 +334,20 @@ namespace GLTFast
                 );
         }
 
+        [Obsolete("AddPrimitiveInstanced has been renamed to AddMeshInstanced. (UnityUpgradable) -> AddMeshInstanced(*)", true)]
+        public void AddPrimitiveInstanced(
+            uint nodeIndex,
+            string meshName,
+            MeshResult meshResult,
+            uint instanceCount,
+            NativeArray<Vector3>? positions,
+            NativeArray<Quaternion>? rotations,
+            NativeArray<Vector3>? scales,
+            int meshNumeration = 0
+        ) => AddMeshInstanced(nodeIndex, meshName, meshResult, instanceCount, positions, rotations, scales, meshNumeration);
+
         /// <inheritdoc />
-        [Obsolete("Use IInstantiator.AddMeshInstanced instead.")]
-        public virtual void AddPrimitiveInstanced(
+        public virtual void AddMeshInstanced(
             uint nodeIndex,
             string meshName,
             MeshResult meshResult,
@@ -321,6 +358,8 @@ namespace GLTFast
             int meshNumeration = 0
         )
         {
+            ApplyMeshNameFallback(nodeIndex, meshResult);
+
             if ((m_Settings.Mask & ComponentType.Mesh) == 0)
             {
                 return;
@@ -329,7 +368,9 @@ namespace GLTFast
             var materials = new Material[meshResult.materialIndices.Length];
             for (var index = 0; index < materials.Length; index++)
             {
-                var material = m_Gltf.GetMaterial(meshResult.materialIndices[index]) ?? m_Gltf.GetDefaultMaterial();
+                var materialIndex = meshResult.materialIndices[index];
+                var material = (materialIndex.HasValue ? m_Gltf.GetMaterial(materialIndex.Value) : null)
+                    ?? m_Gltf.GetDefaultMaterial();
                 material.enableInstancing = true;
                 materials[index] = material;
             }
@@ -377,28 +418,33 @@ namespace GLTFast
                 return;
             }
             var camera = m_Gltf.GetSourceCamera(cameraIndex);
-            switch (camera.GetCameraType())
+            if (camera.Type.Value == CameraType.Undefined)
             {
-                case Schema.Camera.Type.Orthographic:
+                m_Logger?.Error($"Camera {cameraIndex} has unknown type {camera.Type.ToString()}");
+                return;
+            }
+            switch (camera.Type.Value)
+            {
+                case CameraType.Orthographic:
                     var o = camera.Orthographic;
                     AddCameraOrthographic(
                         nodeIndex,
-                        o.znear,
-                        o.zfar >= 0 ? o.zfar : (float?)null,
-                        o.xmag,
-                        o.ymag,
-                        camera.name
+                        o.Znear,
+                        o.Zfar,
+                        o.Xmag,
+                        o.Ymag,
+                        camera.Name
                     );
                     break;
-                case Schema.Camera.Type.Perspective:
+                case CameraType.Perspective:
                     var p = camera.Perspective;
                     AddCameraPerspective(
                         nodeIndex,
-                        p.yfov,
-                        p.znear,
-                        p.zfar,
-                        p.aspectRatio > 0 ? p.aspectRatio : (float?)null,
-                        camera.name
+                        p.Yfov,
+                        p.Znear,
+                        p.Zfar,
+                        p.AspectRatio > 0 ? p.AspectRatio : (float?)null,
+                        camera.Name
                     );
                     break;
             }
@@ -408,19 +454,20 @@ namespace GLTFast
             uint nodeIndex,
             float verticalFieldOfView,
             float nearClipPlane,
-            float farClipPlane,
+            float? farClipPlane,
             // ReSharper disable once UnusedParameter.Local
             float? aspectRatio,
             string cameraName
         )
         {
             var cam = CreateCamera(nodeIndex, cameraName, out var localScale);
+            var farValue = farClipPlane ?? float.MaxValue;
 
             cam.orthographic = false;
 
             cam.fieldOfView = verticalFieldOfView * Mathf.Rad2Deg;
             cam.nearClipPlane = nearClipPlane * localScale;
-            cam.farClipPlane = farClipPlane * localScale;
+            cam.farClipPlane = farValue * localScale;
 
             // // If the aspect ratio is given and does not match the
             // // screen's aspect ratio, the viewport rect is reduced
@@ -530,7 +577,7 @@ namespace GLTFast
             var lightGameObject = m_Nodes[nodeIndex];
             var lightSource = m_Gltf.GetSourceLightPunctual(lightIndex);
 
-            if (lightSource.GetLightType() != LightPunctual.Type.Point)
+            if (lightSource.Type != LightType.Point)
             {
                 // glTF lights' direction is flipped, compared with Unity's, so
                 // we're adding a rotated child GameObject to counteract.
@@ -545,9 +592,11 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
-        public virtual void EndScene(uint[] rootNodeIndices)
+        public virtual void EndScene(IReadOnlyList<uint> rootNodeIndices)
         {
             Profiler.BeginSample("EndScene");
+
+            m_NameFallback?.Release();
 
             if (m_InstanceSlots != null)
             {
@@ -595,9 +644,9 @@ namespace GLTFast
             uint nodeIndex,
             string meshName,
             MeshResult meshResult,
-            uint[] joints = null,
+            IReadOnlyList<uint> joints = null,
             uint? rootJoint = null,
-            float[] morphTargetWeights = null,
+            IReadOnlyList<float> morphTargetWeights = null,
             int meshNumeration = 0
         );
 

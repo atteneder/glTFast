@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Addons
+namespace Unity.Cloud.Gltfast.Addons
 {
     /// <summary>
     /// Factory that owns conversion-phase data (<see cref="IDataCache"/>) and produces
@@ -14,5 +15,6 @@ namespace GLTFast.Addons
     /// and disposed when the cached data is no longer needed. It may be used to apply the same
     /// data to multiple scene instances.
     /// </remarks>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Addons", sourceAssembly: "glTFast")]
     public interface IDataInstanceApplierFactory : IDataCache, IInstanceApplierFactory { }
 }

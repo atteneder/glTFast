@@ -4,15 +4,15 @@
 #if USING_URP || USING_HDRP
 
 using System;
-using GLTFast.Logging;
-using GLTFast.Schema;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     /// <summary>
     /// Converts URP/HDRP Lit shader based materials to glTF materials
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public sealed class LitMaterialExport : StandardMaterialExportBase
     {
         const string k_KeywordMetallicSpecGlossMap = "_METALLICSPECGLOSSMAP"; // URP Lit

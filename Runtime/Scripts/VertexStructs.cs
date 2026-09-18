@@ -4,7 +4,7 @@
 using System.Runtime.InteropServices;
 using Unity.Mathematics;
 
-namespace GLTFast.Vertex
+namespace Unity.Cloud.Gltfast.Vertex
 {
 
     // Most struct members are never accessed, but keeping them public makes still sense for future use.

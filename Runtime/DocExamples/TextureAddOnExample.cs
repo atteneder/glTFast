@@ -3,14 +3,14 @@
 
 using System;
 using System.Threading.Tasks;
-using GLTFast.Addons;
-using GLTFast.Logging;
+using Unity.Cloud.Gltfast.Addons;
+using Unity.Cloud.Gltfast.Logging;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
 
-namespace GLTFast.Documentation.Examples
+namespace Unity.Cloud.Gltfast.Documentation.Examples
 {
     class TextureAddOnExample : MonoBehaviour
     {
@@ -34,12 +34,7 @@ namespace GLTFast.Documentation.Examples
                 // // Global registration of the addons, they will be used for all imports
                 // ImportAddonRegistry.RegisterImportAddon(new WebpTextureAddon());
                 // ImportAddonRegistry.RegisterImportAddon(new PngTextureAddon());
-
-#if NEWTONSOFT_JSON
-                var gltfImport = new Newtonsoft.GltfImport(logger: new ConsoleLogger());
-#else
-                var gltfImport = new GltfImport(logger: new ConsoleLogger());
-#endif
+                var gltfImport = new GltfImport();
 
                 // Local registration of the addons, they will be used only for this import
                 if (webP)
@@ -67,7 +62,7 @@ namespace GLTFast.Documentation.Examples
                 {
                     path = uri;
                 }
-                await gltfImport.Load(path, settings);
+                await gltfImport.LoadAsync(path, settings);
                 await gltfImport.InstantiateMainSceneAsync(transform);
             }
             catch (Exception e)

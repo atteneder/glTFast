@@ -3,8 +3,9 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     /// <summary>
@@ -12,6 +13,7 @@ namespace GLTFast
     /// features from import/export.
     /// </summary>
     [Flags]
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public enum ComponentType
     {
         /// <summary>

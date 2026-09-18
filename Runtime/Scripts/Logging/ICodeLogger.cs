@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Logging
+namespace Unity.Cloud.Gltfast.Logging
 {
 
     /// <summary>
     /// A logger that can receive log messages of severeness levels
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Logging", sourceAssembly: "glTFast")]
     public interface ICodeLogger
     {
 
@@ -35,26 +36,12 @@ namespace GLTFast.Logging
         void Info(LogCode code, params string[] messages);
 
         /// <summary>
-        /// Dispatches an informational message.
+        /// Dispatches a message, routing it to Info/Warning/Error based on the log type.
         /// </summary>
         /// <param name="logType">Type of message e.g. warn or error etc.</param>
         /// <param name="code">Message's log code</param>
         /// <param name="messages">Additional, optional message parts</param>
-        public void Log(LogType logType, LogCode code, params string[] messages)
-        {
-            switch (logType)
-            {
-                case LogType.Log:
-                    Info(code, messages);
-                    break;
-                case LogType.Warning:
-                    Warning(code, messages);
-                    break;
-                default:
-                    Error(code, messages);
-                    break;
-            }
-        }
+        void Log(LogType logType, LogCode code, params string[] messages);
 
         /// <summary>
         /// Dispatches a critical error message.

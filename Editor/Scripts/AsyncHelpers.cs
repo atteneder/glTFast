@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GLTFast.Utils
+namespace Unity.Cloud.Gltfast.Utils
 {
 
     static class AsyncHelpers

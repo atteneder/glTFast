@@ -3,9 +3,9 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("glTFast.Editor")]
-[assembly: InternalsVisibleTo("glTFast.Editor.Tests")]
-[assembly: InternalsVisibleTo("glTFast.Tests")]
+[assembly: InternalsVisibleTo("Unity.Cloud.Gltfast.Editor")]
+[assembly: InternalsVisibleTo("Unity.Cloud.Gltfast.Editor.Tests")]
+[assembly: InternalsVisibleTo("Unity.Cloud.Gltfast.Tests")]
 
 // TODO: Remove once tests are transferred into package
 [assembly: InternalsVisibleTo("glTF-test-framework.Tests")]

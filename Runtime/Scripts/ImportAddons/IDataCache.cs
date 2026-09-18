@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Addons
+namespace Unity.Cloud.Gltfast.Addons
 {
     /// <summary>
     /// Marker interface for objects that hold data produced during the conversion phase of a glTF
@@ -14,5 +15,6 @@ namespace GLTFast.Addons
     /// <see cref="Unity.Collections.NativeArray{T}"/>) and release them in
     /// <see cref="IDisposable.Dispose"/>.
     /// </remarks>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Addons", sourceAssembly: "glTFast")]
     public interface IDataCache : IDisposable { }
 }

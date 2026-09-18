@@ -3,7 +3,7 @@
 
 using System;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     [Flags]
     enum MainBufferType

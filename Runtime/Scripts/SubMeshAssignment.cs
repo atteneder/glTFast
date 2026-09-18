@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Usually one glTF primitive relates to one Unity sub-mesh.
@@ -14,10 +14,10 @@ namespace GLTFast
     /// </summary>
     readonly struct SubMeshAssignment
     {
-        public MeshPrimitiveBase Primitive { get; }
+        public MeshPrimitive Primitive { get; }
         public int VertexBufferIndex { get; }
 
-        public SubMeshAssignment(MeshPrimitiveBase primitive, int vertexBufferIndex)
+        public SubMeshAssignment(MeshPrimitive primitive, int vertexBufferIndex)
         {
             Primitive = primitive;
             VertexBufferIndex = vertexBufferIndex;

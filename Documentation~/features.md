@@ -78,7 +78,7 @@ The glTF 2.0 specification is fully supported, with only a few minor remarks.
 | | |
 | **Animation**
 | via legacy Animation System | ✅ |
-| via custom animation system (via [Add-on API](xref:GLTFast.Animations.IAnimationProcessor)) | ✅ |
+| via custom animation system (via [Add-on API](xref:Unity.Cloud.Gltfast.Animations.IAnimationProcessor)) | ✅ |
 | via Mecanim ([issue][AnimationMecanim]) | ³☑️ |
 | via Playable API | [⁴⛔️](UseCaseCustomPlayablesAnimation.md) |
 
@@ -166,7 +166,7 @@ Not investigated yet:
 
 ### Custom extras and extensions
 
-Optional `extras` and `extensions` object properties are supported. glTFast uses Newtonsoft JSON parser to access these additional properties.
+Optional `extras` and `extensions` object properties are supported.
 
 See [glTFast Add-on API](UseCaseCustomExtras.md) for an example to import the `extras` property in a gltf asset.
 

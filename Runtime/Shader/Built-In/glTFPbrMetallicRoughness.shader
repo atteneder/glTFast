@@ -393,5 +393,5 @@ Shader "glTF/PbrMetallicRoughness"
 
     FallBack "VertexLit"
     // CustomEditor "StandardShaderGUI"
-    CustomEditor "GLTFast.Editor.BuiltInShaderGUI"
+    CustomEditor "Unity.Cloud.Gltfast.Editor.BuiltInShaderGUI"
 }

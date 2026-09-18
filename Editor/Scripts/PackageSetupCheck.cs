@@ -8,7 +8,7 @@ using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
     [InitializeOnLoad, ExcludeFromCoverage]
     static class PackageSetupCheck

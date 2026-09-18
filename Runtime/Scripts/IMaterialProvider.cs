@@ -4,13 +4,15 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine.Scripting.APIUpdating;
 using Material = UnityEngine.Material;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Provides access to glTF materials.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public interface IMaterialProvider : IMaterialsVariantsProvider
     {
         /// <inheritdoc cref="IGltfReadable.GetMaterial"/>

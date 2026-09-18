@@ -1,18 +1,16 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-#if UNITY_ANIMATION
-using UnityEngine.Playables;
-#endif
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Descriptor of a glTF scene instance
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class GameObjectSceneInstance
     {
 
@@ -37,15 +35,6 @@ namespace GLTFast
         /// Only available if the built-in Animation module is enabled.
         /// </summary>
         public Animation LegacyAnimation { get; private set; }
-
-        /// <summary>
-        /// <a href="https://docs.unity3d.com/Manual/Playables.html">Playables</a> support has been removed since
-        /// it was not usable in builds. Use LegacyAnimation instead.
-        /// See: <a href="https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@6.13/manual/UseCaseCustomPlayablesAnimation.html">UseCaseCustomPlayablesAnimation</a>
-        /// </summary>
-        [Obsolete("Playables support has been removed since it was not usable in builds. Use LegacyAnimation instead. " +
-            "See: <a href=\"https://docs.unity3d.com/Packages/com.unity.cloud.gltfast@6.13/manual/UseCaseCustomPlayablesAnimation.html\">UseCaseCustomPlayablesAnimation</a>")]
-        public Playable? Playable { get; internal set; }
 #endif
 
         List<Camera> m_Cameras;

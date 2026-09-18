@@ -26,7 +26,7 @@ Some tests consume glTF&trade; files or other kinds of test input data. Those te
 
 When tests are run in Editor playmode, the test assets are loaded from that location directly.
 
-When tests are run in a player build, `GLTFast.Editor.Tests.PreprocessBuild` copies all test assets into a directory named `gltfast` within [StreamingAssets][StreamingAssets], effectively packing the assets with the build and ensuring the files are accessible when the tests are run.
+When tests are run in a player build, `Unity.Cloud.Gltfast.Editor.Tests.PreprocessBuild` copies all test assets into a directory named `gltfast` within [StreamingAssets][StreamingAssets], effectively packing the assets with the build and ensuring the files are accessible when the tests are run.
 
 > [!CAUTION]
 > If you ran the tests in a production project, you need to remove the test folders in StreamingAssets to ensure they don't end up in a production build.

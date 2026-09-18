@@ -3,10 +3,11 @@
 
 using System;
 using System.Threading.Tasks;
-using GLTFast.Loading;
+using Unity.Cloud.Gltfast.Loading;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     using Logging;
     using Materials;
@@ -15,6 +16,7 @@ namespace GLTFast
     /// Base component for code-less loading of glTF files
     /// Extends <see cref="GltfAsset"/> with bounding box calculation
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class GltfBoundsAsset : GltfAsset
     {
         /// <summary>
@@ -38,7 +40,7 @@ namespace GLTFast
         bool createBoxCollider = true;
 
         /// <inheritdoc />
-        public override async Task<bool> Load(
+        public override async Task<bool> LoadAsync(
             string gltfUrl,
             IDownloadProvider downloadProvider = null,
             IDeferAgent deferAgent = null,
@@ -47,7 +49,7 @@ namespace GLTFast
             )
         {
             Importer = new GltfImport(downloadProvider, deferAgent, materialGenerator, logger);
-            var success = await Importer.Load(gltfUrl);
+            var success = await Importer.LoadAsync(gltfUrl);
             if (success)
             {
                 var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
@@ -74,10 +76,11 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
-        public override async Task<bool> InstantiateScene(int sceneIndex, ICodeLogger logger = null)
+        public override async Task<bool> InstantiateSceneAsync(int sceneIndex, ICodeLogger logger = null)
         {
+            logger ??= ConsoleLogger.Instance;
             var instantiator = (GameObjectBoundsInstantiator)GetDefaultInstantiator(logger);
-            var success = await base.InstantiateScene(sceneIndex, instantiator);
+            var success = await base.InstantiateSceneAsync(sceneIndex, instantiator);
             CurrentSceneId = success ? sceneIndex : (int?)null;
             SceneInstance = instantiator.SceneInstance;
             if (success)

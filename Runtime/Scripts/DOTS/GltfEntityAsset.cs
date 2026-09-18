@@ -5,19 +5,20 @@
 
 using System.IO;
 using System.Threading.Tasks;
-using GLTFast.Loading;
-using GLTFast.Logging;
-using GLTFast.Materials;
+using Unity.Cloud.Gltfast.Loading;
+using Unity.Cloud.Gltfast.Logging;
+using Unity.Cloud.Gltfast.Materials;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 using Unity.Collections;
 #if UNITY_ENTITIES_GRAPHICS
 using Unity.Mathematics;
 #endif
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     /// <summary>
@@ -26,6 +27,7 @@ namespace GLTFast
     /// TODO: To be replaced with a pure ECS concept
     /// </summary>
     [BurstCompile]
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast.dots")]
     public class GltfEntityAsset : GltfAssetBase
     {
 
@@ -50,7 +52,7 @@ namespace GLTFast
         /// </summary>
         public bool StreamingAsset => streamingAsset;
 
-        /// <inheritdoc cref="GLTFast.InstantiationSettings"/>
+        /// <inheritdoc cref="Unity.Cloud.Gltfast.InstantiationSettings"/>
         public InstantiationSettings InstantiationSettings
         {
             get => instantiationSettings;
@@ -87,11 +89,12 @@ namespace GLTFast
             if (loadOnStartup && !string.IsNullOrEmpty(url))
             {
                 // Automatic load on startup
-                await Load(FullUrl);
+                await LoadAsync(FullUrl);
             }
         }
 
-        public override async Task<bool> Load(
+        /// <inheritdoc />
+        public override async Task<bool> LoadAsync(
             string gltfUrl,
             IDownloadProvider downloadProvider = null,
             IDeferAgent deferAgent = null,
@@ -99,19 +102,19 @@ namespace GLTFast
             ICodeLogger logger = null
         )
         {
-            logger = logger ?? new ConsoleLogger();
-            var success = await base.Load(gltfUrl, downloadProvider, deferAgent, materialGenerator, logger);
+            logger ??= ConsoleLogger.Instance;
+            var success = await base.LoadAsync(gltfUrl, downloadProvider, deferAgent, materialGenerator, logger);
             if (success)
             {
-                if (deferAgent != null) await deferAgent.BreakPoint();
+                if (deferAgent != null) await deferAgent.BreakPointAsync();
                 // Auto-Instantiate
                 if (sceneId >= 0)
                 {
-                    await InstantiateScene(sceneId, logger);
+                    await InstantiateSceneAsync(sceneId, logger);
                 }
                 else
                 {
-                    await Instantiate(logger);
+                    await InstantiateAsync(logger);
                 }
             }
             return success;

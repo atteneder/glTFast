@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using GLTFast.Addons;
-using GLTFast.Loading;
-using GLTFast.Logging;
+using Unity.Cloud.Gltfast.Addons;
+using Unity.Cloud.Gltfast.Loading;
+using Unity.Cloud.Gltfast.Logging;
 using UnityEngine;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     static class ImageImport
     {
@@ -41,7 +41,7 @@ namespace GLTFast
 
             var task = addons
                 ?.First<ITextureImageLoader>(addon => addon.IsAbleToLoad(data.Data.AsReadOnlySpan()))
-                ?.LoadImage(
+                ?.LoadImageAsync(
                     data.Data,
                     linear,
                     readable,
@@ -112,7 +112,7 @@ namespace GLTFast
                 cancellationToken.ThrowIfCancellationRequestedWithTracking();
                 await Task.Yield();
             }
-            return await loader.LoadImage(data.Data, linear, readable, generateMipMaps, cancellationToken);
+            return await loader.LoadImageAsync(data.Data, linear, readable, generateMipMaps, cancellationToken);
         }
 
         internal static async ValueTask<IReadOnlyDisposableData> LoadDataAsync(
@@ -121,7 +121,7 @@ namespace GLTFast
             CancellationToken cancellationToken
         )
         {
-            var download = await context.DownloadProvider.Request(uri);
+            var download = await context.DownloadProvider.RequestAsync(uri);
             if (download == null)
             {
                 context.Logger?.Error(LogCode.TextureDownloadFailed, "?", uri.ToString());
@@ -133,12 +133,7 @@ namespace GLTFast
 
             if (download.Success)
             {
-                if (download is INativeDownload nativeDownload)
-                {
-                    return new ReadOnlyData(nativeDownload.NativeData, download);
-                }
-                var data = new ReadOnlyNativeArrayFromManagedArray<byte>(download.Data);
-                return new ReadOnlyData(data.Array.AsNativeArrayReadOnly(), data);
+                return new ReadOnlyData(download.Data, download);
             }
 
             context.Logger?.Error(LogCode.TextureDownloadFailed, download.Error, uri.ToString());

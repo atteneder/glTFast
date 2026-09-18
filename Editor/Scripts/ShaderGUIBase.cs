@@ -5,9 +5,9 @@ using System;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
-using static GLTFast.Materials.MaterialGenerator;
+using static Unity.Cloud.Gltfast.Materials.MaterialGenerator;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
     class ShaderGUIBase : ShaderGUI
     {

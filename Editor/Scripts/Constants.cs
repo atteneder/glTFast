@@ -3,7 +3,7 @@
 
 using UnityEngine;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
     static class Constants
     {

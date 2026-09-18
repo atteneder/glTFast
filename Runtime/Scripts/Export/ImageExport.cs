@@ -3,13 +3,15 @@
 
 using System;
 using System.IO;
+using Unity.Cloud.Gltfast.Objects;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using Material = UnityEngine.Material;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     /// <inheritdoc />
@@ -62,7 +64,7 @@ namespace GLTFast.Export
             get
             {
                 if (m_ImageFormat != ImageFormat.Unknown) return m_ImageFormat;
-                return HasAlpha(m_Texture) ? ImageFormat.Png : ImageFormat.Jpg;
+                return HasAlpha(m_Texture) ? ImageFormat.Png : ImageFormat.Jpeg;
             }
         }
 
@@ -97,16 +99,16 @@ namespace GLTFast.Export
         public override TextureWrapMode WrapModeV => m_Texture != null ? m_Texture.wrapModeV : TextureWrapMode.Repeat;
 
         /// <inheritdoc />
-        public override string MimeType
+        public override ImageMimeType MimeType
         {
             get
             {
                 switch (ImageFormat)
                 {
-                    case ImageFormat.Jpg:
-                        return Constants.mimeTypeJPG;
+                    case ImageFormat.Jpeg:
+                        return ImageMimeType.Jpeg;
                     case ImageFormat.Png:
-                        return Constants.mimeTypePNG;
+                        return ImageMimeType.Png;
                     case ImageFormat.Unknown:
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -124,7 +126,7 @@ namespace GLTFast.Export
             {
                 switch (ImageFormat)
                 {
-                    case ImageFormat.Jpg:
+                    case ImageFormat.Jpeg:
                         return "jpg";
                     case ImageFormat.Png:
                         return "png";
@@ -256,7 +258,7 @@ namespace GLTFast.Export
             if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                 assetPath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
             {
-                return ImageFormat.Jpg;
+                return ImageFormat.Jpeg;
             }
             return ImageFormat.Unknown;
         }

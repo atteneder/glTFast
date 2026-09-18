@@ -7,7 +7,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     /// <summary>
@@ -15,8 +15,7 @@ namespace GLTFast.Export
     /// </summary>
     /// <typeparam name="TIn">Type of items in the input array.</typeparam>
     /// <typeparam name="TOut">Type of items in output NativeArray (might differ from input type TIn).</typeparam>
-    [Obsolete("This class is going to get sealed or removed from the public API in a future release.")]
-    public class ManagedNativeArray<TIn, TOut> : IDisposable
+    sealed class ManagedNativeArray<TIn, TOut> : IDisposable
         where TIn : unmanaged
         where TOut : unmanaged
     {
@@ -59,6 +58,8 @@ namespace GLTFast.Export
         /// </summary>
         public NativeArray<TOut> nativeArray => m_NativeArray;
 
+        internal bool IsBufferHandleAllocated => m_BufferHandle.IsAllocated;
+
         /// <summary>
         /// Disposes the managed NativeArray&lt;TOut&gt;.
         /// </summary>
@@ -68,20 +69,30 @@ namespace GLTFast.Export
             GC.SuppressFinalize(this);
         }
 
+        ~ManagedNativeArray() => Dispose(false);
+
         /// <summary>
         /// Disposes the managed NativeArray&lt;TOut&gt; and unpins the underlying managed array.
         /// </summary>
         /// <param name="disposing">Indicates whether the method call comes from a Dispose method (its value is true)
         /// or from a finalizer (its value is false).</param>
-        protected virtual void Dispose(bool disposing)
+        void Dispose(bool disposing)
         {
-            if (disposing && m_Pinned)
+            // Free the GCHandle on BOTH the dispose and finalizer paths; IsAllocated makes it
+            // idempotent. The AtomicSafetyHandle release stays disposing-only: Release is not
+            // finalizer-thread-safe and CheckDeallocateAndThrow can throw, and a throw escaping a
+            // finalizer terminates the process.
+            if (m_BufferHandle.IsAllocated)
             {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                AtomicSafetyHandle.CheckDeallocateAndThrow(m_SafetyHandle);
-                AtomicSafetyHandle.Release(m_SafetyHandle);
+                if (disposing && m_Pinned)
+                {
+                    AtomicSafetyHandle.CheckDeallocateAndThrow(m_SafetyHandle);
+                    AtomicSafetyHandle.Release(m_SafetyHandle);
+                }
 #endif
                 m_BufferHandle.Free();
+                m_BufferHandle = default;
             }
         }
     }

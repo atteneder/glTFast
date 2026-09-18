@@ -6,14 +6,14 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using GLTFast.Logging;
+using Unity.Cloud.Gltfast.Logging;
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     static class ImageConversionImageLoader
     {
@@ -25,7 +25,7 @@ namespace GLTFast
             CancellationToken cancellationToken
         )
         {
-            using var download = await context.DownloadProvider.RequestTexture(uri, !readable);
+            using var download = await context.DownloadProvider.RequestTextureAsync(uri, !readable);
             if (download == null)
             {
                 context.Logger?.Error(LogCode.TextureDownloadFailed, "?", uri.ToString());

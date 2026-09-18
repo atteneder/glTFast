@@ -4,15 +4,17 @@
 #if UNITY_ANIMATION
 
 using System;
-using GLTFast.Addons;
-using GLTFast.Schema;
+using System.Collections.Generic;
+using Unity.Cloud.Gltfast.Addons;
+using Unity.Cloud.Gltfast.Objects;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
+using WrapMode = UnityEngine.WrapMode;
 
-namespace GLTFast.Animations
+namespace Unity.Cloud.Gltfast.Animations
 {
     sealed class AnimationModuleProcessor : IAnimationProcessor
     {
@@ -63,7 +65,7 @@ namespace GLTFast.Animations
 
         public void AddTranslationCurves(
             int clipIndex, int targetNode, INodeHierarchyInfo nodeHierarchyInfo, NativeArray<float>.ReadOnly times,
-            NativeArray<float3>.ReadOnly values, InterpolationType interpolationType)
+            NativeArray<float3>.ReadOnly values, Interpolation interpolation)
         {
             AddTranslationCurves(
                 AnimationClips[clipIndex],
@@ -72,13 +74,13 @@ namespace GLTFast.Animations
                 nodeHierarchyInfo,
                 times,
                 values,
-                interpolationType
+                interpolation
             );
         }
 
         public void AddRotationCurves(
             int clipIndex, int targetNode, INodeHierarchyInfo nodeHierarchyInfo, NativeArray<float>.ReadOnly times,
-            NativeArray<quaternion>.ReadOnly values, InterpolationType interpolationType)
+            NativeArray<quaternion>.ReadOnly values, Interpolation interpolation)
         {
             AddRotationCurves(
                 AnimationClips[clipIndex],
@@ -87,13 +89,13 @@ namespace GLTFast.Animations
                 nodeHierarchyInfo,
                 times,
                 values,
-                interpolationType
+                interpolation
             );
         }
 
         public void AddScaleCurves(
             int clipIndex, int targetNode, INodeHierarchyInfo nodeHierarchyInfo, NativeArray<float>.ReadOnly times,
-            NativeArray<float3>.ReadOnly values, InterpolationType interpolationType)
+            NativeArray<float3>.ReadOnly values, Interpolation interpolation)
         {
             AddScaleCurves(
                 AnimationClips[clipIndex],
@@ -102,7 +104,7 @@ namespace GLTFast.Animations
                 nodeHierarchyInfo,
                 times,
                 values,
-                interpolationType
+                interpolation
             );
         }
 
@@ -114,8 +116,8 @@ namespace GLTFast.Animations
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<float>.ReadOnly values,
-            InterpolationType interpolationType,
-            string[] morphTargetNames = null
+            Interpolation interpolation,
+            IReadOnlyList<string> morphTargetNames = null
             )
         {
             AddMorphTargetWeightCurves(
@@ -125,7 +127,7 @@ namespace GLTFast.Animations
                 nodeHierarchyInfo,
                 times,
                 values,
-                interpolationType,
+                interpolation,
                 morphTargetNames
             );
         }
@@ -154,7 +156,7 @@ namespace GLTFast.Animations
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<float3>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
             )
         {
             var animationPath = AnimationUtils.CreateAnimationPath(targetNode, nodeHierarchyInfo, subPath);
@@ -162,16 +164,16 @@ namespace GLTFast.Animations
             {
 #if UNITY_6000_2_OR_NEWER
                 AddVec3Curves(
-                    clip, animationPath, k_TranslationPropertyIndex, times, values, interpolationType, m_KeyframesPool);
+                    clip, animationPath, k_TranslationPropertyIndex, times, values, interpolation, m_KeyframesPool);
 #else
                 AddVec3Curves(
-                    clip, animationPath, k_TranslationPropertyIndex, times, values, interpolationType);
+                    clip, animationPath, k_TranslationPropertyIndex, times, values, interpolation);
 #endif
             }
             else
             {
                 AddVec3Curves(
-                    clip, animationPath, k_TranslationPropertyIndex, times, interpolationType);
+                    clip, animationPath, k_TranslationPropertyIndex, times, interpolation);
             }
         }
 
@@ -185,21 +187,21 @@ namespace GLTFast.Animations
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<quaternion>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
         )
         {
             var animationPath = AnimationUtils.CreateAnimationPath(targetNode, nodeHierarchyInfo, subPath);
             if (values.IsCreated)
             {
 #if UNITY_6000_2_OR_NEWER
-                AddQuaternionCurves(clip, animationPath, times, values, interpolationType, m_KeyframesPool);
+                AddQuaternionCurves(clip, animationPath, times, values, interpolation, m_KeyframesPool);
 #else
-                AddQuaternionCurves(clip, animationPath, times, values, interpolationType);
+                AddQuaternionCurves(clip, animationPath, times, values, interpolation);
 #endif
             }
             else
             {
-                AddQuaternionCurves(clip, animationPath, times, interpolationType);
+                AddQuaternionCurves(clip, animationPath, times, interpolation);
             }
         }
 
@@ -213,7 +215,7 @@ namespace GLTFast.Animations
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<float3>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
             )
         {
             var animationPath = AnimationUtils.CreateAnimationPath(targetNode, nodeHierarchyInfo, subPath);
@@ -221,15 +223,15 @@ namespace GLTFast.Animations
             {
 #if UNITY_6000_2_OR_NEWER
                 AddVec3Curves(
-                    clip, animationPath, k_ScalePropertyIndex, times, values, interpolationType, m_KeyframesPool);
+                    clip, animationPath, k_ScalePropertyIndex, times, values, interpolation, m_KeyframesPool);
 #else
                 AddVec3Curves(
-                    clip, animationPath, k_ScalePropertyIndex, times, values, interpolationType);
+                    clip, animationPath, k_ScalePropertyIndex, times, values, interpolation);
 #endif
             }
             else
             {
-                AddVec3Curves(clip, animationPath, k_ScalePropertyIndex, times, interpolationType);
+                AddVec3Curves(clip, animationPath, k_ScalePropertyIndex, times, interpolation);
             }
         }
 
@@ -240,8 +242,8 @@ namespace GLTFast.Animations
             INodeHierarchyInfo nodeHierarchyInfo,
             NativeArray<float>.ReadOnly times,
             NativeArray<float>.ReadOnly values,
-            InterpolationType interpolationType,
-            string[] morphTargetNames = null
+            Interpolation interpolation,
+            IReadOnlyList<string> morphTargetNames = null
             )
         {
             Profiler.BeginSample("AnimationModuleLoader.AddMorphTargetWeightCurves");
@@ -249,7 +251,7 @@ namespace GLTFast.Animations
             if (morphTargetNames == null)
             {
                 morphTargetCount = values.Length / times.Length;
-                if (interpolationType == InterpolationType.CubicSpline)
+                if (interpolation == Interpolation.CubicSpline)
                 {
                     // 3 values per key (in-tangent, out-tangent and value)
                     morphTargetCount /= 3;
@@ -257,7 +259,7 @@ namespace GLTFast.Animations
             }
             else
             {
-                morphTargetCount = morphTargetNames.Length;
+                morphTargetCount = morphTargetNames.Count;
             }
 
             var animationPath = AnimationUtils.CreateAnimationPath(targetNode, nodeHierarchyInfo, subPath);
@@ -275,7 +277,7 @@ namespace GLTFast.Animations
                         morphTargetCount,
                         times,
                         values,
-                        interpolationType
+                        interpolation
                         );
                 }
             }
@@ -289,7 +291,7 @@ namespace GLTFast.Animations
                         animationPath,
                         string.Concat(k_BlendShapePropertyPrefix, morphTargetName),
                         times,
-                        interpolationType
+                        interpolation
                     );
                 }
             }
@@ -300,7 +302,7 @@ namespace GLTFast.Animations
             AnimationClip clip,
             string animationPath,
             NativeArray<float>.ReadOnly times,
-            InterpolationType interpolationType
+            Interpolation interpolation
             )
         {
             Profiler.BeginSample("AnimationModuleLoader.AddQuaternionCurves");
@@ -313,10 +315,10 @@ namespace GLTFast.Animations
             uint duplicates = 0;
 #endif
 
-            switch (interpolationType)
+            switch (interpolation)
             {
-                case InterpolationType.Step:
-                case InterpolationType.CubicSpline:
+                case Interpolation.Step:
+                case Interpolation.CubicSpline:
                 {
                     foreach (var time in times)
                     {
@@ -328,7 +330,7 @@ namespace GLTFast.Animations
 
                     break;
                 }
-                case InterpolationType.Linear:
+                case Interpolation.Linear:
                 default:
                 {
                     var prevTime = times[0];
@@ -384,7 +386,7 @@ namespace GLTFast.Animations
             string animationPath,
             NativeArray<float>.ReadOnly times,
             NativeArray<quaternion>.ReadOnly values,
-            InterpolationType interpolationType,
+            Interpolation interpolation,
             NativeArrayPool<Keyframe> keyframeArrayPool
         )
         {
@@ -400,9 +402,9 @@ namespace GLTFast.Animations
             uint duplicates = 0;
 #endif
 
-            switch (interpolationType)
+            switch (interpolation)
             {
-                case InterpolationType.Step:
+                case Interpolation.Step:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -417,7 +419,7 @@ namespace GLTFast.Animations
                     count = times.Length;
                     break;
                 }
-                case InterpolationType.CubicSpline:
+                case Interpolation.CubicSpline:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -540,7 +542,7 @@ namespace GLTFast.Animations
             string animationPath,
             NativeArray<float>.ReadOnly times,
             NativeArray<quaternion>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
             )
         {
             Profiler.BeginSample("AnimationModuleLoader.AddQuaternionCurves");
@@ -553,9 +555,9 @@ namespace GLTFast.Animations
             uint duplicates = 0;
 #endif
 
-            switch (interpolationType)
+            switch (interpolation)
             {
-                case InterpolationType.Step:
+                case Interpolation.Step:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -568,7 +570,7 @@ namespace GLTFast.Animations
                     }
                     break;
                 }
-                case InterpolationType.CubicSpline:
+                case Interpolation.CubicSpline:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -666,7 +668,7 @@ namespace GLTFast.Animations
             string animationPath,
             int propertyIndex,
             NativeArray<float>.ReadOnly times,
-            InterpolationType interpolationType
+            Interpolation interpolation
             )
         {
             Profiler.BeginSample("AnimationModuleLoader.AddVec3Curves");
@@ -678,9 +680,9 @@ namespace GLTFast.Animations
             var duplicates = 0u;
 #endif
 
-            switch (interpolationType)
+            switch (interpolation)
             {
-                case InterpolationType.Step:
+                case Interpolation.Step:
                 {
                     foreach (var time in times)
                     {
@@ -691,7 +693,7 @@ namespace GLTFast.Animations
 
                     break;
                 }
-                case InterpolationType.CubicSpline:
+                case Interpolation.CubicSpline:
                 {
                     foreach (var time in times)
                     {
@@ -702,7 +704,7 @@ namespace GLTFast.Animations
 
                     break;
                 }
-                case InterpolationType.Linear:
+                case Interpolation.Linear:
                 default:
                 {
                     var prevTime = times[0];
@@ -756,7 +758,7 @@ namespace GLTFast.Animations
             int propertyIndex,
             NativeArray<float>.ReadOnly times,
             NativeArray<float3>.ReadOnly values,
-            InterpolationType interpolationType,
+            Interpolation interpolation,
             NativeArrayPool<Keyframe> keyframeArrayPool
         )
         {
@@ -772,9 +774,9 @@ namespace GLTFast.Animations
 #endif
 
             Profiler.BeginSample("AnimationModuleLoader.AddVec3Curves.PopulateBuffers");
-            switch (interpolationType)
+            switch (interpolation)
             {
-                case InterpolationType.Step:
+                case Interpolation.Step:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -788,7 +790,7 @@ namespace GLTFast.Animations
                     count = times.Length;
                     break;
                 }
-                case InterpolationType.CubicSpline:
+                case Interpolation.CubicSpline:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -889,7 +891,7 @@ namespace GLTFast.Animations
             int propertyIndex,
             NativeArray<float>.ReadOnly times,
             NativeArray<float3>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
             )
         {
             Profiler.BeginSample("AnimationModuleLoader.AddVec3Curves");
@@ -901,9 +903,9 @@ namespace GLTFast.Animations
             uint duplicates = 0;
 #endif
 
-            switch (interpolationType)
+            switch (interpolation)
             {
-                case InterpolationType.Step:
+                case Interpolation.Step:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -915,7 +917,7 @@ namespace GLTFast.Animations
                     }
                     break;
                 }
-                case InterpolationType.CubicSpline:
+                case Interpolation.CubicSpline:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -1000,7 +1002,7 @@ namespace GLTFast.Animations
             string animationPath,
             string propertyName,
             NativeArray<float>.ReadOnly times,
-            InterpolationType interpolationType
+            Interpolation interpolation
             )
         {
             Profiler.BeginSample("AnimationModuleLoader.AddScalarCurve");
@@ -1010,10 +1012,10 @@ namespace GLTFast.Animations
             uint duplicates = 0;
 #endif
 
-            switch (interpolationType)
+            switch (interpolation)
             {
-                case InterpolationType.Step:
-                case InterpolationType.CubicSpline:
+                case Interpolation.Step:
+                case Interpolation.CubicSpline:
                 {
                     foreach (var time in times)
                     {
@@ -1022,7 +1024,7 @@ namespace GLTFast.Animations
 
                     break;
                 }
-                case InterpolationType.Linear:
+                case Interpolation.Linear:
                 default:
                 {
                     var prevTime = times[0];
@@ -1068,7 +1070,7 @@ namespace GLTFast.Animations
             int valueStride,
             NativeArray<float>.ReadOnly times,
             NativeArray<float>.ReadOnly values,
-            InterpolationType interpolationType
+            Interpolation interpolation
             )
         {
             Profiler.BeginSample("AnimationModuleLoader.AddScalarCurve");
@@ -1078,9 +1080,9 @@ namespace GLTFast.Animations
             uint duplicates = 0;
 #endif
 
-            switch (interpolationType)
+            switch (interpolation)
             {
-                case InterpolationType.Step:
+                case Interpolation.Step:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {
@@ -1091,7 +1093,7 @@ namespace GLTFast.Animations
                     }
                     break;
                 }
-                case InterpolationType.CubicSpline:
+                case Interpolation.CubicSpline:
                 {
                     for (var i = 0; i < times.Length; i++)
                     {

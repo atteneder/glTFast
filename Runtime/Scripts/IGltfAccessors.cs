@@ -3,12 +3,18 @@
 
 using System;
 using Unity.Collections;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Provides read-only access to typed glTF accessor data.
     /// </summary>
+    /// <remarks>
+    /// The data is decoded into Unity's coordinate system and value range. For a glTF asset's data
+    /// as stored, use <see cref="IGltfBufferData"/> instead.
+    /// </remarks>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public interface IGltfAccessors
     {
         /// <summary>

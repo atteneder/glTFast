@@ -3,8 +3,9 @@
 
 using System;
 using Unity.Collections;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     enum ChunkFormat : uint
     {
@@ -15,6 +16,7 @@ namespace GLTFast
     /// <summary>
     /// Generic glTF constants and utility methods.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public static class GltfGlobals
     {
 
@@ -46,6 +48,10 @@ namespace GLTFast
         /// <returns>True if the data is a glTF-Binary, false otherwise</returns>
         public static bool IsGltfBinary(byte[] data)
         {
+            if (data == null || data.Length < 4)
+            {
+                return false;
+            }
             var magic = BitConverter.ToUInt32(data, 0);
             return magic == GltfBinaryMagic;
         }

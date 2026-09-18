@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     class NonReadableMeshData<TIndex> : IMeshData<TIndex> where TIndex : unmanaged
     {
@@ -35,7 +35,7 @@ namespace GLTFast.Export
         }
 
 
-        public async ValueTask<NativeArray<TIndex>> GetIndexData(bool sync)
+        public async ValueTask<NativeArray<TIndex>> GetIndexDataAsync(bool sync)
         {
             if (!m_IndexData.IsCreated)
             {
@@ -57,7 +57,7 @@ namespace GLTFast.Export
             return m_IndexData;
         }
 
-        public async ValueTask<NativeArray<byte>> GetVertexData(int stream, bool sync)
+        public async ValueTask<NativeArray<byte>> GetVertexDataAsync(int stream, bool sync)
         {
             Assert.IsTrue(stream >= 0 && stream < 4, "stream must in range 0 to 3");
             m_VertexData ??= new NativeArray<byte>[4];

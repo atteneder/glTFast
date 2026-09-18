@@ -3,13 +3,15 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     /// <summary>
     /// glTF format
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public enum GltfFormat
     {
         /// <summary>
@@ -25,6 +27,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Destination for image files
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public enum ImageDestination
     {
         /// <summary>
@@ -44,6 +47,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Resolutions to existing file conflicts
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public enum FileConflictResolution
     {
         /// <summary>
@@ -60,6 +64,7 @@ namespace GLTFast.Export
     /// glTF compression method.
     /// </summary>
     [Flags]
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public enum Compression
     {
         /// <summary>No compression</summary>
@@ -75,6 +80,7 @@ namespace GLTFast.Export
     /// <summary>
     /// glTF export settings
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public class ExportSettings
     {
         /// <summary>

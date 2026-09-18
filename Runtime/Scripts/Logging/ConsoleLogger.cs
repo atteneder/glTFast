@@ -3,15 +3,23 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Logging
+namespace Unity.Cloud.Gltfast.Logging
 {
 
     /// <summary>
     /// Logs messages directly to the console
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Logging", sourceAssembly: "glTFast")]
     public class ConsoleLogger : ICodeLogger
     {
+        /// <summary>
+        /// Shared no-allocation instance. Used as the default for the public entry
+        /// points when no logger is passed. Prefer this over
+        /// <c>new ConsoleLogger()</c>.
+        /// </summary>
+        public static readonly ConsoleLogger Instance = new();
 
         /// <inheritdoc />
         public void Error(LogCode code, params string[] messages)

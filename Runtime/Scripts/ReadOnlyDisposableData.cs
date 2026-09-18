@@ -4,7 +4,7 @@
 using System;
 using Unity.Collections;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Provides read-only access to byte data and the ability to dispose the underlying resources

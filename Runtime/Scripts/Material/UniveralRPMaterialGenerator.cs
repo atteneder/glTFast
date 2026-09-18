@@ -5,19 +5,22 @@
 
 using System;
 
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-
+using UnityEngine.Scripting.APIUpdating;
+using Color = UnityEngine.Color;
 using Material = UnityEngine.Material;
+using GltfMaterial = Unity.Cloud.Gltfast.Objects.Material;
 
-namespace GLTFast.Materials
+namespace Unity.Cloud.Gltfast.Materials
 {
 
+    [MovedFrom(true, sourceNamespace: "GLTFast.Materials", sourceAssembly: "glTFast")]
     public class UniversalRPMaterialGenerator : ShaderGraphMaterialGenerator
     {
 
@@ -41,19 +44,19 @@ namespace GLTFast.Materials
             m_SupportsCameraOpaqueTexture = renderPipelineAsset.supportsCameraOpaqueTexture;
         }
 
-        protected override void SetDoubleSided(MaterialBase gltfMaterial, Material material)
+        protected override void SetDoubleSided(GltfMaterial gltfMaterial, Material material)
         {
             base.SetDoubleSided(gltfMaterial, material);
             material.SetFloat(MaterialProperty.Cull, (int)CullMode.Off);
         }
 
-        protected override void SetAlphaModeMask(MaterialBase gltfMaterial, Material material)
+        protected override void SetAlphaModeMask(GltfMaterial gltfMaterial, Material material)
         {
             base.SetAlphaModeMask(gltfMaterial, material);
             material.SetFloat(MaterialProperty.AlphaClip, 1);
         }
 
-        protected override void SetShaderModeBlend(MaterialBase gltfMaterial, Material material)
+        protected override void SetShaderModeBlend(GltfMaterial gltfMaterial, Material material)
         {
             material.SetOverrideTag(RenderTypeTag, TransparentRenderType);
             material.EnableKeyword(SurfaceTypeTransparentKeyword);
@@ -101,7 +104,7 @@ namespace GLTFast.Materials
             return base.GetMetallicShader(features);
         }
 
-        protected override ShaderMode? ApplyTransmissionShaderFeatures(MaterialBase gltfMaterial)
+        protected override ShaderMode? ApplyTransmissionShaderFeatures(GltfMaterial gltfMaterial)
         {
             if (!m_SupportsCameraOpaqueTexture)
             {
@@ -109,8 +112,8 @@ namespace GLTFast.Materials
                 return base.ApplyTransmissionShaderFeatures(gltfMaterial);
             }
 
-            if (gltfMaterial?.Extensions?.KHR_materials_transmission != null
-                && gltfMaterial.Extensions.KHR_materials_transmission.transmissionFactor > 0f)
+            if (gltfMaterial?.Extensions?.Transmission != null
+                && gltfMaterial.Extensions.Transmission.TransmissionFactor > 0f)
             {
                 return ShaderMode.Blend;
             }
@@ -129,13 +132,13 @@ namespace GLTFast.Materials
         {
             if (m_SupportsCameraOpaqueTexture)
             {
-                if (transmission.transmissionFactor > 0f)
+                if (transmission.TransmissionFactor > 0f)
                 {
                     material.EnableKeyword(k_TransmissionKeyword);
-                    material.SetFloat(TransmissionFactorProperty, transmission.transmissionFactor);
+                    material.SetFloat(TransmissionFactorProperty, transmission.TransmissionFactor);
                     renderQueue = RenderQueue.Transparent;
                     if (TrySetTexture(
-                        transmission.transmissionTexture,
+                        transmission.TransmissionTexture,
                         material,
                         gltf,
                         TransmissionTextureProperty

@@ -3,16 +3,18 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
-    using Schema;
+    using Objects;
 
     /// <summary>
     /// glTF import settings
     /// </summary>
     [Serializable]
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class ImportSettings
     {
         /// <inheritdoc cref="NameImportMethod"/>
@@ -22,7 +24,7 @@ namespace GLTFast
             set => nodeNameMethod = value;
         }
 
-        /// <inheritdoc cref="GLTFast.AnimationMethod"/>
+        /// <inheritdoc cref="Unity.Cloud.Gltfast.AnimationMethod"/>
         public AnimationMethod AnimationMethod
         {
             get => animationMethod;
@@ -52,7 +54,7 @@ namespace GLTFast
         /// <summary>
         /// Defines the default minification filter mode for textures that have no such specification in data
         /// </summary>
-        public Sampler.MinFilterMode DefaultMinFilterMode
+        public MinFilterMode DefaultMinFilterMode
         {
             get => defaultMinFilterMode;
             set => defaultMinFilterMode = value;
@@ -61,7 +63,7 @@ namespace GLTFast
         /// <summary>
         /// Define the default magnification filter mode for textures that have no such specification in data
         /// </summary>
-        public Sampler.MagFilterMode DefaultMagFilterMode
+        public MagFilterMode DefaultMagFilterMode
         {
             get => defaultMagFilterMode;
             set => defaultMagFilterMode = value;
@@ -94,11 +96,11 @@ namespace GLTFast
 
         [SerializeField]
         [Tooltip("Minification filter mode fallback if no mode was provided.")]
-        Sampler.MinFilterMode defaultMinFilterMode = Sampler.MinFilterMode.Linear;
+        MinFilterMode defaultMinFilterMode = MinFilterMode.Linear;
 
         [SerializeField]
         [Tooltip("Magnification filter mode fallback if no mode was provided.")]
-        Sampler.MagFilterMode defaultMagFilterMode = Sampler.MagFilterMode.Linear;
+        MagFilterMode defaultMagFilterMode = MagFilterMode.Linear;
 
         [SerializeField]
         [Tooltip("Anisotropic filtering level for imported textures.")]

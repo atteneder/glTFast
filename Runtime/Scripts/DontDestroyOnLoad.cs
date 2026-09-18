@@ -3,14 +3,16 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     /// <summary>
     /// Makes GameObject survive scene changes
     /// </summary>
     /// <seealso cref="UnityEngine.Object.DontDestroyOnLoad"/>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class DontDestroyOnLoad : MonoBehaviour
     {
         void Awake()

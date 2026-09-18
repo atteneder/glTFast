@@ -1,0 +1,44 @@
+{
+    "name": "Unity.Cloud.Gltfast.Editor",
+    "rootNamespace": "Unity.Cloud.Gltfast.Editor",
+    "references": [
+        "Unity.Mathematics",
+        "Unity.Cloud.Gltfast",
+        "Unity.Cloud.Gltfast.Export",
+        "UnityEngine.TestTools.Graphics",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "UnityEditor.Formats.Gltf.Validation"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "7.3.1",
+            "define": "USING_URP"
+        },
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "7.3.1",
+            "define": "USING_HDRP"
+        },
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "1.0.0",
+            "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.unity.formats.gltf.validator",
+            "expression": "0.2.0-preview.1",
+            "define": "GLTF_VALIDATOR"
+        }
+    ],
+    "noEngineReferences": false
+}

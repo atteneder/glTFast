@@ -9,7 +9,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
     class ShaderGraphGUI : ShaderGUIBase
     {

@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using GLTFast.Logging;
-using GLTFast.Schema;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     /// <summary>
     /// Converts Built-In Standard shader based materials to glTF materials
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public sealed class BuiltInStandardMaterialExport : StandardMaterialExportBase
     {
         const string k_KeywordMetallicGlossMap = "_METALLICGLOSSMAP";

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.Rendering;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     abstract class MeshGeneratorBase : IDisposable
@@ -31,7 +31,7 @@ namespace GLTFast
             m_MeshName = meshName;
         }
 
-        public async Task<UnityEngine.Mesh> CreateMeshResult(CancellationToken cancellationToken)
+        public async Task<UnityEngine.Mesh> CreateMeshResultAsync(CancellationToken cancellationToken)
         {
             while (!IsCompleted)
             {

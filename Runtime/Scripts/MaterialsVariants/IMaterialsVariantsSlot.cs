@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Represents a material slot.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public interface IMaterialsVariantsSlot
     {
         /// <summary>
@@ -16,7 +18,7 @@ namespace GLTFast
         /// variantIndex, it returns the default material index.
         /// </summary>
         /// <param name="variantIndex">Materials variant index.</param>
-        /// <returns>Corresponding glTF material index.</returns>
-        int GetMaterialIndex(int variantIndex);
+        /// <returns>Corresponding glTF material index, or null when no material is assigned.</returns>
+        int? GetMaterialIndex(int variantIndex);
     }
 }

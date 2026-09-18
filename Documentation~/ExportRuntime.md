@@ -11,23 +11,23 @@ The easiest way to include them is to add the shader variant collection `glTFExp
 ## Export via Script
 
 > [!IMPORTANT]
-> The `GLTFast.Export` namespace can only be used if you reference both `glTFast` and `glTFast.Export` Assemblies in your [Assembly Definition][asmdef].
+> The `Unity.Cloud.Gltfast.Export` namespace can only be used if you reference both `Unity.Cloud.Gltfast` and `Unity.Cloud.Gltfast.Export` Assemblies in your [Assembly Definition][asmdef].
 
 Here's a step-by-step guide to export a GameObject hierarchy/scene from script
 
-- Create an instance of [GameObjectExport](xref:GLTFast.Export.GameObjectExport)
-- Add content via [AddScene](xref:GLTFast.Export.GameObjectExport.AddScene*)
+- Create an instance of [GameObjectExport](xref:Unity.Cloud.Gltfast.Export.GameObjectExport)
+- Add content via [AddScene](xref:Unity.Cloud.Gltfast.Export.GameObjectExport.AddScene*)
 - Two options for the final export
-  - Call [SaveToFileAndDispose](xref:GLTFast.Export.GameObjectExport.SaveToFileAndDispose*) to export a glTF to a file(s)
-  - Call [SaveToStreamAndDispose](xref:GLTFast.Export.GameObjectExport.SaveToStreamAndDispose*) to export to a [Stream][Stream]
+  - Call [SaveToFileAndDisposeAsync](xref:Unity.Cloud.Gltfast.Export.GameObjectExport.SaveToFileAndDisposeAsync*) to export a glTF to a file(s)
+  - Call [SaveToStreamAndDisposeAsync](xref:Unity.Cloud.Gltfast.Export.GameObjectExport.SaveToStreamAndDisposeAsync*) to export to a [Stream][Stream]
 
 glTF export might create more than one file. For example the binary buffer is usually a separate `.bin` file and textures might be separate files as well.
 
 [!code-cs [simple-export](../Runtime/DocExamples/SimpleExport.cs#SimpleExport)]
 
-After calling [SaveToFileAndDispose](xref:GLTFast.Export.GameObjectExport.SaveToFileAndDispose*) the GameObjectExport instance becomes invalid. Do not re-use it.
+After calling [SaveToFileAndDisposeAsync](xref:Unity.Cloud.Gltfast.Export.GameObjectExport.SaveToFileAndDisposeAsync*) the GameObjectExport instance becomes invalid. Do not re-use it.
 
-Further, the export can be customized by passing [ExportSettings](xref:GLTFast.Export.ExportSettings), [GameObjectExportSettings](xref:GLTFast.Export.GameObjectExportSettings) and injectables to [GameObjectExport](xref:GLTFast.Export.GameObjectExport)'s constructor:
+Further, the export can be customized by passing [ExportSettings](xref:Unity.Cloud.Gltfast.Export.ExportSettings), [GameObjectExportSettings](xref:Unity.Cloud.Gltfast.Export.GameObjectExportSettings) and injectables to [GameObjectExport](xref:Unity.Cloud.Gltfast.Export.GameObjectExport)'s constructor:
 
 [!code-cs [advanced-export](../Runtime/DocExamples/ExportSamples.cs#AdvancedExport)]
 
@@ -36,7 +36,7 @@ Further, the export can be customized by passing [ExportSettings](xref:GLTFast.E
 
 ### Scene Origin
 
-When adding GameObjects to a glTF scene, the resulting glTF root nodes' positions will be their original GameObjects' world position in the Unity scene. That might be undesirable (e.g. if the scene is far off the origin and thus not centered), so [AddScene](xref:GLTFast.Export.GameObjectExport.AddScene(System.Collections.Generic.ICollection{UnityEngine.GameObject},Unity.Mathematics.float4x4,System.String)) allows you to provide an inverse scene origin matrix that'll be applied to all root-level nodes.
+When adding GameObjects to a glTF scene, the resulting glTF root nodes' positions will be their original GameObjects' world position in the Unity scene. That might be undesirable (e.g. if the scene is far off the origin and thus not centered), so [AddScene](xref:Unity.Cloud.Gltfast.Export.GameObjectExport.AddScene(System.Collections.Generic.ICollection{UnityEngine.GameObject},Unity.Mathematics.float4x4,System.String)) allows you to provide an inverse scene origin matrix that'll be applied to all root-level nodes.
 
 Here's an example how to export a GameObject, discarding its transform:
 
@@ -46,7 +46,7 @@ Here's an example how to export a GameObject, discarding its transform:
 
 In certain cases glTFast discards mesh vertex attributes that are not used or required. This not only reduces the resulting glTF's file size, but in case of vertex colors, is necessary to preserve visual consistency.
 
-This behavior might be undesirable, for example in authoring workflows where the resulting glTF will be further edited. In that case vertex attribute discarding can be disabled on a per-attribute basis by setting [ExportSettings' PreservedVertexAttributes](xref:GLTFast.Export.ExportSettings.PreservedVertexAttributes) mask.
+This behavior might be undesirable, for example in authoring workflows where the resulting glTF will be further edited. In that case vertex attribute discarding can be disabled on a per-attribute basis by setting [ExportSettings' PreservedVertexAttributes](xref:Unity.Cloud.Gltfast.Export.ExportSettings.PreservedVertexAttributes) mask.
 
 Examples of vertex attribute discarding:
 

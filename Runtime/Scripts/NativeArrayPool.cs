@@ -8,7 +8,7 @@ using Unity.Collections;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>
     /// Manages a pool of re-usable <see cref="NativeArray{T}"/> arrays.
@@ -20,7 +20,8 @@ namespace GLTFast
     {
         readonly NativeArray<T>[] m_Buffers;
 
-        public NativeArrayPool(int maxDimensions) {
+        public NativeArrayPool(int maxDimensions)
+        {
             m_Buffers = new NativeArray<T>[maxDimensions];
         }
 
@@ -38,7 +39,7 @@ namespace GLTFast
             {
                 if (!m_Buffers[dimension].IsCreated)
                 {
-                    m_Buffers[dimension] = new  NativeArray<T>(
+                    m_Buffers[dimension] = new NativeArray<T>(
                         length,
                         Allocator.Temp,
                         NativeArrayOptions.UninitializedMemory
@@ -49,7 +50,7 @@ namespace GLTFast
                 if (m_Buffers[dimension].Length < length)
                 {
                     m_Buffers[dimension].Dispose();
-                    m_Buffers[dimension] = new  NativeArray<T>(
+                    m_Buffers[dimension] = new NativeArray<T>(
                         length,
                         Allocator.Temp,
                         NativeArrayOptions.UninitializedMemory

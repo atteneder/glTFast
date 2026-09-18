@@ -4,18 +4,22 @@
 #if USING_HDRP
 
 using System;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
-using Material = UnityEngine.Material;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Materials
+using Material = UnityEngine.Material;
+using GltfMaterial = Unity.Cloud.Gltfast.Objects.Material;
+
+namespace Unity.Cloud.Gltfast.Materials
 {
 
+    [MovedFrom(true, sourceNamespace: "GLTFast.Materials", sourceAssembly: "glTFast")]
     public class HighDefinitionRPMaterialGenerator : ShaderGraphMaterialGenerator
     {
 
@@ -47,14 +51,14 @@ namespace GLTFast.Materials
         static bool s_MetallicStackLitShaderQueried;
         static Shader s_MetallicStackLitShader;
 
-        public override Material GenerateMaterial(MaterialBase gltfMaterial, IGltfReadable gltf, bool pointsSupport = false)
+        public override Material GenerateMaterial(GltfMaterial gltfMaterial, IGltfReadable gltf, bool pointsSupport = false)
         {
             var material = base.GenerateMaterial(gltfMaterial, gltf, pointsSupport);
             HDMaterial.ValidateMaterial(material);
             return material;
         }
 
-        protected override void SetDoubleSided(Schema.MaterialBase gltfMaterial, Material material)
+        protected override void SetDoubleSided(Objects.Material gltfMaterial, Material material)
         {
             base.SetDoubleSided(gltfMaterial, material);
 
@@ -69,7 +73,7 @@ namespace GLTFast.Materials
             material.SetFloat(CullModeForwardProperty, (int)CullMode.Off);
         }
 
-        protected override void SetAlphaModeMask(Schema.MaterialBase gltfMaterial, Material material)
+        protected override void SetAlphaModeMask(Objects.Material gltfMaterial, Material material)
         {
             base.SetAlphaModeMask(gltfMaterial, material);
 
@@ -78,7 +82,7 @@ namespace GLTFast.Materials
             material.SetShaderPassEnabled(MotionVectorsPass, false);
 
 
-            if (gltfMaterial.Extensions?.KHR_materials_unlit != null)
+            if (gltfMaterial.Extensions?.Unlit != null)
             {
                 material.EnableKeyword(SurfaceTypeTransparentKeyword);
                 material.EnableKeyword(DisableSsrTransparentKeyword);
@@ -131,7 +135,7 @@ namespace GLTFast.Materials
             return base.GetMetallicShader(features);
         }
 
-        protected override void SetShaderModeBlend(Schema.MaterialBase gltfMaterial, Material material)
+        protected override void SetShaderModeBlend(Objects.Material gltfMaterial, Material material)
         {
 
             material.DisableKeyword(AlphaTestOnKeyword);

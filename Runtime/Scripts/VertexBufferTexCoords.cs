@@ -10,11 +10,11 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     using Logging;
-    using Schema;
+    using Objects;
 
     abstract class VertexBufferTexCoordsBase : IDisposable
     {
@@ -31,7 +31,7 @@ namespace GLTFast
             int offset,
             int[] uvAccessorIndices,
             NativeArray<JobHandle> handles,
-            IGltfBuffers buffers
+            BufferStore buffers
             );
         public abstract void AddDescriptors(VertexAttributeDescriptor[] dst, ref int offset, int stream);
         public abstract void ApplyOnMesh(
@@ -67,7 +67,7 @@ namespace GLTFast
             int offset,
             int[] uvAccessorIndices,
             NativeArray<JobHandle> handles,
-            IGltfBuffers buffers
+            BufferStore buffers
             )
         {
             Profiler.BeginSample("ScheduleVertexUVJobs");
@@ -89,12 +89,12 @@ namespace GLTFast
                 }
                 var h = GetUvsJob(
                     data,
-                    uvAcc.count,
-                    uvAcc.componentType,
+                    uvAcc.Count,
+                    uvAcc.ComponentType,
                     byteStride,
                     (float2*)(vDataPtr + outputByteStride * offset + uvSet * sizeof(float2)),
                     outputByteStride,
-                    uvAcc.normalized
+                    uvAcc.Normalized
                 );
                 if (h.HasValue)
                 {
@@ -142,8 +142,8 @@ namespace GLTFast
         unsafe JobHandle? GetUvsJob(
             void* input,
             int count,
-            GltfComponentType inputType,
-            int inputByteStride,
+            AccessorDataType inputType,
+            int? inputByteStride,
             float2* output,
             int outputByteStride,
             bool normalized = false
@@ -154,11 +154,11 @@ namespace GLTFast
 
             switch (inputType)
             {
-                case GltfComponentType.Float:
+                case AccessorDataType.Float:
                 {
                     var jobUv = new Jobs.ConvertUVsFloatToFloatInterleavedJob
                     {
-                        inputByteStride = (inputByteStride > 0) ? inputByteStride : sizeof(float2),
+                        inputByteStride = inputByteStride ?? sizeof(float2),
                         input = (byte*)input,
                         outputByteStride = outputByteStride,
                         result = output
@@ -166,12 +166,12 @@ namespace GLTFast
                     jobHandle = jobUv.ScheduleBatch(count, GltfImport.DefaultBatchCount);
                 }
                 break;
-                case GltfComponentType.UnsignedByte:
+                case AccessorDataType.UnsignedByte:
                     if (normalized)
                     {
                         var jobUv = new Jobs.ConvertUVsUInt8ToFloatInterleavedNormalizedJob
                         {
-                            inputByteStride = (inputByteStride > 0) ? inputByteStride : 2,
+                            inputByteStride = inputByteStride ?? 2 * sizeof(byte),
                             input = (byte*)input,
                             outputByteStride = outputByteStride,
                             result = output
@@ -182,7 +182,7 @@ namespace GLTFast
                     {
                         var jobUv = new Jobs.ConvertUVsUInt8ToFloatInterleavedJob
                         {
-                            inputByteStride = (inputByteStride > 0) ? inputByteStride : 2,
+                            inputByteStride = inputByteStride ?? 2 * sizeof(byte),
                             input = (byte*)input,
                             outputByteStride = outputByteStride,
                             result = output
@@ -190,12 +190,12 @@ namespace GLTFast
                         jobHandle = jobUv.ScheduleBatch(count, GltfImport.DefaultBatchCount);
                     }
                     break;
-                case GltfComponentType.UnsignedShort:
+                case AccessorDataType.UnsignedShort:
                     if (normalized)
                     {
                         var jobUv = new Jobs.ConvertUVsUInt16ToFloatInterleavedNormalizedJob
                         {
-                            inputByteStride = (inputByteStride > 0) ? inputByteStride : 4,
+                            inputByteStride = inputByteStride ?? 2 * sizeof(ushort),
                             input = (byte*)input,
                             outputByteStride = outputByteStride,
                             result = output
@@ -206,7 +206,7 @@ namespace GLTFast
                     {
                         var jobUv = new Jobs.ConvertUVsUInt16ToFloatInterleavedJob
                         {
-                            inputByteStride = (inputByteStride > 0) ? inputByteStride : 4,
+                            inputByteStride = inputByteStride ?? 2 * sizeof(ushort),
                             input = (byte*)input,
                             outputByteStride = outputByteStride,
                             result = output
@@ -214,12 +214,12 @@ namespace GLTFast
                         jobHandle = jobUv.ScheduleBatch(count, GltfImport.DefaultBatchCount);
                     }
                     break;
-                case GltfComponentType.Short:
+                case AccessorDataType.Short:
                     if (normalized)
                     {
                         var job = new Jobs.ConvertUVsInt16ToFloatInterleavedNormalizedJob
                         {
-                            inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
+                            inputByteStride = inputByteStride ?? 2 * sizeof(short),
                             input = (short*)input,
                             outputByteStride = outputByteStride,
                             result = output
@@ -230,7 +230,7 @@ namespace GLTFast
                     {
                         var job = new Jobs.ConvertUVsInt16ToFloatInterleavedJob
                         {
-                            inputByteStride = inputByteStride > 0 ? inputByteStride : 4,
+                            inputByteStride = inputByteStride ?? 2 * sizeof(short),
                             input = (short*)input,
                             outputByteStride = outputByteStride,
                             result = output
@@ -238,12 +238,12 @@ namespace GLTFast
                         jobHandle = job.ScheduleBatch(count, GltfImport.DefaultBatchCount);
                     }
                     break;
-                case GltfComponentType.Byte:
+                case AccessorDataType.Byte:
                     if (normalized)
                     {
                         var jobInt8 = new Jobs.ConvertUVsInt8ToFloatInterleavedNormalizedJob
                         {
-                            inputByteStride = inputByteStride > 0 ? inputByteStride : 2,
+                            inputByteStride = inputByteStride ?? 2 * sizeof(sbyte),
                             input = (sbyte*)input,
                             outputByteStride = outputByteStride,
                             result = output
@@ -254,7 +254,7 @@ namespace GLTFast
                     {
                         var jobInt8 = new Jobs.ConvertUVsInt8ToFloatInterleavedJob
                         {
-                            inputByteStride = inputByteStride > 0 ? inputByteStride : 2,
+                            inputByteStride = inputByteStride ?? 2 * sizeof(sbyte),
                             input = (sbyte*)input,
                             outputByteStride = outputByteStride,
                             result = output

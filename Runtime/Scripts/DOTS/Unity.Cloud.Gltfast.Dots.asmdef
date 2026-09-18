@@ -1,0 +1,35 @@
+{
+    "name": "Unity.Cloud.Gltfast.Dots",
+    "rootNamespace": "Unity.Cloud.Gltfast",
+    "references": [
+        "Unity.Cloud.Gltfast",
+        "Unity.Entities",
+        "Unity.Collections",
+        "Unity.Transforms",
+        "Unity.Mathematics",
+        "Unity.Mathematics.Extensions",
+        "Unity.Mathematics.Extensions.Hybrid",
+        "Unity.Entities.Graphics",
+        "Unity.Burst"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.modules.animation",
+            "expression": "",
+            "define": "UNITY_ANIMATION"
+        },
+        {
+            "name": "com.unity.entities.graphics",
+            "expression": "",
+            "define": "UNITY_ENTITIES_GRAPHICS"
+        }
+    ],
+    "noEngineReferences": false
+}

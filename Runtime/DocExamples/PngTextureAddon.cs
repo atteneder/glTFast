@@ -4,19 +4,19 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using GLTFast.Addons;
+using Unity.Cloud.Gltfast.Addons;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 
-namespace GLTFast.Documentation.Examples
+namespace Unity.Cloud.Gltfast.Documentation.Examples
 {
     class PngTextureAddon : ImportAddon<PngTextureAddonInstance> { }
 
     class PngTextureAddonInstance : ImageLoaderAddonInstance, IDefaultImageFormatLoader
     {
-        public override void Inject(GltfImportBase gltfImport)
+        public override void Inject(GltfImport gltfImport)
         {
             gltfImport.AddImportAddonInstance(this);
         }
@@ -35,7 +35,7 @@ namespace GLTFast.Documentation.Examples
             return ImageFormatDetection.IsPng(data);
         }
 
-        public Task<ImageResult> LoadImage(
+        public Task<ImageResult> LoadImageAsync(
             NativeArray<byte>.ReadOnly data,
             bool linear,
             bool readable,

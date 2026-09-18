@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System.Threading.Tasks;
-using GLTFast.Export;
-using GLTFast.Logging;
+using Unity.Cloud.Gltfast.Export;
+using Unity.Cloud.Gltfast.Logging;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace GLTFast.Editor.Documentation.Examples
+namespace Unity.Cloud.Gltfast.Documentation.Examples.Editor
 {
     static class EditorExportSamples
     {
@@ -24,7 +24,6 @@ namespace GLTFast.Editor.Documentation.Examples
                 Format = GltfFormat.Binary
             };
 
-            var logger = new ConsoleLogger();
             try
             {
                 for (var index = 0; index < rootObjects.Length; index++)
@@ -34,10 +33,10 @@ namespace GLTFast.Editor.Documentation.Examples
                     EditorUtility.DisplayProgressBar(
                         "glTF Batch Export", rootObject.name, index / (float)rootObjects.Length);
 
-                    var export = new GameObjectExport(exportSettings, logger: logger);
+                    var export = new GameObjectExport(exportSettings);
                     export.AddScene(new[] { rootObject }, rootObject.name);
 
-                    var success = await export.SaveToFileAndDispose(
+                    var success = await export.SaveToFileAndDisposeAsync(
                         $"Assets/{rootObject.name}.glb",
                         // Edit Mode does not pump the main-thread SynchronizationContext;
                         // awaited I/O continuations could hang. Force the synchronous path.

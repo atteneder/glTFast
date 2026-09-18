@@ -6,7 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using GLTFast.Editor;
+using Unity.Cloud.Gltfast.Editor;
 using UnityEditor;
 
 using UnityEditor.AssetImporters;
@@ -14,7 +14,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
 
     using Logging;

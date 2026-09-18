@@ -4,7 +4,7 @@
 using System;
 using UnityEngine;
 
-namespace GLTFast.Editor
+namespace Unity.Cloud.Gltfast.Editor
 {
 
     /// <summary>

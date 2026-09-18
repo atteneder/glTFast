@@ -4,27 +4,21 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using GLTFast.Addons;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Addons;
+using Unity.Cloud.Gltfast.Objects;
 using Unity.Collections;
 using UnityEngine;
+using Texture = Unity.Cloud.Gltfast.Objects.Texture;
 
-namespace GLTFast.Documentation.Examples
+namespace Unity.Cloud.Gltfast.Documentation.Examples
 {
     class WebpTextureAddon : ImportAddon<WebpTextureAddonInstance> { }
 
     class WebpTextureAddonInstance : ImageLoaderAddonInstance, ITextureImageLoader
     {
-        public override void Inject(GltfImportBase gltfImport)
+        public override void Inject(GltfImport gltfImport)
         {
-#if NEWTONSOFT_JSON
-            if (gltfImport is not Newtonsoft.GltfImport)
-                return;
-
-            gltfImport.AddImportAddonInstance(this);
-#else
-            Debug.LogError("WebpTextureAddon requires the Newtonsoft.Json package to be installed.");
-#endif
+            gltfImport?.AddImportAddonInstance(this);
         }
 
         public override bool SupportsGltfExtension(string extensionName)
@@ -32,17 +26,16 @@ namespace GLTFast.Documentation.Examples
             return extensionName == "EXT_texture_webp";
         }
 
-        public bool IsAbleToLoad(TextureBase texture, out int imageIndex)
+        public bool IsAbleToLoad(Texture texture, out int imageIndex)
         {
-#if NEWTONSOFT_JSON
-            if (texture is GLTFast.Newtonsoft.Schema.Texture { extensions: not null } t
-                && t.extensions.TryGetValue<TextureWebpExtension>(
+            if (texture?.Extensions != null
+                && texture.Extensions.TryGetValue<TextureWebpExtension>(
                     "EXT_texture_webp", out var ext))
             {
                 imageIndex = ext.source;
                 return true;
             }
-#endif
+
             imageIndex = -1;
             return false;
         }
@@ -52,7 +45,7 @@ namespace GLTFast.Documentation.Examples
             return ImageFormatDetection.IsWebP(data);
         }
 
-        public async Task<ImageResult> LoadImage(
+        public async Task<ImageResult> LoadImageAsync(
             NativeArray<byte>.ReadOnly data,
             bool linear,
             bool readable,
@@ -65,7 +58,6 @@ namespace GLTFast.Documentation.Examples
         }
     }
 
-    [Serializable]
     struct TextureWebpExtension
     {
         public int source;

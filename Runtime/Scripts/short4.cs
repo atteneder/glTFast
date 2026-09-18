@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     /// <summary>A 4 component vector of signed 16-bit integers.</summary>
     struct short4

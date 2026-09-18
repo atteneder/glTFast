@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2023 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-#if NEWTONSOFT_JSON
-
 using System;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Newtonsoft.Schema
+namespace Unity.Cloud.Gltfast.Newtonsoft.Schema
 {
     /// <summary>
     /// Represents a JSON object, containing key-value properties of arbitrary type.
     /// </summary>
+    [Obsolete("Use the AdditionalProperties property (on glTF JSON objects) or IPropertyContainer.TryGetValue (on extensions/extras) instead.")]
+    [MovedFrom(true, sourceNamespace: "GLTFast.Newtonsoft.Schema", sourceAssembly: "glTFast.Newtonsoft")]
     public interface IJsonObject
     {
         /// <summary>
@@ -22,5 +23,3 @@ namespace GLTFast.Newtonsoft.Schema
         bool TryGetValue<T>(string key, out T value);
     }
 }
-
-#endif

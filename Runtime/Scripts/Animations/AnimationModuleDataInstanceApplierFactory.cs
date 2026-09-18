@@ -4,11 +4,11 @@
 #if UNITY_ANIMATION
 
 using System;
-using GLTFast.Addons;
+using Unity.Cloud.Gltfast.Addons;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace GLTFast.Animations
+namespace Unity.Cloud.Gltfast.Animations
 {
     class AnimationModuleDataInstanceApplierFactory : DataInstanceApplierFactory<AnimationClip[]>
     {

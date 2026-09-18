@@ -4,8 +4,9 @@
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
     using Loading;
     using Logging;
@@ -14,6 +15,7 @@ namespace GLTFast
     /// <summary>
     /// Base component for code-less loading of glTF files
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
     public class GltfAsset : GltfAssetBase
     {
         /// <summary>
@@ -62,7 +64,7 @@ namespace GLTFast
             set => streamingAsset = value;
         }
 
-        /// <inheritdoc cref="GLTFast.InstantiationSettings"/>
+        /// <inheritdoc cref="Unity.Cloud.Gltfast.InstantiationSettings"/>
         public InstantiationSettings InstantiationSettings
         {
             get => instantiationSettings;
@@ -113,12 +115,12 @@ namespace GLTFast
             if (loadOnStartup && !string.IsNullOrEmpty(url))
             {
                 // Automatic load on startup
-                await Load(FullUrl);
+                await LoadAsync(FullUrl);
             }
         }
 
         /// <inheritdoc />
-        public override async Task<bool> Load(
+        public override async Task<bool> LoadAsync(
             string gltfUrl,
             IDownloadProvider downloadProvider = null,
             IDeferAgent deferAgent = null,
@@ -126,19 +128,19 @@ namespace GLTFast
             ICodeLogger logger = null
             )
         {
-            logger = logger ?? new ConsoleLogger();
-            var success = await base.Load(gltfUrl, downloadProvider, deferAgent, materialGenerator, logger);
+            logger ??= ConsoleLogger.Instance;
+            var success = await base.LoadAsync(gltfUrl, downloadProvider, deferAgent, materialGenerator, logger);
             if (success)
             {
-                if (deferAgent != null) await deferAgent.BreakPoint();
+                if (deferAgent != null) await deferAgent.BreakPointAsync();
                 // Auto-Instantiate
                 if (sceneId >= 0)
                 {
-                    success = await InstantiateScene(sceneId, logger);
+                    success = await InstantiateSceneAsync(sceneId, logger);
                 }
                 else
                 {
-                    success = await Instantiate(logger);
+                    success = await InstantiateAsync(logger);
                 }
             }
             return success;

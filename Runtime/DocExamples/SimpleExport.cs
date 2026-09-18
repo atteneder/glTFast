@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2024 Unity Technologies and the glTFast authors
 // SPDX-License-Identifier: Apache-2.0
 
-namespace GLTFast.Documentation.Examples
+namespace Unity.Cloud.Gltfast.Documentation.Examples
 {
     #region SimpleExport
     using Export;
@@ -26,7 +26,7 @@ namespace GLTFast.Documentation.Examples
             export.AddScene(rootLevelNodes);
 
             // Async glTF export
-            var success = await export.SaveToFileAndDispose(destinationFilePath);
+            var success = await export.SaveToFileAndDisposeAsync(destinationFilePath);
 
             if (!success)
             {

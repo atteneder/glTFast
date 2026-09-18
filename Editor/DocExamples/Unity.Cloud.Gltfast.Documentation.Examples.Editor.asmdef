@@ -1,0 +1,20 @@
+{
+    "name": "Unity.Cloud.Gltfast.Documentation.Examples.Editor",
+    "rootNamespace": "Unity.Cloud.Gltfast.Documentation.Examples.Editor",
+    "references": [
+        "Unity.Cloud.Gltfast",
+        "Unity.Cloud.Gltfast.Editor",
+        "Unity.Cloud.Gltfast.Export"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

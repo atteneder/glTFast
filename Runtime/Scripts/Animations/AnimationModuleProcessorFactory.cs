@@ -5,7 +5,7 @@
 
 using System;
 
-namespace GLTFast.Animations
+namespace Unity.Cloud.Gltfast.Animations
 {
     sealed class AnimationModuleProcessorFactory : IAnimationProcessorFactory
     {

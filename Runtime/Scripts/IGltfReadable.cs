@@ -2,33 +2,29 @@
 // SPDX-License-Identifier: Apache-2.0
 
 using System;
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
+using Camera = Unity.Cloud.Gltfast.Objects.Camera;
 using Material = UnityEngine.Material;
+using Mesh = Unity.Cloud.Gltfast.Objects.Mesh;
+using Texture = Unity.Cloud.Gltfast.Objects.Texture;
 
-namespace GLTFast
+namespace Unity.Cloud.Gltfast
 {
-
-    /// <inheritdoc />
-    /// <typeparam name="TRoot">glTF root (de-serialized glTF JSON) class type</typeparam>
-    public interface IGltfReadable<out TRoot> : IGltfReadable
-        where TRoot : RootBase
+    /// <summary>
+    /// Provides read-only access to a glTF (glTF objects and imported Unity resources)
+    /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast", sourceAssembly: "glTFast")]
+    public interface IGltfReadable : IMaterialProvider
     {
         /// <summary>
-        /// Get source root (de-serialized glTF JSON).
+        /// De-serialized glTF JSON object.
         /// This is intended for read-only access. Changes might corrupt data
         /// and break subsequent scene instantiation.
         /// </summary>
-        /// <returns>De-serialized glTF root object</returns>
-        TRoot GetSourceRoot();
-    }
-
-    /// <summary>
-    /// Provides read-only access to a glTF (schema and imported Unity resources)
-    /// </summary>
-    public interface IGltfReadable : IMaterialProvider
-    {
+        Root Root { get; }
 
         /// <summary>
         /// Number of materials
@@ -94,21 +90,21 @@ namespace GLTFast
         /// </summary>
         /// <param name="index">glTF camera index</param>
         /// <returns>De-serialized glTF camera</returns>
-        CameraBase GetSourceCamera(uint index);
+        Camera GetSourceCamera(uint index);
 
         /// <summary>
         /// Get source (de-serialized glTF) material
         /// </summary>
         /// <param name="index">glTF material index</param>
         /// <returns>De-serialized glTF material</returns>
-        MaterialBase GetSourceMaterial(int index = 0);
+        Unity.Cloud.Gltfast.Objects.Material GetSourceMaterial(int index = 0);
 
         /// <summary>
         /// Get source (de-serialized glTF) mesh.
         /// </summary>
         /// <param name="meshIndex">glTF mesh index.</param>
         /// <returns>De-serialized glTF mesh.</returns>
-        MeshBase GetSourceMesh(int meshIndex);
+        Mesh GetSourceMesh(int meshIndex);
 
         /// <summary>
         /// Get source (de-serialized glTF) mesh primitive
@@ -116,14 +112,14 @@ namespace GLTFast
         /// <param name="meshIndex">glTF mesh index.</param>
         /// <param name="primitiveIndex">glTF primitive index within mesh.</param>
         /// <returns>De-serialized glTF mesh primitive</returns>
-        MeshPrimitiveBase GetSourceMeshPrimitive(int meshIndex, int primitiveIndex);
+        MeshPrimitive GetSourceMeshPrimitive(int meshIndex, int primitiveIndex);
 
         /// <summary>
         /// Get source (de-serialized glTF) node
         /// </summary>
         /// <param name="index">glTF node index</param>
         /// <returns>De-serialized glTF node</returns>
-        NodeBase GetSourceNode(int index = 0);
+        Node GetSourceNode(int index = 0);
 
         /// <summary>
         /// Get source (de-serialized glTF) scene
@@ -137,7 +133,7 @@ namespace GLTFast
         /// </summary>
         /// <param name="index">glTF texture index</param>
         /// <returns>De-serialized glTF texture</returns>
-        TextureBase GetSourceTexture(int index = 0);
+        Texture GetSourceTexture(int index = 0);
 
         /// <summary>
         /// Get source (de-serialized glTF) image
@@ -161,25 +157,5 @@ namespace GLTFast
         /// <param name="skinId">glTF skin index</param>
         /// <returns>Corresponding bind poses</returns>
         Matrix4x4[] GetBindPoses(int skinId);
-
-        /// <summary>
-        /// Creates a generic byte-array view into an accessor.
-        /// Only available during loading phase as underlying buffers are disposed right afterward.
-        /// </summary>
-        /// <param name="accessorIndex">glTF accessor index</param>
-        /// <returns>Valid byte-slice view into accessor's data if parameter was correct and buffers are available.
-        /// Zero-length slice otherwise.</returns>
-        [Obsolete("This is going to be removed and replaced with an improved way to access accessors' data in a future release.")]
-        NativeSlice<byte> GetAccessor(int accessorIndex);
-
-        /// <summary>
-        /// Creates a generic byte-array view into an accessor.
-        /// Only available during loading phase as underlying buffers are disposed right afterward.
-        /// </summary>
-        /// <param name="accessorIndex">glTF accessor index</param>
-        /// <returns>Valid byte-slice view into accessor's data if parameter was correct and buffers are available.
-        /// Zero-length slice otherwise.</returns>
-        [Obsolete("This is going to be removed and replaced with an improved way to access accessors' data in a future release.")]
-        NativeSlice<byte> GetAccessorData(int accessorIndex);
     }
 }

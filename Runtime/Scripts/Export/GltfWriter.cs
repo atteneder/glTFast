@@ -6,14 +6,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
+using UnityEngine.Scripting.APIUpdating;
 
 #if DRACO_IS_INSTALLED
 using Draco.Encode;
 #endif
-using GLTFast.Schema;
+using Unity.Cloud.Gltfast.Objects;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Cloud.Gltfast.Text.Json;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -21,22 +24,21 @@ using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
-using Buffer = GLTFast.Schema.Buffer;
-using Camera = GLTFast.Schema.Camera;
+using Buffer = Unity.Cloud.Gltfast.Objects.Buffer;
+using Camera = Unity.Cloud.Gltfast.Objects.Camera;
+using CameraType = UnityEngine.CameraType;
 using Debug = UnityEngine.Debug;
-using Material = GLTFast.Schema.Material;
-using Mesh = GLTFast.Schema.Mesh;
-using Sampler = GLTFast.Schema.Sampler;
-using Texture = GLTFast.Schema.Texture;
+using LightType = Unity.Cloud.Gltfast.Objects.LightType;
+using Material = Unity.Cloud.Gltfast.Objects.Material;
+using Mesh = Unity.Cloud.Gltfast.Objects.Mesh;
+using Sampler = Unity.Cloud.Gltfast.Objects.Sampler;
+using Texture = Unity.Cloud.Gltfast.Objects.Texture;
 
-#if DEBUG
-using System.Text;
-#endif
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     using Logging;
@@ -44,6 +46,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Provides glTF export independent of workflow (GameObjects/Entities)
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public class GltfWriter : IGltfWritable
     {
         enum State
@@ -108,7 +111,7 @@ namespace GLTFast.Export
         List<UnityEngine.Material> m_UnityMaterials;
         List<UnityEngine.Mesh> m_UnityMeshes;
         List<VertexAttributeUsage> m_MeshVertexAttributeUsage;
-        Dictionary<int, int[]> m_NodeMaterials;
+        Dictionary<uint, int[]> m_NodeMaterials;
 
         Stream m_BufferStream;
         string m_BufferPath;
@@ -119,7 +122,7 @@ namespace GLTFast.Export
         /// <param name="exportSettings">Export settings</param>
         /// <param name="deferAgent">Defer agent (<see cref="IDeferAgent"/>); decides when/if to preempt
         /// export to preserve a stable frame rate.</param>
-        /// <param name="logger">Interface for logging (error) messages.</param>
+        /// <param name="logger">Custom logger for reporting messages. Defaults to the shared <see cref="Unity.Cloud.Gltfast.Logging.ConsoleLogger.Instance"/> (writes to Unity's Console) when <c>null</c> is passed. Pass <see cref="Unity.Cloud.Gltfast.Logging.NullLogger.Instance"/> (or <c>new NullLogger()</c>) to suppress all output.</param>
         public GltfWriter(
             ExportSettings exportSettings = null,
             IDeferAgent deferAgent = null,
@@ -128,49 +131,54 @@ namespace GLTFast.Export
         {
             m_Gltf = new Root();
             m_Settings = exportSettings ?? new ExportSettings();
-            m_Logger = logger;
+            m_Logger = logger is NullLogger ? null : (logger ?? ConsoleLogger.Instance);
             m_State = State.Initialized;
             m_DeferAgent = deferAgent ?? new UninterruptedDeferAgent();
         }
 
         /// <inheritdoc />
         public uint AddNode(
-            float3? translation = null,
-            quaternion? rotation = null,
-            float3? scale = null,
-            uint[] children = null,
+            double3? translation = null,
+            double4? rotation = null,
+            double3? scale = null,
+            List<uint> children = null,
             string name = null
         )
         {
             CertifyNotDisposed();
             m_State = State.ContentAdded;
             var node = CreateNode(translation, rotation, scale, name);
-            node.children = children;
+            node.Children = children;
             m_Nodes = m_Nodes ?? new List<Node>();
             m_Nodes.Add(node);
             return (uint)m_Nodes.Count - 1;
         }
 
         /// <inheritdoc />
-        [Obsolete("Use overload with joints parameter.")]
-        public void AddMeshToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds)
+        [Obsolete("Use overload with List<uint> children parameter.")]
+        public uint AddNode(
+            float3? translation,
+            quaternion? rotation,
+            float3? scale,
+            uint[] children,
+            string name = null
+        )
         {
-            AddMeshToNode(nodeId, uMesh, materialIds, true);
-        }
-
-        /// <inheritdoc />
-        [Obsolete("Use overload with joints parameter.")]
-        public void AddMeshToNode(int nodeId, UnityEngine.Mesh uMesh, int[] materialIds, bool skinning)
-        {
-            AddMeshToNode(nodeId, uMesh, materialIds, null);
+            return AddNode(
+                translation,
+                rotation?.value,
+                scale,
+                children == null ? null : new List<uint>(children),
+                name
+            );
         }
 
         /// <inheritdoc />
         public void AddMeshToNode(
-            int nodeId,
+            uint nodeId,
             UnityEngine.Mesh uMesh,
             int[] materialIds,
-            uint[] joints
+            List<uint> joints
             )
         {
             if ((m_Settings.ComponentMask & ComponentType.Mesh) == 0) return;
@@ -179,11 +187,11 @@ namespace GLTFast.Export
             if (!ValidateMesh(uMesh))
                 return;
 
-            var node = m_Nodes[nodeId];
+            var node = GetNode(nodeId);
 
             // Always export positions.
             var attributeUsage = VertexAttributeUsage.Position;
-            var skinning = joints != null && joints.Length > 0;
+            var skinning = joints != null && joints.Count > 0;
             if (skinning)
             {
                 attributeUsage |= VertexAttributeUsage.Skinning;
@@ -192,7 +200,7 @@ namespace GLTFast.Export
 
             if (materialIds != null && materialIds.Length > 0)
             {
-                m_NodeMaterials ??= new Dictionary<int, int[]>();
+                m_NodeMaterials ??= new Dictionary<uint, int[]>();
                 m_NodeMaterials[nodeId] = materialIds;
 
                 foreach (var materialId in materialIds)
@@ -224,10 +232,11 @@ namespace GLTFast.Export
                 attributeUsage &= ~VertexAttributeUsage.Skinning;
             }
 
-            node.mesh = AddMesh(uMesh, attributeUsage);
+            var meshId = AddMesh(uMesh, attributeUsage);
+            node.Mesh = meshId;
             if (skinning)
             {
-                node.skin = AddSkin(node.mesh, joints);
+                node.Skin = AddSkin(meshId, joints);
             }
         }
 
@@ -245,7 +254,6 @@ namespace GLTFast.Export
 
             if (uCamera.orthographic)
             {
-                camera.SetCameraType(Camera.Type.Orthographic);
                 var oSize = uCamera.orthographicSize;
                 float aspectRatio;
                 var targetTexture = uCamera.targetTexture;
@@ -257,24 +265,26 @@ namespace GLTFast.Export
                 {
                     aspectRatio = targetTexture.width / (float)targetTexture.height;
                 }
-                camera.orthographic = new CameraOrthographic
+
+                camera.Type = Objects.CameraType.Orthographic;
+                camera.Orthographic = new CameraOrthographic
                 {
-                    ymag = oSize,
-                    xmag = oSize * aspectRatio,
+                    Ymag = oSize,
+                    Xmag = oSize * aspectRatio,
                     // TODO: Check if local scale should be applied to near/far
-                    znear = uCamera.nearClipPlane,
-                    zfar = uCamera.farClipPlane
+                    Znear = uCamera.nearClipPlane,
+                    Zfar = uCamera.farClipPlane
                 };
             }
             else
             {
-                camera.SetCameraType(Camera.Type.Perspective);
-                camera.perspective = new CameraPerspective
+                camera.Type = Objects.CameraType.Perspective;
+                camera.Perspective = new CameraPerspective
                 {
-                    yfov = uCamera.fieldOfView * Mathf.Deg2Rad,
+                    Yfov = uCamera.fieldOfView * Mathf.Deg2Rad,
                     // TODO: Check if local scale should be applied to near/far
-                    znear = uCamera.nearClipPlane,
-                    zfar = uCamera.farClipPlane
+                    Znear = uCamera.nearClipPlane,
+                    Zfar = uCamera.farClipPlane
                 };
             }
 
@@ -297,7 +307,7 @@ namespace GLTFast.Export
             }
             CertifyNotDisposed();
             var light = KhrLightsPunctual.ConvertToLight(uLight);
-            light.intensity *= m_Settings.LightIntensityFactor;
+            light.Intensity *= m_Settings.LightIntensityFactor;
 
             if (m_Lights == null)
             {
@@ -309,7 +319,7 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
-        public void AddCameraToNode(int nodeId, int cameraId)
+        public void AddCameraToNode(uint nodeId, int cameraId)
         {
             CertifyNotDisposed();
             // glTF cameras face in the opposite direction, so we create a
@@ -317,49 +327,56 @@ namespace GLTFast.Export
             // TODO: Detect if this is node is already a helper node
             //       (from glTF import) and discard it (if possible) to enable
             //       lossless round-trips
-            var parent = m_Nodes[nodeId];
-            var node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name: $"{parent.name}_Orientation");
-            node.camera = cameraId;
+            var parent = GetNode(nodeId);
+            var node = AddChildNode(nodeId, rotation: Mathematics.RotateY(math.PI_DBL), name: $"{parent.Name}_Orientation");
+            node.Camera = cameraId;
         }
 
         /// <inheritdoc />
-        public void AddLightToNode(int nodeId, int lightId)
+        public void AddLightToNode(uint nodeId, int lightId)
         {
             CertifyNotDisposed();
-            var node = m_Nodes[nodeId];
+            var node = GetNode(nodeId);
             var light = m_Lights[lightId];
-            if (light.GetLightType() != LightPunctual.Type.Point)
+            if (light.Type != LightType.Point)
             {
                 // glTF lights face in the opposite direction, so we create a
                 // helper node that applies the correct rotation.
                 // TODO: Detect if this is node is already a helper node
                 //       (from glTF import) and discard it (if possible) to enable
                 //       lossless round-trips
-                node = AddChildNode(nodeId, rotation: quaternion.RotateY(math.PI), name: $"{node.name}_Orientation");
+                node = AddChildNode(nodeId, rotation: Mathematics.RotateY(math.PI_DBL), name: $"{node.Name}_Orientation");
             }
-            node.extensions = node.extensions ?? new NodeExtensions();
-            node.Extensions.KHR_lights_punctual = new NodeLightsPunctual
+            node.Extensions = node.Extensions ?? new NodeExtensions();
+            node.Extensions.LightsPunctual = new NodeLightsPunctual
             {
-                light = lightId
+                Light = lightId
             };
         }
 
         /// <inheritdoc />
-        public uint AddScene(uint[] nodes, string name = null)
+        public uint AddScene(List<uint> nodes, string name = null)
         {
             CertifyNotDisposed();
-            m_Scenes = m_Scenes ?? new List<Scene>();
+            m_Scenes ??= new List<Scene>();
             var scene = new Scene
             {
-                name = name,
-                nodes = nodes
+                Name = name,
+                Nodes = nodes
             };
             m_Scenes.Add(scene);
             if (m_Scenes.Count == 1)
             {
-                m_Gltf.scene = 0;
+                m_Gltf.Scene = 0;
             }
             return (uint)m_Scenes.Count - 1;
+        }
+
+        /// <inheritdoc />
+        [Obsolete("Use overload with List<uint> nodes parameter.")]
+        public uint AddScene(uint[] nodes, string name = null)
+        {
+            return AddScene(nodes == null ? null : new List<uint>(nodes), name);
         }
 
         /// <inheritdoc />
@@ -391,8 +408,8 @@ namespace GLTFast.Export
         /// <inheritdoc />
         public int AddImage(ImageExportBase imageExport)
         {
-#if UNITY_IMAGECONVERSION
             CertifyNotDisposed();
+#if UNITY_IMAGECONVERSION
             int imageId;
             if (m_ImageExports != null)
             {
@@ -415,8 +432,8 @@ namespace GLTFast.Export
 
             var image = new Image
             {
-                name = imageExport.FileName,
-                mimeType = imageExport.MimeType
+                Name = imageExport.FileName,
+                MimeType = imageExport.MimeType,
             };
 
             imageExport.JpgQuality = m_Settings.JpgQuality;
@@ -431,7 +448,7 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
-        public int AddTexture(int imageId, int samplerId)
+        public int AddTexture(int? imageId, int? samplerId)
         {
 #if UNITY_IMAGECONVERSION
             CertifyNotDisposed();
@@ -439,8 +456,8 @@ namespace GLTFast.Export
 
             var texture = new Texture
             {
-                source = imageId,
-                sampler = samplerId
+                Source = imageId,
+                Sampler = samplerId
             };
 
             var index = m_Textures.FindIndex(i => TextureComparer.Equals(i, texture));
@@ -457,12 +474,12 @@ namespace GLTFast.Export
         }
 
         /// <inheritdoc />
-        public int AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV)
+        public int? AddSampler(FilterMode filterMode, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV)
         {
             if (filterMode == FilterMode.Bilinear && wrapModeU == TextureWrapMode.Repeat && wrapModeV == TextureWrapMode.Repeat)
             {
                 // This is the default, so no sampler needed
-                return -1;
+                return null;
             }
             CertifyNotDisposed();
             m_Samplers = m_Samplers ?? new List<Sampler>();
@@ -500,10 +517,13 @@ namespace GLTFast.Export
             }
         }
 
-        /// <inheritdoc />
-        public Task<bool> SaveToFileAndDispose(string path) => SaveToFileAndDisposeInternal(path, false);
+        [Obsolete("SaveToFileAndDispose has been renamed to SaveToFileAndDisposeAsync. (UnityUpgradable) -> SaveToFileAndDisposeAsync(*)", true)]
+        public Task<bool> SaveToFileAndDispose(string path) => SaveToFileAndDisposeAsync(path);
 
-        internal async Task<bool> SaveToFileAndDisposeInternal(string path, bool sync)
+        /// <inheritdoc />
+        public Task<bool> SaveToFileAndDisposeAsync(string path) => SaveToFileAndDisposeAsyncInternal(path, false);
+
+        internal async Task<bool> SaveToFileAndDisposeAsyncInternal(string path, bool sync)
         {
             CertifyNotDisposed();
 
@@ -528,10 +548,13 @@ namespace GLTFast.Export
             return success;
         }
 
-        /// <inheritdoc />
-        public Task<bool> SaveToStreamAndDispose(Stream stream) => SaveToStreamAndDispose(stream, false);
+        [Obsolete("SaveToStreamAndDispose has been renamed to SaveToStreamAndDisposeAsync. (UnityUpgradable) -> SaveToStreamAndDisposeAsync(*)", true)]
+        public Task<bool> SaveToStreamAndDispose(Stream stream) => SaveToStreamAndDisposeAsync(stream);
 
-        internal async Task<bool> SaveToStreamAndDispose(Stream stream, bool sync)
+        /// <inheritdoc />
+        public Task<bool> SaveToStreamAndDisposeAsync(Stream stream) => SaveToStreamAndDisposeAsync(stream, false);
+
+        internal async Task<bool> SaveToStreamAndDisposeAsync(Stream stream, bool sync)
         {
             CertifyNotDisposed();
 
@@ -691,18 +714,16 @@ namespace GLTFast.Export
 
         async Task WriteJsonToStream(Stream outStream, bool sync)
         {
-            var writer = new StreamWriter(outStream);
-            m_Gltf.GltfSerialize(writer);
-            // FlushAsync never finishes on the Web, so doing it in sync
+            // Async never finishes on the Web, so doing it in sync
 #if !UNITY_WEBGL || UNITY_EDITOR
             if (!sync)
             {
-                await writer.FlushAsync();
+                await JsonSerializer.SerializeAsync(outStream, m_Gltf, GltfJsonContext.Default.Root);
             }
             else
 #endif
             {
-                writer.Flush();
+                JsonSerializer.Serialize(outStream, m_Gltf, GltfJsonContext.Default.Root);
             }
         }
 
@@ -736,20 +757,17 @@ namespace GLTFast.Export
         void LogSummary(long jsonLength, long bufferLength)
         {
 #if DEBUG
-            if (m_Logger != null)
+            var sb = new StringBuilder("glTF summary: ");
+            sb.AppendFormat("{0} bytes JSON + {1} bytes buffer", jsonLength, bufferLength);
+            if (m_Gltf != null)
             {
-                var sb = new StringBuilder("glTF summary: ");
-                sb.AppendFormat("{0} bytes JSON + {1} bytes buffer", jsonLength, bufferLength);
-                if (m_Gltf != null)
-                {
-                    sb
-                        .AppendFormat(", {0} nodes", m_Gltf.Nodes?.Count ?? 0)
-                        .AppendFormat(", {0} meshes", m_Gltf.Meshes?.Count ?? 0)
-                        .AppendFormat(", {0} materials", m_Gltf.Materials?.Count ?? 0)
-                        .AppendFormat(", {0} images", m_Gltf.Images?.Count ?? 0);
-                }
-                m_Logger.Info(sb.ToString());
+                sb
+                    .AppendFormat(", {0} nodes", m_Gltf.Nodes?.Count ?? 0)
+                    .AppendFormat(", {0} meshes", m_Gltf.Meshes?.Count ?? 0)
+                    .AppendFormat(", {0} materials", m_Gltf.Materials?.Count ?? 0)
+                    .AppendFormat(", {0} images", m_Gltf.Images?.Count ?? 0);
             }
+            m_Logger?.Info(sb.ToString());
 #endif
         }
 
@@ -772,38 +790,38 @@ namespace GLTFast.Export
 
             if (m_BufferStream != null && m_BufferStream.Length > 0)
             {
-                m_Gltf.buffers = new[] {
+                m_Gltf.Buffers = new List<Buffer> {
                     new Buffer {
-                        uri = bufferPath,
-                        byteLength = (uint) m_BufferStream.Length
+                        Uri = string.IsNullOrEmpty(bufferPath) ? null : new UriValue(bufferPath),
+                        ByteLength = m_BufferStream.Length
                     }
                 };
             }
 
-            m_Gltf.scenes = m_Scenes?.ToArray();
-            m_Gltf.nodes = m_Nodes?.ToArray();
-            m_Gltf.meshes = m_Meshes?.ToArray();
-            m_Gltf.skins = m_Skins?.ToArray();
-            m_Gltf.accessors = m_Accessors?.ToArray();
-            m_Gltf.bufferViews = m_BufferViews?.ToArray();
-            m_Gltf.materials = m_Materials?.ToArray();
-            m_Gltf.images = m_Images?.ToArray();
-            m_Gltf.textures = m_Textures?.ToArray();
-            m_Gltf.samplers = m_Samplers?.ToArray();
-            m_Gltf.cameras = m_Cameras?.ToArray();
+            m_Gltf.Scenes = m_Scenes;
+            m_Gltf.Nodes = m_Nodes;
+            m_Gltf.Meshes = m_Meshes;
+            m_Gltf.Skins = m_Skins;
+            m_Gltf.Accessors = m_Accessors;
+            m_Gltf.BufferViews = m_BufferViews;
+            m_Gltf.Materials = m_Materials;
+            m_Gltf.Images = m_Images;
+            m_Gltf.Textures = m_Textures;
+            m_Gltf.Samplers = m_Samplers;
+            m_Gltf.Cameras = m_Cameras;
 
             if (m_Lights != null && m_Lights.Count > 0)
             {
                 RegisterExtensionUsage(Extension.LightsPunctual);
-                m_Gltf.extensions = m_Gltf.extensions ?? new Schema.RootExtensions();
-                m_Gltf.extensions.KHR_lights_punctual = m_Gltf.extensions.KHR_lights_punctual ?? new LightsPunctual();
-                m_Gltf.extensions.KHR_lights_punctual.lights = m_Lights.ToArray();
+                m_Gltf.Extensions = m_Gltf.Extensions ?? new Objects.RootExtensions();
+                m_Gltf.Extensions.LightsPunctual = m_Gltf.Extensions.LightsPunctual ?? new LightsPunctual();
+                m_Gltf.Extensions.LightsPunctual.Lights = m_Lights;
             }
 
-            m_Gltf.asset = new Asset
+            m_Gltf.Asset = new Asset
             {
-                version = "2.0",
-                generator = $"Unity {Application.unityVersion} glTFast {Constants.version}"
+                Version = "2.0",
+                Generator = $"Unity {Application.unityVersion} glTFast {Constants.version}"
             };
 
             BakeExtensions();
@@ -815,34 +833,22 @@ namespace GLTFast.Export
             if (m_ExtensionsRequired != null)
             {
                 var usedOnlyCount = m_ExtensionsUsedOnly?.Count ?? 0;
-                m_Gltf.extensionsRequired = new string[m_ExtensionsRequired.Count];
-                m_Gltf.extensionsUsed = new string[m_ExtensionsRequired.Count + usedOnlyCount];
-                var i = 0;
+                m_Gltf.ExtensionsRequired = new List<EnumOrRawValue<Extension>>(m_ExtensionsRequired.Count);
+                m_Gltf.ExtensionsUsed = new List<EnumOrRawValue<Extension>>(m_ExtensionsRequired.Count + usedOnlyCount);
                 foreach (var extension in m_ExtensionsRequired)
                 {
-                    var name = extension.GetName();
-                    Assert.IsFalse(string.IsNullOrEmpty(name));
-                    m_Gltf.extensionsRequired[i] = name;
-                    m_Gltf.extensionsUsed[i] = name;
-                    i++;
+                    Assert.IsFalse(string.IsNullOrEmpty(extension.GetName()));
+                    m_Gltf.ExtensionsRequired.Add(extension);
+                    m_Gltf.ExtensionsUsed.Add(extension);
                 }
             }
 
             if (m_ExtensionsUsedOnly != null)
             {
-                var i = 0;
-                if (m_Gltf.extensionsUsed == null)
-                {
-                    m_Gltf.extensionsUsed = new string[m_ExtensionsUsedOnly.Count];
-                }
-                else
-                {
-                    i = m_Gltf.extensionsUsed.Length - m_ExtensionsUsedOnly.Count;
-                }
-
+                m_Gltf.ExtensionsUsed ??= new List<EnumOrRawValue<Extension>>(m_ExtensionsUsedOnly.Count);
                 foreach (var extension in m_ExtensionsUsedOnly)
                 {
-                    m_Gltf.extensionsUsed[i++] = extension.GetName();
+                    m_Gltf.ExtensionsUsed.Add(extension);
                 }
             }
         }
@@ -854,7 +860,7 @@ namespace GLTFast.Export
             {
                 var meshId = m_SkinMesh[skinId];
                 var inverseBindMatricesAccessor = m_MeshBindPoses[meshId];
-                m_Skins[skinId].inverseBindMatrices = inverseBindMatricesAccessor;
+                m_Skins[skinId].InverseBindMatrices = inverseBindMatricesAccessor;
             }
 
             m_SkinMesh = null;
@@ -871,9 +877,8 @@ namespace GLTFast.Export
                 {
                     var nodeId = nodeMaterial.Key;
                     var materialIds = nodeMaterial.Value;
-                    var node = m_Nodes[nodeId];
-                    var originalMeshId = node.mesh;
-                    if (originalMeshId < 0) continue;
+                    var node = GetNode(nodeId);
+                    if (node.Mesh is not { } originalMeshId) continue;
                     var mesh = m_Meshes[originalMeshId];
 
                     var meshMaterialCombo = new MeshMaterialCombination(originalMeshId, materialIds);
@@ -891,7 +896,7 @@ namespace GLTFast.Export
                         if (meshMaterialCombos.TryGetValue(meshMaterialCombo, out var meshId))
                         {
                             // Materials are identical -> re-use Mesh object
-                            node.mesh = meshId;
+                            node.Mesh = meshId;
                         }
                         else
                         {
@@ -899,7 +904,7 @@ namespace GLTFast.Export
                             var clonedMeshId = DuplicateMesh(originalMeshId);
                             mesh = m_Meshes[clonedMeshId];
                             AssignMaterialsToMesh(materialIds, mesh);
-                            node.mesh = clonedMeshId;
+                            node.Mesh = clonedMeshId;
                             meshMaterialCombos[meshMaterialCombo] = clonedMeshId;
                         }
                     }
@@ -910,9 +915,9 @@ namespace GLTFast.Export
 
         static void AssignMaterialsToMesh(int[] materialIds, Mesh mesh)
         {
-            for (var i = 0; i < materialIds.Length && i < mesh.primitives.Length; i++)
+            for (var i = 0; i < materialIds.Length && i < mesh.Primitives.Count; i++)
             {
-                mesh.primitives[i].material = materialIds[i] >= 0 ? materialIds[i] : -1;
+                mesh.Primitives[i].Material = materialIds[i] >= 0 ? materialIds[i] : null;
             }
         }
 
@@ -980,7 +985,7 @@ namespace GLTFast.Export
 
                 if (!sync)
                 {
-                    await m_DeferAgent.BreakPoint();
+                    await m_DeferAgent.BreakPointAsync();
                 }
             }
 
@@ -1114,11 +1119,11 @@ namespace GLTFast.Export
 
                 var accessor = new Accessor
                 {
-                    byteOffset = attrData.outputOffset,
-                    componentType = Accessor.GetComponentType(attribute.format),
-                    count = vertexCount,
+                    ByteOffset = attrData.outputOffset,
+                    ComponentType = Accessor.GetComponentType(attribute.format),
+                    Count = vertexCount,
                 };
-                accessor.SetAttributeType(Accessor.GetAccessorAttributeType(attribute.dimension));
+                accessor.Type = new EnumOrRawValue<AccessorType>(Accessor.GetAccessorAttributeType(attribute.dimension));
 
                 var accessorId = AddAccessor(accessor);
 
@@ -1133,50 +1138,36 @@ namespace GLTFast.Export
                         var bounds = uMesh.bounds;
                         var max = bounds.max;
                         var min = bounds.min;
-                        accessor.min = new[] { -max.x, min.y, min.z };
-                        accessor.max = new[] { -min.x, max.y, max.z };
-                        attributes.POSITION = accessorId;
+                        accessor.Min = new List<double> { -max.x, min.y, min.z };
+                        accessor.Max = new List<double> { -min.x, max.y, max.z };
+                        attributes.Position = accessorId;
                         break;
                     case VertexAttribute.Normal:
-                        attributes.NORMAL = accessorId;
+                        attributes.Normal = accessorId;
                         break;
                     case VertexAttribute.Tangent:
                         Assert.AreEqual(4, attribute.dimension, "Invalid tangent vector dimension");
-                        attributes.TANGENT = accessorId;
+                        attributes.Tangent = accessorId;
                         break;
                     case VertexAttribute.Color:
-                        attributes.COLOR_0 = accessorId;
+                        attributes.SetColor(0, accessorId);
                         break;
                     case VertexAttribute.TexCoord0:
-                        attributes.TEXCOORD_0 = accessorId;
-                        break;
                     case VertexAttribute.TexCoord1:
-                        attributes.TEXCOORD_1 = accessorId;
-                        break;
                     case VertexAttribute.TexCoord2:
-                        attributes.TEXCOORD_2 = accessorId;
-                        break;
                     case VertexAttribute.TexCoord3:
-                        attributes.TEXCOORD_3 = accessorId;
-                        break;
                     case VertexAttribute.TexCoord4:
-                        attributes.TEXCOORD_4 = accessorId;
-                        break;
                     case VertexAttribute.TexCoord5:
-                        attributes.TEXCOORD_5 = accessorId;
-                        break;
                     case VertexAttribute.TexCoord6:
-                        attributes.TEXCOORD_6 = accessorId;
-                        break;
                     case VertexAttribute.TexCoord7:
-                        attributes.TEXCOORD_7 = accessorId;
+                        attributes.SetTexCoord((int)attribute.attribute - (int)VertexAttribute.TexCoord0, accessorId);
                         break;
                     case VertexAttribute.BlendWeight:
-                        attributes.WEIGHTS_0 = accessorId;
+                        attributes.SetWeight(0, accessorId);
                         break;
                     case VertexAttribute.BlendIndices:
-                        attributes.JOINTS_0 = accessorId;
-                        accessor.componentType = GltfComponentType.UnsignedShort;
+                        attributes.SetJoint(0, accessorId);
+                        accessor.ComponentType = AccessorDataType.UnsignedShort;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -1193,8 +1184,8 @@ namespace GLTFast.Export
                 streamCount = stream + 1;
             }
 
-            var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? GltfComponentType.UnsignedShort : GltfComponentType.UnsignedInt;
-            mesh.primitives = new MeshPrimitive[meshData.subMeshCount];
+            var indexComponentType = uMesh.indexFormat == IndexFormat.UInt16 ? AccessorDataType.UnsignedShort : AccessorDataType.UnsignedInt;
+            mesh.Primitives = new List<MeshPrimitive>(meshData.subMeshCount);
             var indexAccessors = new Accessor[meshData.subMeshCount];
             var indexOffset = 0;
             MeshTopology? topology = null;
@@ -1214,36 +1205,38 @@ namespace GLTFast.Export
                 if (!mode.HasValue)
                 {
                     m_Logger?.Error(LogCode.TopologyUnsupported, subMeshTopology.ToString());
-                    mode = DrawMode.Points;
+                    mode = PrimitiveMode.Points;
                 }
 
                 var indexAccessor = new Accessor
                 {
-                    byteOffset = indexOffset,
-                    componentType = indexComponentType,
-                    count = meshData.GetIndexCount(subMeshIndex),
+                    ByteOffset = indexOffset,
+                    ComponentType = indexComponentType,
+                    Count = meshData.GetIndexCount(subMeshIndex),
 
                     // min = new []{}, // TODO
                     // max = new []{}, // TODO
                 };
-                indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
+                indexAccessor.Type = new EnumOrRawValue<AccessorType>(AccessorType.Scalar);
 
                 if (subMeshTopology == MeshTopology.Quads)
                 {
-                    indexAccessor.count = indexAccessor.count / 2 * 3;
+                    indexAccessor.Count = indexAccessor.Count / 2 * 3;
                 }
 
                 var indexAccessorId = AddAccessor(indexAccessor);
                 indexAccessors[subMeshIndex] = indexAccessor;
 
-                indexOffset += indexAccessor.count * Accessor.GetComponentTypeSize(indexComponentType);
+                indexOffset += indexAccessor.Count * Accessor.GetComponentTypeSize(indexComponentType);
 
-                mesh.primitives[subMeshIndex] = new MeshPrimitive
+                var primitive = new MeshPrimitive
                 {
-                    mode = mode.Value,
-                    attributes = attributes,
-                    indices = indexAccessorId,
+                    Mode = mode.Value,
+                    Attributes = attributes,
+                    Indices = indexAccessorId,
                 };
+                Assert.AreEqual(subMeshIndex, mesh.Primitives.Count);
+                mesh.Primitives.Add(primitive);
             }
 
             if (!topology.HasValue)
@@ -1256,7 +1249,7 @@ namespace GLTFast.Export
 
             foreach (var accessor in indexAccessors)
             {
-                accessor.bufferView = indexBufferViewId;
+                accessor.BufferView = indexBufferViewId;
             }
 
             var inputStreams = new NativeArray<byte>[streamCount];
@@ -1264,7 +1257,7 @@ namespace GLTFast.Export
 
             for (var stream = 0; stream < streamCount; stream++)
             {
-                inputStreams[stream] = await meshData.GetVertexData(stream, sync);
+                inputStreams[stream] = await meshData.GetVertexDataAsync(stream, sync);
                 outputStreams[stream] = new NativeArray<byte>(outputStrides[stream] * vertexCount, Allocator.Persistent);
             }
 
@@ -1372,7 +1365,7 @@ namespace GLTFast.Export
                 {
                     foreach (var accessorId in accessorIds)
                     {
-                        m_Accessors[accessorId].bufferView = bufferViewId;
+                        m_Accessors[accessorId].BufferView = bufferViewId;
                     }
                 }
             }
@@ -1383,7 +1376,7 @@ namespace GLTFast.Export
             NativeArray<byte> indices;
             if (uMesh.indexFormat == IndexFormat.UInt16)
             {
-                using var indexData16 = await ((IMeshData<ushort>)meshData).GetIndexData(sync);
+                using var indexData16 = await ((IMeshData<ushort>)meshData).GetIndexDataAsync(sync);
 
                 NativeArray<ushort> destIndices;
                 JobHandle job = default;
@@ -1451,7 +1444,7 @@ namespace GLTFast.Export
             }
             else
             {
-                using var indexData32 = await ((IMeshData<uint>)meshData).GetIndexData(sync);
+                using var indexData32 = await ((IMeshData<uint>)meshData).GetIndexDataAsync(sync);
                 NativeArray<uint> destIndices;
                 JobHandle job = default;
                 if (topology.Value == MeshTopology.Quads)
@@ -1538,29 +1531,25 @@ namespace GLTFast.Export
             {
                 var accessor = new Accessor
                 {
-                    byteOffset = 0,
-                    componentType = GltfComponentType.Float,
-                    count = bindposes.Length
+                    ByteOffset = 0,
+                    ComponentType = AccessorDataType.Float,
+                    Count = bindposes.Length
                 };
-                accessor.SetAttributeType(GltfAccessorAttributeType.MAT4);
+                accessor.Type = new EnumOrRawValue<AccessorType>(AccessorType.Matrix4x4);
 
                 var accessorId = AddAccessor(accessor);
                 m_MeshBindPoses ??= new Dictionary<int, int>();
                 m_MeshBindPoses[meshId] = accessorId;
 
                 var bufferViewId = await WriteBindPosesToBuffer(bindposes, sync);
-                accessor.bufferView = bufferViewId;
+                accessor.BufferView = bufferViewId;
             }
         }
 
         async ValueTask<int> WriteBindPosesToBuffer(Matrix4x4[] bindposes, bool sync)
         {
             var bufferViewId = -1;
-#pragma warning disable CS0618 // Type or member is obsolete
-            // See original ObsoleteAttribute:
-            // > ManagedNativeArray is going to get sealed or removed from the public API in a future release.
             var nativeBindPoses = new ManagedNativeArray<Matrix4x4, float4x4>(bindposes);
-#pragma warning restore CS0618 // Type or member is obsolete
             var matrices = nativeBindPoses.nativeArray;
             var job = new ExportJobs.ConvertMatrixJob
             {
@@ -1574,7 +1563,7 @@ namespace GLTFast.Export
             }
             job.Complete();
             bufferViewId = WriteBufferViewToBuffer(
-                matrices.Reinterpret<byte>(sizeof(float) * 4 * 4), BufferViewTarget.None, byteAlignment: 4
+                matrices.Reinterpret<byte>(sizeof(float) * 4 * 4), BufferViewTarget.Undefined, byteAlignment: 4
             );
 
             nativeBindPoses.Dispose();
@@ -1608,11 +1597,11 @@ namespace GLTFast.Export
 
             if (results == null) return;
 
-            mesh.primitives = new MeshPrimitive[results.Length];
+            mesh.Primitives = new List<MeshPrimitive>(results.Length);
             for (var submesh = 0; submesh < results.Length; submesh++)
             {
                 var encodeResult = results[submesh];
-                var bufferViewId = WriteBufferViewToBuffer(encodeResult.data, BufferViewTarget.None);
+                var bufferViewId = WriteBufferViewToBuffer(encodeResult.data, BufferViewTarget.Undefined);
 
                 var attributes = new Attributes();
                 var dracoAttributes = new Attributes();
@@ -1623,13 +1612,13 @@ namespace GLTFast.Export
                     var attribute = vertexAttributeTuple.Value;
                     var accessor = new Accessor
                     {
-                        componentType = vertexAttribute == VertexAttribute.BlendIndices
-                            ? GltfComponentType.UnsignedShort
-                            : GltfComponentType.Float,
-                        count = (int)encodeResult.vertexCount
+                        ComponentType = vertexAttribute == VertexAttribute.BlendIndices
+                            ? AccessorDataType.UnsignedShort
+                            : AccessorDataType.Float,
+                        Count = (int)encodeResult.vertexCount
                     };
                     var attributeType = Accessor.GetAccessorAttributeType(attribute.dimensions);
-                    accessor.SetAttributeType(attributeType);
+                    accessor.Type = new EnumOrRawValue<AccessorType>(attributeType);
 
                     var accessorId = AddAccessor(accessor);
 
@@ -1639,13 +1628,13 @@ namespace GLTFast.Export
                         var bounds = submeshDesc.bounds;
                         var center = bounds.center;
                         var extents = bounds.extents;
-                        accessor.min = new[]
+                        accessor.Min = new List<double>
                         {
                             -center.x-extents.x,
                             center.y-extents.y,
                             center.z-extents.z
                         };
-                        accessor.max = new[]
+                        accessor.Max = new List<double>
                         {
                             -center.x+extents.x,
                             center.y+extents.y,
@@ -1663,26 +1652,28 @@ namespace GLTFast.Export
 
                 var indexAccessor = new Accessor
                 {
-                    componentType = GltfComponentType.UnsignedInt,
-                    count = (int)encodeResult.indexCount
+                    ComponentType = AccessorDataType.UnsignedInt,
+                    Count = (int)encodeResult.indexCount
                 };
-                indexAccessor.SetAttributeType(GltfAccessorAttributeType.SCALAR);
+                indexAccessor.Type = new EnumOrRawValue<AccessorType>(AccessorType.Scalar);
 
                 var indicesId = AddAccessor(indexAccessor);
 
-                mesh.primitives[submesh] = new MeshPrimitive
+                var primitive = new MeshPrimitive
                 {
-                    extensions = new MeshPrimitiveExtensions
+                    Extensions = new MeshPrimitiveExtensions
                     {
-                        KHR_draco_mesh_compression = new MeshPrimitiveDracoExtension
+                        DracoMeshCompression = new MeshPrimitiveDracoExtension
                         {
-                            bufferView = bufferViewId,
-                            attributes = dracoAttributes
+                            BufferView = bufferViewId,
+                            Attributes = dracoAttributes
                         }
                     },
-                    attributes = attributes,
-                    indices = indicesId
+                    Attributes = attributes,
+                    Indices = indicesId
                 };
+                Assert.AreEqual(submesh, mesh.Primitives.Count);
+                mesh.Primitives.Add(primitive);
             }
 
             await ExportBindPoses(meshId, unityMesh, sync);
@@ -1699,60 +1690,40 @@ namespace GLTFast.Export
             switch (type)
             {
                 case VertexAttribute.Position:
-                    attributes.POSITION = accessorId;
-                    dracoAttributes.POSITION = dracoId;
+                    attributes.Position = accessorId;
+                    dracoAttributes.Position = dracoId;
                     break;
                 case VertexAttribute.Normal:
-                    attributes.NORMAL = accessorId;
-                    dracoAttributes.NORMAL = dracoId;
+                    attributes.Normal = accessorId;
+                    dracoAttributes.Normal = dracoId;
                     break;
                 case VertexAttribute.Tangent:
-                    attributes.TANGENT = accessorId;
-                    dracoAttributes.TANGENT = dracoId;
+                    attributes.Tangent = accessorId;
+                    dracoAttributes.Tangent = dracoId;
                     break;
                 case VertexAttribute.Color:
-                    attributes.COLOR_0 = accessorId;
-                    dracoAttributes.COLOR_0 = dracoId;
+                    attributes.SetColor(0, accessorId);
+                    dracoAttributes.SetColor(0, dracoId);
                     break;
                 case VertexAttribute.TexCoord0:
-                    attributes.TEXCOORD_0 = accessorId;
-                    dracoAttributes.TEXCOORD_0 = dracoId;
-                    break;
                 case VertexAttribute.TexCoord1:
-                    attributes.TEXCOORD_1 = accessorId;
-                    dracoAttributes.TEXCOORD_1 = dracoId;
-                    break;
                 case VertexAttribute.TexCoord2:
-                    attributes.TEXCOORD_2 = accessorId;
-                    dracoAttributes.TEXCOORD_2 = dracoId;
-                    break;
                 case VertexAttribute.TexCoord3:
-                    attributes.TEXCOORD_3 = accessorId;
-                    dracoAttributes.TEXCOORD_3 = dracoId;
-                    break;
                 case VertexAttribute.TexCoord4:
-                    attributes.TEXCOORD_4 = accessorId;
-                    dracoAttributes.TEXCOORD_4 = dracoId;
-                    break;
                 case VertexAttribute.TexCoord5:
-                    attributes.TEXCOORD_5 = accessorId;
-                    dracoAttributes.TEXCOORD_5 = dracoId;
-                    break;
                 case VertexAttribute.TexCoord6:
-                    attributes.TEXCOORD_6 = accessorId;
-                    dracoAttributes.TEXCOORD_6 = dracoId;
-                    break;
                 case VertexAttribute.TexCoord7:
-                    attributes.TEXCOORD_7 = accessorId;
-                    dracoAttributes.TEXCOORD_7 = dracoId;
+                    var uvSet = (int)type - (int)VertexAttribute.TexCoord0;
+                    attributes.SetTexCoord(uvSet, accessorId);
+                    dracoAttributes.SetTexCoord(uvSet, dracoId);
                     break;
                 case VertexAttribute.BlendWeight:
-                    attributes.WEIGHTS_0 = accessorId;
-                    dracoAttributes.WEIGHTS_0 = dracoId;
+                    attributes.SetWeight(0, accessorId);
+                    dracoAttributes.SetWeight(0, dracoId);
                     break;
                 case VertexAttribute.BlendIndices:
-                    attributes.JOINTS_0 = accessorId;
-                    dracoAttributes.JOINTS_0 = dracoId;
+                    attributes.SetJoint(0, accessorId);
+                    dracoAttributes.SetJoint(0, dracoId);
                     break;
             }
         }
@@ -1843,7 +1814,7 @@ namespace GLTFast.Export
                         var imageBytes = imageExport.GetData();
                         if (imageBytes != null)
                         {
-                            m_Images[imageId].bufferView = WriteBufferViewToBuffer(imageBytes, BufferViewTarget.None);
+                            m_Images[imageId].BufferView = WriteBufferViewToBuffer(imageBytes, BufferViewTarget.Undefined);
                         }
                     }
                     else if (imageDest == ImageDestination.SeparateFile)
@@ -1854,7 +1825,7 @@ namespace GLTFast.Export
                         }
                         if (imageExport.Write(Path.Combine(directory, fileName), overwrite))
                         {
-                            m_Images[imageId].uri = fileName;
+                            m_Images[imageId].Uri = new UriValue(fileName);
                         }
                         else
                         {
@@ -1862,7 +1833,7 @@ namespace GLTFast.Export
                         }
                     }
                     if (!sync)
-                        await m_DeferAgent.BreakPoint();
+                        await m_DeferAgent.BreakPointAsync();
                 }
             }
 
@@ -2155,73 +2126,66 @@ namespace GLTFast.Export
             return job;
         }
 
-        static DrawMode? GetDrawMode(MeshTopology topology)
+        static PrimitiveMode? GetDrawMode(MeshTopology topology)
         {
             switch (topology)
             {
                 case MeshTopology.Quads:
-                    return DrawMode.Triangles;
+                    return PrimitiveMode.Triangles;
                 case MeshTopology.Triangles:
-                    return DrawMode.Triangles;
+                    return PrimitiveMode.Triangles;
                 case MeshTopology.Lines:
-                    return DrawMode.Lines;
+                    return PrimitiveMode.Lines;
                 case MeshTopology.LineStrip:
-                    return DrawMode.LineStrip;
+                    return PrimitiveMode.LineStrip;
                 case MeshTopology.Points:
-                    return DrawMode.Points;
+                    return PrimitiveMode.Points;
                 default:
                     return null;
             }
         }
 
+        Node GetNode(uint id) => m_Nodes[(int)id];
+
         Node AddChildNode(
-            int parentId,
-            float3? translation = null,
-            quaternion? rotation = null,
-            float3? scale = null,
+            uint parentId,
+            double3? translation = null,
+            double4? rotation = null,
+            double3? scale = null,
             string name = null
         )
         {
-            var parent = m_Nodes[parentId];
+            var parent = GetNode(parentId);
             var node = CreateNode(translation, rotation, scale, name);
             m_Nodes.Add(node);
             var nodeId = (uint)m_Nodes.Count - 1;
-            if (parent.children == null)
-            {
-                parent.children = new[] { nodeId };
-            }
-            else
-            {
-                var newChildren = new uint[parent.children.Length + 1];
-                newChildren[0] = nodeId;
-                parent.children.CopyTo(newChildren, 1);
-                parent.children = newChildren;
-            }
+            parent.Children ??= new List<uint>();
+            parent.Children.Insert(0, nodeId);
             return node;
         }
 
         static Node CreateNode(
-            float3? translation = null,
-            quaternion? rotation = null,
-            float3? scale = null,
+            double3? translation = null,
+            double4? rotation = null,
+            double3? scale = null,
             string name = null
             )
         {
             var node = new Node
             {
-                name = name,
+                Name = name,
             };
-            if (translation.HasValue && !translation.Equals(float3.zero))
+            if (translation.HasValue && !translation.Value.Equals(double3.zero))
             {
-                node.translation = new[] { -translation.Value.x, translation.Value.y, translation.Value.z };
+                node.Translation = new double3(-translation.Value.x, translation.Value.y, translation.Value.z);
             }
-            if (rotation.HasValue && !rotation.Equals(quaternion.identity))
+            if (rotation.HasValue && !rotation.Value.Equals(Mathematics.k_QuaternionIdentity))
             {
-                node.rotation = new[] { rotation.Value.value.x, -rotation.Value.value.y, -rotation.Value.value.z, rotation.Value.value.w };
+                node.Rotation = new double4(rotation.Value.x, -rotation.Value.y, -rotation.Value.z, rotation.Value.w);
             }
-            if (scale.HasValue && !scale.Equals(new float3(1f)))
+            if (scale.HasValue && !scale.Value.Equals(new double3(1f)))
             {
-                node.scale = new[] { scale.Value.x, scale.Value.y, scale.Value.z };
+                node.Scale = scale.Value;
             }
 
             return node;
@@ -2242,7 +2206,7 @@ namespace GLTFast.Export
 
             var mesh = new Mesh
             {
-                name = uMesh.name
+                Name = uMesh.name
             };
             m_Meshes = m_Meshes ?? new List<Mesh>();
             m_UnityMeshes = m_UnityMeshes ?? new List<UnityEngine.Mesh>();
@@ -2255,14 +2219,14 @@ namespace GLTFast.Export
             return meshId;
         }
 
-        int AddSkin(int meshId, uint[] joints)
+        int AddSkin(int meshId, List<uint> joints)
         {
             m_Skins ??= new List<Skin>();
             m_SkinMesh ??= new List<int>();
             var skinId = m_Skins.Count;
             var newSkin = new Skin
             {
-                joints = joints
+                Joints = joints
             };
             m_Skins.Add(newSkin);
             m_SkinMesh.Add(meshId);
@@ -2341,16 +2305,16 @@ namespace GLTFast.Export
 
             var bufferView = new BufferView
             {
-                buffer = 0,
-                byteOffset = (int)byteOffset,
-                byteLength = bufferViewData.Length,
-                target = (int)bufferViewTarget,
+                Buffer = 0,
+                ByteOffset = (int)byteOffset,
+                ByteLength = bufferViewData.Length,
+                Target = bufferViewTarget,
             };
             if (byteStride.HasValue)
             {
                 // Adhere data alignment rules
                 Assert.IsTrue(byteStride.Value % 4 == 0);
-                bufferView.byteStride = byteStride.Value;
+                bufferView.ByteStride = byteStride.Value;
             }
             m_BufferViews = m_BufferViews ?? new List<BufferView>();
             var bufferViewId = m_BufferViews.Count;
@@ -2364,7 +2328,7 @@ namespace GLTFast.Export
             var existingUsage = m_MeshVertexAttributeUsage[meshId];
             if (((existingUsage ^ attributeUsage) & VertexAttributeUsage.Color) == VertexAttributeUsage.Color)
             {
-                m_Logger.Warning(LogCode.InconsistentVertexColorUsage, meshId.ToString());
+                m_Logger?.Warning(LogCode.InconsistentVertexColorUsage, meshId.ToString());
             }
             m_MeshVertexAttributeUsage[meshId] = attributeUsage | existingUsage;
         }

@@ -3,13 +3,15 @@
 
 using System;
 using UnityEngine.Rendering;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
     /// <summary>
     /// Vertex attribute mask.
     /// </summary>
     [Flags]
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public enum VertexAttributeUsage
     {
         /// <summary>No attribute.</summary>
@@ -53,6 +55,7 @@ namespace GLTFast.Export
     /// <summary>
     /// Extension methods for <see cref="VertexAttribute"/>.
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public static class VertexAttributeUsageExtension
     {
         /// <summary>

@@ -3,8 +3,9 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Addons
+namespace Unity.Cloud.Gltfast.Addons
 {
     /// <summary>
     /// Marker interface for objects that apply data produced during the conversion phase to a
@@ -16,5 +17,6 @@ namespace GLTFast.Addons
     /// interfaces such as <see cref="IPostBeginSceneInstanceApplier"/>, which the import pipeline
     /// invokes at well-defined points of the instantiation lifecycle.
     /// </remarks>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Addons", sourceAssembly: "glTFast")]
     public interface IInstanceApplier { }
 }

@@ -3,13 +3,15 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Export
+namespace Unity.Cloud.Gltfast.Export
 {
 
     /// <summary>
     /// Provides the default material export
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Export", sourceAssembly: "glTFast.Export")]
     public static class MaterialExport
     {
 
@@ -31,7 +33,7 @@ namespace GLTFast.Export
                     case RenderPipeline.BuiltIn:
 #if UNITY_SHADER_GRAPH && GLTFAST_BUILTIN_SHADER_GRAPH
                         s_MaterialExport = MetaMaterialExportShaderGraphs<
-                            StandardMaterialExport,
+                            BuiltInStandardMaterialExport,
                             GltfShaderGraphMaterialExporter
                         >.Instance;
 #else
@@ -70,10 +72,17 @@ namespace GLTFast.Export
         /// </summary>
         /// <param name="gltf">glTF to add the image to.</param>
         /// <param name="imageExport">Texture generator to be added</param>
-        /// <param name="textureId">Resulting texture index.</param>
+        /// <param name="textureId">Resulting texture index; -1 when this returns false.</param>
         /// <returns>True if the texture was added, false otherwise.</returns>
-        internal static bool AddImageExport(IGltfWritable gltf, ImageExportBase imageExport, out int textureId)
+        /// <exception cref="InvalidOperationException">Can be thrown by the <paramref name="gltf"/> implementation when it was disposed already.</exception>
+        public static bool TryAddImageExport(IGltfWritable gltf, ImageExportBase imageExport, out int textureId)
         {
+            if (gltf == null || imageExport == null)
+            {
+                textureId = -1;
+                return false;
+            }
+
             var imageId = gltf.AddImage(imageExport);
             if (imageId < 0)
             {
@@ -83,6 +92,12 @@ namespace GLTFast.Export
 
             var samplerId = gltf.AddSampler(imageExport.FilterMode, imageExport.WrapModeU, imageExport.WrapModeV);
             textureId = gltf.AddTexture(imageId, samplerId);
+            if (textureId < 0)
+            {
+                textureId = -1;
+                return false;
+            }
+
             return true;
         }
 

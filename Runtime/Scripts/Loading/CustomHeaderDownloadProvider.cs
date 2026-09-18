@@ -6,15 +6,16 @@ using System.Threading.Tasks;
 
 using UnityEngine;
 using UnityEngine.Networking;
-using UnityEngine.Serialization;
+using UnityEngine.Scripting.APIUpdating;
 
-namespace GLTFast.Loading
+namespace Unity.Cloud.Gltfast.Loading
 {
 
     /// <summary>
     /// Represents an HTTP request header key-value pair
     /// </summary>
     [Serializable]
+    [MovedFrom(true, sourceNamespace: "GLTFast.Loading", sourceAssembly: "glTFast")]
     public struct HttpHeader
     {
         /// <summary>
@@ -45,6 +46,7 @@ namespace GLTFast.Loading
     /// <summary>
     /// DownloadProvider that sends HTTP request with custom header entries
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Loading", sourceAssembly: "glTFast")]
     public class CustomHeaderDownloadProvider : IDownloadProvider
     {
 
@@ -59,17 +61,23 @@ namespace GLTFast.Loading
             m_Headers = headers;
         }
 
+        [Obsolete("Request has been renamed to RequestAsync. (UnityUpgradable) -> RequestAsync(*)", true)]
+        public Task<IDownload> Request(Uri url) => RequestAsync(url);
+
         /// <inheritdoc />
-        public async Task<IDownload> Request(Uri url)
+        public async Task<IDownload> RequestAsync(Uri url)
         {
             var req = new CustomHeaderDownload(url, RegisterHttpHeaders);
             await req.WaitAsync();
             return req;
         }
 
+        [Obsolete("RequestTexture has been renamed to RequestTextureAsync. (UnityUpgradable) -> RequestTextureAsync(*)", true)]
+        public Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable) => RequestTextureAsync(url, nonReadable);
+
         /// <inheritdoc />
 #pragma warning disable CS1998
-        public async Task<ITextureDownload> RequestTexture(Uri url, bool nonReadable)
+        public async Task<ITextureDownload> RequestTextureAsync(Uri url, bool nonReadable)
         {
 #pragma warning restore CS1998
 #if UNITY_WEBREQUEST_TEXTURE
@@ -96,6 +104,7 @@ namespace GLTFast.Loading
     /// <summary>
     /// Download that allows modifying the HTTP request before it's sent
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Loading", sourceAssembly: "glTFast")]
     public class CustomHeaderDownload : AwaitableDownload
     {
 
@@ -116,6 +125,7 @@ namespace GLTFast.Loading
     /// <summary>
     /// Texture download that allows modifying the HTTP request before it's sent
     /// </summary>
+    [MovedFrom(true, sourceNamespace: "GLTFast.Loading", sourceAssembly: "glTFast")]
     public class CustomHeaderTextureDownload : AwaitableTextureDownload
     {
 
