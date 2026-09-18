@@ -195,7 +195,7 @@ namespace GLTFast.Schema
         /// </summary>
         /// <param name="format">vertex attribute format</param>
         /// <returns>glTF component type</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when the value of <see cref="format"/> is unknown.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the value of <paramref name="format"/> is unknown.</exception>
         public static GltfComponentType GetComponentType(VertexAttributeFormat format)
         {
             switch (format)
@@ -229,7 +229,7 @@ namespace GLTFast.Schema
         /// </summary>
         /// <param name="dimension">Number of components per element</param>
         /// <returns>Corresponding one-dimensional glTF attribute type</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when <see cref="dimension"/> is not between 1 and 4.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="dimension"/> is not between 1 and 4.</exception>
         public static GltfAccessorAttributeType GetAccessorAttributeType(int dimension)
         {
             if (dimension < 1 || dimension > 4)

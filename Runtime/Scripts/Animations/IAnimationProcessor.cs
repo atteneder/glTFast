@@ -94,7 +94,7 @@ namespace GLTFast.Animations
         /// <param name="targetNode">glTF index of the targeted node.</param>
         /// <param name="meshNumeration">Target mesh number. A glTF mesh is converted into one or more
         /// <see cref="MeshResult"/> which are numbered consecutively.
-        /// <see cref="IInstantiator.AddPrimitive"/> is called once for each of those MeshResults
+        /// <see cref="IInstantiator.AddMesh"/> is called once for each of those MeshResults
         /// and the meshNumeration matches.</param>
         /// <param name="meshName">Name of the targeted Unity mesh.</param>
         /// <param name="nodeHierarchyInfo">Can be used to query hierarchical information and

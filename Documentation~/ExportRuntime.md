@@ -23,13 +23,13 @@ Here's a step-by-step guide to export a GameObject hierarchy/scene from script
 
 glTF export might create more than one file. For example the binary buffer is usually a separate `.bin` file and textures might be separate files as well.
 
-[!code-cs [simple-export](../DocExamples/SimpleExport.cs#SimpleExport)]
+[!code-cs [simple-export](../Runtime/DocExamples/SimpleExport.cs#SimpleExport)]
 
 After calling [SaveToFileAndDispose](xref:GLTFast.Export.GameObjectExport.SaveToFileAndDispose*) the GameObjectExport instance becomes invalid. Do not re-use it.
 
 Further, the export can be customized by passing [ExportSettings](xref:GLTFast.Export.ExportSettings), [GameObjectExportSettings](xref:GLTFast.Export.GameObjectExportSettings) and injectables to [GameObjectExport](xref:GLTFast.Export.GameObjectExport)'s constructor:
 
-[!code-cs [advanced-export](../DocExamples/ExportSamples.cs#AdvancedExport)]
+[!code-cs [advanced-export](../Runtime/DocExamples/ExportSamples.cs#AdvancedExport)]
 
 > [!WARNING]
 > Exporting to a [Stream][Stream] currently only works for self-contained glTF-Binary files (where the binary buffer and all textures are included in the `.glb` file). Trying other export settings will fail.
@@ -40,7 +40,7 @@ When adding GameObjects to a glTF scene, the resulting glTF root nodes' position
 
 Here's an example how to export a GameObject, discarding its transform:
 
-[!code-cs [local-transform](../DocExamples/ExportSamples.cs#LocalTransform)]
+[!code-cs [local-transform](../Runtime/DocExamples/ExportSamples.cs#LocalTransform)]
 
 ### Vertex Attribute Discarding
 
@@ -61,7 +61,7 @@ Examples of vertex attribute discarding:
 
 *Unity glTFast* supports applying [Google Draco&trade; 3D Data compression][Draco] to meshes. This requires the [Draco for Unity][DracoForUnity] package to be installed.
 
-[!code-cs [draco-export](../DocExamples/ExportSamples.cs#ExportSettingsDraco)]
+[!code-cs [draco-export](../Runtime/DocExamples/ExportSamples.cs#ExportSettingsDraco)]
 
 ## Trademarks
 

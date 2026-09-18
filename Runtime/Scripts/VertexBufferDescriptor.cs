@@ -49,7 +49,6 @@ namespace GLTFast
 
         public override int GetHashCode()
         {
-#if NET_STANDARD
             return HashCode.Combine(
                 m_HasNormals,
                 m_HasTangents,
@@ -58,20 +57,6 @@ namespace GLTFast
                 m_HasBones,
                 m_MorphTargetCount
             );
-#else
-            var hash = 13;
-            if (m_HasNormals)
-                hash = hash * 31 + 13;
-            if (m_HasTangents)
-                hash = hash * 31 + 14;
-            hash = hash * 31 + m_TexCoordCount;
-            if (m_HasColors)
-                hash = hash * 31 + 15;
-            if (m_HasBones)
-                hash = hash * 31 + 16;
-            hash = hash * 31 + m_MorphTargetCount;
-            return hash;
-#endif
         }
 
         public override bool Equals(object? obj) => obj is VertexBufferDescriptor other && Equals(other);

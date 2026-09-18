@@ -19,6 +19,18 @@ Clicking any of these will open a file selection dialog. If additional files are
 
 Exporting via script works exactly the same as [Runtime Export](ExportRuntime.md), with the exception that you don't need to [include the required shaders](ExportRuntime.md#include-required-shaders).
 
+### Editor Scripting: Enforce Synchronous I/O
+
+When triggering an export from Editor scripting &mdash; for example a menu item, a custom inspector, or an asset post-processor &mdash; pass `forceSync: true` to [SaveToFileAndDispose](xref:GLTFast.Export.GameObjectExport.SaveToFileAndDispose*):
+
+```csharp
+await export.SaveToFileAndDispose(path, forceSync: true);
+```
+
+Unity does not pump the main-thread `SynchronizationContext` outside Play Mode, so awaited asynchronous I/O continuations (e.g. `Stream.WriteAsync`) may never resume and the export can hang silently. The `forceSync` overload routes writes through the synchronous I/O path instead, which completes deterministically in Edit Mode. At runtime (Play Mode or in a built player), keep the default asynchronous path to avoid blocking the main thread.
+
+See [Batch Export Scene Roots to glTF Files](UseCaseBatchExport.md) for a complete Editor scripting example.
+
 ## Trademarks
 
 *Unity&reg;* is a registered trademark of [Unity Technologies][unity].

@@ -32,21 +32,12 @@ namespace GLTFast
 
         public int GetHashCode(IReadOnlyList<MeshPrimitiveBase> obj)
         {
-#if NET_STANDARD
             var hashCode = new HashCode();
             foreach (var primitive in obj)
             {
                 hashCode.Add(PrimitiveComparer.CalculateHashCode(primitive));
             }
             return hashCode.ToHashCode();
-#else
-            var hash = 17;
-            foreach (var primitive in obj)
-            {
-                hash = hash * 31 + PrimitiveComparer.CalculateHashCode(primitive);
-            }
-            return hash;
-#endif
         }
     }
 }

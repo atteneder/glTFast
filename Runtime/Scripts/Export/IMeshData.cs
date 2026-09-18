@@ -15,11 +15,11 @@ namespace GLTFast.Export
         MeshTopology GetTopology(int subMesh);
         int GetIndexCount(int subMesh);
 
-        Task<NativeArray<byte>> GetVertexData(int stream, bool sync);
+        ValueTask<NativeArray<byte>> GetVertexData(int stream, bool sync);
     }
 
     interface IMeshData<TIndex> : IMeshData where TIndex : unmanaged
     {
-        Task<NativeArray<TIndex>> GetIndexData(bool sync);
+        ValueTask<NativeArray<TIndex>> GetIndexData(bool sync);
     }
 }

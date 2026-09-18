@@ -267,6 +267,8 @@ namespace GLTFast.Logging
         VertexCountInvalid,
         /// <summary>Could not provide data of an accessor.</summary>
         AccessorAccessFailed,
+        /// <summary>Could not create <see cref="Animation"/> component.</summary>
+        AnimationComponentFail,
     }
 
     /// <summary>
@@ -284,6 +286,7 @@ namespace GLTFast.Logging
             { LogCode.AccessorsShared, @"glTF file uses certain vertex attributes/accessors across multiple meshes!
 This may result in low performance and high memory usage. Try optimizing the glTF file.
 See details in corresponding issue at https://github.com/atteneder/glTFast/issues/52" },
+            { LogCode.AnimationComponentFail, "Could not create Animation component." },
             { LogCode.AnimationChannelNodeInvalid, "Animation channel {0} has invalid node id" },
             { LogCode.AnimationChannelSamplerInvalid, "Animation channel {0} has invalid sampler id or output" },
             { LogCode.AnimationFormatInvalid, "Invalid animation format {0}" },

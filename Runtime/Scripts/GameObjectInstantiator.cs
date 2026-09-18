@@ -26,6 +26,10 @@ namespace GLTFast
     /// <summary>
     /// Generates a GameObject hierarchy from a glTF scene
     /// </summary>
+    /// <remarks>
+    /// A derived class must re-declare the interface (<c>class MyInstantiator : GameObjectInstantiator, IInstantiator</c>)
+    /// for its own <see cref="IInstantiator.AddMesh"/> or <see cref="IInstantiator.AddMeshInstanced"/> to be reached.
+    /// </remarks>
     public class GameObjectInstantiator : IInstantiator
     {
         // Developers might want to customize this class by deriving from it.
@@ -131,7 +135,14 @@ namespace GLTFast
                 var isLegacyAnimation = animationClips.Length > 0 && animationClips[0].legacy;
                 if (isLegacyAnimation)
                 {
-                    var animation = SceneTransform.gameObject.AddComponent<Animation>();
+                    var go = SceneTransform.gameObject;
+                    var animation = go.AddComponent<Animation>();
+
+                    if (animation == null)
+                    {
+                        m_Logger?.Error(LogCode.AnimationComponentFail);
+                        return;
+                    }
 
                     for (var index = 0; index < animationClips.Length; index++)
                     {
@@ -179,12 +190,27 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
+        public virtual void CreateNode(
+            uint nodeIndex,
+            uint? parentIndex,
+            Vector3 position,
+            Quaternion rotation,
+            Vector3 scale,
+            string name
+        )
+        {
+            CreateNode(nodeIndex, parentIndex, position, rotation, scale);
+            SetNodeName(nodeIndex, name);
+        }
+
+        /// <inheritdoc />
         public virtual void SetNodeName(uint nodeIndex, string name)
         {
             m_Nodes[nodeIndex].name = name ?? $"Node-{nodeIndex}";
         }
 
         /// <inheritdoc />
+        [Obsolete("Use IInstantiator.AddMesh instead.")]
         public virtual void AddPrimitive(
             uint nodeIndex,
             string meshName,
@@ -283,6 +309,7 @@ namespace GLTFast
         }
 
         /// <inheritdoc />
+        [Obsolete("Use IInstantiator.AddMeshInstanced instead.")]
         public virtual void AddPrimitiveInstanced(
             uint nodeIndex,
             string meshName,

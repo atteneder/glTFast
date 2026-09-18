@@ -20,6 +20,10 @@ namespace GLTFast.Export
     public class GameObjectExport
     {
 
+#if UNITY_EDITOR
+        static bool s_SyncWarningRaised;
+#endif
+
         GltfWriter m_Writer;
         IMaterialExport m_MaterialExport;
         GameObjectExportSettings m_Settings;
@@ -60,7 +64,7 @@ namespace GLTFast.Export
         /// <summary>
         /// Creates a glTF scene from a collection of GameObjects. The GameObjects will be converted into glTF nodes.
         /// The nodes' positions within the glTF scene will be their GameObjects' world position transformed by the
-        /// <see cref="origin"/> matrix, essentially allowing you to set an arbitrary scene center.
+        /// <paramref name="origin"/> matrix, essentially allowing you to set an arbitrary scene center.
         /// </summary>
         /// <param name="gameObjects">Root level GameObjects (will get added recursively)</param>
         /// <param name="origin">Inverse scene origin matrix. This transform will be applied to all nodes.</param>
@@ -116,13 +120,30 @@ namespace GLTFast.Export
         /// <param name="path">glTF destination file path</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the glTF file was created successfully, false otherwise</returns>
+        public Task<bool> SaveToFileAndDispose(string path, CancellationToken cancellationToken = default)
+            => SaveToFileAndDispose(path, false, cancellationToken);
+
+        /// <summary>
+        /// Exports the collected scenes/content as glTF, writes it to a file
+        /// and disposes this object.
+        /// After the export this instance cannot be re-used!
+        /// </summary>
+        /// <param name="path">glTF destination file path</param>
+        /// <param name="forceSync">When true, enforces sync execution path. Useful to avoid async limitations in Editor
+        /// scripting.</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <returns>True if the glTF file was created successfully, false otherwise</returns>
         public async Task<bool> SaveToFileAndDispose(
             string path,
+            bool forceSync,
             CancellationToken cancellationToken = default
-            )
+        )
         {
             CertifyNotDisposed();
-            var success = await m_Writer.SaveToFileAndDispose(path);
+#if UNITY_EDITOR
+            CertifyEditorForceSync(forceSync, nameof(SaveToFileAndDispose));
+#endif
+            var success = await m_Writer.SaveToFileAndDisposeInternal(path, forceSync);
             m_Writer = null;
             return success;
         }
@@ -135,13 +156,32 @@ namespace GLTFast.Export
         /// <param name="stream">glTF destination stream</param>
         /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
         /// <returns>True if the glTF file was written successfully, false otherwise</returns>
-        public async Task<bool> SaveToStreamAndDispose(
+        public Task<bool> SaveToStreamAndDispose(
             Stream stream,
             CancellationToken cancellationToken = default
-            )
+            ) => SaveToStreamAndDispose(stream, false, cancellationToken);
+
+        /// <summary>
+        /// Exports the collected scenes/content as glTF, writes it to a Stream
+        /// and disposes this object. Only works for self-contained glTF-Binary.
+        /// After the export this instance cannot be re-used!
+        /// </summary>
+        /// <param name="stream">glTF destination stream</param>
+        /// <param name="forceSync">When true, enforces sync execution path. Useful to avoid async limitations in Editor
+        /// scripting.</param>
+        /// <param name="cancellationToken">Token to submit cancellation requests. The default value is None.</param>
+        /// <returns>True if the glTF file was written successfully, false otherwise</returns>
+        public async Task<bool> SaveToStreamAndDispose(
+            Stream stream,
+            bool forceSync,
+            CancellationToken cancellationToken = default
+        )
         {
             CertifyNotDisposed();
-            var success = await m_Writer.SaveToStreamAndDispose(stream);
+#if UNITY_EDITOR
+            CertifyEditorForceSync(forceSync, nameof(SaveToStreamAndDispose));
+#endif
+            var success = await m_Writer.SaveToStreamAndDispose(stream, forceSync);
             m_Writer = null;
             return success;
         }
@@ -153,6 +193,23 @@ namespace GLTFast.Export
                 throw new InvalidOperationException("GameObjectExport was already disposed");
             }
         }
+
+#if UNITY_EDITOR
+        static void CertifyEditorForceSync(bool forceSync, string methodName)
+        {
+            if (!forceSync && !Application.isPlaying && !s_SyncWarningRaised)
+            {
+                Debug.LogWarningFormat(
+                    "{0} was called from the Editor in Edit Mode with forceSync: false. Unity does" +
+                    " not pump the main-thread SynchronizationContext outside Play Mode, so awaited I/O" +
+                    " continuations may never resume and the export can hang. Pass forceSync: true from Editor " +
+                    "scripts (menu items, inspectors, post-processors).",
+                    methodName);
+                s_SyncWarningRaised = true;
+            }
+        }
+#endif
+
         bool AddGameObject(
             GameObject gameObject,
             float4x4? sceneOrigin,

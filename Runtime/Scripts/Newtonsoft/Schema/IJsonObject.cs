@@ -13,7 +13,7 @@ namespace GLTFast.Newtonsoft.Schema
     public interface IJsonObject
     {
         /// <summary>
-        /// Tries find a property of a <see cref="key"/> and cast its <see cref="value"/> to type <see cref="T"/>.
+        /// Tries to find a property of a <paramref name="key"/> and cast its <paramref name="value"/> to type <c>T</c>.
         /// </summary>
         /// <param name="key">Property key</param>
         /// <param name="value">Resulting value</param>

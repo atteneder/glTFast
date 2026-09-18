@@ -57,6 +57,10 @@ namespace GLTFast
         /// <returns>True if the data is a glTF-Binary, false otherwise</returns>
         public static bool IsGltfBinary(NativeArray<byte>.ReadOnly data)
         {
+            if (data.Length < 4)
+            {
+                return false;
+            }
             var magic = data[0] | (uint)data[1] << 8 | (uint)data[2] << 16 | (uint)data[3] << 24;
             return magic == GltfBinaryMagic;
         }

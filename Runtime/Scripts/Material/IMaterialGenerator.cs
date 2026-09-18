@@ -23,7 +23,7 @@ namespace GLTFast.Materials
 
         /// <summary>
         /// Converts a glTF material into a Unity <see cref="Material"/>.
-        /// <see cref="gltfMaterial"/> might reference textures, which can be queried from <see cref="gltf"/>.
+        /// <paramref name="gltfMaterial"/> might reference textures, which can be queried from <paramref name="gltf"/>.
         /// </summary>
         /// <param name="gltfMaterial">Source glTF material</param>
         /// <param name="gltf">Interface to a loaded glTF's resources (e.g. textures)</param>

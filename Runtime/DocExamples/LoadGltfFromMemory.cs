@@ -15,18 +15,8 @@ namespace GLTFast.Documentation.Examples
 
     class LoadGltfFromMemory : MonoBehaviour
     {
-        // Path to the gltf asset to be loaded
-        public string filePath;
-
-        // ReSharper disable once Unity.IncorrectMethodSignature
-        // ReSharper disable once UnusedMember.Local
-        async Task Start()
-        {
-            await LoadGltfFile();
-        }
-
         #region LoadGltfFromMemory
-        async Task LoadGltfFile()
+        public async Task LoadGltfFile(string filePath)
         {
             var gltfDataAsByteArray = await File.ReadAllBytesAsync(filePath);
             var gltf = new GltfImport(logger: new ConsoleLogger());
@@ -78,7 +68,7 @@ namespace GLTFast.Documentation.Examples
             #endregion
         }
 
-        public async Task Instantiation()
+        public async Task Instantiation(string filePath)
         {
             #region Instantiation
             // First step: load glTF
@@ -112,12 +102,13 @@ namespace GLTFast.Documentation.Examples
         }
 
 #if UNITY_ANIMATION
-        public async Task SceneInstanceAccess()
+        public async Task SceneInstanceAccess(string filePath)
         {
             #region SceneInstanceAccess
-            var gltfImport = new GltfImport();
+            var logger = new ConsoleLogger();
+            var gltfImport = new GltfImport(logger: logger);
             await gltfImport.Load(filePath);
-            var instantiator = new GameObjectInstantiator(gltfImport, transform);
+            var instantiator = new GameObjectInstantiator(gltfImport, transform, logger: logger);
             var success = await gltfImport.InstantiateMainSceneAsync(instantiator);
             if (success)
             {
