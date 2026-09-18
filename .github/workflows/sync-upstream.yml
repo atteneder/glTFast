@@ -66,8 +66,9 @@ jobs:
             printf 'guessing whenever upstream changes one of the patched sections.\n\n'
             cat "$RUNNER_TEMP/upstream-report.md"
             printf '\n### After merging\n\n'
-            printf -- '- [ ] Tag the merge commit `com.atteneder.gltfast/%s` and push the tag.\n' "$VERSION"
-            printf -- '- [ ] Draft a GitHub release for that tag with the changelog entry of %s.\n\n' "$VERSION"
+            printf 'The [Release](../actions/workflows/release.yml) workflow tags the merge commit '
+            printf '`com.atteneder.gltfast/%s` and publishes the release from the changelog. ' "$VERSION"
+            printf 'Merge once this version should go out.\n\n'
             printf '[upstream]: https://github.com/Unity-Technologies/com.unity.cloud.gltfast\n'
           } > "$body"
 

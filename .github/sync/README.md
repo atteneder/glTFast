@@ -14,6 +14,18 @@ this repository, so files removed upstream are removed here as well.
 The monorepo keeps hundreds of test assets in Git LFS, so the clone skips LFS content and pulls
 only the objects inside the package folder afterwards.
 
+## Releasing
+
+Merging a sync pull request is the release. The
+[Release](../workflows/release.yml) workflow reacts to `package.json` changing on a release
+branch, tags the merge commit `com.atteneder.gltfast/<version>` and publishes a GitHub release
+with that version's changelog section as its notes. Versions with a prerelease suffix become
+GitHub prereleases. OpenUPM builds from the tag, so nothing else is needed to publish.
+
+It skips versions that are already tagged, so re-running it is harmless, and it fails before
+tagging when the changelog has no section for the version, rather than leaving a tag without a
+release behind.
+
 ## Release channels
 
 Upstream develops several versions in parallel, currently 6.x on `develop` and 7.x on

@@ -1,0 +1,70 @@
+name: Release
+
+# Tags and releases whatever version package.json holds, so merging a sync pull
+# request publishes that release. Versions with a prerelease suffix become GitHub
+# prereleases. OpenUPM picks the package up from the tag.
+
+on:
+  push:
+    branches:
+      - openupm
+      - openupm-preview
+    paths:
+      - package.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          version="$(python3 -c 'import json; print(json.load(open("package.json"))["version"])')"
+          tag="com.atteneder.gltfast/$version"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "::notice::$tag exists already, nothing to release."
+            exit 0
+          fi
+
+          # Fail before tagging rather than leaving a tag without release notes behind.
+          notes="$RUNNER_TEMP/notes.md"
+          awk -v version="$version" '
+            $0 == "## [" version "]" || index($0, "## [" version "] ") == 1 { inside = 1; next }
+            /^## \[/ { inside = 0 }
+            inside
+          ' CHANGELOG.md | sed '/./,$!d' > "$notes"
+
+          if [ ! -s "$notes" ]; then
+            echo "::error::CHANGELOG.md has no section for $version."
+            exit 1
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag --annotate "$tag" --message "com.atteneder.gltfast: $version"
+          git push origin "$tag"
+
+          kind=--latest
+          case "$version" in
+            *-*) kind=--prerelease ;;
+          esac
+
+          gh release create "$tag" \
+            --title "glTFast $version" \
+            --notes-file "$notes" \
+            --verify-tag \
+            "$kind"
